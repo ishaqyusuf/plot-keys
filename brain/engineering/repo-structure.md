@@ -41,10 +41,10 @@ brain/
 - `apps/api`: Core product APIs and orchestration
 - `packages/auth`: Better Auth setup and shared auth helpers
 - `packages/chat-bot`: Shared chatbot logic, prompts, UI integration helpers, and tenant-safe assistant flows
-- `packages/db`: Shared database access and schema
+- `packages/db`: Shared provider-aware database access, schema, and migrations
 - `packages/email`: Shared email templates and delivery utilities
 - `packages/jobs`: Trigger.dev jobs when async workflows are introduced
-- `packages/supabase`: Shared Supabase client and platform integration helpers
+- `packages/supabase`: Optional Supabase-only platform integration helpers
 - `packages/tsconfig`: Shared TypeScript base configs
 - `packages/ui`: Shared UI library and styling foundation
 - `packages/section-registry`: Section schemas and renderer mapping

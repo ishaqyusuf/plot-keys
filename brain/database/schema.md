@@ -49,5 +49,6 @@ This file tracks the current and planned core entities.
 
 ## Status
 - Initial schema foundation is implemented in `packages/db` for `Company`, `User`, and `Membership`.
-- Chosen stack: Supabase Postgres + Drizzle migrations in `packages/db`.
+- Chosen stack: provider-based `packages/db` with Drizzle migrations and Postgres-compatible providers first.
+- Current provider identifiers: `postgres` and `supabase-postgres`.
 - Better Auth tables and feature-specific tables are not implemented yet.

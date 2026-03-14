@@ -20,6 +20,12 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - `apps/website`: consumes shared marketing-facing primitives and layouts
 - `apps/websites`: consumes theme-aware public components that can adapt per tenant
 
+## Tooling Ownership
+- Shared Tailwind entry styles should live in `packages/ui` alongside the token contract they expose.
+- `packages/ui` should export the shared PostCSS configuration used to compile shared styles.
+- Next.js apps should re-export the shared UI PostCSS config during app builds instead of redefining plugin wiring.
+- Keep Tailwind v4 source discovery close to the shared stylesheet with explicit `@source` directives for app and package files.
+
 ## Layers
 1. Foundations
 - Color tokens

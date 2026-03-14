@@ -12,6 +12,7 @@ This file tracks migration conventions and migration milestones.
 - Local Docker Postgres is available through the root `docker-compose.yml`.
 - Initial migration files now exist in `packages/db/drizzle/`.
 - Root scripts `bun run db:generate` and `bun run db:migrate` run the shared database package against the local Docker Postgres URL.
+- `packages/db` now exposes provider metadata so the migration and schema boundary stays app-owned even when infrastructure vendors change.
 
 ## Planned Conventions
 - Use Drizzle migrations from `packages/db`.

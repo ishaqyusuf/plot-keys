@@ -17,3 +17,5 @@ This file holds actionable work that is identified but not currently in progress
 - Replace header-based auth scaffolding with Better Auth session verification and adapter wiring
 - Define Hono + tRPC API folder conventions
 - Define Trigger.dev job boundaries for future async work
+- Decide whether `packages/supabase` should be renamed to a more general platform-integrations package once non-Supabase adapters exist
+- Add the first true non-Postgres database adapter only when a concrete product or deployment need exists

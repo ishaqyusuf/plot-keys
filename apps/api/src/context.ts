@@ -8,13 +8,17 @@ import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 export type TRPCContext = {
   auth: AuthSessionContext;
   db: ReturnType<typeof createDatabaseClient>;
+  databaseProvider: ReturnType<typeof createDatabaseClient>["provider"];
   headers: Headers;
 };
 
 export function buildRequestContext(headers: Headers): TRPCContext {
+  const db = createDatabaseClient();
+
   return {
     auth: resolveSessionFromHeaders(headers),
-    db: createDatabaseClient(),
+    databaseProvider: db.provider,
+    db,
     headers,
   };
 }

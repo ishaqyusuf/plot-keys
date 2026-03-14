@@ -24,7 +24,8 @@ This file tracks chosen and proposed technologies for the project.
 - RPC vs REST split: `Chosen` -> tRPC for typed app procedures with Hono-based API structure
 - Background jobs: `Chosen` -> Trigger.dev
 - Auth: `Chosen` -> Better Auth
-- Database vendor: `Chosen` -> Supabase Postgres
+- Database architecture: `Chosen` -> provider-based `@plotkeys/db` boundary
+- Database vendors: `Chosen` -> Postgres-compatible providers first (`postgres`, `supabase-postgres`)
 - Database ORM/query layer: `Chosen` -> Drizzle ORM
 - Migration toolchain: `Chosen` -> Drizzle migrations managed from `packages/db`
 
@@ -33,7 +34,7 @@ This file tracks chosen and proposed technologies for the project.
 - Domains: `Planned` -> one primary registrar/provider first
 - SSL: `Planned` -> automatic certificate issuance and renewal
 - Hosting: `Chosen` -> Vercel
-- Supabase usage: `Chosen` -> Postgres hosting now; storage/realtime as needed later
+- Supabase usage: `Planned` -> optional Postgres hosting, storage, and realtime integrations when needed
 - AI provider stack: `TODO`
 
 ## Notes

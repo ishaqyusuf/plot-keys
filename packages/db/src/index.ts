@@ -102,24 +102,87 @@ export type MembershipRole = (typeof membershipRoleEnum.enumValues)[number];
 export type MembershipStatus = (typeof membershipStatusEnum.enumValues)[number];
 export type DatabaseSchema = typeof schema;
 export type PlotKeysDatabase = NodePgDatabase<DatabaseSchema>;
+export type DatabaseProvider = "postgres" | "supabase-postgres";
 
 export type DatabaseStatus = "connected" | "unconfigured";
 
 export type DatabaseClient = {
   db: PlotKeysDatabase | null;
+  driver: "node-postgres" | null;
   pool: Pool | null;
+  provider: DatabaseProvider;
   schema: DatabaseSchema;
   status: DatabaseStatus;
 };
 
 export type DatabaseClientOptions = {
   connectionString?: string;
+  provider?: DatabaseProvider;
   poolConfig?: PoolConfig;
+};
+
+export type DatabaseRuntimeConfig = {
+  connectionString: string | null;
+  provider: DatabaseProvider;
 };
 
 declare global {
   // eslint-disable-next-line no-var
   var __plotkeysDbClient__: DatabaseClient | undefined;
+}
+
+const defaultDatabaseProvider: DatabaseProvider = "postgres";
+
+function normalizeDatabaseProvider(
+  provider: string | undefined,
+): DatabaseProvider {
+  if (provider === "supabase-postgres") {
+    return provider;
+  }
+
+  return defaultDatabaseProvider;
+}
+
+export function readDatabaseRuntimeConfig(
+  env: Record<string, string | undefined> = process.env,
+): DatabaseRuntimeConfig {
+  return {
+    connectionString: env.DATABASE_URL ?? null,
+    provider: normalizeDatabaseProvider(env.DATABASE_PROVIDER),
+  };
+}
+
+function createUnconfiguredDatabaseClient(
+  provider: DatabaseProvider,
+): DatabaseClient {
+  return {
+    db: null,
+    driver: null,
+    pool: null,
+    provider,
+    schema,
+    status: "unconfigured",
+  };
+}
+
+function createPostgresDatabaseClient(
+  provider: DatabaseProvider,
+  connectionString: string,
+  poolConfig?: PoolConfig,
+): DatabaseClient {
+  const pool = new Pool({
+    connectionString,
+    ...poolConfig,
+  });
+
+  return {
+    db: drizzle(pool, { schema }),
+    driver: "node-postgres",
+    pool,
+    provider,
+    schema,
+    status: "connected",
+  };
 }
 
 export function createDatabaseClient(
@@ -133,16 +196,13 @@ export function createDatabaseClient(
     return globalThis.__plotkeysDbClient__;
   }
 
+  const runtimeConfig = readDatabaseRuntimeConfig();
+  const provider = options.provider ?? runtimeConfig.provider;
   const connectionString =
-    options.connectionString ?? process.env.DATABASE_URL ?? null;
+    options.connectionString ?? runtimeConfig.connectionString;
 
   if (!connectionString) {
-    const client: DatabaseClient = {
-      db: null,
-      pool: null,
-      schema,
-      status: "unconfigured",
-    };
+    const client = createUnconfiguredDatabaseClient(provider);
 
     if (!options.connectionString && !options.poolConfig) {
       globalThis.__plotkeysDbClient__ = client;
@@ -151,17 +211,11 @@ export function createDatabaseClient(
     return client;
   }
 
-  const pool = new Pool({
+  const client = createPostgresDatabaseClient(
+    provider,
     connectionString,
-    ...options.poolConfig,
-  });
-
-  const client: DatabaseClient = {
-    db: drizzle(pool, { schema }),
-    pool,
-    schema,
-    status: "connected",
-  };
+    options.poolConfig,
+  );
 
   if (!options.connectionString && !options.poolConfig) {
     globalThis.__plotkeysDbClient__ = client;

@@ -18,3 +18,5 @@ This file records completed work milestones.
 - Added Docker-based local Postgres setup and root database lifecycle scripts
 - Generated the initial Drizzle migration for the tenancy foundation tables in `packages/db`
 - Added a dedicated Brain design-system foundation document
+- Introduced a provider-based database boundary in `packages/db` so app code is no longer architecturally tied to Supabase
+- Replaced the platform website shell with a polished SaaS landing page in `apps/website`

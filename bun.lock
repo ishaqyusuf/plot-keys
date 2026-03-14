@@ -41,7 +41,6 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "postcss": "^8.4.0",
-        "tailwindcss": "^4.1.0",
       },
     },
     "apps/website": {
@@ -59,7 +58,6 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "postcss": "^8.4.0",
-        "tailwindcss": "^4.1.0",
       },
     },
     "apps/websites": {
@@ -78,7 +76,6 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "postcss": "^8.4.0",
-        "tailwindcss": "^4.1.0",
       },
     },
     "packages/auth": {
@@ -158,7 +155,10 @@
       },
       "devDependencies": {
         "@plotkeys/tsconfig": "workspace:*",
+        "@tailwindcss/postcss": "^4.1.0",
         "@types/react": "^19.0.0",
+        "postcss": "^8.4.0",
+        "tailwindcss": "^4.1.0",
       },
     },
     "packages/utils": {

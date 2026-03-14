@@ -28,3 +28,8 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 5. Stop it with `bun run db:down`
 
 You can follow container output with `bun run db:logs`.
+
+## Database Architecture
+- App code should depend on `@plotkeys/db` for relational access.
+- `@plotkeys/db` is provider-aware and currently supports the `postgres` and `supabase-postgres` provider identifiers.
+- `packages/supabase` is optional and reserved for Supabase-specific services such as storage or realtime helpers.
