@@ -108,15 +108,21 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - Preserves accessible focus and interaction behavior
 
 ## Current Gaps
-- TODO: Define the first canonical token set in `packages/ui`
-- TODO: Define the first approved typography stack and scale
-- TODO: Define the minimum shared primitive set for the dashboard
-- TODO: Define which website-specific primitives belong in `packages/ui` versus `packages/section-registry`
+- TODO: Add shared form primitives such as input, select, textarea, and field messaging
+- TODO: Define the first table and modal primitives for dashboard-heavy workflows
 - TODO: Decide whether charts/data-viz primitives belong in the first design-system milestone
+- TODO: Document the theming API for tenant-level overrides once theme editing exists
+
+## Current Implementation
+- `packages/ui/src/globals.css` now provides the first semantic token contract for background, foreground, muted text, surface layers, borders, radius, shadows, and primary/accent roles.
+- Typography now intentionally splits between serif display headings and a sans-serif product reading stack.
+- Shared starter primitives now include `Button`, `Badge`, `Card`, and `SectionHeading`.
+- Dashboard and tenant website shells now consume the shared tokens instead of relying on one-off local styling.
+- The first tenant website template uses the shared primitives while preserving a theme-aware boundary in `packages/section-registry`.
 
 ## Near-Term Implementation Order
-1. Define token names and CSS variable contract in `packages/ui`
-2. Normalize typography, spacing, radius, and color usage in existing app shells
-3. Build the first primitive set around buttons, inputs, cards, dialogs, and tables
-4. Add product-level compositions for forms, empty states, filters, and stats
-5. Add website theme tokens that map cleanly into section rendering
+1. Add shared form primitives and field compositions in `packages/ui`
+2. Normalize data-entry and empty-state patterns in the dashboard
+3. Expand the tenant theme token contract beyond accent/background/font values
+4. Add table, dialog, and filter-bar primitives for operational modules
+5. Convert the onboarding checklist into a real persisted flow

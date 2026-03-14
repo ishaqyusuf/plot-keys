@@ -28,6 +28,7 @@ Allow each company to launch and manage a professional website using predefined 
 - Each section accepts `config` and `theme`.
 - Renderer maps section `type` to a component.
 - Invalid or unknown section types must not render unpredictably.
+- Theme overrides may change approved visual tokens, but not section structure.
 
 ## Example Shape
 ```json
@@ -46,14 +47,17 @@ Allow each company to launch and manage a professional website using predefined 
 }
 ```
 
-## Planned Section Library
+## Current Implemented Starter Library
 - Hero banner
-- Property grid
-- Featured properties
-- Property carousel
+- Market stats strip
+- Story grid
+- Listing spotlight cards
+- Testimonial strip
+- CTA band
+
+## Next Planned Section Library
+- Property grid backed by live listing records
 - Agent showcase
-- Testimonials
-- CTA banner
 - Company about section
 - Property search bar
 - Contact section
@@ -66,6 +70,11 @@ Allow each company to launch and manage a professional website using predefined 
 - `packages/section-registry`: section types, schemas, mappings
 - `apps/websites`: section rendering and page delivery
 - `apps/dashboard`: CMS editing and template/theme management
+
+## Current Starter Template
+- The first home-page template is a premium real-estate marketing layout built from six structured sections.
+- It is currently sample-data driven and intended to become the contract for future CMS editing and property-sync wiring.
+- The renderer remains deterministic: each section entry carries its component, type, and config payload.
 
 ## Future Improvements
 - Limited drag-and-drop inside structured constraints

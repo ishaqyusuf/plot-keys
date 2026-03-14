@@ -4,13 +4,29 @@
 @source "../**/*.{ts,tsx}";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #020617;
-  --muted: #64748b;
-  --border: rgba(148, 163, 184, 0.35);
-  --brand: #0f766e;
-  --brand-foreground: #f8fafc;
-  --surface: rgba(255, 255, 255, 0.88);
+  --background: #f4efe7;
+  --foreground: #102033;
+  --muted: #5f6f82;
+  --muted-foreground: #415164;
+  --border: rgba(120, 138, 156, 0.24);
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-strong: #ffffff;
+  --surface-inverse: #102033;
+  --primary: #0f766e;
+  --primary-foreground: #f6fffd;
+  --accent: #f59e0b;
+  --accent-foreground: #1f2937;
+  --success: #0f9f6e;
+  --warning: #ca8a04;
+  --destructive: #dc2626;
+  --ring: rgba(15, 118, 110, 0.22);
+  --shadow-soft: 0 24px 70px rgba(16, 32, 51, 0.08);
+  --shadow-card: 0 18px 42px rgba(16, 32, 51, 0.08);
+  --radius-sm: 0.875rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
+  --radius-xl: 2.25rem;
+  --content-width: 72rem;
 }
 
 * {
@@ -21,14 +37,28 @@ html {
   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
   background: var(--background);
   color: var(--foreground);
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(94, 234, 212, 0.2),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(245, 158, 11, 0.16),
+      transparent 18%
+    ),
+    linear-gradient(180deg, #f4efe7 0%, #f7fafc 45%, #eef4f7 100%);
   color: var(--foreground);
   font-family: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -38,4 +68,28 @@ a {
 
 button {
   font: inherit;
+}
+
+input,
+textarea,
+select,
+button {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(15, 118, 110, 0.18);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  letter-spacing: -0.04em;
+}
+
+p {
+  margin: 0;
 }

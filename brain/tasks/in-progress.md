@@ -8,4 +8,6 @@ This file tracks work currently being executed.
 - Move completed work to `done.md`.
 
 ## In Progress
-- None currently
+- Replace header-based auth scaffolding with Better Auth session verification and adapter wiring
+- Build the real tenant onboarding flow and persist company setup data
+- Connect the first website template to live company and property records

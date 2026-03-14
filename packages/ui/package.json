@@ -4,9 +4,12 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./badge": "./src/components/badge.tsx",
     "./button": "./src/components/button.tsx",
+    "./card": "./src/components/card.tsx",
     "./globals.css": "./src/globals.css",
-    "./postcss.config": "./postcss.config.mjs"
+    "./postcss.config": "./postcss.config.mjs",
+    "./section-heading": "./src/components/section-heading.tsx"
   },
   "scripts": {
     "build": "tsc --noEmit",

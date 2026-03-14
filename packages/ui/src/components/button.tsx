@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-type ButtonVariant = "primary" | "secondary";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
 
 type ButtonProps = ComponentPropsWithoutRef<"button"> & {
   asChild?: boolean;
@@ -17,9 +17,12 @@ type ButtonProps = ComponentPropsWithoutRef<"button"> & {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-teal-700 text-white shadow-[0_18px_36px_rgba(15,118,110,0.24)] hover:bg-teal-800",
+    "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] shadow-[0_18px_36px_rgba(15,118,110,0.24)] hover:brightness-95",
   secondary:
-    "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50",
+    "border border-[color:var(--border)] bg-white/90 text-[color:var(--foreground)] hover:bg-white",
+  ghost: "bg-transparent text-[color:var(--foreground)] hover:bg-black/5",
+  inverse:
+    "bg-[color:var(--surface-inverse)] text-white shadow-[0_18px_36px_rgba(16,32,51,0.22)] hover:bg-slate-900",
 };
 
 export function Button({
@@ -30,7 +33,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors",
+    "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[color:var(--ring)] disabled:cursor-not-allowed disabled:opacity-60",
     variantStyles[variant],
     className,
   );

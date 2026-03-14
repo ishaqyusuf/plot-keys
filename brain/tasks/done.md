@@ -20,3 +20,6 @@ This file records completed work milestones.
 - Added a dedicated Brain design-system foundation document
 - Introduced a provider-based database boundary in `packages/db` so app code is no longer architecturally tied to Supabase
 - Replaced the platform website shell with a polished SaaS landing page in `apps/website`
+- Defined the first canonical UI token contract and starter shared primitives in `packages/ui`
+- Implemented the first structured tenant website template and expanded section library in `packages/section-registry`
+- Replaced the dashboard placeholder page with an MVP-oriented onboarding and roadmap workspace
