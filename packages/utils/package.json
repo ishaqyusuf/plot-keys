@@ -1,0 +1,22 @@
+{
+  "name": "@plotkeys/utils",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./cn": "./src/cn.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.0"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0"
+  }
+}

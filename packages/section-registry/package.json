@@ -1,0 +1,20 @@
+{
+  "name": "@plotkeys/section-registry",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/react": "^19.0.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  }
+}

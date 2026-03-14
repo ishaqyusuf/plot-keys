@@ -1,0 +1,23 @@
+{
+  "name": "@plotkeys/ui",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./button": "./src/components/button.tsx",
+    "./globals.css": "./src/globals.css"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plotkeys/utils": "workspace:*",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/react": "^19.0.0"
+  }
+}

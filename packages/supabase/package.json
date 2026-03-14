@@ -1,0 +1,20 @@
+{
+  "name": "@plotkeys/supabase",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0"
+  }
+}

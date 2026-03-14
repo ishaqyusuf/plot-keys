@@ -1,0 +1,4 @@
+{
+  "extends": "@plotkeys/tsconfig/nextjs.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
