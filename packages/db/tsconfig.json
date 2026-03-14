@@ -1,4 +1,4 @@
 {
   "extends": "@plotkeys/tsconfig/base.json",
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "drizzle/**/*.ts"]
 }

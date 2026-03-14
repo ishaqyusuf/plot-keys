@@ -1,0 +1,17 @@
+enum MembershipRole {
+  platform_admin
+  owner
+  admin
+  agent
+  staff
+
+  @@map("membership_role")
+}
+
+enum MembershipStatus {
+  active
+  invited
+  suspended
+
+  @@map("membership_status")
+}

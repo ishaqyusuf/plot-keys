@@ -26,8 +26,10 @@ This file tracks chosen and proposed technologies for the project.
 - Auth: `Chosen` -> Better Auth
 - Database architecture: `Chosen` -> provider-based `@plotkeys/db` boundary
 - Database vendors: `Chosen` -> Postgres-compatible providers first (`postgres`, `supabase-postgres`)
-- Database ORM/query layer: `Chosen` -> Drizzle ORM
-- Migration toolchain: `Chosen` -> Drizzle migrations managed from `packages/db`
+- Database schema owner: `Chosen` -> Prisma 7 schema in `packages/db/prisma`
+- Default ORM/query layer: `Chosen` -> Prisma 7 Client with the Postgres driver adapter
+- Specialist query layer: `Chosen` -> Drizzle ORM in `packages/db/drizzle`
+- Migration toolchain: `Chosen` -> Prisma migrations managed from `packages/db/prisma`
 
 ## Integrations
 - Payments: `Planned` -> Paystack, Flutterwave, Stripe

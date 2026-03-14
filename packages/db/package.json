@@ -3,16 +3,23 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./drizzle": "./drizzle/client.ts",
+    "./prisma": "./src/prisma.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:drizzle:studio": "drizzle-kit studio",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
     "drizzle-orm": "^0.44.5",
     "pg": "^8.16.3"
   },
@@ -20,6 +27,7 @@
     "@plotkeys/tsconfig": "workspace:*",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.15.5",
-    "drizzle-kit": "^0.31.4"
+    "drizzle-kit": "^0.31.4",
+    "prisma": "7"
   }
 }

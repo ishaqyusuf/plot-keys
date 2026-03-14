@@ -49,6 +49,9 @@ This file tracks the current and planned core entities.
 
 ## Status
 - Initial schema foundation is implemented in `packages/db` for `Company`, `User`, and `Membership`.
-- Chosen stack: provider-based `packages/db` with Drizzle migrations and Postgres-compatible providers first.
+- Canonical schema owner: Prisma in `packages/db/prisma/schema.prisma`.
+- Mirrored query schema: Drizzle in `packages/db/drizzle/schema.ts`.
+- Chosen stack: provider-based `packages/db` with Prisma migrations and Postgres-compatible providers first.
 - Current provider identifiers: `postgres` and `supabase-postgres`.
+- Implemented soft-delete support with nullable `deletedAt`/`deleted_at` columns on the current core tables.
 - Better Auth tables and feature-specific tables are not implemented yet.

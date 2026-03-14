@@ -11,7 +11,7 @@
 - `packages/ui`: Implemented shared UI starter package with global styles and a reusable button primitive.
 - `packages/auth`: Implemented Better Auth-oriented shared config plus request header parsing and membership-aware session context helpers.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
-- `packages/db`: Implemented provider-aware Drizzle database foundation for `users`, `companies`, and `memberships`, plus shared database client bootstrap and migration config.
+- `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, and a mirrored Drizzle query layer for `users`, `companies`, and `memberships`.
 - `packages/email`: Implemented starter email payload helpers.
 - `packages/jobs`: Implemented starter Trigger.dev-oriented job identifiers package.
 - `packages/supabase`: Implemented optional Supabase env readers, browser/server/admin client factories, and tenant storage helpers.
@@ -53,7 +53,9 @@
 - `apps/dashboard/.env.example`: Documents dashboard app variables and shared platform placeholders.
 - `apps/website/.env.example`: Documents marketing site browser-safe variables.
 - `apps/websites/.env.example`: Documents tenant website browser-safe variables.
-- `packages/db/drizzle.config.ts`: Implemented Drizzle migration configuration for the shared database package.
+- `packages/db/prisma/`: Canonical Prisma 7 schema folder for the shared database package, with a main `schema.prisma` plus split domain files.
+- `packages/db/prisma.config.ts`: Prisma 7 CLI configuration for schema location, datasource, and migrations.
+- `packages/db/drizzle/schema.ts`: Mirrored Drizzle schema for specialist query usage.
 - `packages/supabase/src/index.ts`: Implemented optional Supabase runtime helpers for env loading and storage operations.
 - `trigger.config.*`: Planned Trigger.dev configuration once jobs are added.
 

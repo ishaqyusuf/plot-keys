@@ -29,6 +29,8 @@ This file captures the major entity relationships as they become defined.
 ## Current Implementation State
 - `Company -> Membership -> User` is the implemented relational foundation in `packages/db`.
 - Membership uniqueness is enforced per `(companyId, userId)`.
+- Prisma owns the canonical relation definitions and Drizzle mirrors them for specialist query usage.
+- The implemented core tables now support soft delete through nullable `deleted_at` columns; uniqueness applies only to non-deleted records.
 - Feature relationships beyond tenant membership are still planned only.
 
 - `Agent` belongs to `Company`

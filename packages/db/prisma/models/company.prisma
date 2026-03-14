@@ -1,0 +1,15 @@
+model Company {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug        String
+  name        String
+  isActive    Boolean      @default(true) @map("is_active")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  memberships Membership[]
+
+  @@index([slug], map: "companies_slug_idx")
+  @@index([deletedAt], map: "companies_deleted_at_idx")
+
+  @@map("companies")
+}

@@ -1,0 +1,18 @@
+model Membership {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String           @map("company_id") @db.Uuid
+  userId    String           @map("user_id")
+  role      MembershipRole   @default(staff)
+  status    MembershipStatus @default(invited)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId], map: "memberships_company_id_idx")
+  @@index([userId], map: "memberships_user_id_idx")
+  @@index([companyId, userId], map: "memberships_company_user_idx")
+  @@index([deletedAt], map: "memberships_deleted_at_idx")
+  @@map("memberships")
+}

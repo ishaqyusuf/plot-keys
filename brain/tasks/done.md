@@ -23,3 +23,4 @@ This file records completed work milestones.
 - Defined the first canonical UI token contract and starter shared primitives in `packages/ui`
 - Implemented the first structured tenant website template and expanded section library in `packages/section-registry`
 - Replaced the dashboard placeholder page with an MVP-oriented onboarding and roadmap workspace
+- Restructured `packages/db` so Prisma owns schema and migrations while Drizzle remains available for specialist queries
