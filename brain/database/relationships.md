@@ -9,6 +9,8 @@ This file captures the major entity relationships as they become defined.
 
 ## Planned Relationships
 - `Company` has many `Memberships`
+- `Company` has many `SiteConfigurations`
+- `Company` may have many `SiteConfigurationPublishEvents`
 - `Company` has many `Agents`
 - `Company` has many `Properties`
 - `Company` has many `Clients`
@@ -25,6 +27,12 @@ This file captures the major entity relationships as they become defined.
 - `Membership` belongs to `User`
 - `Membership` belongs to `Company`
 - `Membership` has one role within a company such as `owner`, `admin`, `agent`, or `staff`
+- `SiteConfiguration` belongs to `Company`
+- `SiteConfiguration` belongs to one platform `SiteTemplate`
+- `SiteConfiguration` may be created or updated by a `User`
+- `Company` should have at most one active `published` `SiteConfiguration` at a time
+- `SiteConfigurationPublishEvent` belongs to `Company`
+- `SiteConfigurationPublishEvent` references both the previous and next `SiteConfiguration` records when a publish action replaces the live site
 
 ## Current Implementation State
 - `Company -> Membership -> User` is the implemented relational foundation in `packages/db`.
@@ -58,8 +66,12 @@ This file captures the major entity relationships as they become defined.
 
 - `Theme` belongs to `Company`
 - `Template` may be platform-owned and reusable across companies
+- `SiteTemplate` is platform-owned and reusable across companies
+- `SiteConfiguration` is tenant-owned and versioned across drafts and publish events
 
 ## Open Items
 - TODO: Decide whether `AiCreditBalance` is ledger-based or snapshot-based
 - TODO: Decide whether `Agent` stays as a separate profile table or is absorbed by membership plus profile fields
 - TODO: Decide how property-to-client interest tracking is normalized
+- TODO: Decide whether `SiteConfiguration` references `templateId` directly, or stores both `templateId` and immutable `templateKey`
+- TODO: Decide whether publish history needs a dedicated table in MVP or can be deferred until after first publish workflow lands

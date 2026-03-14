@@ -15,7 +15,8 @@ This file records the intended high-level architecture and boundaries between ap
 - Follow Midday's Hono + tRPC API style.
 - Use Better Auth for authentication.
 - Use a provider-based database boundary in `packages/db`.
-- Use Drizzle in `packages/db` for schema and migrations on the current Postgres-backed providers.
+- Use Prisma in `packages/db/prisma` as the canonical schema and migration boundary.
+- Keep Drizzle in `packages/db/drizzle` as a mirrored specialist query layer only when lower-level SQL control is useful.
 - Use Trigger.dev for jobs instead of introducing a custom worker app at the start.
 - Deploy web surfaces on Vercel.
 
@@ -30,7 +31,7 @@ This file records the intended high-level architecture and boundaries between ap
 - `packages/auth`: Better Auth configuration, route wiring, session helpers, and membership-aware authorization helpers
 - `packages/chat-bot`: Shared chatbot logic, prompts, and tenant-safe integration helpers
 - `packages/ui`: Reusable design system primitives and shared styles
-- `packages/db`: Provider-aware database client creation, Drizzle schema, migrations, seed logic, and shared database access
+- `packages/db`: Provider-aware database client creation, Prisma schema and migrations, generated Prisma Client, optional mirrored Drizzle query layer, seed logic, and shared database access
 - `packages/email`: Shared email templates and delivery helpers
 - `packages/jobs`: Trigger.dev tasks and shared job helpers
 - `packages/supabase`: Optional Supabase-only integrations such as storage helpers and realtime utilities
@@ -46,6 +47,8 @@ This file records the intended high-level architecture and boundaries between ap
 - Keep website sections stateless.
 - Each section must accept `config` and `theme`.
 - Layout generation remains structured rather than freeform.
+- Template metadata should define editable versus derived content boundaries.
+- Editable website fields should carry both user-facing guidance and AI-generation guidance.
 - Cross-cutting provider logic belongs in packages or services, not scattered across apps.
 - Application code should depend on `@plotkeys/db` rather than a vendor package for relational queries.
 

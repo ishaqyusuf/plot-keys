@@ -15,6 +15,14 @@ This file holds actionable work that is identified but not currently in progress
 - Define Trigger.dev job boundaries for future async work
 - Build the real tenant onboarding flow and persist company setup data
 - Connect the first website template to live company and property records
+- Implement signup -> verification -> onboarding -> dashboard flow handoff
+- Add Prisma models and migration for `SiteTemplate` and `SiteConfiguration`
+- Seed default platform templates such as `template-1`, `template-2`, and `template-3`
+- Add editable-field metadata with `shortDetail` and `longDetail` to section definitions
+- Build template browser draft management and configuration naming
+- Build inline editor hover states, focus mapping, and sidebar field controls
+- Build AI generate actions that use field-level metadata and tenant context
+- Build publish modal and atomic live-site replacement logic
 - Add shared form primitives for onboarding and dashboard modules
 - Decide whether `packages/supabase` should be renamed to a more general platform-integrations package once non-Supabase adapters exist
 - Add the first true non-Postgres database adapter only when a concrete product or deployment need exists

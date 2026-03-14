@@ -12,7 +12,13 @@ This file maps near-term engineering execution in a practical order.
 2. Create shared UI foundation based on Midday-style package layout
 3. Establish dashboard and website app shells
 4. Define database and auth stack
-5. Build company and property management foundations
-6. Build section registry and first tenant website template
-7. Add lead capture and appointments
-8. Add billing, AI credits, and domain workflows
+5. Ship signup and verified-account flow with Better Auth
+6. Ship tenant onboarding with company setup and subdomain selection
+7. Create Prisma-backed site template and site configuration models
+8. Bootstrap a default tenant website configuration on onboarding completion
+9. Build the tenant dashboard website entrypoint and template browser
+10. Build inline editing, sidebar controls, and AI field generation metadata
+11. Build publish confirmation and live site replacement flow
+12. Build company and property management foundations that feed derived website content
+13. Add lead capture and appointments
+14. Add billing, AI credits, and domain workflows

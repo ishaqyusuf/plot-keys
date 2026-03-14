@@ -32,3 +32,5 @@ This file tracks migration conventions and migration milestones.
 ## TODO
 - Define migration naming convention beyond Drizzle's generated names
 - Define seeding strategy for templates and section library data
+- Define the first Prisma migration for `SiteTemplate` and `SiteConfiguration`
+- Decide whether template seeds should be Prisma seeds, static bootstrap scripts, or app-owned sync code
