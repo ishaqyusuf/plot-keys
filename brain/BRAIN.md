@@ -18,6 +18,7 @@ This Brain is the working memory for the real-estate SaaS. It records the curren
 ## Key References
 - [System Overview](/Users/M1PRO/Documents/code/real-estate-saas/brain/SYSTEM_OVERVIEW.md)
 - [Project Index](/Users/M1PRO/Documents/code/real-estate-saas/brain/PROJECT_INDEX.md)
+- [Design System](/Users/M1PRO/Documents/code/plot-keys/brain/system/design-system.md)
 - [AI Workflow](/Users/M1PRO/Documents/code/real-estate-saas/brain/AI_WORKFLOW.md)
 - [AI Prompt Rules](/Users/M1PRO/Documents/code/real-estate-saas/brain/AI_PROMPT_RULES.md)
 - [Product Vision](/Users/M1PRO/Documents/code/real-estate-saas/brain/product/vision.md)

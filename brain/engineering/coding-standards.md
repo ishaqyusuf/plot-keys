@@ -18,6 +18,7 @@ This file defines implementation guardrails for the repository.
 - Use the latest stable Next.js and Tailwind CSS versions at setup time.
 - Prefer a shared `packages/ui` package over app-local component duplication.
 - Keep section renderer components stateless and predictable.
+- Follow `brain/system/design-system.md` as the source of truth for tokens, primitives, and composition boundaries.
 
 ## Multi-Tenant Rules
 - Scope tenant data explicitly in every app and service boundary.
@@ -32,3 +33,6 @@ This file defines implementation guardrails for the repository.
 ## Documentation Rules
 - Update Brain docs after meaningful implementation changes.
 - Create ADRs for durable architectural choices.
+- Keep a `.env.example` file in every runnable `apps/*` directory, even if some entries are placeholders for future wiring.
+- Add or update `packages/jobs/.env.example` when that package begins using environment variables.
+- Shared packages should document required env vars through the consuming app's `.env.example` rather than package-local env files.

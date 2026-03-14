@@ -9,12 +9,12 @@
 
 ## Packages
 - `packages/ui`: Implemented shared UI starter package with global styles and a reusable button primitive.
-- `packages/auth`: Implemented Better Auth starter helpers and shared config placeholder.
+- `packages/auth`: Implemented Better Auth-oriented shared config plus request header parsing and membership-aware session context helpers.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
-- `packages/db`: Implemented starter database client placeholder for shared data access.
+- `packages/db`: Implemented Drizzle-based Postgres foundation for `users`, `companies`, and `memberships`, plus shared database client bootstrap and migration config.
 - `packages/email`: Implemented starter email payload helpers.
 - `packages/jobs`: Implemented starter Trigger.dev-oriented job identifiers package.
-- `packages/supabase`: Implemented shared Supabase client factory package.
+- `packages/supabase`: Implemented shared Supabase env readers, browser/server/admin client factories, and tenant storage helpers.
 - `packages/tsconfig`: Implemented shared TypeScript base and Next.js configs.
 - `packages/utils`: Implemented shared utility helpers including `cn`.
 - `packages/section-registry`: Implemented section registry starter with a hero banner section and sample page data.
@@ -42,11 +42,19 @@
 
 ## Important Files
 - `package.json`: Implemented monorepo workspace manifest and root scripts.
+- `docker-compose.yml`: Runs the local Postgres database for development.
 - `turbo.json`: Implemented Turbo task pipeline for build, dev, lint, and typecheck.
 - `bunfig.toml`: Implemented Bun workspace configuration.
 - `tsconfig.json`: Implemented top-level TypeScript entrypoint extending shared config.
 - `biome.json`: Implemented linting and formatting rules.
 - `bun.lock`: Installed dependency lockfile.
+- `brain/system/design-system.md`: Defines the shared design-system foundation and rollout order.
+- `apps/api/.env.example`: Documents API runtime variables for local development.
+- `apps/dashboard/.env.example`: Documents dashboard app variables and shared platform placeholders.
+- `apps/website/.env.example`: Documents marketing site browser-safe variables.
+- `apps/websites/.env.example`: Documents tenant website browser-safe variables.
+- `packages/db/drizzle.config.ts`: Implemented Drizzle migration configuration for the shared database package.
+- `packages/supabase/src/index.ts`: Implemented shared Supabase runtime helpers for env loading and storage operations.
 - `trigger.config.*`: Planned Trigger.dev configuration once jobs are added.
 
 ## Notes

@@ -24,6 +24,5 @@ This file tracks the evolving platform boundary, major subsystems, and core resp
 - Domain and SSL management
 
 ## Open Items
-- TODO: Final auth provider
-- TODO: Final database vendor
+- TODO: Final hosting and edge strategy
 - TODO: Final hosting and edge strategy

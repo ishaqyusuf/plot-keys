@@ -10,3 +10,11 @@ This file records completed work milestones.
 - Initialized Project Brain for the real-estate SaaS repository
 - Scaffolded the Bun + Turbo monorepo with `apps/api`, `apps/dashboard`, `apps/website`, `apps/websites`, and the agreed shared packages
 - Added validated starter configs for Next.js, Tailwind CSS, Hono + tRPC, Biome, and shared TypeScript setup
+- Chose Supabase Postgres + Drizzle as the database foundation and documented the Better Auth membership model in ADR-001
+- Scaffolded the first Drizzle-backed database package and membership-aware API request context
+- Expanded the Supabase package with env-safe client factories and tenant storage helpers
+- Added app-level `.env.example` documentation and aligned the repo convention for future env files
+- Added `.env.example` files to every current app directory for a uniform setup convention
+- Added Docker-based local Postgres setup and root database lifecycle scripts
+- Generated the initial Drizzle migration for the tenancy foundation tables in `packages/db`
+- Added a dedicated Brain design-system foundation document

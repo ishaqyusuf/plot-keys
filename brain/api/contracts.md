@@ -12,11 +12,13 @@ This file tracks request and response shape conventions.
 - Preserve tenant scoping in all contracts.
 - Prefer explicit enums for status-driven workflows.
 - Use structured payloads for website sections and AI outputs.
+- Current API scaffold can derive request auth context from headers before full Better Auth session wiring lands.
 
 ## Planned Enums
 - `LeadStatus`: `NEW`, `CONTACTED`, `NEGOTIATING`, `CLOSED`
 - `ClientStage`: `NEW_LEAD`, `INTERESTED`, `NEGOTIATING`, `CLOSED`
 - `PaymentMethod`: `PAYSTACK`, `FLUTTERWAVE`, `STRIPE`, `BANK_TRANSFER`, `CASH`
+- `MembershipRole`: `PLATFORM_ADMIN`, `OWNER`, `ADMIN`, `AGENT`, `STAFF`
 
 ## Structured Builder Contract Example
 ```json

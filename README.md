@@ -19,3 +19,12 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 - `packages/tsconfig`
 - `packages/ui`
 - `packages/utils`
+
+## Local Database
+1. Start Postgres with `bun run db:up`
+2. Generate migrations with `bun run db:generate`
+3. Apply migrations with `bun run db:migrate`
+4. Use `DATABASE_URL=postgres://postgres:postgres@localhost:5432/plotkeys`
+5. Stop it with `bun run db:down`
+
+You can follow container output with `bun run db:logs`.

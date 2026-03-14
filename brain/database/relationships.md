@@ -8,7 +8,7 @@ This file captures the major entity relationships as they become defined.
 - Keep this focused on data relationships rather than API flow.
 
 ## Planned Relationships
-- `Company` has many `Users`
+- `Company` has many `Memberships`
 - `Company` has many `Agents`
 - `Company` has many `Properties`
 - `Company` has many `Clients`
@@ -20,7 +20,19 @@ This file captures the major entity relationships as they become defined.
 - `Company` has many `Domains`
 - `Company` has one or more `AiCreditBalance` records over time or by ledger model
 
+- `User` has many `Memberships`
+- `User` may have one global platform role for support-only workflows, but tenant authorization should come from memberships
+- `Membership` belongs to `User`
+- `Membership` belongs to `Company`
+- `Membership` has one role within a company such as `owner`, `admin`, `agent`, or `staff`
+
+## Current Implementation State
+- `Company -> Membership -> User` is the implemented relational foundation in `packages/db`.
+- Membership uniqueness is enforced per `(companyId, userId)`.
+- Feature relationships beyond tenant membership are still planned only.
+
 - `Agent` belongs to `Company`
+- `Agent` may reference one `User` membership-backed profile
 - `Agent` may have many assigned `Properties`
 - `Agent` may have many assigned `Leads`
 - `Agent` may have many `Appointments`
@@ -46,6 +58,6 @@ This file captures the major entity relationships as they become defined.
 - `Template` may be platform-owned and reusable across companies
 
 ## Open Items
-- TODO: Decide whether `Agent` is a role on `User` or a separate table plus profile
 - TODO: Decide whether `AiCreditBalance` is ledger-based or snapshot-based
+- TODO: Decide whether `Agent` stays as a separate profile table or is absorbed by membership plus profile fields
 - TODO: Decide how property-to-client interest tracking is normalized

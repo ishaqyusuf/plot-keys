@@ -10,6 +10,7 @@ This file tracks the current and planned core entities.
 ## Planned Core Entities
 - `Company`
 - `User`
+- `Membership`
 - `Agent`
 - `Property`
 - `PropertyMedia`
@@ -28,7 +29,8 @@ This file tracks the current and planned core entities.
 
 ## Entity Notes
 - `Company`: tenant root entity
-- `User`: authenticated platform user
+- `User`: authenticated platform user aligned to Better Auth identity
+- `Membership`: joins a user to a company with role and status
 - `Agent`: role-specific company member or profile
 - `Property`: listing record owned by a company
 - `PropertyMedia`: media assets attached to a property
@@ -46,5 +48,6 @@ This file tracks the current and planned core entities.
 - `AiCreditBalance`: tenant credit accounting state
 
 ## Status
-- No schema has been implemented yet.
-- Relationships and fields will be refined during implementation.
+- Initial schema foundation is implemented in `packages/db` for `Company`, `User`, and `Membership`.
+- Chosen stack: Supabase Postgres + Drizzle migrations in `packages/db`.
+- Better Auth tables and feature-specific tables are not implemented yet.
