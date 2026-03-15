@@ -1,0 +1,25 @@
+model TenantDomain {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId        String             @map("company_id") @db.Uuid
+  kind             TenantDomainKind
+  status           TenantDomainStatus @default(pending)
+  hostname         String
+  subdomainLabel   String?            @map("subdomain_label")
+  apexDomain       String             @map("apex_domain")
+  vercelProjectKey String             @map("vercel_project_key")
+  vercelDomainName String?            @map("vercel_domain_name")
+  verificationJson Json?              @map("verification_json")
+  lastError        String?            @map("last_error")
+  provisionedAt    DateTime?          @map("provisioned_at") @db.Timestamptz(6)
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([hostname], map: "tenant_domains_hostname_key")
+  @@index([companyId], map: "tenant_domains_company_id_idx")
+  @@index([companyId, kind], map: "tenant_domains_company_kind_idx")
+  @@index([status], map: "tenant_domains_status_idx")
+  @@index([deletedAt], map: "tenant_domains_deleted_at_idx")
+  @@map("tenant_domains")
+}

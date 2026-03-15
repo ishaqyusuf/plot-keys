@@ -72,6 +72,7 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - Shared tokens must be defined once and consumed everywhere rather than re-declared per app.
 - `packages/ui` is the default home for reusable components; app-local components should only exist when they are genuinely app-specific.
 - Dashboard and platform marketing should share the same foundational tokens even when compositions differ.
+- All product-facing and shared UI work must be evaluated for light and dark mode support before it is considered complete.
 - Tenant website theming should override approved theme tokens, not component structure.
 - New reusable UI should ship with explicit variants instead of boolean prop sprawl.
 - Accessibility is a first-order requirement for color contrast, focus states, keyboard interaction, and semantic structure.
@@ -79,6 +80,7 @@ This file defines the shared design-system foundation for PlotKeys across the da
 ## Initial Token Direction
 ### Color
 - Use semantic tokens first: `background`, `foreground`, `muted`, `border`, `primary`, `accent`, `success`, `warning`, `destructive`
+- Define semantic color tokens so they can support both light and dark surfaces without component rewrites.
 - Keep tenant branding layered on top of semantic roles rather than replacing the full palette contract
 
 ### Typography
@@ -105,24 +107,27 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - Uses shared tokens instead of hardcoded one-off values
 - Has documented variants and default state behavior
 - Works across desktop and mobile
+- Handles light and dark mode gracefully, or explicitly documents why that surface is intentionally single-theme
 - Preserves accessible focus and interaction behavior
 
 ## Current Gaps
-- TODO: Add shared form primitives such as input, select, textarea, and field messaging
 - TODO: Define the first table and modal primitives for dashboard-heavy workflows
+- TODO: Define the shared dark mode strategy for `packages/ui`, including token overrides, activation model, and verification expectations
 - TODO: Decide whether charts/data-viz primitives belong in the first design-system milestone
 - TODO: Document the theming API for tenant-level overrides once theme editing exists
 
 ## Current Implementation
 - `packages/ui/src/globals.css` now provides the first semantic token contract for background, foreground, muted text, surface layers, borders, radius, shadows, and primary/accent roles.
 - Typography now intentionally splits between serif display headings and a sans-serif product reading stack.
-- Shared starter primitives now include `Button`, `Badge`, `Card`, and `SectionHeading`.
+- Shared starter primitives now follow a shadcn-style API and include `Alert`, `Badge`, `Button`, `Card`, `Input`, `Label`, `Select`, `Textarea`, and `SectionHeading`.
+- `packages/ui/src/components` now holds the installed Shadcn-derived component set directly, replacing the previous custom primitive implementations and exposing each component through explicit package subpath exports rather than a shared barrel file.
+- Dashboard auth and builder flows now consume shared form, field-label, and status-message primitives instead of app-local form control styling.
 - Dashboard and tenant website shells now consume the shared tokens instead of relying on one-off local styling.
 - The first tenant website template uses the shared primitives while preserving a theme-aware boundary in `packages/section-registry`.
 
 ## Near-Term Implementation Order
-1. Add shared form primitives and field compositions in `packages/ui`
-2. Normalize data-entry and empty-state patterns in the dashboard
+1. Normalize remaining data-entry and empty-state patterns in the dashboard and website apps
+2. Add table, dialog, and filter-bar primitives for operational modules
 3. Expand the tenant theme token contract beyond accent/background/font values
-4. Add table, dialog, and filter-bar primitives for operational modules
+4. Add field-level validation and helper-message compositions on top of the new form primitives
 5. Convert the onboarding checklist into a real persisted flow

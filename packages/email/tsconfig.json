@@ -1,4 +1,12 @@
 {
   "extends": "@plotkeys/tsconfig/base.json",
-  "include": ["src/**/*.ts"]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"]
+  },
+  "include": ["components", "emails", "render.ts", "defaults.ts", "src/**/*.ts"]
 }

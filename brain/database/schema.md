@@ -7,13 +7,12 @@ This file tracks the current and planned core entities.
 - Update when tables or major fields become concrete.
 - Mark uncertain items as `Planned` or `TODO`.
 
-## Planned Core Entities
+## Core Entities
 - `Company`
 - `User`
 - `Membership`
-- `SiteTemplate`
 - `SiteConfiguration`
-- `SiteConfigurationPublishEvent`
+- `TenantDomain`
 - `Agent`
 - `Property`
 - `PropertyMedia`
@@ -49,40 +48,33 @@ This file tracks the current and planned core entities.
 - `Domain`: purchased or connected tenant domain
 - `AiUsageLog`: auditable record of AI actions
 - `AiCreditBalance`: tenant credit accounting state
-- `SiteTemplate`: platform-defined website preset with section structure and metadata
-- `SiteConfiguration`: tenant-owned draft or published website configuration created from a template
-- `SiteConfigurationPublishEvent`: optional audit record for publish/replace operations
+- `SiteConfiguration`: tenant-owned draft or published website configuration created from a template key
+- `TenantDomain`: tenant-owned hostname record for PlotKeys subdomains and later custom domains
 
 ## Status
 - Initial schema foundation is implemented in `packages/db` for `Company`, `User`, and `Membership`.
+- Auth and website-builder schema is now partially implemented in Prisma for:
+  - `users.password_hash`
+  - `users.email_verified`
+  - `companies.market`
+  - `site_configurations`
+  - `tenant_domains`
 - Canonical schema owner: Prisma in `packages/db/prisma/schema.prisma`.
 - Mirrored query schema: Drizzle in `packages/db/drizzle/schema.ts`.
 - Chosen stack: provider-based `packages/db` with Prisma migrations and Postgres-compatible providers first.
 - Current provider identifiers: `postgres` and `supabase-postgres`.
 - Implemented soft-delete support with nullable `deletedAt`/`deleted_at` columns on the current core tables.
-- Better Auth tables and feature-specific tables are not implemented yet.
+- Better Auth-owned runtime tables are not implemented yet.
 
-## Planned Website Builder Schema
-- `SiteTemplate`
-  - Purpose: platform-owned template definition such as `template-1`, `template-2`, `template-3`
-  - Suggested fields:
-    - `id`
-    - `key`
-    - `name`
-    - `description`
-    - `thumbnailUrl`
-    - `templateSchemaJson`
-    - `isActive`
-    - `createdAt`
-    - `updatedAt`
+## Implemented Website Builder Schema
 - `SiteConfiguration`
-  - Purpose: tenant-owned instantiated website setup created from a platform template
-  - Suggested fields:
+  - Purpose: tenant-owned draft or published website setup created from a platform template key
+  - Implemented fields:
     - `id`
     - `companyId`
-    - `templateId` or stable `templateKey`
+    - `templateKey`
     - `name`
-    - `status` with values like `draft`, `published`, `archived`
+    - `status` with values `draft`, `published`, `archived`
     - `subdomain`
     - `themeJson`
     - `contentJson`
@@ -92,19 +84,51 @@ This file tracks the current and planned core entities.
     - `updatedById`
     - `createdAt`
     - `updatedAt`
-- `SiteConfigurationPublishEvent`
-  - Purpose: optional audit trail for publish actions and live-site replacements
-  - Suggested fields:
+
+## Implemented Tenant Domain Schema
+- `TenantDomain`
+  - Purpose: track tenant website and dashboard hostnames independently from the site configuration records
+  - Implemented fields:
     - `id`
     - `companyId`
-    - `previousConfigurationId`
-    - `nextConfigurationId`
-    - `publishedById`
-    - `publishedAt`
-    - `notes`
+    - `kind`
+    - `status`
+    - `hostname`
+    - `subdomainLabel`
+    - `apexDomain`
+    - `vercelProjectKey`
+    - `vercelDomainName`
+    - `verificationJson`
+    - `lastError`
+    - `provisionedAt`
+    - `createdAt`
+    - `updatedAt`
+  - Current implemented enum values:
+    - `kind`: `sitefront_subdomain`, `dashboard_subdomain`, `sitefront_custom_domain`, `dashboard_custom_domain`
+    - `status`: `pending`, `provisioning`, `active`, `failed`, `detached`
+
+## Current Template Ownership
+- Platform template definitions are currently stored in code inside `packages/section-registry`.
+- The code-backed template catalog currently includes:
+  - `template-1`
+  - `template-2`
+  - `template-3`
+- A `SiteTemplate` table is still optional future work, not current schema.
+
+## Current Auth Notes
+- `User.passwordHash` is currently used by the local Prisma-backed sign-up and sign-in flow.
+- `User.emailVerified` currently gates verification and onboarding access.
+- This is an implementation bridge until Better Auth adapter tables and runtime wiring are added.
+
+## Current Domain Notes
+- Signup currently validates the requested PlotKeys subdomain before onboarding.
+- On onboarding completion, the system creates pending tenant-domain records for:
+  - `{subdomain}.plotkeys.com`
+  - `dashboard.{subdomain}.plotkeys.com`
+- Dashboard now includes a sync action that attempts Vercel project-domain attachment for pending, failed, or provisioning tenant domains.
+- `verificationJson` now stores Vercel verification challenges when a hostname is attached but not yet fully active.
 
 ## Recommended JSON Ownership
-- `templateSchemaJson` should hold the platform-owned section structure and section metadata contract.
 - `themeJson` should hold tenant theme overrides such as brand colors, fonts, and style tokens.
 - `contentJson` should hold tenant-editable content keyed by stable `contentKey` paths.
 - Content derived from operational tables such as listings, agents, or company profile should not be duplicated into editable JSON.

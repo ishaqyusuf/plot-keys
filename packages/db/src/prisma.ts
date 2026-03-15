@@ -62,7 +62,10 @@ export function createPrismaClient(
       return client;
     }
 
-    const client = createConfiguredPrismaClient(runtimeConfig.provider, options);
+    const client = createConfiguredPrismaClient(
+      runtimeConfig.provider,
+      options,
+    );
     globalThis.__plotkeysPrismaClient__ = client;
     return client;
   }

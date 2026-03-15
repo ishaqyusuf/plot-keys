@@ -185,12 +185,8 @@
           "name": "memberships_company_id_companies_id_fk",
           "tableFrom": "memberships",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -198,12 +194,8 @@
           "name": "memberships_user_id_users_id_fk",
           "tableFrom": "memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -288,22 +280,12 @@
     "public.membership_role": {
       "name": "membership_role",
       "schema": "public",
-      "values": [
-        "platform_admin",
-        "owner",
-        "admin",
-        "agent",
-        "staff"
-      ]
+      "values": ["platform_admin", "owner", "admin", "agent", "staff"]
     },
     "public.membership_status": {
       "name": "membership_status",
       "schema": "public",
-      "values": [
-        "active",
-        "invited",
-        "suspended"
-      ]
+      "values": ["active", "invited", "suspended"]
     }
   },
   "schemas": {},

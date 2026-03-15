@@ -9,3 +9,5 @@ export function createEmailPayload(subject: string, to: string): EmailPayload {
     to,
   };
 }
+
+export * from "../defaults";

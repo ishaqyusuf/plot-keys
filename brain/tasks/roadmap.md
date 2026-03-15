@@ -17,8 +17,10 @@ This file maps near-term engineering execution in a practical order.
 7. Create Prisma-backed site template and site configuration models
 8. Bootstrap a default tenant website configuration on onboarding completion
 9. Build the tenant dashboard website entrypoint and template browser
-10. Build inline editing, sidebar controls, and AI field generation metadata
-11. Build publish confirmation and live site replacement flow
-12. Build company and property management foundations that feed derived website content
-13. Add lead capture and appointments
-14. Add billing, AI credits, and domain workflows
+10. Add tenant domain records plus subdomain-first signup and onboarding host previews
+11. Build Vercel subdomain provisioning and host-based runtime resolution
+12. Build inline editing, sidebar controls, and AI field generation metadata
+13. Build publish confirmation and live site replacement flow
+14. Build company and property management foundations that feed derived website content
+15. Add lead capture and appointments
+16. Add billing, AI credits, and full custom-domain workflows

@@ -28,9 +28,19 @@ This file tracks migration conventions and migration milestones.
 ## Milestones
 - Initial tenancy foundation migration captured for `users`, `companies`, and `memberships` plus supporting enums and indexes.
 - Soft-delete support added for the tenancy foundation tables, including active-record-only unique indexes for `users.email`, `companies.slug`, and `(memberships.companyId, memberships.userId)`.
+- Auth and onboarding support added in `0003_auth_onboarding_and_site_configurations`, including:
+  - `users.password_hash`
+  - `users.email_verified`
+  - `companies.market`
+  - `site_configurations`
+- Tenant domain support added in `0004_tenant_domains`, including:
+  - `TenantDomainKind`
+  - `TenantDomainStatus`
+  - `tenant_domains`
 
 ## TODO
 - Define migration naming convention beyond Drizzle's generated names
-- Define seeding strategy for templates and section library data
-- Define the first Prisma migration for `SiteTemplate` and `SiteConfiguration`
+- Define seeding strategy for code-backed template defaults and future section library data
+- Decide whether platform templates should remain code-backed or move into a Prisma `SiteTemplate` table
 - Decide whether template seeds should be Prisma seeds, static bootstrap scripts, or app-owned sync code
+- Add the first migration that records provisioning events or domain retry history once Vercel integration is implemented

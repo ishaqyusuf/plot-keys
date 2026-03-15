@@ -13,16 +13,18 @@ This file holds actionable work that is identified but not currently in progress
 - Replace header-based auth scaffolding with Better Auth session verification and adapter wiring
 - Define Hono + tRPC API folder conventions
 - Define Trigger.dev job boundaries for future async work
-- Build the real tenant onboarding flow and persist company setup data
-- Connect the first website template to live company and property records
-- Implement signup -> verification -> onboarding -> dashboard flow handoff
-- Add Prisma models and migration for `SiteTemplate` and `SiteConfiguration`
-- Seed default platform templates such as `template-1`, `template-2`, and `template-3`
-- Add editable-field metadata with `shortDetail` and `longDetail` to section definitions
-- Build template browser draft management and configuration naming
+- Connect the first website template to live property, agent, and company-profile records
+- Migrate the temporary Prisma-backed auth/session implementation onto full Better Auth handlers and adapters
+- Decide whether platform templates stay code-backed or move into a Prisma `SiteTemplate` table
+- Seed or sync default platform templates such as `template-1`, `template-2`, and `template-3`
 - Build inline editor hover states, focus mapping, and sidebar field controls
-- Build AI generate actions that use field-level metadata and tenant context
-- Build publish modal and atomic live-site replacement logic
+- Replace the current smart-fill placeholder with model-backed AI generation using `shortDetail` and `longDetail`
+- Build publish confirmation modal and rollback-friendly replacement UX
+- Add runtime host resolution that reads tenant website and dashboard hosts from `tenant_domains`
+- Add async Vercel provisioning jobs and retry handling for pending `sitefront` and `dashboard` subdomains
+- Add tenant domain status surfaces in the dashboard so setup failures do not stay silent
+- Add middleware-based hostname resolution for dashboard and public site instead of relying on preview query params
 - Add shared form primitives for onboarding and dashboard modules
+- Implement app-wide dark mode support in `packages/ui` and the Next.js apps using a shared token strategy
 - Decide whether `packages/supabase` should be renamed to a more general platform-integrations package once non-Supabase adapters exist
 - Add the first true non-Postgres database adapter only when a concrete product or deployment need exists

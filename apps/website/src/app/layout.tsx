@@ -1,5 +1,6 @@
 import "@plotkeys/ui/globals.css";
 
+import { NotificationsProvider } from "@plotkeys/notifications-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NotificationsProvider>{children}</NotificationsProvider>
+      </body>
     </html>
   );
 }

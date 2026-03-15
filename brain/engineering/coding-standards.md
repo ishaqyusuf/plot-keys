@@ -17,6 +17,7 @@ This file defines implementation guardrails for the repository.
 - Base design system and project structure on the approved `midday` reference project.
 - Use the latest stable Next.js and Tailwind CSS versions at setup time.
 - Prefer a shared `packages/ui` package over app-local component duplication.
+- Default new product UI and shared primitives to semantic tokens that can support both light and dark mode; document any intentional exceptions.
 - Keep section renderer components stateless and predictable.
 - Follow `brain/system/design-system.md` as the source of truth for tokens, primitives, and composition boundaries.
 

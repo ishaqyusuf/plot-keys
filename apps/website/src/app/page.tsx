@@ -164,8 +164,12 @@ export default function MarketingHomePage() {
 
                 <div className="mt-6 flex items-center justify-between rounded-[1.5rem] border border-white/10 bg-white/6 px-5 py-4">
                   <div>
-                    <p className="text-sm text-slate-300">Lead capture status</p>
-                    <p className="mt-1 text-lg font-medium">Routing to assigned agent</p>
+                    <p className="text-sm text-slate-300">
+                      Lead capture status
+                    </p>
+                    <p className="mt-1 text-lg font-medium">
+                      Routing to assigned agent
+                    </p>
                   </div>
                   <div className="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.25em] text-emerald-300">
                     Live
@@ -243,7 +247,10 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section id="launch" className="px-6 py-8 pb-12 md:px-10 md:py-12 md:pb-16">
+      <section
+        id="launch"
+        className="px-6 py-8 pb-12 md:px-10 md:py-12 md:pb-16"
+      >
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[2rem] border border-slate-200 bg-[#fff7ed] px-6 py-7">
             <p className="text-sm uppercase tracking-[0.35em] text-amber-700">
@@ -253,9 +260,9 @@ export default function MarketingHomePage() {
               Your website should feel as premium as the properties you market.
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-700">
-              PlotKeys pairs a disciplined multi-tenant foundation with
-              polished website presentation, so every company gets a credible
-              digital storefront without rebuilding from scratch.
+              PlotKeys pairs a disciplined multi-tenant foundation with polished
+              website presentation, so every company gets a credible digital
+              storefront without rebuilding from scratch.
             </p>
           </div>
 

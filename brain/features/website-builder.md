@@ -79,40 +79,68 @@ Allow each company to launch and manage a professional website using predefined 
 - `apps/websites`: section rendering and page delivery
 - `apps/dashboard`: CMS editing and template/theme management
 
-## Current Starter Template
-- The first home-page template is a premium real-estate marketing layout built from six structured sections.
-- It is currently sample-data driven and intended to become the contract for future CMS editing and property-sync wiring.
-- The renderer remains deterministic: each section entry carries its component, type, and config payload.
+## Current Implemented Template System
+- `packages/section-registry` now exposes a code-backed template catalog with:
+  - `template-1`
+  - `template-2`
+  - `template-3`
+- Each template defines:
+  - label and description
+  - default theme values
+  - starter content JSON
+  - editable field metadata
+- The current implementation keeps platform templates in code rather than a `SiteTemplate` database table.
+- This is an intentional MVP shortcut and should be treated as the current source of truth until a DB-backed template catalog is added.
 
-## Planned Tenant Flow
+## Current Implemented Builder Flow
+- On onboarding completion, the system creates a default tenant `SiteConfiguration`.
+- `apps/dashboard/src/app/builder/page.tsx` now provides:
+  - template browser
+  - draft list
+  - active-configuration selector
+  - central live preview
+  - editable field sidebar
+  - smart-fill action for editable fields
+  - publish action
+- `apps/dashboard/src/app/live/page.tsx` now renders the current published tenant website for a selected subdomain.
+- `apps/websites/src/app/page.tsx` now resolves published tenant configurations from Prisma and falls back to sample content only when no published tenant site exists.
+
+## Current Tenant Flow
 1. User signs up.
 2. User verifies account.
 3. User creates or confirms company setup and chooses a subdomain.
 4. System creates owner membership and a default tenant website configuration from the default platform template.
-5. Tenant lands in dashboard onboarding with a live starter website or starter draft, depending on final onboarding policy.
-6. Tenant can open the template browser and create or reopen template drafts.
-7. Tenant edits allowed content through inline editing and sidebar controls.
-8. Tenant publishes a selected draft after a replacement confirmation modal.
+5. Tenant lands in the dashboard with builder access.
+6. Tenant can open the template browser and create additional drafts from `template-1`, `template-2`, or `template-3`.
+7. Tenant edits allowed content through the builder sidebar.
+8. Tenant can publish a selected draft, which demotes the previous live configuration.
 
-## Planned Builder UX
-- Template browser should feel seamless for a new tenant and open with at least one default template already applied.
-- Template browser should support multiple templates per tenant, such as `Template 1`, `Template 2`, and `Template 3`.
-- Selecting a template should create or open a tenant-owned draft configuration instead of immediately replacing the live site.
-- The builder UI should use a central live preview with sidebar configuration controls.
-- Hovering editable content should show a dashed or broken border plus editor cursor affordance.
-- Clicking editable content should focus the matching sidebar control.
-- Derived content should show a read-only indicator such as `Managed from Listings` or `Managed from Company Profile`.
-- Publish flow should show a modal explaining that the current live site will be replaced.
+## Current Builder UX
+- Template browser opens with a starter tenant configuration already available.
+- Selecting a template creates a new tenant-owned draft configuration instead of replacing the live site immediately.
+- The builder uses a central live preview and a sidebar field editor.
+- Editable fields expose:
+  - `label`
+  - `shortDetail`
+  - `preferredLength`
+  - optional smart-fill action
+- Publishing now swaps the active live site configuration in the database.
 
-## Planned Data Model
+## Current Missing UX
+- Inline hover-to-edit with dashed borders is not implemented yet.
+- Click-to-focus preview editing is not implemented yet.
+- Publish confirmation modal is not implemented yet.
+- Derived live business content such as listings is not connected yet.
+
+## Current Data Model
 - Platform template
-  - Owned by the platform
-  - Defines section order, section types, default config, and editable-field metadata
+  - Owned in code by `packages/section-registry`
+  - Defines section order, section types, default content, default theme, and editable-field metadata
 - Tenant site configuration
-  - Owned by the tenant company
+  - Owned by the tenant company in Prisma
   - Stores editable content, theme overrides, configuration name, version state, and publish status
 - Published site
-  - Exactly one published configuration per company should be active at a time
+  - Exactly one configuration should be treated as live for a company at a time
 - Draft site
   - Multiple drafts may exist for the same company
 
@@ -130,7 +158,7 @@ Allow each company to launch and manage a professional website using predefined 
   - concise guidance shown to the tenant
   - example: `Homepage headline. Aim for 4-8 words.`
 - `longDetail`
-  - richer guidance used by AI content generation
+  - richer guidance used by AI or smart-fill generation
   - example: `Write a premium real-estate homepage headline for a Lagos luxury agency. Keep it concise, confident, and under 8 words.`
 
 ## Recommended TypeScript Shape
@@ -154,47 +182,28 @@ type EditableFieldDefinition = {
 };
 ```
 
-## Recommended Prisma Model Direction
-```prisma
-model SiteTemplate {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  key                String   @unique
-  name               String
-  description        String?
-  thumbnailUrl       String?  @map("thumbnail_url")
-  templateSchemaJson Json     @map("template_schema_json")
-  isActive           Boolean  @default(true) @map("is_active")
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-}
+## Current Prisma Model Direction
+- `SiteConfiguration` is implemented in Prisma.
+- The current model stores:
+  - `companyId`
+  - `templateKey`
+  - `name`
+  - `status`
+  - `subdomain`
+  - `themeJson`
+  - `contentJson`
+  - `version`
+  - `publishedAt`
+  - `createdById`
+  - `updatedById`
+- `SiteTemplate` is not implemented as a database table yet because the current platform template catalog is code-defined.
 
-model SiteConfiguration {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  companyId   String   @map("company_id") @db.Uuid
-  templateId  String   @map("template_id") @db.Uuid
-  name        String
-  status      String
-  subdomain   String?
-  themeJson   Json     @map("theme_json")
-  contentJson Json     @map("content_json")
-  version     Int      @default(1)
-  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
-  createdById String?  @map("created_by_id")
-  updatedById String?  @map("updated_by_id")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-}
-```
-
-## Recommended Flow Implementation Order
-1. Signup and verification
-2. Tenant onboarding and subdomain selection
-3. Default site configuration bootstrap
-4. Tenant dashboard website entrypoint
-5. Template browser and draft selection
-6. Inline editing and sidebar controls
-7. AI generate actions using field metadata
-8. Publish confirmation and live replacement flow
+## Current Remaining Flow Work
+1. Replace the local auth/session implementation with Better Auth runtime wiring
+2. Add inline hover editing and click-to-focus preview editing
+3. Connect derived data sections from company, property, and agent records
+4. Add publish confirmation UX
+5. Decide when to move platform templates from code into Prisma-backed records
 
 ## Validation Goals
 - A brand-new tenant never lands in an empty website-builder state.

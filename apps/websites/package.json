@@ -10,8 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@plotkeys/db": "workspace:*",
+    "@plotkeys/notifications-react": "workspace:*",
     "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/ui": "workspace:*",
+    "@plotkeys/utils": "workspace:*",
     "next": "^16.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

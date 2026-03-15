@@ -4,7 +4,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./cn": "./src/cn.ts"
+    "./cn": "./src/cn.ts",
+    "./tenant-domains": "./src/tenant-domains.ts",
+    "./vercel-domains": "./src/vercel-domains.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

@@ -1,0 +1,5 @@
+enum SiteConfigurationStatus {
+  draft
+  published
+  archived
+}

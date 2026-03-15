@@ -1,0 +1,14 @@
+enum TenantDomainKind {
+  sitefront_subdomain
+  dashboard_subdomain
+  sitefront_custom_domain
+  dashboard_custom_domain
+}
+
+enum TenantDomainStatus {
+  pending
+  provisioning
+  active
+  failed
+  detached
+}

@@ -1,25 +1,25 @@
 # Project Index
 
 ## Applications
-- `apps/dashboard`: Implemented Next.js dashboard shell for internal company workflows.
+- `apps/dashboard`: Implemented Next.js tenant dashboard with working sign-up, sign-in, verify-email, onboarding, builder, and live-preview flows backed by Prisma server actions; signup is now subdomain-first, previews tenant website/dashboard hostnames, and includes tenant-domain sync controls for Vercel provisioning.
 - `apps/website`: Implemented Next.js marketing site landing page for the platform with hero, feature, workflow, and CTA sections.
 - `apps/api`: Implemented Hono + tRPC API scaffold with a health router and query-layer split.
-- `apps/websites`: Implemented Next.js tenant website renderer shell backed by the section registry package.
+- `apps/websites`: Implemented Next.js tenant website renderer that now loads published tenant site configurations from Prisma, can resolve by tenant hostname, and falls back to sample content when no live tenant site exists.
 - `apps/docs`: Optional future docs app if product or developer documentation becomes public.
 
 ## Packages
-- `packages/ui`: Implemented shared UI starter package with global styles and a reusable button primitive.
-- `packages/auth`: Implemented Better Auth-oriented shared config plus request header parsing and membership-aware session context helpers.
+- `packages/ui`: Implemented shared UI package with global styles and a full Shadcn-derived component set living directly in `src/components`, with each primitive exported through explicit package subpath exports instead of a root barrel file.
+- `packages/auth`: Implemented route helpers plus a temporary Prisma-backed auth/session layer for sign-up, sign-in, verification, password hashing, and signed cookie sessions while Better Auth runtime wiring is still pending.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
-- `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, and a mirrored Drizzle query layer for `users`, `companies`, and `memberships`.
-- `packages/email`: Implemented starter email payload helpers.
+- `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, and a mirrored Drizzle query layer; current implemented Prisma models cover `users`, `companies`, `memberships`, `site_configurations`, and `tenant_domains`.
+- `packages/email`: Implemented a Midday-aligned React Email package structure with shared email defaults, starter email components, a render helper, and a first welcome email template.
 - `packages/jobs`: Implemented starter Trigger.dev-oriented job identifiers package.
+- `packages/notifications`: Implemented framework-agnostic notification types, a typed notification-definition registry, recipient contacts for users/subscribers, and an in-memory notification store contract using `notificationType` naming.
+- `packages/notifications-react`: Implemented the shared React provider, hooks, and viewport used by the three Next.js apps.
 - `packages/supabase`: Implemented optional Supabase env readers, browser/server/admin client factories, and tenant storage helpers.
 - `packages/tsconfig`: Implemented shared TypeScript base and Next.js configs.
-- `packages/utils`: Implemented shared utility helpers including `cn`.
-- `packages/section-registry`: Implemented section registry starter with a hero banner section and sample page data.
-- `packages/notifications`: TODO: Define when email, SMS, and in-app messaging requirements are implemented.
-
+- `packages/utils`: Implemented shared utility helpers including `cn`, tenant hostname builders, and a Vercel project-domain sync helper.
+- `packages/section-registry`: Implemented section registry with a multi-section home-page library, code-backed template catalog, editable field metadata, and tenant content/theme resolution helpers.
 ## Services
 - AI generation and credit accounting service
 - Domain provider integration service
@@ -50,7 +50,7 @@
 - `bun.lock`: Installed dependency lockfile.
 - `brain/system/design-system.md`: Defines the shared design-system foundation and rollout order.
 - `apps/api/.env.example`: Documents API runtime variables for local development.
-- `apps/dashboard/.env.example`: Documents dashboard app variables and shared platform placeholders.
+- `apps/dashboard/.env.example`: Documents dashboard app variables, auth secret, and Vercel project-domain provisioning env vars.
 - `apps/website/.env.example`: Documents marketing site browser-safe variables.
 - `apps/websites/.env.example`: Documents tenant website browser-safe variables.
 - `packages/db/prisma/`: Canonical Prisma 7 schema folder for the shared database package, with a main `schema.prisma` plus split domain files.
@@ -64,3 +64,6 @@
 - Repo structure should continue to evolve as real business modules are implemented.
 - The default shared package baseline should stay close to Midday and include project-required additions: `auth`, `chat-bot`, `db`, `email`, `jobs`, `section-registry`, `supabase`, `tsconfig`, `ui`, `utils`.
 - Relational application access should route through `packages/db`; vendor packages stay optional.
+- Current auth/runtime note: dashboard auth is working through a local Prisma-backed implementation in `packages/auth`, but full Better Auth adapter and handler wiring remains future work.
+- Domain/runtime note: tenant website and dashboard hostnames are stored as Prisma `TenantDomain` records, the dashboard can sync them against Vercel, and the public renderer can resolve by hostname when records exist.
+- The initial notification implementation currently focuses on reusable in-app notifications with typed definitions; delivery transports such as email, SMS, or push remain future work.
