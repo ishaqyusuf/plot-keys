@@ -1,11 +1,24 @@
 import { serve } from "@hono/node-server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { buildRequestContext, createTRPCContext } from "./context";
 import { appRouter } from "./routers/_app";
 
 const app = new Hono();
+const dashboardOrigin =
+  process.env.DASHBOARD_APP_URL ?? "http://localhost:3901";
+
+app.use(
+  "/trpc/*",
+  cors({
+    allowHeaders: ["Content-Type"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    origin: dashboardOrigin,
+  }),
+);
 
 app.get("/", (c) => {
   return c.json({
@@ -15,7 +28,7 @@ app.get("/", (c) => {
 });
 
 app.get("/health", async (c) => {
-  const context = buildRequestContext(c.req.raw.headers);
+  const context = await buildRequestContext(c.req.raw.headers);
 
   return c.json({
     api: "ok",

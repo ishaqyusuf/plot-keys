@@ -1,9 +1,9 @@
 # Project Index
 
 ## Applications
-- `apps/dashboard`: Implemented Next.js tenant dashboard with working sign-up, sign-in, verify-email, onboarding, builder, and live-preview flows backed by Prisma server actions; signup is now subdomain-first, previews tenant website/dashboard hostnames, and includes tenant-domain sync controls for Vercel provisioning.
+- `apps/dashboard`: Implemented Next.js tenant dashboard with working sign-up, sign-in, verify-email, onboarding, builder, and live-preview flows; auth entry now uses a Midday-style `src/trpc/client.tsx` and `src/trpc/server.tsx` split, a dashboard-owned `/api/trpc` route, `use-zod-form`, and a temporary dashboard session bridge route while onboarding/builder/domain mutations still include legacy server-action paths during the ongoing migration.
 - `apps/website`: Implemented Next.js marketing site landing page for the platform with hero, feature, workflow, and CTA sections.
-- `apps/api`: Implemented Hono + tRPC API scaffold with a health router and query-layer split.
+- `apps/api`: Implemented Hono + tRPC API with a health router, public auth router (`signUp`, `signIn`, `verifyEmail`), API-owned auth schemas in `src/schemas`, SuperJSON transformer, and CORS setup for the dashboard app.
 - `apps/websites`: Implemented Next.js tenant website renderer that now loads published tenant site configurations from Prisma, can resolve by tenant hostname, and falls back to sample content when no live tenant site exists.
 - `apps/docs`: Optional future docs app if product or developer documentation becomes public.
 
@@ -11,7 +11,7 @@
 - `packages/ui`: Implemented shared UI package with global styles and a full Shadcn-derived component set living directly in `src/components`, with each primitive exported through explicit package subpath exports instead of a root barrel file.
 - `packages/auth`: Implemented route helpers plus a temporary Prisma-backed auth/session layer for sign-up, sign-in, verification, password hashing, and signed cookie sessions while Better Auth runtime wiring is still pending.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
-- `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, and a mirrored Drizzle query layer; current implemented Prisma models cover `users`, `companies`, `memberships`, `site_configurations`, and `tenant_domains`.
+- `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, a growing `src/queries` layer for reusable Prisma-backed domain queries, and a mirrored Drizzle query layer; current implemented Prisma models cover `users`, `companies`, `memberships`, `site_configurations`, and `tenant_domains`.
 - `packages/email`: Implemented a Midday-aligned React Email package structure with shared email defaults, starter email components, a render helper, and a first welcome email template.
 - `packages/jobs`: Implemented starter Trigger.dev-oriented job identifiers package.
 - `packages/notifications`: Implemented framework-agnostic notification types, a typed notification-definition registry, recipient contacts for users/subscribers, and an in-memory notification store contract using `notificationType` naming.

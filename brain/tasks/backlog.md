@@ -24,7 +24,7 @@ This file holds actionable work that is identified but not currently in progress
 - Add async Vercel provisioning jobs and retry handling for pending `sitefront` and `dashboard` subdomains
 - Add tenant domain status surfaces in the dashboard so setup failures do not stay silent
 - Add middleware-based hostname resolution for dashboard and public site instead of relying on preview query params
-- Add shared form primitives for onboarding and dashboard modules
 - Implement app-wide dark mode support in `packages/ui` and the Next.js apps using a shared token strategy
+- Add a shared `SubmitButton` primitive in `packages/ui` and standardize dashboard forms on the `useZodForm` + `Controller` pattern documented from the Midday reference
 - Decide whether `packages/supabase` should be renamed to a more general platform-integrations package once non-Supabase adapters exist
 - Add the first true non-Postgres database adapter only when a concrete product or deployment need exists

@@ -1,8 +1,19 @@
 "use client";
 
-import { Card, CardContent } from "@plotkeys/ui/card";
-import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@plotkeys/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@plotkeys/ui/input-group";
+import type { ComponentProps } from "react";
 import { useId, useState } from "react";
 
 const plotkeysRootDomain = "plotkeys.com";
@@ -12,6 +23,7 @@ type SubdomainFieldProps = {
   defaultValue?: string;
   description?: string;
   id?: string;
+  inputProps?: ComponentProps<typeof InputGroupInput>;
   name?: string;
 };
 
@@ -28,6 +40,7 @@ export function SubdomainField({
   defaultValue = "",
   description = "Choose the tenant name that appears before .plotkeys.com.",
   id,
+  inputProps,
   name = "subdomain",
 }: SubdomainFieldProps) {
   const generatedId = useId();
@@ -38,25 +51,35 @@ export function SubdomainField({
   const dashboardHostname = `${dashboardLabel}.${previewValue}.${plotkeysRootDomain}`;
 
   return (
-    <div className="grid gap-2">
-      <Label htmlFor={inputId}>Subdomain</Label>
-      <div className="flex items-center overflow-hidden rounded-[var(--radius-sm)] border border-[color:var(--border)] bg-white shadow-sm focus-within:border-teal-400 focus-within:ring-4 focus-within:ring-[color:var(--ring)]">
-        <Input
-          className="rounded-none border-none shadow-none focus-visible:ring-0"
-          defaultValue={defaultValue}
-          id={inputId}
-          name={name}
-          onChange={(event) => setSubdomain(event.target.value)}
-          placeholder="astergrove"
-          required
-        />
-        <span className="border-l border-[color:var(--border)] px-4 py-3 text-sm text-slate-500">
-          .{plotkeysRootDomain}
-        </span>
-      </div>
-      <p className="text-sm leading-6 text-slate-500">{description}</p>
-      <Card className="bg-slate-50">
-        <CardContent className="space-y-1 px-4 py-3 text-sm text-slate-600">
+    <FieldGroup>
+      <Field>
+        <FieldLabel htmlFor={inputId}>Subdomain</FieldLabel>
+        <InputGroup>
+          <InputGroupInput
+            {...inputProps}
+            defaultValue={defaultValue}
+            id={inputId}
+            name={name}
+            onChange={(event) => {
+              setSubdomain(event.target.value);
+              inputProps?.onChange?.(event);
+            }}
+            placeholder="astergrove"
+            required
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupText>.{plotkeysRootDomain}</InputGroupText>
+          </InputGroupAddon>
+        </InputGroup>
+        <FieldDescription>{description}</FieldDescription>
+      </Field>
+      <Card className="bg-muted/40">
+        <CardHeader className="px-4 pt-4 pb-0">
+          <CardTitle className="text-sm font-medium text-foreground">
+            Hostname preview
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-1 px-4 pb-4 text-sm text-muted-foreground">
           <p>
             Website: <strong>{websiteHostname}</strong>
           </p>
@@ -65,6 +88,6 @@ export function SubdomainField({
           </p>
         </CardContent>
       </Card>
-    </div>
+    </FieldGroup>
   );
 }

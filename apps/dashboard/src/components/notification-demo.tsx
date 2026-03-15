@@ -7,21 +7,21 @@ export function NotificationDemo() {
   const notifications = useNotifications();
 
   return (
-    <div className="mt-8 rounded-[calc(var(--radius-md)-0.15rem)] border border-[color:var(--border)] bg-slate-50/80 p-5">
+    <div className="mt-8 rounded-[calc(var(--radius-md)-0.15rem)] border border-border bg-muted/40 p-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">
             Notifications package
           </p>
-          <h3 className="mt-2 font-serif text-2xl text-slate-950">
+          <h3 className="mt-2 font-serif text-2xl text-foreground">
             Trigger framework-agnostic notifications through the React layer.
           </h3>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             This demo uses notification types and recipient contacts for both a
             tenant user and a site subscriber.
           </p>
         </div>
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-muted-foreground">
           Active: {notifications.notifications.length}
         </div>
       </div>

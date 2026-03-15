@@ -12,6 +12,8 @@ export type PrismaDatabaseClient = {
   status: "connected" | "unconfigured";
 };
 
+export type Db = PrismaClient;
+
 declare global {
   // eslint-disable-next-line no-var
   var __plotkeysPrismaClient__: PrismaDatabaseClient | undefined;

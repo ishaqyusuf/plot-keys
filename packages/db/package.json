@@ -5,7 +5,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./drizzle": "./drizzle/client.ts",
-    "./prisma": "./src/prisma.ts"
+    "./prisma": "./src/prisma.ts",
+    "./queries/auth": "./src/queries/auth.ts",
+    "./queries/company": "./src/queries/company.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

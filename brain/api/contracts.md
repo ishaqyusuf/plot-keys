@@ -13,6 +13,11 @@ This file tracks request and response shape conventions.
 - Prefer explicit enums for status-driven workflows.
 - Use structured payloads for website sections and AI outputs.
 - Current API scaffold can derive request auth context from headers before full Better Auth session wiring lands.
+- Auth mutations now return structured session handoff payloads instead of redirect responses:
+  - `sessionToken`
+  - `redirectTo`
+  - auth-flow-specific metadata such as onboarding defaults for sign-up
+- Store API-facing Zod schemas in `apps/api/src/schemas/*` rather than shared utility packages so transport contracts stay API-owned and discoverable.
 
 ## Planned Enums
 - `LeadStatus`: `NEW`, `CONTACTED`, `NEGOTIATING`, `CLOSED`

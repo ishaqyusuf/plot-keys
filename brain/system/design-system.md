@@ -73,6 +73,8 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - `packages/ui` is the default home for reusable components; app-local components should only exist when they are genuinely app-specific.
 - Dashboard and platform marketing should share the same foundational tokens even when compositions differ.
 - All product-facing and shared UI work must be evaluated for light and dark mode support before it is considered complete.
+- Product pages must use semantic Tailwind tokens such as `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`, and `bg-accent` instead of raw palette classes like `slate-*`, `teal-*`, `amber-*`, hardcoded hex values, or one-off rgba colors.
+- If a surface needs a gradient, tint, or translucent treatment, build it from the semantic token contract with CSS variables or token-derived Tailwind values rather than fixed colors.
 - Tenant website theming should override approved theme tokens, not component structure.
 - New reusable UI should ship with explicit variants instead of boolean prop sprawl.
 - Accessibility is a first-order requirement for color contrast, focus states, keyboard interaction, and semantic structure.
@@ -115,14 +117,17 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - TODO: Define the shared dark mode strategy for `packages/ui`, including token overrides, activation model, and verification expectations
 - TODO: Decide whether charts/data-viz primitives belong in the first design-system milestone
 - TODO: Document the theming API for tenant-level overrides once theme editing exists
+- TODO: Promote the current dashboard form approach into shared `packages/ui` guidance, including a reusable `SubmitButton` and the approved `Controller`/`FormField` boundary
 
 ## Current Implementation
 - `packages/ui/src/globals.css` now provides the first semantic token contract for background, foreground, muted text, surface layers, borders, radius, shadows, and primary/accent roles.
+- `packages/ui/src/globals.css` is now also responsible for the default dark-mode token contract; page code should not compensate for missing dark colors with app-local overrides.
 - Typography now intentionally splits between serif display headings and a sans-serif product reading stack.
 - Shared starter primitives now follow a shadcn-style API and include `Alert`, `Badge`, `Button`, `Card`, `Input`, `Label`, `Select`, `Textarea`, and `SectionHeading`.
 - `packages/ui/src/components` now holds the installed Shadcn-derived component set directly, replacing the previous custom primitive implementations and exposing each component through explicit package subpath exports rather than a shared barrel file.
 - Dashboard auth and builder flows now consume shared form, field-label, and status-message primitives instead of app-local form control styling.
-- Dashboard and tenant website shells now consume the shared tokens instead of relying on one-off local styling.
+- Dashboard form state should default to `useZodForm`, with `Controller` reserved for controlled inputs and a shared submit-action component used for loading/disabled submit states once exported from `packages/ui`.
+- Dashboard, marketing, and tenant website shells should consume shared semantic tokens instead of relying on one-off local styling or fixed palette utilities.
 - The first tenant website template uses the shared primitives while preserving a theme-aware boundary in `packages/section-registry`.
 
 ## Near-Term Implementation Order

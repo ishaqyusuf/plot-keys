@@ -25,6 +25,10 @@ Guide a new user from account creation to verified access, then into tenant comp
   - `/builder`
   - `/live`
 - `apps/dashboard/src/app/actions.ts` now persists sign-up, sign-in, email verification, onboarding, builder edits, draft creation, and publish actions through Prisma.
+- Auth entry pages now use client-side `use-zod-form` forms backed by tRPC auth mutations, while onboarding and builder flows still use server actions for now.
+- `apps/api` now owns the implemented auth mutations for sign-up, sign-in, and verify-email.
+- `apps/dashboard` now mounts the shared app router through a same-origin `/api/trpc` route and uses a Midday-style `src/trpc/client.tsx` and `src/trpc/server.tsx` split.
+- `apps/dashboard/src/app/api/session/route.ts` now persists and clears the signed session cookie after successful auth mutations.
 - Signup now captures:
   - company name
   - tenant subdomain
@@ -49,6 +53,7 @@ Guide a new user from account creation to verified access, then into tenant comp
 
 ## Current Implementation Notes
 - The auth/session layer is currently a local Prisma-backed implementation inside `packages/auth`.
+- Auth business logic for sign-up, sign-in, and verify-email now flows through `apps/api` tRPC procedures instead of dashboard server actions.
 - Better Auth remains the intended long-term auth runtime, but the current flow is not yet wired through Better Auth adapters or handlers.
 - The implemented flow is intended to keep product momentum while the final auth integration is still pending.
 - Signup currently uses an instant verified-session handoff for the primary path instead of forcing the user through the verification screen first.

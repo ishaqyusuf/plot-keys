@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@plotkeys/api": "workspace:*",
     "@plotkeys/auth": "workspace:*",
     "@plotkeys/db": "workspace:*",
     "@plotkeys/notifications": "workspace:*",
@@ -17,9 +19,17 @@
     "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/ui": "workspace:*",
     "@plotkeys/utils": "workspace:*",
+    "@tanstack/react-query": "^5.90.2",
+    "@trpc/tanstack-react-query": "^11.0.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/react-query": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "next": "^16.1.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.71.2",
+    "superjson": "^2.2.2",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@plotkeys/tsconfig": "workspace:*",

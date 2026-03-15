@@ -34,3 +34,5 @@ This file records completed work milestones.
 - Added shared notifications packages with a framework-agnostic core, a React adapter for hooks/providers, and provider wiring across the three web apps
 - Extended the notifications core with a typed registry and the first `signup_successful` notification surfaced in the signup-to-onboarding flow
 - Reshaped `packages/email` toward the Midday/GND React Email package layout with starter components, defaults, render helper, and a welcome email template
+- Moved sign-up, sign-in, and verify-email into `apps/api` tRPC mutations, added a Midday-style dashboard `client.tsx`/`server.tsx` tRPC setup with a same-origin `/api/trpc` route, added `use-zod-form`, and introduced a temporary session bridge route for auth cookie persistence
+- Started the Midday-style backend structure by moving auth API contracts into `apps/api/src/schemas` and creating the first reusable Prisma-backed query modules under `packages/db/src/queries`

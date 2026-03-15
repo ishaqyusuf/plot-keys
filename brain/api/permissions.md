@@ -26,5 +26,6 @@ This file tracks authorization and permission expectations.
 ## Open Items
 - Initial role model: `platform_admin`, `owner`, `admin`, `agent`, `staff`
 - Better Auth should manage identity and sessions; application tables should manage company memberships
-- Current API scaffold resolves request auth context from headers and exposes active membership data in the server context
+- Current API scaffold can now resolve auth context from either request headers or the session cookie when mounted through the dashboard-owned `/api/trpc` route
+- Current auth implementation detail: dashboard auth forms now call same-origin tRPC auth mutations and persist the returned signed session token through a temporary same-origin dashboard session route
 - TODO: Fine-grained permissions for CRM, billing, AI, and domain operations

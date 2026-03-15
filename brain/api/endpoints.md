@@ -41,4 +41,9 @@ This file tracks implemented and planned API surfaces.
 ## Status
 - Implemented starter Hono app root route at `/`.
 - Implemented starter tRPC router namespace `health`.
+- Implemented tRPC router namespace `auth` with public mutations for:
+  - `auth.signUp`
+  - `auth.signIn`
+  - `auth.verifyEmail`
+- Implemented dashboard-owned Next route adapter at `/api/trpc` so the dashboard can call the shared app router through a same-origin endpoint.
 - Implemented query-layer example in `apps/api/src/db/queries/health.ts`.

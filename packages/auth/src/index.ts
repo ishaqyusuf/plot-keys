@@ -1,11 +1,18 @@
 import {
   createHmac,
   randomBytes,
-  randomUUID,
   scryptSync,
   timingSafeEqual,
 } from "node:crypto";
-import { createPrismaClient, type MembershipRole } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  createUser,
+  type Db,
+  findUserByEmail,
+  getSessionUserByTokenUserId,
+  type MembershipRole,
+  verifyUserEmailByIdentity,
+} from "@plotkeys/db";
 import { z } from "zod";
 
 export const authRoutes = {
@@ -18,7 +25,12 @@ export const authRoutes = {
   verifyEmail: "/verify-email",
 };
 
+export const sessionBridgeInputSchema = z.object({
+  sessionToken: z.string().trim().min(1, "Session token is required."),
+});
+
 export type OnboardingStatus = "not_started" | "in_progress" | "completed";
+export type SessionBridgeInput = z.infer<typeof sessionBridgeInputSchema>;
 
 export function resolvePostVerificationRoute(
   onboardingStatus: OnboardingStatus,
@@ -175,7 +187,7 @@ function verifyPasswordHash(password: string, storedHash: string) {
   );
 }
 
-function requirePrismaClient() {
+function requireDb() {
   const client = createPrismaClient();
 
   if (!client.db) {
@@ -214,32 +226,25 @@ export function readSessionToken(token: string) {
 }
 
 export async function signUpUser(input: {
+  db?: Db;
   email: string;
   emailVerified?: boolean;
   name: string;
   password: string;
 }) {
-  const prisma = requirePrismaClient();
+  const db = input.db ?? requireDb();
   const email = input.email.trim().toLowerCase();
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      deletedAt: null,
-      email,
-    },
-  });
+  const existingUser = await findUserByEmail(db, email);
 
   if (existingUser) {
     throw new Error("An account with that email already exists.");
   }
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      emailVerified: input.emailVerified ?? false,
-      id: randomUUID(),
-      name: input.name.trim(),
-      passwordHash: hashPassword(input.password),
-    },
+  const user = await createUser(db, {
+    email,
+    emailVerified: input.emailVerified ?? false,
+    name: input.name,
+    passwordHash: hashPassword(input.password),
   });
 
   return {
@@ -252,14 +257,11 @@ export async function signUpUser(input: {
 }
 
 export async function verifyUserEmail(token: string) {
-  const prisma = requirePrismaClient();
+  const db = requireDb();
   const payload = decodeToken(token, verificationTokenSchema);
-  const user = await prisma.user.findFirst({
-    where: {
-      deletedAt: null,
-      email: payload.email,
-      id: payload.userId,
-    },
+  const user = await verifyUserEmailByIdentity(db, {
+    email: payload.email,
+    userId: payload.userId,
   });
 
   if (!user) {
@@ -268,24 +270,12 @@ export async function verifyUserEmail(token: string) {
     );
   }
 
-  return prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      emailVerified: true,
-    },
-  });
+  return user;
 }
 
 export async function signInUser(input: { email: string; password: string }) {
-  const prisma = requirePrismaClient();
-  const user = await prisma.user.findFirst({
-    where: {
-      deletedAt: null,
-      email: input.email.trim().toLowerCase(),
-    },
-  });
+  const db = requireDb();
+  const user = await findUserByEmail(db, input.email);
 
   if (!user || !user.passwordHash) {
     throw new Error("Incorrect email or password.");
@@ -303,25 +293,9 @@ export async function signInUser(input: { email: string; password: string }) {
 }
 
 export async function getAppSessionFromSessionToken(token: string) {
-  const prisma = requirePrismaClient();
+  const db = requireDb();
   const payload = readSessionToken(token);
-  const user = await prisma.user.findFirst({
-    where: {
-      deletedAt: null,
-      id: payload.userId,
-    },
-    include: {
-      memberships: {
-        include: {
-          company: true,
-        },
-        where: {
-          deletedAt: null,
-          status: "active",
-        },
-      },
-    },
-  });
+  const user = await getSessionUserByTokenUserId(db, payload.userId);
 
   if (!user) {
     return null;

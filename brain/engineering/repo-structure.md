@@ -50,6 +50,19 @@ brain/
 - `packages/section-registry`: Section schemas and renderer mapping
 - `packages/utils`: Shared utilities
 
+## Midday-Inspired Internal Layout
+- `apps/api/src/schemas/*`: API request/response Zod schemas and API-owned contract types
+- `apps/api/src/routers/*`: tRPC router namespaces that compose schemas, auth checks, and service/query calls
+- `packages/db/src/queries/*`: database-facing query and mutation modules grouped by domain
+- `apps/dashboard/src/trpc/client.tsx`: browser-side tRPC provider and `useTRPC` access
+- `apps/dashboard/src/trpc/server.tsx`: server-side tRPC query options, hydration, and prefetch helpers
+
+## Structural Rules
+- Prefer adding a new module under `packages/db/src/queries/*` before writing inline Prisma in an app or router.
+- Query modules under `packages/db/src/queries/*` should receive `db` from the caller instead of constructing their own client.
+- Prefer adding a schema under `apps/api/src/schemas/*` before defining a new API contract in an app component or shared utility package.
+- Keep routers thin; if a procedure is doing substantial data shaping or persistence work, extract that work downward into query or service modules.
+
 ## Later Additions
 - Add new packages only when a responsibility cannot live cleanly in the current baseline packages.
 - Likely future candidates: dedicated AI, billing, and domain packages.

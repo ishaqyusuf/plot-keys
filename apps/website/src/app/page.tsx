@@ -1,4 +1,13 @@
+import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@plotkeys/ui/card";
+import { SectionHeading } from "@plotkeys/ui/section-heading";
 import Link from "next/link";
 
 const highlights = [
@@ -54,27 +63,28 @@ const workflow = [
 
 export default function MarketingHomePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,#99f6e4_0%,rgba(153,246,228,0)_22%),radial-gradient(circle_at_top_right,#fcd34d_0%,rgba(252,211,77,0)_18%),linear-gradient(180deg,#f4efe7_0%,#fcfbf7_42%,#f8fafc_100%)] text-slate-950">
+    <main className="min-h-screen overflow-hidden bg-background text-foreground">
       <section className="relative px-6 py-6 md:px-10 md:py-8">
-        <div className="mx-auto max-w-6xl rounded-[2rem] border border-slate-200/80 bg-white/80 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.08)] backdrop-blur md:p-8">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--primary)_24%,transparent)_0%,transparent_22%),radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--accent)_20%,transparent)_0%,transparent_18%)]" />
+        <div className="mx-auto max-w-6xl rounded-[2rem] border border-border bg-card p-5 shadow-[var(--shadow-soft)] backdrop-blur md:p-8">
           <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.45em] text-teal-700">
+              <p className="text-xs uppercase tracking-[0.45em] text-primary">
                 PlotKeys
               </p>
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 The operating system for modern real-estate companies.
               </p>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-5 text-sm text-slate-600">
-              <a href="#features" className="transition hover:text-slate-950">
+            <nav className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
+              <a href="#features" className="transition hover:text-foreground">
                 Features
               </a>
-              <a href="#workflow" className="transition hover:text-slate-950">
+              <a href="#workflow" className="transition hover:text-foreground">
                 Workflow
               </a>
-              <a href="#launch" className="transition hover:text-slate-950">
+              <a href="#launch" className="transition hover:text-foreground">
                 Launch
               </a>
               <Button asChild variant="secondary">
@@ -85,11 +95,11 @@ export default function MarketingHomePage() {
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div className="relative">
-              <div className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-teal-800">
+              <Badge className="px-4 py-2 text-xs uppercase tracking-[0.3em]">
                 Built for agencies, developers, and property teams
-              </div>
+              </Badge>
 
-              <h1 className="mt-6 max-w-4xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] text-slate-950 md:text-7xl">
+              <h1 className="mt-6 max-w-4xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] text-foreground md:text-7xl">
                 Run the business.
                 <br />
                 Launch the website.
@@ -97,7 +107,7 @@ export default function MarketingHomePage() {
                 Capture every lead.
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
                 PlotKeys unifies listings, CRM, agents, appointments, AI
                 content, and branded property websites in one clean workflow.
               </p>
@@ -111,13 +121,13 @@ export default function MarketingHomePage() {
                 </Button>
               </div>
 
-              <ul className="mt-8 grid gap-3 text-sm text-slate-700">
+              <ul className="mt-8 grid gap-3 text-sm text-foreground">
                 {highlights.map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3"
+                    className="flex items-start gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-3"
                   >
-                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-amber-400" />
+                    <span className="mt-1 size-2.5 rounded-full bg-accent" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -125,21 +135,21 @@ export default function MarketingHomePage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -right-6 top-8 hidden h-28 w-28 rounded-full bg-teal-200/70 blur-3xl md:block" />
-              <div className="absolute -left-4 bottom-8 hidden h-28 w-28 rounded-full bg-amber-200/70 blur-3xl md:block" />
+              <div className="absolute -right-6 top-8 hidden h-28 w-28 rounded-full bg-primary/20 blur-3xl md:block" />
+              <div className="absolute -left-4 bottom-8 hidden h-28 w-28 rounded-full bg-accent/20 blur-3xl md:block" />
 
-              <div className="relative rounded-[2rem] bg-slate-950 p-6 text-white shadow-[0_24px_60px_rgba(15,23,42,0.24)] md:p-8">
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-teal-200">
+              <div className="relative rounded-[2rem] bg-foreground p-6 text-background shadow-[var(--shadow-card)] md:p-8">
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-primary-foreground/75">
                   <span>Live tenant website</span>
                   <span>company.plotkeys.app</span>
                 </div>
 
-                <div className="mt-8 rounded-[1.5rem] bg-white/8 p-5 ring-1 ring-white/10">
-                  <p className="text-sm text-slate-300">Featured property</p>
+                <div className="mt-8 rounded-[1.5rem] bg-background/10 p-5 ring-1 ring-background/10">
+                  <p className="text-sm text-primary-foreground/70">Featured property</p>
                   <h2 className="mt-3 font-serif text-3xl leading-tight">
                     Elegant homes, credible brand, smoother lead flow.
                   </h2>
-                  <p className="mt-4 text-sm leading-7 text-slate-300">
+                  <p className="mt-4 text-sm leading-7 text-primary-foreground/75">
                     Every listing, testimonial, CTA, and neighborhood story is
                     presented in a structured layout that feels premium on both
                     desktop and mobile.
@@ -149,12 +159,12 @@ export default function MarketingHomePage() {
                     {metrics.map((metric) => (
                       <div
                         key={metric.label}
-                        className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4"
+                        className="rounded-2xl border border-background/10 bg-background/10 px-4 py-4"
                       >
-                        <p className="text-2xl font-semibold text-white">
+                        <p className="text-2xl font-semibold text-background">
                           {metric.value}
                         </p>
-                        <p className="mt-2 text-xs uppercase tracking-[0.25em] text-slate-400">
+                        <p className="mt-2 text-xs uppercase tracking-[0.25em] text-primary-foreground/60">
                           {metric.label}
                         </p>
                       </div>
@@ -162,16 +172,16 @@ export default function MarketingHomePage() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between rounded-[1.5rem] border border-white/10 bg-white/6 px-5 py-4">
+                <div className="mt-6 flex items-center justify-between rounded-[1.5rem] border border-background/10 bg-background/10 px-5 py-4">
                   <div>
-                    <p className="text-sm text-slate-300">
+                    <p className="text-sm text-primary-foreground/70">
                       Lead capture status
                     </p>
                     <p className="mt-1 text-lg font-medium">
                       Routing to assigned agent
                     </p>
                   </div>
-                  <div className="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.25em] text-emerald-300">
+                  <div className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.25em] text-primary-foreground">
                     Live
                   </div>
                 </div>
@@ -183,44 +193,44 @@ export default function MarketingHomePage() {
 
       <section id="features" className="px-6 py-8 md:px-10 md:py-12">
         <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
-              Why teams choose PlotKeys
-            </p>
-            <h2 className="mt-3 font-serif text-4xl tracking-[-0.03em] text-slate-950 md:text-5xl">
-              A cleaner system for operations and public presence.
-            </h2>
-          </div>
+          <SectionHeading
+            eyebrow="Why teams choose PlotKeys"
+            title="A cleaner system for operations and public presence."
+          />
 
           <div className="mt-8 grid gap-5 lg:grid-cols-3">
             {features.map((feature) => (
-              <article
+              <Card
                 key={feature.title}
-                className="rounded-[1.75rem] border border-slate-200 bg-white px-6 py-7 shadow-[0_18px_40px_rgba(15,23,42,0.05)]"
+                className="gap-4 rounded-[1.75rem] border-border bg-card py-7 shadow-[var(--shadow-card)]"
               >
-                <div className="h-12 w-12 rounded-2xl bg-[linear-gradient(135deg,#0f766e_0%,#14b8a6_100%)]" />
-                <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
-                  {feature.title}
-                </h3>
-                <p className="mt-3 text-base leading-7 text-slate-600">
-                  {feature.description}
-                </p>
-              </article>
+                <CardHeader className="px-6 pb-0">
+                  <div className="size-12 rounded-2xl bg-[linear-gradient(135deg,var(--primary)_0%,color-mix(in_srgb,var(--primary)_70%,white)_100%)]" />
+                  <CardTitle className="mt-5 text-2xl tracking-[-0.03em] text-foreground">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6">
+                  <CardDescription className="text-base leading-7 text-muted-foreground">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       <section id="workflow" className="px-6 py-8 md:px-10 md:py-12">
-        <div className="mx-auto grid max-w-6xl gap-8 rounded-[2rem] bg-[linear-gradient(145deg,#0f172a_0%,#134e4a_100%)] px-6 py-8 text-white shadow-[0_22px_60px_rgba(15,23,42,0.18)] md:px-8 md:py-10 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="mx-auto grid max-w-6xl gap-8 rounded-[2rem] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--foreground)_96%,black)_0%,var(--primary)_100%)] px-6 py-8 text-primary-foreground shadow-[var(--shadow-soft)] md:px-8 md:py-10 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-teal-200">
+            <p className="text-sm uppercase tracking-[0.35em] text-primary-foreground/80">
               Simple workflow
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.03em]">
               From setup to launch without the usual platform mess.
             </h2>
-            <p className="mt-4 max-w-md text-base leading-7 text-slate-300">
+            <p className="mt-4 max-w-md text-base leading-7 text-primary-foreground/75">
               PlotKeys is designed to give small and growing real-estate teams a
               clear path from internal operations to a public-ready website.
             </p>
@@ -230,15 +240,15 @@ export default function MarketingHomePage() {
             {workflow.map((item) => (
               <div
                 key={item.step}
-                className="rounded-[1.5rem] border border-white/10 bg-white/7 px-5 py-5"
+                className="rounded-[1.5rem] border border-primary-foreground/10 bg-primary-foreground/10 px-5 py-5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="rounded-full border border-teal-200/30 bg-teal-300/10 px-3 py-1 text-xs font-medium tracking-[0.3em] text-teal-100">
+                  <div className="rounded-full border border-primary-foreground/15 bg-primary-foreground/10 px-3 py-1 text-xs font-medium tracking-[0.3em] text-primary-foreground/85">
                     {item.step}
                   </div>
                   <h3 className="text-xl font-semibold">{item.title}</h3>
                 </div>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-primary-foreground/75">
                   {item.description}
                 </p>
               </div>
@@ -252,42 +262,49 @@ export default function MarketingHomePage() {
         className="px-6 py-8 pb-12 md:px-10 md:py-12 md:pb-16"
       >
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-[2rem] border border-slate-200 bg-[#fff7ed] px-6 py-7">
-            <p className="text-sm uppercase tracking-[0.35em] text-amber-700">
-              Built for trust
-            </p>
-            <h2 className="mt-4 font-serif text-4xl tracking-[-0.03em] text-slate-950">
-              Your website should feel as premium as the properties you market.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-700">
-              PlotKeys pairs a disciplined multi-tenant foundation with polished
-              website presentation, so every company gets a credible digital
-              storefront without rebuilding from scratch.
-            </p>
-          </div>
+          <Card className="rounded-[2rem] border-border bg-accent/10 py-7 shadow-none">
+            <CardHeader className="px-6 pb-0">
+              <CardTitle className="text-sm uppercase tracking-[0.35em] text-accent-foreground">
+                Built for trust
+              </CardTitle>
+              <CardTitle className="mt-4 font-serif text-4xl tracking-[-0.03em] text-foreground">
+                Your website should feel as premium as the properties you market.
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6">
+              <CardDescription className="text-base leading-7 text-muted-foreground">
+                PlotKeys pairs a disciplined multi-tenant foundation with polished
+                website presentation, so every company gets a credible digital
+                storefront without rebuilding from scratch.
+              </CardDescription>
+            </CardContent>
+          </Card>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white px-6 py-7 shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
-            <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
-              Ready to launch
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-slate-950">
-              Start with a clean foundation and scale from there.
-            </h2>
-            <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">
-              Use PlotKeys to centralize operations now, then expand into
-              branded websites, custom domains, AI assistance, and deeper
-              automation as your team grows.
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="px-6 py-3.5">
-                <Link href="/signup">Create workspace</Link>
-              </Button>
-              <Button asChild variant="secondary" className="px-6 py-3.5">
-                <Link href="/contact">Talk to sales</Link>
-              </Button>
-            </div>
-          </div>
+          <Card className="rounded-[2rem] border-border bg-card py-7 shadow-[var(--shadow-card)]">
+            <CardHeader className="px-6 pb-0">
+              <CardTitle className="text-sm uppercase tracking-[0.35em] text-muted-foreground">
+                Ready to launch
+              </CardTitle>
+              <CardTitle className="mt-4 text-3xl tracking-[-0.03em] text-foreground">
+                Start with a clean foundation and scale from there.
+              </CardTitle>
+              <CardDescription className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
+                Use PlotKeys to centralize operations now, then expand into
+                branded websites, custom domains, AI assistance, and deeper
+                automation as your team grows.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild className="px-6 py-3.5">
+                  <Link href="/signup">Create workspace</Link>
+                </Button>
+                <Button asChild variant="secondary" className="px-6 py-3.5">
+                  <Link href="/contact">Talk to sales</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>

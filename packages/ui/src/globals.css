@@ -56,15 +56,20 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(94, 234, 212, 0.2),
+      color-mix(in srgb, var(--primary) 24%, transparent),
       transparent 20%
     ),
     radial-gradient(
       circle at top right,
-      rgba(245, 158, 11, 0.16),
+      color-mix(in srgb, var(--accent) 20%, transparent),
       transparent 18%
     ),
-    linear-gradient(180deg, #f4efe7 0%, #f7fafc 45%, #eef4f7 100%);
+    linear-gradient(
+      180deg,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 78%, white) 45%,
+      color-mix(in srgb, var(--background) 72%, var(--foreground) 8%) 100%
+    );
   color: var(--foreground);
   font-family: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
   text-rendering: optimizeLegibility;
@@ -88,7 +93,7 @@ button {
 }
 
 ::selection {
-  background: rgba(15, 118, 110, 0.18);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 h1,
@@ -105,6 +110,24 @@ p {
 }
 
 .dark {
+  --background: #0d1622;
+  --foreground: #eef4f7;
+  --muted: #8ea1b3;
+  --muted-foreground: #b6c5d2;
+  --border: rgba(182, 197, 210, 0.2);
+  --surface: rgba(18, 29, 44, 0.88);
+  --surface-strong: #152133;
+  --surface-inverse: #eef4f7;
+  --primary: #1db3a8;
+  --primary-foreground: #081414;
+  --accent: #f2b84b;
+  --accent-foreground: #1a1408;
+  --success: #3ac989;
+  --warning: #f0c95a;
+  --destructive: #f06a6a;
+  --ring: rgba(29, 179, 168, 0.28);
+  --shadow-soft: 0 24px 70px rgba(0, 0, 0, 0.32);
+  --shadow-card: 0 18px 42px rgba(0, 0, 0, 0.28);
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -130,6 +153,8 @@ p {
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--surface-strong);

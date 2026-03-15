@@ -16,6 +16,7 @@ export {
 } from "../drizzle/client";
 export {
   createPrismaClient,
+  type Db,
   type PrismaDatabaseClient,
 } from "./prisma";
 export {
@@ -28,3 +29,5 @@ export {
 } from "./runtime";
 
 export { createDrizzleClient as createDatabaseClient } from "../drizzle/client";
+export * from "./queries/auth";
+export * from "./queries/company";

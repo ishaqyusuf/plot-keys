@@ -7,9 +7,26 @@ import {
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Card } from "@plotkeys/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@plotkeys/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@plotkeys/ui/field";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@plotkeys/ui/empty";
 import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
 import { Textarea } from "@plotkeys/ui/textarea";
 import Link from "next/link";
 import type { JSX } from "react";
@@ -52,10 +69,17 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   if (!prisma) {
     return (
       <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl p-8">
-          <p className="text-lg text-slate-700">
-            DATABASE_URL is not configured for the builder flow.
-          </p>
+        <Card className="mx-auto max-w-3xl">
+          <CardContent className="p-8">
+            <Empty className="border">
+              <EmptyHeader>
+                <EmptyTitle>Builder is unavailable</EmptyTitle>
+                <EmptyDescription>
+                  `DATABASE_URL` is not configured for the builder flow.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </CardContent>
         </Card>
       </main>
     );
@@ -89,10 +113,17 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   if (!activeConfiguration) {
     return (
       <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl p-8">
-          <p className="text-lg text-slate-700">
-            No template configuration exists for this tenant yet.
-          </p>
+        <Card className="mx-auto max-w-3xl">
+          <CardContent className="p-8">
+            <Empty className="border">
+              <EmptyHeader>
+                <EmptyTitle>No template configuration yet</EmptyTitle>
+                <EmptyDescription>
+                  No template configuration exists for this tenant yet.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </CardContent>
         </Card>
       </main>
     );
@@ -113,10 +144,10 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
       <div className="mx-auto max-w-[90rem]">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-slate-500">
+            <p className="text-sm uppercase tracking-[0.32em] text-muted-foreground">
               Template builder
             </p>
-            <h1 className="mt-2 font-serif text-4xl text-slate-950">
+            <h1 className="mt-2 font-serif text-4xl text-foreground">
               Edit, switch, and publish tenant templates.
             </h1>
           </div>
@@ -135,7 +166,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
         </div>
 
         {(params.saved || params.generated || params.published) && (
-          <Alert className="mb-6" variant="success">
+          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
               {params.published
                 ? "The selected template is now published."
@@ -147,12 +178,14 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
         )}
 
         <div className="grid gap-6 xl:grid-cols-[18rem_1fr_23rem]">
-          <Card className="bg-white/90">
-            <div className="p-6">
-              <p className="text-sm uppercase tracking-[0.28em] text-slate-500">
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-0">
+              <CardTitle className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Templates
-              </p>
-              <div className="mt-4 grid gap-3">
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 px-6 pb-6">
+              <div className="grid gap-3">
                 {templateCatalog.map((template) => (
                   <form action={createTemplateDraftAction} key={template.key}>
                     <input
@@ -163,15 +196,15 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                     <button
                       className={`w-full rounded-md border px-4 py-4 text-left transition-colors ${
                         activeConfiguration.templateKey === template.key
-                          ? "border-teal-300 bg-teal-50"
-                          : "border-[color:var(--border)] bg-white hover:bg-slate-50"
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-background hover:bg-muted/50"
                       }`}
                       type="submit"
                     >
-                      <p className="font-semibold text-slate-950">
+                      <p className="font-semibold text-foreground">
                         {template.name}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
                         {template.description}
                       </p>
                     </button>
@@ -179,10 +212,10 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 ))}
               </div>
 
-              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Configurations
               </p>
-              <div className="mt-4 grid gap-3">
+              <div className="grid gap-3">
                 {configurations.map((configuration) => (
                   <form
                     action={switchBuilderConfigurationAction}
@@ -196,8 +229,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                     <button
                       className={`w-full rounded-md border px-4 py-4 text-left transition-colors ${
                         activeConfiguration.id === configuration.id
-                          ? "border-slate-900 bg-slate-950 text-white"
-                          : "border-[color:var(--border)] bg-white text-slate-900 hover:bg-slate-50"
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border bg-background text-foreground hover:bg-muted/50"
                       }`}
                       type="submit"
                     >
@@ -206,8 +239,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                         <Badge
                           variant={
                             configuration.status === "published"
-                              ? "success"
-                              : "neutral"
+                              ? "default"
+                              : "outline"
                           }
                         >
                           {configuration.status}
@@ -220,64 +253,67 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                   </form>
                 ))}
               </div>
-            </div>
+            </CardContent>
           </Card>
 
-          <Card className="overflow-hidden bg-white/82">
-            <div className="border-b border-[color:var(--border)] px-6 py-4">
+          <Card className="overflow-hidden bg-card">
+            <CardHeader className="border-b px-6 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-slate-500">
+                  <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                     Previewing
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">
+                  <p className="mt-1 text-lg font-semibold text-foreground">
                     {activeConfiguration.name}
                   </p>
                 </div>
-                <Badge variant="primary">{preview.template.name}</Badge>
+                <Badge variant="default">{preview.template.name}</Badge>
               </div>
-            </div>
-            <div className="max-h-[80vh] overflow-auto bg-slate-50/70 p-4">
-              <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-white shadow-[var(--shadow-soft)]">
+            </CardHeader>
+            <CardContent className="max-h-[80vh] overflow-auto bg-muted/40 p-4">
+              <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-background shadow-[var(--shadow-soft)]">
                 {preview.page.sections.map((section) =>
                   renderPreviewSection(section, preview.theme),
                 )}
               </div>
-            </div>
+            </CardContent>
           </Card>
 
-          <Card className="bg-white/90">
-            <div className="p-6">
-              <p className="text-sm uppercase tracking-[0.28em] text-slate-500">
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-0">
+              <CardTitle className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Content editor
-              </p>
-              <div className="mt-4 grid gap-4">
+              </CardTitle>
+              <CardDescription>
+                Update editable fields and publish a new tenant site version
+                when the copy is ready.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 px-6 pb-6">
+              <div className="grid gap-4">
                 {preview.editableFields.map((field) => (
                   <div
                     key={field.contentKey}
-                    className="rounded-[var(--radius-sm)] border border-[color:var(--border)] bg-slate-50/70 p-4"
+                    className="rounded-[var(--radius-sm)] border border-border bg-muted/40 p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-semibold text-slate-950">
+                      <p className="font-semibold text-foreground">
                         {field.label}
                       </p>
-                      <Badge variant="neutral">{field.fieldType}</Badge>
+                      <Badge variant="outline">{field.fieldType}</Badge>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {field.shortDetail}
                     </p>
-                    <p className="mt-2 text-xs leading-6 text-slate-500">
+                    <p className="mt-2 text-xs leading-6 text-muted-foreground">
                       {field.longDetail}
                     </p>
                     {field.preferredLength ? (
-                      <p className="mt-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+                      <p className="mt-2 text-xs uppercase tracking-[0.24em] text-muted-foreground">
                         Preferred length: {field.preferredLength}
                       </p>
                     ) : null}
-                    <form
-                      action={updateSiteFieldAction}
-                      className="mt-4 grid gap-3"
-                    >
+                    <form action={updateSiteFieldAction} className="mt-4">
                       <input
                         name="configId"
                         type="hidden"
@@ -288,35 +324,45 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                         type="hidden"
                         value={field.contentKey}
                       />
-                      {field.fieldType === "textarea" ? (
-                        <Textarea
-                          className="min-h-28"
-                          defaultValue={
-                            (
-                              activeConfiguration.contentJson as Record<
-                                string,
-                                string
-                              >
-                            )[field.contentKey] ?? ""
-                          }
-                          name="value"
-                        />
-                      ) : (
-                        <Input
-                          defaultValue={
-                            (
-                              activeConfiguration.contentJson as Record<
-                                string,
-                                string
-                              >
-                            )[field.contentKey] ?? ""
-                          }
-                          name="value"
-                        />
-                      )}
-                      <div className="flex flex-col gap-2">
+                      <FieldGroup>
+                        <Field>
+                          <FieldLabel htmlFor={`${field.contentKey}-value`}>
+                            {field.label}
+                          </FieldLabel>
+                          {field.fieldType === "textarea" ? (
+                            <Textarea
+                              className="min-h-28"
+                              defaultValue={
+                                (
+                                  activeConfiguration.contentJson as Record<
+                                    string,
+                                    string
+                                  >
+                                )[field.contentKey] ?? ""
+                              }
+                              id={`${field.contentKey}-value`}
+                              name="value"
+                            />
+                          ) : (
+                            <Input
+                              defaultValue={
+                                (
+                                  activeConfiguration.contentJson as Record<
+                                    string,
+                                    string
+                                  >
+                                )[field.contentKey] ?? ""
+                              }
+                              id={`${field.contentKey}-value`}
+                              name="value"
+                            />
+                          )}
+                          <FieldDescription>
+                            {field.shortDetail}
+                          </FieldDescription>
+                        </Field>
                         <Button type="submit">Save field</Button>
-                      </div>
+                      </FieldGroup>
                     </form>
                     {field.aiEnabled ? (
                       <form action={smartFillFieldAction} className="mt-2">
@@ -344,31 +390,34 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 ))}
               </div>
 
-              <form
-                action={publishSiteConfigurationAction}
-                className="mt-6 grid gap-3"
-              >
+              <form action={publishSiteConfigurationAction}>
                 <input
                   name="configId"
                   type="hidden"
                   value={activeConfiguration.id}
                 />
-                <div className="grid gap-2">
-                  <Label htmlFor="publish-name">
-                    New template name before publish
-                  </Label>
-                  <Input
-                    defaultValue={activeConfiguration.name}
-                    id="publish-name"
-                    name="nextName"
-                    placeholder="Template launch name"
-                  />
-                </div>
-                <Button type="submit">
-                  Publish and replace current live site
-                </Button>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="publish-name">
+                      New template name before publish
+                    </FieldLabel>
+                    <Input
+                      defaultValue={activeConfiguration.name}
+                      id="publish-name"
+                      name="nextName"
+                      placeholder="Template launch name"
+                    />
+                    <FieldDescription>
+                      This name becomes the new live configuration label after
+                      publishing.
+                    </FieldDescription>
+                  </Field>
+                  <Button type="submit">
+                    Publish and replace current live site
+                  </Button>
+                </FieldGroup>
               </form>
-            </div>
+            </CardContent>
           </Card>
         </div>
       </div>
