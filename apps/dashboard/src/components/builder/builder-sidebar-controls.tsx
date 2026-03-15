@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@plotkeys/ui/avatar";
-import { templateCatalog } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import {
   DropdownMenu,
@@ -13,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@plotkeys/ui/dropdown-menu";
-import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup } from "@plotkeys/ui/field";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { forwardRef, useState } from "react";
@@ -55,15 +53,6 @@ const tierOptions: PickerOption[] = [
     value: "Pro",
   },
 ];
-// import { Tabs, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
-import {
-  describeTemplateAccess,
-  resolvePlanEntitlements,
-  type SubscriptionTier,
-  type TemplateTier,
-  tierLabels,
-} from "@plotkeys/utils";
-// import { useState } from "react";
 
 const templateOptions: TemplateOption[] = [
   {
@@ -109,7 +98,6 @@ const accentThemeOptions: PickerOption[] = [
   { value: "Violet" },
   { value: "Yellow" },
 ];
-import { createTemplateDraftAction } from "../../app/actions";
 
 const fontGroups: FontGroup[] = [
   {
@@ -145,12 +133,9 @@ const fontGroups: FontGroup[] = [
 
 type BuilderSidebarControlsProps = {
   currentTemplateKey: string;
-  currentTier: SubscriptionTier;
-  templateUsageCounts: Record<string, number>;
 };
 
 function ChevronIcon() {
-  // function FeatureState({ enabled, label }: { enabled: boolean; label: string }) {
   return (
     <svg
       aria-hidden="true"
@@ -164,12 +149,6 @@ function ChevronIcon() {
     >
       <path d="m9 18 6-6-6-6" />
     </svg>
-    // <div className="flex items-center justify-between gap-3 rounded-md border border-border/70 bg-background px-3 py-2.5">
-    //   <span className="text-sm text-foreground">{label}</span>
-    //   <Badge variant={enabled ? "default" : "outline"}>
-    //     {enabled ? "Included" : "Locked"}
-    //   </Badge>
-    // </div>
   );
 }
 
@@ -187,14 +166,6 @@ function findInitialTemplate(currentTemplateKey: string): TemplateOption {
     }
   );
 }
-// export function BuilderSidebarControls({
-//   currentTemplateKey,
-//   currentTier,
-//   templateUsageCounts,
-// }: BuilderSidebarControlsProps) {
-//   const currentTemplate =
-//     templateCatalog.find((template) => template.key === currentTemplateKey) ??
-//     templateCatalog[0]!;
 
 const PickerButton = forwardRef<
   HTMLButtonElement,
@@ -230,12 +201,6 @@ const PickerButton = forwardRef<
       ) : null}
       <ChevronIcon />
     </button>
-    //   const [templateGroup, setTemplateGroup] = useState<TemplateTier>(
-    //     currentTemplate.tier,
-    //   );
-    //   const entitlements = resolvePlanEntitlements(currentTier);
-    //   const visibleTemplates = templateCatalog.filter(
-    //     (template) => template.tier === templateGroup,
   );
 });
 
@@ -287,25 +252,6 @@ function TierMenu({
     </DropdownMenu>
   );
 }
-// <FieldGroup className="flex flex-col gap-5">
-//   <Field className="space-y-3">
-//     <div className="rounded-lg border border-border/70 bg-background p-4">
-//       <div className="flex items-start justify-between gap-3">
-//         <div>
-//           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-//             Subscription tier
-//           </p>
-//           <p className="mt-2 text-lg font-semibold text-foreground">
-//             {tierLabels[currentTier]}
-//           </p>
-//           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-//             Template access and future billing-sensitive features now follow
-//             this company plan on the server and in the builder UI.
-//           </p>
-//         </div>
-//         <Badge variant="outline">{tierLabels[currentTier]}</Badge>
-//       </div>
-//     </div>
 
 function TemplateMenu({
   group,
@@ -328,25 +274,6 @@ function TemplateMenu({
     tenants: 0,
     title: value,
   };
-  //     <div className="grid gap-2">
-  //       <FeatureState
-  //         enabled={entitlements.features.customerAccounts}
-  //         label="Customer accounts"
-  //       />
-  //       <FeatureState
-  //         enabled={entitlements.features.websitePayments}
-  //         label="Website payments"
-  //       />
-  //       <FeatureState
-  //         enabled={entitlements.features.customDomains}
-  //         label="Custom domains"
-  //       />
-  //       <FeatureState
-  //         enabled={entitlements.features.aiTools}
-  //         label="AI-powered tools"
-  //       />
-  //     </div>
-  //   </Field>
 
   return (
     <DropdownMenu>
@@ -373,23 +300,10 @@ function TemplateMenu({
         className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
         side="right"
       >
-        {/* <Field className="space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-            Template library
-          </p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Starter, Plus, and Pro templates stay visible here, but only
-            entitled layouts can be opened into new drafts.
-          </p>
-        </div> */}
-
         <Tabs
           className="flex flex-col gap-3"
           onValueChange={(value) => onGroupChange(value as TemplateGroup)}
           value={group}
-          //   onValueChange={(value) => setTemplateGroup(value as TemplateTier)}
-          //   value={templateGroup}
         >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="starter">Starter</TabsTrigger>
@@ -472,19 +386,6 @@ function ThemeMenu({
                 className="rounded-md py-2 pr-8"
                 key={option.value}
                 value={option.value}
-                // <div className="grid gap-3">
-                //   {visibleTemplates.map((template) => {
-                //     const templateAccess = describeTemplateAccess(
-                //       currentTier,
-                //       template.tier,
-                //     );
-                //     const isCurrentTemplate = template.key === currentTemplateKey;
-                //     const usageCount = templateUsageCounts[template.key] ?? 0;
-
-                //     return (
-                //       <div
-                //         className="rounded-lg border border-border/70 bg-background p-4"
-                //         key={template.key}
               >
                 {option.value}
               </DropdownMenuRadioItem>
@@ -552,39 +453,14 @@ export function BuilderSidebarControls({
   const [template, setTemplate] = useState(initialTemplate.title);
   const [theme, setTheme] = useState("Neutral");
   const [font, setFont] = useState("Inter");
-  // <div className="flex items-start justify-between gap-3">
-  //   <div>
-  //     <p className="text-sm font-semibold text-foreground">
-  //       {template.name}
-  //     </p>
-  //     <p className="mt-1 text-xs leading-5 text-muted-foreground">
-  //       {template.description}
-  //     </p>
-  //   </div>
-  //   <Badge variant="outline">{template.tier}</Badge>
-  // </div>
 
   const visibleTemplates = templateOptions.filter(
     (option) => option.group === templateGroup,
   );
-  // <div className="mt-3 flex flex-wrap items-center gap-2">
-  //   <Badge variant="outline">{usageCount} tenant sites</Badge>
-  //   {isCurrentTemplate ? <Badge>Current</Badge> : null}
-  //   {!templateAccess.allowed ? (
-  //     <Badge variant="outline">
-  //       Requires {tierLabels[templateAccess.requiredTier]}
-  //     </Badge>
-  //   ) : null}
-  // </div>
 
   const selectedTemplateInGroup = visibleTemplates.find(
     (option) => option.title === template,
   );
-  // <p className="mt-3 text-xs leading-5 text-muted-foreground">
-  //   {isCurrentTemplate
-  //     ? "This configuration is already active in the builder."
-  //     : templateAccess.message}
-  // </p>
 
   return (
     <FieldGroup className="flex flex-col gap-5">
@@ -608,27 +484,6 @@ export function BuilderSidebarControls({
 
       <Field>
         <FontMenu onValueChange={setFont} value={font} />
-        {/* <form action={createTemplateDraftAction} className="mt-4">
-                  <input
-                    name="templateKey"
-                    type="hidden"
-                    value={template.key}
-                  />
-                  <Button
-                    className="w-full"
-                    disabled={!templateAccess.allowed || isCurrentTemplate}
-                    type="submit"
-                    variant={templateAccess.allowed ? "default" : "secondary"}
-                  >
-                    {isCurrentTemplate
-                      ? "Current template"
-                      : templateAccess.ctaLabel}
-                  </Button>
-                </form>
-              </div>
-            );
-          })}
-        </div> */}
       </Field>
     </FieldGroup>
   );

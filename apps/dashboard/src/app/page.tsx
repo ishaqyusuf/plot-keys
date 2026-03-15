@@ -1,4 +1,4 @@
-import { createPrismaClient, findCompanyById } from "@plotkeys/db";
+import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -10,11 +10,7 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { SectionHeading } from "@plotkeys/ui/section-heading";
-import {
-  isVercelDomainProvisioningConfigured,
-  resolvePlanEntitlements,
-  tierLabels,
-} from "@plotkeys/utils";
+import { isVercelDomainProvisioningConfigured } from "@plotkeys/utils";
 import Link from "next/link";
 import { SignOutButton } from "../components/auth/sign-out-button";
 import { NotificationDemo } from "../components/notification-demo";
@@ -61,12 +57,6 @@ export default async function DashboardHomePage({
   await ensureBuilderConfigurationExists();
 
   const prisma = createPrismaClient().db;
-  const company = prisma
-    ? await findCompanyById(prisma, session.activeMembership.companyId)
-    : null;
-  const planEntitlements = company
-    ? resolvePlanEntitlements(company.planTier)
-    : null;
   const domainProvisioningConfigured = isVercelDomainProvisioningConfigured();
   const domainStatuses = await prisma?.tenantDomain.findMany({
     orderBy: {
@@ -106,23 +96,6 @@ export default async function DashboardHomePage({
                 verification, onboarding, and website bootstrap. The next
                 operational surface is the builder.
               </CardDescription>
-              {company && planEntitlements ? (
-                <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">
-                    {tierLabels[company.planTier]} plan
-                  </Badge>
-                  <Badge variant="outline">
-                    {planEntitlements.features.customDomains
-                      ? "Custom domains enabled"
-                      : "Upgrade for domains"}
-                  </Badge>
-                  <Badge variant="outline">
-                    {planEntitlements.features.aiTools
-                      ? "AI tools enabled"
-                      : "Upgrade for AI tools"}
-                  </Badge>
-                </div>
-              ) : null}
             </CardHeader>
             <CardContent className="flex flex-col gap-3 px-8 pb-8 md:px-10 md:pb-10 sm:flex-row">
               <Button asChild>

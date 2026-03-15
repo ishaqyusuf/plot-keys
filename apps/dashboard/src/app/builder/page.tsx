@@ -1,8 +1,4 @@
-import {
-  createPrismaClient,
-  findCompanyById,
-  listTemplateUsageCounts,
-} from "@plotkeys/db";
+import { createPrismaClient } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
@@ -16,7 +12,6 @@ import {
   EmptyTitle,
 } from "@plotkeys/ui/empty";
 import { Separator } from "@plotkeys/ui/separator";
-import { resolvePlanEntitlements, tierLabels } from "@plotkeys/utils";
 import Link from "next/link";
 import type { JSX } from "react";
 
@@ -53,7 +48,6 @@ function renderPreviewSection(
 type BuilderPageProps = {
   searchParams?: Promise<{
     configId?: string;
-    error?: string;
     generated?: string;
     published?: string;
     saved?: string;
@@ -84,30 +78,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   }
 
   const params = (await searchParams) ?? {};
-  const company = await findCompanyById(
-    prisma,
-    session.activeMembership.companyId,
-  );
-
-  if (!company) {
-    return (
-      <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl">
-          <CardContent className="p-8">
-            <Empty className="border">
-              <EmptyHeader>
-                <EmptyTitle>Company not found</EmptyTitle>
-                <EmptyDescription>
-                  The active tenant company could not be loaded for the builder.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
-
   const configurations = await prisma.siteConfiguration.findMany({
     orderBy: [
       {
@@ -122,8 +92,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
       deletedAt: null,
     },
   });
-  const templateUsageCounts = await listTemplateUsageCounts(prisma);
-  const planEntitlements = resolvePlanEntitlements(company.planTier);
 
   const activeConfiguration =
     configurations.find(
@@ -166,19 +134,14 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   return (
     <main className="min-h-screen bg-background px-3 py-3 md:px-4 md:py-4">
       <div className="mx-auto grid max-w-[118rem] gap-4 xl:grid-cols-[15.5rem_minmax(0,1fr)]">
-        {(params.error ||
-          params.saved ||
-          params.generated ||
-          params.published) && (
+        {(params.saved || params.generated || params.published) && (
           <Alert className="xl:col-start-2 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
-              {params.error
-                ? params.error
-                : params.published
-                  ? "The selected template is now published."
-                  : params.generated
-                    ? "A smart-fill suggestion was applied to the field."
-                    : "Your field update was saved."}
+              {params.published
+                ? "The selected template is now published."
+                : params.generated
+                  ? "A smart-fill suggestion was applied to the field."
+                  : "Your field update was saved."}
             </AlertDescription>
           </Alert>
         )}
@@ -207,17 +170,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {configurations.length} saved configurations
                     </p>
-                    <p className="mt-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                      Active plan
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-foreground">
-                      {tierLabels[company.planTier]}
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {planEntitlements.features.customDomains
-                        ? "Custom domains and customer accounts are available on this workspace."
-                        : "Upgrade to Plus or Pro to unlock custom domains, customer accounts, and premium templates."}
-                    </p>
                   </div>
                   <Badge
                     variant={
@@ -232,8 +184,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
 
                 <BuilderSidebarControls
                   currentTemplateKey={activeConfiguration.templateKey}
-                  currentTier={company.planTier}
-                  templateUsageCounts={templateUsageCounts}
                 />
               </section>
 

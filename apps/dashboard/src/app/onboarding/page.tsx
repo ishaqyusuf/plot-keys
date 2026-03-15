@@ -162,8 +162,8 @@ export default async function OnboardingPage({
                 </SelectContent>
               </Select>
               <FieldDescription>
-                New tenants start on Starter, so onboarding only offers Starter
-                templates. Plus and Pro layouts unlock after a plan upgrade.
+                Start from a predefined section layout that can still be edited
+                later in the builder.
               </FieldDescription>
             </Field>
           </FieldGroup>
