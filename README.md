@@ -29,6 +29,23 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 
 You can follow container output with `bun run db:logs`.
 
+## Portless Local URLs
+PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for stable named `.localhost` URLs during development.
+
+1. Install the CLI once with `npm install -g portless`
+2. Start the full workspace with `bun run dev:portless`
+3. Or start a single app with `bun run dev:dashboard:portless`, `bun run dev:website:portless`, `bun run dev:tenant-site:portless`, or `bun run dev:api:portless`
+
+Default routes:
+- `http://plotkeys.localhost:1355` for the marketing site
+- `http://app.plotkeys.localhost:1355` for the dashboard
+- `http://api.plotkeys.localhost:1355` for the API
+- `http://tenant.plotkeys.localhost:1355` for the tenant site
+
+Tenant subdomains also work through the tenant-site route, so a host like `http://acme.tenant.plotkeys.localhost:1355` maps to the tenant-site app.
+
+If you use Portless locally, update app env vars that still point at hardcoded `localhost:<port>` URLs to the matching named host above.
+
 ## Database Architecture
 - App code should depend on `@plotkeys/db` for relational access.
 - `@plotkeys/db` is provider-aware and currently supports the `postgres` and `supabase-postgres` provider identifiers.

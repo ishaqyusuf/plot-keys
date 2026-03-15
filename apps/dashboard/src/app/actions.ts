@@ -1,5 +1,7 @@
 "use server";
 
+import { buildRequestContext } from "@plotkeys/api/context";
+import { appRouter } from "@plotkeys/api/router";
 import {
   authRoutes,
   authSessionCookieName,
@@ -9,23 +11,10 @@ import {
   signUpUser,
   verifyUserEmail,
 } from "@plotkeys/auth";
-import { createPrismaClient, findCompanyById } from "@plotkeys/db";
-import {
-  createInitialSiteConfigurationInput,
-  getTemplateDefinition,
-} from "@plotkeys/section-registry";
-import {
-  buildDashboardHostname,
-  buildSitefrontHostname,
-  describeTemplateAccess,
-  isVercelDomainProvisioningConfigured,
-  normalizeSubdomainLabel,
-  plotkeysRootDomain,
-  type SubscriptionTier,
-  syncTenantDomainWithVercel,
-} from "@plotkeys/utils";
+import { createPrismaClient } from "@plotkeys/db";
+import { normalizeSubdomainLabel } from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -77,15 +66,6 @@ async function assertSubdomainAvailability(
   }
 }
 
-function assertTemplateAccess(planTier: SubscriptionTier, templateKey: string) {
-  const template = getTemplateDefinition(templateKey);
-  const templateAccess = describeTemplateAccess(planTier, template.tier);
-
-  if (!templateAccess.allowed) {
-    throw new Error(templateAccess.message);
-  }
-}
-
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
 
@@ -96,6 +76,12 @@ async function setSessionCookie(userId: string) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
   });
+}
+
+async function createServerCaller() {
+  const headerStore = await headers();
+
+  return appRouter.createCaller(await buildRequestContext(headerStore));
 }
 
 export async function signUpAction(formData: FormData) {
@@ -199,18 +185,9 @@ export async function signOutAction() {
 }
 
 export async function completeOnboardingAction(formData: FormData) {
-  const session = await requireAuthenticatedSession();
-  const prisma = createPrismaClient().db;
+  await requireAuthenticatedSession();
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
-
-  if (!prisma) {
-    redirect(
-      createRedirectUrl(authRoutes.onboarding, {
-        error: "DATABASE_URL is not configured.",
-      }),
-    );
-  }
 
   const companyName = pendingOnboarding?.company ?? "";
   const subdomain = normalizeSubdomainLabel(pendingOnboarding?.subdomain ?? "");
@@ -224,74 +201,16 @@ export async function completeOnboardingAction(formData: FormData) {
       );
     }
 
-    await assertSubdomainAvailability(prisma, subdomain);
-    assertTemplateAccess("starter", templateKey);
-
-    const initialSiteConfiguration = createInitialSiteConfigurationInput({
+    const caller = await createServerCaller();
+    const result = await caller.workspace.completeOnboarding({
       companyName,
       market,
       subdomain,
       templateKey,
     });
 
-    const siteConfiguration = await prisma.$transaction(async (tx) => {
-      const company = await tx.company.create({
-        data: {
-          market,
-          name: companyName,
-          planStartedAt: new Date(),
-          planStatus: "active",
-          planTier: "starter",
-          slug: subdomain,
-        },
-      });
-
-      await tx.membership.create({
-        data: {
-          companyId: company.id,
-          role: "owner",
-          status: "active",
-          userId: session.user.id,
-        },
-      });
-
-      await tx.tenantDomain.createMany({
-        data: [
-          {
-            apexDomain: plotkeysRootDomain,
-            companyId: company.id,
-            hostname: buildSitefrontHostname(subdomain),
-            kind: "sitefront_subdomain",
-            status: "pending",
-            subdomainLabel: subdomain,
-            vercelProjectKey: "sitefront",
-          },
-          {
-            apexDomain: plotkeysRootDomain,
-            companyId: company.id,
-            hostname: buildDashboardHostname(subdomain),
-            kind: "dashboard_subdomain",
-            status: "pending",
-            subdomainLabel: `dashboard.${subdomain}`,
-            vercelProjectKey: "dashboard",
-          },
-        ],
-      });
-
-      return tx.siteConfiguration.create({
-        data: {
-          ...initialSiteConfiguration,
-          companyId: company.id,
-          createdById: session.user.id,
-          publishedAt: new Date(),
-          status: "published",
-          updatedById: session.user.id,
-        },
-      });
-    });
-
     clearPendingOnboardingCookie(cookieStore);
-    redirect(`/builder?configId=${siteConfiguration.id}`);
+    redirect(`/builder?configId=${result.configId}`);
   } catch (error) {
     redirect(
       createRedirectUrl(authRoutes.onboarding, {
@@ -305,166 +224,75 @@ export async function completeOnboardingAction(formData: FormData) {
 }
 
 export async function createTemplateDraftAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    redirect("/builder?error=DATABASE_URL is not configured.");
-  }
-
   const templateKey = String(formData.get("templateKey") ?? "template-1");
-  const company = await findCompanyById(
-    prisma,
-    session.activeMembership.companyId,
-  );
-
-  if (!company) {
-    redirect("/builder?error=Company not found.");
-  }
 
   try {
-    assertTemplateAccess(company.planTier, templateKey);
+    const caller = await createServerCaller();
+    const result = await caller.workspace.createTemplateDraft({
+      templateKey,
+    });
+
+    redirect(`/builder?configId=${result.configId}`);
+  } catch (error) {
+    redirect(
+      `/builder?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to create draft.",
+      )}`,
+    );
+  }
+}
+
+export async function updateSiteFieldAction(formData: FormData) {
+  const configId = String(formData.get("configId") ?? "");
+  const contentKey = String(formData.get("contentKey") ?? "");
+  const value = String(formData.get("value") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    const result = await caller.workspace.updateSiteField({
+      configId,
+      contentKey,
+      value,
+    });
+
+    revalidatePath("/builder");
+    revalidatePath("/live");
+    redirect(`/builder?configId=${result.configId}&saved=1`);
   } catch (error) {
     redirect(
       `/builder?error=${encodeURIComponent(
         error instanceof Error
           ? error.message
-          : "Template access is unavailable.",
+          : "Unable to update template field.",
       )}`,
     );
   }
-
-  const existingDraft = await prisma.siteConfiguration.findFirst({
-    orderBy: {
-      updatedAt: "desc",
-    },
-    where: {
-      companyId: company.id,
-      deletedAt: null,
-      status: "draft",
-      templateKey,
-    },
-  });
-
-  if (existingDraft) {
-    redirect(`/builder?configId=${existingDraft.id}`);
-  }
-
-  const initialSiteConfiguration = createInitialSiteConfigurationInput({
-    companyName: company.name,
-    market: company.market ?? session.activeMembership.companyName,
-    subdomain: company.slug,
-    templateKey,
-  });
-
-  const configuration = await prisma.siteConfiguration.create({
-    data: {
-      ...initialSiteConfiguration,
-      companyId: company.id,
-      createdById: session.user.id,
-      updatedById: session.user.id,
-    },
-  });
-
-  redirect(`/builder?configId=${configuration.id}`);
-}
-
-export async function updateSiteFieldAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    redirect("/builder?error=DATABASE_URL is not configured.");
-  }
-
-  const configId = String(formData.get("configId") ?? "");
-  const contentKey = String(formData.get("contentKey") ?? "");
-  const value = String(formData.get("value") ?? "");
-  const configuration = await prisma.siteConfiguration.findFirst({
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-      id: configId,
-    },
-  });
-
-  if (!configuration) {
-    redirect("/builder?error=Template configuration not found.");
-  }
-
-  const currentContent = configuration.contentJson as Record<string, string>;
-
-  await prisma.siteConfiguration.update({
-    where: {
-      id: configuration.id,
-    },
-    data: {
-      contentJson: {
-        ...currentContent,
-        [contentKey]: value,
-      },
-      updatedById: session.user.id,
-      version: configuration.version + 1,
-    },
-  });
-
-  revalidatePath("/builder");
-  revalidatePath("/live");
-  redirect(`/builder?configId=${configuration.id}&saved=1`);
 }
 
 export async function publishSiteConfigurationAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    redirect("/builder?error=DATABASE_URL is not configured.");
-  }
-
   const configId = String(formData.get("configId") ?? "");
   const nextName = String(formData.get("nextName") ?? "").trim();
-  const configuration = await prisma.siteConfiguration.findFirst({
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-      id: configId,
-    },
-  });
 
-  if (!configuration) {
-    redirect("/builder?error=Template configuration not found.");
+  try {
+    const caller = await createServerCaller();
+    const result = await caller.workspace.publishSiteConfiguration({
+      configId,
+      nextName,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/builder");
+    revalidatePath("/live");
+    redirect(`/builder?configId=${result.configId}&published=1`);
+  } catch (error) {
+    redirect(
+      `/builder?error=${encodeURIComponent(
+        error instanceof Error
+          ? error.message
+          : "Unable to publish template configuration.",
+      )}`,
+    );
   }
-
-  await prisma.$transaction([
-    prisma.siteConfiguration.updateMany({
-      data: {
-        status: "draft",
-        updatedById: session.user.id,
-      },
-      where: {
-        companyId: session.activeMembership.companyId,
-        deletedAt: null,
-        status: "published",
-      },
-    }),
-    prisma.siteConfiguration.update({
-      where: {
-        id: configuration.id,
-      },
-      data: {
-        name: nextName || configuration.name,
-        publishedAt: new Date(),
-        status: "published",
-        updatedById: session.user.id,
-        version: configuration.version + 1,
-      },
-    }),
-  ]);
-
-  revalidatePath("/");
-  revalidatePath("/builder");
-  revalidatePath("/live");
-  redirect(`/builder?configId=${configuration.id}&published=1`);
 }
 
 export async function switchBuilderConfigurationAction(formData: FormData) {
@@ -474,174 +302,76 @@ export async function switchBuilderConfigurationAction(formData: FormData) {
 }
 
 export async function smartFillFieldAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    redirect("/builder?error=DATABASE_URL is not configured.");
-  }
-
   const configId = String(formData.get("configId") ?? "");
   const contentKey = String(formData.get("contentKey") ?? "");
   const shortDetail = String(formData.get("shortDetail") ?? "");
-  const configuration = await prisma.siteConfiguration.findFirst({
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-      id: configId,
-    },
-  });
+  try {
+    const caller = await createServerCaller();
+    const result = await caller.workspace.smartFillField({
+      configId,
+      contentKey,
+      shortDetail,
+    });
 
-  if (!configuration) {
-    redirect("/builder?error=Template configuration not found.");
+    redirect(`/builder?configId=${result.configId}&generated=1`);
+  } catch (error) {
+    redirect(
+      `/builder?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to smart-fill field.",
+      )}`,
+    );
   }
-
-  const currentContent = configuration.contentJson as Record<string, string>;
-  const suggestion =
-    contentKey === "hero.title"
-      ? `${session.activeMembership.companyName} unlocks better moves.`
-      : `${shortDetail} for ${session.activeMembership.companyName}.`;
-
-  await prisma.siteConfiguration.update({
-    where: {
-      id: configuration.id,
-    },
-    data: {
-      contentJson: {
-        ...currentContent,
-        [contentKey]: suggestion,
-      },
-      updatedById: session.user.id,
-      version: configuration.version + 1,
-    },
-  });
-
-  redirect(`/builder?configId=${configuration.id}&generated=1`);
 }
 
 export async function ensureBuilderConfigurationExists() {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
+  try {
+    const caller = await createServerCaller();
+    const result = await caller.workspace.ensureBuilderConfigurationExists();
 
-  if (!prisma) {
-    redirect("/sign-in?error=DATABASE_URL is not configured.");
-  }
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
 
-  const configuration = await prisma.siteConfiguration.findFirst({
-    orderBy: [
-      {
-        status: "asc",
-      },
-      {
-        updatedAt: "desc",
-      },
-    ],
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-    },
-  });
-
-  if (!configuration) {
-    const company = await findCompanyById(
-      prisma,
-      session.activeMembership.companyId,
-    );
-
-    if (!company) {
-      redirect("/onboarding?error=Company not found.");
+    if (!prisma) {
+      redirect("/sign-in?error=DATABASE_URL is not configured.");
     }
 
-    const initialSiteConfiguration = createInitialSiteConfigurationInput({
-      companyName: company.name,
-      market: company.market ?? company.name,
-      subdomain: company.slug,
-      templateKey: getTemplateDefinition("template-1").key,
-    });
-
-    const createdConfiguration = await prisma.siteConfiguration.create({
-      data: {
-        ...initialSiteConfiguration,
-        companyId: company.id,
-        createdById: session.user.id,
-        publishedAt: new Date(),
-        status: "published",
-        updatedById: session.user.id,
+    const configuration = await prisma.siteConfiguration.findFirst({
+      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+      where: {
+        companyId: session.activeMembership.companyId,
+        deletedAt: null,
       },
     });
 
-    redirect(`/builder?configId=${createdConfiguration.id}`);
+    if (!configuration) {
+      redirect(`/builder?configId=${result.configId}`);
+    }
+  } catch (error) {
+    redirect(
+      `/sign-in?error=${encodeURIComponent(
+        error instanceof Error
+          ? error.message
+          : "Unable to ensure builder configuration.",
+      )}`,
+    );
   }
 }
 
 export async function syncTenantDomainsAction() {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.syncTenantDomains();
 
-  if (!prisma) {
-    redirect("/?error=DATABASE_URL is not configured.");
+    revalidatePath("/");
+    revalidatePath("/live");
+    redirect("/?domains=1");
+  } catch (error) {
+    redirect(
+      `/?error=${encodeURIComponent(
+        error instanceof Error
+          ? error.message
+          : "Unable to sync tenant domains.",
+      )}`,
+    );
   }
-
-  if (!isVercelDomainProvisioningConfigured()) {
-    redirect("/?error=Vercel domain provisioning env vars are not configured.");
-  }
-
-  const domains = await prisma.tenantDomain.findMany({
-    orderBy: {
-      createdAt: "asc",
-    },
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-      status: {
-        in: ["failed", "pending", "provisioning"],
-      },
-    },
-  });
-
-  for (const domain of domains) {
-    try {
-      await prisma.tenantDomain.update({
-        where: {
-          id: domain.id,
-        },
-        data: {
-          lastError: null,
-          status: "provisioning",
-        },
-      });
-
-      const syncedDomain = await syncTenantDomainWithVercel(domain);
-
-      await prisma.tenantDomain.update({
-        where: {
-          id: domain.id,
-        },
-        data: {
-          lastError: syncedDomain.lastError,
-          provisionedAt: syncedDomain.provisionedAt,
-          status: syncedDomain.status,
-          verificationJson: syncedDomain.verificationJson ?? undefined,
-          vercelDomainName: syncedDomain.vercelDomainName,
-        },
-      });
-    } catch (error) {
-      await prisma.tenantDomain.update({
-        where: {
-          id: domain.id,
-        },
-        data: {
-          lastError:
-            error instanceof Error
-              ? error.message
-              : "Unable to sync tenant domain.",
-          status: "failed",
-        },
-      });
-    }
-  }
-
-  revalidatePath("/");
-  revalidatePath("/live");
-  redirect("/?domains=1");
 }

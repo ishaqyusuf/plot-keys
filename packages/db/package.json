@@ -7,7 +7,10 @@
     "./drizzle": "./drizzle/client.ts",
     "./prisma": "./src/prisma.ts",
     "./queries/auth": "./src/queries/auth.ts",
-    "./queries/company": "./src/queries/company.ts"
+    "./queries/company": "./src/queries/company.ts",
+    "./queries/onboarding": "./src/queries/onboarding.ts",
+    "./queries/site-configuration": "./src/queries/site-configuration.ts",
+    "./queries/tenant-domain": "./src/queries/tenant-domain.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

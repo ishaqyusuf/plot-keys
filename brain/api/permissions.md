@@ -28,4 +28,8 @@ This file tracks authorization and permission expectations.
 - Better Auth should manage identity and sessions; application tables should manage company memberships
 - Current API scaffold can now resolve auth context from either request headers or the session cookie when mounted through the dashboard-owned `/api/trpc` route
 - Current auth implementation detail: dashboard auth forms now call same-origin tRPC auth mutations and persist the returned signed session token through a temporary same-origin dashboard session route
+- The API now distinguishes between:
+  - authenticated procedures that require a signed-in user
+  - membership procedures that require an active tenant membership before company-scoped builder, onboarding-completion, or domain mutations run
+- Workspace builder and domain mutations now enforce company scoping in the API layer before hitting Prisma-backed query helpers.
 - TODO: Fine-grained permissions for CRM, billing, AI, and domain operations

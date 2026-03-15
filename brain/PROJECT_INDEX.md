@@ -42,7 +42,7 @@
 - Analytics
 
 ## Important Files
-- `package.json`: Implemented monorepo workspace manifest and root scripts.
+- `package.json`: Implemented monorepo workspace manifest and root scripts, including fixed-port local dev commands and Portless-powered `dev:portless` entry points for named `.localhost` URLs.
 - `docker-compose.yml`: Runs the local Postgres database for development.
 - `turbo.json`: Implemented Turbo task pipeline for build, dev, lint, and typecheck.
 - `bunfig.toml`: Implemented Bun workspace configuration.

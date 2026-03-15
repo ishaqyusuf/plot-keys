@@ -5,11 +5,13 @@
   "exports": {
     "./context": "./src/context.ts",
     "./router": "./src/routers/_app.ts",
-    "./schemas/auth": "./src/schemas/auth.schema.ts"
+    "./schemas/auth": "./src/schemas/auth.schema.ts",
+    "./schemas/workspace": "./src/schemas/workspace.schema.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "dev": "bun --watch src/index.ts",
+    "dev:portless": "portless api.plotkeys bun --watch src/index.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },
@@ -18,6 +20,7 @@
     "@plotkeys/auth": "workspace:*",
     "@plotkeys/db": "workspace:*",
     "@plotkeys/notifications": "workspace:*",
+    "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/utils": "workspace:*",
     "@trpc/server": "^11.0.0",
     "hono": "^4.0.0",

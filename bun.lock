@@ -16,6 +16,7 @@
         "@plotkeys/auth": "workspace:*",
         "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications": "workspace:*",
+        "@plotkeys/section-registry": "workspace:*",
         "@plotkeys/utils": "workspace:*",
         "@trpc/server": "^11.0.0",
         "hono": "^4.0.0",

@@ -286,9 +286,6 @@ function TemplateMenu({
           <span className="mt-1 block pr-10 text-sm font-medium text-foreground">
             {activeTemplate.title}
           </span>
-          <span className="mt-1 block pr-8 text-xs leading-5 text-muted-foreground">
-            {activeTemplate.description}
-          </span>
           <Badge className="mt-2" variant="outline">
             {group}
           </Badge>

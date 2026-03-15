@@ -61,6 +61,51 @@ const workflow = [
   },
 ];
 
+const pricingPlans = [
+  {
+    description:
+      "For smaller operators and spin-off brands that need a credible online presence fast.",
+    features: [
+      "Basic website presence",
+      "Newsletter capture",
+      "Listings visibility",
+      "Starter templates",
+      "No customer account system",
+    ],
+    price: "NGN 0",
+    subtitle: "Launch essentials",
+    tier: "Starter",
+  },
+  {
+    description:
+      "For growing teams that want branded customer journeys, payments, and stronger digital operations.",
+    features: [
+      "Customer accounts",
+      "Website payments",
+      "Estate-management experiences",
+      "Custom domain connection",
+      "Plus templates",
+    ],
+    price: "NGN 24k",
+    subtitle: "Growth-ready workspace",
+    tier: "Plus",
+  },
+  {
+    description:
+      "For serious brands ready to add AI-powered workflows and the strongest website presentation.",
+    features: [
+      "Everything in Plus",
+      "AI-powered features",
+      "Pro templates",
+      "Premium presentation tools",
+      "Priority expansion path",
+    ],
+    price: "NGN 79k",
+    subtitle: "Premium operating layer",
+    tier: "Pro",
+  },
+];
+
 export default function MarketingHomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
@@ -83,6 +128,9 @@ export default function MarketingHomePage() {
               </a>
               <a href="#workflow" className="transition hover:text-foreground">
                 Workflow
+              </a>
+              <a href="#pricing" className="transition hover:text-foreground">
+                Pricing
               </a>
               <a href="#launch" className="transition hover:text-foreground">
                 Launch
@@ -252,6 +300,125 @@ export default function MarketingHomePage() {
                   {item.description}
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" className="px-6 py-8 md:px-10 md:py-12">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading
+            eyebrow="Pricing"
+            title="Choose the operating layer that matches your growth stage."
+            description="Start with a clean public presence, then expand into payments, custom domains, and AI-assisted workflows as your company grows."
+          />
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+            {pricingPlans.map((plan) => (
+              <Card
+                key={plan.tier}
+                className={
+                  plan.tier === "Pro"
+                    ? "gap-4 rounded-[1.75rem] border-transparent bg-[linear-gradient(145deg,color-mix(in_srgb,var(--foreground)_96%,black)_0%,var(--primary)_100%)] py-7 text-primary-foreground shadow-[var(--shadow-soft)]"
+                    : "gap-4 rounded-[1.75rem] border-border bg-card py-7 shadow-[var(--shadow-card)]"
+                }
+              >
+                <CardHeader className="px-6 pb-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p
+                        className={
+                          plan.tier === "Pro"
+                            ? "text-sm uppercase tracking-[0.32em] text-primary-foreground/70"
+                            : "text-sm uppercase tracking-[0.32em] text-muted-foreground"
+                        }
+                      >
+                        {plan.subtitle}
+                      </p>
+                      <CardTitle
+                        className={
+                          plan.tier === "Pro"
+                            ? "mt-4 text-3xl tracking-[-0.03em] text-primary-foreground"
+                            : "mt-4 text-3xl tracking-[-0.03em] text-foreground"
+                        }
+                      >
+                        {plan.tier}
+                      </CardTitle>
+                    </div>
+                    <Badge variant={plan.tier === "Pro" ? "secondary" : "outline"}>
+                      {plan.tier === "Pro" ? "Most complete" : "Monthly"}
+                    </Badge>
+                  </div>
+
+                  <div className="mt-6 flex items-end gap-2">
+                    <span
+                      className={
+                        plan.tier === "Pro"
+                          ? "font-serif text-5xl tracking-[-0.04em] text-primary-foreground"
+                          : "font-serif text-5xl tracking-[-0.04em] text-foreground"
+                      }
+                    >
+                      {plan.price}
+                    </span>
+                    <span
+                      className={
+                        plan.tier === "Pro"
+                          ? "pb-2 text-sm uppercase tracking-[0.24em] text-primary-foreground/70"
+                          : "pb-2 text-sm uppercase tracking-[0.24em] text-muted-foreground"
+                      }
+                    >
+                      / month
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-6">
+                  <CardDescription
+                    className={
+                      plan.tier === "Pro"
+                        ? "text-base leading-7 text-primary-foreground/75"
+                        : "text-base leading-7 text-muted-foreground"
+                    }
+                  >
+                    {plan.description}
+                  </CardDescription>
+
+                  <ul className="mt-6 grid gap-3">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className={
+                          plan.tier === "Pro"
+                            ? "flex items-start gap-3 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-3 text-sm text-primary-foreground"
+                            : "flex items-start gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground"
+                        }
+                      >
+                        <span
+                          className={
+                            plan.tier === "Pro"
+                              ? "mt-1 size-2.5 rounded-full bg-accent"
+                              : "mt-1 size-2.5 rounded-full bg-primary"
+                          }
+                        />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-6">
+                    <Button
+                      asChild
+                      className="w-full"
+                      variant={plan.tier === "Pro" ? "secondary" : "default"}
+                    >
+                      <Link href="/signup">
+                        {plan.tier === "Starter"
+                          ? "Start free"
+                          : `Choose ${plan.tier}`}
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

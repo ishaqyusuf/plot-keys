@@ -1,33 +1,35 @@
 export {
-  companies,
-  memberships,
-  membershipRoleEnum,
-  membershipStatusEnum,
-  schema,
-  users,
-  type DatabaseSchema,
-  type MembershipRole,
-  type MembershipStatus,
-} from "../drizzle/schema";
-export {
   createDrizzleClient,
+  createDrizzleClient as createDatabaseClient,
   type DrizzleDatabaseClient as DatabaseClient,
   type PlotKeysDatabase,
 } from "../drizzle/client";
+export {
+  companies,
+  type DatabaseSchema,
+  type MembershipRole,
+  type MembershipStatus,
+  membershipRoleEnum,
+  membershipStatusEnum,
+  memberships,
+  schema,
+  users,
+} from "../drizzle/schema";
 export {
   createPrismaClient,
   type Db,
   type PrismaDatabaseClient,
 } from "./prisma";
+export * from "./queries/auth";
+export * from "./queries/company";
+export * from "./queries/onboarding";
+export * from "./queries/site-configuration";
+export * from "./queries/tenant-domain";
 export {
-  normalizeDatabaseProvider,
-  readDatabaseRuntimeConfig,
   type DatabaseClientOptions,
   type DatabaseProvider,
   type DatabaseRuntimeConfig,
   type DatabaseStatus,
+  normalizeDatabaseProvider,
+  readDatabaseRuntimeConfig,
 } from "./runtime";
-
-export { createDrizzleClient as createDatabaseClient } from "../drizzle/client";
-export * from "./queries/auth";
-export * from "./queries/company";

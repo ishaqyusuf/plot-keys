@@ -188,33 +188,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               </section>
 
               <Separator />
-
-              <section className="space-y-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-                    Publish
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Keep publishing intentional while the preview becomes the
-                    editing surface.
-                  </p>
-                </div>
-                <form action={publishSiteConfigurationAction}>
-                  <input
-                    name="configId"
-                    type="hidden"
-                    value={activeConfiguration.id}
-                  />
-                  <input
-                    name="nextName"
-                    type="hidden"
-                    value={activeConfiguration.name}
-                  />
-                  <Button className="w-full" type="submit">
-                    Publish current configuration
-                  </Button>
-                </form>
-              </section>
             </div>
           </div>
         </aside>
@@ -232,6 +205,19 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              <form action={publishSiteConfigurationAction}>
+                <input
+                  name="configId"
+                  type="hidden"
+                  value={activeConfiguration.id}
+                />
+                <input
+                  name="nextName"
+                  type="hidden"
+                  value={activeConfiguration.name}
+                />
+                <Button type="submit">Publish current configuration</Button>
+              </form>
               <Button asChild variant="secondary">
                 <Link href="/">Back to dashboard</Link>
               </Button>

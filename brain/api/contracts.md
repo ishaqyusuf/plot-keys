@@ -23,6 +23,15 @@ This file tracks request and response shape conventions.
   - `redirectTo`
   - `verificationToken`
 - Store API-facing Zod schemas in `apps/api/src/schemas/*` rather than shared utility packages so transport contracts stay API-owned and discoverable.
+- Workspace/dashboard mutations now use API-owned schemas in `apps/api/src/schemas/workspace.schema.ts` for:
+  - onboarding completion
+  - template draft creation
+  - site-field updates
+  - publish requests
+  - smart-fill requests
+- Current workspace mutation responses stay intentionally small and redirect-friendly:
+  - `configId` for builder mutations that should route the dashboard back to a specific configuration
+  - `syncedCount` for tenant-domain sync operations
 
 ## Planned Enums
 - `LeadStatus`: `NEW`, `CONTACTED`, `NEGOTIATING`, `CLOSED`

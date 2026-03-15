@@ -45,6 +45,15 @@ This file tracks implemented and planned API surfaces.
   - `auth.signUp`
   - `auth.signIn`
   - `auth.verifyEmail`
+- Implemented tRPC router namespace `workspace` for authenticated tenant/dashboard mutations:
+  - `workspace.completeOnboarding`
+  - `workspace.ensureBuilderConfigurationExists`
+  - `workspace.createTemplateDraft`
+  - `workspace.updateSiteField`
+  - `workspace.publishSiteConfiguration`
+  - `workspace.smartFillField`
+  - `workspace.syncTenantDomains`
 - `auth.signUp` now creates unverified users, plans a channel-aware verification notification through the shared notifications package, and redirects the dashboard flow to `/verify-email` instead of dropping directly into onboarding with an active session.
 - Implemented dashboard-owned Next route adapter at `/api/trpc` so the dashboard can call the shared app router through a same-origin endpoint.
 - Implemented query-layer example in `apps/api/src/db/queries/health.ts`.
+- Dashboard server actions for onboarding, builder mutations, and tenant-domain sync are now thin wrappers around same-origin tRPC workspace mutations instead of owning the core business logic inline.
