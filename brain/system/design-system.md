@@ -18,7 +18,7 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - `packages/ui`: canonical home for shared tokens, primitives, compositions, and global styles
 - `apps/dashboard`: consumes the product-facing portion of the design system
 - `apps/website`: consumes shared marketing-facing primitives and layouts
-- `apps/websites`: consumes theme-aware public components that can adapt per tenant
+- `apps/tenant-site`: consumes theme-aware public components that can adapt per tenant
 
 ## Tooling Ownership
 - Shared Tailwind entry styles should live in `packages/ui` alongside the token contract they expose.

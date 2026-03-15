@@ -8,7 +8,7 @@ This file records completed work milestones.
 
 ## Done
 - Initialized Project Brain for the real-estate SaaS repository
-- Scaffolded the Bun + Turbo monorepo with `apps/api`, `apps/dashboard`, `apps/website`, `apps/websites`, and the agreed shared packages
+- Scaffolded the Bun + Turbo monorepo with `apps/api`, `apps/dashboard`, `apps/website`, `apps/tenant-site`, and the agreed shared packages
 - Added validated starter configs for Next.js, Tailwind CSS, Hono + tRPC, Biome, and shared TypeScript setup
 - Chose Supabase Postgres + Drizzle as the database foundation and documented the Better Auth membership model in ADR-001
 - Scaffolded the first Drizzle-backed database package and membership-aware API request context
@@ -27,7 +27,7 @@ This file records completed work milestones.
 - Added starter dashboard routes for sign-up, sign-in, verify-email, and onboarding to begin the tenant entry flow
 - Implemented Prisma-backed tenant signup, verification, onboarding, session cookies, and dashboard route guards
 - Added Prisma schema and migration support for onboarding fields and tenant `site_configurations`
-- Implemented code-backed platform templates plus tenant draft/publish website builder flow across `apps/dashboard`, `packages/auth`, `packages/section-registry`, and `apps/websites`
+- Implemented code-backed platform templates plus tenant draft/publish website builder flow across `apps/dashboard`, `packages/auth`, `packages/section-registry`, and `apps/tenant-site`
 - Added subdomain-first signup UX with PlotKeys website and dashboard hostname previews
 - Added Prisma `tenant_domains` schema plus onboarding creation of pending `sitefront` and `dashboard` hostname records
 - Added dashboard-triggered Vercel tenant-domain sync logic plus hostname-aware public site lookup fallbacking to slug-based preview mode

@@ -23,7 +23,7 @@ This file records the intended high-level architecture and boundaries between ap
 ## Planned App Boundaries
 - `apps/dashboard`: Authenticated tenant/admin product UI
 - `apps/website`: Platform marketing site and shared public presentation concerns
-- `apps/websites`: Tenant website renderer and page delivery
+- `apps/tenant-site`: Tenant website renderer and page delivery
 - `apps/api`: Core API and business orchestration
 
 ## Planned Shared Package Boundaries

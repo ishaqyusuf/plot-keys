@@ -76,7 +76,7 @@ Allow each company to launch and manage a professional website using predefined 
 
 ## Planned Package and App Ownership
 - `packages/section-registry`: section types, schemas, mappings
-- `apps/websites`: section rendering and page delivery
+- `apps/tenant-site`: section rendering and page delivery
 - `apps/dashboard`: CMS editing and template/theme management
 
 ## Current Implemented Template System
@@ -103,7 +103,7 @@ Allow each company to launch and manage a professional website using predefined 
   - smart-fill action for editable fields
   - publish action
 - `apps/dashboard/src/app/live/page.tsx` now renders the current published tenant website for a selected subdomain.
-- `apps/websites/src/app/page.tsx` now resolves published tenant configurations from Prisma and falls back to sample content only when no published tenant site exists.
+- `apps/tenant-site/src/app/page.tsx` now resolves published tenant configurations from Prisma and falls back to sample content only when no published tenant site exists.
 
 ## Current Tenant Flow
 1. User signs up.

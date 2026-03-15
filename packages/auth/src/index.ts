@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   createHmac,
   randomBytes,
@@ -14,24 +16,20 @@ import {
   verifyUserEmailByIdentity,
 } from "@plotkeys/db";
 import { z } from "zod";
+import {
+  authCookiePrefix,
+  authRoutes,
+} from "./shared";
 
-export const authRoutes = {
-  dashboardHome: "/",
-  onboarding: "/onboarding",
-  signIn: "/sign-in",
-  signOut: "/sign-out",
-  signUp: "/sign-up",
-  signUpSuccess: "/verify-email",
-  verifyEmail: "/verify-email",
-};
-
-export const sessionBridgeInputSchema = z.object({
-  sessionToken: z.string().trim().min(1, "Session token is required."),
-});
+export {
+  authCookiePrefix,
+  authRoutes,
+  authSessionCookieName,
+  sessionBridgeInputSchema,
+  type SessionBridgeInput,
+} from "./shared";
 
 export type OnboardingStatus = "not_started" | "in_progress" | "completed";
-export type SessionBridgeInput = z.infer<typeof sessionBridgeInputSchema>;
-
 export function resolvePostVerificationRoute(
   onboardingStatus: OnboardingStatus,
 ) {
@@ -39,9 +37,6 @@ export function resolvePostVerificationRoute(
     ? authRoutes.dashboardHome
     : authRoutes.onboarding;
 }
-
-export const authCookiePrefix = "plotkeys";
-export const authSessionCookieName = `${authCookiePrefix}_session`;
 
 export const authHeaderNames = {
   activeCompanyId: "x-plotkeys-company-id",

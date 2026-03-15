@@ -1,4 +1,4 @@
-import { sessionBridgeInputSchema } from "@plotkeys/auth";
+import { sessionBridgeInputSchema } from "@plotkeys/auth/shared";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

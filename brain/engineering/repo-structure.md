@@ -19,7 +19,7 @@ apps/
   api/
   dashboard/
   website/
-  websites/
+  tenant-site/
 packages/
   auth/
   chat-bot/
@@ -37,7 +37,7 @@ brain/
 ## Intended Responsibilities
 - `apps/dashboard`: Internal multi-tenant product UI
 - `apps/website`: Platform marketing site
-- `apps/websites`: Structured tenant website rendering
+- `apps/tenant-site`: Structured tenant website rendering
 - `apps/api`: Core product APIs and orchestration
 - `packages/auth`: Better Auth setup and shared auth helpers
 - `packages/chat-bot`: Shared chatbot logic, prompts, UI integration helpers, and tenant-safe assistant flows

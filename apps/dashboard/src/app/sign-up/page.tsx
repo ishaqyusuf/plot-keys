@@ -1,4 +1,4 @@
-import { authRoutes } from "@plotkeys/auth";
+import { authRoutes } from "@plotkeys/auth/shared";
 import { FlowShell } from "../../components/flow-shell";
 import { SignUpForm } from "../../components/auth/sign-up-form";
 import { getCurrentAppSession } from "../../lib/session";

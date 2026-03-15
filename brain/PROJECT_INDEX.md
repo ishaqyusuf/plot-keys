@@ -2,14 +2,14 @@
 
 ## Applications
 - `apps/dashboard`: Implemented Next.js tenant dashboard with working sign-up, sign-in, verify-email, onboarding, builder, and live-preview flows; auth entry now uses a Midday-style `src/trpc/client.tsx` and `src/trpc/server.tsx` split, a dashboard-owned `/api/trpc` route, `use-zod-form`, and a temporary dashboard session bridge route while onboarding/builder/domain mutations still include legacy server-action paths during the ongoing migration.
-- `apps/website`: Implemented Next.js marketing site landing page for the platform with hero, feature, workflow, and CTA sections.
+- `apps/website`: Implemented Next.js marketing site landing page for the platform with hero, feature, workflow, and CTA sections; public `/signup`, `/sign-up`, `/login`, and `/sign-in` routes now hand off to the dashboard auth experience so main-site acquisition links resolve correctly.
 - `apps/api`: Implemented Hono + tRPC API with a health router, public auth router (`signUp`, `signIn`, `verifyEmail`), API-owned auth schemas in `src/schemas`, SuperJSON transformer, and CORS setup for the dashboard app.
-- `apps/websites`: Implemented Next.js tenant website renderer that now loads published tenant site configurations from Prisma, can resolve by tenant hostname, and falls back to sample content when no live tenant site exists.
+- `apps/tenant-site`: Implemented Next.js tenant website renderer that now loads published tenant site configurations from Prisma, can resolve by tenant hostname, and falls back to sample content when no live tenant site exists.
 - `apps/docs`: Optional future docs app if product or developer documentation becomes public.
 
 ## Packages
 - `packages/ui`: Implemented shared UI package with global styles and a full Shadcn-derived component set living directly in `src/components`, with each primitive exported through explicit package subpath exports instead of a root barrel file.
-- `packages/auth`: Implemented route helpers plus a temporary Prisma-backed auth/session layer for sign-up, sign-in, verification, password hashing, and signed cookie sessions while Better Auth runtime wiring is still pending.
+- `packages/auth`: Implemented route helpers plus a temporary Prisma-backed auth/session layer for sign-up, sign-in, verification, password hashing, and signed cookie sessions while Better Auth runtime wiring is still pending; browser-safe constants and validation schemas now live behind a shared subpath so client bundles do not import database-backed auth code.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
 - `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, a growing `src/queries` layer for reusable Prisma-backed domain queries, and a mirrored Drizzle query layer; current implemented Prisma models cover `users`, `companies`, `memberships`, `site_configurations`, and `tenant_domains`.
 - `packages/email`: Implemented a Midday-aligned React Email package structure with shared email defaults, starter email components, a render helper, and a first welcome email template.
@@ -52,7 +52,7 @@
 - `apps/api/.env.example`: Documents API runtime variables for local development.
 - `apps/dashboard/.env.example`: Documents dashboard app variables, auth secret, and Vercel project-domain provisioning env vars.
 - `apps/website/.env.example`: Documents marketing site browser-safe variables.
-- `apps/websites/.env.example`: Documents tenant website browser-safe variables.
+- `apps/tenant-site/.env.example`: Documents tenant website browser-safe variables.
 - `packages/db/prisma/`: Canonical Prisma 7 schema folder for the shared database package, with a main `schema.prisma` plus split domain files.
 - `packages/db/prisma.config.ts`: Prisma 7 CLI configuration for schema location, datasource, and migrations.
 - `packages/db/drizzle/schema.ts`: Mirrored Drizzle schema for specialist query usage.

@@ -6,7 +6,7 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 - `apps/api`: Hono + tRPC API
 - `apps/dashboard`: authenticated dashboard
 - `apps/website`: platform marketing website
-- `apps/websites`: tenant website renderer
+- `apps/tenant-site`: tenant website renderer
 
 ## Packages
 - `packages/auth`

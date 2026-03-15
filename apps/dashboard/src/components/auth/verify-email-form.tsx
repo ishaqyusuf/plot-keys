@@ -1,6 +1,6 @@
 "use client";
 
-import { authRoutes } from "@plotkeys/auth";
+import { authRoutes } from "@plotkeys/auth/shared";
 import { verifyEmailInputSchema } from "@plotkeys/api/schemas/auth";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@plotkeys/ui/button";

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Tenant Websites",
+  title: "PlotKeys Tenant Site",
   description: "Structured tenant website renderer for PlotKeys",
 };
 

@@ -1,4 +1,4 @@
-import { authRoutes } from "@plotkeys/auth";
+import { authRoutes } from "@plotkeys/auth/shared";
 import { templateCatalog } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Button } from "@plotkeys/ui/button";

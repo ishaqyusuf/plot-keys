@@ -2,7 +2,7 @@
 
 import {
   authRoutes,
-} from "@plotkeys/auth";
+} from "@plotkeys/auth/shared";
 import {
   signUpInputSchema,
   type SignUpInput,

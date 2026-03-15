@@ -59,11 +59,14 @@
         "postcss": "^8.4.0",
       },
     },
-    "apps/website": {
-      "name": "@plotkeys/website",
+    "apps/tenant-site": {
+      "name": "@plotkeys/tenant-site",
       "dependencies": {
+        "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications-react": "workspace:*",
+        "@plotkeys/section-registry": "workspace:*",
         "@plotkeys/ui": "workspace:*",
+        "@plotkeys/utils": "workspace:*",
         "next": "^16.1.5",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -77,14 +80,11 @@
         "postcss": "^8.4.0",
       },
     },
-    "apps/websites": {
-      "name": "@plotkeys/websites",
+    "apps/website": {
+      "name": "@plotkeys/website",
       "dependencies": {
-        "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications-react": "workspace:*",
-        "@plotkeys/section-registry": "workspace:*",
         "@plotkeys/ui": "workspace:*",
-        "@plotkeys/utils": "workspace:*",
         "next": "^16.1.5",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -513,6 +513,8 @@
 
     "@plotkeys/supabase": ["@plotkeys/supabase@workspace:packages/supabase"],
 
+    "@plotkeys/tenant-site": ["@plotkeys/tenant-site@workspace:apps/tenant-site"],
+
     "@plotkeys/tsconfig": ["@plotkeys/tsconfig@workspace:packages/tsconfig"],
 
     "@plotkeys/ui": ["@plotkeys/ui@workspace:packages/ui"],
@@ -520,8 +522,6 @@
     "@plotkeys/utils": ["@plotkeys/utils@workspace:packages/utils"],
 
     "@plotkeys/website": ["@plotkeys/website@workspace:apps/website"],
-
-    "@plotkeys/websites": ["@plotkeys/websites@workspace:apps/websites"],
 
     "@prisma/adapter-pg": ["@prisma/adapter-pg@7.5.0", "", { "dependencies": { "@prisma/driver-adapter-utils": "7.5.0", "@types/pg": "8.11.11", "pg": "^8.16.3", "postgres-array": "3.0.4" } }, "sha512-EJx7OLULahcC3IjJgdx2qRDNCT+ToY2v66UkeETMCLhNOTgqVzRzYvOEphY7Zp0eHyzfkC33Edd/qqeadf9R4A=="],
 

@@ -20,7 +20,7 @@
     "dev:api": "turbo dev --filter=@plotkeys/api",
     "dev:dashboard": "turbo dev --filter=@plotkeys/dashboard",
     "dev:website": "turbo dev --filter=@plotkeys/website",
-    "dev:websites": "turbo dev --filter=@plotkeys/websites",
+    "dev:tenant-site": "turbo dev --filter=@plotkeys/tenant-site",
     "lint": "turbo lint",
     "format": "biome format --write .",
     "typecheck": "turbo typecheck"

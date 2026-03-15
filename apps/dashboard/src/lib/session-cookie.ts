@@ -1,4 +1,4 @@
-import { authSessionCookieName } from "@plotkeys/auth";
+import { authSessionCookieName } from "@plotkeys/auth/shared";
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
 export function clearAuthSessionCookie(cookieStore: ResponseCookies) {
