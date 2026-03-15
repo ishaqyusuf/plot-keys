@@ -28,6 +28,7 @@ This file records the intended high-level architecture and boundaries between ap
 
 ## Planned Shared Package Boundaries
 - `packages/auth`: Better Auth configuration and shared auth helpers
+- `packages/app-store`: Shared external app/provider clients such as WhatsApp transport adapters
 - `packages/auth`: Better Auth configuration, route wiring, session helpers, and membership-aware authorization helpers
 - `packages/chat-bot`: Shared chatbot logic, prompts, and tenant-safe integration helpers
 - `packages/ui`: Reusable design system primitives and shared styles
@@ -68,6 +69,7 @@ This file records the intended high-level architecture and boundaries between ap
 - Public website rendering can now resolve the tenant by hostname when a matching `TenantDomain` record exists, with slug/query fallback still present for previews and local development.
 - Notifications now use a split-package pattern: framework-agnostic models in `packages/notifications` and React hooks/provider rendering in `packages/notifications-react`.
 - The notifications core is moving toward the GND pattern by centering typed `notificationType` definitions rather than app-local string usage.
+- Notification definitions can now declare channel targets such as `email`, `whatsapp`, and `in_app`, while `packages/notifications` now exposes a GND-style `payload-utils` trigger layer, separate file-based definitions in `types/`, and a `services/` directory so app code triggers domain notifications through a service boundary instead of assembling dispatch payloads inline. Concrete WhatsApp provider calls now route through `packages/app-store`.
 
 ## Deferred Decisions
 - Exact Vercel deployment topology for tenant websites and dashboard hostnames

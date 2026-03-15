@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { createPrismaClient, findCompanyById } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -10,7 +10,11 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { SectionHeading } from "@plotkeys/ui/section-heading";
-import { isVercelDomainProvisioningConfigured } from "@plotkeys/utils";
+import {
+  isVercelDomainProvisioningConfigured,
+  resolvePlanEntitlements,
+  tierLabels,
+} from "@plotkeys/utils";
 import Link from "next/link";
 import { SignOutButton } from "../components/auth/sign-out-button";
 import { NotificationDemo } from "../components/notification-demo";
@@ -56,8 +60,15 @@ export default async function DashboardHomePage({
 
   await ensureBuilderConfigurationExists();
 
+  const prisma = createPrismaClient().db;
+  const company = prisma
+    ? await findCompanyById(prisma, session.activeMembership.companyId)
+    : null;
+  const planEntitlements = company
+    ? resolvePlanEntitlements(company.planTier)
+    : null;
   const domainProvisioningConfigured = isVercelDomainProvisioningConfigured();
-  const domainStatuses = await createPrismaClient().db?.tenantDomain.findMany({
+  const domainStatuses = await prisma?.tenantDomain.findMany({
     orderBy: {
       createdAt: "asc",
     },
@@ -92,9 +103,26 @@ export default async function DashboardHomePage({
               </CardTitle>
               <CardDescription className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
                 You have completed the first tenant journey: account creation,
-                verification, onboarding, and starter website bootstrap. The
-                next operational surface is the builder.
+                verification, onboarding, and website bootstrap. The next
+                operational surface is the builder.
               </CardDescription>
+              {company && planEntitlements ? (
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">
+                    {tierLabels[company.planTier]} plan
+                  </Badge>
+                  <Badge variant="outline">
+                    {planEntitlements.features.customDomains
+                      ? "Custom domains enabled"
+                      : "Upgrade for domains"}
+                  </Badge>
+                  <Badge variant="outline">
+                    {planEntitlements.features.aiTools
+                      ? "AI tools enabled"
+                      : "Upgrade for AI tools"}
+                  </Badge>
+                </div>
+              ) : null}
             </CardHeader>
             <CardContent className="flex flex-col gap-3 px-8 pb-8 md:px-10 md:pb-10 sm:flex-row">
               <Button asChild>
@@ -127,7 +155,10 @@ export default async function DashboardHomePage({
                     <p className="text-sm uppercase tracking-[0.25em] text-primary-foreground/70">
                       {card.label}
                     </p>
-                    <Badge className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground" variant="outline">
+                    <Badge
+                      className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
+                      variant="outline"
+                    >
                       {card.value}
                     </Badge>
                   </CardHeader>
@@ -215,7 +246,7 @@ export default async function DashboardHomePage({
                         variant={
                           domain.status === "active" ? "default" : "outline"
                         }
-                        >
+                      >
                         {domain.status}
                       </Badge>
                     </CardHeader>

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  makeSubscriberRecipients,
+  makeUserRecipients,
+} from "@plotkeys/notifications";
 import { useNotifications } from "@plotkeys/notifications-react";
 import { Button } from "@plotkeys/ui/button";
 
@@ -29,17 +33,15 @@ export function NotificationDemo() {
       <div className="mt-5 flex flex-wrap gap-3">
         <Button
           onClick={() => {
-            notifications.showSuccess("Draft saved", {
-              description:
-                "The latest builder changes were stored for your tenant workspace.",
-              notificationType: "site_configuration_saved",
-              recipients: [
-                {
-                  displayName: "Workspace admin",
-                  kind: "user",
-                  userId: "workspace-admin",
-                },
-              ],
+            notifications.service.send("site_configuration_saved", {
+              payload: {
+                description:
+                  "The latest builder changes were stored for your tenant workspace.",
+              },
+              recipients: makeUserRecipients({
+                displayName: "Workspace admin",
+                userId: "workspace-admin",
+              }),
             });
           }}
           type="button"
@@ -49,22 +51,21 @@ export function NotificationDemo() {
 
         <Button
           onClick={() => {
-            notifications.showInfo("New subscriber captured", {
-              description:
-                "A marketing lead subscribed from the tenant website footer form.",
-              notificationType: "subscriber_lead_created",
+            notifications.service.send("subscriber_lead_created", {
+              payload: {
+                description:
+                  "A marketing lead subscribed from the tenant website footer form.",
+              },
               recipients: [
-                {
+                ...makeSubscriberRecipients({
                   displayName: "Ada Subscriber",
-                  kind: "subscriber",
                   subscriberId: "subscriber-001",
                   topic: "property-alerts",
-                },
-                {
+                }),
+                ...makeUserRecipients({
                   displayName: "Workspace admin",
-                  kind: "user",
                   userId: "workspace-admin",
-                },
+                }),
               ],
             });
           }}
@@ -76,20 +77,26 @@ export function NotificationDemo() {
 
         <Button
           onClick={() => {
-            notifications.showWarning("Publish needs review", {
-              action: {
-                label: "Open builder",
-                onClick: () => {
-                  notifications.showInfo("Builder route ready", {
-                    description:
-                      "Route actions can be connected here without coupling the core package to Next.js.",
-                    notificationType: "builder_route_hint",
-                  });
-                },
+            notifications.service.send("site_publish_requires_review", {
+              payload: {
+                description:
+                  "Your template has unpublished changes that still need a final pass.",
               },
-              description:
-                "Your template has unpublished changes that still need a final pass.",
-              notificationType: "site_publish_requires_review",
+              recipients: makeUserRecipients({
+                displayName: "Workspace admin",
+                userId: "workspace-admin",
+              }),
+            });
+
+            notifications.service.send("builder_route_hint", {
+              payload: {
+                description:
+                  "Route actions can be connected here without coupling the core package to Next.js.",
+              },
+              recipients: makeUserRecipients({
+                displayName: "Workspace admin",
+                userId: "workspace-admin",
+              }),
             });
           }}
           type="button"

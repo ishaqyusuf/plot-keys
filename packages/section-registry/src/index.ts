@@ -1,5 +1,7 @@
 import type { JSX } from "react";
 
+export type TemplateTier = "starter" | "plus" | "pro";
+
 import {
   type CtaBandConfig,
   CtaBandSection,
@@ -64,6 +66,7 @@ export type TemplateDefinition = {
   editableFields: EditableFieldDefinition[];
   key: string;
   name: string;
+  tier: TemplateTier;
 };
 
 export type ResolvedWebsitePresentation = {
@@ -356,6 +359,7 @@ export const templateCatalog: TemplateDefinition[] = [
     editableFields: baseEditableFields,
     key: "template-1",
     name: "Template 1",
+    tier: "starter",
   },
   {
     defaultContent: createDefaultContent(
@@ -376,6 +380,7 @@ export const templateCatalog: TemplateDefinition[] = [
     editableFields: baseEditableFields,
     key: "template-2",
     name: "Template 2",
+    tier: "plus",
   },
   {
     defaultContent: createDefaultContent(
@@ -397,6 +402,7 @@ export const templateCatalog: TemplateDefinition[] = [
     editableFields: baseEditableFields,
     key: "template-3",
     name: "Template 3",
+    tier: "pro",
   },
 ];
 

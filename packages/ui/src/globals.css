@@ -11,6 +11,7 @@
   --muted: #5f6f82;
   --muted-foreground: #415164;
   --border: rgba(120, 138, 156, 0.24);
+  --input: rgba(120, 138, 156, 0.42);
   --surface: rgba(255, 255, 255, 0.82);
   --surface-strong: #ffffff;
   --surface-inverse: #102033;
@@ -115,6 +116,7 @@ p {
   --muted: #8ea1b3;
   --muted-foreground: #b6c5d2;
   --border: rgba(182, 197, 210, 0.2);
+  --input: rgba(182, 197, 210, 0.34);
   --surface: rgba(18, 29, 44, 0.88);
   --surface-strong: #152133;
   --surface-inverse: #eef4f7;
@@ -157,7 +159,7 @@ p {
   --color-warning: var(--warning);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
-  --color-input: var(--surface-strong);
+  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

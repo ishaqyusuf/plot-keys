@@ -15,6 +15,7 @@
         "@hono/node-server": "^1.13.0",
         "@plotkeys/auth": "workspace:*",
         "@plotkeys/db": "workspace:*",
+        "@plotkeys/notifications": "workspace:*",
         "@plotkeys/utils": "workspace:*",
         "@trpc/server": "^11.0.0",
         "hono": "^4.0.0",
@@ -98,6 +99,13 @@
         "postcss": "^8.4.0",
       },
     },
+    "packages/app-store": {
+      "name": "@plotkeys/app-store",
+      "devDependencies": {
+        "@plotkeys/tsconfig": "workspace:*",
+        "@types/node": "^22.0.0",
+      },
+    },
     "packages/auth": {
       "name": "@plotkeys/auth",
       "dependencies": {
@@ -162,6 +170,8 @@
     "packages/notifications": {
       "name": "@plotkeys/notifications",
       "dependencies": {
+        "@plotkeys/app-store": "workspace:*",
+        "@plotkeys/email": "workspace:*",
         "@plotkeys/utils": "workspace:*",
         "zod": "^3.23.0",
       },
@@ -492,6 +502,8 @@
     "@noble/hashes": ["@noble/hashes@2.0.1", "", {}, "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="],
 
     "@plotkeys/api": ["@plotkeys/api@workspace:apps/api"],
+
+    "@plotkeys/app-store": ["@plotkeys/app-store@workspace:packages/app-store"],
 
     "@plotkeys/auth": ["@plotkeys/auth@workspace:packages/auth"],
 

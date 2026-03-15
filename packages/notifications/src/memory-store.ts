@@ -3,7 +3,7 @@ import type {
   NotificationInput,
   NotificationRecord,
   NotificationState,
-} from "./types";
+} from "./core-types";
 
 const DEFAULT_DURATION_MS = 5000;
 
@@ -18,6 +18,7 @@ function createNotificationRecord(
   input: NotificationInput,
 ): NotificationRecord {
   return {
+    channels: input.channels ?? ["in_app"],
     createdAt: new Date().toISOString(),
     description: input.description,
     durationMs: input.durationMs ?? DEFAULT_DURATION_MS,

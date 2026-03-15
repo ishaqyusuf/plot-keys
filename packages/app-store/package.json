@@ -1,0 +1,18 @@
+{
+  "name": "@plotkeys/app-store",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./whatsapp-client": "./src/whatsapp-client.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0"
+  }
+}

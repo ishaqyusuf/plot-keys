@@ -37,6 +37,15 @@ This file tracks migration conventions and migration milestones.
   - `TenantDomainKind`
   - `TenantDomainStatus`
   - `tenant_domains`
+- User contact support added in `0005_user_phone_number`, including:
+  - `users.phone_number`
+- Company subscription-tier support added in `0006_company_plan_tiers`, including:
+  - `company_plan_tier`
+  - `company_plan_status`
+  - `companies.plan_tier`
+  - `companies.plan_status`
+  - `companies.plan_started_at`
+  - `companies.plan_ends_at`
 
 ## TODO
 - Define migration naming convention beyond Drizzle's generated names

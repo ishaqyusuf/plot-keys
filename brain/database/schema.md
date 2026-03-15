@@ -56,7 +56,12 @@ This file tracks the current and planned core entities.
 - Auth and website-builder schema is now partially implemented in Prisma for:
   - `users.password_hash`
   - `users.email_verified`
+  - `users.phone_number`
   - `companies.market`
+  - `companies.plan_tier`
+  - `companies.plan_status`
+  - `companies.plan_started_at`
+  - `companies.plan_ends_at`
   - `site_configurations`
   - `tenant_domains`
 - Canonical schema owner: Prisma in `packages/db/prisma/schema.prisma`.
@@ -84,6 +89,25 @@ This file tracks the current and planned core entities.
     - `updatedById`
     - `createdAt`
     - `updatedAt`
+
+## Implemented Company Plan Schema
+- `Company`
+  - Purpose: tenant root record plus the current subscription tier used for entitlement checks
+  - Implemented fields:
+    - `id`
+    - `slug`
+    - `name`
+    - `market`
+    - `planTier` with values `starter`, `plus`, `pro`
+    - `planStatus` with values `active`, `past_due`, `canceled`
+    - `planStartedAt`
+    - `planEndsAt`
+    - `isActive`
+    - `createdAt`
+    - `updatedAt`
+  - Current behavior:
+    - onboarding creates new companies on the `starter` tier with `active` status
+    - builder template access now resolves from `Company.planTier`
 
 ## Implemented Tenant Domain Schema
 - `TenantDomain`
@@ -113,11 +137,13 @@ This file tracks the current and planned core entities.
   - `template-1`
   - `template-2`
   - `template-3`
+- Each code-backed template now includes tier metadata so builder access can be enforced against the tenant company plan.
 - A `SiteTemplate` table is still optional future work, not current schema.
 
 ## Current Auth Notes
 - `User.passwordHash` is currently used by the local Prisma-backed sign-up and sign-in flow.
 - `User.emailVerified` currently gates verification and onboarding access.
+- `User.phoneNumber` is now captured during signup so notification recipients can support WhatsApp delivery planning.
 - This is an implementation bridge until Better Auth adapter tables and runtime wiring are added.
 
 ## Current Domain Notes

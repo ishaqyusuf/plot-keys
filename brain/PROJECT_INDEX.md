@@ -10,11 +10,12 @@
 ## Packages
 - `packages/ui`: Implemented shared UI package with global styles and a full Shadcn-derived component set living directly in `src/components`, with each primitive exported through explicit package subpath exports instead of a root barrel file.
 - `packages/auth`: Implemented route helpers plus a temporary Prisma-backed auth/session layer for sign-up, sign-in, verification, password hashing, and signed cookie sessions while Better Auth runtime wiring is still pending; browser-safe constants and validation schemas now live behind a shared subpath so client bundles do not import database-backed auth code.
+- `packages/app-store`: Implemented a starter provider-client package and now includes a WhatsApp client for Meta Graph API delivery used by notification services.
 - `packages/chat-bot`: Implemented starter chatbot types and prompt helper.
 - `packages/db`: Implemented provider-aware shared database package with Prisma-owned schema/migrations, Prisma Client, a growing `src/queries` layer for reusable Prisma-backed domain queries, and a mirrored Drizzle query layer; current implemented Prisma models cover `users`, `companies`, `memberships`, `site_configurations`, and `tenant_domains`.
 - `packages/email`: Implemented a Midday-aligned React Email package structure with shared email defaults, starter email components, a render helper, and a first welcome email template.
 - `packages/jobs`: Implemented starter Trigger.dev-oriented job identifiers package.
-- `packages/notifications`: Implemented framework-agnostic notification types, a typed notification-definition registry, recipient contacts for users/subscribers, and an in-memory notification store contract using `notificationType` naming.
+- `packages/notifications`: Implemented framework-agnostic notification types with separate file-based definitions under `src/types/`, a typed notification-definition registry, recipient contacts for users/subscribers, an in-memory notification store contract using `notificationType` naming, a GND-style `payload-utils` trigger layer, and service classes for notification triggering plus real Resend/WhatsApp delivery wiring.
 - `packages/notifications-react`: Implemented the shared React provider, hooks, and viewport used by the three Next.js apps.
 - `packages/supabase`: Implemented optional Supabase env readers, browser/server/admin client factories, and tenant storage helpers.
 - `packages/tsconfig`: Implemented shared TypeScript base and Next.js configs.
@@ -66,4 +67,4 @@
 - Relational application access should route through `packages/db`; vendor packages stay optional.
 - Current auth/runtime note: dashboard auth is working through a local Prisma-backed implementation in `packages/auth`, but full Better Auth adapter and handler wiring remains future work.
 - Domain/runtime note: tenant website and dashboard hostnames are stored as Prisma `TenantDomain` records, the dashboard can sync them against Vercel, and the public renderer can resolve by hostname when records exist.
-- The initial notification implementation currently focuses on reusable in-app notifications with typed definitions; delivery transports such as email, SMS, or push remain future work.
+- The notification implementation now follows the GND package anatomy more closely: `index.ts` as the entrypoint, `payload-utils` for trigger builders, `types/` for separate notification definitions, and `services/` for notification triggering plus channel delivery. The current auth and dashboard notification entry points now route through `NotificationService` instead of building domain notifications directly in app code.

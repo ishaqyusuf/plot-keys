@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  createNotificationFromType,
-  createUserNotificationContact,
-  plotKeysNotificationTypes,
+  makeUserRecipients,
 } from "@plotkeys/notifications";
 import { useNotifications } from "@plotkeys/notifications-react";
 import { useEffect, useRef } from "react";
@@ -27,7 +25,7 @@ export function OnboardingSignupNotification({
   siteHostname,
   subdomain,
 }: OnboardingSignupNotificationProps) {
-  const { notify } = useNotifications();
+  const { service } = useNotifications();
   const hasNotified = useRef(false);
 
   useEffect(() => {
@@ -37,36 +35,27 @@ export function OnboardingSignupNotification({
 
     hasNotified.current = true;
 
-    notify(
-      createNotificationFromType(
-        plotKeysNotificationTypes,
-        "signup_successful",
-        {
-          companyName,
-          dashboardHostname,
-          email,
-          fullName,
-          siteHostname,
-          subdomain,
-        },
-        {
-          description: `Your account is ready. Continue onboarding ${companyName} and claim ${siteHostname}.`,
-          recipients: [
-            createUserNotificationContact({
-              displayName: fullName,
-              email,
-              userId: email,
-            }),
-          ],
-        },
-      ),
-    );
+    service.send("signup_successful", {
+      payload: {
+        companyName,
+        dashboardHostname,
+        email,
+        fullName,
+        siteHostname,
+        subdomain,
+      },
+      recipients: makeUserRecipients({
+        displayName: fullName,
+        email,
+        userId: email,
+      }),
+    });
   }, [
     companyName,
     dashboardHostname,
     email,
     fullName,
-    notify,
+    service,
     show,
     siteHostname,
     subdomain,

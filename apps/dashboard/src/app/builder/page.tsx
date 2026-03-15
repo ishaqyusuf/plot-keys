@@ -1,43 +1,28 @@
-import { createPrismaClient } from "@plotkeys/db";
-import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
-  resolveWebsitePresentation,
-  templateCatalog,
-} from "@plotkeys/section-registry";
+  createPrismaClient,
+  findCompanyById,
+  listTemplateUsageCounts,
+} from "@plotkeys/db";
+import type { HomeSectionDefinition } from "@plotkeys/section-registry";
+import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@plotkeys/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@plotkeys/ui/field";
+import { Card, CardContent } from "@plotkeys/ui/card";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@plotkeys/ui/empty";
-import { Input } from "@plotkeys/ui/input";
-import { Textarea } from "@plotkeys/ui/textarea";
+import { Separator } from "@plotkeys/ui/separator";
+import { resolvePlanEntitlements, tierLabels } from "@plotkeys/utils";
 import Link from "next/link";
 import type { JSX } from "react";
+
+import { BuilderSidebarControls } from "../../components/builder/builder-sidebar-controls";
 import { requireOnboardedSession } from "../../lib/session";
-import {
-  createTemplateDraftAction,
-  publishSiteConfigurationAction,
-  smartFillFieldAction,
-  switchBuilderConfigurationAction,
-  updateSiteFieldAction,
-} from "../actions";
+import { publishSiteConfigurationAction } from "../actions";
 
 function renderPreviewSection(
   section: HomeSectionDefinition,
@@ -49,13 +34,26 @@ function renderPreviewSection(
   }) => JSX.Element;
 
   return (
-    <SectionComponent key={section.id} config={section.config} theme={theme} />
+    <section className="group/section relative">
+      <div className="pointer-events-none absolute inset-x-5 top-5 z-20 flex items-center justify-between gap-3 opacity-0 transition-opacity duration-200 group-hover/section:opacity-100">
+        <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
+          Editable surface
+        </div>
+        <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-xs text-foreground shadow-sm backdrop-blur">
+          Click to edit {"->"}
+        </div>
+      </div>
+      <div className="transition-all duration-200 group-hover/section:ring-1 group-hover/section:ring-primary/25">
+        <SectionComponent config={section.config} theme={theme} />
+      </div>
+    </section>
   );
 }
 
 type BuilderPageProps = {
   searchParams?: Promise<{
     configId?: string;
+    error?: string;
     generated?: string;
     published?: string;
     saved?: string;
@@ -86,6 +84,30 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   }
 
   const params = (await searchParams) ?? {};
+  const company = await findCompanyById(
+    prisma,
+    session.activeMembership.companyId,
+  );
+
+  if (!company) {
+    return (
+      <main className="min-h-screen p-8">
+        <Card className="mx-auto max-w-3xl">
+          <CardContent className="p-8">
+            <Empty className="border">
+              <EmptyHeader>
+                <EmptyTitle>Company not found</EmptyTitle>
+                <EmptyDescription>
+                  The active tenant company could not be loaded for the builder.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+
   const configurations = await prisma.siteConfiguration.findMany({
     orderBy: [
       {
@@ -100,6 +122,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
       deletedAt: null,
     },
   });
+  const templateUsageCounts = await listTemplateUsageCounts(prisma);
+  const planEntitlements = resolvePlanEntitlements(company.planTier);
 
   const activeConfiguration =
     configurations.find(
@@ -140,286 +164,159 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   });
 
   return (
-    <main className="min-h-screen px-6 py-10 md:px-8">
-      <div className="mx-auto max-w-[90rem]">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-muted-foreground">
-              Template builder
-            </p>
-            <h1 className="mt-2 font-serif text-4xl text-foreground">
-              Edit, switch, and publish tenant templates.
-            </h1>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild variant="secondary">
-              <Link href="/">Back to dashboard</Link>
-            </Button>
-            <Button asChild>
-              <Link
-                href={`/live?subdomain=${session.activeMembership.companySlug}`}
-              >
-                Open live site
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {(params.saved || params.generated || params.published) && (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
+    <main className="min-h-screen bg-background px-3 py-3 md:px-4 md:py-4">
+      <div className="mx-auto grid max-w-[118rem] gap-4 xl:grid-cols-[15.5rem_minmax(0,1fr)]">
+        {(params.error ||
+          params.saved ||
+          params.generated ||
+          params.published) && (
+          <Alert className="xl:col-start-2 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
-              {params.published
-                ? "The selected template is now published."
-                : params.generated
-                  ? "A smart-fill suggestion was applied to the field."
-                  : "Your field update was saved."}
+              {params.error
+                ? params.error
+                : params.published
+                  ? "The selected template is now published."
+                  : params.generated
+                    ? "A smart-fill suggestion was applied to the field."
+                    : "Your field update was saved."}
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="grid gap-6 xl:grid-cols-[18rem_1fr_23rem]">
-          <Card className="bg-card">
-            <CardHeader className="px-6 pt-6 pb-0">
-              <CardTitle className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
-                Templates
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-6 px-6 pb-6">
-              <div className="grid gap-3">
-                {templateCatalog.map((template) => (
-                  <form action={createTemplateDraftAction} key={template.key}>
-                    <input
-                      name="templateKey"
-                      type="hidden"
-                      value={template.key}
-                    />
-                    <button
-                      className={`w-full rounded-md border px-4 py-4 text-left transition-colors ${
-                        activeConfiguration.templateKey === template.key
-                          ? "border-primary bg-primary/10"
-                          : "border-border bg-background hover:bg-muted/50"
-                      }`}
-                      type="submit"
-                    >
-                      <p className="font-semibold text-foreground">
-                        {template.name}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {template.description}
-                      </p>
-                    </button>
-                  </form>
-                ))}
+        <aside className="xl:sticky xl:top-4 xl:h-[calc(100svh-2rem)]">
+          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
+            <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-6 py-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
+                  Builder setup
+                </p>
+                <Badge variant="outline">Studio</Badge>
               </div>
+            </div>
 
-              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
-                Configurations
-              </p>
-              <div className="grid gap-3">
-                {configurations.map((configuration) => (
-                  <form
-                    action={switchBuilderConfigurationAction}
-                    key={configuration.id}
+            <div className="flex-1 space-y-6 overflow-y-auto p-6">
+              <section className="space-y-4">
+                <div className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                      Active configuration
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-foreground">
+                      {activeConfiguration.name}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {configurations.length} saved configurations
+                    </p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                      Active plan
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {tierLabels[company.planTier]}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {planEntitlements.features.customDomains
+                        ? "Custom domains and customer accounts are available on this workspace."
+                        : "Upgrade to Plus or Pro to unlock custom domains, customer accounts, and premium templates."}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      activeConfiguration.status === "published"
+                        ? "default"
+                        : "outline"
+                    }
                   >
-                    <input
-                      name="configId"
-                      type="hidden"
-                      value={configuration.id}
-                    />
-                    <button
-                      className={`w-full rounded-md border px-4 py-4 text-left transition-colors ${
-                        activeConfiguration.id === configuration.id
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background text-foreground hover:bg-muted/50"
-                      }`}
-                      type="submit"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="font-semibold">{configuration.name}</p>
-                        <Badge
-                          variant={
-                            configuration.status === "published"
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {configuration.status}
-                        </Badge>
-                      </div>
-                      <p className="mt-2 text-sm opacity-80">
-                        {configuration.templateKey}
-                      </p>
-                    </button>
-                  </form>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                    {activeConfiguration.status}
+                  </Badge>
+                </div>
 
-          <Card className="overflow-hidden bg-card">
-            <CardHeader className="border-b px-6 py-4">
-              <div className="flex items-center justify-between gap-4">
+                <BuilderSidebarControls
+                  currentTemplateKey={activeConfiguration.templateKey}
+                  currentTier={company.planTier}
+                  templateUsageCounts={templateUsageCounts}
+                />
+              </section>
+
+              <Separator />
+
+              <section className="space-y-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
-                    Previewing
+                  <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                    Publish
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-foreground">
-                    {activeConfiguration.name}
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Keep publishing intentional while the preview becomes the
+                    editing surface.
                   </p>
                 </div>
-                <Badge variant="default">{preview.template.name}</Badge>
+                <form action={publishSiteConfigurationAction}>
+                  <input
+                    name="configId"
+                    type="hidden"
+                    value={activeConfiguration.id}
+                  />
+                  <input
+                    name="nextName"
+                    type="hidden"
+                    value={activeConfiguration.name}
+                  />
+                  <Button className="w-full" type="submit">
+                    Publish current configuration
+                  </Button>
+                </form>
+              </section>
+            </div>
+          </div>
+        </aside>
+
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">{preview.page.page}</Badge>
+              <Badge variant="outline">
+                {preview.page.sections.length} sections
+              </Badge>
+              <Badge variant="outline">
+                {preview.editableFields.length} editable fields
+              </Badge>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild variant="secondary">
+                <Link href="/">Back to dashboard</Link>
+              </Button>
+              <Button asChild>
+                <Link
+                  href={`/live?subdomain=${session.activeMembership.companySlug}`}
+                >
+                  Open live site
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mx-auto overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
+            <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="size-2.5 rounded-full bg-foreground/20" />
+                <span className="size-2.5 rounded-full bg-foreground/20" />
+                <span className="size-2.5 rounded-full bg-foreground/20" />
               </div>
-            </CardHeader>
-            <CardContent className="max-h-[80vh] overflow-auto bg-muted/40 p-4">
-              <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-background shadow-[var(--shadow-soft)]">
+              <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                {session.activeMembership.companySlug}.plotkeys.app /
+                builder-preview
+              </p>
+            </div>
+
+            <div className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4">
+              <div className="overflow-hidden rounded-lg border border-border/70 bg-background">
                 {preview.page.sections.map((section) =>
                   renderPreviewSection(section, preview.theme),
                 )}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="px-6 pt-6 pb-0">
-              <CardTitle className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
-                Content editor
-              </CardTitle>
-              <CardDescription>
-                Update editable fields and publish a new tenant site version
-                when the copy is ready.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6 px-6 pb-6">
-              <div className="grid gap-4">
-                {preview.editableFields.map((field) => (
-                  <div
-                    key={field.contentKey}
-                    className="rounded-[var(--radius-sm)] border border-border bg-muted/40 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-semibold text-foreground">
-                        {field.label}
-                      </p>
-                      <Badge variant="outline">{field.fieldType}</Badge>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {field.shortDetail}
-                    </p>
-                    <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                      {field.longDetail}
-                    </p>
-                    {field.preferredLength ? (
-                      <p className="mt-2 text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                        Preferred length: {field.preferredLength}
-                      </p>
-                    ) : null}
-                    <form action={updateSiteFieldAction} className="mt-4">
-                      <input
-                        name="configId"
-                        type="hidden"
-                        value={activeConfiguration.id}
-                      />
-                      <input
-                        name="contentKey"
-                        type="hidden"
-                        value={field.contentKey}
-                      />
-                      <FieldGroup>
-                        <Field>
-                          <FieldLabel htmlFor={`${field.contentKey}-value`}>
-                            {field.label}
-                          </FieldLabel>
-                          {field.fieldType === "textarea" ? (
-                            <Textarea
-                              className="min-h-28"
-                              defaultValue={
-                                (
-                                  activeConfiguration.contentJson as Record<
-                                    string,
-                                    string
-                                  >
-                                )[field.contentKey] ?? ""
-                              }
-                              id={`${field.contentKey}-value`}
-                              name="value"
-                            />
-                          ) : (
-                            <Input
-                              defaultValue={
-                                (
-                                  activeConfiguration.contentJson as Record<
-                                    string,
-                                    string
-                                  >
-                                )[field.contentKey] ?? ""
-                              }
-                              id={`${field.contentKey}-value`}
-                              name="value"
-                            />
-                          )}
-                          <FieldDescription>
-                            {field.shortDetail}
-                          </FieldDescription>
-                        </Field>
-                        <Button type="submit">Save field</Button>
-                      </FieldGroup>
-                    </form>
-                    {field.aiEnabled ? (
-                      <form action={smartFillFieldAction} className="mt-2">
-                        <input
-                          name="configId"
-                          type="hidden"
-                          value={activeConfiguration.id}
-                        />
-                        <input
-                          name="contentKey"
-                          type="hidden"
-                          value={field.contentKey}
-                        />
-                        <input
-                          name="shortDetail"
-                          type="hidden"
-                          value={field.shortDetail}
-                        />
-                        <Button type="submit" variant="ghost">
-                          Smart-fill from guidance
-                        </Button>
-                      </form>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-
-              <form action={publishSiteConfigurationAction}>
-                <input
-                  name="configId"
-                  type="hidden"
-                  value={activeConfiguration.id}
-                />
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor="publish-name">
-                      New template name before publish
-                    </FieldLabel>
-                    <Input
-                      defaultValue={activeConfiguration.name}
-                      id="publish-name"
-                      name="nextName"
-                      placeholder="Template launch name"
-                    />
-                    <FieldDescription>
-                      This name becomes the new live configuration label after
-                      publishing.
-                    </FieldDescription>
-                  </Field>
-                  <Button type="submit">
-                    Publish and replace current live site
-                  </Button>
-                </FieldGroup>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );

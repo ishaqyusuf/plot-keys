@@ -17,6 +17,7 @@
     "@hono/node-server": "^1.13.0",
     "@plotkeys/auth": "workspace:*",
     "@plotkeys/db": "workspace:*",
+    "@plotkeys/notifications": "workspace:*",
     "@plotkeys/utils": "workspace:*",
     "@trpc/server": "^11.0.0",
     "hono": "^4.0.0",

@@ -8,7 +8,9 @@ This file holds actionable work that is identified but not currently in progress
 - Move tasks to `in-progress.md` when started.
 
 ## Backlog
-- Define initial billing model for subscriptions and AI credits
+- Define exact pricing amounts, billing intervals, and upgrade/downgrade rules for Starter, Plus, and Pro
+- Implement template entitlement rules for starter, plus, and pro templates including free picks and paid unlocks
+- Define mobile app request packaging and fulfillment flow for Pro customers
 - Choose initial domain provider
 - Replace header-based auth scaffolding with Better Auth session verification and adapter wiring
 - Define Hono + tRPC API folder conventions
@@ -17,6 +19,10 @@ This file holds actionable work that is identified but not currently in progress
 - Migrate the temporary Prisma-backed auth/session implementation onto full Better Auth handlers and adapters
 - Decide whether platform templates stay code-backed or move into a Prisma `SiteTemplate` table
 - Seed or sync default platform templates such as `template-1`, `template-2`, and `template-3`
+- Add template metadata for tier, preview media, marketing description, and purchase eligibility
+- Add usage-count aggregation for template cards so tenants can assess template uniqueness
+- Add upgrade/downgrade lifecycle handling that updates `Company.planTier` and `Company.planStatus` from the future billing provider
+- Add paid template-unlock records and free-pick claim tracking per tenant
 - Build inline editor hover states, focus mapping, and sidebar field controls
 - Replace the current smart-fill placeholder with model-backed AI generation using `shortDetail` and `longDetail`
 - Build publish confirmation modal and rollback-friendly replacement UX

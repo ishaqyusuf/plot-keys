@@ -59,9 +59,7 @@ export function createPrismaClient(
     const runtimeConfig = readDatabaseRuntimeConfig();
 
     if (!runtimeConfig.connectionString) {
-      const client = createUnconfiguredPrismaClient(runtimeConfig.provider);
-      globalThis.__plotkeysPrismaClient__ = client;
-      return client;
+      return createUnconfiguredPrismaClient(runtimeConfig.provider);
     }
 
     const client = createConfiguredPrismaClient(
@@ -73,6 +71,19 @@ export function createPrismaClient(
   }
 
   if (!options.connectionString && globalThis.__plotkeysPrismaClient__) {
+    if (
+      globalThis.__plotkeysPrismaClient__.status === "unconfigured" &&
+      process.env.DATABASE_URL
+    ) {
+      const runtimeConfig = readDatabaseRuntimeConfig();
+      const client = createConfiguredPrismaClient(
+        runtimeConfig.provider,
+        options,
+      );
+      globalThis.__plotkeysPrismaClient__ = client;
+      return client;
+    }
+
     return globalThis.__plotkeysPrismaClient__;
   }
 

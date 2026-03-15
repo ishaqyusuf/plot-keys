@@ -4,8 +4,10 @@ import { FlowShell } from "../../components/flow-shell";
 
 type VerifyEmailPageProps = {
   searchParams?: Promise<{
+    company?: string;
     email?: string;
     error?: string;
+    subdomain?: string;
     token?: string;
   }>;
 };
@@ -16,11 +18,18 @@ export default async function VerifyEmailPage({
   const params = (await searchParams) ?? {};
   const email = params.email ?? "your email address";
   const token = params.token ?? "";
+  const onboarding =
+    params.company && params.subdomain
+      ? {
+          company: params.company,
+          subdomain: params.subdomain,
+        }
+      : undefined;
 
   return (
     <FlowShell
       badge="Flow 02"
-      description="This verification route still works for manual or legacy email checks, but the primary signup flow now moves straight into onboarding with an active session."
+      description="Signup now pauses here until the account owner confirms the email address. Verification completes the auth handoff, restores the reserved onboarding payload, and then continues into workspace setup."
       sidePanel={
         <>
           <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
@@ -47,12 +56,16 @@ export default async function VerifyEmailPage({
       <div className="flex flex-col gap-5">
         <Badge variant="secondary">Verification pending</Badge>
         <p className="max-w-2xl text-base leading-8 text-muted-foreground">
-          We created the account for <strong>{email}</strong>. Clicking below
-          simulates opening the email verification link and completes the
+          We created the account for <strong>{email}</strong>. Open the
+          verification link from email or use the action below to complete the
           verified-account handoff into onboarding.
         </p>
 
-        <VerifyEmailForm initialError={params.error} token={token} />
+        <VerifyEmailForm
+          initialError={params.error}
+          onboarding={onboarding}
+          token={token}
+        />
       </div>
     </FlowShell>
   );

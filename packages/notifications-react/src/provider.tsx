@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  createNotificationFromType,
   createMemoryNotificationStore,
+  NotificationService,
   type NotificationInput,
   type NotificationRecord,
   type NotificationStore,
   type NotificationVariant,
+  plotKeysNotificationTypes,
 } from "@plotkeys/notifications";
 import {
   createContext,
@@ -35,6 +38,7 @@ type NotificationsContextValue = {
   dismiss: (notificationId: string) => void;
   notifications: NotificationRecord[];
   notify: (input: NotifyInput) => string;
+  service: NotificationService;
   showError: (
     title: string,
     input?: Omit<VariantNotifyInput, "title" | "variant">,
@@ -73,6 +77,7 @@ export function NotificationsProvider({
   );
   const actionHandlersRef = useRef(new Map<string, () => void>());
   const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const serviceRef = useRef<NotificationService | null>(null);
   const state = useNotificationStore(storeRef.current);
 
   useEffect(() => {
@@ -148,6 +153,22 @@ export function NotificationsProvider({
     });
   }
 
+  if (!serviceRef.current) {
+    serviceRef.current = new NotificationService((type, input) => {
+      return notify(
+        createNotificationFromType(
+          plotKeysNotificationTypes,
+          type,
+          input.payload as never,
+          {
+            channels: input.channels,
+            recipients: input.recipients ?? [],
+          },
+        ),
+      );
+    });
+  }
+
   const value: NotificationsContextValue = {
     clear() {
       actionHandlersRef.current.clear();
@@ -161,6 +182,7 @@ export function NotificationsProvider({
       (notification) => notification.status === "active",
     ),
     notify,
+    service: serviceRef.current,
     showError(title, input) {
       return notifyWithVariant("error", title, input);
     },

@@ -1,4 +1,4 @@
-import type { NotificationInput, NotificationState } from "./types";
+import type { NotificationInput, NotificationState } from "./core-types";
 
 export type NotificationListener = () => void;
 

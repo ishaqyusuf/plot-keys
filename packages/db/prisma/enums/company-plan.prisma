@@ -1,0 +1,15 @@
+enum CompanyPlanTier {
+  starter
+  plus
+  pro
+
+  @@map("company_plan_tier")
+}
+
+enum CompanyPlanStatus {
+  active
+  past_due
+  canceled
+
+  @@map("company_plan_status")
+}

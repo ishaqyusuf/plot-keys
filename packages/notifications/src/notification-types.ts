@@ -1,12 +1,32 @@
 import { z } from "zod";
 import type { NotificationContactKind } from "./contacts";
-import type { NotificationInput, NotificationVariant } from "./types";
+import type {
+  NotificationChannel,
+  NotificationDispatch,
+  NotificationInput,
+  NotificationVariant,
+} from "./core-types";
+import {
+  authEmailVerified,
+  type AuthEmailVerifiedPayload,
+  authVerificationRequested,
+  type AuthVerificationRequestedPayload,
+  builderRouteHint,
+  onboardingReminder,
+  type OnboardingReminderPayload,
+  signupSuccessful,
+  type SignupSuccessfulPayload,
+  siteConfigurationSaved,
+  sitePublishRequiresReview,
+  subscriberLeadCreated,
+} from "./types";
 
 type BuiltNotificationInput = Omit<NotificationInput, "action">;
 
 export type NotificationTypeDefinition<
   TSchema extends z.ZodTypeAny = z.ZodTypeAny,
 > = {
+  defaultChannels?: NotificationChannel[];
   defaultRecipients?: NotificationContactKind[];
   description?: string;
   schema: TSchema;
@@ -57,6 +77,7 @@ export function createNotificationFromType<
 
   return {
     ...input,
+    channels: input?.channels ?? definition.defaultChannels ?? ["in_app"],
     description: input?.description ?? definition.description,
     notificationType,
     title: input?.title ?? definition.title ?? "Notification",
@@ -64,25 +85,57 @@ export function createNotificationFromType<
   };
 }
 
-export const signupSuccessfulPayloadSchema = z.object({
-  companyName: z.string().min(1),
-  dashboardHostname: z.string().min(1),
-  email: z.string().email(),
-  fullName: z.string().min(1),
-  siteHostname: z.string().min(1),
-  subdomain: z.string().min(1),
-});
+export function createNotificationDispatchFromType<
+  TRegistry extends NotificationTypeRegistry,
+  TType extends keyof TRegistry & string,
+>(
+  registry: TRegistry,
+  notificationType: TType,
+  payload: z.infer<TRegistry[TType]["schema"]>,
+  input?: Omit<
+    NotificationDispatch,
+    | "channels"
+    | "description"
+    | "notificationType"
+    | "payload"
+    | "recipients"
+    | "title"
+    | "variant"
+  > & {
+    channels?: NotificationChannel[];
+    description?: string;
+    recipients?: NotificationDispatch["recipients"];
+    title?: string;
+    variant?: NotificationVariant;
+  },
+): NotificationDispatch {
+  const definition = registry[notificationType];
+
+  if (!definition) {
+    throw new Error(`Unknown notification type: ${notificationType}`);
+  }
+
+  definition.schema.parse(payload);
+
+  return {
+    ...input,
+    channels: input?.channels ?? definition.defaultChannels ?? ["in_app"],
+    description: input?.description ?? definition.description,
+    notificationType,
+    payload,
+    recipients: input?.recipients ?? [],
+    title: input?.title ?? definition.title ?? "Notification",
+    variant: input?.variant ?? definition.variant ?? "info",
+  };
+}
 
 export const plotKeysNotificationTypes = defineNotificationTypes({
-  signup_successful: defineNotificationType({
-    defaultRecipients: ["user", "subscriber"],
-    description: "The owner account was created and tenant setup can continue.",
-    schema: signupSuccessfulPayloadSchema,
-    title: "Account created successfully",
-    variant: "success",
-  }),
+  auth_email_verified: authEmailVerified,
+  auth_verification_requested: authVerificationRequested,
+  builder_route_hint: builderRouteHint,
+  onboarding_reminder: onboardingReminder,
+  signup_successful: signupSuccessful,
+  site_configuration_saved: siteConfigurationSaved,
+  site_publish_requires_review: sitePublishRequiresReview,
+  subscriber_lead_created: subscriberLeadCreated,
 });
-
-export type SignupSuccessfulPayload = z.infer<
-  typeof signupSuccessfulPayloadSchema
->;

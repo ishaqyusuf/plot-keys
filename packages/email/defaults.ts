@@ -1,3 +1,17 @@
+export function defaultVerificationSubject(companyName: string) {
+  return `Verify your PlotKeys account for ${companyName}`;
+}
+
+export function defaultVerificationHeading(companyName: string) {
+  return `Verify ${companyName} to continue`;
+}
+
+export function defaultVerificationBody(companyName: string) {
+  return `Confirm your email address to unlock the PlotKeys workspace for ${companyName} and continue onboarding.`;
+}
+
+export const DEFAULT_VERIFICATION_BUTTON_TEXT = "Verify email address";
+
 export function defaultWelcomeSubject(companyName: string) {
   return `Welcome to PlotKeys, ${companyName}`;
 }

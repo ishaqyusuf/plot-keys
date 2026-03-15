@@ -1,8 +1,19 @@
 "use client";
 
-export async function persistSession(sessionToken: string) {
+type PendingOnboardingPayload = {
+  company: string;
+  subdomain: string;
+};
+
+export async function persistSession(
+  sessionToken: string,
+  onboarding?: PendingOnboardingPayload,
+) {
   const response = await fetch("/api/session", {
-    body: JSON.stringify({ sessionToken }),
+    body: JSON.stringify({
+      onboarding,
+      sessionToken,
+    }),
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

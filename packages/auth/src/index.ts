@@ -75,6 +75,7 @@ export type AuthenticatedUser = {
   email?: string;
   id: string;
   name?: string;
+  phoneNumber?: string | null;
 };
 
 export type ActiveMembership = {
@@ -105,6 +106,7 @@ export type AppSession = {
     emailVerified: boolean;
     id: string;
     name: string | null;
+    phoneNumber: string | null;
   };
 };
 
@@ -226,6 +228,7 @@ export async function signUpUser(input: {
   emailVerified?: boolean;
   name: string;
   password: string;
+  phoneNumber: string;
 }) {
   const db = input.db ?? requireDb();
   const email = input.email.trim().toLowerCase();
@@ -240,6 +243,7 @@ export async function signUpUser(input: {
     emailVerified: input.emailVerified ?? false,
     name: input.name,
     passwordHash: hashPassword(input.password),
+    phoneNumber: input.phoneNumber,
   });
 
   return {
@@ -313,6 +317,7 @@ export async function getAppSessionFromSessionToken(token: string) {
       emailVerified: user.emailVerified,
       id: user.id,
       name: user.name,
+      phoneNumber: user.phoneNumber,
     },
   } satisfies AppSession;
 }
@@ -354,6 +359,7 @@ export function resolveSessionFromHeaders(
         email: requestHeaders.userEmail,
         id: requestHeaders.userId,
         name: requestHeaders.userName,
+        phoneNumber: undefined,
       },
     },
   };

@@ -9,7 +9,7 @@ import {
   signUpUser,
   verifyUserEmail,
 } from "@plotkeys/auth";
-import { createPrismaClient } from "@plotkeys/db";
+import { createPrismaClient, findCompanyById } from "@plotkeys/db";
 import {
   createInitialSiteConfigurationInput,
   getTemplateDefinition,
@@ -17,9 +17,11 @@ import {
 import {
   buildDashboardHostname,
   buildSitefrontHostname,
+  describeTemplateAccess,
   isVercelDomainProvisioningConfigured,
   normalizeSubdomainLabel,
   plotkeysRootDomain,
+  type SubscriptionTier,
   syncTenantDomainWithVercel,
 } from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
@@ -30,6 +32,10 @@ import {
   requireAuthenticatedSession,
   requireOnboardedSession,
 } from "../lib/session";
+import {
+  clearPendingOnboardingCookie,
+  readPendingOnboardingCookie,
+} from "../lib/session-cookie";
 
 const reservedSubdomains = new Set([
   "admin",
@@ -71,6 +77,15 @@ async function assertSubdomainAvailability(
   }
 }
 
+function assertTemplateAccess(planTier: SubscriptionTier, templateKey: string) {
+  const template = getTemplateDefinition(templateKey);
+  const templateAccess = describeTemplateAccess(planTier, template.tier);
+
+  if (!templateAccess.allowed) {
+    throw new Error(templateAccess.message);
+  }
+}
+
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
 
@@ -88,6 +103,7 @@ export async function signUpAction(formData: FormData) {
   const name = String(formData.get("name") ?? "");
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const phoneNumber = String(formData.get("phoneNumber") ?? "");
   const prisma = createPrismaClient().db;
   const subdomain = normalizeSubdomainLabel(
     String(formData.get("subdomain") ?? ""),
@@ -100,19 +116,20 @@ export async function signUpAction(formData: FormData) {
 
     await assertSubdomainAvailability(prisma, subdomain);
 
-    const { user } = await signUpUser({
+    const { user, verificationToken } = await signUpUser({
       email,
-      emailVerified: true,
+      emailVerified: false,
       name,
       password,
+      phoneNumber,
     });
 
-    await setSessionCookie(user.id);
     redirect(
-      createRedirectUrl(authRoutes.onboarding, {
+      createRedirectUrl(authRoutes.signUpSuccess, {
         company,
-        signup: "successful",
+        email: user.email,
         subdomain,
+        token: verificationToken,
       }),
     );
   } catch (error) {
@@ -177,12 +194,15 @@ export async function signOutAction() {
   const cookieStore = await cookies();
 
   cookieStore.delete(authSessionCookieName);
+  clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }
 
 export async function completeOnboardingAction(formData: FormData) {
   const session = await requireAuthenticatedSession();
   const prisma = createPrismaClient().db;
+  const cookieStore = await cookies();
+  const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
 
   if (!prisma) {
     redirect(
@@ -192,15 +212,20 @@ export async function completeOnboardingAction(formData: FormData) {
     );
   }
 
-  const companyName = String(formData.get("company") ?? "").trim();
-  const subdomain = normalizeSubdomainLabel(
-    String(formData.get("subdomain") ?? ""),
-  );
+  const companyName = pendingOnboarding?.company ?? "";
+  const subdomain = normalizeSubdomainLabel(pendingOnboarding?.subdomain ?? "");
   const market = String(formData.get("market") ?? "").trim();
   const templateKey = String(formData.get("template") ?? "template-1");
 
   try {
+    if (!companyName || !subdomain) {
+      throw new Error(
+        "Your company setup details are missing. Please start again from signup.",
+      );
+    }
+
     await assertSubdomainAvailability(prisma, subdomain);
+    assertTemplateAccess("starter", templateKey);
 
     const initialSiteConfiguration = createInitialSiteConfigurationInput({
       companyName,
@@ -214,6 +239,9 @@ export async function completeOnboardingAction(formData: FormData) {
         data: {
           market,
           name: companyName,
+          planStartedAt: new Date(),
+          planStatus: "active",
+          planTier: "starter",
           slug: subdomain,
         },
       });
@@ -262,6 +290,7 @@ export async function completeOnboardingAction(formData: FormData) {
       });
     });
 
+    clearPendingOnboardingCookie(cookieStore);
     redirect(`/builder?configId=${siteConfiguration.id}`);
   } catch (error) {
     redirect(
@@ -284,14 +313,25 @@ export async function createTemplateDraftAction(formData: FormData) {
   }
 
   const templateKey = String(formData.get("templateKey") ?? "template-1");
-  const company = await prisma.company.findUnique({
-    where: {
-      id: session.activeMembership.companyId,
-    },
-  });
+  const company = await findCompanyById(
+    prisma,
+    session.activeMembership.companyId,
+  );
 
   if (!company) {
     redirect("/builder?error=Company not found.");
+  }
+
+  try {
+    assertTemplateAccess(company.planTier, templateKey);
+  } catch (error) {
+    redirect(
+      `/builder?error=${encodeURIComponent(
+        error instanceof Error
+          ? error.message
+          : "Template access is unavailable.",
+      )}`,
+    );
   }
 
   const existingDraft = await prisma.siteConfiguration.findFirst({
@@ -503,11 +543,10 @@ export async function ensureBuilderConfigurationExists() {
   });
 
   if (!configuration) {
-    const company = await prisma.company.findUnique({
-      where: {
-        id: session.activeMembership.companyId,
-      },
-    });
+    const company = await findCompanyById(
+      prisma,
+      session.activeMembership.companyId,
+    );
 
     if (!company) {
       redirect("/onboarding?error=Company not found.");

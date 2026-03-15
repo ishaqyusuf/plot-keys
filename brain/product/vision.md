@@ -19,8 +19,38 @@ Build the operating system for real-estate companies: one platform to manage ope
 ## Business Model
 - Multi-tenant SaaS
 - Monthly subscriptions
-- Example tiers: Starter, Professional, Enterprise
-- Additional monetization from AI credits and domain-related revenue
+- Three launch tiers: Starter, Plus, Pro
+- Additional monetization from AI credits, paid template purchases, mobile-app requests, and domain-related revenue
+
+## Pricing Plan Direction
+- Starter
+- Basic website presence for smaller operators and spin-off brands
+- No customer account system
+- Newsletter capture available
+- Subscription surfaces available
+- Listings available, but no direct on-site purchase flow
+- Limited to starter templates
+- Plus
+- Includes customer accounts
+- Includes website payments and customer estate-management experiences
+- Includes custom domain connection
+- Includes plus templates
+- Pro
+- Includes all Plus capabilities
+- Adds AI-powered features
+- Includes pro templates
+
+## Template Plan Direction
+- Starter templates
+- Any template marked `starter` is free for every subscription tier
+- Plus templates
+- Plus-tier tenants can pick 3 plus templates for free
+- Plus-tier tenants can preview and then buy additional plus templates
+- Pro-tier tenants can access all plus templates
+- Pro templates
+- Pro-tier tenants can pick 3 pro templates for free
+- Pro-tier tenants can preview and then buy additional pro templates
+- Mobile app request is positioned as a pro-level template/package option
 
 ## Core User Outcomes
 - Launch a professional website in minutes

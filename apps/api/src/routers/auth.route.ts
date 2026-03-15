@@ -13,6 +13,10 @@ import {
 import { normalizeSubdomainLabel } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 
+import {
+  planAuthEmailVerifiedNotification,
+  planAuthVerificationRequestedNotification,
+} from "../lib/auth-notifications";
 import { createTRPCRouter, publicProcedure } from "../lib.trpc";
 import {
   signInInputSchema,
@@ -104,21 +108,31 @@ export const authRouter = createTRPCRouter({
     try {
       await assertSubdomainAvailability(db, subdomain);
 
-      const { user } = await signUpUser({
+      const { user, verificationToken } = await signUpUser({
         db,
         email: input.email,
-        emailVerified: true,
+        emailVerified: false,
         name: input.name,
         password: input.password,
+        phoneNumber: input.phoneNumber,
+      });
+      await planAuthVerificationRequestedNotification({
+        companyName: input.company.trim(),
+        email: user.email,
+        fullName: input.name.trim(),
+        phoneNumber: user.phoneNumber,
+        token: verificationToken,
+        userId: user.id,
       });
 
       return {
+        email: user.email,
         onboarding: {
           company: input.company.trim(),
           subdomain,
         },
-        redirectTo: authRoutes.onboarding,
-        sessionToken: createSessionToken(user.id),
+        redirectTo: authRoutes.signUpSuccess,
+        verificationToken,
       };
     } catch (error) {
       if (error instanceof TRPCError) {
@@ -137,6 +151,19 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         const user = await verifyUserEmail(input.token);
+
+        if (input.company && input.subdomain) {
+          const subdomain = normalizeSubdomainLabel(input.subdomain);
+
+          await planAuthEmailVerifiedNotification({
+            companyName: input.company.trim(),
+            email: user.email,
+            fullName: user.name ?? "Workspace owner",
+            phoneNumber: user.phoneNumber,
+            siteHostname: `${subdomain}.plotkeys.com`,
+            userId: user.id,
+          });
+        }
 
         return resolvePostAuthRedirect(user.id);
       } catch (error) {

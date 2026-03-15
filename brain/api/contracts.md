@@ -14,9 +14,14 @@ This file tracks request and response shape conventions.
 - Use structured payloads for website sections and AI outputs.
 - Current API scaffold can derive request auth context from headers before full Better Auth session wiring lands.
 - Auth mutations now return structured session handoff payloads instead of redirect responses:
-  - `sessionToken`
   - `redirectTo`
   - auth-flow-specific metadata such as onboarding defaults for sign-up
+  - `sessionToken` only when the auth step is complete enough to persist a dashboard session immediately
+- `auth.signUp` now returns verification-first metadata rather than an active session:
+  - `email`
+  - `onboarding`
+  - `redirectTo`
+  - `verificationToken`
 - Store API-facing Zod schemas in `apps/api/src/schemas/*` rather than shared utility packages so transport contracts stay API-owned and discoverable.
 
 ## Planned Enums

@@ -45,5 +45,6 @@ This file tracks implemented and planned API surfaces.
   - `auth.signUp`
   - `auth.signIn`
   - `auth.verifyEmail`
+- `auth.signUp` now creates unverified users, plans a channel-aware verification notification through the shared notifications package, and redirects the dashboard flow to `/verify-email` instead of dropping directly into onboarding with an active session.
 - Implemented dashboard-owned Next route adapter at `/api/trpc` so the dashboard can call the shared app router through a same-origin endpoint.
 - Implemented query-layer example in `apps/api/src/db/queries/health.ts`.

@@ -5,10 +5,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./contacts": "./src/contacts.ts",
+    "./delivery": "./src/delivery.ts",
     "./memory-store": "./src/memory-store.ts",
     "./notification-types": "./src/notification-types.ts",
+    "./payload-utils": "./src/payload-utils.ts",
+    "./services": "./src/services/triggers.ts",
     "./store": "./src/store.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types/index.ts",
+    "./core-types": "./src/core-types.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
@@ -16,6 +20,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@plotkeys/app-store": "workspace:*",
+    "@plotkeys/email": "workspace:*",
     "@plotkeys/utils": "workspace:*",
     "zod": "^3.23.0"
   },

@@ -14,11 +14,12 @@ export async function findUserByEmail(db: Db, email: string) {
 export async function createUser(
   db: Db,
   input: {
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  passwordHash: string;
-},
+    email: string;
+    emailVerified: boolean;
+    name: string;
+    passwordHash: string;
+    phoneNumber?: string;
+  },
 ) {
   return db.user.create({
     data: {
@@ -27,6 +28,7 @@ export async function createUser(
       id: randomUUID(),
       name: input.name.trim(),
       passwordHash: input.passwordHash,
+      phoneNumber: input.phoneNumber?.trim() || null,
     },
   });
 }

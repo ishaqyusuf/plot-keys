@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  isNormalizedPhoneNumber,
+  normalizePhoneNumber,
+} from "@plotkeys/utils";
 
 export const signUpInputSchema = z.object({
   company: z.string().trim().min(1, "Company name is required."),
@@ -7,6 +11,14 @@ export const signUpInputSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long."),
+  phoneNumber: z
+    .string()
+    .trim()
+    .transform(normalizePhoneNumber)
+    .refine(
+      isNormalizedPhoneNumber,
+      "Enter a valid phone number in international format.",
+    ),
   subdomain: z
     .string()
     .trim()
@@ -23,6 +35,8 @@ export const signInInputSchema = z.object({
 });
 
 export const verifyEmailInputSchema = z.object({
+  company: z.string().trim().min(1).optional(),
+  subdomain: z.string().trim().min(1).optional(),
   token: z.string().trim().min(1, "Verification token is required."),
 });
 
@@ -31,11 +45,14 @@ export const authSessionResultSchema = z.object({
   sessionToken: z.string().trim().min(1),
 });
 
-export const signUpResultSchema = authSessionResultSchema.extend({
+export const signUpResultSchema = z.object({
+  email: z.string().trim().email(),
   onboarding: z.object({
     company: z.string().trim().min(1),
     subdomain: z.string().trim().min(1),
   }),
+  redirectTo: z.string().trim().min(1),
+  verificationToken: z.string().trim().min(1),
 });
 
 export type SignInInput = z.infer<typeof signInInputSchema>;

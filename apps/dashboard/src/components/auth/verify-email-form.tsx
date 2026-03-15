@@ -15,9 +15,14 @@ import { persistSession } from "./session-bridge";
 
 export function VerifyEmailForm({
   initialError,
+  onboarding,
   token,
 }: {
   initialError?: string;
+  onboarding?: {
+    company: string;
+    subdomain: string;
+  };
   token: string;
 }) {
   const router = useRouter();
@@ -25,6 +30,8 @@ export function VerifyEmailForm({
   const [formError, setFormError] = useState<string | null>(initialError ?? null);
   const form = useZodForm(verifyEmailInputSchema, {
     defaultValues: {
+      company: onboarding?.company ?? "",
+      subdomain: onboarding?.subdomain ?? "",
       token,
     },
   });
@@ -34,7 +41,7 @@ export function VerifyEmailForm({
         setFormError(error.message);
       },
       async onSuccess(result) {
-        await persistSession(result.sessionToken);
+        await persistSession(result.sessionToken, onboarding);
         router.push(result.redirectTo);
         router.refresh();
       },
@@ -44,12 +51,16 @@ export function VerifyEmailForm({
   async function onSubmit() {
     setFormError(null);
     await verifyEmailMutation.mutateAsync({
+      company: form.getValues("company") || undefined,
+      subdomain: form.getValues("subdomain") || undefined,
       token: form.getValues("token"),
     });
   }
 
   return (
     <div className="flex flex-col gap-5">
+      <input type="hidden" {...form.register("company")} />
+      <input type="hidden" {...form.register("subdomain")} />
       <input type="hidden" {...form.register("token")} />
 
       <AuthFormError

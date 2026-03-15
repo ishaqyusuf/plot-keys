@@ -19,7 +19,6 @@ import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
 import { SubdomainField } from "../subdomain-field";
 import { AuthFormError } from "./auth-form-error";
-import { persistSession } from "./session-bridge";
 
 export function SignUpForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
@@ -31,6 +30,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       email: "",
       name: "",
       password: "",
+      phoneNumber: "",
       subdomain: "",
     },
   });
@@ -40,12 +40,11 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
         setFormError(error.message);
       },
       async onSuccess(result) {
-        await persistSession(result.sessionToken);
-
         const params = new URLSearchParams({
           company: result.onboarding.company,
-          signup: "successful",
+          email: result.email,
           subdomain: result.onboarding.subdomain,
+          token: result.verificationToken,
         });
 
         router.push(`${result.redirectTo}?${params.toString()}`);
@@ -94,6 +93,15 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           />
         </Field>
         <Field>
+          <FieldLabel htmlFor="sign-up-phone">WhatsApp number</FieldLabel>
+          <Input
+            id="sign-up-phone"
+            placeholder="+2348012345678"
+            type="tel"
+            {...form.register("phoneNumber")}
+          />
+        </Field>
+        <Field>
           <FieldLabel htmlFor="sign-up-company">Company name</FieldLabel>
           <Input
             id="sign-up-company"
@@ -117,6 +125,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           form.formState.errors.name?.message ??
           form.formState.errors.email?.message ??
           form.formState.errors.password?.message ??
+          form.formState.errors.phoneNumber?.message ??
           form.formState.errors.company?.message ??
           form.formState.errors.subdomain?.message
         }

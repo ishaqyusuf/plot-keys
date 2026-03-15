@@ -31,6 +31,8 @@ This file tracks the likely implementation sequence at a product level.
 
 ## Phase 3: Commercial Platform
 - Subscription billing
+- Tiered plan entitlements for Starter, Plus, and Pro
+- Paid template unlocks and entitlement tracking
 - Custom domains
 - Domain purchase and management
 - SSL automation
@@ -43,8 +45,13 @@ This file tracks the likely implementation sequence at a product level.
 - AI usage tracking and credits
 - AI billing and credit packs
 
-## Phase 5: Expansion
+## Phase 5: Premium Experience
+- Pro template expansion
+- Mobile app request packaging
 - Template marketplace
+- Uniqueness and template popularity insights
+
+## Phase 6: Expansion
 - AI lead reply assistant
 - AI recommendations
 - AI layout suggestions

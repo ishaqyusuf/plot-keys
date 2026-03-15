@@ -24,6 +24,18 @@ export const membershipStatusEnum = pgEnum("membership_status", [
   "suspended",
 ]);
 
+export const companyPlanTierEnum = pgEnum("company_plan_tier", [
+  "starter",
+  "plus",
+  "pro",
+]);
+
+export const companyPlanStatusEnum = pgEnum("company_plan_status", [
+  "active",
+  "past_due",
+  "canceled",
+]);
+
 export const users = pgTable(
   "users",
   {
@@ -54,6 +66,13 @@ export const companies = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     slug: text("slug").notNull(),
     name: text("name").notNull(),
+    market: text("market"),
+    planTier: companyPlanTierEnum("plan_tier").default("starter").notNull(),
+    planStatus: companyPlanStatusEnum("plan_status")
+      .default("active")
+      .notNull(),
+    planStartedAt: timestamp("plan_started_at", { withTimezone: true }),
+    planEndsAt: timestamp("plan_ends_at", { withTimezone: true }),
     isActive: boolean("is_active").default(true).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -65,6 +84,8 @@ export const companies = pgTable(
   },
   (table) => ({
     slugIndex: index("companies_slug_idx").on(table.slug),
+    planTierIndex: index("companies_plan_tier_idx").on(table.planTier),
+    planStatusIndex: index("companies_plan_status_idx").on(table.planStatus),
     deletedAtIndex: index("companies_deleted_at_idx").on(table.deletedAt),
     activeSlugUniqueIndex: uniqueIndex("companies_slug_key")
       .on(table.slug)
@@ -107,6 +128,8 @@ export const memberships = pgTable(
 );
 
 export const schema = {
+  companyPlanStatusEnum,
+  companyPlanTierEnum,
   users,
   companies,
   memberships,
@@ -114,4 +137,7 @@ export const schema = {
 
 export type MembershipRole = (typeof membershipRoleEnum.enumValues)[number];
 export type MembershipStatus = (typeof membershipStatusEnum.enumValues)[number];
+export type CompanyPlanTier = (typeof companyPlanTierEnum.enumValues)[number];
+export type CompanyPlanStatus =
+  (typeof companyPlanStatusEnum.enumValues)[number];
 export type DatabaseSchema = typeof schema;
