@@ -72,7 +72,7 @@ const pricingPlans = [
       "Starter templates",
       "No customer account system",
     ],
-    price: "NGN 0",
+    price: "NGN 24k",
     subtitle: "Launch essentials",
     tier: "Starter",
   },
@@ -162,7 +162,7 @@ export default function MarketingHomePage() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild className="px-6 py-3.5">
-                  <Link href="/signup">Start free</Link>
+                  <Link href="/signup">Create workspace</Link>
                 </Button>
                 <Button asChild variant="secondary" className="px-6 py-3.5">
                   <Link href="#features">Explore platform</Link>
@@ -408,12 +408,10 @@ export default function MarketingHomePage() {
                     <Button
                       asChild
                       className="w-full"
-                      variant={plan.tier === "Pro" ? "secondary" : "default"}
+                      variant="default"
                     >
                       <Link href="/signup">
-                        {plan.tier === "Starter"
-                          ? "Start free"
-                          : `Choose ${plan.tier}`}
+                        {`Choose ${plan.tier}`}
                       </Link>
                     </Button>
                   </div>

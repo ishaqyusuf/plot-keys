@@ -24,12 +24,14 @@ Build the operating system for real-estate companies: one platform to manage ope
 
 ## Pricing Plan Direction
 - Starter
+- NGN 24,000 / month
 - Basic website presence for smaller operators and spin-off brands
 - No customer account system
 - Newsletter capture available
 - Subscription surfaces available
 - Listings available, but no direct on-site purchase flow
 - Limited to starter templates
+- No free launch plan is currently intended
 - Plus
 - Includes customer accounts
 - Includes website payments and customer estate-management experiences
