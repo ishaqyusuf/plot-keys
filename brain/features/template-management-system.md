@@ -98,6 +98,17 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   - `useTenantAgents()`
   - `useTenantContactInfo()`
   - `useTemplateConfig()`
+- Recommended package split:
+  - `apps/web/(dashboard)`
+  - `apps/web/(website-runtime)`
+  - `apps/web/(website-editor)`
+  - `packages/website-builder/core`
+  - `packages/website-builder/registry`
+  - `packages/website-builder/sections`
+  - `packages/website-builder/templates`
+  - `packages/website-builder/hooks`
+  - `packages/website-builder/actions`
+  - `packages/website-builder/schemas`
 
 ## Onboarding Integration Direction
 - Onboarding inputs should immediately drive:
@@ -123,6 +134,7 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 - Color systems should expose a full token set for light and dark themes.
 - Style presets should control spacing, padding, radius, and density choices.
 - Resolved config should be derived from small tenant selections rather than copied token blobs wherever possible.
+- Some UI slots may intentionally resolve to a different internal font via font fallback maps while still presenting a single primary font choice to the user.
 
 ## Editable Content and AI
 - Editable text should be modeled as structured content nodes instead of plain strings.
@@ -142,6 +154,10 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   5. prepare structured AI payload with tenant, page, and section context
   6. preview result before acceptance
   7. write accepted result back into draft config only
+- Reference docs:
+  - [brain/modules/editable-content-and-ai.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/editable-content-and-ai.md)
+  - [brain/code-examples/editable-text.example.tsx](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/editable-text.example.tsx)
+  - [brain/code-examples/section-definition.example.ts](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/section-definition.example.ts)
 
 ## Install And Purchase Flows
 - Template install flow:
@@ -155,6 +171,9 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   3. system creates purchase intent and billing line item if needed
   4. payment success creates license/entitlement
   5. asset becomes assignable to the tenant website
+- Related workflow docs:
+  - [brain/workflows/template-install-flow.md](/Users/M1PRO/Documents/code/plot-keys/brain/workflows/template-install-flow.md)
+  - [brain/modules/template-marketplace.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/template-marketplace.md)
 
 ## Current Implementation Alignment
 - The repo already has a structured website builder with code-backed templates, section registry ownership, draft/published `SiteConfiguration` records, and plan-aware template gating.

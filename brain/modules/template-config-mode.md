@@ -148,6 +148,19 @@ Components consume resolved config through hooks.
 - useTemplateStylePreset
 - useTemplateImage
 
+## Recommended Internal Layers
+- user-facing template config
+- resolved color-system tokens
+- resolved style-preset values
+- named image-slot resolution
+- internal font fallback mapping for specific UI slots
+
+## Reference Examples
+- [brain/code-examples/font-fallbacks.example.ts](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/font-fallbacks.example.ts)
+- [brain/code-examples/color-systems.example.ts](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/color-systems.example.ts)
+- [brain/code-examples/style-presets.example.ts](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/style-presets.example.ts)
+- [brain/code-examples/template-config-provider.example.tsx](/Users/M1PRO/Documents/code/plot-keys/brain/code-examples/template-config-provider.example.tsx)
+
 ## Editor Experience
 
 Template config mode should provide clear grouped controls:

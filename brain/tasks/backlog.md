@@ -39,7 +39,11 @@ This file holds actionable work that is identified but not currently in progress
 - Design the migration path from `SiteConfiguration` to a dedicated `Website` plus `WebsiteVersion` model, or explicitly defer it
 - Add page-version and section-instance persistence if the richer website version graph is adopted
 - Define tenant runtime context shape and hooks for live, draft, preview-token, and host-based rendering
+- Add a public runtime API split for site config, content/data, and safe actions
+- Add a form action registry for contact, inquiry, newsletter, and similar public actions
+- Add mode-aware draft rendering behavior for placeholders, hidden outlines, and inline validation
 - Add controlled template config storage for selected font, color system, style preset, and named image assignments
+- Add internal font-fallback resolution for special UI slots without exposing raw typography complexity to users
 - Add upgrade/downgrade lifecycle handling that updates `Company.planTier` and `Company.planStatus` from the future billing provider
 - Add paid template-unlock records and free-pick claim tracking per tenant
 - Add stock-image catalog, licensing, and watermark-safe preview behavior

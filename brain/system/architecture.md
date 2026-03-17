@@ -69,6 +69,14 @@ This file records the intended high-level architecture and boundaries between ap
   - initial draft installation
 - Tenant website requests should resolve tenant context first using custom domain, subdomain, preview token, or editor preview route.
 - Runtime context should provide tenant identity, website identity, mode, branding, and feature availability to sections and data hooks.
+- The preferred runtime stack is:
+  - tenant website runtime
+  - pages
+  - sections
+  - section config
+  - data hooks
+  - tenant context
+  - actions
 - Template installation should create tenant-owned draft state from immutable platform-owned template blueprints.
 - Planned versioning boundary:
   - `Website` owns `activeVersionId` and `draftVersionId`
@@ -83,6 +91,9 @@ This file records the intended high-level architecture and boundaries between ap
   - default config
   - renderer component
   - support flags for draft/live
+- Form submissions should route through an action registry rather than allowing arbitrary section-level endpoint posts.
+- Sections should fetch through public runtime hooks and runtime APIs, not private dashboard APIs.
+- Draft mode should support editor placeholders, hidden-section outlines, and validation feedback; live mode should be publish-safe and cache-friendly.
 - Template config mode should stay controlled:
   - font selection
   - color system selection
