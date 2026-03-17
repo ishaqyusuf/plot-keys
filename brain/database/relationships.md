@@ -9,8 +9,14 @@ This file captures the major entity relationships as they become defined.
 
 ## Relationships
 - `Company` has many `Memberships`
+- `Company` has one or more `Websites` when dedicated website roots are introduced
+- `Company` has many `WebsiteVersions` through `Website`
 - `Company` has many `SiteConfigurations`
 - `Company` has many `TenantDomains`
+- `Company` has many `TenantTemplateLicenses`
+- `Company` has many `TenantTemplateConfigs`
+- `Company` has many `TenantStockImageLicenses`
+- `Company` has many `TenantLogos`
 - `Company` has many `Agents`
 - `Company` has many `Properties`
 - `Company` has many `Clients`
@@ -28,7 +34,18 @@ This file captures the major entity relationships as they become defined.
 - `Membership` belongs to `Company`
 - `Membership` has one role within a company such as `owner`, `admin`, `agent`, or `staff`
 - `SiteConfiguration` belongs to `Company`
+- `Website` belongs to `Company`
+- `Website` has one active `WebsiteVersion`
+- `Website` has one draft `WebsiteVersion`
+- `WebsiteVersion` belongs to `Website`
+- `WebsiteVersion` has many `PageVersions`
+- `PageVersion` belongs to `WebsiteVersion`
+- `PageVersion` has many `SectionInstances`
 - `TenantDomain` belongs to `Company`
+- `TenantTemplateLicense` belongs to `Company`
+- `TenantTemplateConfig` belongs to `Company`
+- `TenantStockImageLicense` belongs to `Company`
+- `TenantLogo` belongs to `Company`
 - `SiteConfiguration` may be created or updated by a `User`
 - `Company` should have at most one active `published` `SiteConfiguration` at a time
 
@@ -68,6 +85,20 @@ This file captures the major entity relationships as they become defined.
 
 - `Theme` belongs to `Company`
 - `Template` may be platform-owned and reusable across companies
+- `Template` has many `TemplatePages`
+- `TemplatePage` belongs to `Template`
+- `TemplatePage` has many `TemplateSections`
+- `TemplateSection` belongs to `TemplatePage`
+- `Template` has many `TemplatePlanAccess` rules
+- `TemplatePurchase` belongs to `Company`
+- `TemplatePurchase` belongs to `Template`
+- `TenantTemplateLicense` belongs to `Template` or references a stable template key
+- `TenantTemplateConfig` belongs to a tenant website aggregate such as `Website` or `SiteConfiguration`
+- `WebsiteAssetAssignment` belongs to a tenant website aggregate
+- `WebsiteAssetAssignment` may reference `StockImage`, `TenantLogo`, or future asset records
+- `StockImagePurchase` belongs to `Company`
+- `StockImagePurchase` belongs to `StockImage`
+- `TenantStockImageLicense` belongs to `StockImage`
 - `SiteConfiguration` is tenant-owned and versioned across drafts and publish states
 - `TenantDomain` is tenant-owned and distinguishes between website and dashboard hostname records
 - `TenantDomain` is now also the basis for hostname-aware runtime lookup in the public website renderer when a matching host is available
@@ -78,4 +109,5 @@ This file captures the major entity relationships as they become defined.
 - TODO: Decide how property-to-client interest tracking is normalized
 - TODO: Decide when platform templates move from code in `packages/section-registry` into relational records
 - TODO: Decide whether publish history needs a dedicated table in MVP or can be deferred until after first publish workflow lands
+- TODO: Decide whether planned `Website` and `WebsiteVersion` tables replace or wrap the existing `SiteConfiguration` model
 - TODO: Extend dashboard runtime routing from preview/query-param lookup to canonical `TenantDomain.hostname` lookup

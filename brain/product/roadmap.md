@@ -23,16 +23,21 @@ This file tracks the likely implementation sequence at a product level.
 
 ## Phase 2: Website Generator
 - Template system
+- Template management foundation
 - Theme config
+- Template config mode with fonts, color systems, style presets, and named image slots
 - Section registry
 - Tenant website rendering
 - CMS editing for content blocks
+- Draft/live publish model
 - Auto-sync property listings to public site
 
 ## Phase 3: Commercial Platform
 - Subscription billing
 - Tiered plan entitlements for Starter, Plus, and Pro
 - Paid template unlocks and entitlement tracking
+- Template marketplace licensing records
+- Stock image marketplace and licensing
 - Custom domains
 - Domain purchase and management
 - SSL automation
@@ -40,6 +45,7 @@ This file tracks the likely implementation sequence at a product level.
 
 ## Phase 4: AI Layer
 - Website content generation
+- Inline AI generation for editable content nodes
 - Property description generation
 - Blog and SEO generation
 - AI usage tracking and credits
@@ -47,6 +53,7 @@ This file tracks the likely implementation sequence at a product level.
 
 ## Phase 5: Premium Experience
 - Pro template expansion
+- Logo system and AI-assisted brand assets
 - Mobile app request packaging
 - Template marketplace
 - Uniqueness and template popularity insights

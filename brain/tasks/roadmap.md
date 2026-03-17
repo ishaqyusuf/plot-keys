@@ -13,14 +13,19 @@ This file maps near-term engineering execution in a practical order.
 3. Establish dashboard and website app shells
 4. Define database and auth stack
 5. Ship signup and verified-account flow with Better Auth
-6. Ship tenant onboarding with company setup and subdomain selection
-7. Create Prisma-backed site template and site configuration models
-8. Bootstrap a default tenant website configuration on onboarding completion
-9. Build the tenant dashboard website entrypoint and template browser
-10. Add tenant domain records plus subdomain-first signup and onboarding host previews
-11. Build Vercel subdomain provisioning and host-based runtime resolution
-12. Build inline editing, sidebar controls, and AI field generation metadata
-13. Build publish confirmation and live site replacement flow
-14. Build company and property management foundations that feed derived website content
-15. Add lead capture and appointments
-16. Add billing, AI credits, and full custom-domain workflows
+6. Ship guided tenant onboarding with company setup, subdomain selection, and generation-ready business inputs
+7. Add resumable onboarding persistence plus tenant-profile derivation
+8. Add onboarding-driven template recommendation, fallback ranking, and premium-upgrade suggestion logic
+9. Ship code-backed platform templates plus Prisma-backed tenant `SiteConfiguration` records
+10. Bootstrap a personalized default tenant website draft on onboarding completion
+11. Build the tenant dashboard website entrypoint and recommended-template handoff
+12. Add tenant domain records plus subdomain-first signup and onboarding host previews
+13. Build Vercel subdomain provisioning and host-based runtime resolution
+14. Build inline editing, sidebar controls, and AI field generation metadata
+15. Build publish confirmation and live site replacement flow
+16. Add template entitlement, free-pick, and paid-unlock records
+17. Add controlled template config mode for fonts, color systems, style presets, named image slots, and page composition defaults
+18. Decide whether to keep `SiteConfiguration` as the long-term aggregate or introduce `Website` plus `WebsiteVersion`
+19. Build company and property management foundations that feed derived website content
+20. Add lead capture and appointments
+21. Add unified billing across subscriptions, templates, stock images, domains, and AI credits

@@ -41,25 +41,62 @@ This file records the intended high-level architecture and boundaries between ap
 - `packages/tsconfig`: Shared TypeScript base configs
 - `packages/utils`: Shared utilities
 - `packages/section-registry`: Website section registry, config schemas, and renderer mappings
+- `packages/website-builder`: Template runtime, versioning logic, template config resolution, asset assignment, and editor-safe actions if the current builder scope outgrows app-local ownership
 
 ## Package Strategy
 - Start from the tighter Midday-style shared package baseline plus required project additions: `auth`, `chat-bot`, `db`, `email`, `jobs`, `section-registry`, `supabase`, `tsconfig`, `ui`, `utils`.
 - Add dedicated packages for AI, billing, or domains later only when the codebase clearly benefits from the separation.
 
 ## Key Rules
+- Onboarding should collect only data that has an immediate downstream use in recommendations, defaults, runtime visibility, or content generation.
 - Keep website sections stateless.
 - Each section must accept `config` and `theme`.
 - Layout generation remains structured rather than freeform.
 - Template metadata should define editable versus derived content boundaries.
 - Editable website fields should carry both user-facing guidance and AI-generation guidance.
+- Editable text direction is shifting from plain strings toward structured content nodes with AI metadata such as description and length bounds.
 - Cross-cutting provider logic belongs in packages or services, not scattered across apps.
 - Application code should depend on `@plotkeys/db` rather than a vendor package for relational queries.
+
+## Template Management Architecture Direction
+- Onboarding should act as the first structured input stage for template recommendation, draft creation, and AI bootstrapping.
+- The onboarding pipeline should derive a tenant profile from business identity, market focus, brand style, contact information, and content-readiness inputs.
+- Derived onboarding outputs should feed:
+  - template ranking
+  - default design configuration
+  - section visibility
+  - AI prompt context
+  - initial draft installation
+- Tenant website requests should resolve tenant context first using custom domain, subdomain, preview token, or editor preview route.
+- Runtime context should provide tenant identity, website identity, mode, branding, and feature availability to sections and data hooks.
+- Template installation should create tenant-owned draft state from immutable platform-owned template blueprints.
+- Planned versioning boundary:
+  - `Website` owns `activeVersionId` and `draftVersionId`
+  - `WebsiteVersion` tracks `DRAFT` and `LIVE` snapshots
+  - `PageVersion` groups ordered pages within a version
+  - `SectionInstance` belongs to a page version and stores `configJson` plus optional `dataBindingJson`
+- Until that fuller graph exists, `SiteConfiguration` remains the current tenant-owned draft/publish aggregate.
+- Section types should continue to come from a registry contract with:
+  - stable `type`
+  - label and category
+  - Zod schema
+  - default config
+  - renderer component
+  - support flags for draft/live
+- Template config mode should stay controlled:
+  - font selection
+  - color system selection
+  - style preset selection
+  - named image assignment
+- Marketplace and asset purchases should converge through a shared billing boundary rather than bespoke payment flows per asset type.
 
 ## Current Implementation Notes
 - Prisma is the schema and migration owner for the implemented onboarding and site-configuration flows.
 - `packages/auth` currently uses a local Prisma-backed auth/session implementation to keep signup and dashboard flows moving.
 - Better Auth remains the target auth runtime and should replace the temporary local implementation when adapter wiring is added.
 - Platform website templates are currently code-backed in `packages/section-registry`; tenant-owned site configurations are relational records in Prisma.
+- The implemented onboarding flow currently captures only a small subset of the future generation inputs and should be treated as an MVP bridge.
+- The current website-builder implementation effectively combines website root, draft state, live state, theme overrides, and editable content inside `SiteConfiguration`, while future docs point toward a richer `Website`/`WebsiteVersion` model.
 - Tenant subdomain ownership is now modeled explicitly through Prisma `TenantDomain` records.
 - Current hostname direction:
   - public website target: `{subdomain}.plotkeys.com`
@@ -75,3 +112,4 @@ This file records the intended high-level architecture and boundaries between ap
 - Exact Vercel deployment topology for tenant websites and dashboard hostnames
 - TODO: Decide whether Postgres RLS is part of the first production hardening pass
 - TODO: Decide when a non-Postgres adapter is justified in `packages/db`
+- TODO: Decide whether the website aggregate remains `SiteConfiguration`-centric or migrates to dedicated website/version/page tables
