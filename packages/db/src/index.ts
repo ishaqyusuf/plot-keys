@@ -20,9 +20,11 @@ export {
   type Db,
   type PrismaDatabaseClient,
 } from "./prisma";
+export * from "./queries/agent";
 export * from "./queries/auth";
 export * from "./queries/company";
 export * from "./queries/onboarding";
+export * from "./queries/property";
 export * from "./queries/site-configuration";
 export * from "./queries/tenant-domain";
 export {

@@ -69,6 +69,14 @@ export type TemplateDefinition = {
   tier: TemplateTier;
 };
 
+export type LiveListingItem = {
+  imageUrl?: string | null;
+  location: string;
+  price?: string | null;
+  specs?: string | null;
+  title: string;
+};
+
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
   page: {
@@ -82,6 +90,7 @@ export type ResolvedWebsitePresentation = {
 type ResolveTemplateOptions = {
   companyName?: string;
   content?: TenantContentRecord;
+  liveListings?: LiveListingItem[];
   market?: string;
   subdomain?: string;
   templateKey: string;
@@ -190,7 +199,48 @@ function createDefaultContent(
   };
 }
 
-function buildHomePage(content: TenantContentRecord): {
+function buildListingSpotlightItems(
+  liveListings: LiveListingItem[] | undefined,
+): ListingSpotlightItem[] {
+  if (liveListings && liveListings.length > 0) {
+    return liveListings.slice(0, 3).map((listing) => ({
+      imageHint: listing.imageUrl ?? "Property listing",
+      location: listing.location,
+      price: listing.price ?? "Price on request",
+      specs: listing.specs ?? "",
+      title: listing.title,
+    }));
+  }
+
+  return [
+    {
+      imageHint: "Waterfront duplex preview",
+      location: "Banana Island",
+      price: "NGN 1.85B",
+      specs: "5 bed • 6 bath • cinema room • private dock access",
+      title: "Sunlit waterfront duplex with private family lounge",
+    },
+    {
+      imageHint: "Minimal tower penthouse preview",
+      location: "Ikoyi",
+      price: "NGN 980M",
+      specs: "4 bed • skyline terrace • concierge • smart controls",
+      title: "Penthouse residence with skyline-facing entertaining suite",
+    },
+    {
+      imageHint: "Garden estate preview",
+      location: "Lekki Phase 1",
+      price: "NGN 620M",
+      specs: "4 bed • pool deck • home office • gated community",
+      title: "Contemporary family home tucked into a quiet garden estate",
+    },
+  ];
+}
+
+function buildHomePage(
+  content: TenantContentRecord,
+  liveListings?: LiveListingItem[],
+): {
   page: "home";
   sections: HomeSectionDefinition[];
 } {
@@ -258,33 +308,11 @@ function buildHomePage(content: TenantContentRecord): {
         component: ListingSpotlightSection,
         config: {
           description:
-            "The first template supports promotional inventory cards that can later be sourced directly from the platform listing model.",
+            liveListings && liveListings.length > 0
+              ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
+              : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
           eyebrow: "Featured inventory",
-          items: [
-            {
-              imageHint: "Waterfront duplex preview",
-              location: "Banana Island",
-              price: "NGN 1.85B",
-              specs: "5 bed • 6 bath • cinema room • private dock access",
-              title: "Sunlit waterfront duplex with private family lounge",
-            },
-            {
-              imageHint: "Minimal tower penthouse preview",
-              location: "Ikoyi",
-              price: "NGN 980M",
-              specs: "4 bed • skyline terrace • concierge • smart controls",
-              title:
-                "Penthouse residence with skyline-facing entertaining suite",
-            },
-            {
-              imageHint: "Garden estate preview",
-              location: "Lekki Phase 1",
-              price: "NGN 620M",
-              specs: "4 bed • pool deck • home office • gated community",
-              title:
-                "Contemporary family home tucked into a quiet garden estate",
-            },
-          ],
+          items: buildListingSpotlightItems(liveListings),
           title: "Featured listings feel editorial, not templated.",
         },
         id: "listing-spotlight",
@@ -448,6 +476,7 @@ export function createInitialSiteConfigurationInput({
 export function resolveWebsitePresentation({
   companyName,
   content,
+  liveListings,
   market,
   subdomain,
   templateKey,
@@ -461,7 +490,7 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(mergedContent),
+    page: buildHomePage(mergedContent, liveListings),
     template,
     theme: {
       ...template.defaultTheme,

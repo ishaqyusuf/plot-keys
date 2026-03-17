@@ -1,5 +1,4 @@
 import { createPrismaClient } from "@plotkeys/db";
-import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
@@ -13,37 +12,16 @@ import {
 } from "@plotkeys/ui/empty";
 import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
-import type { JSX } from "react";
 
+import { BuilderPreviewPanel } from "../../components/builder/builder-preview-panel";
 import { BuilderSidebarControls } from "../../components/builder/builder-sidebar-controls";
+import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../lib/session";
-import { publishSiteConfigurationAction } from "../actions";
-
-function renderPreviewSection(
-  section: HomeSectionDefinition,
-  theme: ReturnType<typeof resolveWebsitePresentation>["theme"],
-) {
-  const SectionComponent = section.component as (props: {
-    config: HomeSectionDefinition["config"];
-    theme: typeof theme;
-  }) => JSX.Element;
-
-  return (
-    <section className="group/section relative">
-      <div className="pointer-events-none absolute inset-x-5 top-5 z-20 flex items-center justify-between gap-3 opacity-0 transition-opacity duration-200 group-hover/section:opacity-100">
-        <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
-          Editable surface
-        </div>
-        <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-xs text-foreground shadow-sm backdrop-blur">
-          Click to edit {"->"}
-        </div>
-      </div>
-      <div className="transition-all duration-200 group-hover/section:ring-1 group-hover/section:ring-primary/25">
-        <SectionComponent config={section.config} theme={theme} />
-      </div>
-    </section>
-  );
-}
+import {
+  publishSiteConfigurationAction,
+  smartFillFieldAction,
+  updateSiteFieldAction,
+} from "../actions";
 
 type BuilderPageProps = {
   searchParams?: Promise<{
@@ -188,6 +166,24 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               </section>
 
               <Separator />
+
+              <section className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                  Editable fields
+                </p>
+                <p className="text-xs text-muted-foreground leading-5">
+                  Click any section in the preview to reveal its inline field
+                  editor. Changes are saved per field.
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <Badge variant="outline">
+                    {preview.editableFields.length} fields
+                  </Badge>
+                  <Badge variant="outline">
+                    {preview.page.sections.length} sections
+                  </Badge>
+                </div>
+              </section>
             </div>
           </div>
         </aside>
@@ -196,28 +192,14 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           <div className="flex flex-wrap items-center justify-between gap-3 px-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">{preview.page.page}</Badge>
-              <Badge variant="outline">
-                {preview.page.sections.length} sections
-              </Badge>
-              <Badge variant="outline">
-                {preview.editableFields.length} editable fields
-              </Badge>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <form action={publishSiteConfigurationAction}>
-                <input
-                  name="configId"
-                  type="hidden"
-                  value={activeConfiguration.id}
-                />
-                <input
-                  name="nextName"
-                  type="hidden"
-                  value={activeConfiguration.name}
-                />
-                <Button type="submit">Publish current configuration</Button>
-              </form>
+              <PublishConfirmationDialog
+                configId={activeConfiguration.id}
+                currentName={activeConfiguration.name}
+                onPublish={publishSiteConfigurationAction}
+              />
               <Button asChild variant="secondary">
                 <Link href="/">Back to dashboard</Link>
               </Button>
@@ -231,27 +213,14 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             </div>
           </div>
 
-          <div className="mx-auto overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
-            <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-foreground/20" />
-                <span className="size-2.5 rounded-full bg-foreground/20" />
-                <span className="size-2.5 rounded-full bg-foreground/20" />
-              </div>
-              <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                {session.activeMembership.companySlug}.plotkeys.app /
-                builder-preview
-              </p>
-            </div>
-
-            <div className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4">
-              <div className="overflow-hidden rounded-lg border border-border/70 bg-background">
-                {preview.page.sections.map((section) =>
-                  renderPreviewSection(section, preview.theme),
-                )}
-              </div>
-            </div>
-          </div>
+          <BuilderPreviewPanel
+            companySlug={session.activeMembership.companySlug}
+            configId={activeConfiguration.id}
+            editableFields={preview.editableFields}
+            onSmartFill={smartFillFieldAction}
+            onUpdateField={updateSiteFieldAction}
+            preview={preview}
+          />
         </section>
       </div>
     </main>

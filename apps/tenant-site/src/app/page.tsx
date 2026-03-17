@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { createPrismaClient, listFeaturedProperties } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
   resolveWebsitePresentation,
@@ -85,9 +85,19 @@ export default async function TenantWebsiteHomePage({
 
       if (publishedConfiguration) {
         matchedHostname = tenantDomain?.hostname ?? matchedHostname;
+
+        const featuredProperties = await listFeaturedProperties(prisma, company.id);
+
         preview = resolveWebsitePresentation({
           companyName: company.name,
           content: publishedConfiguration.contentJson as Record<string, string>,
+          liveListings: featuredProperties.map((p) => ({
+            imageUrl: p.imageUrl,
+            location: p.location,
+            price: p.price,
+            specs: p.specs,
+            title: p.title,
+          })),
           market: company.market ?? company.name,
           subdomain: company.slug,
           templateKey: publishedConfiguration.templateKey,

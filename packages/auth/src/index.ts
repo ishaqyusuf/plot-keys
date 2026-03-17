@@ -1,26 +1,19 @@
 import "server-only";
 
-import {
-  createHmac,
-  randomBytes,
-  scryptSync,
-  timingSafeEqual,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
 import {
   createPrismaClient,
   createUser,
   type Db,
   findUserByEmail,
   getSessionUserByTokenUserId,
-  type MembershipRole,
   verifyUserEmailByIdentity,
 } from "@plotkeys/db";
 import { z } from "zod";
-import {
-  authCookiePrefix,
-  authRoutes,
-} from "./shared";
+import { authCookiePrefix, authRoutes } from "./shared";
 
+export { auth } from "./better-auth";
 export {
   authCookiePrefix,
   authRoutes,
@@ -30,6 +23,7 @@ export {
 } from "./shared";
 
 export type OnboardingStatus = "not_started" | "in_progress" | "completed";
+
 export function resolvePostVerificationRoute(
   onboardingStatus: OnboardingStatus,
 ) {
@@ -37,39 +31,6 @@ export function resolvePostVerificationRoute(
     ? authRoutes.dashboardHome
     : authRoutes.onboarding;
 }
-
-export const authHeaderNames = {
-  activeCompanyId: "x-plotkeys-company-id",
-  role: "x-plotkeys-role",
-  userEmail: "x-plotkeys-user-email",
-  userId: "x-plotkeys-user-id",
-  userName: "x-plotkeys-user-name",
-} as const;
-
-const membershipRoleSchema = z.enum([
-  "platform_admin",
-  "owner",
-  "admin",
-  "agent",
-  "staff",
-]);
-
-const requestAuthHeadersSchema = z.object({
-  activeCompanyId: z.string().trim().min(1).optional(),
-  role: membershipRoleSchema.optional(),
-  userEmail: z.string().email().optional(),
-  userId: z.string().trim().min(1).optional(),
-  userName: z.string().trim().min(1).optional(),
-});
-
-const sessionTokenSchema = z.object({
-  exp: z.number().int().positive(),
-  userId: z.string().trim().min(1),
-});
-
-const verificationTokenSchema = sessionTokenSchema.extend({
-  email: z.string().email(),
-});
 
 export type AuthenticatedUser = {
   email?: string;
@@ -80,18 +41,15 @@ export type AuthenticatedUser = {
 
 export type ActiveMembership = {
   companyId: string;
-  role: MembershipRole;
+  role: import("@plotkeys/db").MembershipRole;
 };
 
 export type AuthSessionContext = {
   activeMembership: ActiveMembership | null;
-  headers: RequestAuthHeaders;
   session: {
     user: AuthenticatedUser;
   } | null;
 };
-
-export type RequestAuthHeaders = z.infer<typeof requestAuthHeadersSchema>;
 
 export type AppSession = {
   activeMembership:
@@ -109,60 +67,6 @@ export type AppSession = {
     phoneNumber: string | null;
   };
 };
-
-type SignedTokenPayload = {
-  exp: number;
-  userId: string;
-};
-
-type VerificationTokenPayload = SignedTokenPayload & {
-  email: string;
-};
-
-function getAuthSecret() {
-  return process.env.BETTER_AUTH_SECRET ?? "plotkeys-local-dev-secret";
-}
-
-function createSignature(value: string) {
-  return createHmac("sha256", getAuthSecret())
-    .update(value)
-    .digest("base64url");
-}
-
-function encodeToken(payload: SignedTokenPayload | VerificationTokenPayload) {
-  const serialized = Buffer.from(JSON.stringify(payload)).toString("base64url");
-
-  return `${serialized}.${createSignature(serialized)}`;
-}
-
-function decodeToken<TPayload extends SignedTokenPayload>(
-  token: string,
-  schema: z.ZodSchema<TPayload>,
-) {
-  const [serialized, signature] = token.split(".");
-
-  if (!serialized || !signature) {
-    throw new Error("Invalid token format.");
-  }
-
-  const expectedSignature = createSignature(serialized);
-
-  if (
-    !timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
-  ) {
-    throw new Error("Invalid token signature.");
-  }
-
-  const payload = schema.parse(
-    JSON.parse(Buffer.from(serialized, "base64url").toString("utf8")),
-  );
-
-  if (payload.exp <= Date.now()) {
-    throw new Error("Token has expired.");
-  }
-
-  return payload;
-}
 
 function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -202,26 +106,6 @@ export function createAuthConfig() {
   };
 }
 
-export function createEmailVerificationToken(
-  input: Pick<VerificationTokenPayload, "email" | "userId">,
-) {
-  return encodeToken({
-    ...input,
-    exp: Date.now() + 1000 * 60 * 30,
-  });
-}
-
-export function createSessionToken(userId: string) {
-  return encodeToken({
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 7,
-    userId,
-  });
-}
-
-export function readSessionToken(token: string) {
-  return decodeToken(token, sessionTokenSchema);
-}
-
 export async function signUpUser(input: {
   db?: Db;
   email: string;
@@ -246,6 +130,21 @@ export async function signUpUser(input: {
     phoneNumber: input.phoneNumber,
   });
 
+  // Create a Better Auth account record so the user can sign in via Better Auth
+  await db.account.create({
+    data: {
+      id: randomUUID(),
+      accountId: user.id,
+      providerId: "credential",
+      userId: user.id,
+      password: hashPassword(input.password),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  });
+
+  const { createEmailVerificationToken } = await import("./tokens");
+
   return {
     user,
     verificationToken: createEmailVerificationToken({
@@ -257,7 +156,8 @@ export async function signUpUser(input: {
 
 export async function verifyUserEmail(token: string) {
   const db = requireDb();
-  const payload = decodeToken(token, verificationTokenSchema);
+  const { decodeVerificationToken } = await import("./tokens");
+  const payload = decodeVerificationToken(token);
   const user = await verifyUserEmailByIdentity(db, {
     email: payload.email,
     userId: payload.userId,
@@ -291,78 +191,69 @@ export async function signInUser(input: { email: string; password: string }) {
   return user;
 }
 
-export async function getAppSessionFromSessionToken(token: string) {
+export async function createBetterAuthSession(
+  userId: string,
+): Promise<{ sessionToken: string; expiresAt: Date }> {
   const db = requireDb();
-  const payload = readSessionToken(token);
-  const user = await getSessionUserByTokenUserId(db, payload.userId);
+  const sessionToken = randomUUID();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 
-  if (!user) {
-    return null;
-  }
-
-  const membership = user.memberships[0] ?? null;
-
-  return {
-    activeMembership: membership
-      ? {
-          companyId: membership.companyId,
-          companyName: membership.company.name,
-          companySlug: membership.company.slug,
-          role: membership.role,
-        }
-      : null,
-    onboardingStatus: membership ? "completed" : "not_started",
-    user: {
-      email: user.email,
-      emailVerified: user.emailVerified,
-      id: user.id,
-      name: user.name,
-      phoneNumber: user.phoneNumber,
+  await db.session.create({
+    data: {
+      id: randomUUID(),
+      expiresAt,
+      token: sessionToken,
+      userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
-  } satisfies AppSession;
-}
-
-export function readRequestAuthHeaders(headers: Headers): RequestAuthHeaders {
-  return requestAuthHeadersSchema.parse({
-    activeCompanyId: headers.get(authHeaderNames.activeCompanyId) ?? undefined,
-    role: headers.get(authHeaderNames.role) ?? undefined,
-    userEmail: headers.get(authHeaderNames.userEmail) ?? undefined,
-    userId: headers.get(authHeaderNames.userId) ?? undefined,
-    userName: headers.get(authHeaderNames.userName) ?? undefined,
   });
+
+  return { sessionToken, expiresAt };
 }
 
-export function resolveSessionFromHeaders(
+export async function getAppSessionFromBetterAuth(
   headers: Headers,
-): AuthSessionContext {
-  const requestHeaders = readRequestAuthHeaders(headers);
+): Promise<AppSession | null> {
+  const { auth } = await import("./better-auth");
 
-  if (!requestHeaders.userId) {
+  try {
+    const result = await auth.api.getSession({ headers });
+
+    if (!result?.session) {
+      return null;
+    }
+
+    const db = requireDb();
+    const user = await getSessionUserByTokenUserId(db, result.user.id);
+
+    if (!user) {
+      return null;
+    }
+
+    const membership = user.memberships[0] ?? null;
+
     return {
-      activeMembership: null,
-      headers: requestHeaders,
-      session: null,
-    };
-  }
-
-  return {
-    activeMembership:
-      requestHeaders.activeCompanyId && requestHeaders.role
+      activeMembership: membership
         ? {
-            companyId: requestHeaders.activeCompanyId,
-            role: requestHeaders.role,
+            companyId: membership.companyId,
+            companyName: membership.company.name,
+            companySlug: membership.company.slug,
+            role: membership.role,
           }
         : null,
-    headers: requestHeaders,
-    session: {
+      onboardingStatus: membership ? "completed" : "not_started",
       user: {
-        email: requestHeaders.userEmail,
-        id: requestHeaders.userId,
-        name: requestHeaders.userName,
-        phoneNumber: undefined,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        id: user.id,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
       },
-    },
-  };
+    } satisfies AppSession;
+  } catch {
+    return null;
+  }
 }
 
 export function hasActiveMembership(

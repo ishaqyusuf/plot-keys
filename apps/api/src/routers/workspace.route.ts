@@ -9,12 +9,10 @@ import {
   findLatestSiteConfigurationForCompany,
   findSiteConfigurationByIdForCompany,
   listSyncableTenantDomains,
-  markTenantDomainFailed,
-  markTenantDomainProvisioning,
   publishSiteConfiguration,
   updateSiteConfigurationContentField,
-  updateTenantDomainSyncResult,
 } from "@plotkeys/db";
+import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
 import {
   createInitialSiteConfigurationInput,
   getTemplateDefinition,
@@ -26,7 +24,6 @@ import {
   isVercelDomainProvisioningConfigured,
   plotkeysRootDomain,
   type SubscriptionTier,
-  syncTenantDomainWithVercel,
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 
@@ -325,36 +322,21 @@ export const workspaceRouter = createTRPCRouter({
       ctx.auth.activeMembership.companyId,
     );
 
-    for (const domain of domains) {
-      try {
-        await markTenantDomainProvisioning(db, {
-          domainId: domain.id,
-        });
-
-        const syncedDomain = await syncTenantDomainWithVercel(domain);
-
-        await updateTenantDomainSyncResult(db, {
-          domainId: domain.id,
-          lastError: syncedDomain.lastError,
-          provisionedAt: syncedDomain.provisionedAt ?? null,
-          status: syncedDomain.status,
-          vercelDomainName: syncedDomain.vercelDomainName ?? null,
-          verificationJson: syncedDomain.verificationJson,
-        });
-      } catch (error) {
-        await markTenantDomainFailed(db, {
-          domainId: domain.id,
-          message:
-            error instanceof Error
-              ? error.message
-              : "Unable to sync tenant domain.",
-        });
-      }
+    if (domains.length === 0) {
+      return { queued: false, queuedCount: 0 };
     }
 
-    return {
-      syncedCount: domains.length,
-    };
+    // Queue domain sync as a background job with exponential backoff retries
+    await runInBackground(
+      domainSyncHandler,
+      { companyId: ctx.auth.activeMembership.companyId },
+      {
+        baseDelayMs: 2000,
+        maxAttempts: 4,
+      },
+    );
+
+    return { queued: true, queuedCount: domains.length };
   }),
   updateSiteField: membershipProcedure
     .input(updateSiteFieldInputSchema)

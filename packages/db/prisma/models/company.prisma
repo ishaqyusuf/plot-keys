@@ -13,7 +13,9 @@ model Company {
   deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
   memberships        Membership[]
   siteConfigurations SiteConfiguration[]
-  tenantDomains       TenantDomain[]
+  tenantDomains      TenantDomain[]
+  properties         Property[]
+  agents             Agent[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")

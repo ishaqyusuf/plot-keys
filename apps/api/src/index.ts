@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { auth } from "@plotkeys/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -19,6 +20,10 @@ app.use(
     origin: dashboardOrigin,
   }),
 );
+
+app.on(["GET", "POST"], "/api/auth/**", (c) => {
+  return auth.handler(c.req.raw);
+});
 
 app.get("/", (c) => {
   return c.json({

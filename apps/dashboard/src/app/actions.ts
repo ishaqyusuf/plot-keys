@@ -3,9 +3,9 @@
 import { buildRequestContext } from "@plotkeys/api/context";
 import { appRouter } from "@plotkeys/api/router";
 import {
+  authCookiePrefix,
   authRoutes,
-  authSessionCookieName,
-  createSessionToken,
+  createBetterAuthSession,
   resolvePostVerificationRoute,
   signInUser,
   signUpUser,
@@ -68,10 +68,11 @@ async function assertSubdomainAvailability(
 
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
+  const { sessionToken, expiresAt } = await createBetterAuthSession(userId);
 
-  cookieStore.set(authSessionCookieName, createSessionToken(userId), {
+  cookieStore.set(`${authCookiePrefix}.session_token`, sessionToken, {
+    expires: expiresAt,
     httpOnly: true,
-    maxAge: 60 * 60 * 24 * 7,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -179,7 +180,7 @@ export async function verifyEmailAction(formData: FormData) {
 export async function signOutAction() {
   const cookieStore = await cookies();
 
-  cookieStore.delete(authSessionCookieName);
+  cookieStore.delete(`${authCookiePrefix}.session_token`);
   clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }

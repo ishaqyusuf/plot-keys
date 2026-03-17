@@ -1,7 +1,7 @@
 import {
   authRoutes,
-  createSessionToken,
-  getAppSessionFromSessionToken,
+  createBetterAuthSession,
+  getAppSessionFromBetterAuth,
   signInUser,
   signUpUser,
   verifyUserEmail,
@@ -76,8 +76,13 @@ async function assertSubdomainAvailability(
 }
 
 async function resolvePostAuthRedirect(userId: string) {
-  const sessionToken = createSessionToken(userId);
-  const appSession = await getAppSessionFromSessionToken(sessionToken);
+  const { sessionToken } = await createBetterAuthSession(userId);
+
+  // Build synthetic headers so we can load the session from the DB
+  const syntheticHeaders = new Headers({
+    cookie: `plotkeys.session_token=${sessionToken}`,
+  });
+  const appSession = await getAppSessionFromBetterAuth(syntheticHeaders);
 
   return {
     redirectTo: appSession?.activeMembership
