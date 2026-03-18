@@ -97,9 +97,22 @@ export function WebsiteRuntimeProvider({
     };
   }, [renderMode, templateConfig]);
 
+  // Inject color system tokens as CSS custom properties on a wrapper div so
+  // section components can reference var(--pk-primary) etc.
+  const colorVars = useMemo(() => {
+    const vars: Record<string, string> = {};
+    for (const [key, val] of Object.entries(value.colorSystem.light)) {
+      const cssVar = `--pk-${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`;
+      vars[cssVar] = val as string;
+    }
+    return vars as React.CSSProperties;
+  }, [value.colorSystem]);
+
   return (
     <WebsiteRuntimeContext.Provider value={value}>
-      {children}
+      <div style={colorVars}>
+        {children}
+      </div>
     </WebsiteRuntimeContext.Provider>
   );
 }

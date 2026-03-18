@@ -1,5 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
-import { resolveWebsitePresentation } from "@plotkeys/section-registry";
+import { deserializeTemplateConfig, resolveWebsitePresentation, templateCatalog } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -18,9 +18,11 @@ import { BuilderSidebarControls } from "../../components/builder/builder-sidebar
 import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../lib/session";
 import {
+  createTemplateDraftAction,
   publishSiteConfigurationAction,
   smartFillFieldAction,
   updateSiteFieldAction,
+  updateSiteThemeFieldAction,
 } from "../actions";
 
 type BuilderPageProps = {
@@ -101,6 +103,13 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     );
   }
 
+  const publishedConfiguration = configurations.find(
+    (c) => c.status === "published" && c.id !== activeConfiguration.id,
+  );
+  const activeTemplateLabel =
+    templateCatalog.find((t) => t.key === activeConfiguration.templateKey)?.name ??
+    activeConfiguration.templateKey;
+
   const preview = resolveWebsitePresentation({
     companyName: session.activeMembership.companyName,
     content: activeConfiguration.contentJson as Record<string, string>,
@@ -173,7 +182,13 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 </div>
 
                 <BuilderSidebarControls
+                  configId={activeConfiguration.id}
                   currentTemplateKey={activeConfiguration.templateKey}
+                  templateConfig={deserializeTemplateConfig(
+                    activeConfiguration.themeJson as Record<string, string>,
+                  )}
+                  onCreateDraft={createTemplateDraftAction}
+                  onUpdateTheme={updateSiteThemeFieldAction}
                 />
               </section>
 
@@ -209,8 +224,10 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             <div className="flex flex-wrap items-center gap-3">
               <PublishConfirmationDialog
                 configId={activeConfiguration.id}
+                currentLiveName={publishedConfiguration?.name ?? null}
                 currentName={activeConfiguration.name}
                 onPublish={publishSiteConfigurationAction}
+                templateLabel={activeTemplateLabel}
               />
               <Button asChild variant="secondary">
                 <Link href="/">Back to dashboard</Link>
@@ -232,6 +249,9 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             onSmartFill={smartFillFieldAction}
             onUpdateField={updateSiteFieldAction}
             preview={preview}
+            templateConfig={deserializeTemplateConfig(
+              activeConfiguration.themeJson as Record<string, string>,
+            )}
           />
         </section>
       </div>

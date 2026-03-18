@@ -36,6 +36,7 @@ import { requireAuthenticatedSession } from "../../lib/session";
 import { readPendingOnboardingCookie } from "../../lib/session-cookie";
 import {
   completeOnboardingAction,
+  refreshOnboardingAction,
   saveOnboardingStepAction,
 } from "../actions";
 
@@ -928,6 +929,17 @@ function LaunchStep({
       {derivedDesign && (
         <DesignConfigPreview design={derivedDesign} />
       )}
+
+      <div className="flex items-center gap-3">
+        <form action={refreshOnboardingAction}>
+          <Button size="sm" type="submit" variant="outline">
+            Refresh recommendations
+          </Button>
+        </form>
+        <p className="text-xs text-muted-foreground">
+          Re-score templates based on your latest profile answers.
+        </p>
+      </div>
 
       {saved?.businessSummary ? (
         <Card className="border-border/60 bg-muted/20">
