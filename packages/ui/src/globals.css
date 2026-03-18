@@ -4,7 +4,7 @@
 
 @source "../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
-@source "../../packages/**/*.{ts,tsx}";
+@source "../../section-registry/**/*.{ts,tsx}";
 
 :root {
   --background: #f4efe7;
