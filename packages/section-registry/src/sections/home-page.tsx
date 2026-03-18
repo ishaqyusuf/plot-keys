@@ -193,6 +193,9 @@ export function HeroBannerSection({
 }) {
   return (
     <section className="px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
+      <span className="bg-destructive p-4 rounded-full text-slate-950">
+        adbbsadsandsadsa
+      </span>
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
