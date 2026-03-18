@@ -1,5 +1,6 @@
 import {
   completeTenantOnboarding,
+  countCompaniesByTemplateKey,
   createCompanyOnboardingBundle,
   createPrismaClient,
   createSiteConfiguration,
@@ -43,6 +44,7 @@ import {
   createTRPCRouter,
   membershipProcedure,
 } from "../lib.trpc";
+import { generateFieldContent } from "../lib.ai";
 import {
   completeOnboardingInputSchema,
   createTemplateDraftInputSchema,
@@ -428,6 +430,21 @@ export const workspaceRouter = createTRPCRouter({
 
     return { profile, summary };
   }),
+  getTemplateCatalog: authenticatedProcedure.query(async () => {
+    const db = getDb();
+    const usageCounts = await countCompaniesByTemplateKey(db);
+
+    return templateCatalog.map((template) => ({
+      description: template.description,
+      key: template.key,
+      marketingTagline: template.marketingTagline,
+      name: template.name,
+      previewImageUrl: template.previewImageUrl ?? null,
+      purchasable: template.purchasable,
+      tier: template.tier,
+      usageCount: usageCounts[template.key] ?? 0,
+    }));
+  }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)
     .mutation(async ({ ctx, input }) => {
@@ -579,10 +596,29 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
+      // Fetch the onboarding record for business context (optional — enriches the prompt)
+      const onboarding = await findTenantOnboardingByUserId(
+        db,
+        ctx.auth.session.user.id,
+      );
+
+      const aiSuggestion = await generateFieldContent({
+        businessSummary: onboarding?.businessSummary,
+        companyName: company.name,
+        contentKey: input.contentKey,
+        longDetail: input.longDetail,
+        market: onboarding?.market ?? company.market,
+        preferredLength: input.preferredLength,
+        shortDetail: input.shortDetail,
+        templateKey: configuration.templateKey,
+      });
+
+      // Fall back to deterministic placeholder when ANTHROPIC_API_KEY is absent
       const suggestion =
-        input.contentKey === "hero.title"
+        aiSuggestion ??
+        (input.contentKey === "hero.title"
           ? `${company.name} unlocks better moves.`
-          : `${input.shortDetail} for ${company.name}.`;
+          : `${input.shortDetail} for ${company.name}.`);
 
       await updateSiteConfigurationContentField(db, {
         configId: configuration.id,

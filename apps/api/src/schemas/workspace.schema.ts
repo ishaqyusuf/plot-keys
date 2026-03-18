@@ -57,6 +57,8 @@ export const publishSiteConfigurationInputSchema = z.object({
 export const smartFillFieldInputSchema = z.object({
   configId: z.string().trim().min(1, "Configuration id is required."),
   contentKey: z.string().trim().min(1, "Content key is required."),
+  longDetail: z.string().trim().optional(),
+  preferredLength: z.string().trim().optional(),
   shortDetail: z.string().trim().min(1, "Field detail is required."),
 });
 

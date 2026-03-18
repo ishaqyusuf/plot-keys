@@ -65,7 +65,13 @@ export type TemplateDefinition = {
   description: string;
   editableFields: EditableFieldDefinition[];
   key: string;
+  /** Human-readable marketing tagline shown in the template picker. */
+  marketingTagline: string;
   name: string;
+  /** Whether this template can be individually purchased without a plan upgrade. */
+  purchasable: boolean;
+  /** URL of the preview thumbnail used in template cards. */
+  previewImageUrl?: string;
   tier: TemplateTier;
 };
 
@@ -386,7 +392,10 @@ export const templateCatalog: TemplateDefinition[] = [
       "Premium luxury positioning with calm, editorial presentation.",
     editableFields: baseEditableFields,
     key: "template-1",
-    name: "Template 1",
+    marketingTagline:
+      "A calm, editorial layout built for luxury and premium residential brands.",
+    name: "Aster Grove",
+    purchasable: false,
     tier: "starter",
   },
   {
@@ -407,7 +416,10 @@ export const templateCatalog: TemplateDefinition[] = [
     description: "Sharper city-led positioning for modern urban inventory.",
     editableFields: baseEditableFields,
     key: "template-2",
-    name: "Template 2",
+    marketingTagline:
+      "Bold, listing-first layout for urban agencies and commercial portfolios.",
+    name: "Atlas Urban",
+    purchasable: true,
     tier: "plus",
   },
   {
@@ -429,7 +441,10 @@ export const templateCatalog: TemplateDefinition[] = [
       "Warm, trust-led presentation for family and investor audiences.",
     editableFields: baseEditableFields,
     key: "template-3",
-    name: "Template 3",
+    marketingTagline:
+      "Warm, trust-driven layout ideal for family buyers and investor audiences.",
+    name: "Palmstone",
+    purchasable: true,
     tier: "pro",
   },
 ];
