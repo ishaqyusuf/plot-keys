@@ -5,7 +5,7 @@ import type {
   SerializableSectionData,
   TenantContentRecord,
 } from "@plotkeys/section-registry";
-import { sectionComponents } from "@plotkeys/section-registry";
+import { sectionComponents, WebsiteRuntimeProvider } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
@@ -280,25 +280,27 @@ export function BuilderPreviewPanel({
         className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4"
         onClick={() => setFocusedSectionId(null)}
       >
-        <div
-          className="overflow-hidden rounded-lg border border-border/70"
-          style={{ backgroundColor: "#f8fafc", fontFamily: "Satoshi, sans-serif" }}
-        >
-          {sections.map((section) => (
-            <PreviewSection
-              configId={configId}
-              content={content}
-              editableFields={editableFields}
-              focused={focusedSectionId === section.id}
-              key={section.id}
-              section={section}
-              theme={theme}
-              onFocus={() => handleSectionFocus(section.id)}
-              onSmartFill={onSmartFill}
-              onUpdate={onUpdateField}
-            />
-          ))}
-        </div>
+        <WebsiteRuntimeProvider renderMode="draft">
+          <div
+            className="overflow-hidden rounded-lg border border-border/70"
+            style={{ backgroundColor: "#f8fafc", fontFamily: "Satoshi, sans-serif" }}
+          >
+            {sections.map((section) => (
+              <PreviewSection
+                configId={configId}
+                content={content}
+                editableFields={editableFields}
+                focused={focusedSectionId === section.id}
+                key={section.id}
+                section={section}
+                theme={theme}
+                onFocus={() => handleSectionFocus(section.id)}
+                onSmartFill={onSmartFill}
+                onUpdate={onUpdateField}
+              />
+            ))}
+          </div>
+        </WebsiteRuntimeProvider>
       </div>
     </div>
   );
