@@ -16,7 +16,7 @@ export const saveOnboardingProgressInputSchema = z.object({
   // Step 2: Market Focus
   locations: z.array(z.string().trim()).optional(),
   propertyTypes: z.array(z.string().trim()).optional(),
-  targetAudience: z.string().trim().nullable().optional(),
+  targetAudience: z.array(z.string().trim()).optional(),
   // Step 3: Brand Style
   tone: z.string().trim().nullable().optional(),
   stylePreference: z.string().trim().nullable().optional(),

@@ -15,6 +15,6 @@ export const sessionBridgeInputSchema = z.object({
 });
 
 export const authCookiePrefix = "plotkeys";
-export const authSessionCookieName = `${authCookiePrefix}_session`;
+export const authSessionCookieName = `${authCookiePrefix}.session_token`;
 
 export type SessionBridgeInput = z.infer<typeof sessionBridgeInputSchema>;

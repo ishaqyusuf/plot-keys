@@ -1,5 +1,5 @@
 /**
- * Dashboard middleware.
+ * Dashboard proxy (Next.js 16 convention, replaces middleware).
  *
  * Responsibilities:
  * 1. Extract the tenant subdomain from the request host and inject it as
@@ -15,7 +15,7 @@
  *   localhost / 127.x.x.x          → no tenant slug injected
  */
 
-import { authCookiePrefix, authRoutes } from "@plotkeys/auth/shared";
+import { authRoutes, authSessionCookieName } from "@plotkeys/auth/shared";
 import { type NextRequest, NextResponse } from "next/server";
 
 const PLOTKEYS_DOMAIN = "plotkeys.com";
@@ -61,11 +61,10 @@ function extractTenantSlug(host: string): string | null {
 }
 
 function hasSessionCookie(request: NextRequest): boolean {
-  const cookieName = `${authCookiePrefix}.session_token`;
-  return !!request.cookies.get(cookieName)?.value;
+  return !!request.cookies.get(authSessionCookieName)?.value;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") ?? "";
   const tenantSlug = extractTenantSlug(host);

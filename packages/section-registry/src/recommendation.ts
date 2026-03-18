@@ -27,7 +27,7 @@ export type OnboardingSnapshot = {
   propertyTypes?: string[] | null;
   stylePreference?: string | null;
   tagline?: string | null;
-  targetAudience?: string | null;
+  targetAudience?: string[] | null;
   tone?: string | null;
 };
 

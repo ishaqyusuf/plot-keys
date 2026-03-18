@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  authRoutes,
-} from "@plotkeys/auth/shared";
+import { authRoutes } from "@plotkeys/auth/shared";
 import {
   signInInputSchema,
   type SignInInput,
@@ -23,9 +21,7 @@ import { persistSession } from "./session-bridge";
 
 const DevQuickFill =
   process.env.NODE_ENV === "development"
-    ? dynamic(() =>
-        import("../dev/dev-quick-fill").then((m) => m.DevQuickFill),
-      )
+    ? dynamic(() => import("../dev/dev-quick-fill").then((m) => m.DevQuickFill))
     : null;
 
 const DEV_PRESETS = [
@@ -42,7 +38,9 @@ const DEV_PRESETS = [
 export function SignInForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
   const trpc = useTRPC();
-  const [formError, setFormError] = useState<string | null>(initialError ?? null);
+  const [formError, setFormError] = useState<string | null>(
+    initialError ?? null,
+  );
   const form = useZodForm(signInInputSchema, {
     defaultValues: {
       email: "",
@@ -55,6 +53,7 @@ export function SignInForm({ initialError }: { initialError?: string }) {
         setFormError(error.message);
       },
       async onSuccess(result) {
+        // console.log("Sign-in successful, session token received:", result);
         await persistSession(result.sessionToken);
         router.push(result.redirectTo);
         router.refresh();

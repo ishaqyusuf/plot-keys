@@ -3,8 +3,8 @@
 import { buildRequestContext } from "@plotkeys/api/context";
 import { appRouter } from "@plotkeys/api/router";
 import {
-  authCookiePrefix,
   authRoutes,
+  authSessionCookieName,
   createBetterAuthSession,
   resolvePostVerificationRoute,
   signInUser,
@@ -68,9 +68,10 @@ async function assertSubdomainAvailability(
 
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
-  const { sessionToken, expiresAt } = await createBetterAuthSession(userId);
+  const { signedSessionToken, expiresAt } =
+    await createBetterAuthSession(userId);
 
-  cookieStore.set(`${authCookiePrefix}.session_token`, sessionToken, {
+  cookieStore.set(authSessionCookieName, signedSessionToken, {
     expires: expiresAt,
     httpOnly: true,
     path: "/",
@@ -96,6 +97,7 @@ export async function signUpAction(formData: FormData) {
     String(formData.get("subdomain") ?? ""),
   );
 
+  let redirectUrl: string;
   try {
     if (!prisma) {
       throw new Error("DATABASE_URL is not configured.");
@@ -111,28 +113,27 @@ export async function signUpAction(formData: FormData) {
       phoneNumber,
     });
 
-    redirect(
-      createRedirectUrl(authRoutes.signUpSuccess, {
-        company,
-        email: user.email,
-        subdomain,
-        token: verificationToken,
-      }),
-    );
+    redirectUrl = createRedirectUrl(authRoutes.signUpSuccess, {
+      company,
+      email: user.email,
+      subdomain,
+      token: verificationToken,
+    });
   } catch (error) {
-    redirect(
-      createRedirectUrl(authRoutes.signUp, {
-        error:
-          error instanceof Error ? error.message : "Unable to create account.",
-      }),
-    );
+    redirectUrl = createRedirectUrl(authRoutes.signUp, {
+      error:
+        error instanceof Error ? error.message : "Unable to create account.",
+    });
   }
+
+  redirect(redirectUrl);
 }
 
 export async function signInAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
+  let redirectUrl: string;
   try {
     const user = await signInUser({
       email,
@@ -140,47 +141,44 @@ export async function signInAction(formData: FormData) {
     });
 
     await setSessionCookie(user.id);
-    const destination = user.emailVerified
+    redirectUrl = user.emailVerified
       ? authRoutes.dashboardHome
       : authRoutes.verifyEmail;
-
-    redirect(destination);
   } catch (error) {
-    redirect(
-      createRedirectUrl(authRoutes.signIn, {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to sign in right now.",
-      }),
-    );
+    redirectUrl = createRedirectUrl(authRoutes.signIn, {
+      error:
+        error instanceof Error ? error.message : "Unable to sign in right now.",
+    });
   }
+
+  redirect(redirectUrl);
 }
 
 export async function verifyEmailAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
 
+  let redirectUrl: string;
   try {
     const user = await verifyUserEmail(token);
 
     await setSessionCookie(user.id);
-    redirect(resolvePostVerificationRoute("not_started"));
+    redirectUrl = resolvePostVerificationRoute("not_started");
   } catch (error) {
-    redirect(
-      createRedirectUrl(authRoutes.verifyEmail, {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to verify that email address.",
-      }),
-    );
+    redirectUrl = createRedirectUrl(authRoutes.verifyEmail, {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to verify that email address.",
+    });
   }
+
+  redirect(redirectUrl);
 }
 
 export async function signOutAction() {
   const cookieStore = await cookies();
 
-  cookieStore.delete(`${authCookiePrefix}.session_token`);
+  cookieStore.delete(authSessionCookieName);
   clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }
@@ -189,6 +187,7 @@ export async function completeOnboardingAction(formData: FormData) {
   const session = await requireAuthenticatedSession();
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
+  let redirectUrl: string;
 
   const market = String(formData.get("market") ?? "").trim();
   const templateKey = String(formData.get("template") ?? "template-1");
@@ -237,36 +236,35 @@ export async function completeOnboardingAction(formData: FormData) {
     });
 
     clearPendingOnboardingCookie(cookieStore);
-    redirect(`/builder?configId=${result.configId}`);
+    redirectUrl = `/builder?configId=${result.configId}`;
   } catch (error) {
-    redirect(
-      createRedirectUrl(authRoutes.onboarding, {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to finish onboarding.",
-      }),
-    );
+    redirectUrl = createRedirectUrl(authRoutes.onboarding, {
+      error:
+        error instanceof Error ? error.message : "Unable to finish onboarding.",
+    });
   }
+
+  redirect(redirectUrl);
 }
 
 export async function createTemplateDraftAction(formData: FormData) {
   const templateKey = String(formData.get("templateKey") ?? "template-1");
 
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     const result = await caller.workspace.createTemplateDraft({
       templateKey,
     });
 
-    redirect(`/builder?configId=${result.configId}`);
+    redirectUrl = `/builder?configId=${result.configId}`;
   } catch (error) {
-    redirect(
-      `/builder?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to create draft.",
-      )}`,
-    );
+    redirectUrl = `/builder?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create draft.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function updateSiteThemeFieldAction(formData: FormData) {
@@ -274,6 +272,7 @@ export async function updateSiteThemeFieldAction(formData: FormData) {
   const themeKey = String(formData.get("themeKey") ?? "");
   const value = String(formData.get("value") ?? "");
 
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     const result = await caller.workspace.updateSiteThemeField({
@@ -284,16 +283,14 @@ export async function updateSiteThemeFieldAction(formData: FormData) {
 
     revalidatePath("/builder");
     revalidatePath("/live");
-    redirect(`/builder?configId=${result.configId}&saved=1`);
+    redirectUrl = `/builder?configId=${result.configId}&saved=1`;
   } catch (error) {
-    redirect(
-      `/builder?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to update theme field.",
-      )}`,
-    );
+    redirectUrl = `/builder?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to update theme field.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 /**
@@ -320,6 +317,7 @@ export async function updateSiteFieldAction(formData: FormData) {
   const contentKey = String(formData.get("contentKey") ?? "");
   const value = String(formData.get("value") ?? "");
 
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     const result = await caller.workspace.updateSiteField({
@@ -330,22 +328,23 @@ export async function updateSiteFieldAction(formData: FormData) {
 
     revalidatePath("/builder");
     revalidatePath("/live");
-    redirect(`/builder?configId=${result.configId}&saved=1`);
+    redirectUrl = `/builder?configId=${result.configId}&saved=1`;
   } catch (error) {
-    redirect(
-      `/builder?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to update template field.",
-      )}`,
-    );
+    redirectUrl = `/builder?error=${encodeURIComponent(
+      error instanceof Error
+        ? error.message
+        : "Unable to update template field.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function publishSiteConfigurationAction(formData: FormData) {
   const configId = String(formData.get("configId") ?? "");
   const nextName = String(formData.get("nextName") ?? "").trim();
 
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     const result = await caller.workspace.publishSiteConfiguration({
@@ -356,16 +355,16 @@ export async function publishSiteConfigurationAction(formData: FormData) {
     revalidatePath("/");
     revalidatePath("/builder");
     revalidatePath("/live");
-    redirect(`/builder?configId=${result.configId}&published=1`);
+    redirectUrl = `/builder?configId=${result.configId}&published=1`;
   } catch (error) {
-    redirect(
-      `/builder?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to publish template configuration.",
-      )}`,
-    );
+    redirectUrl = `/builder?error=${encodeURIComponent(
+      error instanceof Error
+        ? error.message
+        : "Unable to publish template configuration.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function switchBuilderConfigurationAction(formData: FormData) {
@@ -378,6 +377,8 @@ export async function smartFillFieldAction(formData: FormData) {
   const configId = String(formData.get("configId") ?? "");
   const contentKey = String(formData.get("contentKey") ?? "");
   const shortDetail = String(formData.get("shortDetail") ?? "");
+
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     const result = await caller.workspace.smartFillField({
@@ -386,14 +387,14 @@ export async function smartFillFieldAction(formData: FormData) {
       shortDetail,
     });
 
-    redirect(`/builder?configId=${result.configId}&generated=1`);
+    redirectUrl = `/builder?configId=${result.configId}&generated=1`;
   } catch (error) {
-    redirect(
-      `/builder?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to smart-fill field.",
-      )}`,
-    );
+    redirectUrl = `/builder?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to smart-fill field.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function ensureBuilderConfigurationExists() {
@@ -419,21 +420,14 @@ export async function ensureBuilderConfigurationExists() {
     if (!configuration) {
       redirect(`/builder?configId=${result.configId}`);
     }
-  } catch (error) {
-    redirect(
-      `/sign-in?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to ensure builder configuration.",
-      )}`,
-    );
-  }
+  } catch {}
 }
 
 export async function saveOnboardingStepAction(formData: FormData) {
   const step = String(formData.get("currentStep") ?? "business-identity");
   const nextStep = String(formData.get("nextStep") ?? "");
 
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
 
@@ -443,8 +437,7 @@ export async function saveOnboardingStepAction(formData: FormData) {
     };
 
     if (step === "business-identity") {
-      input.tagline =
-        String(formData.get("tagline") ?? "").trim() || null;
+      input.tagline = String(formData.get("tagline") ?? "").trim() || null;
       input.businessType =
         String(formData.get("businessType") ?? "").trim() || null;
       input.primaryGoal =
@@ -459,8 +452,10 @@ export async function saveOnboardingStepAction(formData: FormData) {
       input.propertyTypes = propertyTypeValues
         .map((v) => String(v).trim())
         .filter(Boolean);
-      input.targetAudience =
-        String(formData.get("targetAudience") ?? "").trim() || null;
+      input.targetAudience = formData
+        .getAll("targetAudience")
+        .map((v) => String(v).trim())
+        .filter(Boolean);
     } else if (step === "brand-style") {
       input.tone = String(formData.get("tone") ?? "").trim() || null;
       input.stylePreference =
@@ -471,8 +466,7 @@ export async function saveOnboardingStepAction(formData: FormData) {
       input.phone = String(formData.get("phone") ?? "").trim() || null;
       input.contactEmail =
         String(formData.get("contactEmail") ?? "").trim() || null;
-      input.whatsapp =
-        String(formData.get("whatsapp") ?? "").trim() || null;
+      input.whatsapp = String(formData.get("whatsapp") ?? "").trim() || null;
       input.officeAddress =
         String(formData.get("officeAddress") ?? "").trim() || null;
     } else if (step === "content-readiness") {
@@ -486,23 +480,24 @@ export async function saveOnboardingStepAction(formData: FormData) {
     }
 
     await caller.workspace.saveOnboardingProgress(input);
-    redirect(`/onboarding?step=${nextStep}`);
+    redirectUrl = `/onboarding?step=${nextStep}`;
   } catch (error) {
-    redirect(
-      createRedirectUrl("/onboarding", {
-        step,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to save onboarding progress.",
-      }),
-    );
+    redirectUrl = createRedirectUrl("/onboarding", {
+      step,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to save onboarding progress.",
+    });
   }
+
+  redirect(redirectUrl);
 }
 
 // ─── Property actions ─────────────────────────────────────────────────────
 
 export async function createPropertyAction(formData: FormData) {
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.createProperty({
@@ -510,26 +505,35 @@ export async function createPropertyAction(formData: FormData) {
       description: String(formData.get("description") ?? "").trim() || null,
       price: String(formData.get("price") ?? "").trim() || null,
       location: String(formData.get("location") ?? "").trim() || null,
-      bedrooms: formData.get("bedrooms") ? Number(formData.get("bedrooms")) : null,
-      bathrooms: formData.get("bathrooms") ? Number(formData.get("bathrooms")) : null,
+      bedrooms: formData.get("bedrooms")
+        ? Number(formData.get("bedrooms"))
+        : null,
+      bathrooms: formData.get("bathrooms")
+        ? Number(formData.get("bathrooms"))
+        : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
-      status: (String(formData.get("status") ?? "active") as "active" | "sold" | "rented" | "off_market"),
+      status: String(formData.get("status") ?? "active") as
+        | "active"
+        | "sold"
+        | "rented"
+        | "off_market",
       featured: formData.get("featured") === "true",
     });
     revalidatePath("/properties");
-    redirect("/properties");
+    redirectUrl = "/properties";
   } catch (error) {
-    redirect(
-      `/properties?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to create property.",
-      )}`,
-    );
+    redirectUrl = `/properties?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create property.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function updatePropertyAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.updateProperty({
@@ -538,38 +542,47 @@ export async function updatePropertyAction(formData: FormData) {
       description: String(formData.get("description") ?? "").trim() || null,
       price: String(formData.get("price") ?? "").trim() || null,
       location: String(formData.get("location") ?? "").trim() || null,
-      bedrooms: formData.get("bedrooms") ? Number(formData.get("bedrooms")) : null,
-      bathrooms: formData.get("bathrooms") ? Number(formData.get("bathrooms")) : null,
+      bedrooms: formData.get("bedrooms")
+        ? Number(formData.get("bedrooms"))
+        : null,
+      bathrooms: formData.get("bathrooms")
+        ? Number(formData.get("bathrooms"))
+        : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
-      status: (String(formData.get("status") ?? "active") as "active" | "sold" | "rented" | "off_market"),
+      status: String(formData.get("status") ?? "active") as
+        | "active"
+        | "sold"
+        | "rented"
+        | "off_market",
       featured: formData.get("featured") === "true",
     });
     revalidatePath("/properties");
-    redirect("/properties");
+    redirectUrl = "/properties";
   } catch (error) {
-    redirect(
-      `/properties?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to update property.",
-      )}`,
-    );
+    redirectUrl = `/properties?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to update property.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function deletePropertyAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.deleteProperty({ propertyId });
     revalidatePath("/properties");
-    redirect("/properties");
+    redirectUrl = "/properties";
   } catch (error) {
-    redirect(
-      `/properties?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to delete property.",
-      )}`,
-    );
+    redirectUrl = `/properties?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to delete property.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function togglePropertyFeaturedAction(formData: FormData) {
@@ -586,6 +599,7 @@ export async function togglePropertyFeaturedAction(formData: FormData) {
 // ─── Agent actions ────────────────────────────────────────────────────────
 
 export async function createAgentAction(formData: FormData) {
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.createAgent({
@@ -596,21 +610,24 @@ export async function createAgentAction(formData: FormData) {
       phone: String(formData.get("phone") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
       featured: formData.get("featured") === "true",
-      displayOrder: formData.get("displayOrder") ? Number(formData.get("displayOrder")) : null,
+      displayOrder: formData.get("displayOrder")
+        ? Number(formData.get("displayOrder"))
+        : null,
     });
     revalidatePath("/agents");
-    redirect("/agents");
+    redirectUrl = "/agents";
   } catch (error) {
-    redirect(
-      `/agents?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to create agent.",
-      )}`,
-    );
+    redirectUrl = `/agents?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create agent.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function updateAgentAction(formData: FormData) {
   const agentId = String(formData.get("agentId") ?? "");
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.updateAgent({
@@ -622,33 +639,36 @@ export async function updateAgentAction(formData: FormData) {
       phone: String(formData.get("phone") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
       featured: formData.get("featured") === "true",
-      displayOrder: formData.get("displayOrder") ? Number(formData.get("displayOrder")) : null,
+      displayOrder: formData.get("displayOrder")
+        ? Number(formData.get("displayOrder"))
+        : null,
     });
     revalidatePath("/agents");
-    redirect("/agents");
+    redirectUrl = "/agents";
   } catch (error) {
-    redirect(
-      `/agents?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to update agent.",
-      )}`,
-    );
+    redirectUrl = `/agents?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to update agent.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function deleteAgentAction(formData: FormData) {
   const agentId = String(formData.get("agentId") ?? "");
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.deleteAgent({ agentId });
     revalidatePath("/agents");
-    redirect("/agents");
+    redirectUrl = "/agents";
   } catch (error) {
-    redirect(
-      `/agents?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to delete agent.",
-      )}`,
-    );
+    redirectUrl = `/agents?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to delete agent.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }
 
 export async function toggleAgentFeaturedAction(formData: FormData) {
@@ -663,20 +683,19 @@ export async function toggleAgentFeaturedAction(formData: FormData) {
 }
 
 export async function syncTenantDomainsAction() {
+  let redirectUrl: string;
   try {
     const caller = await createServerCaller();
     await caller.workspace.syncTenantDomains();
 
     revalidatePath("/");
     revalidatePath("/live");
-    redirect("/?domains=1");
+    redirectUrl = "/?domains=1";
   } catch (error) {
-    redirect(
-      `/?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to sync tenant domains.",
-      )}`,
-    );
+    redirectUrl = `/?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to sync tenant domains.",
+    )}`;
   }
+
+  redirect(redirectUrl);
 }

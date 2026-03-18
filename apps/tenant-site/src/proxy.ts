@@ -1,5 +1,5 @@
 /**
- * Tenant-site middleware.
+ * Tenant-site proxy (Next.js 16 convention, replaces middleware).
  *
  * Responsibilities:
  * 1. Resolve the tenant from the incoming request host.
@@ -48,7 +48,7 @@ function resolveHostContext(host: string): {
   return { tenantHostname: hostname, tenantSubdomain: null };
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const { tenantHostname, tenantSubdomain } = resolveHostContext(host);
 

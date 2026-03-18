@@ -29,6 +29,7 @@ import { canAccessTemplateTier } from "@plotkeys/utils";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { FlowShell } from "../../components/flow-shell";
+import { TagInput } from "../../components/tag-input";
 import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
 import { requireAuthenticatedSession } from "../../lib/session";
 import { readPendingOnboardingCookie } from "../../lib/session-cookie";
@@ -500,13 +501,14 @@ function MarketFocusStep({
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel htmlFor="targetAudience">Target audience (optional)</FieldLabel>
-          <Input
-            defaultValue={saved?.targetAudience ?? ""}
-            id="targetAudience"
+          <FieldLabel>Target audience (optional)</FieldLabel>
+          <TagInput
             name="targetAudience"
-            placeholder="First-time buyers, investors, diaspora clients"
+            defaultValue={saved?.targetAudience ?? []}
           />
+          <FieldDescription>
+            Select from suggestions or type your own and press Enter.
+          </FieldDescription>
         </Field>
       </FieldGroup>
       <NavButtons backPath={backPath} />

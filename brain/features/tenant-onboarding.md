@@ -59,12 +59,21 @@ Guide a new user from account creation to verified access, then into a guided on
   - `locations`
   - `propertyTypes`
 - Optional:
-  - `targetAudience`
-- Example `targetAudience` values:
-  - `low_income`
-  - `mid_market`
-  - `high_end`
-  - `mixed`
+  - `targetAudience` — **multi-select tag input** (`String[]` in DB)
+    - UI: badge-based selector with system suggestions + custom tags
+    - Users can pick from predefined suggestions or type custom values
+- System-provided `targetAudience` suggestions:
+  - `First-time buyers`
+  - `Investors`
+  - `Diaspora clients`
+  - `Luxury buyers`
+  - `Mid-market renters`
+  - `Commercial tenants`
+  - `Families`
+  - `Young professionals`
+  - `Corporate relocations`
+  - `HNW individuals`
+- Users may also create custom audience tags
 
 ### Brand Style
 - Required:

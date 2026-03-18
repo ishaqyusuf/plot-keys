@@ -1,6 +1,6 @@
 import {
   type AppSession,
-  authCookiePrefix,
+  authSessionCookieName,
   authRoutes,
   getAppSessionFromBetterAuth,
 } from "@plotkeys/auth";
@@ -27,7 +27,7 @@ async function buildRequestHeadersWithCookies(): Promise<Headers> {
 
 export async function getCurrentAppSession(): Promise<AppSession | null> {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get(`${authCookiePrefix}.session_token`)?.value;
+  const sessionToken = cookieStore.get(authSessionCookieName)?.value;
 
   if (!sessionToken) {
     return null;

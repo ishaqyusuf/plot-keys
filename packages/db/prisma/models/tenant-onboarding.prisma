@@ -1,21 +1,21 @@
 model TenantOnboarding {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String    @unique @map("user_id")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Core identity set during signup
-  companyName String    @map("company_name")
+  companyName String @map("company_name")
   subdomain   String
 
   // Step 1: Business Identity
-  tagline        String? @map("tagline")
-  businessType   String? @map("business_type")
-  primaryGoal    String? @map("primary_goal")
+  tagline      String? @map("tagline")
+  businessType String? @map("business_type")
+  primaryGoal  String? @map("primary_goal")
 
   // Step 2: Market Focus
   locations      String[] @map("locations")
   propertyTypes  String[] @map("property_types")
-  targetAudience String?  @map("target_audience")
+  targetAudience String[] @map("target_audience")
 
   // Step 3: Brand Style
   tone               String? @map("tone")
@@ -38,11 +38,11 @@ model TenantOnboarding {
   hasBlogContent     Boolean @default(false) @map("has_blog_content")
 
   // Step 6: Derived tenant profile (computed after each step save)
-  businessSummary      String? @map("business_summary")
-  segment              String? // luxury | commercial | residential | rental | mixed
-  designIntent         String? @map("design_intent") // editorial | bold | warm | clean
-  conversionFocus      String? @map("conversion_focus") // leads | listings | brand | balanced
-  complexity           String? // low | medium | high
+  businessSummary        String? @map("business_summary")
+  segment                String? // luxury | commercial | residential | rental | mixed
+  designIntent           String? @map("design_intent") // editorial | bold | warm | clean
+  conversionFocus        String? @map("conversion_focus") // leads | listings | brand | balanced
+  complexity             String? // low | medium | high
   recommendedTemplateKey String? @map("recommended_template_key")
 
   // Final step fields (market = primary market area, templateKey = chosen template)
@@ -56,6 +56,5 @@ model TenantOnboarding {
 
   @@index([userId], map: "tenant_onboardings_user_id_idx")
   @@index([completedAt], map: "tenant_onboardings_completed_at_idx")
-
   @@map("tenant_onboardings")
 }

@@ -1,5 +1,4 @@
-// import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
-import { promisify } from "node:util";
+import { compare, hash } from "bcrypt-ts";
 import {
   createPrismaClient,
   createUser,
@@ -66,23 +65,17 @@ export type AppSession = {
   };
 };
 
-const scryptAsync = promisify(scrypt);
+const BCRYPT_COST = 12;
 
 async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const hash = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${hash.toString("hex")}`;
+  return hash(password, BCRYPT_COST);
 }
 
 async function verifyPasswordHash(
   password: string,
   storedHash: string,
 ): Promise<boolean> {
-  const [salt, hash] = storedHash.split(":");
-  if (!salt || !hash) return false;
-  const hashBuffer = Buffer.from(hash, "hex");
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return timingSafeEqual(hashBuffer, derived);
+  return compare(password, storedHash);
 }
 
 function requireDb() {
@@ -188,9 +181,45 @@ export async function signInUser(input: { email: string; password: string }) {
   return user;
 }
 
+/**
+ * Sign a cookie value using HMAC-SHA256, matching the format that
+ * Better Auth / better-call expects: `{value}.{base64Signature}`.
+ *
+ * Returns the raw signed value (NOT URL-encoded). The cookie serializer
+ * (Next.js `cookies().set()`) handles encoding.
+ */
+async function signCookieValue(value: string, secret: string): Promise<string> {
+  const key = await globalThis.crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await globalThis.crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(value),
+  );
+  const base64Sig = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  return `${value}.${base64Sig}`;
+}
+
+function getAuthSecret(): string {
+  return process.env.BETTER_AUTH_SECRET ?? "plotkeys-local-dev-secret";
+}
+
+/**
+ * Creates a Better Auth session in the DB and returns both:
+ *  - `sessionToken`: the raw token stored in the DB
+ *  - `signedSessionToken`: the cookie-ready value (signed with HMAC-SHA256)
+ *
+ * The dashboard must set the cookie to `signedSessionToken` so that
+ * Better Auth's `getSignedCookie` can verify it on subsequent requests.
+ */
 export async function createBetterAuthSession(
   userId: string,
-): Promise<{ sessionToken: string; expiresAt: Date }> {
+): Promise<{ sessionToken: string; signedSessionToken: string; expiresAt: Date }> {
   const db = requireDb();
   const sessionToken = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
@@ -206,7 +235,9 @@ export async function createBetterAuthSession(
     },
   });
 
-  return { sessionToken, expiresAt };
+  const signedSessionToken = await signCookieValue(sessionToken, getAuthSecret());
+
+  return { sessionToken, signedSessionToken, expiresAt };
 }
 
 export async function getAppSessionFromBetterAuth(

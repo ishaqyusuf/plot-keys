@@ -7,6 +7,9 @@ This file records completed work milestones.
 - Add concise completion notes with enough context for future readers.
 
 ## Done
+- Fixed sign-in → onboarding redirect loop by standardizing auth session cookie usage on `plotkeys.session_token` across dashboard middleware, session readers, API redirect resolution, and server actions
+- Fixed NEXT_REDIRECT error across all dashboard server actions by moving `redirect()` outside `try/catch` blocks so Next.js redirect exceptions propagate correctly
+- Switched auth password hashing and verification in `packages/auth` from local scrypt utilities to `bcrypt-ts`
 - Initialized Project Brain for the real-estate SaaS repository
 - Scaffolded the Bun + Turbo monorepo with `apps/api`, `apps/dashboard`, `apps/website`, `apps/tenant-site`, and the agreed shared packages
 - Added validated starter configs for Next.js, Tailwind CSS, Hono + tRPC, Biome, and shared TypeScript setup

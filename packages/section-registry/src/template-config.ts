@@ -21,67 +21,115 @@ import type { DerivedDesignConfig } from "./recommendation";
 export type StylePreset = "vega" | "nova" | "maia" | "myra" | "lyra";
 
 export type StylePresetDefinition = {
-  accentColor: string;
-  backgroundColor: string;
-  /** Visual spacing density. */
-  density: "compact" | "comfortable" | "spacious";
-  fontFamily: string;
-  headingFontFamily: string;
-  label: string;
-  /** Border-radius scale. */
-  radius: "none" | "sm" | "md" | "lg" | "full";
+  key: StylePreset;
+  name: string;
+  /** Tailwind spacing classes applied to section layout. */
+  spacing: {
+    sectionY: string;
+    sectionGap: string;
+    containerX: string;
+    gridGap: string;
+  };
+  /** Tailwind border-radius classes applied per UI element type. */
+  radius: {
+    card: string;
+    button: string;
+    input: string;
+    modal: string;
+  };
+  density: "compact" | "balanced" | "airy";
 };
 
 export const stylePresets: Record<StylePreset, StylePresetDefinition> = {
   /** Clean, minimal — great for lead-gen residential brands. */
   vega: {
-    accentColor: "#0369a1",
-    backgroundColor: "#f0f9ff",
-    density: "comfortable",
-    fontFamily: "Inter",
-    headingFontFamily: "Epilogue",
-    label: "Vega",
-    radius: "md",
+    key: "vega",
+    name: "Vega",
+    spacing: {
+      sectionY: "py-20",
+      sectionGap: "gap-10",
+      containerX: "px-4 md:px-6",
+      gridGap: "gap-6",
+    },
+    radius: {
+      card: "rounded-2xl",
+      button: "rounded-md",
+      input: "rounded-md",
+      modal: "rounded-2xl",
+    },
+    density: "balanced",
   },
   /** Dark, editorial luxury — best for high-end brands. */
   nova: {
-    accentColor: "#1e293b",
-    backgroundColor: "#0f172a",
-    density: "spacious",
-    fontFamily: "Satoshi",
-    headingFontFamily: "Space Grotesk",
-    label: "Nova",
-    radius: "sm",
+    key: "nova",
+    name: "Nova",
+    spacing: {
+      sectionY: "py-24",
+      sectionGap: "gap-12",
+      containerX: "px-5 md:px-8",
+      gridGap: "gap-8",
+    },
+    radius: {
+      card: "rounded-3xl",
+      button: "rounded-full",
+      input: "rounded-xl",
+      modal: "rounded-3xl",
+    },
+    density: "airy",
   },
   /** Warm editorial serif — perfect for boutique and family agencies. */
   maia: {
-    accentColor: "#0f766e",
-    backgroundColor: "#f4efe7",
-    density: "spacious",
-    fontFamily: "Georgia",
-    headingFontFamily: "Playfair Display",
-    label: "Maia",
-    radius: "none",
+    key: "maia",
+    name: "Maia",
+    spacing: {
+      sectionY: "py-28",
+      sectionGap: "gap-14",
+      containerX: "px-6 md:px-10",
+      gridGap: "gap-8",
+    },
+    radius: {
+      card: "rounded-none",
+      button: "rounded-none",
+      input: "rounded-sm",
+      modal: "rounded-sm",
+    },
+    density: "airy",
   },
   /** Minimal neutral — versatile for any market segment. */
   myra: {
-    accentColor: "#334155",
-    backgroundColor: "#f8fafc",
+    key: "myra",
+    name: "Myra",
+    spacing: {
+      sectionY: "py-16",
+      sectionGap: "gap-8",
+      containerX: "px-4 md:px-5",
+      gridGap: "gap-4",
+    },
+    radius: {
+      card: "rounded-lg",
+      button: "rounded-full",
+      input: "rounded-full",
+      modal: "rounded-xl",
+    },
     density: "compact",
-    fontFamily: "Inter",
-    headingFontFamily: "Inter",
-    label: "Myra",
-    radius: "full",
   },
   /** Bold, high-contrast — ideal for commercial and investor audiences. */
   lyra: {
-    accentColor: "#1d4ed8",
-    backgroundColor: "#f8fafc",
-    density: "comfortable",
-    fontFamily: "Satoshi",
-    headingFontFamily: "Satoshi",
-    label: "Lyra",
-    radius: "lg",
+    key: "lyra",
+    name: "Lyra",
+    spacing: {
+      sectionY: "py-20",
+      sectionGap: "gap-10",
+      containerX: "px-4 md:px-8",
+      gridGap: "gap-6",
+    },
+    radius: {
+      card: "rounded-xl",
+      button: "rounded-lg",
+      input: "rounded-lg",
+      modal: "rounded-2xl",
+    },
+    density: "balanced",
   },
 };
 
@@ -308,7 +356,8 @@ export function serializeTemplateConfig(
   if (config.backgroundColor) output.backgroundColor = config.backgroundColor;
   if (config.colorSystem) output.colorSystem = config.colorSystem;
   if (config.fontFamily) output.fontFamily = config.fontFamily;
-  if (config.headingFontFamily) output.headingFontFamily = config.headingFontFamily;
+  if (config.headingFontFamily)
+    output.headingFontFamily = config.headingFontFamily;
   if (config.logo) output.logo = config.logo;
   if (config.market) output.market = config.market;
   if (config.stylePreset) output.stylePreset = config.stylePreset;
@@ -378,25 +427,16 @@ export function applyConfigUpdate(
 }
 
 /**
- * Merges a style preset definition with tenant-supplied overrides from
- * TemplateConfig. Tenant values always win — the preset provides defaults.
+ * Merges tenant-supplied overrides into a TemplateConfig anchored to the
+ * given style preset. The preset controls layout (spacing, radius, density)
+ * only; colors and fonts are separate concerns managed via their own fields.
  */
 export function resolvePresetConfig(
   presetKey: StylePreset | undefined,
   overrides: Partial<TemplateConfig> = {},
 ): TemplateConfig {
-  const base = presetKey ? stylePresets[presetKey] : undefined;
-
   return {
-    accentColor: overrides.accentColor ?? base?.accentColor,
-    backgroundColor: overrides.backgroundColor ?? base?.backgroundColor,
-    colorSystem: overrides.colorSystem,
-    fontFamily: overrides.fontFamily ?? base?.fontFamily,
-    headingFontFamily: overrides.headingFontFamily ?? base?.headingFontFamily,
-    logo: overrides.logo,
-    market: overrides.market,
-    namedImages: overrides.namedImages,
+    ...overrides,
     stylePreset: overrides.stylePreset ?? presetKey,
-    supportLine: overrides.supportLine,
   };
 }

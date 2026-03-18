@@ -11,7 +11,7 @@ export type OnboardingStepProgressInput = {
   // Step 2: Market Focus
   locations?: string[];
   propertyTypes?: string[];
-  targetAudience?: string | null;
+  targetAudience?: string[];
   // Step 3: Brand Style
   tone?: string | null;
   stylePreference?: string | null;
@@ -59,9 +59,13 @@ export async function upsertTenantOnboarding(
     update: {
       companyName: input.companyName.trim(),
       currentStep: input.currentStep ?? "business-identity",
-      ...(input.market !== undefined && { market: input.market.trim() || null }),
+      ...(input.market !== undefined && {
+        market: input.market.trim() || null,
+      }),
       subdomain: input.subdomain.trim().toLowerCase(),
-      ...(input.templateKey !== undefined && { templateKey: input.templateKey }),
+      ...(input.templateKey !== undefined && {
+        templateKey: input.templateKey,
+      }),
     },
     where: { userId: input.userId },
   });
@@ -75,37 +79,69 @@ export async function saveOnboardingStepProgress(
 
   return db.tenantOnboarding.update({
     data: {
-      ...(fields.currentStep !== undefined && { currentStep: fields.currentStep }),
-      ...(fields.companyName !== undefined && { companyName: fields.companyName.trim() }),
+      ...(fields.currentStep !== undefined && {
+        currentStep: fields.currentStep,
+      }),
+      ...(fields.companyName !== undefined && {
+        companyName: fields.companyName.trim(),
+      }),
       // Step 1
       ...(fields.tagline !== undefined && { tagline: fields.tagline }),
-      ...(fields.businessType !== undefined && { businessType: fields.businessType }),
-      ...(fields.primaryGoal !== undefined && { primaryGoal: fields.primaryGoal }),
+      ...(fields.businessType !== undefined && {
+        businessType: fields.businessType,
+      }),
+      ...(fields.primaryGoal !== undefined && {
+        primaryGoal: fields.primaryGoal,
+      }),
       // Step 2
       ...(fields.locations !== undefined && { locations: fields.locations }),
-      ...(fields.propertyTypes !== undefined && { propertyTypes: fields.propertyTypes }),
-      ...(fields.targetAudience !== undefined && { targetAudience: fields.targetAudience }),
+      ...(fields.propertyTypes !== undefined && {
+        propertyTypes: fields.propertyTypes,
+      }),
+      ...(fields.targetAudience !== undefined && {
+        targetAudience: fields.targetAudience,
+      }),
       // Step 3
       ...(fields.tone !== undefined && { tone: fields.tone }),
-      ...(fields.stylePreference !== undefined && { stylePreference: fields.stylePreference }),
-      ...(fields.preferredColorHint !== undefined && { preferredColorHint: fields.preferredColorHint }),
+      ...(fields.stylePreference !== undefined && {
+        stylePreference: fields.stylePreference,
+      }),
+      ...(fields.preferredColorHint !== undefined && {
+        preferredColorHint: fields.preferredColorHint,
+      }),
       // Step 4
       ...(fields.phone !== undefined && { phone: fields.phone }),
-      ...(fields.contactEmail !== undefined && { contactEmail: fields.contactEmail }),
+      ...(fields.contactEmail !== undefined && {
+        contactEmail: fields.contactEmail,
+      }),
       ...(fields.whatsapp !== undefined && { whatsapp: fields.whatsapp }),
-      ...(fields.officeAddress !== undefined && { officeAddress: fields.officeAddress }),
+      ...(fields.officeAddress !== undefined && {
+        officeAddress: fields.officeAddress,
+      }),
       // Step 5
       ...(fields.hasLogo !== undefined && { hasLogo: fields.hasLogo }),
-      ...(fields.hasListings !== undefined && { hasListings: fields.hasListings }),
-      ...(fields.hasExistingContent !== undefined && { hasExistingContent: fields.hasExistingContent }),
+      ...(fields.hasListings !== undefined && {
+        hasListings: fields.hasListings,
+      }),
+      ...(fields.hasExistingContent !== undefined && {
+        hasExistingContent: fields.hasExistingContent,
+      }),
       ...(fields.hasAgents !== undefined && { hasAgents: fields.hasAgents }),
-      ...(fields.hasProjects !== undefined && { hasProjects: fields.hasProjects }),
-      ...(fields.hasTestimonials !== undefined && { hasTestimonials: fields.hasTestimonials }),
-      ...(fields.hasBlogContent !== undefined && { hasBlogContent: fields.hasBlogContent }),
+      ...(fields.hasProjects !== undefined && {
+        hasProjects: fields.hasProjects,
+      }),
+      ...(fields.hasTestimonials !== undefined && {
+        hasTestimonials: fields.hasTestimonials,
+      }),
+      ...(fields.hasBlogContent !== undefined && {
+        hasBlogContent: fields.hasBlogContent,
+      }),
       // Final
       ...(fields.market !== undefined && { market: fields.market }),
       ...(fields.subdomain !== undefined && { subdomain: fields.subdomain }),
-      ...(fields.templateKey !== undefined && { templateKey: fields.templateKey }),
+      ...(fields.templateKey !== undefined && {
+        templateKey: fields.templateKey,
+      }),
     },
     where: { userId },
   });
