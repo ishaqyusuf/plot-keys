@@ -1,0 +1,28 @@
+enum TemplateLicenseSource {
+  free              // One free template pick included for all plans
+  plan_included     // Included in the current plan tier at no extra cost
+  purchased         // Individually purchased outside of a plan
+  admin_granted     // Granted by a platform admin (e.g., comp, partnership)
+
+  @@map("template_license_source")
+}
+
+/// Tracks which templates a company is licensed to use and how that license was obtained.
+/// A company may hold multiple licenses (e.g., plan_included + a purchased add-on).
+model TenantTemplateLicense {
+  id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId   String                @map("company_id") @db.Uuid
+  templateKey String                @map("template_key")
+  source      TemplateLicenseSource
+  grantedAt   DateTime              @default(now()) @map("granted_at") @db.Timestamptz(6)
+  revokedAt   DateTime?             @map("revoked_at") @db.Timestamptz(6)
+  grantedById String?               @map("granted_by_id") @db.Uuid
+
+  company     Company               @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, templateKey, source], map: "tenant_template_licenses_company_template_source_uidx")
+  @@index([companyId], map: "tenant_template_licenses_company_id_idx")
+  @@index([templateKey], map: "tenant_template_licenses_template_key_idx")
+
+  @@map("tenant_template_licenses")
+}

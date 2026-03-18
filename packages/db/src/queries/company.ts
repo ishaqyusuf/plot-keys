@@ -18,6 +18,29 @@ export async function findCompanyById(db: Db, id: string) {
   });
 }
 
+export async function updateCompanyLogo(
+  db: Db,
+  companyId: string,
+  logoUrl: string | null,
+) {
+  return db.company.update({
+    data: { logoUrl },
+    where: { id: companyId },
+  });
+}
+
+export async function updateCompanyPlan(
+  db: Db,
+  companyId: string,
+  planTier: "starter" | "plus" | "pro",
+  planStatus: "active" | "past_due" | "canceled",
+) {
+  return db.company.update({
+    data: { planStatus, planTier },
+    where: { id: companyId },
+  });
+}
+
 export async function listTemplateUsageCounts(db: Db) {
   const records = await db.siteConfiguration.findMany({
     distinct: ["companyId", "templateKey"],

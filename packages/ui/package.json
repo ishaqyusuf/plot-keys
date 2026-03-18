@@ -56,10 +56,13 @@
     "./slider": "./src/components/slider.tsx",
     "./sonner": "./src/components/sonner.tsx",
     "./spinner": "./src/components/spinner.tsx",
+    "./submit-button": "./src/components/submit-button.tsx",
     "./switch": "./src/components/switch.tsx",
     "./table": "./src/components/table.tsx",
     "./tabs": "./src/components/tabs.tsx",
     "./textarea": "./src/components/textarea.tsx",
+    "./theme-provider": "./src/components/theme-provider.tsx",
+    "./theme-toggle": "./src/components/theme-toggle.tsx",
     "./toggle": "./src/components/toggle.tsx",
     "./toggle-group": "./src/components/toggle-group.tsx",
     "./tooltip": "./src/components/tooltip.tsx"

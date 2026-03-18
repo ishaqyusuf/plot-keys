@@ -65,9 +65,34 @@ export type TemplateDefinition = {
   description: string;
   editableFields: EditableFieldDefinition[];
   key: string;
+  /** Human-readable marketing tagline shown in the template picker. */
+  marketingTagline: string;
   name: string;
+  /** Whether this template can be individually purchased without a plan upgrade. */
+  purchasable: boolean;
+  /** URL of the preview thumbnail used in template cards. */
+  previewImageUrl?: string;
   tier: TemplateTier;
 };
+
+export type LiveListingItem = {
+  imageUrl?: string | null;
+  location: string;
+  price?: string | null;
+  specs?: string | null;
+  title: string;
+};
+
+/**
+ * Controls how the website is rendered.
+ *
+ * - `live`    Published tenant site. No editing chrome.
+ * - `draft`   Builder / editor view. Empty fields show placeholder outlines;
+ *             sections may render a subtle focus outline on hover.
+ * - `preview` Authenticated preview (preview-token URL). Renders published
+ *             content with a "Preview" badge; no editing controls.
+ */
+export type RenderMode = "draft" | "live" | "preview";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
@@ -75,6 +100,7 @@ export type ResolvedWebsitePresentation = {
     page: "home";
     sections: HomeSectionDefinition[];
   };
+  renderMode: RenderMode;
   template: TemplateDefinition;
   theme: ThemeConfig;
 };
@@ -82,7 +108,10 @@ export type ResolvedWebsitePresentation = {
 type ResolveTemplateOptions = {
   companyName?: string;
   content?: TenantContentRecord;
+  liveListings?: LiveListingItem[];
   market?: string;
+  /** Defaults to "live" when omitted. */
+  renderMode?: RenderMode;
   subdomain?: string;
   templateKey: string;
   theme?: TenantThemeRecord;
@@ -190,7 +219,48 @@ function createDefaultContent(
   };
 }
 
-function buildHomePage(content: TenantContentRecord): {
+function buildListingSpotlightItems(
+  liveListings: LiveListingItem[] | undefined,
+): ListingSpotlightItem[] {
+  if (liveListings && liveListings.length > 0) {
+    return liveListings.slice(0, 3).map((listing) => ({
+      imageHint: listing.imageUrl ?? "Property listing",
+      location: listing.location,
+      price: listing.price ?? "Price on request",
+      specs: listing.specs ?? "",
+      title: listing.title,
+    }));
+  }
+
+  return [
+    {
+      imageHint: "Waterfront duplex preview",
+      location: "Banana Island",
+      price: "NGN 1.85B",
+      specs: "5 bed • 6 bath • cinema room • private dock access",
+      title: "Sunlit waterfront duplex with private family lounge",
+    },
+    {
+      imageHint: "Minimal tower penthouse preview",
+      location: "Ikoyi",
+      price: "NGN 980M",
+      specs: "4 bed • skyline terrace • concierge • smart controls",
+      title: "Penthouse residence with skyline-facing entertaining suite",
+    },
+    {
+      imageHint: "Garden estate preview",
+      location: "Lekki Phase 1",
+      price: "NGN 620M",
+      specs: "4 bed • pool deck • home office • gated community",
+      title: "Contemporary family home tucked into a quiet garden estate",
+    },
+  ];
+}
+
+function buildHomePage(
+  content: TenantContentRecord,
+  liveListings?: LiveListingItem[],
+): {
   page: "home";
   sections: HomeSectionDefinition[];
 } {
@@ -258,33 +328,11 @@ function buildHomePage(content: TenantContentRecord): {
         component: ListingSpotlightSection,
         config: {
           description:
-            "The first template supports promotional inventory cards that can later be sourced directly from the platform listing model.",
+            liveListings && liveListings.length > 0
+              ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
+              : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
           eyebrow: "Featured inventory",
-          items: [
-            {
-              imageHint: "Waterfront duplex preview",
-              location: "Banana Island",
-              price: "NGN 1.85B",
-              specs: "5 bed • 6 bath • cinema room • private dock access",
-              title: "Sunlit waterfront duplex with private family lounge",
-            },
-            {
-              imageHint: "Minimal tower penthouse preview",
-              location: "Ikoyi",
-              price: "NGN 980M",
-              specs: "4 bed • skyline terrace • concierge • smart controls",
-              title:
-                "Penthouse residence with skyline-facing entertaining suite",
-            },
-            {
-              imageHint: "Garden estate preview",
-              location: "Lekki Phase 1",
-              price: "NGN 620M",
-              specs: "4 bed • pool deck • home office • gated community",
-              title:
-                "Contemporary family home tucked into a quiet garden estate",
-            },
-          ],
+          items: buildListingSpotlightItems(liveListings),
           title: "Featured listings feel editorial, not templated.",
         },
         id: "listing-spotlight",
@@ -338,6 +386,10 @@ function buildHomePage(content: TenantContentRecord): {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Template catalog
+// ---------------------------------------------------------------------------
+
 export const templateCatalog: TemplateDefinition[] = [
   {
     defaultContent: createDefaultContent(
@@ -358,7 +410,10 @@ export const templateCatalog: TemplateDefinition[] = [
       "Premium luxury positioning with calm, editorial presentation.",
     editableFields: baseEditableFields,
     key: "template-1",
-    name: "Template 1",
+    marketingTagline:
+      "A calm, editorial layout built for luxury and premium residential brands.",
+    name: "Aster Grove",
+    purchasable: false,
     tier: "starter",
   },
   {
@@ -379,7 +434,10 @@ export const templateCatalog: TemplateDefinition[] = [
     description: "Sharper city-led positioning for modern urban inventory.",
     editableFields: baseEditableFields,
     key: "template-2",
-    name: "Template 2",
+    marketingTagline:
+      "Bold, listing-first layout for urban agencies and commercial portfolios.",
+    name: "Atlas Urban",
+    purchasable: true,
     tier: "plus",
   },
   {
@@ -401,7 +459,84 @@ export const templateCatalog: TemplateDefinition[] = [
       "Warm, trust-led presentation for family and investor audiences.",
     editableFields: baseEditableFields,
     key: "template-3",
-    name: "Template 3",
+    marketingTagline:
+      "Warm, trust-driven layout ideal for family buyers and investor audiences.",
+    name: "Palmstone",
+    purchasable: true,
+    tier: "pro",
+  },
+];
+
+  // ─── Template 4: Meridian Estates (residential / clean / listings) ───
+  {
+    defaultContent: createDefaultContent(
+      "Meridian Estates",
+      "Port Harcourt",
+      "Prime residential and commercial addresses",
+    ),
+    defaultTheme: {
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+      logo: "Meridian Estates",
+      market: "Port Harcourt",
+      supportLine: "+234 803 444 7700",
+    },
+    description: "Clean, listing-first layout for high-volume residential markets.",
+    editableFields: baseEditableFields,
+    key: "template-4",
+    marketingTagline: "Listing-first, data-backed layout for residential sales agencies.",
+    name: "Meridian",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 5: Thornfield (investor / bold / commercial) ───────────
+  {
+    defaultContent: createDefaultContent(
+      "Thornfield Capital",
+      "Victoria Island, Lagos",
+      "Investment-grade commercial and mixed-use assets",
+    ),
+    defaultTheme: {
+      accentColor: "#1e293b",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Thornfield Capital",
+      market: "Victoria Island, Lagos",
+      supportLine: "+234 1 234 5678",
+    },
+    description: "Bold, data-confident presentation for commercial and investor audiences.",
+    editableFields: baseEditableFields,
+    key: "template-5",
+    marketingTagline: "High-conviction layout built for commercial and investment-grade mandates.",
+    name: "Thornfield",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 6: Crestview (family / warm / mid-market) ──────────────
+  {
+    defaultContent: createDefaultContent(
+      "Crestview Homes",
+      "Abuja",
+      "Quality family homes across Abuja's best neighbourhoods",
+    ),
+    defaultTheme: {
+      accentColor: "#16a34a",
+      backgroundColor: "#f0fdf4",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: 'Georgia, "Times New Roman", serif',
+      logo: "Crestview Homes",
+      market: "Abuja",
+      supportLine: "+234 802 100 4321",
+    },
+    description: "Warm, community-led layout for family-focused mid-market agencies.",
+    editableFields: baseEditableFields,
+    key: "template-6",
+    marketingTagline: "Welcoming, community-driven layout for family-first residential agencies.",
+    name: "Crestview",
+    purchasable: true,
     tier: "pro",
   },
 ];
@@ -448,7 +583,9 @@ export function createInitialSiteConfigurationInput({
 export function resolveWebsitePresentation({
   companyName,
   content,
+  liveListings,
   market,
+  renderMode = "live",
   subdomain,
   templateKey,
   theme,
@@ -461,7 +598,8 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(mergedContent),
+    page: buildHomePage(mergedContent, liveListings),
+    renderMode,
     template,
     theme: {
       ...template.defaultTheme,
@@ -475,8 +613,95 @@ export function resolveWebsitePresentation({
   };
 }
 
+/**
+ * Returns true when a content field value should be treated as empty/missing
+ * and should show a placeholder outline in draft rendering mode.
+ */
+export function isContentFieldEmpty(value: string | undefined | null): boolean {
+  return !value || value.trim().length === 0;
+}
+
+/**
+ * Returns the CSS class string to apply to a content field wrapper when in
+ * draft mode and the field has no user-supplied value.
+ */
+export function draftPlaceholderClass(
+  renderMode: RenderMode,
+  value: string | undefined | null,
+): string {
+  if (renderMode !== "draft") return "";
+  return isContentFieldEmpty(value)
+    ? "outline-dashed outline-2 outline-offset-2 outline-amber-400/60 rounded"
+    : "";
+}
+
 export const sampleTheme = fallbackTemplate.defaultTheme;
 export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
+
+export {
+  applyAiGeneration,
+  applyHumanEdit,
+  flattenContentNodes,
+  liftFlatContent,
+} from "./content-nodes";
+export {
+  applyConfigUpdate,
+  deserializeTemplateConfig,
+  fromDerivedDesignConfig,
+  serializeTemplateConfig,
+  stylePresets,
+} from "./template-config";
+export {
+  getFreeStockImages,
+  getStockImageById,
+  getStockImagesByCategory,
+  getStockImagesForSlot,
+  stockImageCatalog,
+} from "./stock-images";
+export type {
+  StockImage,
+  StockImageCategory,
+  StockImageLicenseTier,
+} from "./stock-images";
+export type {
+  ColorScheme,
+  StylePreset,
+  TemplateConfig,
+} from "./template-config";
+export type {
+  ContentNode,
+  ContentNodeKind,
+  ContentNodeProvenance,
+  ContentNodeRecord,
+} from "./content-nodes";
+export { resolveFontStack, resolveHeadingFontStack } from "./fonts";
+export {
+  collectContentKeys,
+  getEnabledSections,
+  getTemplatePageInventory,
+} from "./page-inventory";
+export type {
+  PageDefinition,
+  SectionSlot,
+  TemplatePageInventory,
+} from "./page-inventory";
+export {
+  buildBusinessSummary,
+  deriveDesignConfig,
+  derivePageComposition,
+  derivePersonalizedContent,
+  deriveProfile,
+  deriveSectionVisibility,
+  scoreTemplates,
+} from "./recommendation";
+export type {
+  DerivedDesignConfig,
+  DerivedPageComposition,
+  DerivedProfile,
+  OnboardingSnapshot,
+  SectionVisibilityMap,
+  TemplateRecommendation,
+} from "./recommendation";
 
 export type {
   CtaBandConfig,

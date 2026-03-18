@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { createPrismaClient, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
   resolveWebsitePresentation,
@@ -39,11 +39,17 @@ export default async function TenantWebsiteHomePage({
   const params = (await searchParams) ?? {};
   const requestHeaders = await headers();
   const prisma = createPrismaClient().db;
-  const requestedHostname =
+
+  // Prefer middleware-injected headers; fall back to query params for local dev.
+  const tenantSubdomain =
+    requestHeaders.get("x-tenant-subdomain") || params.subdomain || null;
+  const tenantHostname =
+    requestHeaders.get("x-tenant-hostname") ||
     extractTenantHostname(params.hostname) ||
-    extractTenantHostname(requestHeaders.get("x-forwarded-host")) ||
-    extractTenantHostname(requestHeaders.get("host"));
-  const subdomain = params.subdomain;
+    null;
+
+  const requestedHostname = tenantHostname;
+  const subdomain = tenantSubdomain;
   let matchedHostname: string | null = requestedHostname;
 
   let preview = {
@@ -52,27 +58,21 @@ export default async function TenantWebsiteHomePage({
   };
 
   if (prisma) {
-    const tenantDomain = requestedHostname
-      ? await prisma.tenantDomain.findFirst({
-          include: {
-            company: true,
-          },
-          where: {
-            deletedAt: null,
-            hostname: requestedHostname,
-          },
-        })
+    // Prefer hostname-based lookup via tenant_domains (handles custom domains).
+    // Fall back to slug-based lookup for preview mode (?subdomain= query param).
+    const resolvedTenant = requestedHostname
+      ? await resolveTenantByHostname(prisma, requestedHostname)
       : null;
-    const company =
-      tenantDomain?.company ??
-      (subdomain
+
+    const company = resolvedTenant
+      ? await prisma.company.findFirst({
+          where: { deletedAt: null, id: resolvedTenant.companyId },
+        })
+      : subdomain
         ? await prisma.company.findFirst({
-            where: {
-              deletedAt: null,
-              slug: subdomain,
-            },
+            where: { deletedAt: null, slug: subdomain },
           })
-        : null);
+        : null;
 
     if (company) {
       const publishedConfiguration = await prisma.siteConfiguration.findFirst({
@@ -84,11 +84,22 @@ export default async function TenantWebsiteHomePage({
       });
 
       if (publishedConfiguration) {
-        matchedHostname = tenantDomain?.hostname ?? matchedHostname;
+        matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
+
+        const featuredProperties = await listFeaturedProperties(prisma, company.id);
+
         preview = resolveWebsitePresentation({
           companyName: company.name,
           content: publishedConfiguration.contentJson as Record<string, string>,
+          liveListings: featuredProperties.map((p) => ({
+            imageUrl: p.imageUrl,
+            location: p.location,
+            price: p.price,
+            specs: p.specs,
+            title: p.title,
+          })),
           market: company.market ?? company.name,
+          renderMode: "live",
           subdomain: company.slug,
           templateKey: publishedConfiguration.templateKey,
           theme: publishedConfiguration.themeJson as Record<string, string>,

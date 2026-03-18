@@ -1,0 +1,97 @@
+/**
+ * Website and WebsiteVersion models.
+ *
+ * Migration path from SiteConfiguration:
+ *
+ * Phase 1 (current) — SiteConfiguration is the authoritative store.
+ *   `Website` and `WebsiteVersion` exist in the schema but are not yet
+ *   populated by application code. New code may start writing to them
+ *   in parallel without removing SiteConfiguration reads.
+ *
+ * Phase 2 — Dual-write. Application writes to both models simultaneously.
+ *   A backfill migration creates one Website per Company and one
+ *   WebsiteVersion per existing SiteConfiguration row.
+ *
+ * Phase 3 — Cutover. All read paths switch to Website/WebsiteVersion.
+ *   SiteConfiguration is retained as an archive table only.
+ *
+ * Phase 4 — Cleanup. SiteConfiguration is dropped once monitoring confirms
+ *   no reads are hitting it.
+ *
+ * The `legacyConfigId` column on WebsiteVersion tracks the source row during
+ * the migration window so Phase 3 can validate data fidelity.
+ */
+
+enum WebsiteStatus {
+  active
+  archived
+
+  @@map("website_status")
+}
+
+enum WebsiteVersionStatus {
+  draft
+  published
+  archived
+
+  @@map("website_version_status")
+}
+
+/**
+ * One Website per Company.
+ *
+ * Replaces the ad-hoc "one active SiteConfiguration per company" pattern
+ * with an explicit, named entity that owns the publishing lifecycle.
+ */
+model Website {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId    String        @unique @map("company_id") @db.Uuid
+  templateKey  String        @map("template_key")
+  subdomain    String?
+  status       WebsiteStatus @default(active)
+  publishedVersionId String? @map("published_version_id") @db.Uuid
+
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  versions     WebsiteVersion[]
+
+  @@index([companyId], map: "websites_company_id_idx")
+  @@index([templateKey], map: "websites_template_key_idx")
+  @@map("websites")
+}
+
+/**
+ * Immutable snapshot of a website at a point in time.
+ *
+ * Each publish creates a new version; the previous version is archived.
+ * Draft edits accumulate on the latest draft version until published.
+ * This allows rollbacks by pointing `Website.publishedVersionId` at an
+ * older version row.
+ */
+model WebsiteVersion {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  websiteId       String               @map("website_id") @db.Uuid
+  versionNumber   Int                  @map("version_number")
+  status          WebsiteVersionStatus @default(draft)
+  name            String?
+  themeJson       Json                 @default("{}") @map("theme_json")
+  contentJson     Json                 @default("{}") @map("content_json")
+  /** Tracks the source SiteConfiguration row during the migration window. */
+  legacyConfigId  String?              @map("legacy_config_id") @db.Uuid
+  publishedAt     DateTime?            @map("published_at") @db.Timestamptz(6)
+  createdById     String?              @map("created_by_id")
+  updatedById     String?              @map("updated_by_id")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  website         Website              @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  createdBy       User?                @relation("WebsiteVersionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy       User?                @relation("WebsiteVersionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@unique([websiteId, versionNumber])
+  @@index([websiteId, status], map: "website_versions_website_status_idx")
+  @@map("website_versions")
+}

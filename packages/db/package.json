@@ -10,6 +10,7 @@
     "./queries/company": "./src/queries/company.ts",
     "./queries/onboarding": "./src/queries/onboarding.ts",
     "./queries/site-configuration": "./src/queries/site-configuration.ts",
+    "./queries/template-license": "./src/queries/template-license.ts",
     "./queries/tenant-domain": "./src/queries/tenant-domain.ts"
   },
   "scripts": {
@@ -19,6 +20,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:drizzle:studio": "drizzle-kit studio",
+    "seed:templates": "bun src/seed-templates.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },

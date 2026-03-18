@@ -3,9 +3,9 @@
 import { buildRequestContext } from "@plotkeys/api/context";
 import { appRouter } from "@plotkeys/api/router";
 import {
+  authCookiePrefix,
   authRoutes,
-  authSessionCookieName,
-  createSessionToken,
+  createBetterAuthSession,
   resolvePostVerificationRoute,
   signInUser,
   signUpUser,
@@ -68,10 +68,11 @@ async function assertSubdomainAvailability(
 
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
+  const { sessionToken, expiresAt } = await createBetterAuthSession(userId);
 
-  cookieStore.set(authSessionCookieName, createSessionToken(userId), {
+  cookieStore.set(`${authCookiePrefix}.session_token`, sessionToken, {
+    expires: expiresAt,
     httpOnly: true,
-    maxAge: 60 * 60 * 24 * 7,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -179,26 +180,52 @@ export async function verifyEmailAction(formData: FormData) {
 export async function signOutAction() {
   const cookieStore = await cookies();
 
-  cookieStore.delete(authSessionCookieName);
+  cookieStore.delete(`${authCookiePrefix}.session_token`);
   clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }
 
 export async function completeOnboardingAction(formData: FormData) {
-  await requireAuthenticatedSession();
+  const session = await requireAuthenticatedSession();
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
 
-  const companyName = pendingOnboarding?.company ?? "";
-  const subdomain = normalizeSubdomainLabel(pendingOnboarding?.subdomain ?? "");
   const market = String(formData.get("market") ?? "").trim();
   const templateKey = String(formData.get("template") ?? "template-1");
+
+  // Load persisted onboarding record from DB (durable across devices/sessions).
+  // Fall back to the cookie for users who signed up before DB persistence was added.
+  const prisma = createPrismaClient().db;
+  const savedOnboarding = prisma
+    ? await prisma.tenantOnboarding.findUnique({
+        where: { userId: session.user.id },
+      })
+    : null;
+
+  const companyName =
+    savedOnboarding?.companyName ?? pendingOnboarding?.company ?? "";
+  const subdomain = normalizeSubdomainLabel(
+    savedOnboarding?.subdomain ?? pendingOnboarding?.subdomain ?? "",
+  );
 
   try {
     if (!companyName || !subdomain) {
       throw new Error(
         "Your company setup details are missing. Please start again from signup.",
       );
+    }
+
+    // Persist the final market + template selection so the record is up-to-date
+    // before the workspace procedure reads it.
+    if (savedOnboarding && prisma) {
+      await prisma.tenantOnboarding.update({
+        data: {
+          currentStep: "completing",
+          market,
+          templateKey,
+        },
+        where: { userId: session.user.id },
+      });
     }
 
     const caller = await createServerCaller();
@@ -353,6 +380,76 @@ export async function ensureBuilderConfigurationExists() {
           ? error.message
           : "Unable to ensure builder configuration.",
       )}`,
+    );
+  }
+}
+
+export async function saveOnboardingStepAction(formData: FormData) {
+  const step = String(formData.get("currentStep") ?? "business-identity");
+  const nextStep = String(formData.get("nextStep") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic input built per-step
+    const input: Record<string, any> = {
+      currentStep: nextStep || step,
+    };
+
+    if (step === "business-identity") {
+      input.tagline =
+        String(formData.get("tagline") ?? "").trim() || null;
+      input.businessType =
+        String(formData.get("businessType") ?? "").trim() || null;
+      input.primaryGoal =
+        String(formData.get("primaryGoal") ?? "").trim() || null;
+    } else if (step === "market-focus") {
+      const locationsRaw = String(formData.get("locations") ?? "");
+      input.locations = locationsRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const propertyTypeValues = formData.getAll("propertyTypes");
+      input.propertyTypes = propertyTypeValues
+        .map((v) => String(v).trim())
+        .filter(Boolean);
+      input.targetAudience =
+        String(formData.get("targetAudience") ?? "").trim() || null;
+    } else if (step === "brand-style") {
+      input.tone = String(formData.get("tone") ?? "").trim() || null;
+      input.stylePreference =
+        String(formData.get("stylePreference") ?? "").trim() || null;
+      input.preferredColorHint =
+        String(formData.get("preferredColorHint") ?? "").trim() || null;
+    } else if (step === "contact-operations") {
+      input.phone = String(formData.get("phone") ?? "").trim() || null;
+      input.contactEmail =
+        String(formData.get("contactEmail") ?? "").trim() || null;
+      input.whatsapp =
+        String(formData.get("whatsapp") ?? "").trim() || null;
+      input.officeAddress =
+        String(formData.get("officeAddress") ?? "").trim() || null;
+    } else if (step === "content-readiness") {
+      input.hasLogo = formData.get("hasLogo") === "on";
+      input.hasListings = formData.get("hasListings") === "on";
+      input.hasExistingContent = formData.get("hasExistingContent") === "on";
+      input.hasAgents = formData.get("hasAgents") === "on";
+      input.hasProjects = formData.get("hasProjects") === "on";
+      input.hasTestimonials = formData.get("hasTestimonials") === "on";
+      input.hasBlogContent = formData.get("hasBlogContent") === "on";
+    }
+
+    await caller.workspace.saveOnboardingProgress(input);
+    redirect(`/onboarding?step=${nextStep}`);
+  } catch (error) {
+    redirect(
+      createRedirectUrl("/onboarding", {
+        step,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to save onboarding progress.",
+      }),
     );
   }
 }

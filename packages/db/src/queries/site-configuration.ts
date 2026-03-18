@@ -80,6 +80,30 @@ export async function createSiteConfiguration(
   });
 }
 
+export async function updateSiteConfigurationThemeField(
+  db: Db,
+  input: {
+    configId: string;
+    currentTheme: Record<string, string>;
+    themeKey: string;
+    updatedById: string;
+    value: string;
+    version: number;
+  },
+) {
+  return db.siteConfiguration.update({
+    data: {
+      themeJson: {
+        ...input.currentTheme,
+        [input.themeKey]: input.value,
+      },
+      updatedById: input.updatedById,
+      version: input.version + 1,
+    },
+    where: { id: input.configId },
+  });
+}
+
 export async function updateSiteConfigurationContentField(
   db: Db,
   input: {
@@ -103,6 +127,53 @@ export async function updateSiteConfigurationContentField(
       updatedById: input.updatedById,
       version: input.version + 1,
     },
+  });
+}
+
+/**
+ * Returns the count of distinct companies using each template key.
+ * Only published or draft configurations are counted (not archived).
+ * Used to show template uniqueness / popularity on template picker cards.
+ */
+export async function countCompaniesByTemplateKey(
+  db: Db,
+): Promise<Record<string, number>> {
+  const rows = await db.siteConfiguration.groupBy({
+    _count: { companyId: true },
+    by: ["templateKey"],
+    where: {
+      deletedAt: null,
+      status: { in: ["draft", "published"] },
+    },
+  });
+
+  return Object.fromEntries(
+    rows.map((row) => [row.templateKey, row._count.companyId]),
+  );
+}
+
+/**
+ * Replaces the full `themeJson` with a serialized `TemplateConfig` object.
+ * Use this for structured design updates (e.g. changing the style preset,
+ * accent color, or named image assignments) rather than per-key updates.
+ * Increments the version number.
+ */
+export async function updateSiteConfigurationTheme(
+  db: Db,
+  input: {
+    configId: string;
+    themeJson: Record<string, string>;
+    updatedById: string;
+    version: number;
+  },
+) {
+  return db.siteConfiguration.update({
+    data: {
+      themeJson: input.themeJson,
+      updatedById: input.updatedById,
+      version: input.version + 1,
+    },
+    where: { id: input.configId },
   });
 }
 

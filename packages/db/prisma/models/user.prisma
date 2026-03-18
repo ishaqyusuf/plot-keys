@@ -9,9 +9,15 @@ model User {
   createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  image       String?
   memberships Membership[]
   createdSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationCreatedBy")
   updatedSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationUpdatedBy")
+  createdWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionCreatedBy")
+  updatedWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionUpdatedBy")
+  sessions    Session[]
+  accounts    Account[]
+  tenantOnboarding TenantOnboarding?
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")

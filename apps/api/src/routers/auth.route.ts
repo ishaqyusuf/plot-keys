@@ -1,7 +1,7 @@
 import {
   authRoutes,
-  createSessionToken,
-  getAppSessionFromSessionToken,
+  createBetterAuthSession,
+  getAppSessionFromBetterAuth,
   signInUser,
   signUpUser,
   verifyUserEmail,
@@ -9,6 +9,7 @@ import {
 import {
   createPrismaClient,
   findCompanyBySlug,
+  upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { normalizeSubdomainLabel } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
@@ -76,8 +77,13 @@ async function assertSubdomainAvailability(
 }
 
 async function resolvePostAuthRedirect(userId: string) {
-  const sessionToken = createSessionToken(userId);
-  const appSession = await getAppSessionFromSessionToken(sessionToken);
+  const { sessionToken } = await createBetterAuthSession(userId);
+
+  // Build synthetic headers so we can load the session from the DB
+  const syntheticHeaders = new Headers({
+    cookie: `plotkeys.session_token=${sessionToken}`,
+  });
+  const appSession = await getAppSessionFromBetterAuth(syntheticHeaders);
 
   return {
     redirectTo: appSession?.activeMembership
@@ -116,6 +122,16 @@ export const authRouter = createTRPCRouter({
         password: input.password,
         phoneNumber: input.phoneNumber,
       });
+
+      // Persist onboarding identity to the DB immediately so it can be
+      // resumed from any device/session even if the cookie expires.
+      await upsertTenantOnboarding(db, {
+        companyName: input.company.trim(),
+        currentStep: "market",
+        subdomain,
+        userId: user.id,
+      });
+
       await planAuthVerificationRequestedNotification({
         companyName: input.company.trim(),
         email: user.email,

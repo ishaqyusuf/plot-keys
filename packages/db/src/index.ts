@@ -20,11 +20,15 @@ export {
   type Db,
   type PrismaDatabaseClient,
 } from "./prisma";
+export * from "./queries/agent";
 export * from "./queries/auth";
 export * from "./queries/company";
-export * from "./queries/onboarding";
+export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
+export * from "./queries/property";
 export * from "./queries/site-configuration";
+export * from "./queries/template-license";
 export * from "./queries/tenant-domain";
+export * from "./queries/website";
 export {
   type DatabaseClientOptions,
   type DatabaseProvider,

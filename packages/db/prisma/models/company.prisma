@@ -3,6 +3,7 @@ model Company {
   slug               String
   name               String
   market             String?
+  logoUrl            String?           @map("logo_url")
   planTier           CompanyPlanTier   @default(starter) @map("plan_tier")
   planStatus         CompanyPlanStatus @default(active) @map("plan_status")
   planStartedAt      DateTime?         @map("plan_started_at") @db.Timestamptz(6)
@@ -13,7 +14,12 @@ model Company {
   deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
   memberships        Membership[]
   siteConfigurations SiteConfiguration[]
-  tenantDomains       TenantDomain[]
+  website            Website?
+  tenantDomains      TenantDomain[]
+  properties         Property[]
+  agents             Agent[]
+  templateLicenses   TenantTemplateLicense[]
+  billingLineItems   BillingLineItem[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")
