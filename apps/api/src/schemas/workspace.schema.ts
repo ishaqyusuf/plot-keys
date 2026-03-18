@@ -83,3 +83,53 @@ export type SmartFillFieldInput = z.infer<typeof smartFillFieldInputSchema>;
 export type SaveOnboardingProgressInput = z.infer<
   typeof saveOnboardingProgressInputSchema
 >;
+
+// ---------------------------------------------------------------------------
+// Property schemas
+// ---------------------------------------------------------------------------
+
+export const createPropertyInputSchema = z.object({
+  bathrooms: z.number().int().min(0).nullable().optional(),
+  bedrooms: z.number().int().min(0).nullable().optional(),
+  description: z.string().trim().nullable().optional(),
+  featured: z.boolean().optional(),
+  imageUrl: z.string().trim().url().nullable().optional(),
+  location: z.string().trim().min(1, "Location is required."),
+  price: z.string().trim().nullable().optional(),
+  specs: z.string().trim().nullable().optional(),
+  status: z.enum(["active", "sold", "rented", "off_market"]).optional(),
+  title: z.string().trim().min(1, "Title is required."),
+});
+
+export const updatePropertyInputSchema = createPropertyInputSchema
+  .partial()
+  .extend({
+    propertyId: z.string().trim().min(1, "Property id is required."),
+  });
+
+export const deletePropertyInputSchema = z.object({
+  propertyId: z.string().trim().min(1, "Property id is required."),
+});
+
+// ---------------------------------------------------------------------------
+// Agent schemas
+// ---------------------------------------------------------------------------
+
+export const createAgentInputSchema = z.object({
+  bio: z.string().trim().nullable().optional(),
+  displayOrder: z.number().int().min(0).optional(),
+  email: z.string().trim().email().nullable().optional(),
+  featured: z.boolean().optional(),
+  imageUrl: z.string().trim().url().nullable().optional(),
+  name: z.string().trim().min(1, "Name is required."),
+  phone: z.string().trim().nullable().optional(),
+  title: z.string().trim().nullable().optional(),
+});
+
+export const updateAgentInputSchema = createAgentInputSchema.partial().extend({
+  agentId: z.string().trim().min(1, "Agent id is required."),
+});
+
+export const deleteAgentInputSchema = z.object({
+  agentId: z.string().trim().min(1, "Agent id is required."),
+});

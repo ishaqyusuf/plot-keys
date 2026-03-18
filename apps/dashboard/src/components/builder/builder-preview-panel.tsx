@@ -1,6 +1,7 @@
 "use client";
 
-import type { EditableFieldDefinition, HomeSectionDefinition, ResolvedWebsitePresentation } from "@plotkeys/section-registry";
+import type { EditableFieldDefinition, HomeSectionDefinition, ResolvedWebsitePresentation, TemplateConfig } from "@plotkeys/section-registry";
+import { WebsiteRuntimeProvider } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@plotkeys/ui/field";
@@ -14,6 +15,7 @@ type BuilderPreviewPanelProps = {
   configId: string;
   editableFields: EditableFieldDefinition[];
   preview: ResolvedWebsitePresentation;
+  templateConfig?: TemplateConfig;
   onUpdateField: (formData: FormData) => Promise<void>;
   onSmartFill: (formData: FormData) => Promise<void>;
 };
@@ -228,6 +230,7 @@ export function BuilderPreviewPanel({
   configId,
   editableFields,
   preview,
+  templateConfig = {},
   onUpdateField,
   onSmartFill,
 }: BuilderPreviewPanelProps) {
@@ -266,6 +269,7 @@ export function BuilderPreviewPanel({
         className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4"
         onClick={() => setFocusedSectionId(null)}
       >
+        <WebsiteRuntimeProvider renderMode="draft" templateConfig={templateConfig}>
         <div className="overflow-hidden rounded-lg border border-border/70 bg-background">
           {preview.page.sections.map((section) => (
             <PreviewSection
@@ -282,6 +286,7 @@ export function BuilderPreviewPanel({
             />
           ))}
         </div>
+        </WebsiteRuntimeProvider>
       </div>
     </div>
   );

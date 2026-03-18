@@ -1,8 +1,10 @@
 import { authRoutes } from "@plotkeys/auth/shared";
 import { createPrismaClient } from "@plotkeys/db";
 import {
+  deriveDesignConfig,
   deriveProfile,
   scoreTemplates,
+  stylePresets,
   templateCatalog,
 } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
@@ -34,6 +36,7 @@ import { requireAuthenticatedSession } from "../../lib/session";
 import { readPendingOnboardingCookie } from "../../lib/session-cookie";
 import {
   completeOnboardingAction,
+  refreshOnboardingAction,
   saveOnboardingStepAction,
 } from "../actions";
 
@@ -133,31 +136,38 @@ export default async function OnboardingPage({
     canAccessTemplateTier("starter", t.tier),
   );
 
-  // Build template recommendations from saved profile (or freshly derived if step data exists)
+  // Build template recommendations and design config for the Launch step
+  const onboardingSnapshot = {
+    businessType: savedOnboarding?.businessType,
+    companyName: savedOnboarding?.companyName,
+    hasBlogContent: savedOnboarding?.hasBlogContent,
+    hasAgents: savedOnboarding?.hasAgents,
+    hasExistingContent: savedOnboarding?.hasExistingContent,
+    hasListings: savedOnboarding?.hasListings,
+    hasLogo: savedOnboarding?.hasLogo,
+    hasProjects: savedOnboarding?.hasProjects,
+    hasTestimonials: savedOnboarding?.hasTestimonials,
+    locations: savedOnboarding?.locations,
+    primaryGoal: savedOnboarding?.primaryGoal,
+    propertyTypes: savedOnboarding?.propertyTypes,
+    stylePreference: savedOnboarding?.stylePreference,
+    tagline: savedOnboarding?.tagline,
+    targetAudience: savedOnboarding?.targetAudience,
+    tone: savedOnboarding?.tone,
+  };
+
+  const derivedProfile =
+    currentStepId === "launch" ? deriveProfile(onboardingSnapshot) : null;
+
   const recommendations =
-    currentStepId === "launch"
-      ? scoreTemplates(
-          deriveProfile({
-            businessType: savedOnboarding?.businessType,
-            companyName: savedOnboarding?.companyName,
-            hasBlogContent: savedOnboarding?.hasBlogContent,
-            hasAgents: savedOnboarding?.hasAgents,
-            hasExistingContent: savedOnboarding?.hasExistingContent,
-            hasListings: savedOnboarding?.hasListings,
-            hasLogo: savedOnboarding?.hasLogo,
-            hasProjects: savedOnboarding?.hasProjects,
-            hasTestimonials: savedOnboarding?.hasTestimonials,
-            locations: savedOnboarding?.locations,
-            primaryGoal: savedOnboarding?.primaryGoal,
-            propertyTypes: savedOnboarding?.propertyTypes,
-            stylePreference: savedOnboarding?.stylePreference,
-            tagline: savedOnboarding?.tagline,
-            targetAudience: savedOnboarding?.targetAudience,
-            tone: savedOnboarding?.tone,
-          }),
-          starterTemplates,
-        )
+    currentStepId === "launch" && derivedProfile
+      ? scoreTemplates(derivedProfile, starterTemplates)
       : [];
+
+  const derivedDesign =
+    derivedProfile
+      ? deriveDesignConfig(derivedProfile, onboardingSnapshot)
+      : null;
 
   return (
     <>
@@ -229,6 +239,7 @@ export default async function OnboardingPage({
           <LaunchStep
             backPath={backPath}
             companyName={companyName}
+            derivedDesign={derivedDesign}
             recommendations={recommendations}
             saved={savedOnboarding}
             starterTemplates={starterTemplates}
@@ -709,9 +720,93 @@ function ContentReadinessStep({
 // Step 6: Launch
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Design config preview card (shown on Launch step)
+// ---------------------------------------------------------------------------
+
+type DerivedDesign = ReturnType<typeof deriveDesignConfig> | null;
+
+function DesignConfigPreview({ design }: { design: NonNullable<DerivedDesign> }) {
+  const preset = stylePresets[design.stylePreset];
+  const presetLabel = preset?.label ?? design.stylePreset;
+
+  const colorSystemLabels: Record<string, string> = {
+    forest: "Forest — deep greens, natural tones",
+    ocean: "Ocean — deep blues, aqua tones",
+    slate: "Slate — monochromatic, high contrast",
+  };
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm text-muted-foreground">
+          Your auto-selected design defaults
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3 text-sm">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* Style preset */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Style</p>
+            <div className="flex items-center gap-2">
+              <div
+                className="h-4 w-4 rounded-full border border-border"
+                style={{ backgroundColor: design.accentColor }}
+              />
+              <span className="font-medium text-foreground capitalize">
+                {design.stylePreset}
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">{presetLabel}</p>
+          </div>
+
+          {/* Color system */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Colour</p>
+            <span className="font-medium text-foreground capitalize">{design.colorSystem}</span>
+            <p className="text-[11px] text-muted-foreground">
+              {colorSystemLabels[design.colorSystem] ?? design.colorSystem}
+            </p>
+          </div>
+
+          {/* Body font */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Body font</p>
+            <span className="font-medium text-foreground">{design.fontFamily}</span>
+          </div>
+
+          {/* Heading font */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Heading font</p>
+            <span className="font-medium text-foreground">{design.headingFontFamily}</span>
+          </div>
+        </div>
+
+        {/* Color swatch preview */}
+        <div className="flex items-center gap-2 pt-1">
+          <div
+            className="h-6 w-12 rounded border border-border"
+            style={{ backgroundColor: design.backgroundColor }}
+            title={`Background: ${design.backgroundColor}`}
+          />
+          <div
+            className="h-6 w-12 rounded border border-border"
+            style={{ backgroundColor: design.accentColor }}
+            title={`Accent: ${design.accentColor}`}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            These defaults are fully adjustable in the builder.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function LaunchStep({
   backPath,
   companyName,
+  derivedDesign,
   recommendations,
   saved,
   starterTemplates,
@@ -719,6 +814,7 @@ function LaunchStep({
 }: {
   backPath: string | null;
   companyName: string;
+  derivedDesign: DerivedDesign;
   recommendations: ReturnType<typeof scoreTemplates>;
   saved: SavedOnboarding;
   starterTemplates: typeof templateCatalog;
@@ -829,6 +925,21 @@ function LaunchStep({
           </FieldDescription>
         </Field>
       </FieldGroup>
+
+      {derivedDesign && (
+        <DesignConfigPreview design={derivedDesign} />
+      )}
+
+      <div className="flex items-center gap-3">
+        <form action={refreshOnboardingAction}>
+          <Button size="sm" type="submit" variant="outline">
+            Refresh recommendations
+          </Button>
+        </form>
+        <p className="text-xs text-muted-foreground">
+          Re-score templates based on your latest profile answers.
+        </p>
+      </div>
 
       {saved?.businessSummary ? (
         <Card className="border-border/60 bg-muted/20">
