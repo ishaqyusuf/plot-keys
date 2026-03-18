@@ -723,6 +723,7 @@ export function HeroSearchSection({
         <div className="mx-auto mt-10 max-w-3xl rounded-xl bg-white/10 p-3 backdrop-blur-sm">
           <div className="flex flex-col gap-3 md:flex-row">
             <select
+              aria-label="Property type"
               className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
               defaultValue=""
             >
@@ -744,9 +745,13 @@ export function HeroSearchSection({
             </select>
 
             <select
+              aria-label="Location"
               className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
               defaultValue=""
             >
+              <option className="text-gray-900" value="">
+                Select Location
+              </option>
               {config.locationOptions.map((loc) => (
                 <option className="text-gray-900" key={loc} value={loc}>
                   {loc}
@@ -755,6 +760,7 @@ export function HeroSearchSection({
             </select>
 
             <select
+              aria-label="Price range"
               className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
               defaultValue=""
             >

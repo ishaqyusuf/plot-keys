@@ -26,3 +26,8 @@
 - Added dark variants for ContactForm error state in `extended-sections.tsx`.
 - Other extended sections already use CSS variables (`--foreground`, `--muted-foreground`, etc.) that auto-adapt via `@custom-variant dark` in globals.css.
 - TypeScript compilation verified clean.
+
+## Inline Edit Fix
+- Root cause: `BuilderPreviewPanel` rendered sections without `WebsiteRuntimeProvider`, so `EditableText` components could not detect draft mode via `useIsDraftMode()` hook.
+- Fix: Wrapped the section rendering container with `<WebsiteRuntimeProvider renderMode="draft">` in `builder-preview-panel.tsx`.
+- This enables the amber ring editing affordances and contentEditable behavior on text fields within sections when viewed in the builder.

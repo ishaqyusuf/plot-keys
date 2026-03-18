@@ -12,8 +12,8 @@ This file defines the reusable UI building blocks in the template system.
 - `MobileActionBar`
 
 ## Hero Sections
-- `Hero`
-- `HeroWithSearch`
+- `Hero` (HeroBannerSection) — Two-column hero with eyebrow, title, subtitle, CTA, and signature card
+- `HeroWithSearch` (HeroSearchSection) — Full-width dark hero with property type/location/price search bar
 - `HeroSplit`
 - `HeroVideo`
 - `HeroSlider`
@@ -50,7 +50,7 @@ This file defines the reusable UI building blocks in the template system.
 - `AboutPreview`
 - `CompanyStory`
 - `MissionVision`
-- `WhyChooseUs`
+- `WhyChooseUs` (WhyChooseUsSection) — 4-column stat icon grid with accent-colored icons
 - `StatsCounter`
 - `Certifications`
 - `PartnerLogos`
@@ -67,6 +67,7 @@ This file defines the reusable UI building blocks in the template system.
 - `ServicesPreview`
 - `ServiceGrid`
 - `ServiceDetail`
+- `ServiceHighlights` (ServiceHighlightsSection) — 3-column horizontal service cards with icons
 - `ProcessSteps`
 - `BenefitsSection`
 - `PricingPreview`

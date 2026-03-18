@@ -207,12 +207,17 @@ const propertyGridSlot: SectionSlot = {
 
 // Helpers to extract base slots for composition.
 // These are guaranteed to exist — they are defined in the `baseHomeSections` literal above.
-const heroSlot = baseHomeSections.find(s => s.id === "hero")!;
-const marketStatsSlot = baseHomeSections.find(s => s.id === "market-stats")!;
-const featuredListingsSlot = baseHomeSections.find(s => s.id === "featured-listings")!;
-const storySlot = baseHomeSections.find(s => s.id === "story")!;
-const testimonialsSlot = { ...baseHomeSections.find(s => s.id === "testimonials")!, defaultEnabled: true };
-const ctaSlot = baseHomeSections.find(s => s.id === "cta")!;
+function requireSlot(id: string): SectionSlot {
+  const slot = baseHomeSections.find(s => s.id === id);
+  if (!slot) throw new Error(`Missing base section slot: ${id}`);
+  return slot;
+}
+const heroSlot = requireSlot("hero");
+const marketStatsSlot = requireSlot("market-stats");
+const featuredListingsSlot = requireSlot("featured-listings");
+const storySlot = requireSlot("story");
+const testimonialsSlot = { ...requireSlot("testimonials"), defaultEnabled: true };
+const ctaSlot = requireSlot("cta");
 
 // ---------------------------------------------------------------------------
 // Template-specific page inventories
