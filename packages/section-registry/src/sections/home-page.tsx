@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
 
-import type { RenderMode } from "../types";
-import { draftEditableClass, draftPlaceholderClass } from "./section-utils";
-
 export type ThemeConfig = {
   accentColor: string;
   backgroundColor: string;
@@ -185,25 +182,23 @@ function SectionHeading({
 
 export function HeroBannerSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: HeroBannerConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
-    <section className={`px-6 py-8 md:px-10 md:py-10 ${draftEditableClass(renderMode)}`} style={shell(theme)}>
+    <section className="px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
           <h1
-            className={`mt-6 max-w-4xl text-5xl leading-[0.92] text-slate-950 md:text-7xl ${draftPlaceholderClass(renderMode, config.title)}`}
+            className="mt-6 max-w-4xl text-5xl leading-[0.92] text-slate-950 md:text-7xl"
             style={{ fontFamily: theme.headingFontFamily }}
           >
             {config.title}
           </h1>
-          <p className={`mt-5 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl ${draftPlaceholderClass(renderMode, config.subtitle)}`}>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
             {config.subtitle}
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -285,15 +280,13 @@ export function MarketStatsSection({
 
 export function StoryGridSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: StoryGridConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
-    <section className={`px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`} style={shell(theme)}>
+    <section className="px-6 py-10 md:px-10 md:py-14" style={shell(theme)}>
       <SectionHeading
         eyebrow={config.eyebrow}
         title={config.title}
@@ -418,16 +411,14 @@ export function TestimonialStripSection({
 
 export function CtaBandSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: CtaBandConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
     <section
-      className={`px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14 ${draftEditableClass(renderMode)}`}
+      className="px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14"
       style={shell(theme)}
     >
       <Surface className="overflow-hidden bg-[linear-gradient(145deg,#102033_0%,#0f766e_100%)] text-white">
@@ -437,12 +428,12 @@ export function CtaBandSection({
               Ready to enquire
             </p>
             <h2
-              className={`mt-3 text-4xl text-white ${draftPlaceholderClass(renderMode, config.title)}`}
+              className="mt-3 text-4xl text-white"
               style={{ fontFamily: theme.headingFontFamily }}
             >
               {config.title}
             </h2>
-            <p className={`mt-4 max-w-2xl text-base leading-7 text-slate-200 ${draftPlaceholderClass(renderMode, config.body)}`}>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-200">
               {config.body}
             </p>
           </div>

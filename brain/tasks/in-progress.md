@@ -9,4 +9,3 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-_Nothing currently in progress._
