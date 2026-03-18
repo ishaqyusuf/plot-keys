@@ -58,9 +58,12 @@ export type TemplateRecommendation = {
 export type DerivedDesignConfig = {
   accentColor: string;
   backgroundColor: string;
+  /** Named color system key (e.g. "slate", "ocean", "forest"). */
+  colorSystem: string;
   fontFamily: string;
   headingFontFamily: string;
-  stylePreset: "editorial" | "bold" | "warm" | "clean";
+  /** Maps to the 5 brain-defined named style presets. */
+  stylePreset: "vega" | "nova" | "maia" | "myra" | "lyra";
 };
 
 /** Which page sections to render and in what logical order. */
@@ -90,9 +93,9 @@ export function buildBusinessSummary(snap: OnboardingSnapshot): string {
   const parts: string[] = [];
 
   const businessTypeLabel: Record<string, string> = {
-    "commercial": "commercial real estate",
-    "luxury": "luxury real estate",
-    "mixed": "full-service real estate",
+    commercial: "commercial real estate",
+    luxury: "luxury real estate",
+    mixed: "full-service real estate",
     "residential-rentals": "residential rental",
     "residential-sales": "residential sales",
   };
@@ -215,13 +218,11 @@ export function deriveProfile(snap: OnboardingSnapshot): DerivedProfile {
 
   // --- template recommendation ---
   const recommendations = scoreTemplates(
-    { complexity, conversionFocus, designIntent, segment },
+    { conversionFocus, designIntent, segment },
     templateCatalog,
   );
   const recommendedTemplateKey =
-    recommendations[0]?.template.key ??
-    templateCatalog[0]?.key ??
-    "template-1";
+    recommendations[0]?.template.key ?? templateCatalog[0]?.key ?? "template-1";
 
   return {
     complexity,
@@ -240,50 +241,62 @@ export function deriveDesignConfig(
   profile: Pick<DerivedProfile, "designIntent" | "segment">,
   snap: Pick<OnboardingSnapshot, "tone" | "stylePreference">,
 ): DerivedDesignConfig {
-  type DesignPreset = {
-    accentColor: string;
-    backgroundColor: string;
-    fontFamily: string;
-    headingFontFamily: string;
-    stylePreset: DerivedDesignConfig["stylePreset"];
-  };
+  type DesignPreset = Omit<DerivedDesignConfig, never>;
 
-  const presets: Record<DerivedProfile["designIntent"], DesignPreset> = {
-    editorial: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      stylePreset: "editorial",
-    },
+  // Luxury segment always gets the nova (dark editorial) preset
+  const resolvedIntent =
+    profile.segment === "luxury" ? "luxury" : profile.designIntent;
+
+  const presets: Record<string, DesignPreset> = {
+    // bold → lyra
     bold: {
       accentColor: "#1d4ed8",
       backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
-      stylePreset: "bold",
+      colorSystem: "slate",
+      fontFamily: "Satoshi",
+      headingFontFamily: "Satoshi",
+      stylePreset: "lyra",
     },
+    // editorial → maia
+    editorial: {
+      accentColor: "#0f766e",
+      backgroundColor: "#f4efe7",
+      colorSystem: "forest",
+      fontFamily: "Georgia",
+      headingFontFamily: "Playfair Display",
+      stylePreset: "maia",
+    },
+    // warm → maia
     warm: {
       accentColor: "#b45309",
       backgroundColor: "#fffaf0",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      stylePreset: "warm",
+      colorSystem: "forest",
+      fontFamily: "Georgia",
+      headingFontFamily: "Fraunces",
+      stylePreset: "maia",
     },
+    // clean → vega
     clean: {
-      accentColor: "#334155",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      stylePreset: "clean",
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      colorSystem: "ocean",
+      fontFamily: "Inter",
+      headingFontFamily: "Epilogue",
+      stylePreset: "vega",
+    },
+    // luxury → nova
+    luxury: {
+      accentColor: "#1e293b",
+      backgroundColor: "#0f172a",
+      colorSystem: "slate",
+      fontFamily: "Satoshi",
+      headingFontFamily: "Space Grotesk",
+      stylePreset: "nova",
     },
   };
 
-  // Luxury segment always gets the editorial preset regardless of stated preference
-  const intent =
-    profile.segment === "luxury" ? "editorial" : profile.designIntent;
-
-  return presets[intent];
+  return (presets[resolvedIntent] ??
+    presets["editorial"]) as DerivedDesignConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -349,7 +362,8 @@ export function derivePersonalizedContent(
 ): TenantContentRecord {
   const company = snap.companyName ?? "Our Agency";
 
-  const primaryLocation = (snap.locations ?? []).filter(Boolean)[0] ?? "your area";
+  const primaryLocation =
+    (snap.locations ?? []).filter(Boolean)[0] ?? "your area";
 
   const market =
     (snap.locations ?? []).filter(Boolean).join(" and ") || primaryLocation;
@@ -477,9 +491,156 @@ const templateTags: Record<string, TemplateScoringTags> = {
     designIntentTags: ["warm"],
     segmentTags: ["residential", "rental"],
   },
+  "template-7": {
+    // Vega Lite — clean, volume residential, starter
+    conversionFocusTags: ["listings", "balanced"],
+    designIntentTags: ["clean"],
+    segmentTags: ["residential", "rental"],
+  },
+  "template-8": {
+    // Nova Basic — bold, urban professional, starter
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["bold"],
+    segmentTags: ["commercial", "residential", "luxury"],
+  },
+  "template-9": {
+    // Lyra Basic — bold, growth, lead-gen starter
+    conversionFocusTags: ["leads", "listings"],
+    designIntentTags: ["bold", "clean"],
+    segmentTags: ["residential", "mixed"],
+  },
+  "template-10": {
+    // Myra Basic — clean, rental & property management, starter
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["clean"],
+    segmentTags: ["rental", "residential"],
+  },
+  "template-11": {
+    // Maia Growth — editorial, lifestyle, brand-first, plus
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["editorial", "warm"],
+    segmentTags: ["luxury", "residential", "mixed"],
+  },
+  "template-12": {
+    // Horizon Plus — clean, versatile, mixed portfolio, plus
+    conversionFocusTags: ["listings", "balanced"],
+    designIntentTags: ["clean", "editorial"],
+    segmentTags: ["mixed", "residential", "commercial", "rental"],
+  },
+  "template-13": {
+    // Nova Pro — bold, dark, luxury commercial, pro
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["bold"],
+    segmentTags: ["luxury", "commercial"],
+  },
+  "template-14": {
+    // Hana — warm/family starter
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["warm"],
+    segmentTags: ["residential", "rental"],
+  },
+  "template-15": {
+    // Farah — bright/conversion starter
+    conversionFocusTags: ["leads", "listings"],
+    designIntentTags: ["bold", "clean"],
+    segmentTags: ["residential", "mixed"],
+  },
+  "template-16": {
+    // Dara — trustworthy/mid-market starter
+    conversionFocusTags: ["balanced", "leads"],
+    designIntentTags: ["clean"],
+    segmentTags: ["residential", "rental"],
+  },
+  "template-17": {
+    // Layla — elegant/boutique starter
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["editorial", "warm"],
+    segmentTags: ["luxury", "residential"],
+  },
+  "template-18": {
+    // Jouri — fresh/lifestyle starter
+    conversionFocusTags: ["leads", "listings"],
+    designIntentTags: ["clean", "bold"],
+    segmentTags: ["residential", "mixed"],
+  },
+  "template-19": {
+    // Amal — aspirational/brand storytelling plus
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["editorial"],
+    segmentTags: ["luxury", "residential"],
+  },
+  "template-20": {
+    // Bayan — clear/data-forward plus
+    conversionFocusTags: ["listings", "balanced"],
+    designIntentTags: ["clean"],
+    segmentTags: ["commercial", "mixed", "residential"],
+  },
+  "template-21": {
+    // Yasmin — warm/elegant boutique plus
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["warm", "editorial"],
+    segmentTags: ["luxury", "residential", "rental"],
+  },
+  "template-22": {
+    // Sahar — fresh/dawn positioning plus
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["clean", "bold"],
+    segmentTags: ["residential", "mixed"],
+  },
+  "template-23": {
+    // Tamar — community/trusted plus
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["warm"],
+    segmentTags: ["residential", "rental", "mixed"],
+  },
+  "template-24": {
+    // Zain — graceful/modern minimal plus
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["clean", "bold"],
+    segmentTags: ["commercial", "residential", "luxury"],
+  },
+  "template-25": {
+    // Shams — bright luxury pro
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["warm", "editorial"],
+    segmentTags: ["luxury", "residential"],
+  },
+  "template-26": {
+    // Karim — full-featured/generous pro
+    conversionFocusTags: ["balanced", "brand"],
+    designIntentTags: ["clean", "editorial"],
+    segmentTags: ["mixed", "commercial", "residential"],
+  },
+  "template-27": {
+    // Rafiq — trusted-advisor pro
+    conversionFocusTags: ["leads", "brand"],
+    designIntentTags: ["editorial", "warm"],
+    segmentTags: ["residential", "rental", "luxury"],
+  },
+  "template-28": {
+    // Amber — rich/warm luxury pro
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["warm"],
+    segmentTags: ["luxury", "residential"],
+  },
+  "template-29": {
+    // Saffron — premium/exclusive pro
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["bold", "editorial"],
+    segmentTags: ["luxury", "commercial"],
+  },
+  "template-30": {
+    // Coral — coastal/aspirational pro
+    conversionFocusTags: ["listings", "brand"],
+    designIntentTags: ["bold", "clean"],
+    segmentTags: ["luxury", "residential", "mixed"],
+  },
 };
 
-type PartialProfile = Omit<DerivedProfile, "complexity" | "recommendedTemplateKey">;
+type PartialProfile = Omit<
+  DerivedProfile,
+  "complexity" | "recommendedTemplateKey"
+>;
 
 function scoreTemplate(
   profile: PartialProfile,

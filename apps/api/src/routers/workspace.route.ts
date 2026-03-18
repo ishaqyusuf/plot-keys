@@ -1,9 +1,13 @@
 import {
   completeTenantOnboarding,
   countCompaniesByTemplateKey,
+  createAgent,
   createCompanyOnboardingBundle,
   createPrismaClient,
+  createProperty,
   createSiteConfiguration,
+  deleteAgent,
+  deleteProperty,
   type Db,
   findCompanyById,
   findCompanyBySlug,
@@ -16,16 +20,22 @@ import {
   findTemplateLicensesForCompany,
   grantTemplateLicense,
   hasTemplateLicense,
+  listAgentsForCompany,
+  listPropertiesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
-  updateOnboardingProfile,
-  updateSiteConfigurationContentField,
-  updateSiteConfigurationThemeField,
+  toggleAgentFeatured,
+  togglePropertyFeatured,
+  updateAgent,
   updateCompanyLogo,
   updateCompanyPlan,
+  updateOnboardingProfile,
+  updateProperty,
+  updateSiteConfigurationContentField,
+  updateSiteConfigurationThemeField,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
@@ -54,6 +64,7 @@ import {
   authenticatedProcedure,
   createTRPCRouter,
   membershipProcedure,
+  publicProcedure,
 } from "../lib.trpc";
 import { generateFieldContent } from "../lib.ai";
 import {
@@ -201,35 +212,39 @@ export const workspaceRouter = createTRPCRouter({
       const personalizedContent =
         profile && snapshot
           ? derivePersonalizedContent(
-              { ...snapshot, locations: [market, ...(snapshot.locations ?? [])] },
+              {
+                ...snapshot,
+                locations: [market, ...(snapshot.locations ?? [])],
+              },
               profile,
             )
           : null;
 
       const template = getTemplateDefinition(templateKey);
 
-      const initialSiteConfiguration = personalizedContent && designConfig
-        ? {
-            contentJson: personalizedContent,
-            name: `${template.name} Draft`,
-            subdomain,
-            templateKey: template.key,
-            themeJson: {
-              ...template.defaultTheme,
-              accentColor: designConfig.accentColor,
-              backgroundColor: designConfig.backgroundColor,
-              fontFamily: designConfig.fontFamily,
-              headingFontFamily: designConfig.headingFontFamily,
-              logo: companyName,
+      const initialSiteConfiguration =
+        personalizedContent && designConfig
+          ? {
+              contentJson: personalizedContent,
+              name: `${template.name} Draft`,
+              subdomain,
+              templateKey: template.key,
+              themeJson: {
+                ...template.defaultTheme,
+                accentColor: designConfig.accentColor,
+                backgroundColor: designConfig.backgroundColor,
+                fontFamily: designConfig.fontFamily,
+                headingFontFamily: designConfig.headingFontFamily,
+                logo: companyName,
+                market,
+              },
+            }
+          : createInitialSiteConfigurationInput({
+              companyName,
               market,
-            },
-          }
-        : createInitialSiteConfigurationInput({
-            companyName,
-            market,
-            subdomain,
-            templateKey,
-          });
+              subdomain,
+              templateKey,
+            });
 
       const siteConfiguration = await createCompanyOnboardingBundle(db, {
         apexDomain: plotkeysRootDomain,
@@ -319,7 +334,10 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      const updated = await saveOnboardingStepProgress(db, { userId, ...input });
+      const updated = await saveOnboardingStepProgress(db, {
+        userId,
+        ...input,
+      });
 
       // Re-derive profile after every save so the Launch step always has
       // an up-to-date recommendation without an extra round-trip.
@@ -491,7 +509,9 @@ export const workspaceRouter = createTRPCRouter({
    */
   claimFreeTemplateLicense: membershipProcedure
     .input(
-      z.object({ templateKey: z.string().trim().min(1, "Template key is required.") }),
+      z.object({
+        templateKey: z.string().trim().min(1, "Template key is required."),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
@@ -532,7 +552,12 @@ export const workspaceRouter = createTRPCRouter({
     const { canAccessTemplateTier } = await import("@plotkeys/utils");
 
     const allowedKeys = templateCatalog
-      .filter((t) => canAccessTemplateTier(company.planTier as "starter" | "plus" | "pro", t.tier))
+      .filter((t) =>
+        canAccessTemplateTier(
+          company.planTier as "starter" | "plus" | "pro",
+          t.tier,
+        ),
+      )
       .map((t) => t.key);
 
     await syncPlanIncludedLicenses(
@@ -574,28 +599,9 @@ export const workspaceRouter = createTRPCRouter({
 
       // Store the provider reference in a billing line item if provided
       if (input.providerRef) {
-        await db.billingLineItem.upsert({
-          create: {
-            amountMinorUnits: 0,
-            companyId,
-            currency: "NGN",
-            kind: "subscription",
-            meta: { providerRef: input.providerRef },
-            providerRef: input.providerRef,
-            status: input.planStatus === "active" ? "active" : "cancelled",
-          },
-          update: {
-            meta: { providerRef: input.providerRef },
-            status: input.planStatus === "active" ? "active" : "cancelled",
-          },
-          where: {
-            // Fall back to a synthetic unique check — provider refs are unique per company
-            id: "00000000-0000-0000-0000-000000000000",
-          },
-        }).catch(() => {
-          // Upsert by providerRef isn't directly supported — insert separately
-          return db.billingLineItem.create({
-            data: {
+        await db.billingLineItem
+          .upsert({
+            create: {
               amountMinorUnits: 0,
               companyId,
               currency: "NGN",
@@ -604,8 +610,32 @@ export const workspaceRouter = createTRPCRouter({
               providerRef: input.providerRef,
               status: input.planStatus === "active" ? "active" : "cancelled",
             },
-          }).catch(() => null); // Non-fatal if billing record fails
-        });
+            update: {
+              meta: { providerRef: input.providerRef },
+              status: input.planStatus === "active" ? "active" : "cancelled",
+            },
+            where: {
+              // Fall back to a synthetic unique check — provider refs are unique per company
+              id: "00000000-0000-0000-0000-000000000000",
+            },
+          })
+          .catch(() => {
+            // Upsert by providerRef isn't directly supported — insert separately
+            return db.billingLineItem
+              .create({
+                data: {
+                  amountMinorUnits: 0,
+                  companyId,
+                  currency: "NGN",
+                  kind: "subscription",
+                  meta: { providerRef: input.providerRef },
+                  providerRef: input.providerRef,
+                  status:
+                    input.planStatus === "active" ? "active" : "cancelled",
+                },
+              })
+              .catch(() => null); // Non-fatal if billing record fails
+          });
       }
 
       // Sync plan-included template licenses to match the new tier
@@ -963,12 +993,13 @@ export const workspaceRouter = createTRPCRouter({
         price: p.price,
         specs:
           p.specs ??
-          [
+          ([
             p.bedrooms ? `${p.bedrooms} bed` : null,
             p.bathrooms ? `${p.bathrooms} bath` : null,
           ]
             .filter(Boolean)
-            .join(" • ") || null,
+            .join(" • ") ||
+            null),
         title: p.title,
       }));
 
@@ -1010,5 +1041,158 @@ export const workspaceRouter = createTRPCRouter({
         input.logoUrl,
       );
       return { companyId: company.id, logoUrl: company.logoUrl };
+    }),
+
+  // ─── Properties ───────────────────────────────────────────────────────────
+
+  listProperties: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return listPropertiesForCompany(db, ctx.auth.activeMembership.companyId, {
+      limit: 100,
+    });
+  }),
+
+  createProperty: membershipProcedure
+    .input(
+      z.object({
+        title: z.string().trim().min(1, "Title is required."),
+        description: z.string().trim().optional().nullable(),
+        price: z.string().trim().optional().nullable(),
+        location: z.string().trim().optional().nullable(),
+        bedrooms: z.number().int().nonnegative().optional().nullable(),
+        bathrooms: z.number().int().nonnegative().optional().nullable(),
+        specs: z.string().trim().optional().nullable(),
+        imageUrl: z.string().url().optional().nullable(),
+        status: z
+          .enum(["active", "sold", "rented", "off_market"])
+          .optional()
+          .default("active"),
+        featured: z.boolean().optional().default(false),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createProperty(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        ...input,
+      });
+    }),
+
+  updateProperty: membershipProcedure
+    .input(
+      z.object({
+        propertyId: z.string().trim().min(1),
+        title: z.string().trim().min(1).optional(),
+        description: z.string().trim().optional().nullable(),
+        price: z.string().trim().optional().nullable(),
+        location: z.string().trim().optional().nullable(),
+        bedrooms: z.number().int().nonnegative().optional().nullable(),
+        bathrooms: z.number().int().nonnegative().optional().nullable(),
+        specs: z.string().trim().optional().nullable(),
+        imageUrl: z.string().url().optional().nullable(),
+        status: z.enum(["active", "sold", "rented", "off_market"]).optional(),
+        featured: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const { propertyId, ...data } = input;
+      return updateProperty(db, propertyId, ctx.auth.activeMembership.companyId, data);
+    }),
+
+  deleteProperty: membershipProcedure
+    .input(z.object({ propertyId: z.string().trim().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await deleteProperty(db, input.propertyId, ctx.auth.activeMembership.companyId);
+      return { deleted: true };
+    }),
+
+  togglePropertyFeatured: membershipProcedure
+    .input(z.object({ propertyId: z.string().trim().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const result = await togglePropertyFeatured(
+        db,
+        input.propertyId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!result) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Property not found." });
+      }
+      return { featured: result.featured, propertyId: result.id };
+    }),
+
+  // ─── Agents ───────────────────────────────────────────────────────────────
+
+  listAgents: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return listAgentsForCompany(db, ctx.auth.activeMembership.companyId, {
+      limit: 100,
+    });
+  }),
+
+  createAgent: membershipProcedure
+    .input(
+      z.object({
+        name: z.string().trim().min(1, "Name is required."),
+        title: z.string().trim().optional().nullable(),
+        bio: z.string().trim().optional().nullable(),
+        email: z.string().email().optional().nullable(),
+        phone: z.string().trim().optional().nullable(),
+        imageUrl: z.string().url().optional().nullable(),
+        featured: z.boolean().optional().default(false),
+        displayOrder: z.number().int().optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createAgent(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        ...input,
+      });
+    }),
+
+  updateAgent: membershipProcedure
+    .input(
+      z.object({
+        agentId: z.string().trim().min(1),
+        name: z.string().trim().min(1).optional(),
+        title: z.string().trim().optional().nullable(),
+        bio: z.string().trim().optional().nullable(),
+        email: z.string().email().optional().nullable(),
+        phone: z.string().trim().optional().nullable(),
+        imageUrl: z.string().url().optional().nullable(),
+        featured: z.boolean().optional(),
+        displayOrder: z.number().int().optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const { agentId, ...data } = input;
+      return updateAgent(db, agentId, ctx.auth.activeMembership.companyId, data);
+    }),
+
+  deleteAgent: membershipProcedure
+    .input(z.object({ agentId: z.string().trim().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await deleteAgent(db, input.agentId, ctx.auth.activeMembership.companyId);
+      return { deleted: true };
+    }),
+
+  toggleAgentFeatured: membershipProcedure
+    .input(z.object({ agentId: z.string().trim().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const result = await toggleAgentFeatured(
+        db,
+        input.agentId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!result) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found." });
+      }
+      return { agentId: result.id, featured: result.featured };
     }),
 });

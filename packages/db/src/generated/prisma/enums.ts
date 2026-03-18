@@ -75,3 +75,61 @@ export const TenantDomainStatus = {
 } as const
 
 export type TenantDomainStatus = (typeof TenantDomainStatus)[keyof typeof TenantDomainStatus]
+
+
+export const BillingLineItemKind = {
+  subscription: 'subscription',
+  template_purchase: 'template_purchase',
+  stock_image: 'stock_image',
+  domain_addon: 'domain_addon',
+  ai_credits: 'ai_credits'
+} as const
+
+export type BillingLineItemKind = (typeof BillingLineItemKind)[keyof typeof BillingLineItemKind]
+
+
+export const BillingLineItemStatus = {
+  pending: 'pending',
+  active: 'active',
+  cancelled: 'cancelled',
+  expired: 'expired'
+} as const
+
+export type BillingLineItemStatus = (typeof BillingLineItemStatus)[keyof typeof BillingLineItemStatus]
+
+
+export const PropertyStatus = {
+  active: 'active',
+  sold: 'sold',
+  rented: 'rented',
+  off_market: 'off_market'
+} as const
+
+export type PropertyStatus = (typeof PropertyStatus)[keyof typeof PropertyStatus]
+
+
+export const TemplateLicenseSource = {
+  free: 'free',
+  plan_included: 'plan_included',
+  purchased: 'purchased',
+  admin_granted: 'admin_granted'
+} as const
+
+export type TemplateLicenseSource = (typeof TemplateLicenseSource)[keyof typeof TemplateLicenseSource]
+
+
+export const WebsiteStatus = {
+  active: 'active',
+  archived: 'archived'
+} as const
+
+export type WebsiteStatus = (typeof WebsiteStatus)[keyof typeof WebsiteStatus]
+
+
+export const WebsiteVersionStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
+} as const
+
+export type WebsiteVersionStatus = (typeof WebsiteVersionStatus)[keyof typeof WebsiteVersionStatus]

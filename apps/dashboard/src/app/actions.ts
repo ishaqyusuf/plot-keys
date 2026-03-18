@@ -500,6 +500,168 @@ export async function saveOnboardingStepAction(formData: FormData) {
   }
 }
 
+// ─── Property actions ─────────────────────────────────────────────────────
+
+export async function createPropertyAction(formData: FormData) {
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.createProperty({
+      title: String(formData.get("title") ?? "").trim(),
+      description: String(formData.get("description") ?? "").trim() || null,
+      price: String(formData.get("price") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      bedrooms: formData.get("bedrooms") ? Number(formData.get("bedrooms")) : null,
+      bathrooms: formData.get("bathrooms") ? Number(formData.get("bathrooms")) : null,
+      specs: String(formData.get("specs") ?? "").trim() || null,
+      imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      status: (String(formData.get("status") ?? "active") as "active" | "sold" | "rented" | "off_market"),
+      featured: formData.get("featured") === "true",
+    });
+    revalidatePath("/properties");
+    redirect("/properties");
+  } catch (error) {
+    redirect(
+      `/properties?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to create property.",
+      )}`,
+    );
+  }
+}
+
+export async function updatePropertyAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateProperty({
+      propertyId,
+      title: String(formData.get("title") ?? "").trim() || undefined,
+      description: String(formData.get("description") ?? "").trim() || null,
+      price: String(formData.get("price") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      bedrooms: formData.get("bedrooms") ? Number(formData.get("bedrooms")) : null,
+      bathrooms: formData.get("bathrooms") ? Number(formData.get("bathrooms")) : null,
+      specs: String(formData.get("specs") ?? "").trim() || null,
+      imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      status: (String(formData.get("status") ?? "active") as "active" | "sold" | "rented" | "off_market"),
+      featured: formData.get("featured") === "true",
+    });
+    revalidatePath("/properties");
+    redirect("/properties");
+  } catch (error) {
+    redirect(
+      `/properties?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to update property.",
+      )}`,
+    );
+  }
+}
+
+export async function deletePropertyAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.deleteProperty({ propertyId });
+    revalidatePath("/properties");
+    redirect("/properties");
+  } catch (error) {
+    redirect(
+      `/properties?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to delete property.",
+      )}`,
+    );
+  }
+}
+
+export async function togglePropertyFeaturedAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.togglePropertyFeatured({ propertyId });
+    revalidatePath("/properties");
+  } catch {
+    // non-fatal — page will show current state on next load
+  }
+}
+
+// ─── Agent actions ────────────────────────────────────────────────────────
+
+export async function createAgentAction(formData: FormData) {
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.createAgent({
+      name: String(formData.get("name") ?? "").trim(),
+      title: String(formData.get("title") ?? "").trim() || null,
+      bio: String(formData.get("bio") ?? "").trim() || null,
+      email: String(formData.get("email") ?? "").trim() || null,
+      phone: String(formData.get("phone") ?? "").trim() || null,
+      imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      featured: formData.get("featured") === "true",
+      displayOrder: formData.get("displayOrder") ? Number(formData.get("displayOrder")) : null,
+    });
+    revalidatePath("/agents");
+    redirect("/agents");
+  } catch (error) {
+    redirect(
+      `/agents?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to create agent.",
+      )}`,
+    );
+  }
+}
+
+export async function updateAgentAction(formData: FormData) {
+  const agentId = String(formData.get("agentId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateAgent({
+      agentId,
+      name: String(formData.get("name") ?? "").trim() || undefined,
+      title: String(formData.get("title") ?? "").trim() || null,
+      bio: String(formData.get("bio") ?? "").trim() || null,
+      email: String(formData.get("email") ?? "").trim() || null,
+      phone: String(formData.get("phone") ?? "").trim() || null,
+      imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      featured: formData.get("featured") === "true",
+      displayOrder: formData.get("displayOrder") ? Number(formData.get("displayOrder")) : null,
+    });
+    revalidatePath("/agents");
+    redirect("/agents");
+  } catch (error) {
+    redirect(
+      `/agents?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to update agent.",
+      )}`,
+    );
+  }
+}
+
+export async function deleteAgentAction(formData: FormData) {
+  const agentId = String(formData.get("agentId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.deleteAgent({ agentId });
+    revalidatePath("/agents");
+    redirect("/agents");
+  } catch (error) {
+    redirect(
+      `/agents?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to delete agent.",
+      )}`,
+    );
+  }
+}
+
+export async function toggleAgentFeaturedAction(formData: FormData) {
+  const agentId = String(formData.get("agentId") ?? "");
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.toggleAgentFeatured({ agentId });
+    revalidatePath("/agents");
+  } catch {
+    // non-fatal
+  }
+}
+
 export async function syncTenantDomainsAction() {
   try {
     const caller = await createServerCaller();

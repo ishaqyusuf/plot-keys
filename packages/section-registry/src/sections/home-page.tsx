@@ -289,9 +289,11 @@ export function MarketStatsSection({
 export function StoryGridSection({
   config,
   theme,
+  renderMode = "live",
 }: {
   config: StoryGridConfig;
   theme: ThemeConfig;
+  renderMode?: RenderMode;
 }) {
   return (
     <section

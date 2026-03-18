@@ -1,6 +1,4 @@
-import "server-only";
 
-import { randomUUID } from "node:crypto";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createPrismaClient } from "@plotkeys/db";
@@ -26,7 +24,7 @@ export const auth = betterAuth({
   },
   advanced: {
     cookiePrefix: authCookiePrefix,
-    generateId: () => randomUUID(),
+    generateId: () => crypto.randomUUID(),
   },
   user: {
     additionalFields: {

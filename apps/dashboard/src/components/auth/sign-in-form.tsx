@@ -11,6 +11,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useMutation } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +20,24 @@ import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
 import { AuthFormError } from "./auth-form-error";
 import { persistSession } from "./session-bridge";
+
+const DevQuickFill =
+  process.env.NODE_ENV === "development"
+    ? dynamic(() =>
+        import("../dev/dev-quick-fill").then((m) => m.DevQuickFill),
+      )
+    : null;
+
+const DEV_PRESETS = [
+  {
+    label: "user-1",
+    values: { email: "amara@astergrove.com", password: "lorem-ipsum" },
+  },
+  {
+    label: "user-2",
+    values: { email: "james@sunrise.com", password: "lorem-ipsum" },
+  },
+];
 
 export function SignInForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
@@ -53,6 +72,13 @@ export function SignInForm({ initialError }: { initialError?: string }) {
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
+      {DevQuickFill && (
+        <DevQuickFill
+          presets={DEV_PRESETS}
+          onFill={(values) => form.reset(values)}
+        />
+      )}
+
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="sign-in-email">Email address</FieldLabel>

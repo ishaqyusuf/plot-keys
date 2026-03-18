@@ -15,7 +15,7 @@
  *   localhost / 127.x.x.x          → no tenant slug injected
  */
 
-import { authCookiePrefix, authRoutes } from "@plotkeys/auth";
+import { authCookiePrefix, authRoutes } from "@plotkeys/auth/shared";
 import { type NextRequest, NextResponse } from "next/server";
 
 const PLOTKEYS_DOMAIN = "plotkeys.com";

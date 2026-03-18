@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import type { Db } from "../prisma";
 
 export async function findUserByEmail(db: Db, email: string) {
@@ -25,7 +23,7 @@ export async function createUser(
     data: {
       email: input.email.trim().toLowerCase(),
       emailVerified: input.emailVerified,
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       name: input.name.trim(),
       passwordHash: input.passwordHash,
       phoneNumber: input.phoneNumber?.trim() || null,

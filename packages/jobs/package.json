@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
     "@plotkeys/db": "workspace:*",
+    "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/utils": "workspace:*"
   },
   "devDependencies": {

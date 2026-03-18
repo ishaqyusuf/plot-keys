@@ -51,11 +51,21 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Agent: 'Agent',
+  Session: 'Session',
+  Account: 'Account',
+  Verification: 'Verification',
+  BillingLineItem: 'BillingLineItem',
   Company: 'Company',
   Membership: 'Membership',
+  Property: 'Property',
   SiteConfiguration: 'SiteConfiguration',
   TenantDomain: 'TenantDomain',
-  User: 'User'
+  TenantOnboarding: 'TenantOnboarding',
+  TenantTemplateLicense: 'TenantTemplateLicense',
+  User: 'User',
+  Website: 'Website',
+  WebsiteVersion: 'WebsiteVersion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -74,11 +84,96 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const AgentScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  title: 'title',
+  bio: 'bio',
+  email: 'email',
+  phone: 'phone',
+  imageUrl: 'imageUrl',
+  featured: 'featured',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type AgentScalarFieldEnum = (typeof AgentScalarFieldEnum)[keyof typeof AgentScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  expiresAt: 'expiresAt',
+  token: 'token',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  userId: 'userId'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const AccountScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  providerId: 'providerId',
+  userId: 'userId',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  idToken: 'idToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+  scope: 'scope',
+  password: 'password',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
+
+
+export const VerificationScalarFieldEnum = {
+  id: 'id',
+  identifier: 'identifier',
+  value: 'value',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
+
+
+export const BillingLineItemScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  kind: 'kind',
+  status: 'status',
+  amountMinorUnits: 'amountMinorUnits',
+  currency: 'currency',
+  providerRef: 'providerRef',
+  meta: 'meta',
+  periodStartAt: 'periodStartAt',
+  periodEndAt: 'periodEndAt',
+  paidAt: 'paidAt',
+  cancelledAt: 'cancelledAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillingLineItemScalarFieldEnum = (typeof BillingLineItemScalarFieldEnum)[keyof typeof BillingLineItemScalarFieldEnum]
+
+
 export const CompanyScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
   name: 'name',
   market: 'market',
+  logoUrl: 'logoUrl',
   planTier: 'planTier',
   planStatus: 'planStatus',
   planStartedAt: 'planStartedAt',
@@ -104,6 +199,27 @@ export const MembershipScalarFieldEnum = {
 } as const
 
 export type MembershipScalarFieldEnum = (typeof MembershipScalarFieldEnum)[keyof typeof MembershipScalarFieldEnum]
+
+
+export const PropertyScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  title: 'title',
+  description: 'description',
+  price: 'price',
+  location: 'location',
+  bedrooms: 'bedrooms',
+  bathrooms: 'bathrooms',
+  specs: 'specs',
+  imageUrl: 'imageUrl',
+  status: 'status',
+  featured: 'featured',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
 
 
 export const SiteConfigurationScalarFieldEnum = {
@@ -148,6 +264,61 @@ export const TenantDomainScalarFieldEnum = {
 export type TenantDomainScalarFieldEnum = (typeof TenantDomainScalarFieldEnum)[keyof typeof TenantDomainScalarFieldEnum]
 
 
+export const TenantOnboardingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  companyName: 'companyName',
+  subdomain: 'subdomain',
+  tagline: 'tagline',
+  businessType: 'businessType',
+  primaryGoal: 'primaryGoal',
+  locations: 'locations',
+  propertyTypes: 'propertyTypes',
+  targetAudience: 'targetAudience',
+  tone: 'tone',
+  stylePreference: 'stylePreference',
+  preferredColorHint: 'preferredColorHint',
+  phone: 'phone',
+  contactEmail: 'contactEmail',
+  whatsapp: 'whatsapp',
+  officeAddress: 'officeAddress',
+  hasLogo: 'hasLogo',
+  hasListings: 'hasListings',
+  hasExistingContent: 'hasExistingContent',
+  hasAgents: 'hasAgents',
+  hasProjects: 'hasProjects',
+  hasTestimonials: 'hasTestimonials',
+  hasBlogContent: 'hasBlogContent',
+  businessSummary: 'businessSummary',
+  segment: 'segment',
+  designIntent: 'designIntent',
+  conversionFocus: 'conversionFocus',
+  complexity: 'complexity',
+  recommendedTemplateKey: 'recommendedTemplateKey',
+  market: 'market',
+  templateKey: 'templateKey',
+  currentStep: 'currentStep',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantOnboardingScalarFieldEnum = (typeof TenantOnboardingScalarFieldEnum)[keyof typeof TenantOnboardingScalarFieldEnum]
+
+
+export const TenantTemplateLicenseScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  templateKey: 'templateKey',
+  source: 'source',
+  grantedAt: 'grantedAt',
+  revokedAt: 'revokedAt',
+  grantedById: 'grantedById'
+} as const
+
+export type TenantTemplateLicenseScalarFieldEnum = (typeof TenantTemplateLicenseScalarFieldEnum)[keyof typeof TenantTemplateLicenseScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -158,10 +329,45 @@ export const UserScalarFieldEnum = {
   globalRole: 'globalRole',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  image: 'image'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const WebsiteScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  templateKey: 'templateKey',
+  subdomain: 'subdomain',
+  status: 'status',
+  publishedVersionId: 'publishedVersionId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type WebsiteScalarFieldEnum = (typeof WebsiteScalarFieldEnum)[keyof typeof WebsiteScalarFieldEnum]
+
+
+export const WebsiteVersionScalarFieldEnum = {
+  id: 'id',
+  websiteId: 'websiteId',
+  versionNumber: 'versionNumber',
+  status: 'status',
+  name: 'name',
+  themeJson: 'themeJson',
+  contentJson: 'contentJson',
+  legacyConfigId: 'legacyConfigId',
+  publishedAt: 'publishedAt',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WebsiteVersionScalarFieldEnum = (typeof WebsiteVersionScalarFieldEnum)[keyof typeof WebsiteVersionScalarFieldEnum]
 
 
 export const SortOrder = {

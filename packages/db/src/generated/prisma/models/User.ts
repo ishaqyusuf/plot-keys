@@ -35,6 +35,7 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  image: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  image: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -61,6 +63,7 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   deletedAt: number
+  image: number
   _all: number
 }
 
@@ -76,6 +79,7 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  image?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -89,6 +93,7 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  image?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  image?: true
   _all?: true
 }
 
@@ -188,6 +194,7 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
+  image: string | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -222,9 +229,15 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  image?: Prisma.StringNullableFilter<"User"> | string | null
   memberships?: Prisma.MembershipListRelationFilter
   createdSiteConfigurations?: Prisma.SiteConfigurationListRelationFilter
   updatedSiteConfigurations?: Prisma.SiteConfigurationListRelationFilter
+  createdWebsiteVersions?: Prisma.WebsiteVersionListRelationFilter
+  updatedWebsiteVersions?: Prisma.WebsiteVersionListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  accounts?: Prisma.AccountListRelationFilter
+  tenantOnboarding?: Prisma.XOR<Prisma.TenantOnboardingNullableScalarRelationFilter, Prisma.TenantOnboardingWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -238,9 +251,15 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  image?: Prisma.SortOrderInput | Prisma.SortOrder
   memberships?: Prisma.MembershipOrderByRelationAggregateInput
   createdSiteConfigurations?: Prisma.SiteConfigurationOrderByRelationAggregateInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationOrderByRelationAggregateInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionOrderByRelationAggregateInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionOrderByRelationAggregateInput
+  sessions?: Prisma.SessionOrderByRelationAggregateInput
+  accounts?: Prisma.AccountOrderByRelationAggregateInput
+  tenantOnboarding?: Prisma.TenantOnboardingOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -257,9 +276,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  image?: Prisma.StringNullableFilter<"User"> | string | null
   memberships?: Prisma.MembershipListRelationFilter
   createdSiteConfigurations?: Prisma.SiteConfigurationListRelationFilter
   updatedSiteConfigurations?: Prisma.SiteConfigurationListRelationFilter
+  createdWebsiteVersions?: Prisma.WebsiteVersionListRelationFilter
+  updatedWebsiteVersions?: Prisma.WebsiteVersionListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  accounts?: Prisma.AccountListRelationFilter
+  tenantOnboarding?: Prisma.XOR<Prisma.TenantOnboardingNullableScalarRelationFilter, Prisma.TenantOnboardingWhereInput> | null
 }, "id">
 
 export type UserOrderByWithAggregationInput = {
@@ -273,6 +298,7 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  image?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -292,6 +318,7 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
@@ -305,9 +332,15 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
   createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -321,9 +354,15 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -337,9 +376,15 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -353,9 +398,15 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -369,6 +420,7 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -382,6 +434,7 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -395,6 +448,7 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserScalarRelationFilter = {
@@ -418,6 +472,7 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  image?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -431,6 +486,7 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  image?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -444,6 +500,35 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  image?: Prisma.SortOrder
+}
+
+export type UserCreateNestedOneWithoutSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  upsert?: Prisma.UserUpsertWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserCreateNestedOneWithoutAccountsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountsInput, Prisma.UserUncheckedCreateWithoutAccountsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountsInput, Prisma.UserUncheckedCreateWithoutAccountsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountsInput
+  upsert?: Prisma.UserUpsertWithoutAccountsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountsInput, Prisma.UserUpdateWithoutAccountsInput>, Prisma.UserUncheckedUpdateWithoutAccountsInput>
 }
 
 export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -492,6 +577,252 @@ export type UserUpdateOneWithoutUpdatedSiteConfigurationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUpdatedSiteConfigurationsInput, Prisma.UserUpdateWithoutUpdatedSiteConfigurationsInput>, Prisma.UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput>
 }
 
+export type UserCreateNestedOneWithoutTenantOnboardingInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTenantOnboardingInput, Prisma.UserUncheckedCreateWithoutTenantOnboardingInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTenantOnboardingInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTenantOnboardingNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTenantOnboardingInput, Prisma.UserUncheckedCreateWithoutTenantOnboardingInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTenantOnboardingInput
+  upsert?: Prisma.UserUpsertWithoutTenantOnboardingInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTenantOnboardingInput, Prisma.UserUpdateWithoutTenantOnboardingInput>, Prisma.UserUncheckedUpdateWithoutTenantOnboardingInput>
+}
+
+export type UserCreateNestedOneWithoutCreatedWebsiteVersionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutCreatedWebsiteVersionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedWebsiteVersionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutUpdatedWebsiteVersionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUpdatedWebsiteVersionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCreatedWebsiteVersionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutCreatedWebsiteVersionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedWebsiteVersionsInput
+  upsert?: Prisma.UserUpsertWithoutCreatedWebsiteVersionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedWebsiteVersionsInput, Prisma.UserUpdateWithoutCreatedWebsiteVersionsInput>, Prisma.UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput>
+}
+
+export type UserUpdateOneWithoutUpdatedWebsiteVersionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUpdatedWebsiteVersionsInput
+  upsert?: Prisma.UserUpsertWithoutUpdatedWebsiteVersionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUpdatedWebsiteVersionsInput, Prisma.UserUpdateWithoutUpdatedWebsiteVersionsInput>, Prisma.UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput>
+}
+
+export type UserCreateWithoutSessionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSessionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+}
+
+export type UserUpsertWithoutSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAccountsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAccountsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAccountsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountsInput, Prisma.UserUncheckedCreateWithoutAccountsInput>
+}
+
+export type UserUpsertWithoutAccountsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAccountsInput, Prisma.UserUncheckedUpdateWithoutAccountsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountsInput, Prisma.UserUncheckedCreateWithoutAccountsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAccountsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAccountsInput, Prisma.UserUncheckedUpdateWithoutAccountsInput>
+}
+
+export type UserUpdateWithoutAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+}
+
 export type UserCreateWithoutMembershipsInput = {
   id: string
   email: string
@@ -503,8 +834,14 @@ export type UserCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -518,8 +855,14 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -549,8 +892,14 @@ export type UserUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -564,8 +913,14 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedSiteConfigurationsInput = {
@@ -579,8 +934,14 @@ export type UserCreateWithoutCreatedSiteConfigurationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
@@ -594,8 +955,14 @@ export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSiteConfigurationsInput = {
@@ -614,8 +981,14 @@ export type UserCreateWithoutUpdatedSiteConfigurationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
   createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
@@ -629,8 +1002,14 @@ export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  image?: string | null
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUpdatedSiteConfigurationsInput = {
@@ -660,8 +1039,14 @@ export type UserUpdateWithoutCreatedSiteConfigurationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
@@ -675,8 +1060,14 @@ export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
   updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutUpdatedSiteConfigurationsInput = {
@@ -701,8 +1092,14 @@ export type UserUpdateWithoutUpdatedSiteConfigurationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
@@ -716,8 +1113,314 @@ export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
   createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTenantOnboardingInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTenantOnboardingInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTenantOnboardingInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTenantOnboardingInput, Prisma.UserUncheckedCreateWithoutTenantOnboardingInput>
+}
+
+export type UserUpsertWithoutTenantOnboardingInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTenantOnboardingInput, Prisma.UserUncheckedUpdateWithoutTenantOnboardingInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTenantOnboardingInput, Prisma.UserUncheckedCreateWithoutTenantOnboardingInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTenantOnboardingInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTenantOnboardingInput, Prisma.UserUncheckedUpdateWithoutTenantOnboardingInput>
+}
+
+export type UserUpdateWithoutTenantOnboardingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTenantOnboardingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCreatedWebsiteVersionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCreatedWebsiteVersionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCreatedWebsiteVersionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutCreatedWebsiteVersionsInput>
+}
+
+export type UserCreateWithoutUpdatedWebsiteVersionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutUpdatedWebsiteVersionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput>
+}
+
+export type UserUpsertWithoutCreatedWebsiteVersionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutCreatedWebsiteVersionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCreatedWebsiteVersionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedWebsiteVersionsInput, Prisma.UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput>
+}
+
+export type UserUpdateWithoutCreatedWebsiteVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutUpdatedWebsiteVersionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutUpdatedWebsiteVersionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutUpdatedWebsiteVersionsInput, Prisma.UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput>
+}
+
+export type UserUpdateWithoutUpdatedWebsiteVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -729,12 +1432,20 @@ export type UserCountOutputType = {
   memberships: number
   createdSiteConfigurations: number
   updatedSiteConfigurations: number
+  createdWebsiteVersions: number
+  updatedWebsiteVersions: number
+  sessions: number
+  accounts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   createdSiteConfigurations?: boolean | UserCountOutputTypeCountCreatedSiteConfigurationsArgs
   updatedSiteConfigurations?: boolean | UserCountOutputTypeCountUpdatedSiteConfigurationsArgs
+  createdWebsiteVersions?: boolean | UserCountOutputTypeCountCreatedWebsiteVersionsArgs
+  updatedWebsiteVersions?: boolean | UserCountOutputTypeCountUpdatedWebsiteVersionsArgs
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  accounts?: boolean | UserCountOutputTypeCountAccountsArgs
 }
 
 /**
@@ -768,6 +1479,34 @@ export type UserCountOutputTypeCountUpdatedSiteConfigurationsArgs<ExtArgs extend
   where?: Prisma.SiteConfigurationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCreatedWebsiteVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebsiteVersionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountUpdatedWebsiteVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebsiteVersionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccountWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -780,9 +1519,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  image?: boolean
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   createdSiteConfigurations?: boolean | Prisma.User$createdSiteConfigurationsArgs<ExtArgs>
   updatedSiteConfigurations?: boolean | Prisma.User$updatedSiteConfigurationsArgs<ExtArgs>
+  createdWebsiteVersions?: boolean | Prisma.User$createdWebsiteVersionsArgs<ExtArgs>
+  updatedWebsiteVersions?: boolean | Prisma.User$updatedWebsiteVersionsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  tenantOnboarding?: boolean | Prisma.User$tenantOnboardingArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -797,6 +1542,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  image?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -810,6 +1556,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  image?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -823,13 +1570,19 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  image?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "emailVerified" | "name" | "globalRole" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "emailVerified" | "name" | "globalRole" | "createdAt" | "updatedAt" | "deletedAt" | "image", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   createdSiteConfigurations?: boolean | Prisma.User$createdSiteConfigurationsArgs<ExtArgs>
   updatedSiteConfigurations?: boolean | Prisma.User$updatedSiteConfigurationsArgs<ExtArgs>
+  createdWebsiteVersions?: boolean | Prisma.User$createdWebsiteVersionsArgs<ExtArgs>
+  updatedWebsiteVersions?: boolean | Prisma.User$updatedWebsiteVersionsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  tenantOnboarding?: boolean | Prisma.User$tenantOnboardingArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -841,6 +1594,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     memberships: Prisma.$MembershipPayload<ExtArgs>[]
     createdSiteConfigurations: Prisma.$SiteConfigurationPayload<ExtArgs>[]
     updatedSiteConfigurations: Prisma.$SiteConfigurationPayload<ExtArgs>[]
+    createdWebsiteVersions: Prisma.$WebsiteVersionPayload<ExtArgs>[]
+    updatedWebsiteVersions: Prisma.$WebsiteVersionPayload<ExtArgs>[]
+    sessions: Prisma.$SessionPayload<ExtArgs>[]
+    accounts: Prisma.$AccountPayload<ExtArgs>[]
+    tenantOnboarding: Prisma.$TenantOnboardingPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -853,6 +1611,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
+    image: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1250,6 +2009,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdSiteConfigurations<T extends Prisma.User$createdSiteConfigurationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdSiteConfigurationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SiteConfigurationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   updatedSiteConfigurations<T extends Prisma.User$updatedSiteConfigurationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$updatedSiteConfigurationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SiteConfigurationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdWebsiteVersions<T extends Prisma.User$createdWebsiteVersionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdWebsiteVersionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebsiteVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  updatedWebsiteVersions<T extends Prisma.User$updatedWebsiteVersionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$updatedWebsiteVersionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebsiteVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tenantOnboarding<T extends Prisma.User$tenantOnboardingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tenantOnboardingArgs<ExtArgs>>): Prisma.Prisma__TenantOnboardingClient<runtime.Types.Result.GetResult<Prisma.$TenantOnboardingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1289,6 +2053,7 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly image: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -1751,6 +2516,121 @@ export type User$updatedSiteConfigurationsArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.SiteConfigurationScalarFieldEnum | Prisma.SiteConfigurationScalarFieldEnum[]
+}
+
+/**
+ * User.createdWebsiteVersions
+ */
+export type User$createdWebsiteVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebsiteVersion
+   */
+  select?: Prisma.WebsiteVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebsiteVersion
+   */
+  omit?: Prisma.WebsiteVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebsiteVersionInclude<ExtArgs> | null
+  where?: Prisma.WebsiteVersionWhereInput
+  orderBy?: Prisma.WebsiteVersionOrderByWithRelationInput | Prisma.WebsiteVersionOrderByWithRelationInput[]
+  cursor?: Prisma.WebsiteVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebsiteVersionScalarFieldEnum | Prisma.WebsiteVersionScalarFieldEnum[]
+}
+
+/**
+ * User.updatedWebsiteVersions
+ */
+export type User$updatedWebsiteVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebsiteVersion
+   */
+  select?: Prisma.WebsiteVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebsiteVersion
+   */
+  omit?: Prisma.WebsiteVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebsiteVersionInclude<ExtArgs> | null
+  where?: Prisma.WebsiteVersionWhereInput
+  orderBy?: Prisma.WebsiteVersionOrderByWithRelationInput | Prisma.WebsiteVersionOrderByWithRelationInput[]
+  cursor?: Prisma.WebsiteVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebsiteVersionScalarFieldEnum | Prisma.WebsiteVersionScalarFieldEnum[]
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Session
+   */
+  select?: Prisma.SessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Session
+   */
+  omit?: Prisma.SessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionInclude<ExtArgs> | null
+  where?: Prisma.SessionWhereInput
+  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.accounts
+ */
+export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Account
+   */
+  select?: Prisma.AccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Account
+   */
+  omit?: Prisma.AccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccountInclude<ExtArgs> | null
+  where?: Prisma.AccountWhereInput
+  orderBy?: Prisma.AccountOrderByWithRelationInput | Prisma.AccountOrderByWithRelationInput[]
+  cursor?: Prisma.AccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+}
+
+/**
+ * User.tenantOnboarding
+ */
+export type User$tenantOnboardingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantOnboarding
+   */
+  select?: Prisma.TenantOnboardingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantOnboarding
+   */
+  omit?: Prisma.TenantOnboardingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantOnboardingInclude<ExtArgs> | null
+  where?: Prisma.TenantOnboardingWhereInput
 }
 
 /**

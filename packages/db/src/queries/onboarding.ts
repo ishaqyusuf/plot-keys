@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import type { Db } from "../prisma";
 
 export type OnboardingStepProgressInput = {
@@ -52,7 +50,7 @@ export async function upsertTenantOnboarding(
     create: {
       companyName: input.companyName.trim(),
       currentStep: input.currentStep ?? "business-identity",
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       market: input.market?.trim() || null,
       subdomain: input.subdomain.trim().toLowerCase(),
       templateKey: input.templateKey ?? null,

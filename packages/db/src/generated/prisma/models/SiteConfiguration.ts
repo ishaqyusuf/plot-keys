@@ -619,14 +619,6 @@ export type EnumSiteConfigurationStatusFieldUpdateOperationsInput = {
   set?: $Enums.SiteConfigurationStatus
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type SiteConfigurationCreateNestedManyWithoutCreatedByInput = {
   create?: Prisma.XOR<Prisma.SiteConfigurationCreateWithoutCreatedByInput, Prisma.SiteConfigurationUncheckedCreateWithoutCreatedByInput> | Prisma.SiteConfigurationCreateWithoutCreatedByInput[] | Prisma.SiteConfigurationUncheckedCreateWithoutCreatedByInput[]
   connectOrCreate?: Prisma.SiteConfigurationCreateOrConnectWithoutCreatedByInput | Prisma.SiteConfigurationCreateOrConnectWithoutCreatedByInput[]

@@ -11,6 +11,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useMutation } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +20,38 @@ import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
 import { SubdomainField } from "../subdomain-field";
 import { AuthFormError } from "./auth-form-error";
+
+const DevQuickFill =
+  process.env.NODE_ENV === "development"
+    ? dynamic(() =>
+        import("../dev/dev-quick-fill").then((m) => m.DevQuickFill),
+      )
+    : null;
+
+const DEV_PRESETS = [
+  {
+    label: "user-1",
+    values: {
+      company: "Aster Grove Realty",
+      email: "amara@astergrove.com",
+      name: "Amara Okafor",
+      password: "lorem-ipsum",
+      phoneNumber: "+2348012345678",
+      subdomain: "aster-grove",
+    },
+  },
+  {
+    label: "user-2",
+    values: {
+      company: "Sunrise Properties",
+      email: "james@sunrise.com",
+      name: "James Adeyemi",
+      password: "lorem-ipsum",
+      phoneNumber: "+2348098765432",
+      subdomain: "sunrise-props",
+    },
+  },
+];
 
 export function SignUpForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
@@ -65,6 +98,13 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
+      {DevQuickFill && (
+        <DevQuickFill
+          presets={DEV_PRESETS}
+          onFill={(values) => form.reset(values)}
+        />
+      )}
+
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="sign-up-name">Full name</FieldLabel>

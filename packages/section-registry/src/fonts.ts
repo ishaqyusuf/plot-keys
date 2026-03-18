@@ -78,3 +78,60 @@ export function resolveHeadingFontStack(
 
 const systemFontStack =
   "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+// ---------------------------------------------------------------------------
+// Slot-level font overrides
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-slot font override map.
+ *
+ * Some UI slots benefit from a different typeface than the body/heading fonts
+ * (e.g. a badge should stay compact; eyebrows benefit from letter-spacing).
+ * Keys are slot identifiers; values are resolved CSS font-family stacks.
+ */
+export type FontFallbackMap = {
+  badge?: string;
+  eyebrow?: string;
+  subscribeButton?: string;
+};
+
+/** Default per-slot font overrides keyed by font-family name. */
+export const fontFallbacks: Record<string, FontFallbackMap> = {
+  satoshi: {
+    badge: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    eyebrow: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    subscribeButton: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  },
+  georgia: {
+    badge: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    eyebrow: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    subscribeButton: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  },
+  inter: {
+    badge: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    eyebrow: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    subscribeButton: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  },
+  playfair: {
+    badge: "'Playfair Display', Georgia, serif",
+    eyebrow: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    subscribeButton: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  },
+};
+
+/**
+ * Resolves the font stack for a specific UI slot, falling back to the
+ * base font stack when no slot override is configured.
+ *
+ * @param fontFamily - The base font family name (e.g. "Satoshi", "Georgia")
+ * @param slot - The UI slot key (e.g. "badge", "eyebrow", "subscribeButton")
+ */
+export function resolveSlotFont(
+  fontFamily: string | undefined,
+  slot: keyof FontFallbackMap,
+): string {
+  const key = (fontFamily ?? "").toLowerCase().split(",")[0]?.trim() ?? "";
+  const slotOverride = fontFallbacks[key]?.[slot];
+  return slotOverride ?? resolveFontStack(fontFamily);
+}

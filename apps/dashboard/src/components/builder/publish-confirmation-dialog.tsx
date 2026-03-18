@@ -18,15 +18,19 @@ import { useRef, useState } from "react";
 type PublishConfirmationDialogProps = {
   changedFieldCount?: number;
   configId: string;
+  currentLiveName?: string;
   currentName: string;
   onPublish: (formData: FormData) => Promise<void>;
+  templateLabel?: string;
 };
 
 export function PublishConfirmationDialog({
   changedFieldCount,
   configId,
+  currentLiveName,
   currentName,
   onPublish,
+  templateLabel,
 }: PublishConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(currentName);

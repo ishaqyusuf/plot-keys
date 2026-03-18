@@ -14,10 +14,250 @@
 import type { DerivedDesignConfig } from "./recommendation";
 
 // ---------------------------------------------------------------------------
-// Config type
+// Style preset
 // ---------------------------------------------------------------------------
 
-export type StylePreset = "bold" | "clean" | "editorial" | "warm";
+/** Named style presets aligned with the Template Config Mode brain doc. */
+export type StylePreset = "vega" | "nova" | "maia" | "myra" | "lyra";
+
+export type StylePresetDefinition = {
+  accentColor: string;
+  backgroundColor: string;
+  /** Visual spacing density. */
+  density: "compact" | "comfortable" | "spacious";
+  fontFamily: string;
+  headingFontFamily: string;
+  label: string;
+  /** Border-radius scale. */
+  radius: "none" | "sm" | "md" | "lg" | "full";
+};
+
+export const stylePresets: Record<StylePreset, StylePresetDefinition> = {
+  /** Clean, minimal — great for lead-gen residential brands. */
+  vega: {
+    accentColor: "#0369a1",
+    backgroundColor: "#f0f9ff",
+    density: "comfortable",
+    fontFamily: "Inter",
+    headingFontFamily: "Epilogue",
+    label: "Vega",
+    radius: "md",
+  },
+  /** Dark, editorial luxury — best for high-end brands. */
+  nova: {
+    accentColor: "#1e293b",
+    backgroundColor: "#0f172a",
+    density: "spacious",
+    fontFamily: "Satoshi",
+    headingFontFamily: "Space Grotesk",
+    label: "Nova",
+    radius: "sm",
+  },
+  /** Warm editorial serif — perfect for boutique and family agencies. */
+  maia: {
+    accentColor: "#0f766e",
+    backgroundColor: "#f4efe7",
+    density: "spacious",
+    fontFamily: "Georgia",
+    headingFontFamily: "Playfair Display",
+    label: "Maia",
+    radius: "none",
+  },
+  /** Minimal neutral — versatile for any market segment. */
+  myra: {
+    accentColor: "#334155",
+    backgroundColor: "#f8fafc",
+    density: "compact",
+    fontFamily: "Inter",
+    headingFontFamily: "Inter",
+    label: "Myra",
+    radius: "full",
+  },
+  /** Bold, high-contrast — ideal for commercial and investor audiences. */
+  lyra: {
+    accentColor: "#1d4ed8",
+    backgroundColor: "#f8fafc",
+    density: "comfortable",
+    fontFamily: "Satoshi",
+    headingFontFamily: "Satoshi",
+    label: "Lyra",
+    radius: "lg",
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Color system
+// ---------------------------------------------------------------------------
+
+export type ColorTokenSet = {
+  accent: string;
+  accentForeground: string;
+  background: string;
+  border: string;
+  card: string;
+  cardForeground: string;
+  destructive: string;
+  destructiveForeground: string;
+  foreground: string;
+  input: string;
+  muted: string;
+  mutedForeground: string;
+  popover: string;
+  popoverForeground: string;
+  primary: string;
+  primaryForeground: string;
+  ring: string;
+  secondary: string;
+  secondaryForeground: string;
+};
+
+export type ColorSystem = {
+  dark: ColorTokenSet;
+  light: ColorTokenSet;
+  name: string;
+};
+
+export const colorSystems: Record<string, ColorSystem> = {
+  slate: {
+    name: "Slate",
+    light: {
+      accent: "240 4.8% 95.9%",
+      accentForeground: "240 5.9% 10%",
+      background: "0 0% 100%",
+      border: "240 5.9% 90%",
+      card: "0 0% 100%",
+      cardForeground: "240 10% 3.9%",
+      destructive: "0 84.2% 60.2%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "240 10% 3.9%",
+      input: "240 5.9% 90%",
+      muted: "240 4.8% 95.9%",
+      mutedForeground: "240 3.8% 46.1%",
+      popover: "0 0% 100%",
+      popoverForeground: "240 10% 3.9%",
+      primary: "221 83% 53%",
+      primaryForeground: "0 0% 98%",
+      ring: "221 83% 53%",
+      secondary: "240 4.8% 95.9%",
+      secondaryForeground: "240 5.9% 10%",
+    },
+    dark: {
+      accent: "240 3.7% 15.9%",
+      accentForeground: "0 0% 98%",
+      background: "240 10% 3.9%",
+      border: "240 3.7% 15.9%",
+      card: "240 10% 3.9%",
+      cardForeground: "0 0% 98%",
+      destructive: "0 62.8% 30.6%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "0 0% 98%",
+      input: "240 3.7% 15.9%",
+      muted: "240 3.7% 15.9%",
+      mutedForeground: "240 5% 64.9%",
+      popover: "240 10% 3.9%",
+      popoverForeground: "0 0% 98%",
+      primary: "221 83% 53%",
+      primaryForeground: "0 0% 98%",
+      ring: "221 83% 53%",
+      secondary: "240 3.7% 15.9%",
+      secondaryForeground: "0 0% 98%",
+    },
+  },
+  ocean: {
+    name: "Ocean",
+    light: {
+      accent: "199 89% 94%",
+      accentForeground: "199 89% 20%",
+      background: "204 100% 98%",
+      border: "199 50% 88%",
+      card: "0 0% 100%",
+      cardForeground: "199 80% 8%",
+      destructive: "0 84.2% 60.2%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "199 80% 8%",
+      input: "199 50% 88%",
+      muted: "199 50% 94%",
+      mutedForeground: "199 30% 46%",
+      popover: "0 0% 100%",
+      popoverForeground: "199 80% 8%",
+      primary: "199 89% 48%",
+      primaryForeground: "0 0% 100%",
+      ring: "199 89% 48%",
+      secondary: "199 50% 92%",
+      secondaryForeground: "199 80% 14%",
+    },
+    dark: {
+      accent: "199 60% 18%",
+      accentForeground: "199 89% 80%",
+      background: "199 80% 6%",
+      border: "199 40% 16%",
+      card: "199 70% 8%",
+      cardForeground: "199 30% 96%",
+      destructive: "0 62.8% 30.6%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "199 30% 96%",
+      input: "199 40% 16%",
+      muted: "199 40% 14%",
+      mutedForeground: "199 20% 60%",
+      popover: "199 70% 8%",
+      popoverForeground: "199 30% 96%",
+      primary: "199 89% 48%",
+      primaryForeground: "0 0% 100%",
+      ring: "199 89% 48%",
+      secondary: "199 40% 14%",
+      secondaryForeground: "199 30% 96%",
+    },
+  },
+  forest: {
+    name: "Forest",
+    light: {
+      accent: "142 52% 92%",
+      accentForeground: "142 52% 18%",
+      background: "138 30% 98%",
+      border: "142 30% 86%",
+      card: "0 0% 100%",
+      cardForeground: "142 60% 7%",
+      destructive: "0 84.2% 60.2%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "142 60% 7%",
+      input: "142 30% 86%",
+      muted: "142 20% 94%",
+      mutedForeground: "142 15% 45%",
+      popover: "0 0% 100%",
+      popoverForeground: "142 60% 7%",
+      primary: "142 71% 45%",
+      primaryForeground: "0 0% 100%",
+      ring: "142 71% 45%",
+      secondary: "142 20% 91%",
+      secondaryForeground: "142 60% 12%",
+    },
+    dark: {
+      accent: "142 40% 16%",
+      accentForeground: "142 52% 78%",
+      background: "142 60% 5%",
+      border: "142 30% 14%",
+      card: "142 50% 7%",
+      cardForeground: "142 20% 96%",
+      destructive: "0 62.8% 30.6%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "142 20% 96%",
+      input: "142 30% 14%",
+      muted: "142 30% 12%",
+      mutedForeground: "142 12% 60%",
+      popover: "142 50% 7%",
+      popoverForeground: "142 20% 96%",
+      primary: "142 71% 45%",
+      primaryForeground: "0 0% 100%",
+      ring: "142 71% 45%",
+      secondary: "142 30% 12%",
+      secondaryForeground: "142 20% 96%",
+    },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Config type
+// ---------------------------------------------------------------------------
 
 export type ColorScheme = {
   accentColor: string;
@@ -28,14 +268,14 @@ export type ColorScheme = {
 
 /**
  * Controlled template configuration stored in `SiteConfiguration.themeJson`.
- *
- * Extends the raw `ThemeConfig` with explicit labels for the builder.
  */
 export type TemplateConfig = {
   /** The chosen accent color as a CSS hex value. */
   accentColor?: string;
   /** The chosen background color. */
   backgroundColor?: string;
+  /** Active color system key (e.g. "slate", "ocean", "forest"). */
+  colorSystem?: string;
   /** Body font family name (resolved via `resolveFontStack`). */
   fontFamily?: string;
   /** Heading font family name (resolved via `resolveHeadingFontStack`). */
@@ -56,48 +296,9 @@ export type TemplateConfig = {
 };
 
 // ---------------------------------------------------------------------------
-// Style presets
-// ---------------------------------------------------------------------------
-
-export const stylePresets: Record<StylePreset, ColorScheme & { fontFamily: string; headingFontFamily: string; label: string }> = {
-  bold: {
-    accentColor: "#1e293b",
-    backgroundColor: "#0f172a",
-    fontFamily: "Inter",
-    headingFontFamily: "Space Grotesk",
-    label: "Bold & Modern",
-  },
-  clean: {
-    accentColor: "#0369a1",
-    backgroundColor: "#f0f9ff",
-    fontFamily: "Inter",
-    headingFontFamily: "Epilogue",
-    label: "Clean & Professional",
-  },
-  editorial: {
-    accentColor: "#0f766e",
-    backgroundColor: "#f4efe7",
-    fontFamily: "Georgia",
-    headingFontFamily: "Playfair Display",
-    label: "Editorial & Refined",
-  },
-  warm: {
-    accentColor: "#16a34a",
-    backgroundColor: "#fdf6ee",
-    fontFamily: "Avenir",
-    headingFontFamily: "Fraunces",
-    label: "Warm & Inviting",
-  },
-};
-
-// ---------------------------------------------------------------------------
 // Serialization helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Serializes a `TemplateConfig` into the flat `themeJson`-compatible shape.
- * Unknown fields are preserved via spread so custom ad-hoc keys survive.
- */
 export function serializeTemplateConfig(
   config: TemplateConfig,
 ): Record<string, string> {
@@ -105,7 +306,7 @@ export function serializeTemplateConfig(
 
   if (config.accentColor) output.accentColor = config.accentColor;
   if (config.backgroundColor) output.backgroundColor = config.backgroundColor;
-  if (config.foregroundColor) output.foregroundColor = config.foregroundColor;
+  if (config.colorSystem) output.colorSystem = config.colorSystem;
   if (config.fontFamily) output.fontFamily = config.fontFamily;
   if (config.headingFontFamily) output.headingFontFamily = config.headingFontFamily;
   if (config.logo) output.logo = config.logo;
@@ -122,10 +323,6 @@ export function serializeTemplateConfig(
   return output;
 }
 
-/**
- * Deserializes a flat `themeJson` record back into a `TemplateConfig`.
- * Unknown keys are ignored.
- */
 export function deserializeTemplateConfig(
   raw: Record<string, string>,
 ): TemplateConfig {
@@ -141,8 +338,8 @@ export function deserializeTemplateConfig(
   return {
     accentColor: raw.accentColor,
     backgroundColor: raw.backgroundColor,
+    colorSystem: raw.colorSystem,
     fontFamily: raw.fontFamily,
-    foregroundColor: raw.foregroundColor,
     headingFontFamily: raw.headingFontFamily,
     logo: raw.logo,
     market: raw.market,
@@ -152,27 +349,19 @@ export function deserializeTemplateConfig(
   };
 }
 
-/**
- * Converts a `DerivedDesignConfig` (from the recommendation engine) into a
- * `TemplateConfig` so onboarding-driven defaults can be stored in the same
- * structured format.
- */
 export function fromDerivedDesignConfig(
   derived: DerivedDesignConfig,
 ): TemplateConfig {
   return {
     accentColor: derived.accentColor,
     backgroundColor: derived.backgroundColor,
+    colorSystem: derived.colorSystem,
     fontFamily: derived.fontFamily,
     headingFontFamily: derived.headingFontFamily,
     stylePreset: derived.stylePreset as StylePreset | undefined,
   };
 }
 
-/**
- * Applies a partial `TemplateConfig` update over an existing config.
- * Returns the merged result.
- */
 export function applyConfigUpdate(
   existing: TemplateConfig,
   update: Partial<TemplateConfig>,
@@ -185,5 +374,29 @@ export function applyConfigUpdate(
     ...existing,
     ...update,
     namedImages: mergedNamedImages,
+  };
+}
+
+/**
+ * Merges a style preset definition with tenant-supplied overrides from
+ * TemplateConfig. Tenant values always win — the preset provides defaults.
+ */
+export function resolvePresetConfig(
+  presetKey: StylePreset | undefined,
+  overrides: Partial<TemplateConfig> = {},
+): TemplateConfig {
+  const base = presetKey ? stylePresets[presetKey] : undefined;
+
+  return {
+    accentColor: overrides.accentColor ?? base?.accentColor,
+    backgroundColor: overrides.backgroundColor ?? base?.backgroundColor,
+    colorSystem: overrides.colorSystem,
+    fontFamily: overrides.fontFamily ?? base?.fontFamily,
+    headingFontFamily: overrides.headingFontFamily ?? base?.headingFontFamily,
+    logo: overrides.logo,
+    market: overrides.market,
+    namedImages: overrides.namedImages,
+    stylePreset: overrides.stylePreset ?? presetKey,
+    supportLine: overrides.supportLine,
   };
 }

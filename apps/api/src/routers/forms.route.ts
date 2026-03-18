@@ -12,10 +12,12 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "../lib.trpc";
 
-let _db: ReturnType<typeof createPrismaClient> | null = null;
+let _client: ReturnType<typeof createPrismaClient> | null = null;
 function getDb() {
-  if (!_db) _db = createPrismaClient();
-  return _db;
+  if (!_client) _client = createPrismaClient();
+  const { db } = _client;
+  if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DATABASE_URL is not configured." });
+  return db;
 }
 
 const contactInputSchema = z.object({

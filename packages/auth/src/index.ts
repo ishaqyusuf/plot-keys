@@ -1,7 +1,5 @@
-import "server-only";
-
-import { randomUUID } from "node:crypto";
-import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
+// import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { promisify } from "node:util";
 import {
   createPrismaClient,
   createUser,
@@ -68,24 +66,23 @@ export type AppSession = {
   };
 };
 
-function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const derivedKey = scryptSync(password, salt, 64).toString("hex");
+const scryptAsync = promisify(scrypt);
 
-  return `${salt}:${derivedKey}`;
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const hash = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${salt}:${hash.toString("hex")}`;
 }
 
-function verifyPasswordHash(password: string, storedHash: string) {
-  const [salt, storedDerivedKey] = storedHash.split(":");
-
-  if (!salt || !storedDerivedKey) {
-    return false;
-  }
-
-  return timingSafeEqual(
-    scryptSync(password, salt, 64),
-    Buffer.from(storedDerivedKey, "hex"),
-  );
+async function verifyPasswordHash(
+  password: string,
+  storedHash: string,
+): Promise<boolean> {
+  const [salt, hash] = storedHash.split(":");
+  if (!salt || !hash) return false;
+  const hashBuffer = Buffer.from(hash, "hex");
+  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
+  return timingSafeEqual(hashBuffer, derived);
 }
 
 function requireDb() {
@@ -126,18 +123,18 @@ export async function signUpUser(input: {
     email,
     emailVerified: input.emailVerified ?? false,
     name: input.name,
-    passwordHash: hashPassword(input.password),
+    passwordHash: await hashPassword(input.password),
     phoneNumber: input.phoneNumber,
   });
 
   // Create a Better Auth account record so the user can sign in via Better Auth
   await db.account.create({
     data: {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       accountId: user.id,
       providerId: "credential",
       userId: user.id,
-      password: hashPassword(input.password),
+      password: await hashPassword(input.password),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -180,7 +177,7 @@ export async function signInUser(input: { email: string; password: string }) {
     throw new Error("Incorrect email or password.");
   }
 
-  if (!verifyPasswordHash(input.password, user.passwordHash)) {
+  if (!(await verifyPasswordHash(input.password, user.passwordHash))) {
     throw new Error("Incorrect email or password.");
   }
 
@@ -195,12 +192,12 @@ export async function createBetterAuthSession(
   userId: string,
 ): Promise<{ sessionToken: string; expiresAt: Date }> {
   const db = requireDb();
-  const sessionToken = randomUUID();
+  const sessionToken = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 
   await db.session.create({
     data: {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       expiresAt,
       token: sessionToken,
       userId,
