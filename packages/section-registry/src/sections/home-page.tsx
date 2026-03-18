@@ -186,15 +186,13 @@ function SectionHeading({
 
 export function HeroBannerSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: HeroBannerConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
-    <section className={`px-6 py-8 md:px-10 md:py-10 ${draftEditableClass(renderMode)}`} style={shell(theme)}>
+    <section className="px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
@@ -290,15 +288,16 @@ export function MarketStatsSection({
 
 export function StoryGridSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: StoryGridConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
-    <section className={`px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`} style={shell(theme)}>
+    <section
+      className={`px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`}
+      style={shell(theme)}
+    >
       <div className="flex flex-col gap-3">
         <p className="text-sm uppercase tracking-[0.32em] text-[color:var(--muted)]">
           {config.eyebrow}
@@ -436,16 +435,14 @@ export function TestimonialStripSection({
 
 export function CtaBandSection({
   config,
-  renderMode = "live",
   theme,
 }: {
   config: CtaBandConfig;
-  renderMode?: RenderMode;
   theme: ThemeConfig;
 }) {
   return (
     <section
-      className={`px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14 ${draftEditableClass(renderMode)}`}
+      className="px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14"
       style={shell(theme)}
     >
       <Surface className="overflow-hidden bg-[linear-gradient(145deg,#102033_0%,#0f766e_100%)] text-white">

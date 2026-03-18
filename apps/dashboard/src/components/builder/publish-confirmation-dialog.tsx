@@ -18,19 +18,15 @@ import { useRef, useState } from "react";
 type PublishConfirmationDialogProps = {
   changedFieldCount?: number;
   configId: string;
-  currentLiveName?: string | null;
   currentName: string;
   onPublish: (formData: FormData) => Promise<void>;
-  templateLabel?: string | null;
 };
 
 export function PublishConfirmationDialog({
   changedFieldCount,
   configId,
-  currentLiveName,
   currentName,
   onPublish,
-  templateLabel,
 }: PublishConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(currentName);
@@ -61,7 +57,8 @@ export function PublishConfirmationDialog({
         <DialogHeader>
           <DialogTitle>Publish configuration</DialogTitle>
           <DialogDescription>
-            Review what will go live before confirming.
+            This will replace the currently live site with this configuration.
+            The current live version will be archived.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,7 +99,7 @@ export function PublishConfirmationDialog({
         <form onSubmit={handleSubmit} ref={formRef}>
           <FieldGroup className="py-2">
             <Field>
-              <FieldLabel>Save this version as</FieldLabel>
+              <FieldLabel>Configuration name</FieldLabel>
               <Input
                 autoComplete="off"
                 onChange={(e) => setName(e.target.value)}

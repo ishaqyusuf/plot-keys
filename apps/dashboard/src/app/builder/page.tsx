@@ -1,5 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
-import { deserializeTemplateConfig, resolveWebsitePresentation, templateCatalog } from "@plotkeys/section-registry";
+import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -18,7 +18,6 @@ import { BuilderSidebarControls } from "../../components/builder/builder-sidebar
 import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../lib/session";
 import {
-  createTemplateDraftAction,
   publishSiteConfigurationAction,
   smartFillFieldAction,
   updateSiteFieldAction,
@@ -30,8 +29,6 @@ type BuilderPageProps = {
   searchParams?: Promise<{
     configId?: string;
     generated?: string;
-    /** Present when landing directly from onboarding completion. */
-    onboarded?: string;
     published?: string;
     saved?: string;
   }>;
@@ -138,16 +135,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   return (
     <main className="min-h-screen bg-background px-3 py-3 md:px-4 md:py-4">
       <div className="mx-auto grid max-w-[118rem] gap-4 xl:grid-cols-[15.5rem_minmax(0,1fr)]">
-        {params.onboarded && (
-          <div className="xl:col-start-2 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-            <p className="font-semibold">Your workspace is ready 🎉</p>
-            <p className="mt-0.5 text-emerald-700 dark:text-emerald-400">
-              Your first website draft has been created using your onboarding preferences.
-              Browse sections, edit copy, and publish when you&apos;re happy.
-            </p>
-          </div>
-        )}
-        {!params.onboarded && (params.saved || params.generated || params.published) && (
+        {(params.saved || params.generated || params.published) && (
           <Alert className="xl:col-start-2 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
               {params.published
@@ -196,7 +184,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 </div>
 
                 <BuilderSidebarControls
-                  configId={activeConfiguration.id}
                   currentTemplateKey={activeConfiguration.templateKey}
                   templateConfig={deserializeTemplateConfig(
                     activeConfiguration.themeJson as Record<string, string>,
@@ -240,10 +227,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               <PublishConfirmationDialog
                 changedFieldCount={changedFieldCount}
                 configId={activeConfiguration.id}
-                currentLiveName={publishedConfiguration?.name ?? null}
                 currentName={activeConfiguration.name}
                 onPublish={publishSiteConfigurationAction}
-                templateLabel={activeTemplateLabel}
               />
               <Button asChild variant="secondary">
                 <Link href="/">Back to dashboard</Link>
@@ -265,9 +250,6 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             onSmartFill={smartFillFieldAction}
             onUpdateField={updateSiteFieldAction}
             preview={preview}
-            templateConfig={deserializeTemplateConfig(
-              activeConfiguration.themeJson as Record<string, string>,
-            )}
           />
         </section>
       </div>

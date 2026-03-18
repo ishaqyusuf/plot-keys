@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "plotkeys",
@@ -215,7 +214,7 @@
       },
     },
     "packages/supabase": {
-      "name": "@plotkeys/supabase",
+      "name": "@plotkeys/platform-integrations",
       "dependencies": {
         "@supabase/supabase-js": "^2.49.0",
       },
@@ -531,9 +530,9 @@
 
     "@plotkeys/notifications-react": ["@plotkeys/notifications-react@workspace:packages/notifications-react"],
 
-    "@plotkeys/section-registry": ["@plotkeys/section-registry@workspace:packages/section-registry"],
+    "@plotkeys/platform-integrations": ["@plotkeys/platform-integrations@workspace:packages/supabase"],
 
-    "@plotkeys/supabase": ["@plotkeys/supabase@workspace:packages/supabase"],
+    "@plotkeys/section-registry": ["@plotkeys/section-registry@workspace:packages/section-registry"],
 
     "@plotkeys/tenant-site": ["@plotkeys/tenant-site@workspace:apps/tenant-site"],
 
