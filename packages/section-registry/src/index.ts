@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import type { RenderMode } from "./types";
 
 export type TemplateTier = "starter" | "plus" | "pro";
 
@@ -8,6 +9,7 @@ import {
   type HeroBannerConfig,
   HeroBannerSection,
   type ListingSpotlightConfig,
+  type ListingSpotlightItem,
   ListingSpotlightSection,
   type MarketStatsConfig,
   MarketStatsSection,
@@ -17,6 +19,14 @@ import {
   TestimonialStripSection,
   type ThemeConfig,
 } from "./sections/home-page";
+import {
+  AgentShowcaseSection,
+  type AgentShowcaseConfig,
+  PropertyGridSection,
+  type PropertyGridConfig,
+  ContactSection,
+  type ContactSectionConfig,
+} from "./sections/extended-sections";
 
 export type SectionDefinition<TConfig> = {
   component: (props: { config: TConfig; theme: ThemeConfig }) => JSX.Element;
@@ -31,7 +41,10 @@ export type HomeSectionDefinition =
   | SectionDefinition<StoryGridConfig>
   | SectionDefinition<ListingSpotlightConfig>
   | SectionDefinition<TestimonialStripConfig>
-  | SectionDefinition<CtaBandConfig>;
+  | SectionDefinition<CtaBandConfig>
+  | SectionDefinition<AgentShowcaseConfig>
+  | SectionDefinition<PropertyGridConfig>
+  | SectionDefinition<ContactSectionConfig>;
 
 export type EditableFieldDefinition = {
   aiEnabled?: boolean;
@@ -77,22 +90,22 @@ export type TemplateDefinition = {
 
 export type LiveListingItem = {
   imageUrl?: string | null;
+  id?: string;
   location: string;
   price?: string | null;
   specs?: string | null;
   title: string;
 };
 
-/**
- * Controls how the website is rendered.
- *
- * - `live`    Published tenant site. No editing chrome.
- * - `draft`   Builder / editor view. Empty fields show placeholder outlines;
- *             sections may render a subtle focus outline on hover.
- * - `preview` Authenticated preview (preview-token URL). Renders published
- *             content with a "Preview" badge; no editing controls.
- */
-export type RenderMode = "draft" | "live" | "preview";
+export type LiveAgentItem = {
+  bio?: string | null;
+  id: string;
+  imageUrl?: string | null;
+  name: string;
+  title?: string | null;
+};
+
+export type { RenderMode } from "./types";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
@@ -108,6 +121,7 @@ export type ResolvedWebsitePresentation = {
 type ResolveTemplateOptions = {
   companyName?: string;
   content?: TenantContentRecord;
+  liveAgents?: LiveAgentItem[];
   liveListings?: LiveListingItem[];
   market?: string;
   /** Defaults to "live" when omitted. */
@@ -257,132 +271,241 @@ function buildListingSpotlightItems(
   ];
 }
 
+// ---------------------------------------------------------------------------
+// Section builder map — maps page-inventory sectionType → HomeSectionDefinition
+// ---------------------------------------------------------------------------
+
+type SectionBuilder = (
+  content: TenantContentRecord,
+  liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
+) => HomeSectionDefinition;
+
+const sectionBuilders: Record<string, SectionBuilder> = {
+  HeroBannerSection: (content) => ({
+    component: HeroBannerSection,
+    config: {
+      ctaHref: "#featured-listings",
+      ctaText: content["hero.ctaText"] ?? "Browse listings",
+      eyebrow:
+        content["hero.eyebrow"] ?? "Luxury homes and investment addresses",
+      subtitle:
+        content["hero.subtitle"] ??
+        "A refined real-estate experience for buyers, investors, and families looking for trusted guidance.",
+      title:
+        content["hero.title"] ??
+        "Find your next signature property with confidence.",
+    },
+    id: "hero-banner",
+    type: "hero_banner",
+  }),
+  MarketStatsSection: () => ({
+    component: MarketStatsSection,
+    config: {
+      items: [
+        { label: "Homes sold last year", value: "128" },
+        { label: "Average closing timeline", value: "21 days" },
+        { label: "Verified buyer inquiries", value: "94%" },
+      ],
+    },
+    id: "market-stats",
+    type: "market_stats",
+  }),
+  ListingSpotlightSection: (content, liveListings) => ({
+    component: ListingSpotlightSection,
+    config: {
+      description:
+        liveListings && liveListings.length > 0
+          ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
+          : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
+      eyebrow: "Featured inventory",
+      items: buildListingSpotlightItems(liveListings),
+      title: "Featured listings feel editorial, not templated.",
+    },
+    id: "listing-spotlight",
+    type: "listing_spotlight",
+  }),
+  StoryGridSection: (content) => ({
+    component: StoryGridSection,
+    config: {
+      description:
+        content["story.description"] ??
+        "The first tenant template balances premium presentation with clear information architecture so every public page can convert interest into real conversations.",
+      eyebrow: "Why this template works",
+      items: [
+        {
+          body: "Organize your offer around neighborhoods, trust signals, and high-value inventory without rebuilding each landing page from scratch.",
+          title: "Premium positioning",
+        },
+        {
+          body: "Structured sections give every property, team story, and CTA a clean place in the page, so content stays usable on mobile and desktop.",
+          title: "Disciplined layout system",
+        },
+        {
+          body: "Every section is designed to support lead capture and future CMS-driven editing rather than static one-off pages.",
+          title: "Built for conversion",
+        },
+      ],
+      title:
+        content["story.title"] ??
+        "A polished website system for agencies that need credibility fast.",
+    },
+    id: "story-grid",
+    type: "story_grid",
+  }),
+  TestimonialStripSection: () => ({
+    component: TestimonialStripSection,
+    config: {
+      items: [
+        {
+          quote:
+            "They made the shortlist feel effortless and handled every detail with a calm level of professionalism.",
+          role: "Buyer, Ikoyi relocation",
+          speaker: "M. Adebayo",
+        },
+        {
+          quote:
+            "The property presentation felt thoughtful from first click to first viewing, which immediately built trust with our family.",
+          role: "Home buyer, Lekki",
+          speaker: "R. Okonkwo",
+        },
+        {
+          quote:
+            "Our inquiries improved because the website finally reflected the quality of the homes we represent.",
+          role: "Managing partner, luxury brokerage",
+          speaker: "T. Hassan",
+        },
+      ],
+    },
+    id: "testimonial-strip",
+    type: "testimonial_strip",
+  }),
+  CtaBandSection: (content) => ({
+    component: CtaBandSection,
+    config: {
+      body:
+        content["cta.body"] ??
+        "Book a private consultation, request a shortlist, or start a tailored property search with a team that understands premium client expectations.",
+      primaryHref: "#",
+      primaryText: "Book a consultation",
+      secondaryHref: "#featured-listings",
+      secondaryText: "View available homes",
+      title:
+        content["cta.title"] ??
+        "Start your search with a team that knows the market.",
+    },
+    id: "cta-band",
+    type: "cta_band",
+  }),
+  AgentShowcaseSection: (_content, _listings, liveAgents) => ({
+    component: AgentShowcaseSection,
+    config: {
+      description: "Meet the team behind every successful deal.",
+      eyebrow: "Our team",
+      items: (liveAgents ?? []).map((a) => ({
+        bio: a.bio ?? undefined,
+        id: a.id,
+        name: a.name,
+        photoUrl: a.imageUrl ?? undefined,
+        role: a.title ?? "Agent",
+      })),
+      title: "The people who make it happen.",
+    },
+    id: "agent-showcase",
+    type: "agent_showcase",
+  }),
+  PropertyGridSection: (_content, liveListings) => ({
+    component: PropertyGridSection,
+    config: {
+      ctaHref: "/properties",
+      ctaText: "View all properties",
+      eyebrow: "Active listings",
+      items: (liveListings ?? []).map((p, i) => ({
+        id: p.id ?? `property-${i}`,
+        imageUrl: p.imageUrl ?? undefined,
+        location: p.location,
+        price: p.price ?? undefined,
+        slug: p.id,
+        specs: p.specs ?? undefined,
+        title: p.title,
+      })),
+      title: "Properties available now.",
+    },
+    id: "property-grid",
+    type: "property_grid",
+  }),
+  ContactSection: (content, _listings, _agents, subdomain) => ({
+    component: ContactSection,
+    config: {
+      address: content["contact.address"] ?? undefined,
+      ctaText: "Send message",
+      email: content["contact.email"] ?? undefined,
+      formEndpoint: "/api/contact",
+      phone: content["contact.phone"] ?? undefined,
+      subdomain: subdomain ?? "",
+      subtitle:
+        "Have a question about a listing, or ready to start your search? Get in touch and we'll get back to you within 24 hours.",
+      title: "Get in touch.",
+      whatsapp: content["contact.whatsapp"] ?? undefined,
+    },
+    id: "contact-section",
+    type: "contact_section",
+  }),
+};
+
+/**
+ * Builds the home page section list driven by the page-inventory for the
+ * given template. Per-template overrides (e.g. Meridian leads with listings)
+ * are respected automatically.
+ */
 function buildHomePage(
   content: TenantContentRecord,
   liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
 ): {
   page: "home";
   sections: HomeSectionDefinition[];
 } {
+  const { getEnabledSections } = require("./page-inventory") as typeof import("./page-inventory");
+  const slots = getEnabledSections(templateKey, "home");
+
+  const sections: HomeSectionDefinition[] = slots
+    .map((slot) => {
+      const builder = sectionBuilders[slot.sectionType];
+      return builder ? builder(content, liveListings, liveAgents, subdomain) : null;
+    })
+    .filter((s): s is HomeSectionDefinition => s !== null);
+
+  // Fallback: if no inventory slots matched, render the default set
+  if (sections.length === 0) {
+    return buildDefaultHomePage(content, liveListings, liveAgents, subdomain);
+  }
+
+  return { page: "home", sections };
+}
+
+/** Fallback for unknown template keys — renders the standard 5-section home. */
+function buildDefaultHomePage(
+  content: TenantContentRecord,
+  liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
+): { page: "home"; sections: HomeSectionDefinition[] } {
+  const defaultOrder = [
+    "HeroBannerSection",
+    "MarketStatsSection",
+    "StoryGridSection",
+    "ListingSpotlightSection",
+    "TestimonialStripSection",
+    "CtaBandSection",
+  ];
   return {
     page: "home",
-    sections: [
-      {
-        component: HeroBannerSection,
-        config: {
-          ctaHref: "#featured-listings",
-          ctaText: content["hero.ctaText"] ?? "Browse listings",
-          eyebrow:
-            content["hero.eyebrow"] ?? "Luxury homes and investment addresses",
-          subtitle:
-            content["hero.subtitle"] ??
-            "A refined real-estate experience for buyers, investors, and families looking for trusted guidance.",
-          title:
-            content["hero.title"] ??
-            "Find your next signature property with confidence.",
-        },
-        id: "hero-banner",
-        type: "hero_banner",
-      },
-      {
-        component: MarketStatsSection,
-        config: {
-          items: [
-            { label: "Homes sold last year", value: "128" },
-            { label: "Average closing timeline", value: "21 days" },
-            { label: "Verified buyer inquiries", value: "94%" },
-          ],
-        },
-        id: "market-stats",
-        type: "market_stats",
-      },
-      {
-        component: StoryGridSection,
-        config: {
-          description:
-            content["story.description"] ??
-            "The first tenant template balances premium presentation with clear information architecture so every public page can convert interest into real conversations.",
-          eyebrow: "Why this template works",
-          items: [
-            {
-              body: "Organize your offer around neighborhoods, trust signals, and high-value inventory without rebuilding each landing page from scratch.",
-              title: "Premium positioning",
-            },
-            {
-              body: "Structured sections give every property, team story, and CTA a clean place in the page, so content stays usable on mobile and desktop.",
-              title: "Disciplined layout system",
-            },
-            {
-              body: "Every section is designed to support lead capture and future CMS-driven editing rather than static one-off pages.",
-              title: "Built for conversion",
-            },
-          ],
-          title:
-            content["story.title"] ??
-            "A polished website system for agencies that need credibility fast.",
-        },
-        id: "story-grid",
-        type: "story_grid",
-      },
-      {
-        component: ListingSpotlightSection,
-        config: {
-          description:
-            liveListings && liveListings.length > 0
-              ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
-              : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
-          eyebrow: "Featured inventory",
-          items: buildListingSpotlightItems(liveListings),
-          title: "Featured listings feel editorial, not templated.",
-        },
-        id: "listing-spotlight",
-        type: "listing_spotlight",
-      },
-      {
-        component: TestimonialStripSection,
-        config: {
-          items: [
-            {
-              quote:
-                "They made the shortlist feel effortless and handled every detail with a calm level of professionalism.",
-              role: "Buyer, Ikoyi relocation",
-              speaker: "M. Adebayo",
-            },
-            {
-              quote:
-                "The property presentation felt thoughtful from first click to first viewing, which immediately built trust with our family.",
-              role: "Home buyer, Lekki",
-              speaker: "R. Okonkwo",
-            },
-            {
-              quote:
-                "Our inquiries improved because the website finally reflected the quality of the homes we represent.",
-              role: "Managing partner, luxury brokerage",
-              speaker: "T. Hassan",
-            },
-          ],
-        },
-        id: "testimonial-strip",
-        type: "testimonial_strip",
-      },
-      {
-        component: CtaBandSection,
-        config: {
-          body:
-            content["cta.body"] ??
-            "Book a private consultation, request a shortlist, or start a tailored property search with a team that understands premium client expectations.",
-          primaryHref: "#",
-          primaryText: "Book a consultation",
-          secondaryHref: "#featured-listings",
-          secondaryText: "View available homes",
-          title:
-            content["cta.title"] ??
-            "Start your search with a team that knows the market.",
-        },
-        id: "cta-band",
-        type: "cta_band",
-      },
-    ],
+    sections: defaultOrder
+      .map((type) => sectionBuilders[type]?.(content, liveListings, liveAgents, subdomain))
+      .filter((s): s is HomeSectionDefinition => s !== null),
   };
 }
 
@@ -583,6 +706,7 @@ export function createInitialSiteConfigurationInput({
 export function resolveWebsitePresentation({
   companyName,
   content,
+  liveAgents,
   liveListings,
   market,
   renderMode = "live",
@@ -598,7 +722,7 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(mergedContent, liveListings),
+    page: buildHomePage(mergedContent, templateKey, liveListings, liveAgents, subdomain),
     renderMode,
     template,
     theme: {
@@ -636,7 +760,7 @@ export function draftPlaceholderClass(
 }
 
 export const sampleTheme = fallbackTemplate.defaultTheme;
-export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
+export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent, fallbackTemplate.key);
 
 export {
   applyAiGeneration,

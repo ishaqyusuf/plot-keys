@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+import type { RenderMode } from "../types";
+import { EditableText } from "./editing-primitives";
+import { draftEditableClass } from "./section-utils";
+
 export type ThemeConfig = {
   accentColor: string;
   backgroundColor: string;
@@ -192,15 +196,19 @@ export function HeroBannerSection({
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
-          <h1
+          <EditableText
+            as="h1"
             className="mt-6 max-w-4xl text-5xl leading-[0.92] text-slate-950 md:text-7xl"
+            contentKey="hero.title"
             style={{ fontFamily: theme.headingFontFamily }}
-          >
-            {config.title}
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
-            {config.subtitle}
-          </p>
+            value={config.title}
+          />
+          <EditableText
+            as="p"
+            className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl"
+            contentKey="hero.subtitle"
+            value={config.subtitle}
+          />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <ActionButton href={config.ctaHref}>{config.ctaText}</ActionButton>
             <ActionButton href="#featured-listings" variant="secondary">
@@ -286,12 +294,28 @@ export function StoryGridSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="px-6 py-10 md:px-10 md:py-14" style={shell(theme)}>
-      <SectionHeading
-        eyebrow={config.eyebrow}
-        title={config.title}
-        description={config.description}
-      />
+    <section
+      className={`px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`}
+      style={shell(theme)}
+    >
+      <div className="flex flex-col gap-3">
+        <p className="text-sm uppercase tracking-[0.32em] text-[color:var(--muted)]">
+          {config.eyebrow}
+        </p>
+        <EditableText
+          as="h2"
+          className="font-serif text-4xl text-[color:var(--foreground)] md:text-5xl"
+          contentKey="story.title"
+          style={{ fontFamily: theme.headingFontFamily }}
+          value={config.title}
+        />
+        <EditableText
+          as="p"
+          className="max-w-2xl text-base leading-8 text-[color:var(--muted-foreground)] md:text-lg"
+          contentKey="story.description"
+          value={config.description}
+        />
+      </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
@@ -427,15 +451,19 @@ export function CtaBandSection({
             <p className="text-sm uppercase tracking-[0.3em] text-teal-100">
               Ready to enquire
             </p>
-            <h2
+            <EditableText
+              as="h2"
               className="mt-3 text-4xl text-white"
+              contentKey="cta.title"
               style={{ fontFamily: theme.headingFontFamily }}
-            >
-              {config.title}
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-200">
-              {config.body}
-            </p>
+              value={config.title}
+            />
+            <EditableText
+              as="p"
+              className="mt-4 max-w-2xl text-base leading-7 text-slate-200"
+              contentKey="cta.body"
+              value={config.body}
+            />
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
