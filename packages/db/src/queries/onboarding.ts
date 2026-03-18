@@ -1,4 +1,57 @@
+import { randomUUID } from "node:crypto";
+
 import type { Db } from "../prisma";
+
+export async function upsertTenantOnboarding(
+  db: Db,
+  input: {
+    companyName: string;
+    currentStep?: string;
+    market?: string;
+    subdomain: string;
+    templateKey?: string;
+    userId: string;
+  },
+) {
+  return db.tenantOnboarding.upsert({
+    create: {
+      companyName: input.companyName.trim(),
+      currentStep: input.currentStep ?? "market",
+      id: randomUUID(),
+      market: input.market?.trim() || null,
+      subdomain: input.subdomain.trim().toLowerCase(),
+      templateKey: input.templateKey ?? null,
+      userId: input.userId,
+    },
+    update: {
+      companyName: input.companyName.trim(),
+      currentStep: input.currentStep ?? "market",
+      ...(input.market !== undefined && { market: input.market.trim() || null }),
+      subdomain: input.subdomain.trim().toLowerCase(),
+      ...(input.templateKey !== undefined && { templateKey: input.templateKey }),
+    },
+    where: { userId: input.userId },
+  });
+}
+
+export async function findTenantOnboardingByUserId(db: Db, userId: string) {
+  return db.tenantOnboarding.findUnique({
+    where: { userId },
+  });
+}
+
+export async function completeTenantOnboarding(db: Db, userId: string) {
+  return db.tenantOnboarding.updateMany({
+    data: {
+      completedAt: new Date(),
+      currentStep: "done",
+    },
+    where: {
+      completedAt: null,
+      userId,
+    },
+  });
+}
 
 export async function createCompanyOnboardingBundle(
   db: Db,

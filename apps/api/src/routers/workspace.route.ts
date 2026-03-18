@@ -1,4 +1,5 @@
 import {
+  completeTenantOnboarding,
   createCompanyOnboardingBundle,
   createPrismaClient,
   createSiteConfiguration,
@@ -8,9 +9,11 @@ import {
   findLatestDraftForTemplate,
   findLatestSiteConfigurationForCompany,
   findSiteConfigurationByIdForCompany,
+  findTenantOnboardingByUserId,
   listSyncableTenantDomains,
   publishSiteConfiguration,
   updateSiteConfigurationContentField,
+  upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
 import {
@@ -36,6 +39,7 @@ import {
   completeOnboardingInputSchema,
   createTemplateDraftInputSchema,
   publishSiteConfigurationInputSchema,
+  saveOnboardingProgressInputSchema,
   smartFillFieldInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
@@ -115,28 +119,93 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      await assertSubdomainAvailability(db, input.subdomain);
-      assertTemplateAccess("starter", input.templateKey);
+      // Use the persisted onboarding record as the source of truth so that
+      // company identity is consistent regardless of which device or session
+      // the user finishes from. Fall back to input values for backward compat.
+      const savedOnboarding = await findTenantOnboardingByUserId(
+        db,
+        ctx.auth.session.user.id,
+      );
+
+      const companyName = savedOnboarding?.companyName ?? input.companyName;
+      const subdomain = savedOnboarding?.subdomain ?? input.subdomain;
+      const market = input.market;
+      const templateKey = input.templateKey;
+
+      await assertSubdomainAvailability(db, subdomain);
+      assertTemplateAccess("starter", templateKey);
 
       const siteConfiguration = await createCompanyOnboardingBundle(db, {
         apexDomain: plotkeysRootDomain,
-        companyName: input.companyName,
+        companyName,
         createdById: ctx.auth.session.user.id,
-        dashboardHostname: buildDashboardHostname(input.subdomain),
+        dashboardHostname: buildDashboardHostname(subdomain),
         initialSiteConfiguration: createInitialSiteConfigurationInput({
-          companyName: input.companyName,
-          market: input.market,
-          subdomain: input.subdomain,
-          templateKey: input.templateKey,
+          companyName,
+          market,
+          subdomain,
+          templateKey,
         }),
-        market: input.market,
-        sitefrontHostname: buildSitefrontHostname(input.subdomain),
-        subdomain: input.subdomain,
+        market,
+        sitefrontHostname: buildSitefrontHostname(subdomain),
+        subdomain,
       });
+
+      // Mark the onboarding record as completed
+      await completeTenantOnboarding(db, ctx.auth.session.user.id);
 
       return {
         configId: siteConfiguration.id,
       };
+    }),
+  getOnboardingState: authenticatedProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const onboarding = await findTenantOnboardingByUserId(
+      db,
+      ctx.auth.session.user.id,
+    );
+
+    if (!onboarding) {
+      return null;
+    }
+
+    return {
+      companyName: onboarding.companyName,
+      completedAt: onboarding.completedAt,
+      currentStep: onboarding.currentStep,
+      market: onboarding.market,
+      subdomain: onboarding.subdomain,
+      templateKey: onboarding.templateKey,
+    };
+  }),
+  saveOnboardingProgress: authenticatedProcedure
+    .input(saveOnboardingProgressInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+
+      const existing = await findTenantOnboardingByUserId(
+        db,
+        ctx.auth.session.user.id,
+      );
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message:
+            "No onboarding record found. Complete sign-up before saving progress.",
+        });
+      }
+
+      await upsertTenantOnboarding(db, {
+        companyName: existing.companyName,
+        currentStep: input.currentStep ?? existing.currentStep,
+        market: input.market ?? existing.market ?? undefined,
+        subdomain: existing.subdomain,
+        templateKey: input.templateKey ?? existing.templateKey ?? undefined,
+        userId: ctx.auth.session.user.id,
+      });
+
+      return { saved: true };
     }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)

@@ -1,0 +1,18 @@
+model TenantOnboarding {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @unique @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String    @map("company_name")
+  subdomain   String
+  market      String?
+  templateKey String?   @map("template_key")
+  currentStep String    @default("market") @map("current_step")
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId], map: "tenant_onboardings_user_id_idx")
+  @@index([completedAt], map: "tenant_onboardings_completed_at_idx")
+
+  @@map("tenant_onboardings")
+}

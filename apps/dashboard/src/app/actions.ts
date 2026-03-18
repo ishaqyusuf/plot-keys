@@ -186,20 +186,46 @@ export async function signOutAction() {
 }
 
 export async function completeOnboardingAction(formData: FormData) {
-  await requireAuthenticatedSession();
+  const session = await requireAuthenticatedSession();
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
 
-  const companyName = pendingOnboarding?.company ?? "";
-  const subdomain = normalizeSubdomainLabel(pendingOnboarding?.subdomain ?? "");
   const market = String(formData.get("market") ?? "").trim();
   const templateKey = String(formData.get("template") ?? "template-1");
+
+  // Load persisted onboarding record from DB (durable across devices/sessions).
+  // Fall back to the cookie for users who signed up before DB persistence was added.
+  const prisma = createPrismaClient().db;
+  const savedOnboarding = prisma
+    ? await prisma.tenantOnboarding.findUnique({
+        where: { userId: session.user.id },
+      })
+    : null;
+
+  const companyName =
+    savedOnboarding?.companyName ?? pendingOnboarding?.company ?? "";
+  const subdomain = normalizeSubdomainLabel(
+    savedOnboarding?.subdomain ?? pendingOnboarding?.subdomain ?? "",
+  );
 
   try {
     if (!companyName || !subdomain) {
       throw new Error(
         "Your company setup details are missing. Please start again from signup.",
       );
+    }
+
+    // Persist the final market + template selection so the record is up-to-date
+    // before the workspace procedure reads it.
+    if (savedOnboarding && prisma) {
+      await prisma.tenantOnboarding.update({
+        data: {
+          currentStep: "completing",
+          market,
+          templateKey,
+        },
+        where: { userId: session.user.id },
+      });
     }
 
     const caller = await createServerCaller();

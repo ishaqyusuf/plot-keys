@@ -7,6 +7,12 @@ export const completeOnboardingInputSchema = z.object({
   templateKey: z.string().trim().min(1),
 });
 
+export const saveOnboardingProgressInputSchema = z.object({
+  currentStep: z.string().trim().min(1).optional(),
+  market: z.string().trim().optional(),
+  templateKey: z.string().trim().optional(),
+});
+
 export const createTemplateDraftInputSchema = z.object({
   templateKey: z.string().trim().min(1, "Template key is required."),
 });
@@ -39,3 +45,6 @@ export type PublishSiteConfigurationInput = z.infer<
   typeof publishSiteConfigurationInputSchema
 >;
 export type SmartFillFieldInput = z.infer<typeof smartFillFieldInputSchema>;
+export type SaveOnboardingProgressInput = z.infer<
+  typeof saveOnboardingProgressInputSchema
+>;

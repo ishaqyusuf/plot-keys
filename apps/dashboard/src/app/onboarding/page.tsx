@@ -1,4 +1,5 @@
 import { authRoutes } from "@plotkeys/auth/shared";
+import { createPrismaClient } from "@plotkeys/db";
 import { templateCatalog } from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Button } from "@plotkeys/ui/button";
@@ -48,19 +49,45 @@ export default async function OnboardingPage({
 }: OnboardingPageProps) {
   const session = await requireAuthenticatedSession();
   const params = (await searchParams) ?? {};
-  const cookieStore = await cookies();
-  const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
-  const companyName = pendingOnboarding?.company ?? params.company ?? "";
-  const subdomain = pendingOnboarding?.subdomain ?? params.subdomain ?? "";
-  const starterTemplates = templateCatalog.filter((template) =>
-    canAccessTemplateTier("starter", template.tier),
-  );
 
   if (session.activeMembership) {
     return (
       <meta content={`0;url=${authRoutes.dashboardHome}`} httpEquiv="refresh" />
     );
   }
+
+  // --- Load saved onboarding state from DB (durable, survives cookie expiry) ---
+  const prisma = createPrismaClient().db;
+  const savedOnboarding = prisma
+    ? await prisma.tenantOnboarding.findUnique({
+        where: { userId: session.user.id },
+      })
+    : null;
+
+  // Fall back to cookie for sessions that pre-date DB persistence
+  const cookieStore = await cookies();
+  const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
+
+  const companyName =
+    savedOnboarding?.companyName ??
+    pendingOnboarding?.company ??
+    params.company ??
+    "";
+  const subdomain =
+    savedOnboarding?.subdomain ??
+    pendingOnboarding?.subdomain ??
+    params.subdomain ??
+    "";
+
+  // Pre-fill any in-progress values saved on previous visits
+  const savedMarket = savedOnboarding?.market ?? "";
+  const savedTemplateKey = savedOnboarding?.templateKey ?? "template-1";
+
+  const isResumed = Boolean(savedOnboarding && !savedOnboarding.completedAt && savedMarket);
+
+  const starterTemplates = templateCatalog.filter((template) =>
+    canAccessTemplateTier("starter", template.tier),
+  );
 
   return (
     <>
@@ -77,11 +104,15 @@ export default async function OnboardingPage({
       />
       <FlowShell
         badge="Flow 03"
-        description="Onboarding now finishes the tenant setup started during signup. Your company name and PlotKeys hostnames are already reserved, so this step only needs the remaining launch details before creating the tenant company, owner membership, initial published site configuration, and pending website/dashboard domain records."
+        description={
+          isResumed
+            ? "Resuming your in-progress workspace setup. Your previous selections are pre-filled — update anything and click Finish to complete."
+            : "Onboarding now finishes the tenant setup started during signup. Your company name and PlotKeys hostnames are already reserved, so this step only needs the remaining launch details before creating the tenant company, owner membership, initial published site configuration, and pending website/dashboard domain records."
+        }
         sidePanel={
           <>
             <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
-              Onboarding payload
+              {isResumed ? "Resuming onboarding" : "Onboarding payload"}
             </p>
             <div className="mt-6 grid gap-3">
               {onboardingSteps.map((item, index) => (
@@ -98,7 +129,11 @@ export default async function OnboardingPage({
             </div>
           </>
         }
-        title="Set up the tenant company and bootstrap the first website."
+        title={
+          isResumed
+            ? "Resume your workspace setup."
+            : "Set up the tenant company and bootstrap the first website."
+        }
       >
         <form action={completeOnboardingAction} className="flex flex-col gap-6">
           <Card className="border-border/60 bg-muted/30">
@@ -137,6 +172,7 @@ export default async function OnboardingPage({
                 Primary market
               </FieldLabel>
               <Input
+                defaultValue={savedMarket}
                 id="onboarding-market"
                 name="market"
                 placeholder="Lekki, Lagos"
@@ -147,7 +183,7 @@ export default async function OnboardingPage({
               <FieldLabel htmlFor="onboarding-template">
                 Default template
               </FieldLabel>
-              <Select defaultValue="template-1" name="template">
+              <Select defaultValue={savedTemplateKey} name="template">
                 <SelectTrigger className="w-full" id="onboarding-template">
                   <SelectValue placeholder="Choose a starter template" />
                 </SelectTrigger>
@@ -183,7 +219,7 @@ export default async function OnboardingPage({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button disabled={!companyName || !subdomain} type="submit">
-              Finish onboarding
+              {isResumed ? "Resume and finish" : "Finish onboarding"}
             </Button>
             <Button asChild variant="secondary">
               <Link href={authRoutes.signOut}>Cancel</Link>

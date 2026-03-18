@@ -15,6 +15,7 @@ model User {
   updatedSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationUpdatedBy")
   sessions    Session[]
   accounts    Account[]
+  tenantOnboarding TenantOnboarding?
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")
