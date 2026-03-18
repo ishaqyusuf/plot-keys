@@ -83,12 +83,24 @@ export type LiveListingItem = {
   title: string;
 };
 
+/**
+ * Controls how the website is rendered.
+ *
+ * - `live`    Published tenant site. No editing chrome.
+ * - `draft`   Builder / editor view. Empty fields show placeholder outlines;
+ *             sections may render a subtle focus outline on hover.
+ * - `preview` Authenticated preview (preview-token URL). Renders published
+ *             content with a "Preview" badge; no editing controls.
+ */
+export type RenderMode = "draft" | "live" | "preview";
+
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
   page: {
     page: "home";
     sections: HomeSectionDefinition[];
   };
+  renderMode: RenderMode;
   template: TemplateDefinition;
   theme: ThemeConfig;
 };
@@ -98,6 +110,8 @@ type ResolveTemplateOptions = {
   content?: TenantContentRecord;
   liveListings?: LiveListingItem[];
   market?: string;
+  /** Defaults to "live" when omitted. */
+  renderMode?: RenderMode;
   subdomain?: string;
   templateKey: string;
   theme?: TenantThemeRecord;
@@ -571,6 +585,7 @@ export function resolveWebsitePresentation({
   content,
   liveListings,
   market,
+  renderMode = "live",
   subdomain,
   templateKey,
   theme,
@@ -584,6 +599,7 @@ export function resolveWebsitePresentation({
   return {
     editableFields: template.editableFields,
     page: buildHomePage(mergedContent, liveListings),
+    renderMode,
     template,
     theme: {
       ...template.defaultTheme,
@@ -595,6 +611,28 @@ export function resolveWebsitePresentation({
         `${subdomain ?? companyName?.toLowerCase().replace(/\s+/g, "") ?? "company"}.plotkeys.app`,
     },
   };
+}
+
+/**
+ * Returns true when a content field value should be treated as empty/missing
+ * and should show a placeholder outline in draft rendering mode.
+ */
+export function isContentFieldEmpty(value: string | undefined | null): boolean {
+  return !value || value.trim().length === 0;
+}
+
+/**
+ * Returns the CSS class string to apply to a content field wrapper when in
+ * draft mode and the field has no user-supplied value.
+ */
+export function draftPlaceholderClass(
+  renderMode: RenderMode,
+  value: string | undefined | null,
+): string {
+  if (renderMode !== "draft") return "";
+  return isContentFieldEmpty(value)
+    ? "outline-dashed outline-2 outline-offset-2 outline-amber-400/60 rounded"
+    : "";
 }
 
 export const sampleTheme = fallbackTemplate.defaultTheme;

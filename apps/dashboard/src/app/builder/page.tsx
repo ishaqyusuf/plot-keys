@@ -103,6 +103,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     companyName: session.activeMembership.companyName,
     content: activeConfiguration.contentJson as Record<string, string>,
     market: session.activeMembership.companyName,
+    renderMode: "draft",
     subdomain:
       activeConfiguration.subdomain ?? session.activeMembership.companySlug,
     templateKey: activeConfiguration.templateKey,

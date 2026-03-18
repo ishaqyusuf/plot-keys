@@ -3,6 +3,7 @@ model Company {
   slug               String
   name               String
   market             String?
+  logoUrl            String?           @map("logo_url")
   planTier           CompanyPlanTier   @default(starter) @map("plan_tier")
   planStatus         CompanyPlanStatus @default(active) @map("plan_status")
   planStartedAt      DateTime?         @map("plan_started_at") @db.Timestamptz(6)

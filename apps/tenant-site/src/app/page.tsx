@@ -39,11 +39,17 @@ export default async function TenantWebsiteHomePage({
   const params = (await searchParams) ?? {};
   const requestHeaders = await headers();
   const prisma = createPrismaClient().db;
-  const requestedHostname =
+
+  // Prefer middleware-injected headers; fall back to query params for local dev.
+  const tenantSubdomain =
+    requestHeaders.get("x-tenant-subdomain") || params.subdomain || null;
+  const tenantHostname =
+    requestHeaders.get("x-tenant-hostname") ||
     extractTenantHostname(params.hostname) ||
-    extractTenantHostname(requestHeaders.get("x-forwarded-host")) ||
-    extractTenantHostname(requestHeaders.get("host"));
-  const subdomain = params.subdomain;
+    null;
+
+  const requestedHostname = tenantHostname;
+  const subdomain = tenantSubdomain;
   let matchedHostname: string | null = requestedHostname;
 
   let preview = {
@@ -99,6 +105,7 @@ export default async function TenantWebsiteHomePage({
             title: p.title,
           })),
           market: company.market ?? company.name,
+          renderMode: "live",
           subdomain: company.slug,
           templateKey: publishedConfiguration.templateKey,
           theme: publishedConfiguration.themeJson as Record<string, string>,

@@ -43,6 +43,13 @@ export const createTemplateDraftInputSchema = z.object({
   templateKey: z.string().trim().min(1, "Template key is required."),
 });
 
+export const changePlanInputSchema = z.object({
+  planStatus: z.enum(["active", "past_due", "canceled"]).default("active"),
+  planTier: z.enum(["starter", "plus", "pro"]),
+  /** External billing provider reference (Stripe subscription ID, Paystack reference, etc.) */
+  providerRef: z.string().trim().optional(),
+});
+
 export const updateSiteFieldInputSchema = z.object({
   configId: z.string().trim().min(1, "Configuration id is required."),
   contentKey: z.string().trim().min(1, "Content key is required."),

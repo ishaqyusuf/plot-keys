@@ -63,3 +63,12 @@ export async function requireOnboardedSession() {
     activeMembership: NonNullable<AppSession["activeMembership"]>;
   };
 }
+
+/**
+ * Returns the tenant slug injected by middleware from the request host.
+ * Falls back to null when running on localhost without DNS.
+ */
+export async function getTenantSlugFromHost(): Promise<string | null> {
+  const requestHeaders = await headers();
+  return requestHeaders.get("x-tenant-subdomain");
+}

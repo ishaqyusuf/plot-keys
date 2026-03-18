@@ -1,6 +1,7 @@
 import "@plotkeys/ui/globals.css";
 
 import { NotificationsProvider } from "@plotkeys/notifications-react";
+import { ThemeProvider } from "@plotkeys/ui/theme-provider";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -13,11 +14,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html suppressHydrationWarning lang="en">
       <body>
-        <TRPCReactProvider>
-          <NotificationsProvider>{children}</NotificationsProvider>
-        </TRPCReactProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <TRPCReactProvider>
+            <NotificationsProvider>{children}</NotificationsProvider>
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

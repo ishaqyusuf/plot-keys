@@ -24,6 +24,8 @@ import {
   updateOnboardingProfile,
   updateSiteConfigurationContentField,
   updateSiteConfigurationThemeField,
+  updateCompanyLogo,
+  updateCompanyPlan,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
@@ -46,6 +48,7 @@ import {
   type SubscriptionTier,
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
   authenticatedProcedure,
@@ -54,6 +57,7 @@ import {
 } from "../lib.trpc";
 import { generateFieldContent } from "../lib.ai";
 import {
+  changePlanInputSchema,
   completeOnboardingInputSchema,
   createTemplateDraftInputSchema,
   publishSiteConfigurationInputSchema,
@@ -544,6 +548,80 @@ export const workspaceRouter = createTRPCRouter({
 
     return { licensedTemplateKeys: [...updatedKeys] };
   }),
+  /**
+   * Upgrade or downgrade the company subscription plan.
+   *
+   * On upgrade: syncs plan-included template licenses to the new, wider set.
+   * On downgrade: syncs licenses to the narrower set (revokes unlicensed templates).
+   *
+   * In production this is called by a billing webhook handler after the
+   * payment provider confirms the subscription change. The `providerRef` field
+   * stores the billing provider's subscription ID for reconciliation.
+   */
+  changePlan: membershipProcedure
+    .input(changePlanInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      // Persist the new plan tier and status
+      const company = await updateCompanyPlan(
+        db,
+        companyId,
+        input.planTier,
+        input.planStatus,
+      );
+
+      // Store the provider reference in a billing line item if provided
+      if (input.providerRef) {
+        await db.billingLineItem.upsert({
+          create: {
+            amountMinorUnits: 0,
+            companyId,
+            currency: "NGN",
+            kind: "subscription",
+            meta: { providerRef: input.providerRef },
+            providerRef: input.providerRef,
+            status: input.planStatus === "active" ? "active" : "cancelled",
+          },
+          update: {
+            meta: { providerRef: input.providerRef },
+            status: input.planStatus === "active" ? "active" : "cancelled",
+          },
+          where: {
+            // Fall back to a synthetic unique check — provider refs are unique per company
+            id: "00000000-0000-0000-0000-000000000000",
+          },
+        }).catch(() => {
+          // Upsert by providerRef isn't directly supported — insert separately
+          return db.billingLineItem.create({
+            data: {
+              amountMinorUnits: 0,
+              companyId,
+              currency: "NGN",
+              kind: "subscription",
+              meta: { providerRef: input.providerRef },
+              providerRef: input.providerRef,
+              status: input.planStatus === "active" ? "active" : "cancelled",
+            },
+          }).catch(() => null); // Non-fatal if billing record fails
+        });
+      }
+
+      // Sync plan-included template licenses to match the new tier
+      const { canAccessTemplateTier } = await import("@plotkeys/utils");
+      const allowedKeys = templateCatalog
+        .filter((t) => canAccessTemplateTier(input.planTier, t.tier))
+        .map((t) => t.key);
+
+      await syncPlanIncludedLicenses(db, companyId, allowedKeys);
+
+      return {
+        companyId,
+        planStatus: company.planStatus,
+        planTier: company.planTier,
+      };
+    }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)
     .mutation(async ({ ctx, input }) => {
@@ -907,5 +985,30 @@ export const workspaceRouter = createTRPCRouter({
         theme: configuration.themeJson as Record<string, string>,
         version: configuration.version,
       };
+    }),
+  /**
+   * Persist the company logo URL.
+   *
+   * The caller is responsible for uploading the file to storage (e.g. Supabase
+   * Storage, Cloudinary, S3) and providing the public URL. Pass `null` to clear
+   * the logo.
+   *
+   * AI-assisted logo generation (e.g. DALL-E prompt → storage) would call this
+   * procedure after writing the generated image to the storage bucket.
+   */
+  setCompanyLogo: membershipProcedure
+    .input(
+      z.object({
+        logoUrl: z.string().url("A valid URL is required.").nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const company = await updateCompanyLogo(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input.logoUrl,
+      );
+      return { companyId: company.id, logoUrl: company.logoUrl };
     }),
 });
