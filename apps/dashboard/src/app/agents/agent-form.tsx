@@ -18,6 +18,7 @@ import { type ReactNode, useState } from "react";
 
 type AgentData = {
   bio?: string | null;
+  displayOrder?: number;
   email?: string | null;
   id?: string;
   imageUrl?: string | null;
@@ -112,15 +113,27 @@ export function AgentForm({ initialData, onSave, trigger }: AgentFormProps) {
                 rows={3}
               />
             </Field>
-            <Field>
-              <FieldLabel>Photo URL</FieldLabel>
-              <Input
-                defaultValue={initialData?.imageUrl ?? ""}
-                name="imageUrl"
-                placeholder="https://..."
-                type="url"
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel>Photo URL</FieldLabel>
+                <Input
+                  defaultValue={initialData?.imageUrl ?? ""}
+                  name="imageUrl"
+                  placeholder="https://..."
+                  type="url"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Display order</FieldLabel>
+                <Input
+                  defaultValue={initialData?.displayOrder ?? 0}
+                  min="0"
+                  name="displayOrder"
+                  placeholder="0"
+                  type="number"
+                />
+              </Field>
+            </div>
           </FieldGroup>
           <DialogFooter className="mt-4">
             <DialogClose asChild>

@@ -25,8 +25,7 @@ This file holds actionable work that is identified but not currently in progress
 - Add email verification requirement to Better Auth config (requireEmailVerification: true) to enforce native pre-signin check
 
 ### Dashboard Routes
-- Property listings CRUD — add "View on website" link once template section is connected to live DB records
-- Agent management — add featured/display-order sorting controls
+- Property listings CRUD — consider individual /listings/{slug} deep-links once property detail page slug field is added to schema
 
 ### Section Registry / Tenant Site
 - (Done in this batch — see done.md)

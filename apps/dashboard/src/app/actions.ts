@@ -605,13 +605,15 @@ export async function createAgentAction(formData: FormData) {
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const bio = String(formData.get("bio") ?? "").trim() || null;
   const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
+  const displayOrderRaw = formData.get("displayOrder");
+  const displayOrder = displayOrderRaw !== null && displayOrderRaw !== "" ? Number(displayOrderRaw) : 0;
 
   try {
     const caller = await createServerCaller();
     if (isUpdate) {
-      await caller.workspace.updateAgent({ agentId, bio, email, imageUrl, name, phone, title });
+      await caller.workspace.updateAgent({ agentId, bio, displayOrder, email, imageUrl, name, phone, title });
     } else {
-      await caller.workspace.createAgent({ bio, email, imageUrl, name, phone, title });
+      await caller.workspace.createAgent({ bio, displayOrder, email, imageUrl, name, phone, title });
     }
     revalidatePath("/agents");
     redirect("/agents");
@@ -619,6 +621,24 @@ export async function createAgentAction(formData: FormData) {
     redirect(
       `/agents?error=${encodeURIComponent(
         error instanceof Error ? error.message : "Unable to save agent.",
+      )}`,
+    );
+  }
+}
+
+export async function toggleAgentFeaturedAction(formData: FormData) {
+  const agentId = String(formData.get("agentId") ?? "").trim();
+  const featured = formData.get("featured") === "true";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.toggleAgentFeatured({ agentId, featured });
+    revalidatePath("/agents");
+    redirect("/agents");
+  } catch (error) {
+    redirect(
+      `/agents?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to update agent.",
       )}`,
     );
   }

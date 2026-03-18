@@ -133,3 +133,8 @@ export const updateAgentInputSchema = createAgentInputSchema.partial().extend({
 export const deleteAgentInputSchema = z.object({
   agentId: z.string().trim().min(1, "Agent id is required."),
 });
+
+export const toggleAgentFeaturedInputSchema = z.object({
+  agentId: z.string().trim().min(1, "Agent id is required."),
+  featured: z.boolean(),
+});

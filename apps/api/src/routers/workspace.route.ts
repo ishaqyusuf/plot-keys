@@ -27,6 +27,7 @@ import {
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
+  toggleAgentFeatured,
   togglePropertyFeatured,
   updateAgent,
   updateCompanyLogo,
@@ -72,6 +73,7 @@ import {
   createPropertyInputSchema,
   createTemplateDraftInputSchema,
   deleteAgentInputSchema,
+  toggleAgentFeaturedInputSchema,
   deletePropertyInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
@@ -1143,6 +1145,19 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       await deleteAgent(db, input.agentId, ctx.auth.activeMembership.companyId);
+      return { agentId: input.agentId };
+    }),
+
+  toggleAgentFeatured: membershipProcedure
+    .input(toggleAgentFeaturedInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await toggleAgentFeatured(
+        db,
+        input.agentId,
+        ctx.auth.activeMembership.companyId,
+        input.featured,
+      );
       return { agentId: input.agentId };
     }),
 });

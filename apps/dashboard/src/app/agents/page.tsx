@@ -11,7 +11,11 @@ import {
 import Link from "next/link";
 
 import { requireOnboardedSession } from "../../lib/session";
-import { createAgentAction, deleteAgentAction } from "../actions";
+import {
+  createAgentAction,
+  deleteAgentAction,
+  toggleAgentFeaturedAction,
+} from "../actions";
 import { AgentForm } from "./agent-form";
 
 export default async function AgentsPage() {
@@ -99,6 +103,17 @@ export default async function AgentsPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <form action={toggleAgentFeaturedAction}>
+                      <input type="hidden" name="agentId" value={agent.id} />
+                      <input
+                        type="hidden"
+                        name="featured"
+                        value={String(!agent.featured)}
+                      />
+                      <Button size="sm" type="submit" variant="ghost">
+                        {agent.featured ? "Unfeature" : "Feature"}
+                      </Button>
+                    </form>
                     <AgentForm
                       initialData={agent}
                       onSave={createAgentAction}

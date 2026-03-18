@@ -78,3 +78,15 @@ export async function deleteAgent(
     where: { companyId, deletedAt: null, id: agentId },
   });
 }
+
+export async function toggleAgentFeatured(
+  db: Db,
+  agentId: string,
+  companyId: string,
+  featured: boolean,
+) {
+  return db.agent.updateMany({
+    data: { featured },
+    where: { companyId, deletedAt: null, id: agentId },
+  });
+}

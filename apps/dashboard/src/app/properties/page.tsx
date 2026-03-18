@@ -26,6 +26,8 @@ export default async function PropertiesPage() {
     ? await listPropertiesForCompany(prisma, session.activeMembership.companyId)
     : [];
 
+  const siteUrl = `https://${session.activeMembership.companySlug}.plotkeys.com`;
+
   return (
     <main className="min-h-screen bg-background px-3 py-3 md:px-4 md:py-4">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -39,6 +41,11 @@ export default async function PropertiesPage() {
           <div className="flex items-center gap-2">
             <Button asChild variant="secondary">
               <Link href="/">Back to dashboard</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={siteUrl} rel="noopener noreferrer" target="_blank">
+                View site
+              </Link>
             </Button>
             <PropertyForm onSave={createPropertyAction} />
           </div>
