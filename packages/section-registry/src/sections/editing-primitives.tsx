@@ -19,6 +19,8 @@ import { useIsDraftMode } from "../runtime-context";
 // ---------------------------------------------------------------------------
 
 export type EditableTextProps = {
+  /** Semantic HTML tag to render. Defaults to "span" for inline, "div" for block. */
+  as?: "h1" | "h2" | "h3" | "h4" | "p" | "span" | "div";
   /** Class names forwarded to the wrapper element. */
   className?: string;
   /** The content key this field maps to (e.g. "hero.title"). */
@@ -27,6 +29,8 @@ export type EditableTextProps = {
   display?: "block" | "inline";
   /** Called with the new value when the user commits an inline edit. */
   onCommit?: (contentKey: string, value: string) => void;
+  /** Inline styles forwarded to the rendered element. */
+  style?: React.CSSProperties;
   /** The current field value. */
   value: string;
 };
@@ -36,10 +40,12 @@ export type EditableTextProps = {
  * contentEditable with a visible amber outline and a "Save" button overlay.
  */
 export function EditableText({
+  as,
   className,
   contentKey,
   display = "inline",
   onCommit,
+  style,
   value,
 }: EditableTextProps) {
   const isDraft = useIsDraftMode();
@@ -48,8 +54,8 @@ export function EditableText({
   const ref = useRef<HTMLElement>(null);
 
   if (!isDraft) {
-    const Tag = display === "block" ? "div" : "span";
-    return <Tag className={className}>{value}</Tag>;
+    const Tag = as ?? (display === "block" ? "div" : "span");
+    return <Tag className={className} style={style}>{value}</Tag>;
   }
 
   function handleClick() {
@@ -69,11 +75,12 @@ export function EditableText({
     setLocalValue((e.target as HTMLElement).innerText);
   }
 
-  const Tag = display === "block" ? "div" : ("span" as "div" | "span");
+  const Tag = (as ?? (display === "block" ? "div" : "span")) as "div" | "span";
 
   return (
     <Tag
       ref={ref as React.RefObject<HTMLDivElement & HTMLSpanElement>}
+      style={style}
       className={[
         className,
         "relative cursor-text outline-none",

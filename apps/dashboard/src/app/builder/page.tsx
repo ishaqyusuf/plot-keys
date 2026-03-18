@@ -23,6 +23,7 @@ import {
   smartFillFieldAction,
   updateSiteFieldAction,
   updateSiteThemeFieldAction,
+  updateSiteThemeFieldSilentAction,
 } from "../actions";
 
 type BuilderPageProps = {
@@ -106,6 +107,19 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   const publishedConfiguration = configurations.find(
     (c) => c.status === "published" && c.id !== activeConfiguration.id,
   );
+
+  // Count fields that differ between this draft and the currently-published config.
+  const changedFieldCount = (() => {
+    if (!publishedConfiguration) return undefined;
+    const draftContent = activeConfiguration.contentJson as Record<string, string>;
+    const liveContent = publishedConfiguration.contentJson as Record<string, string>;
+    const allKeys = new Set([...Object.keys(draftContent), ...Object.keys(liveContent)]);
+    let count = 0;
+    for (const key of allKeys) {
+      if ((draftContent[key] ?? "") !== (liveContent[key] ?? "")) count++;
+    }
+    return count;
+  })();
   const activeTemplateLabel =
     templateCatalog.find((t) => t.key === activeConfiguration.templateKey)?.name ??
     activeConfiguration.templateKey;
@@ -189,6 +203,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                   )}
                   onCreateDraft={createTemplateDraftAction}
                   onUpdateTheme={updateSiteThemeFieldAction}
+                  onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
                 />
               </section>
 
@@ -223,6 +238,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
 
             <div className="flex flex-wrap items-center gap-3">
               <PublishConfirmationDialog
+                changedFieldCount={changedFieldCount}
                 configId={activeConfiguration.id}
                 currentLiveName={publishedConfiguration?.name ?? null}
                 currentName={activeConfiguration.name}

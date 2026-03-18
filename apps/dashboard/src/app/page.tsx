@@ -58,15 +58,24 @@ export default async function DashboardHomePage({
 
   const prisma = createPrismaClient().db;
   const domainProvisioningConfigured = isVercelDomainProvisioningConfigured();
-  const domainStatuses = await prisma?.tenantDomain.findMany({
-    orderBy: {
-      createdAt: "asc",
-    },
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-    },
-  });
+
+  const [domainStatuses, propertyCount, agentCount, publishedConfig] = await Promise.all([
+    prisma?.tenantDomain.findMany({
+      orderBy: { createdAt: "asc" },
+      where: { companyId: session.activeMembership.companyId, deletedAt: null },
+    }),
+    prisma?.property.count({
+      where: { companyId: session.activeMembership.companyId, deletedAt: null },
+    }),
+    prisma?.agent.count({
+      where: { companyId: session.activeMembership.companyId, deletedAt: null },
+    }),
+    prisma?.siteConfiguration.findFirst({
+      orderBy: { updatedAt: "desc" },
+      select: { name: true, status: true, updatedAt: true },
+      where: { companyId: session.activeMembership.companyId, deletedAt: null, status: "published" },
+    }),
+  ]);
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
@@ -140,6 +149,73 @@ export default async function DashboardHomePage({
                   </CardContent>
                 </Card>
               ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Metrics strip */}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Properties", value: String(propertyCount ?? 0), href: "/properties" },
+            { label: "Agents", value: String(agentCount ?? 0), href: "/agents" },
+            {
+              label: "Live config",
+              value: publishedConfig?.name ?? "—",
+              href: "/builder",
+            },
+            {
+              label: "Last published",
+              value: publishedConfig
+                ? new Date(publishedConfig.updatedAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "—",
+              href: "/builder",
+            },
+          ].map((stat) => (
+            <Link key={stat.label} href={stat.href}>
+              <Card className="h-full cursor-pointer bg-card transition-shadow hover:shadow-md">
+                <CardContent className="px-6 py-5">
+                  <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                    {stat.label}
+                  </p>
+                  <p className="mt-2 truncate text-2xl font-semibold text-foreground">
+                    {stat.value}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Quick-nav cards */}
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-3">
+              <CardTitle className="text-lg">Properties</CardTitle>
+              <CardDescription>
+                Manage your property listings, mark featured properties, and track availability.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <Button asChild variant="secondary">
+                <Link href="/properties">View properties</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-3">
+              <CardTitle className="text-lg">Agents</CardTitle>
+              <CardDescription>
+                Add or update team members shown on your public site.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <Button asChild variant="secondary">
+                <Link href="/agents">View agents</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

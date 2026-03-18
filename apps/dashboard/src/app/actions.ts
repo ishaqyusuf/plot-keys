@@ -296,6 +296,25 @@ export async function updateSiteThemeFieldAction(formData: FormData) {
   }
 }
 
+/**
+ * Silent theme field update — revalidates the page without redirecting.
+ * Used by the builder sidebar for optimistic UI so pickers don't trigger a full reload.
+ */
+export async function updateSiteThemeFieldSilentAction(formData: FormData) {
+  const configId = String(formData.get("configId") ?? "");
+  const themeKey = String(formData.get("themeKey") ?? "");
+  const value = String(formData.get("value") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateSiteThemeField({ configId, themeKey, value });
+    revalidatePath("/builder");
+    revalidatePath("/live");
+  } catch {
+    // Silently swallow — the optimistic local state already reflects the choice.
+  }
+}
+
 export async function updateSiteFieldAction(formData: FormData) {
   const configId = String(formData.get("configId") ?? "");
   const contentKey = String(formData.get("contentKey") ?? "");

@@ -60,9 +60,17 @@ export type ContactSectionConfig = {
   address?: string;
   ctaText: string;
   email?: string;
+  /**
+   * API endpoint to POST the form data to.
+   * If provided, the form will submit via fetch instead of the local stub handler.
+   * Set to "/api/contact" in the tenant-site renderer.
+   */
+  formEndpoint?: string;
   /** Placeholder note shown before a real map embed is connected */
   mapPlaceholder?: string;
   phone?: string;
+  /** The company subdomain — included in the POST body so the API can route the submission. */
+  subdomain?: string;
   subtitle: string;
   title: string;
   whatsapp?: string;
@@ -406,6 +414,8 @@ function ContactForm({
   theme: ThemeConfig;
 }) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (submitted) {
     return (
@@ -424,14 +434,52 @@ function ContactForm({
     );
   }
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    if (config.formEndpoint) {
+      setSubmitting(true);
+      setError(null);
+      try {
+        const body = {
+          email: String(data.get("email") ?? ""),
+          message: String(data.get("message") ?? ""),
+          name: String(data.get("name") ?? ""),
+          phone: String(data.get("phone") ?? "") || undefined,
+          subdomain: config.subdomain ?? "",
+        };
+        const res = await fetch(config.formEndpoint, {
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => null) as { error?: string } | null;
+          throw new Error(payload?.error ?? "Unable to send message.");
+        }
+        setSubmitted(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to send message.");
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      setSubmitted(true);
+    }
+  }
+
   return (
     <form
       className="space-y-5"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
+      onSubmit={handleSubmit}
     >
+      {error && (
+        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
@@ -476,11 +524,12 @@ function ContactForm({
         />
       </div>
       <button
-        className="w-full rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        className="w-full rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        disabled={submitting}
         style={{ backgroundColor: theme.accentColor }}
         type="submit"
       >
-        {config.ctaText}
+        {submitting ? "Sending…" : config.ctaText}
       </button>
     </form>
   );

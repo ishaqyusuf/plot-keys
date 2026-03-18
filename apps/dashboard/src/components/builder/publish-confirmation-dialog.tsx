@@ -16,6 +16,7 @@ import { Input } from "@plotkeys/ui/input";
 import { useRef, useState } from "react";
 
 type PublishConfirmationDialogProps = {
+  changedFieldCount?: number;
   configId: string;
   currentLiveName?: string | null;
   currentName: string;
@@ -24,6 +25,7 @@ type PublishConfirmationDialogProps = {
 };
 
 export function PublishConfirmationDialog({
+  changedFieldCount,
   configId,
   currentLiveName,
   currentName,
@@ -73,6 +75,16 @@ export function PublishConfirmationDialog({
               <>
                 <span className="text-foreground">Template</span>
                 <span>{templateLabel}</span>
+              </>
+            )}
+            {changedFieldCount !== undefined && (
+              <>
+                <span className="text-foreground">Changes</span>
+                <span>
+                  {changedFieldCount === 0
+                    ? "No fields changed since last publish"
+                    : `${changedFieldCount} field${changedFieldCount !== 1 ? "s" : ""} changed since last publish`}
+                </span>
               </>
             )}
           </div>

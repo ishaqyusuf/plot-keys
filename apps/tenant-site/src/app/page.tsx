@@ -1,4 +1,4 @@
-import { createPrismaClient, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
+import { createPrismaClient, listAgentsForCompany, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
   deserializeTemplateConfig,
@@ -90,12 +90,23 @@ export default async function TenantWebsiteHomePage({
         matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
         activeThemeJson = publishedConfiguration.themeJson as Record<string, string>;
 
-        const featuredProperties = await listFeaturedProperties(prisma, company.id);
+        const [featuredProperties, agents] = await Promise.all([
+          listFeaturedProperties(prisma, company.id),
+          listAgentsForCompany(prisma, company.id, { limit: 10 }),
+        ]);
 
         preview = resolveWebsitePresentation({
           companyName: company.name,
           content: publishedConfiguration.contentJson as Record<string, string>,
+          liveAgents: agents.map((a) => ({
+            bio: a.bio,
+            id: a.id,
+            imageUrl: a.imageUrl,
+            name: a.name,
+            title: a.title,
+          })),
           liveListings: featuredProperties.map((p) => ({
+            id: p.id,
             imageUrl: p.imageUrl,
             location: p.location,
             price: p.price,

@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import type { RenderMode } from "./types";
 
 export type TemplateTier = "starter" | "plus" | "pro";
 
@@ -8,6 +9,7 @@ import {
   type HeroBannerConfig,
   HeroBannerSection,
   type ListingSpotlightConfig,
+  type ListingSpotlightItem,
   ListingSpotlightSection,
   type MarketStatsConfig,
   MarketStatsSection,
@@ -17,6 +19,14 @@ import {
   TestimonialStripSection,
   type ThemeConfig,
 } from "./sections/home-page";
+import {
+  AgentShowcaseSection,
+  type AgentShowcaseConfig,
+  PropertyGridSection,
+  type PropertyGridConfig,
+  ContactSection,
+  type ContactSectionConfig,
+} from "./sections/extended-sections";
 
 export type SectionDefinition<TConfig> = {
   component: (props: { config: TConfig; theme: ThemeConfig }) => JSX.Element;
@@ -31,7 +41,10 @@ export type HomeSectionDefinition =
   | SectionDefinition<StoryGridConfig>
   | SectionDefinition<ListingSpotlightConfig>
   | SectionDefinition<TestimonialStripConfig>
-  | SectionDefinition<CtaBandConfig>;
+  | SectionDefinition<CtaBandConfig>
+  | SectionDefinition<AgentShowcaseConfig>
+  | SectionDefinition<PropertyGridConfig>
+  | SectionDefinition<ContactSectionConfig>;
 
 export type EditableFieldDefinition = {
   aiEnabled?: boolean;
@@ -83,10 +96,19 @@ export type TemplateDefinition = {
 
 export type LiveListingItem = {
   imageUrl?: string | null;
+  id?: string;
   location: string;
   price?: string | null;
   specs?: string | null;
   title: string;
+};
+
+export type LiveAgentItem = {
+  bio?: string | null;
+  id: string;
+  imageUrl?: string | null;
+  name: string;
+  title?: string | null;
 };
 
 export type { RenderMode } from "./types";
@@ -105,6 +127,7 @@ export type ResolvedWebsitePresentation = {
 type ResolveTemplateOptions = {
   companyName?: string;
   content?: TenantContentRecord;
+  liveAgents?: LiveAgentItem[];
   liveListings?: LiveListingItem[];
   market?: string;
   /** Defaults to "live" when omitted. */
@@ -261,6 +284,8 @@ function buildListingSpotlightItems(
 type SectionBuilder = (
   content: TenantContentRecord,
   liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
 ) => HomeSectionDefinition;
 
 const sectionBuilders: Record<string, SectionBuilder> = {
@@ -379,6 +404,60 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     id: "cta-band",
     type: "cta_band",
   }),
+  AgentShowcaseSection: (_content, _listings, liveAgents) => ({
+    component: AgentShowcaseSection,
+    config: {
+      description: "Meet the team behind every successful deal.",
+      eyebrow: "Our team",
+      items: (liveAgents ?? []).map((a) => ({
+        bio: a.bio ?? undefined,
+        id: a.id,
+        name: a.name,
+        photoUrl: a.imageUrl ?? undefined,
+        role: a.title ?? "Agent",
+      })),
+      title: "The people who make it happen.",
+    },
+    id: "agent-showcase",
+    type: "agent_showcase",
+  }),
+  PropertyGridSection: (_content, liveListings) => ({
+    component: PropertyGridSection,
+    config: {
+      ctaHref: "/properties",
+      ctaText: "View all properties",
+      eyebrow: "Active listings",
+      items: (liveListings ?? []).map((p, i) => ({
+        id: p.id ?? `property-${i}`,
+        imageUrl: p.imageUrl ?? undefined,
+        location: p.location,
+        price: p.price ?? undefined,
+        slug: p.id,
+        specs: p.specs ?? undefined,
+        title: p.title,
+      })),
+      title: "Properties available now.",
+    },
+    id: "property-grid",
+    type: "property_grid",
+  }),
+  ContactSection: (content, _listings, _agents, subdomain) => ({
+    component: ContactSection,
+    config: {
+      address: content["contact.address"] ?? undefined,
+      ctaText: "Send message",
+      email: content["contact.email"] ?? undefined,
+      formEndpoint: "/api/contact",
+      phone: content["contact.phone"] ?? undefined,
+      subdomain: subdomain ?? "",
+      subtitle:
+        "Have a question about a listing, or ready to start your search? Get in touch and we'll get back to you within 24 hours.",
+      title: "Get in touch.",
+      whatsapp: content["contact.whatsapp"] ?? undefined,
+    },
+    id: "contact-section",
+    type: "contact_section",
+  }),
 };
 
 /**
@@ -390,6 +469,8 @@ function buildHomePage(
   content: TenantContentRecord,
   templateKey: string,
   liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
 ): {
   page: "home";
   sections: HomeSectionDefinition[];
@@ -400,13 +481,13 @@ function buildHomePage(
   const sections: HomeSectionDefinition[] = slots
     .map((slot) => {
       const builder = sectionBuilders[slot.sectionType];
-      return builder ? builder(content, liveListings) : null;
+      return builder ? builder(content, liveListings, liveAgents, subdomain) : null;
     })
     .filter((s): s is HomeSectionDefinition => s !== null);
 
   // Fallback: if no inventory slots matched, render the default set
   if (sections.length === 0) {
-    return buildDefaultHomePage(content, liveListings);
+    return buildDefaultHomePage(content, liveListings, liveAgents, subdomain);
   }
 
   return { page: "home", sections };
@@ -416,6 +497,8 @@ function buildHomePage(
 function buildDefaultHomePage(
   content: TenantContentRecord,
   liveListings?: LiveListingItem[],
+  liveAgents?: LiveAgentItem[],
+  subdomain?: string,
 ): { page: "home"; sections: HomeSectionDefinition[] } {
   const defaultOrder = [
     "HeroBannerSection",
@@ -428,7 +511,7 @@ function buildDefaultHomePage(
   return {
     page: "home",
     sections: defaultOrder
-      .map((type) => sectionBuilders[type]?.(content, liveListings))
+      .map((type) => sectionBuilders[type]?.(content, liveListings, liveAgents, subdomain))
       .filter((s): s is HomeSectionDefinition => s !== null),
   };
 }
@@ -834,6 +917,7 @@ export function createInitialSiteConfigurationInput({
 export function resolveWebsitePresentation({
   companyName,
   content,
+  liveAgents,
   liveListings,
   market,
   renderMode = "live",
@@ -849,7 +933,7 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(mergedContent, templateKey, liveListings),
+    page: buildHomePage(mergedContent, templateKey, liveListings, liveAgents, subdomain),
     renderMode,
     template,
     theme: {
@@ -866,7 +950,7 @@ export function resolveWebsitePresentation({
 
 
 export const sampleTheme = fallbackTemplate.defaultTheme;
-export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
+export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent, fallbackTemplate.key);
 
 export {
   WebsiteRuntimeProvider,

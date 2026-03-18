@@ -18,9 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@plotkeys/ui/dropdown-menu";
-import { Field, FieldGroup } from "@plotkeys/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Input } from "@plotkeys/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
-import { useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,6 +35,7 @@ type BuilderSidebarControlsProps = {
   templateConfig: TemplateConfig;
   onCreateDraft: (formData: FormData) => Promise<void>;
   onUpdateTheme: (formData: FormData) => Promise<void>;
+  onUpdateThemeSilent?: (formData: FormData) => Promise<void>;
 };
 
 // ---------------------------------------------------------------------------
@@ -108,26 +110,34 @@ const presetEntries = Object.entries(stylePresets) as [
 function StylePresetMenu({
   configId,
   onSave,
+  onSaveSilent,
   value,
 }: {
   configId: string;
   onSave: (formData: FormData) => Promise<void>;
+  onSaveSilent?: (formData: FormData) => Promise<void>;
   value: string;
 }) {
+  const [optimisticValue, setOptimisticValue] = useState(value);
   const [, startTransition] = useTransition();
 
   function handleChange(preset: string) {
+    setOptimisticValue(preset);
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
       fd.set("themeKey", "stylePreset");
       fd.set("value", preset);
-      await onSave(fd);
+      if (onSaveSilent) {
+        await onSaveSilent(fd);
+      } else {
+        await onSave(fd);
+      }
     });
   }
 
-  const current = stylePresets[value as keyof typeof stylePresets];
-  const label = current?.label ?? value ?? "Default";
+  const current = stylePresets[optimisticValue as keyof typeof stylePresets];
+  const label = current?.label ?? optimisticValue ?? "Default";
 
   return (
     <DropdownMenu>
@@ -149,7 +159,7 @@ function StylePresetMenu({
         className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
         side="right"
       >
-        <DropdownMenuRadioGroup onValueChange={handleChange} value={value}>
+        <DropdownMenuRadioGroup onValueChange={handleChange} value={optimisticValue}>
           <DropdownMenuGroup>
             {presetEntries.map(([key, preset]) => (
               <DropdownMenuRadioItem
@@ -195,25 +205,33 @@ const colorSystemEntries = Object.entries(colorSystems) as [
 function ColorSystemMenu({
   configId,
   onSave,
+  onSaveSilent,
   value,
 }: {
   configId: string;
   onSave: (formData: FormData) => Promise<void>;
+  onSaveSilent?: (formData: FormData) => Promise<void>;
   value: string;
 }) {
+  const [optimisticValue, setOptimisticValue] = useState(value);
   const [, startTransition] = useTransition();
 
   function handleChange(system: string) {
+    setOptimisticValue(system);
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
       fd.set("themeKey", "colorSystem");
       fd.set("value", system);
-      await onSave(fd);
+      if (onSaveSilent) {
+        await onSaveSilent(fd);
+      } else {
+        await onSave(fd);
+      }
     });
   }
 
-  const current = colorSystems[value];
+  const current = colorSystems[optimisticValue];
 
   return (
     <DropdownMenu>
@@ -232,7 +250,7 @@ function ColorSystemMenu({
                 />
               </>
             )}
-            {current?.label ?? value ?? "Default"}
+            {current?.label ?? optimisticValue ?? "Default"}
           </span>
         </PickerButton>
       </DropdownMenuTrigger>
@@ -241,7 +259,7 @@ function ColorSystemMenu({
         className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
         side="right"
       >
-        <DropdownMenuRadioGroup onValueChange={handleChange} value={value}>
+        <DropdownMenuRadioGroup onValueChange={handleChange} value={optimisticValue}>
           <DropdownMenuGroup>
             {colorSystemEntries.map(([key, system]) => (
               <DropdownMenuRadioItem
@@ -289,38 +307,46 @@ function FontMenu({
   configId,
   label,
   onSave,
+  onSaveSilent,
   themeKey,
   value,
 }: {
   configId: string;
   label: string;
   onSave: (formData: FormData) => Promise<void>;
+  onSaveSilent?: (formData: FormData) => Promise<void>;
   themeKey: string;
   value: string;
 }) {
+  const [optimisticValue, setOptimisticValue] = useState(value);
   const [, startTransition] = useTransition();
 
   function handleChange(font: string) {
+    setOptimisticValue(font);
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
       fd.set("themeKey", themeKey);
       fd.set("value", font);
-      await onSave(fd);
+      if (onSaveSilent) {
+        await onSaveSilent(fd);
+      } else {
+        await onSave(fd);
+      }
     });
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <PickerButton label={label}>{value || "Default"}</PickerButton>
+        <PickerButton label={label}>{optimisticValue || "Default"}</PickerButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
         className="max-h-72 w-56 overflow-y-auto rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
         side="right"
       >
-        <DropdownMenuRadioGroup onValueChange={handleChange} value={value}>
+        <DropdownMenuRadioGroup onValueChange={handleChange} value={optimisticValue}>
           {fontOptions.map((group, i) => (
             <div key={group.label}>
               <DropdownMenuGroup>
@@ -343,6 +369,64 @@ function FontMenu({
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Image Slots
+// ---------------------------------------------------------------------------
+
+function ImageSlotsSection({
+  configId,
+  namedImageSlots,
+  namedImages,
+  onSave,
+}: {
+  configId: string;
+  namedImageSlots: Record<string, string>;
+  namedImages?: Record<string, string>;
+  onSave: (formData: FormData) => Promise<void>;
+}) {
+  const slots = Object.keys(namedImageSlots);
+  const [values, setValues] = useState<Record<string, string>>(
+    Object.fromEntries(slots.map((slot) => [slot, namedImages?.[slot] ?? namedImageSlots[slot] ?? ""])),
+  );
+  const [, startTransition] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleChange(slot: string, url: string) {
+    setValues((prev) => ({ ...prev, [slot]: url }));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      startTransition(async () => {
+        const fd = new FormData();
+        fd.set("configId", configId);
+        fd.set("themeKey", `namedImage.${slot}`);
+        fd.set("value", url.trim());
+        await onSave(fd);
+      });
+    }, 600);
+  }
+
+  if (slots.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Images</p>
+      {slots.map((slot) => (
+        <div key={slot}>
+          <FieldLabel className="text-xs capitalize text-muted-foreground">
+            {slot.replace(/([A-Z])/g, " $1").trim()}
+          </FieldLabel>
+          <Input
+            className="mt-1 text-xs"
+            placeholder="Paste image URL…"
+            value={values[slot] ?? ""}
+            onChange={(e) => handleChange(slot, e.target.value)}
+          />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -463,7 +547,11 @@ export function BuilderSidebarControls({
   templateConfig,
   onCreateDraft,
   onUpdateTheme,
+  onUpdateThemeSilent,
 }: BuilderSidebarControlsProps) {
+  const currentTemplate = templateCatalog.find((t) => t.key === currentTemplateKey);
+  const namedImageSlots = currentTemplate?.namedImageSlots ?? {};
+
   return (
     <FieldGroup className="flex flex-col gap-4">
       <Field>
@@ -478,6 +566,7 @@ export function BuilderSidebarControls({
         <StylePresetMenu
           configId={configId}
           onSave={onUpdateTheme}
+          onSaveSilent={onUpdateThemeSilent}
           value={templateConfig.stylePreset ?? "vega"}
         />
       </Field>
@@ -486,6 +575,7 @@ export function BuilderSidebarControls({
         <ColorSystemMenu
           configId={configId}
           onSave={onUpdateTheme}
+          onSaveSilent={onUpdateThemeSilent}
           value={templateConfig.colorSystem ?? "slate"}
         />
       </Field>
@@ -495,6 +585,7 @@ export function BuilderSidebarControls({
           configId={configId}
           label="Body font"
           onSave={onUpdateTheme}
+          onSaveSilent={onUpdateThemeSilent}
           themeKey="fontFamily"
           value={templateConfig.fontFamily ?? "Inter"}
         />
@@ -505,10 +596,22 @@ export function BuilderSidebarControls({
           configId={configId}
           label="Heading font"
           onSave={onUpdateTheme}
+          onSaveSilent={onUpdateThemeSilent}
           themeKey="headingFontFamily"
           value={templateConfig.headingFontFamily ?? "Inter"}
         />
       </Field>
+
+      {Object.keys(namedImageSlots).length > 0 && (
+        <Field>
+          <ImageSlotsSection
+            configId={configId}
+            namedImageSlots={namedImageSlots}
+            namedImages={templateConfig.namedImages}
+            onSave={onUpdateTheme}
+          />
+        </Field>
+      )}
     </FieldGroup>
   );
 }
