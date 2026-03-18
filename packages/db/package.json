@@ -20,6 +20,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:drizzle:studio": "drizzle-kit studio",
+    "seed:templates": "bun src/seed-templates.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },

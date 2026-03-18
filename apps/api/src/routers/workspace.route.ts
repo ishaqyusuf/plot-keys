@@ -8,6 +8,7 @@ import {
   findCompanyById,
   findCompanyBySlug,
   findLatestDraftForTemplate,
+  listFeaturedProperties,
   findLatestSiteConfigurationForCompany,
   findLicensedTemplateKeys,
   findSiteConfigurationByIdForCompany,
@@ -852,7 +853,7 @@ export const workspaceRouter = createTRPCRouter({
 
       return { configId: configuration.id };
     }),
-  getSiteRenderData: authenticatedProcedure
+  getSiteRenderData: publicProcedure
     .input(
       z.object({
         subdomain: z.string().trim().min(1, "Subdomain is required."),
@@ -869,20 +870,36 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      const configuration = await findLatestSiteConfigurationForCompany(
-        db,
-        company.id,
-      );
+      const [configuration, featuredProperties] = await Promise.all([
+        findLatestSiteConfigurationForCompany(db, company.id),
+        listFeaturedProperties(db, company.id),
+      ]);
 
       if (!configuration) {
         return null;
       }
+
+      const liveListings = featuredProperties.map((p) => ({
+        imageUrl: p.imageUrl,
+        location: p.location,
+        price: p.price,
+        specs:
+          p.specs ??
+          [
+            p.bedrooms ? `${p.bedrooms} bed` : null,
+            p.bathrooms ? `${p.bathrooms} bath` : null,
+          ]
+            .filter(Boolean)
+            .join(" • ") || null,
+        title: p.title,
+      }));
 
       return {
         companyId: company.id,
         companyName: company.name,
         configId: configuration.id,
         content: configuration.contentJson as Record<string, string>,
+        liveListings,
         market: company.market,
         status: configuration.status,
         subdomain: input.subdomain,

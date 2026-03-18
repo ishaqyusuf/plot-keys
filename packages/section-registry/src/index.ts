@@ -372,6 +372,10 @@ function buildHomePage(
   };
 }
 
+// ---------------------------------------------------------------------------
+// Template catalog
+// ---------------------------------------------------------------------------
+
 export const templateCatalog: TemplateDefinition[] = [
   {
     defaultContent: createDefaultContent(
@@ -444,6 +448,80 @@ export const templateCatalog: TemplateDefinition[] = [
     marketingTagline:
       "Warm, trust-driven layout ideal for family buyers and investor audiences.",
     name: "Palmstone",
+    purchasable: true,
+    tier: "pro",
+  },
+];
+
+  // ─── Template 4: Meridian Estates (residential / clean / listings) ───
+  {
+    defaultContent: createDefaultContent(
+      "Meridian Estates",
+      "Port Harcourt",
+      "Prime residential and commercial addresses",
+    ),
+    defaultTheme: {
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+      logo: "Meridian Estates",
+      market: "Port Harcourt",
+      supportLine: "+234 803 444 7700",
+    },
+    description: "Clean, listing-first layout for high-volume residential markets.",
+    editableFields: baseEditableFields,
+    key: "template-4",
+    marketingTagline: "Listing-first, data-backed layout for residential sales agencies.",
+    name: "Meridian",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 5: Thornfield (investor / bold / commercial) ───────────
+  {
+    defaultContent: createDefaultContent(
+      "Thornfield Capital",
+      "Victoria Island, Lagos",
+      "Investment-grade commercial and mixed-use assets",
+    ),
+    defaultTheme: {
+      accentColor: "#1e293b",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Thornfield Capital",
+      market: "Victoria Island, Lagos",
+      supportLine: "+234 1 234 5678",
+    },
+    description: "Bold, data-confident presentation for commercial and investor audiences.",
+    editableFields: baseEditableFields,
+    key: "template-5",
+    marketingTagline: "High-conviction layout built for commercial and investment-grade mandates.",
+    name: "Thornfield",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 6: Crestview (family / warm / mid-market) ──────────────
+  {
+    defaultContent: createDefaultContent(
+      "Crestview Homes",
+      "Abuja",
+      "Quality family homes across Abuja's best neighbourhoods",
+    ),
+    defaultTheme: {
+      accentColor: "#16a34a",
+      backgroundColor: "#f0fdf4",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: 'Georgia, "Times New Roman", serif',
+      logo: "Crestview Homes",
+      market: "Abuja",
+      supportLine: "+234 802 100 4321",
+    },
+    description: "Warm, community-led layout for family-focused mid-market agencies.",
+    editableFields: baseEditableFields,
+    key: "template-6",
+    marketingTagline: "Welcoming, community-driven layout for family-first residential agencies.",
+    name: "Crestview",
     purchasable: true,
     tier: "pro",
   },

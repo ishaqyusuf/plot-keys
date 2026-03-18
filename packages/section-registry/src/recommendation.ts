@@ -459,6 +459,24 @@ const templateTags: Record<string, TemplateScoringTags> = {
     designIntentTags: ["warm", "editorial"],
     segmentTags: ["mixed", "residential", "rental"],
   },
+  "template-4": {
+    // Meridian — clean, listing-first, residential volume
+    conversionFocusTags: ["listings", "balanced"],
+    designIntentTags: ["clean"],
+    segmentTags: ["residential", "rental", "mixed"],
+  },
+  "template-5": {
+    // Thornfield — bold, investor, commercial
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["bold"],
+    segmentTags: ["commercial", "mixed"],
+  },
+  "template-6": {
+    // Crestview — warm, family, mid-market
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["warm"],
+    segmentTags: ["residential", "rental"],
+  },
 };
 
 type PartialProfile = Omit<DerivedProfile, "complexity" | "recommendedTemplateKey">;
