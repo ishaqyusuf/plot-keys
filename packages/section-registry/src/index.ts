@@ -651,6 +651,18 @@ export {
   serializeTemplateConfig,
   stylePresets,
 } from "./template-config";
+export {
+  getFreeStockImages,
+  getStockImageById,
+  getStockImagesByCategory,
+  getStockImagesForSlot,
+  stockImageCatalog,
+} from "./stock-images";
+export type {
+  StockImage,
+  StockImageCategory,
+  StockImageLicenseTier,
+} from "./stock-images";
 export type {
   ColorScheme,
   StylePreset,

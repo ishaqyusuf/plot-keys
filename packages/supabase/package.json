@@ -1,9 +1,11 @@
 {
-  "name": "@plotkeys/supabase",
+  "name": "@plotkeys/platform-integrations",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./storage": "./src/storage.ts",
+    "./supabase": "./src/supabase.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0"

@@ -1,6 +1,43 @@
 import type { Db } from "../prisma";
 
 /**
+ * Resolves a tenant company from a fully-qualified hostname.
+ *
+ * Used by middleware and the public tenant-site page to map:
+ *   - `{slug}.plotkeys.com` → company via `tenant_domains` table
+ *   - `custom-domain.com`   → company via `tenant_domains` table
+ *
+ * Returns null when no matching active domain is found.
+ */
+export async function resolveTenantByHostname(
+  db: Db,
+  hostname: string,
+): Promise<{ companyId: string; companySlug: string; hostname: string } | null> {
+  const normalizedHostname = hostname.toLowerCase().replace(/:\d+$/, "");
+
+  const tenantDomain = await db.tenantDomain.findFirst({
+    include: {
+      company: { select: { deletedAt: true, id: true, slug: true } },
+    },
+    where: {
+      deletedAt: null,
+      hostname: normalizedHostname,
+      status: "active",
+    },
+  });
+
+  if (tenantDomain && !tenantDomain.company.deletedAt) {
+    return {
+      companyId: tenantDomain.company.id,
+      companySlug: tenantDomain.company.slug,
+      hostname: tenantDomain.hostname,
+    };
+  }
+
+  return null;
+}
+
+/**
  * Returns all tenant domain records for a company (any status, not deleted).
  * Used to surface domain provisioning status in the dashboard.
  */
