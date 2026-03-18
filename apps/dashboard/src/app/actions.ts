@@ -384,6 +384,76 @@ export async function ensureBuilderConfigurationExists() {
   }
 }
 
+export async function saveOnboardingStepAction(formData: FormData) {
+  const step = String(formData.get("currentStep") ?? "business-identity");
+  const nextStep = String(formData.get("nextStep") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic input built per-step
+    const input: Record<string, any> = {
+      currentStep: nextStep || step,
+    };
+
+    if (step === "business-identity") {
+      input.tagline =
+        String(formData.get("tagline") ?? "").trim() || null;
+      input.businessType =
+        String(formData.get("businessType") ?? "").trim() || null;
+      input.primaryGoal =
+        String(formData.get("primaryGoal") ?? "").trim() || null;
+    } else if (step === "market-focus") {
+      const locationsRaw = String(formData.get("locations") ?? "");
+      input.locations = locationsRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const propertyTypeValues = formData.getAll("propertyTypes");
+      input.propertyTypes = propertyTypeValues
+        .map((v) => String(v).trim())
+        .filter(Boolean);
+      input.targetAudience =
+        String(formData.get("targetAudience") ?? "").trim() || null;
+    } else if (step === "brand-style") {
+      input.tone = String(formData.get("tone") ?? "").trim() || null;
+      input.stylePreference =
+        String(formData.get("stylePreference") ?? "").trim() || null;
+      input.preferredColorHint =
+        String(formData.get("preferredColorHint") ?? "").trim() || null;
+    } else if (step === "contact-operations") {
+      input.phone = String(formData.get("phone") ?? "").trim() || null;
+      input.contactEmail =
+        String(formData.get("contactEmail") ?? "").trim() || null;
+      input.whatsapp =
+        String(formData.get("whatsapp") ?? "").trim() || null;
+      input.officeAddress =
+        String(formData.get("officeAddress") ?? "").trim() || null;
+    } else if (step === "content-readiness") {
+      input.hasLogo = formData.get("hasLogo") === "on";
+      input.hasListings = formData.get("hasListings") === "on";
+      input.hasExistingContent = formData.get("hasExistingContent") === "on";
+      input.hasAgents = formData.get("hasAgents") === "on";
+      input.hasProjects = formData.get("hasProjects") === "on";
+      input.hasTestimonials = formData.get("hasTestimonials") === "on";
+      input.hasBlogContent = formData.get("hasBlogContent") === "on";
+    }
+
+    await caller.workspace.saveOnboardingProgress(input);
+    redirect(`/onboarding?step=${nextStep}`);
+  } catch (error) {
+    redirect(
+      createRedirectUrl("/onboarding", {
+        step,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to save onboarding progress.",
+      }),
+    );
+  }
+}
+
 export async function syncTenantDomainsAction() {
   try {
     const caller = await createServerCaller();

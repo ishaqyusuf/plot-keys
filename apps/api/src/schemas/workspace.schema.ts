@@ -9,6 +9,32 @@ export const completeOnboardingInputSchema = z.object({
 
 export const saveOnboardingProgressInputSchema = z.object({
   currentStep: z.string().trim().min(1).optional(),
+  // Step 1: Business Identity
+  tagline: z.string().trim().nullable().optional(),
+  businessType: z.string().trim().nullable().optional(),
+  primaryGoal: z.string().trim().nullable().optional(),
+  // Step 2: Market Focus
+  locations: z.array(z.string().trim()).optional(),
+  propertyTypes: z.array(z.string().trim()).optional(),
+  targetAudience: z.string().trim().nullable().optional(),
+  // Step 3: Brand Style
+  tone: z.string().trim().nullable().optional(),
+  stylePreference: z.string().trim().nullable().optional(),
+  preferredColorHint: z.string().trim().nullable().optional(),
+  // Step 4: Contact And Operations
+  phone: z.string().trim().nullable().optional(),
+  contactEmail: z.string().trim().nullable().optional(),
+  whatsapp: z.string().trim().nullable().optional(),
+  officeAddress: z.string().trim().nullable().optional(),
+  // Step 5: Content Readiness
+  hasLogo: z.boolean().optional(),
+  hasListings: z.boolean().optional(),
+  hasExistingContent: z.boolean().optional(),
+  hasAgents: z.boolean().optional(),
+  hasProjects: z.boolean().optional(),
+  hasTestimonials: z.boolean().optional(),
+  hasBlogContent: z.boolean().optional(),
+  // Final step
   market: z.string().trim().optional(),
   templateKey: z.string().trim().optional(),
 });

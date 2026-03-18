@@ -12,6 +12,7 @@ import {
   findTenantOnboardingByUserId,
   listSyncableTenantDomains,
   publishSiteConfiguration,
+  saveOnboardingStepProgress,
   updateSiteConfigurationContentField,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
@@ -170,11 +171,38 @@ export const workspaceRouter = createTRPCRouter({
     }
 
     return {
+      // Core
       companyName: onboarding.companyName,
       completedAt: onboarding.completedAt,
       currentStep: onboarding.currentStep,
-      market: onboarding.market,
       subdomain: onboarding.subdomain,
+      // Step 1
+      tagline: onboarding.tagline,
+      businessType: onboarding.businessType,
+      primaryGoal: onboarding.primaryGoal,
+      // Step 2
+      locations: onboarding.locations,
+      propertyTypes: onboarding.propertyTypes,
+      targetAudience: onboarding.targetAudience,
+      // Step 3
+      tone: onboarding.tone,
+      stylePreference: onboarding.stylePreference,
+      preferredColorHint: onboarding.preferredColorHint,
+      // Step 4
+      phone: onboarding.phone,
+      contactEmail: onboarding.contactEmail,
+      whatsapp: onboarding.whatsapp,
+      officeAddress: onboarding.officeAddress,
+      // Step 5
+      hasLogo: onboarding.hasLogo,
+      hasListings: onboarding.hasListings,
+      hasExistingContent: onboarding.hasExistingContent,
+      hasAgents: onboarding.hasAgents,
+      hasProjects: onboarding.hasProjects,
+      hasTestimonials: onboarding.hasTestimonials,
+      hasBlogContent: onboarding.hasBlogContent,
+      // Final
+      market: onboarding.market,
       templateKey: onboarding.templateKey,
     };
   }),
@@ -196,13 +224,9 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      await upsertTenantOnboarding(db, {
-        companyName: existing.companyName,
-        currentStep: input.currentStep ?? existing.currentStep,
-        market: input.market ?? existing.market ?? undefined,
-        subdomain: existing.subdomain,
-        templateKey: input.templateKey ?? existing.templateKey ?? undefined,
+      await saveOnboardingStepProgress(db, {
         userId: ctx.auth.session.user.id,
+        ...input,
       });
 
       return { saved: true };
