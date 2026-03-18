@@ -1,6 +1,12 @@
 # Progress
 
 ## 2026-03-18
+- Added `/builder/preview` client-side testing page for previewing all templates without DB.
+  - Template cycling via back/next buttons and dropdown with tabbed tier selector.
+  - Local publish checkbox state per template.
+  - Renders sections using `sectionComponents` registry and `resolveWebsitePresentation`.
+- Compacted `BuilderSidebarControls` spacing (py-3→py-2, gap-5→gap-3).
+- Made builder page sidebar responsive: hidden below `xl`, replaced with Sheet-based drawer (`BuilderSidebarDrawer`) triggered by Settings2 icon.
 - Updated auth password hashing in `packages/auth/src/index.ts` to use `bcrypt-ts` (`hash`/`compare`) instead of local scrypt-based helpers.
 - Added `bcrypt-ts` dependency in `packages/auth/package.json`.
 - Verified no file-level TypeScript errors in `packages/auth/src/index.ts`.
