@@ -68,12 +68,6 @@ export type TemplateDefinition = {
   /** Human-readable marketing tagline shown in the template picker. */
   marketingTagline: string;
   name: string;
-  /**
-   * Default named image slot assignments for this template.
-   * Keys are slot names (heroImage, aboutImage, ctaBackground, teamPhoto).
-   * Values are default stock image URLs shown before the tenant uploads their own.
-   */
-  namedImageSlots?: Record<string, string>;
   /** Whether this template can be individually purchased without a plan upgrade. */
   purchasable: boolean;
   /** URL of the preview thumbnail used in template cards. */
@@ -89,7 +83,16 @@ export type LiveListingItem = {
   title: string;
 };
 
-export type { RenderMode } from "./types";
+/**
+ * Controls how the website is rendered.
+ *
+ * - `live`    Published tenant site. No editing chrome.
+ * - `draft`   Builder / editor view. Empty fields show placeholder outlines;
+ *             sections may render a subtle focus outline on hover.
+ * - `preview` Authenticated preview (preview-token URL). Renders published
+ *             content with a "Preview" badge; no editing controls.
+ */
+export type RenderMode = "draft" | "live" | "preview";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
@@ -254,182 +257,132 @@ function buildListingSpotlightItems(
   ];
 }
 
-// ---------------------------------------------------------------------------
-// Section builder map — maps page-inventory sectionType → HomeSectionDefinition
-// ---------------------------------------------------------------------------
-
-type SectionBuilder = (
-  content: TenantContentRecord,
-  liveListings?: LiveListingItem[],
-) => HomeSectionDefinition;
-
-const sectionBuilders: Record<string, SectionBuilder> = {
-  HeroBannerSection: (content) => ({
-    component: HeroBannerSection,
-    config: {
-      ctaHref: "#featured-listings",
-      ctaText: content["hero.ctaText"] ?? "Browse listings",
-      eyebrow:
-        content["hero.eyebrow"] ?? "Luxury homes and investment addresses",
-      subtitle:
-        content["hero.subtitle"] ??
-        "A refined real-estate experience for buyers, investors, and families looking for trusted guidance.",
-      title:
-        content["hero.title"] ??
-        "Find your next signature property with confidence.",
-    },
-    id: "hero-banner",
-    type: "hero_banner",
-  }),
-  MarketStatsSection: () => ({
-    component: MarketStatsSection,
-    config: {
-      items: [
-        { label: "Homes sold last year", value: "128" },
-        { label: "Average closing timeline", value: "21 days" },
-        { label: "Verified buyer inquiries", value: "94%" },
-      ],
-    },
-    id: "market-stats",
-    type: "market_stats",
-  }),
-  ListingSpotlightSection: (content, liveListings) => ({
-    component: ListingSpotlightSection,
-    config: {
-      description:
-        liveListings && liveListings.length > 0
-          ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
-          : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
-      eyebrow: "Featured inventory",
-      items: buildListingSpotlightItems(liveListings),
-      title: "Featured listings feel editorial, not templated.",
-    },
-    id: "listing-spotlight",
-    type: "listing_spotlight",
-  }),
-  StoryGridSection: (content) => ({
-    component: StoryGridSection,
-    config: {
-      description:
-        content["story.description"] ??
-        "The first tenant template balances premium presentation with clear information architecture so every public page can convert interest into real conversations.",
-      eyebrow: "Why this template works",
-      items: [
-        {
-          body: "Organize your offer around neighborhoods, trust signals, and high-value inventory without rebuilding each landing page from scratch.",
-          title: "Premium positioning",
-        },
-        {
-          body: "Structured sections give every property, team story, and CTA a clean place in the page, so content stays usable on mobile and desktop.",
-          title: "Disciplined layout system",
-        },
-        {
-          body: "Every section is designed to support lead capture and future CMS-driven editing rather than static one-off pages.",
-          title: "Built for conversion",
-        },
-      ],
-      title:
-        content["story.title"] ??
-        "A polished website system for agencies that need credibility fast.",
-    },
-    id: "story-grid",
-    type: "story_grid",
-  }),
-  TestimonialStripSection: () => ({
-    component: TestimonialStripSection,
-    config: {
-      items: [
-        {
-          quote:
-            "They made the shortlist feel effortless and handled every detail with a calm level of professionalism.",
-          role: "Buyer, Ikoyi relocation",
-          speaker: "M. Adebayo",
-        },
-        {
-          quote:
-            "The property presentation felt thoughtful from first click to first viewing, which immediately built trust with our family.",
-          role: "Home buyer, Lekki",
-          speaker: "R. Okonkwo",
-        },
-        {
-          quote:
-            "Our inquiries improved because the website finally reflected the quality of the homes we represent.",
-          role: "Managing partner, luxury brokerage",
-          speaker: "T. Hassan",
-        },
-      ],
-    },
-    id: "testimonial-strip",
-    type: "testimonial_strip",
-  }),
-  CtaBandSection: (content) => ({
-    component: CtaBandSection,
-    config: {
-      body:
-        content["cta.body"] ??
-        "Book a private consultation, request a shortlist, or start a tailored property search with a team that understands premium client expectations.",
-      primaryHref: "#",
-      primaryText: "Book a consultation",
-      secondaryHref: "#featured-listings",
-      secondaryText: "View available homes",
-      title:
-        content["cta.title"] ??
-        "Start your search with a team that knows the market.",
-    },
-    id: "cta-band",
-    type: "cta_band",
-  }),
-};
-
-/**
- * Builds the home page section list driven by the page-inventory for the
- * given template. Per-template overrides (e.g. Meridian leads with listings)
- * are respected automatically.
- */
 function buildHomePage(
   content: TenantContentRecord,
-  templateKey: string,
   liveListings?: LiveListingItem[],
 ): {
   page: "home";
   sections: HomeSectionDefinition[];
 } {
-  const { getEnabledSections } = require("./page-inventory") as typeof import("./page-inventory");
-  const slots = getEnabledSections(templateKey, "home");
-
-  const sections: HomeSectionDefinition[] = slots
-    .map((slot) => {
-      const builder = sectionBuilders[slot.sectionType];
-      return builder ? builder(content, liveListings) : null;
-    })
-    .filter((s): s is HomeSectionDefinition => s !== null);
-
-  // Fallback: if no inventory slots matched, render the default set
-  if (sections.length === 0) {
-    return buildDefaultHomePage(content, liveListings);
-  }
-
-  return { page: "home", sections };
-}
-
-/** Fallback for unknown template keys — renders the standard 5-section home. */
-function buildDefaultHomePage(
-  content: TenantContentRecord,
-  liveListings?: LiveListingItem[],
-): { page: "home"; sections: HomeSectionDefinition[] } {
-  const defaultOrder = [
-    "HeroBannerSection",
-    "MarketStatsSection",
-    "StoryGridSection",
-    "ListingSpotlightSection",
-    "TestimonialStripSection",
-    "CtaBandSection",
-  ];
   return {
     page: "home",
-    sections: defaultOrder
-      .map((type) => sectionBuilders[type]?.(content, liveListings))
-      .filter((s): s is HomeSectionDefinition => s !== null),
+    sections: [
+      {
+        component: HeroBannerSection,
+        config: {
+          ctaHref: "#featured-listings",
+          ctaText: content["hero.ctaText"] ?? "Browse listings",
+          eyebrow:
+            content["hero.eyebrow"] ?? "Luxury homes and investment addresses",
+          subtitle:
+            content["hero.subtitle"] ??
+            "A refined real-estate experience for buyers, investors, and families looking for trusted guidance.",
+          title:
+            content["hero.title"] ??
+            "Find your next signature property with confidence.",
+        },
+        id: "hero-banner",
+        type: "hero_banner",
+      },
+      {
+        component: MarketStatsSection,
+        config: {
+          items: [
+            { label: "Homes sold last year", value: "128" },
+            { label: "Average closing timeline", value: "21 days" },
+            { label: "Verified buyer inquiries", value: "94%" },
+          ],
+        },
+        id: "market-stats",
+        type: "market_stats",
+      },
+      {
+        component: StoryGridSection,
+        config: {
+          description:
+            content["story.description"] ??
+            "The first tenant template balances premium presentation with clear information architecture so every public page can convert interest into real conversations.",
+          eyebrow: "Why this template works",
+          items: [
+            {
+              body: "Organize your offer around neighborhoods, trust signals, and high-value inventory without rebuilding each landing page from scratch.",
+              title: "Premium positioning",
+            },
+            {
+              body: "Structured sections give every property, team story, and CTA a clean place in the page, so content stays usable on mobile and desktop.",
+              title: "Disciplined layout system",
+            },
+            {
+              body: "Every section is designed to support lead capture and future CMS-driven editing rather than static one-off pages.",
+              title: "Built for conversion",
+            },
+          ],
+          title:
+            content["story.title"] ??
+            "A polished website system for agencies that need credibility fast.",
+        },
+        id: "story-grid",
+        type: "story_grid",
+      },
+      {
+        component: ListingSpotlightSection,
+        config: {
+          description:
+            liveListings && liveListings.length > 0
+              ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
+              : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
+          eyebrow: "Featured inventory",
+          items: buildListingSpotlightItems(liveListings),
+          title: "Featured listings feel editorial, not templated.",
+        },
+        id: "listing-spotlight",
+        type: "listing_spotlight",
+      },
+      {
+        component: TestimonialStripSection,
+        config: {
+          items: [
+            {
+              quote:
+                "They made the shortlist feel effortless and handled every detail with a calm level of professionalism.",
+              role: "Buyer, Ikoyi relocation",
+              speaker: "M. Adebayo",
+            },
+            {
+              quote:
+                "The property presentation felt thoughtful from first click to first viewing, which immediately built trust with our family.",
+              role: "Home buyer, Lekki",
+              speaker: "R. Okonkwo",
+            },
+            {
+              quote:
+                "Our inquiries improved because the website finally reflected the quality of the homes we represent.",
+              role: "Managing partner, luxury brokerage",
+              speaker: "T. Hassan",
+            },
+          ],
+        },
+        id: "testimonial-strip",
+        type: "testimonial_strip",
+      },
+      {
+        component: CtaBandSection,
+        config: {
+          body:
+            content["cta.body"] ??
+            "Book a private consultation, request a shortlist, or start a tailored property search with a team that understands premium client expectations.",
+          primaryHref: "#",
+          primaryText: "Book a consultation",
+          secondaryHref: "#featured-listings",
+          secondaryText: "View available homes",
+          title:
+            content["cta.title"] ??
+            "Start your search with a team that knows the market.",
+        },
+        id: "cta-band",
+        type: "cta_band",
+      },
+    ],
   };
 }
 
@@ -438,7 +391,6 @@ function buildDefaultHomePage(
 // ---------------------------------------------------------------------------
 
 export const templateCatalog: TemplateDefinition[] = [
-  // ─── Starter templates ────────────────────────────────────────────────
   {
     defaultContent: createDefaultContent(
       "Aster Grove Realty",
@@ -461,119 +413,9 @@ export const templateCatalog: TemplateDefinition[] = [
     marketingTagline:
       "A calm, editorial layout built for luxury and premium residential brands.",
     name: "Aster Grove",
-    namedImageSlots: {
-      aboutImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
-      ctaBackground: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
-      heroImage: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600",
-    },
     purchasable: false,
     tier: "starter",
   },
-  {
-    defaultContent: createDefaultContent(
-      "Vega Realty",
-      "Lagos Island",
-      "Smart homes for the modern buyer",
-    ),
-    defaultTheme: {
-      accentColor: "#7c3aed",
-      backgroundColor: "#faf5ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Vega Realty",
-      market: "Lagos Island",
-      supportLine: "+234 802 700 1111",
-    },
-    description: "Minimal, tech-forward layout for urban lifestyle brands.",
-    editableFields: baseEditableFields,
-    key: "template-7",
-    marketingTagline: "Clean and minimal — built for tech-forward urban agencies.",
-    name: "Vega Lite",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1600",
-    },
-    purchasable: false,
-    tier: "starter",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Nova Homes",
-      "Enugu",
-      "Trusted homes for growing families",
-    ),
-    defaultTheme: {
-      accentColor: "#0284c7",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Manrope, system-ui, sans-serif",
-      headingFontFamily: "Manrope, system-ui, sans-serif",
-      logo: "Nova Homes",
-      market: "Enugu",
-      supportLine: "+234 803 100 2200",
-    },
-    description: "Bright, trustworthy layout for family-first residential agencies.",
-    editableFields: baseEditableFields,
-    key: "template-8",
-    marketingTagline: "Bright and trustworthy — ideal for family-first residential agencies.",
-    name: "Nova Basic",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1600",
-    },
-    purchasable: false,
-    tier: "starter",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Lyra Properties",
-      "Ibadan",
-      "Quality homes at every price point",
-    ),
-    defaultTheme: {
-      accentColor: "#dc2626",
-      backgroundColor: "#fff7f7",
-      fontFamily: "Lato, Helvetica, sans-serif",
-      headingFontFamily: "Lato, Helvetica, sans-serif",
-      logo: "Lyra Properties",
-      market: "Ibadan",
-      supportLine: "+234 811 000 4455",
-    },
-    description: "Bold, energetic layout for high-volume sales teams.",
-    editableFields: baseEditableFields,
-    key: "template-9",
-    marketingTagline: "Bold and energetic — for high-volume residential sales teams.",
-    name: "Lyra Basic",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600",
-    },
-    purchasable: false,
-    tier: "starter",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Myra Real Estate",
-      "Kano",
-      "Professional homes for ambitious buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#059669",
-      backgroundColor: "#f0fdf4",
-      fontFamily: "Roboto, Arial, sans-serif",
-      headingFontFamily: "Roboto, Arial, sans-serif",
-      logo: "Myra Real Estate",
-      market: "Kano",
-      supportLine: "+234 807 333 5566",
-    },
-    description: "Clean, professional layout for growth-focused agencies.",
-    editableFields: baseEditableFields,
-    key: "template-10",
-    marketingTagline: "Professional and approachable — for growth-focused real estate agencies.",
-    name: "Myra Basic",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1600",
-    },
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Plus templates ───────────────────────────────────────────────────
   {
     defaultContent: createDefaultContent(
       "Atlas Urban Homes",
@@ -595,92 +437,9 @@ export const templateCatalog: TemplateDefinition[] = [
     marketingTagline:
       "Bold, listing-first layout for urban agencies and commercial portfolios.",
     name: "Atlas Urban",
-    namedImageSlots: {
-      aboutImage: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
-      heroImage: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600",
-    },
     purchasable: true,
     tier: "plus",
   },
-  {
-    defaultContent: createDefaultContent(
-      "Meridian Estates",
-      "Port Harcourt",
-      "Prime residential and commercial addresses",
-    ),
-    defaultTheme: {
-      accentColor: "#0369a1",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Meridian Estates",
-      market: "Port Harcourt",
-      supportLine: "+234 803 444 7700",
-    },
-    description: "Clean, listing-first layout for high-volume residential markets.",
-    editableFields: baseEditableFields,
-    key: "template-4",
-    marketingTagline: "Listing-first, data-backed layout for residential sales agencies.",
-    name: "Meridian",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600",
-    },
-    purchasable: true,
-    tier: "plus",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Maia Rentals",
-      "Abuja",
-      "Premium rentals for every lifestyle",
-    ),
-    defaultTheme: {
-      accentColor: "#d97706",
-      backgroundColor: "#fffbeb",
-      fontFamily: "Manrope, system-ui, sans-serif",
-      headingFontFamily: "Fraunces, Georgia, serif",
-      logo: "Maia Rentals",
-      market: "Abuja",
-      supportLine: "+234 810 600 7788",
-    },
-    description: "Warm editorial layout tailored for premium rental agencies.",
-    editableFields: baseEditableFields,
-    key: "template-11",
-    marketingTagline: "Editorial warmth for rental agencies and property management brands.",
-    name: "Maia Growth",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600",
-    },
-    purchasable: true,
-    tier: "plus",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Horizon Agents",
-      "Lagos Mainland",
-      "Your neighbourhood experts",
-    ),
-    defaultTheme: {
-      accentColor: "#0891b2",
-      backgroundColor: "#f0fdfa",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Epilogue, Helvetica, sans-serif",
-      logo: "Horizon Agents",
-      market: "Lagos Mainland",
-      supportLine: "+234 802 888 3344",
-    },
-    description: "Agent-centric layout highlighting team credentials and local expertise.",
-    editableFields: baseEditableFields,
-    key: "template-12",
-    marketingTagline: "Agent-forward layout for area specialists and team-driven agencies.",
-    name: "Horizon Plus",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1600",
-    },
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Pro templates ────────────────────────────────────────────────────
   {
     defaultContent: createDefaultContent(
       "Palmstone Properties",
@@ -703,14 +462,36 @@ export const templateCatalog: TemplateDefinition[] = [
     marketingTagline:
       "Warm, trust-driven layout ideal for family buyers and investor audiences.",
     name: "Palmstone",
-    namedImageSlots: {
-      aboutImage: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800",
-      ctaBackground: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?w=1200",
-      heroImage: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1600",
-    },
     purchasable: true,
     tier: "pro",
   },
+];
+
+  // ─── Template 4: Meridian Estates (residential / clean / listings) ───
+  {
+    defaultContent: createDefaultContent(
+      "Meridian Estates",
+      "Port Harcourt",
+      "Prime residential and commercial addresses",
+    ),
+    defaultTheme: {
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+      logo: "Meridian Estates",
+      market: "Port Harcourt",
+      supportLine: "+234 803 444 7700",
+    },
+    description: "Clean, listing-first layout for high-volume residential markets.",
+    editableFields: baseEditableFields,
+    key: "template-4",
+    marketingTagline: "Listing-first, data-backed layout for residential sales agencies.",
+    name: "Meridian",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 5: Thornfield (investor / bold / commercial) ───────────
   {
     defaultContent: createDefaultContent(
       "Thornfield Capital",
@@ -731,12 +512,10 @@ export const templateCatalog: TemplateDefinition[] = [
     key: "template-5",
     marketingTagline: "High-conviction layout built for commercial and investment-grade mandates.",
     name: "Thornfield",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600",
-    },
     purchasable: true,
     tier: "pro",
   },
+  // ─── Template 6: Crestview (family / warm / mid-market) ──────────────
   {
     defaultContent: createDefaultContent(
       "Crestview Homes",
@@ -757,36 +536,6 @@ export const templateCatalog: TemplateDefinition[] = [
     key: "template-6",
     marketingTagline: "Welcoming, community-driven layout for family-first residential agencies.",
     name: "Crestview",
-    namedImageSlots: {
-      heroImage: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600",
-    },
-    purchasable: true,
-    tier: "pro",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Nova Luxury Estate",
-      "Banana Island, Lagos",
-      "Ultra-luxury residential and private estate addresses",
-    ),
-    defaultTheme: {
-      accentColor: "#92400e",
-      backgroundColor: "#1c1917",
-      fontFamily: "Playfair Display, Georgia, serif",
-      headingFontFamily: "Playfair Display, Georgia, serif",
-      logo: "Nova Luxury Estate",
-      market: "Banana Island",
-      supportLine: "+234 1 700 8800",
-    },
-    description: "Dark, ultra-luxury layout for exclusive private estate brands.",
-    editableFields: baseEditableFields,
-    key: "template-13",
-    marketingTagline: "Dark editorial luxury for private estate and ultra-high-net-worth agencies.",
-    name: "Nova Pro",
-    namedImageSlots: {
-      ctaBackground: "https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?w=1200",
-      heroImage: "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1600",
-    },
     purchasable: true,
     tier: "pro",
   },
@@ -849,7 +598,7 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(mergedContent, templateKey, liveListings),
+    page: buildHomePage(mergedContent, liveListings),
     renderMode,
     template,
     theme: {
@@ -864,21 +613,30 @@ export function resolveWebsitePresentation({
   };
 }
 
+/**
+ * Returns true when a content field value should be treated as empty/missing
+ * and should show a placeholder outline in draft rendering mode.
+ */
+export function isContentFieldEmpty(value: string | undefined | null): boolean {
+  return !value || value.trim().length === 0;
+}
+
+/**
+ * Returns the CSS class string to apply to a content field wrapper when in
+ * draft mode and the field has no user-supplied value.
+ */
+export function draftPlaceholderClass(
+  renderMode: RenderMode,
+  value: string | undefined | null,
+): string {
+  if (renderMode !== "draft") return "";
+  return isContentFieldEmpty(value)
+    ? "outline-dashed outline-2 outline-offset-2 outline-amber-400/60 rounded"
+    : "";
+}
 
 export const sampleTheme = fallbackTemplate.defaultTheme;
 export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
-
-export {
-  WebsiteRuntimeProvider,
-  useColorSystem,
-  useIsDraftMode,
-  useRenderMode,
-  useResolvedFont,
-  useTemplateConfig,
-  useTemplateImage,
-  useTemplateStylePreset,
-} from "./runtime-context";
-export type { WebsiteRuntimeProviderProps } from "./runtime-context";
 
 export {
   applyAiGeneration,
@@ -888,12 +646,8 @@ export {
 } from "./content-nodes";
 export {
   applyConfigUpdate,
-  colorSystems,
   deserializeTemplateConfig,
-  fontFallbacks,
   fromDerivedDesignConfig,
-  resolvePresetConfig,
-  resolveSlotFont,
   serializeTemplateConfig,
   stylePresets,
 } from "./template-config";
@@ -911,11 +665,7 @@ export type {
 } from "./stock-images";
 export type {
   ColorScheme,
-  ColorSystem,
-  ColorTokenSet,
-  FontFallbackMap,
   StylePreset,
-  StylePresetDefinition,
   TemplateConfig,
 } from "./template-config";
 export type {
@@ -971,46 +721,3 @@ export {
   StoryGridSection,
   TestimonialStripSection,
 };
-export {
-  AgentShowcaseSection,
-  ContactSection,
-  FAQAccordionSection,
-  NewsletterSection,
-  PropertyGridSection,
-} from "./sections/extended-sections";
-export type {
-  AgentCardItem,
-  AgentShowcaseConfig,
-  ContactSectionConfig,
-  FAQAccordionConfig,
-  FAQItem,
-  NewsletterConfig,
-  PropertyGridConfig,
-  PropertyGridItem,
-} from "./sections/extended-sections";
-export {
-  draftEditableClass,
-  draftPlaceholderClass,
-  isContentFieldEmpty,
-} from "./sections/section-utils";
-export {
-  EditableImage,
-  EditableRepeater,
-  EditableText,
-} from "./sections/editing-primitives";
-export type {
-  EditableImageProps,
-  EditableRepeaterProps,
-  EditableTextProps,
-} from "./sections/editing-primitives";
-export {
-  getFormAction,
-  getFormProcedurePath,
-  isSectionFormBound,
-  sectionFormBindings,
-} from "./form-registry";
-export type {
-  FormAction,
-  FormActionKind,
-  SectionFormBinding,
-} from "./form-registry";

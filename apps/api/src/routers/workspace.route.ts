@@ -1,14 +1,10 @@
 import {
   completeTenantOnboarding,
   countCompaniesByTemplateKey,
-  createAgent,
   createCompanyOnboardingBundle,
   createPrismaClient,
-  createProperty,
   createSiteConfiguration,
   type Db,
-  deleteAgent,
-  deleteProperty,
   findCompanyById,
   findCompanyBySlug,
   findLatestDraftForTemplate,
@@ -20,21 +16,16 @@ import {
   findTemplateLicensesForCompany,
   grantTemplateLicense,
   hasTemplateLicense,
-  listAgentsForCompany,
-  listPropertiesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
-  togglePropertyFeatured,
-  updateAgent,
-  updateCompanyLogo,
-  updateCompanyPlan,
   updateOnboardingProfile,
-  updateProperty,
   updateSiteConfigurationContentField,
   updateSiteConfigurationThemeField,
+  updateCompanyLogo,
+  updateCompanyPlan,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
@@ -68,16 +59,10 @@ import { generateFieldContent } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
-  createAgentInputSchema,
-  createPropertyInputSchema,
   createTemplateDraftInputSchema,
-  deleteAgentInputSchema,
-  deletePropertyInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
   smartFillFieldInputSchema,
-  updateAgentInputSchema,
-  updatePropertyInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
 
@@ -223,42 +208,9 @@ export const workspaceRouter = createTRPCRouter({
 
       const template = getTemplateDefinition(templateKey);
 
-      // Merge contact details into contentJson so contact page / footer / CTA
-      // sections are pre-filled from onboarding without any manual editing.
-      const contactContentOverrides: Record<string, string> = {};
-      if (savedOnboarding?.phone) {
-        contactContentOverrides["contact.phone"] = savedOnboarding.phone;
-      }
-      if (savedOnboarding?.whatsapp) {
-        contactContentOverrides["contact.whatsapp"] = savedOnboarding.whatsapp;
-      }
-      if (savedOnboarding?.contactEmail) {
-        contactContentOverrides["contact.email"] = savedOnboarding.contactEmail;
-      }
-      if (savedOnboarding?.officeAddress) {
-        contactContentOverrides["contact.address"] = savedOnboarding.officeAddress;
-      }
-
-      // Store section visibility flags as content keys so the renderer can
-      // hide/show sections without a separate DB query.
-      const visibilityContent: Record<string, string> = {};
-      if (snapshot) {
-        const { deriveSectionVisibility } = await import("@plotkeys/section-registry");
-        const visibility = deriveSectionVisibility(snapshot);
-        visibilityContent["visibility.agents"] = String(visibility.agents);
-        visibilityContent["visibility.blog"] = String(visibility.blog);
-        visibilityContent["visibility.listings"] = String(visibility.listings);
-        visibilityContent["visibility.projects"] = String(visibility.projects);
-        visibilityContent["visibility.testimonials"] = String(visibility.testimonials);
-      }
-
       const initialSiteConfiguration = personalizedContent && designConfig
         ? {
-            contentJson: {
-              ...personalizedContent,
-              ...contactContentOverrides,
-              ...visibilityContent,
-            },
+            contentJson: personalizedContent,
             name: `${template.name} Draft`,
             subdomain,
             templateKey: template.key,
@@ -266,12 +218,10 @@ export const workspaceRouter = createTRPCRouter({
               ...template.defaultTheme,
               accentColor: designConfig.accentColor,
               backgroundColor: designConfig.backgroundColor,
-              colorSystem: designConfig.colorSystem,
               fontFamily: designConfig.fontFamily,
               headingFontFamily: designConfig.headingFontFamily,
               logo: companyName,
               market,
-              stylePreset: designConfig.stylePreset,
             },
           }
         : createInitialSiteConfigurationInput({
@@ -1060,89 +1010,5 @@ export const workspaceRouter = createTRPCRouter({
         input.logoUrl,
       );
       return { companyId: company.id, logoUrl: company.logoUrl };
-    }),
-
-  // ---------------------------------------------------------------------------
-  // Property CRUD
-  // ---------------------------------------------------------------------------
-
-  listProperties: membershipProcedure.query(async ({ ctx }) => {
-    const db = getDb();
-    return listPropertiesForCompany(db, ctx.auth.activeMembership.companyId);
-  }),
-
-  createProperty: membershipProcedure
-    .input(createPropertyInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      return createProperty(db, ctx.auth.activeMembership.companyId, input);
-    }),
-
-  updateProperty: membershipProcedure
-    .input(updatePropertyInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      const { propertyId, ...data } = input;
-      await updateProperty(db, propertyId, ctx.auth.activeMembership.companyId, data);
-      return { propertyId };
-    }),
-
-  deleteProperty: membershipProcedure
-    .input(deletePropertyInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      await deleteProperty(db, input.propertyId, ctx.auth.activeMembership.companyId);
-      return { propertyId: input.propertyId };
-    }),
-
-  togglePropertyFeatured: membershipProcedure
-    .input(
-      z.object({
-        featured: z.boolean(),
-        propertyId: z.string().trim().min(1),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      await togglePropertyFeatured(
-        db,
-        input.propertyId,
-        ctx.auth.activeMembership.companyId,
-        input.featured,
-      );
-      return { propertyId: input.propertyId };
-    }),
-
-  // ---------------------------------------------------------------------------
-  // Agent CRUD
-  // ---------------------------------------------------------------------------
-
-  listAgents: membershipProcedure.query(async ({ ctx }) => {
-    const db = getDb();
-    return listAgentsForCompany(db, ctx.auth.activeMembership.companyId);
-  }),
-
-  createAgent: membershipProcedure
-    .input(createAgentInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      return createAgent(db, ctx.auth.activeMembership.companyId, input);
-    }),
-
-  updateAgent: membershipProcedure
-    .input(updateAgentInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      const { agentId, ...data } = input;
-      await updateAgent(db, agentId, ctx.auth.activeMembership.companyId, data);
-      return { agentId };
-    }),
-
-  deleteAgent: membershipProcedure
-    .input(deleteAgentInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      await deleteAgent(db, input.agentId, ctx.auth.activeMembership.companyId);
-      return { agentId: input.agentId };
     }),
 });

@@ -1,11 +1,9 @@
 import { createPrismaClient, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
-  deserializeTemplateConfig,
   resolveWebsitePresentation,
   sampleHomePage,
   sampleTheme,
-  WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -58,7 +56,6 @@ export default async function TenantWebsiteHomePage({
     page: sampleHomePage,
     theme: sampleTheme,
   };
-  let activeThemeJson: Record<string, string> | null = null;
 
   if (prisma) {
     // Prefer hostname-based lookup via tenant_domains (handles custom domains).
@@ -88,7 +85,6 @@ export default async function TenantWebsiteHomePage({
 
       if (publishedConfiguration) {
         matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
-        activeThemeJson = publishedConfiguration.themeJson as Record<string, string>;
 
         const featuredProperties = await listFeaturedProperties(prisma, company.id);
 
@@ -106,15 +102,11 @@ export default async function TenantWebsiteHomePage({
           renderMode: "live",
           subdomain: company.slug,
           templateKey: publishedConfiguration.templateKey,
-          theme: activeThemeJson,
+          theme: publishedConfiguration.themeJson as Record<string, string>,
         });
       }
     }
   }
-
-  const templateConfig = activeThemeJson
-    ? deserializeTemplateConfig(activeThemeJson)
-    : {};
 
   return (
     <main className="min-h-screen px-4 py-5 md:px-6 md:py-6">
@@ -144,11 +136,9 @@ export default async function TenantWebsiteHomePage({
           </div>
         </div>
 
-        <WebsiteRuntimeProvider renderMode="live" templateConfig={templateConfig}>
-          {preview.page.sections.map((section) =>
-            renderSection(section, preview.theme),
-          )}
-        </WebsiteRuntimeProvider>
+        {preview.page.sections.map((section) =>
+          renderSection(section, preview.theme),
+        )}
       </div>
     </main>
   );
