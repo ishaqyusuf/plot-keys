@@ -474,10 +474,30 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     config: {
       eyebrow: "Common questions",
       items: [
-        { id: "faq-1", question: "How do I schedule a viewing?", answer: "Contact us through the form or call our support line to arrange a private viewing at your convenience." },
-        { id: "faq-2", question: "What areas do you cover?", answer: "We cover all major residential and commercial districts. Check our listings page for current availability by location." },
-        { id: "faq-3", question: "Do you help with financing?", answer: "We partner with trusted mortgage advisors and can connect you with financing options suited to your budget." },
-        { id: "faq-4", question: "How long does the buying process take?", answer: "Typical timelines range from 30 to 90 days depending on the property type, financing, and legal requirements." },
+        {
+          id: "faq-1",
+          question: "How do I schedule a viewing?",
+          answer:
+            "Contact us through the form or call our support line to arrange a private viewing at your convenience.",
+        },
+        {
+          id: "faq-2",
+          question: "What areas do you cover?",
+          answer:
+            "We cover all major residential and commercial districts. Check our listings page for current availability by location.",
+        },
+        {
+          id: "faq-3",
+          question: "Do you help with financing?",
+          answer:
+            "We partner with trusted mortgage advisors and can connect you with financing options suited to your budget.",
+        },
+        {
+          id: "faq-4",
+          question: "How long does the buying process take?",
+          answer:
+            "Typical timelines range from 30 to 90 days depending on the property type, financing, and legal requirements.",
+        },
       ],
       title: "Frequently asked questions.",
     },
@@ -490,7 +510,8 @@ const sectionBuilders: Record<string, SectionBuilder> = {
       disclaimer: "No spam. Unsubscribe anytime.",
       placeholder: "Enter your email",
       submitText: "Subscribe",
-      subtitle: "Get market updates, new listings, and expert insights delivered weekly.",
+      subtitle:
+        "Get market updates, new listings, and expert insights delivered weekly.",
       title: "Stay ahead of the market.",
     },
     id: "newsletter-strip",
@@ -501,8 +522,17 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     config: {
       ctaHref: "/properties",
       ctaText: content["hero.ctaText"] ?? "Search now",
-      locationOptions: ["All locations", "Lekki", "Ikoyi", "Victoria Island", "Abuja", "Port Harcourt"],
-      subtitle: content["hero.subtitle"] ?? "Search thousands of verified listings across premium locations.",
+      locationOptions: [
+        "All locations",
+        "Lekki",
+        "Ikoyi",
+        "Victoria Island",
+        "Abuja",
+        "Port Harcourt",
+      ],
+      subtitle:
+        content["hero.subtitle"] ??
+        "Search thousands of verified listings across premium locations.",
       title: content["hero.title"] ?? "Find Your Dream Home",
     },
     id: "hero-search",
@@ -513,10 +543,34 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     config: {
       eyebrow: "Why choose us",
       items: [
-        { icon: "🏠", stat: "500+", title: "Properties Sold", description: "Trusted by hundreds of families and investors across the country." },
-        { icon: "⭐", stat: "98%", title: "Client Satisfaction", description: "Consistently rated excellent by buyers and sellers alike." },
-        { icon: "📍", stat: "25+", title: "Neighborhoods", description: "Deep local expertise across the most sought-after locations." },
-        { icon: "🤝", stat: "15+", title: "Years Experience", description: "A proven track record built on relationships and results." },
+        {
+          icon: "🏠",
+          stat: "500+",
+          title: "Properties Sold",
+          description:
+            "Trusted by hundreds of families and investors across the country.",
+        },
+        {
+          icon: "⭐",
+          stat: "98%",
+          title: "Client Satisfaction",
+          description:
+            "Consistently rated excellent by buyers and sellers alike.",
+        },
+        {
+          icon: "📍",
+          stat: "25+",
+          title: "Neighborhoods",
+          description:
+            "Deep local expertise across the most sought-after locations.",
+        },
+        {
+          icon: "🤝",
+          stat: "15+",
+          title: "Years Experience",
+          description:
+            "A proven track record built on relationships and results.",
+        },
       ],
       title: "Numbers that speak for themselves.",
     },
@@ -526,12 +580,28 @@ const sectionBuilders: Record<string, SectionBuilder> = {
   ServiceHighlightsSection: () => ({
     component: ServiceHighlightsSection,
     config: {
-      description: "From first viewing to final signature, we handle every detail.",
+      description:
+        "From first viewing to final signature, we handle every detail.",
       eyebrow: "Our services",
       items: [
-        { icon: "🔍", title: "Property Search", description: "Curated shortlists matched to your lifestyle, budget, and investment goals." },
-        { icon: "📋", title: "Transaction Management", description: "End-to-end support through legal, financial, and closing processes." },
-        { icon: "📈", title: "Market Advisory", description: "Data-driven insights on pricing, timing, and high-growth neighborhoods." },
+        {
+          icon: "🔍",
+          title: "Property Search",
+          description:
+            "Curated shortlists matched to your lifestyle, budget, and investment goals.",
+        },
+        {
+          icon: "📋",
+          title: "Transaction Management",
+          description:
+            "End-to-end support through legal, financial, and closing processes.",
+        },
+        {
+          icon: "📈",
+          title: "Market Advisory",
+          description:
+            "Data-driven insights on pricing, timing, and high-growth neighborhoods.",
+        },
       ],
       title: "Full-service real estate, simplified.",
     },
@@ -586,11 +656,26 @@ export const sectionComponents: Record<
     config: unknown;
     theme: ThemeConfig;
   }) => JSX.Element,
-  faq_accordion: FAQAccordionSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
-  newsletter_strip: NewsletterSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
-  hero_search: HeroSearchSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
-  why_choose_us: WhyChooseUsSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
-  service_highlights: ServiceHighlightsSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
+  faq_accordion: FAQAccordionSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  newsletter_strip: NewsletterSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  hero_search: HeroSearchSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  why_choose_us: WhyChooseUsSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  service_highlights: ServiceHighlightsSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
 };
 
 /**
@@ -1015,8 +1100,7 @@ export const templateCatalog: TemplateDefinition[] = [
       market: "Ibadan",
       supportLine: "+234 803 600 0801",
     },
-    description:
-      "Warm, family-friendly starter for community-rooted agencies.",
+    description: "Warm, family-friendly starter for community-rooted agencies.",
     editableFields: baseEditableFields,
     key: "template-14",
     marketingTagline:
@@ -1487,8 +1571,7 @@ export const templateCatalog: TemplateDefinition[] = [
       "Boutique starter layout that puts your agents and team front and center.",
     editableFields: baseEditableFields,
     key: "template-32",
-    marketingTagline:
-      "Agent-first boutique starter that leads with your team.",
+    marketingTagline: "Agent-first boutique starter that leads with your team.",
     name: "Rania",
     purchasable: false,
     tier: "starter",
@@ -1513,8 +1596,7 @@ export const templateCatalog: TemplateDefinition[] = [
       "Ultra-clean starter that strips away everything except hero and listings.",
     editableFields: baseEditableFields,
     key: "template-33",
-    marketingTagline:
-      "Minimal, listings-only starter with maximum clarity.",
+    marketingTagline: "Minimal, listings-only starter with maximum clarity.",
     name: "Jihan",
     purchasable: false,
     tier: "starter",
@@ -1565,8 +1647,7 @@ export const templateCatalog: TemplateDefinition[] = [
       "Statistics-forward starter that leads with market data and numbers.",
     editableFields: baseEditableFields,
     key: "template-35",
-    marketingTagline:
-      "Stats-heavy starter for data-confident agencies.",
+    marketingTagline: "Stats-heavy starter for data-confident agencies.",
     name: "Walid",
     purchasable: false,
     tier: "starter",

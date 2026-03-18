@@ -158,7 +158,10 @@ export function PropertyGridSection({
   const isEmpty = config.items.length === 0;
 
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="flex items-end justify-between">
@@ -271,7 +274,10 @@ export function AgentShowcaseSection({
   theme: ThemeConfig;
 }): JSX.Element {
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-7xl">
         <SectionTag>{config.eyebrow}</SectionTag>
         <SectionTitle theme={theme}>{config.title}</SectionTitle>
@@ -345,7 +351,10 @@ export function ContactSection({
   theme: ThemeConfig;
 }): JSX.Element {
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           {/* Left — copy + contacts */}
@@ -556,7 +565,10 @@ export function FAQAccordionSection({
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-3xl">
         {config.eyebrow && <SectionTag>{config.eyebrow}</SectionTag>}
         <SectionTitle theme={theme}>{config.title}</SectionTitle>
@@ -817,7 +829,10 @@ export function WhyChooseUsSection({
   theme: ThemeConfig;
 }): JSX.Element {
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <SectionTag>{config.eyebrow}</SectionTag>
@@ -874,7 +889,10 @@ export function ServiceHighlightsSection({
   theme: ThemeConfig;
 }): JSX.Element {
   return (
-    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
+      style={shell(theme)}
+    >
       <div className="mx-auto max-w-7xl">
         <div>
           <SectionTag>{config.eyebrow}</SectionTag>
