@@ -19,3 +19,10 @@
 - Registered all 5 new section types (FAQ, Newsletter, HeroSearch, WhyChooseUs, ServiceHighlights) in section builders, component registry, and union types in `index.ts`.
 - Added 15 new template definitions (template-31 through template-45) with unique themes, content, and tier assignments.
 - Created page inventory compositions for templates 31-45 in `page-inventory.ts` with reusable slot definitions.
+
+## Dark Mode Support
+- Added `dark:` variant Tailwind classes to all hardcoded color references in `home-page.tsx` section components: Eyebrow, Surface, ActionButton, HeroBannerSection, MarketStatsSection, StoryGridSection, ListingSpotlightSection, TestimonialStripSection.
+- CtaBandSection left unchanged (already dark-on-dark gradient).
+- Added dark variants for ContactForm error state in `extended-sections.tsx`.
+- Other extended sections already use CSS variables (`--foreground`, `--muted-foreground`, etc.) that auto-adapt via `@custom-variant dark` in globals.css.
+- TypeScript compilation verified clean.
