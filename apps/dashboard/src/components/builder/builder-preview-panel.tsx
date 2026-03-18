@@ -1,19 +1,26 @@
 "use client";
 
-import type { EditableFieldDefinition, HomeSectionDefinition, ResolvedWebsitePresentation } from "@plotkeys/section-registry";
+import type {
+  EditableFieldDefinition,
+  SerializableSectionData,
+  TenantContentRecord,
+} from "@plotkeys/section-registry";
+import { sectionComponents } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@plotkeys/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
 import type { JSX } from "react";
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 type BuilderPreviewPanelProps = {
   companySlug: string;
   configId: string;
+  defaultContent: TenantContentRecord;
   editableFields: EditableFieldDefinition[];
-  preview: ResolvedWebsitePresentation;
+  sections: SerializableSectionData[];
+  theme: Record<string, string>;
   onUpdateField: (formData: FormData) => Promise<void>;
   onSmartFill: (formData: FormData) => Promise<void>;
 };
@@ -26,6 +33,9 @@ function sectionLabel(type: string): string {
     listing_spotlight: "Listings spotlight",
     testimonial_strip: "Testimonials",
     cta_band: "CTA band",
+    agent_showcase: "Agent showcase",
+    property_grid: "Property grid",
+    contact_section: "Contact",
   };
 
   return labels[type] ?? type;
@@ -39,6 +49,7 @@ function fieldsForSection(
     hero_banner: ["hero."],
     story_grid: ["story."],
     cta_band: ["cta."],
+    contact_section: ["contact."],
   };
 
   const prefixes = prefixMap[sectionType];
@@ -95,12 +106,12 @@ function FieldEditor({
         <FieldLabel>{field.label}</FieldLabel>
         {field.aiEnabled && (
           <Button
+            className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
             disabled={isFilling}
             onClick={handleSmartFill}
             size="sm"
             type="button"
             variant="ghost"
-            className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
           >
             {isFilling ? "Filling…" : "AI fill"}
           </Button>
@@ -135,33 +146,29 @@ function FieldEditor({
 }
 
 type PreviewSectionProps = {
-  content: Record<string, string>;
   configId: string;
+  content: Record<string, string>;
   editableFields: EditableFieldDefinition[];
   focused: boolean;
+  section: SerializableSectionData;
+  theme: Record<string, string>;
   onFocus: () => void;
-  section: HomeSectionDefinition;
-  theme: ResolvedWebsitePresentation["theme"];
-  onUpdate: (formData: FormData) => Promise<void>;
   onSmartFill: (formData: FormData) => Promise<void>;
+  onUpdate: (formData: FormData) => Promise<void>;
 };
 
 function PreviewSection({
-  content,
   configId,
+  content,
   editableFields,
   focused,
-  onFocus,
   section,
   theme,
-  onUpdate,
+  onFocus,
   onSmartFill,
-}: PreviewSectionProps) {
-  const SectionComponent = section.component as (props: {
-    config: HomeSectionDefinition["config"];
-    theme: typeof theme;
-  }) => JSX.Element;
-
+  onUpdate,
+}: PreviewSectionProps): JSX.Element {
+  const SectionComponent = sectionComponents[section.type];
   const sectionFields = fieldsForSection(section.type, editableFields);
 
   return (
@@ -184,6 +191,7 @@ function PreviewSection({
           </div>
         )}
       </div>
+
       <div
         className={[
           "transition-all duration-200",
@@ -194,7 +202,13 @@ function PreviewSection({
           .filter(Boolean)
           .join(" ")}
       >
-        <SectionComponent config={section.config} theme={theme} />
+        {SectionComponent ? (
+          <SectionComponent config={section.config} theme={theme as never} />
+        ) : (
+          <div className="flex h-20 items-center justify-center text-xs text-muted-foreground">
+            Unknown section type: {section.type}
+          </div>
+        )}
       </div>
 
       {focused && sectionFields.length > 0 && (
@@ -226,17 +240,19 @@ function PreviewSection({
 export function BuilderPreviewPanel({
   companySlug,
   configId,
+  defaultContent,
   editableFields,
-  preview,
-  onUpdateField,
+  sections,
+  theme,
   onSmartFill,
+  onUpdateField,
 }: BuilderPreviewPanelProps) {
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
 
   const content = Object.fromEntries(
     editableFields.map((f) => [
       f.contentKey,
-      (preview.template.defaultContent[f.contentKey] ?? "") as string,
+      (defaultContent[f.contentKey] ?? "") as string,
     ]),
   );
 
@@ -256,9 +272,7 @@ export function BuilderPreviewPanel({
           {companySlug}.plotkeys.app / builder-preview
         </p>
         <div className="flex items-center gap-2">
-          <Badge variant="outline">
-            {preview.page.sections.length} sections
-          </Badge>
+          <Badge variant="outline">{sections.length} sections</Badge>
         </div>
       </div>
 
@@ -266,19 +280,22 @@ export function BuilderPreviewPanel({
         className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4"
         onClick={() => setFocusedSectionId(null)}
       >
-        <div className="overflow-hidden rounded-lg border border-border/70 bg-background">
-          {preview.page.sections.map((section) => (
+        <div
+          className="overflow-hidden rounded-lg border border-border/70"
+          style={{ backgroundColor: "#f8fafc", fontFamily: "Satoshi, sans-serif" }}
+        >
+          {sections.map((section) => (
             <PreviewSection
               configId={configId}
               content={content}
               editableFields={editableFields}
               focused={focusedSectionId === section.id}
               key={section.id}
+              section={section}
+              theme={theme}
               onFocus={() => handleSectionFocus(section.id)}
               onSmartFill={onSmartFill}
               onUpdate={onUpdateField}
-              section={section}
-              theme={preview.theme}
             />
           ))}
         </div>

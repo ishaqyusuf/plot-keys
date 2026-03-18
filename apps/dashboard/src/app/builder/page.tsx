@@ -1,5 +1,9 @@
 import { createPrismaClient } from "@plotkeys/db";
-import { resolveWebsitePresentation } from "@plotkeys/section-registry";
+import {
+  deserializeTemplateConfig,
+  resolveWebsitePresentation,
+  templateCatalog,
+} from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -18,6 +22,7 @@ import { BuilderSidebarControls } from "../../components/builder/builder-sidebar
 import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../lib/session";
 import {
+  createTemplateDraftAction,
   publishSiteConfigurationAction,
   smartFillFieldAction,
   updateSiteFieldAction,
@@ -184,6 +189,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 </div>
 
                 <BuilderSidebarControls
+                  configId={activeConfiguration.id}
                   currentTemplateKey={activeConfiguration.templateKey}
                   templateConfig={deserializeTemplateConfig(
                     activeConfiguration.themeJson as Record<string, string>,
@@ -246,10 +252,12 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           <BuilderPreviewPanel
             companySlug={session.activeMembership.companySlug}
             configId={activeConfiguration.id}
+            defaultContent={preview.template.defaultContent}
             editableFields={preview.editableFields}
+            sections={preview.page.sections.map(({ component: _c, ...rest }) => rest)}
+            theme={activeConfiguration.themeJson as Record<string, string>}
             onSmartFill={smartFillFieldAction}
             onUpdateField={updateSiteFieldAction}
-            preview={preview}
           />
         </section>
       </div>

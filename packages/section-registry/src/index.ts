@@ -455,6 +455,65 @@ const sectionBuilders: Record<string, SectionBuilder> = {
 };
 
 /**
+ * Client-safe registry mapping section type keys to their React components.
+ * Use this in client components instead of reading `section.component` from
+ * a `HomeSectionDefinition` (which cannot cross the server/client boundary as
+ * a prop).
+ */
+export const sectionComponents: Record<
+  string,
+  (props: { config: unknown; theme: ThemeConfig }) => JSX.Element
+> = {
+  hero_banner: HeroBannerSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  market_stats: MarketStatsSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  story_grid: StoryGridSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  listing_spotlight: ListingSpotlightSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  testimonial_strip: TestimonialStripSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  cta_band: CtaBandSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  agent_showcase: AgentShowcaseSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  property_grid: PropertyGridSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  contact_section: ContactSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+};
+
+/**
+ * Serializable section data — safe to pass across the server/client boundary.
+ * Strip the `component` field from `HomeSectionDefinition` before sending to
+ * a Client Component and use `sectionComponents` to render.
+ */
+export type SerializableSectionData = {
+  config: unknown;
+  id: string;
+  type: string;
+};
+
+/**
  * Builds the home page section list driven by the page-inventory for the
  * given template. Per-template overrides (e.g. Meridian leads with listings)
  * are respected automatically.
