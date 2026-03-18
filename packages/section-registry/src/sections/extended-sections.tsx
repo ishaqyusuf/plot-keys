@@ -658,7 +658,6 @@ export function NewsletterSection({
 export type HeroSearchConfig = {
   title: string;
   subtitle: string;
-  searchPlaceholder: string;
   locationOptions: string[];
   ctaText: string;
   ctaHref: string;
@@ -744,11 +743,16 @@ export function HeroSearchSection({
               </option>
             </select>
 
-            <input
-              className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
-              placeholder={config.searchPlaceholder}
-              type="text"
-            />
+            <select
+              className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+              defaultValue=""
+            >
+              {config.locationOptions.map((loc) => (
+                <option className="text-gray-900" key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
 
             <select
               className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"

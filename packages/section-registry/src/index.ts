@@ -500,7 +500,6 @@ const sectionBuilders: Record<string, SectionBuilder> = {
       ctaHref: "/properties",
       ctaText: content["hero.ctaText"] ?? "Search now",
       locationOptions: ["All locations", "Lekki", "Ikoyi", "Victoria Island", "Abuja", "Port Harcourt"],
-      searchPlaceholder: "Enter a city, neighborhood, or address…",
       subtitle: content["hero.subtitle"] ?? "Search thousands of verified listings across premium locations.",
       title: content["hero.title"] ?? "Find Your Dream Home",
     },
