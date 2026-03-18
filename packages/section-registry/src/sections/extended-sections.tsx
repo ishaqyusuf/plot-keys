@@ -650,3 +650,242 @@ export function NewsletterSection({
     </section>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Types — HeroSearch, WhyChooseUs, ServiceHighlights
+// ---------------------------------------------------------------------------
+
+export type HeroSearchConfig = {
+  title: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  locationOptions: string[];
+  ctaText: string;
+  ctaHref: string;
+};
+
+export type WhyChooseUsItem = {
+  icon: string;
+  stat: string;
+  title: string;
+  description: string;
+};
+
+export type WhyChooseUsConfig = {
+  eyebrow: string;
+  title: string;
+  items: WhyChooseUsItem[];
+};
+
+export type ServiceHighlightItem = {
+  title: string;
+  description: string;
+  icon: string;
+};
+
+export type ServiceHighlightsConfig = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  items: ServiceHighlightItem[];
+};
+
+// ---------------------------------------------------------------------------
+// HeroSearchSection
+// ---------------------------------------------------------------------------
+
+export function HeroSearchSection({
+  config,
+  theme,
+}: {
+  config: HeroSearchConfig;
+  theme: ThemeConfig;
+}): JSX.Element {
+  return (
+    <section
+      className="px-6 py-20 md:px-10 md:py-28"
+      style={{
+        background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+        fontFamily: theme.fontFamily,
+      }}
+    >
+      <div className="mx-auto max-w-4xl text-center">
+        <h1
+          className="text-4xl font-bold text-white md:text-5xl lg:text-6xl"
+          style={{ fontFamily: theme.headingFontFamily }}
+        >
+          {config.title}
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-white/70">
+          {config.subtitle}
+        </p>
+
+        {/* Search bar */}
+        <div className="mx-auto mt-10 max-w-3xl rounded-xl bg-white/10 p-3 backdrop-blur-sm">
+          <div className="flex flex-col gap-3 md:flex-row">
+            <select
+              className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+              defaultValue=""
+            >
+              <option className="text-gray-900" value="">
+                Any Type
+              </option>
+              <option className="text-gray-900" value="house">
+                House
+              </option>
+              <option className="text-gray-900" value="apartment">
+                Apartment
+              </option>
+              <option className="text-gray-900" value="villa">
+                Villa
+              </option>
+              <option className="text-gray-900" value="commercial">
+                Commercial
+              </option>
+            </select>
+
+            <input
+              className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
+              placeholder={config.searchPlaceholder}
+              type="text"
+            />
+
+            <select
+              className="flex-1 rounded-lg bg-white/20 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+              defaultValue=""
+            >
+              <option className="text-gray-900" value="">
+                Any Price
+              </option>
+              <option className="text-gray-900" value="under-500k">
+                Under $500K
+              </option>
+              <option className="text-gray-900" value="500k-1m">
+                $500K-$1M
+              </option>
+              <option className="text-gray-900" value="1m-2m">
+                $1M-$2M
+              </option>
+              <option className="text-gray-900" value="2m-plus">
+                $2M+
+              </option>
+            </select>
+
+            <a
+              className="shrink-0 rounded-lg px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              href={config.ctaHref}
+              style={{ backgroundColor: theme.accentColor }}
+            >
+              {config.ctaText}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// WhyChooseUsSection
+// ---------------------------------------------------------------------------
+
+export function WhyChooseUsSection({
+  config,
+  theme,
+}: {
+  config: WhyChooseUsConfig;
+  theme: ThemeConfig;
+}): JSX.Element {
+  return (
+    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+      <div className="mx-auto max-w-7xl">
+        <div className="text-center">
+          <SectionTag>{config.eyebrow}</SectionTag>
+          <SectionTitle theme={theme}>{config.title}</SectionTitle>
+        </div>
+
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {config.items.map((item) => (
+            <div key={item.title} className="flex flex-col items-center text-center">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full text-2xl"
+                style={{
+                  backgroundColor: `${theme.accentColor}1a`,
+                  color: theme.accentColor,
+                }}
+              >
+                {item.icon}
+              </div>
+              <p
+                className="mt-4 text-3xl font-bold"
+                style={{
+                  color: theme.accentColor,
+                  fontFamily: theme.headingFontFamily,
+                }}
+              >
+                {item.stat}
+              </p>
+              <h3 className="mt-2 text-sm font-bold text-[color:var(--foreground)]">
+                {item.title}
+              </h3>
+              <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ServiceHighlightsSection
+// ---------------------------------------------------------------------------
+
+export function ServiceHighlightsSection({
+  config,
+  theme,
+}: {
+  config: ServiceHighlightsConfig;
+  theme: ThemeConfig;
+}): JSX.Element {
+  return (
+    <section className="px-6 py-16 md:px-10 md:py-20" style={shell(theme)}>
+      <div className="mx-auto max-w-7xl">
+        <div>
+          <SectionTag>{config.eyebrow}</SectionTag>
+          <SectionTitle theme={theme}>{config.title}</SectionTitle>
+          <SectionDescription>{config.description}</SectionDescription>
+        </div>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {config.items.map((item) => (
+            <div
+              key={item.title}
+              className="flex gap-4 rounded-xl border border-[color:var(--border)] p-5 transition-shadow hover:shadow-md"
+            >
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl"
+                style={{
+                  backgroundColor: `${theme.accentColor}1a`,
+                  color: theme.accentColor,
+                }}
+              >
+                {item.icon}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-[color:var(--foreground)]">
+                  {item.title}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
