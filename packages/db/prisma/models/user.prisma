@@ -13,6 +13,8 @@ model User {
   memberships Membership[]
   createdSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationCreatedBy")
   updatedSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationUpdatedBy")
+  createdWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionCreatedBy")
+  updatedWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionUpdatedBy")
   sessions    Session[]
   accounts    Account[]
   tenantOnboarding TenantOnboarding?

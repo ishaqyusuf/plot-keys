@@ -638,7 +638,29 @@ export function draftPlaceholderClass(
 export const sampleTheme = fallbackTemplate.defaultTheme;
 export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
 
+export {
+  applyAiGeneration,
+  applyHumanEdit,
+  flattenContentNodes,
+  liftFlatContent,
+} from "./content-nodes";
+export type {
+  ContentNode,
+  ContentNodeKind,
+  ContentNodeProvenance,
+  ContentNodeRecord,
+} from "./content-nodes";
 export { resolveFontStack, resolveHeadingFontStack } from "./fonts";
+export {
+  collectContentKeys,
+  getEnabledSections,
+  getTemplatePageInventory,
+} from "./page-inventory";
+export type {
+  PageDefinition,
+  SectionSlot,
+  TemplatePageInventory,
+} from "./page-inventory";
 export {
   buildBusinessSummary,
   deriveDesignConfig,
