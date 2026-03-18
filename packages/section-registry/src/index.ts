@@ -507,6 +507,17 @@ export function resolveWebsitePresentation({
 export const sampleTheme = fallbackTemplate.defaultTheme;
 export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
 
+export {
+  buildBusinessSummary,
+  deriveProfile,
+  scoreTemplates,
+} from "./recommendation";
+export type {
+  DerivedProfile,
+  OnboardingSnapshot,
+  TemplateRecommendation,
+} from "./recommendation";
+
 export type {
   CtaBandConfig,
   HeroBannerConfig,

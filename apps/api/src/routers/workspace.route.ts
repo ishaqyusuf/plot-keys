@@ -13,13 +13,18 @@ import {
   listSyncableTenantDomains,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
+  updateOnboardingProfile,
   updateSiteConfigurationContentField,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
 import {
+  buildBusinessSummary,
   createInitialSiteConfigurationInput,
+  deriveProfile,
   getTemplateDefinition,
+  scoreTemplates,
+  templateCatalog,
 } from "@plotkeys/section-registry";
 import {
   buildDashboardHostname,
@@ -201,6 +206,13 @@ export const workspaceRouter = createTRPCRouter({
       hasProjects: onboarding.hasProjects,
       hasTestimonials: onboarding.hasTestimonials,
       hasBlogContent: onboarding.hasBlogContent,
+      // Derived profile
+      businessSummary: onboarding.businessSummary,
+      segment: onboarding.segment,
+      designIntent: onboarding.designIntent,
+      conversionFocus: onboarding.conversionFocus,
+      complexity: onboarding.complexity,
+      recommendedTemplateKey: onboarding.recommendedTemplateKey,
       // Final
       market: onboarding.market,
       templateKey: onboarding.templateKey,
@@ -210,11 +222,9 @@ export const workspaceRouter = createTRPCRouter({
     .input(saveOnboardingProgressInputSchema)
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
+      const userId = ctx.auth.session.user.id;
 
-      const existing = await findTenantOnboardingByUserId(
-        db,
-        ctx.auth.session.user.id,
-      );
+      const existing = await findTenantOnboardingByUserId(db, userId);
 
       if (!existing) {
         throw new TRPCError({
@@ -224,13 +234,93 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      await saveOnboardingStepProgress(db, {
-        userId: ctx.auth.session.user.id,
-        ...input,
+      const updated = await saveOnboardingStepProgress(db, { userId, ...input });
+
+      // Re-derive profile after every save so the Launch step always has
+      // an up-to-date recommendation without an extra round-trip.
+      const snapshot = {
+        businessType: updated.businessType,
+        companyName: updated.companyName,
+        hasBlogContent: updated.hasBlogContent,
+        hasAgents: updated.hasAgents,
+        hasExistingContent: updated.hasExistingContent,
+        hasListings: updated.hasListings,
+        hasLogo: updated.hasLogo,
+        hasProjects: updated.hasProjects,
+        hasTestimonials: updated.hasTestimonials,
+        locations: updated.locations,
+        primaryGoal: updated.primaryGoal,
+        propertyTypes: updated.propertyTypes,
+        stylePreference: updated.stylePreference,
+        tagline: updated.tagline,
+        targetAudience: updated.targetAudience,
+        tone: updated.tone,
+      };
+
+      const profile = deriveProfile(snapshot);
+      const summary = buildBusinessSummary(snapshot);
+
+      await updateOnboardingProfile(db, userId, {
+        businessSummary: summary,
+        complexity: profile.complexity,
+        conversionFocus: profile.conversionFocus,
+        designIntent: profile.designIntent,
+        recommendedTemplateKey: profile.recommendedTemplateKey,
+        segment: profile.segment,
       });
 
-      return { saved: true };
+      return { profile, saved: true };
     }),
+  getTemplateRecommendations: authenticatedProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const onboarding = await findTenantOnboardingByUserId(
+      db,
+      ctx.auth.session.user.id,
+    );
+
+    const profile = onboarding
+      ? deriveProfile({
+          businessType: onboarding.businessType,
+          companyName: onboarding.companyName,
+          hasBlogContent: onboarding.hasBlogContent,
+          hasAgents: onboarding.hasAgents,
+          hasExistingContent: onboarding.hasExistingContent,
+          hasListings: onboarding.hasListings,
+          hasLogo: onboarding.hasLogo,
+          hasProjects: onboarding.hasProjects,
+          hasTestimonials: onboarding.hasTestimonials,
+          locations: onboarding.locations,
+          primaryGoal: onboarding.primaryGoal,
+          propertyTypes: onboarding.propertyTypes,
+          stylePreference: onboarding.stylePreference,
+          tagline: onboarding.tagline,
+          targetAudience: onboarding.targetAudience,
+          tone: onboarding.tone,
+        })
+      : null;
+
+    const recommendations = scoreTemplates(
+      profile ?? {
+        conversionFocus: "leads",
+        designIntent: "editorial",
+        segment: "mixed",
+      },
+      templateCatalog,
+    ).map((r) => ({
+      description: r.template.description,
+      key: r.template.key,
+      name: r.template.name,
+      reason: r.reason,
+      score: r.score,
+      tier: r.template.tier,
+    }));
+
+    return {
+      profile,
+      recommendations,
+      topKey: recommendations[0]?.key ?? "template-1",
+    };
+  }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)
     .mutation(async ({ ctx, input }) => {

@@ -37,6 +37,14 @@ model TenantOnboarding {
   hasTestimonials    Boolean @default(false) @map("has_testimonials")
   hasBlogContent     Boolean @default(false) @map("has_blog_content")
 
+  // Step 6: Derived tenant profile (computed after each step save)
+  businessSummary      String? @map("business_summary")
+  segment              String? // luxury | commercial | residential | rental | mixed
+  designIntent         String? @map("design_intent") // editorial | bold | warm | clean
+  conversionFocus      String? @map("conversion_focus") // leads | listings | brand | balanced
+  complexity           String? // low | medium | high
+  recommendedTemplateKey String? @map("recommended_template_key")
+
   // Final step fields (market = primary market area, templateKey = chosen template)
   market      String?
   templateKey String? @map("template_key")

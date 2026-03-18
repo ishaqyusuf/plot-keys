@@ -132,6 +132,31 @@ export async function completeTenantOnboarding(db: Db, userId: string) {
   });
 }
 
+export async function updateOnboardingProfile(
+  db: Db,
+  userId: string,
+  profile: {
+    businessSummary: string;
+    complexity: string;
+    conversionFocus: string;
+    designIntent: string;
+    recommendedTemplateKey: string;
+    segment: string;
+  },
+) {
+  return db.tenantOnboarding.update({
+    data: {
+      businessSummary: profile.businessSummary,
+      complexity: profile.complexity,
+      conversionFocus: profile.conversionFocus,
+      designIntent: profile.designIntent,
+      recommendedTemplateKey: profile.recommendedTemplateKey,
+      segment: profile.segment,
+    },
+    where: { userId },
+  });
+}
+
 export async function createCompanyOnboardingBundle(
   db: Db,
   input: {

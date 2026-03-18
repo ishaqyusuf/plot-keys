@@ -1,6 +1,10 @@
 import { authRoutes } from "@plotkeys/auth/shared";
 import { createPrismaClient } from "@plotkeys/db";
-import { templateCatalog } from "@plotkeys/section-registry";
+import {
+  deriveProfile,
+  scoreTemplates,
+  templateCatalog,
+} from "@plotkeys/section-registry";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
@@ -129,6 +133,32 @@ export default async function OnboardingPage({
     canAccessTemplateTier("starter", t.tier),
   );
 
+  // Build template recommendations from saved profile (or freshly derived if step data exists)
+  const recommendations =
+    currentStepId === "launch"
+      ? scoreTemplates(
+          deriveProfile({
+            businessType: savedOnboarding?.businessType,
+            companyName: savedOnboarding?.companyName,
+            hasBlogContent: savedOnboarding?.hasBlogContent,
+            hasAgents: savedOnboarding?.hasAgents,
+            hasExistingContent: savedOnboarding?.hasExistingContent,
+            hasListings: savedOnboarding?.hasListings,
+            hasLogo: savedOnboarding?.hasLogo,
+            hasProjects: savedOnboarding?.hasProjects,
+            hasTestimonials: savedOnboarding?.hasTestimonials,
+            locations: savedOnboarding?.locations,
+            primaryGoal: savedOnboarding?.primaryGoal,
+            propertyTypes: savedOnboarding?.propertyTypes,
+            stylePreference: savedOnboarding?.stylePreference,
+            tagline: savedOnboarding?.tagline,
+            targetAudience: savedOnboarding?.targetAudience,
+            tone: savedOnboarding?.tone,
+          }),
+          starterTemplates,
+        )
+      : [];
+
   return (
     <>
       <OnboardingSignupNotification
@@ -199,6 +229,7 @@ export default async function OnboardingPage({
           <LaunchStep
             backPath={backPath}
             companyName={companyName}
+            recommendations={recommendations}
             saved={savedOnboarding}
             starterTemplates={starterTemplates}
             subdomain={subdomain}
@@ -681,18 +712,23 @@ function ContentReadinessStep({
 function LaunchStep({
   backPath,
   companyName,
+  recommendations,
   saved,
   starterTemplates,
   subdomain,
 }: {
   backPath: string | null;
   companyName: string;
+  recommendations: ReturnType<typeof scoreTemplates>;
   saved: SavedOnboarding;
   starterTemplates: typeof templateCatalog;
   subdomain: string;
 }) {
   const savedMarket = saved?.market ?? "";
-  const savedTemplateKey = saved?.templateKey ?? "template-1";
+  // Prefer: user's saved explicit choice → top recommendation → DB saved recommendation → fallback
+  const topRecommendedKey = recommendations[0]?.template.key;
+  const defaultTemplateKey =
+    saved?.templateKey ?? topRecommendedKey ?? saved?.recommendedTemplateKey ?? "template-1";
 
   return (
     <form action={completeOnboardingAction} className="flex flex-col gap-6">
@@ -737,26 +773,71 @@ function LaunchStep({
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel htmlFor="launch-template">Default template</FieldLabel>
-          <Select defaultValue={savedTemplateKey} name="template">
-            <SelectTrigger className="w-full" id="launch-template">
-              <SelectValue placeholder="Choose a starter template" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {starterTemplates.map((template) => (
-                  <SelectItem key={template.key} value={template.key}>
-                    {template.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <FieldLabel htmlFor="launch-template">Starting template</FieldLabel>
+          {recommendations.length > 0 ? (
+            <div className="grid gap-2">
+              {recommendations.map((rec, i) => (
+                <label
+                  key={rec.template.key}
+                  className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition ${
+                    rec.template.key === defaultTemplateKey
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <input
+                    className="mt-0.5 accent-primary"
+                    defaultChecked={rec.template.key === defaultTemplateKey}
+                    name="template"
+                    type="radio"
+                    value={rec.template.key}
+                  />
+                  <span>
+                    <span className="block font-medium text-foreground">
+                      {rec.template.name}
+                      {i === 0 && (
+                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                          Recommended
+                        </span>
+                      )}
+                    </span>
+                    <span className="block text-muted-foreground">
+                      {rec.reason}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <Select defaultValue={defaultTemplateKey} name="template">
+              <SelectTrigger className="w-full" id="launch-template">
+                <SelectValue placeholder="Choose a starter template" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {starterTemplates.map((template) => (
+                    <SelectItem key={template.key} value={template.key}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
           <FieldDescription>
             Start from a predefined section layout — still fully editable in the builder.
           </FieldDescription>
         </Field>
       </FieldGroup>
+
+      {saved?.businessSummary ? (
+        <Card className="border-border/60 bg-muted/20">
+          <CardContent className="px-4 py-3 text-sm text-muted-foreground">
+            <span className="mr-1 font-medium text-foreground">Your profile:</span>
+            {saved.businessSummary}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {!companyName || !subdomain ? (
         <Alert variant="destructive">
