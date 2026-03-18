@@ -9,19 +9,15 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Backlog
 
+### Tenant Onboarding (High → Low)
+
+- Add refresh recommendations button on Launch step wired to refreshOnboardingProfile tRPC procedure
+- Add multi-tenant membership switching support (future — defer until second workspace user exists)
+- Progressive enrichment: allow skipping non-critical onboarding steps and enriching later from the dashboard
+
 ### Section Registry / Website Builder (High → Low)
 
-- Fix templateCatalog bug: templates 4-6 are declared outside the array as orphaned objects
-- Add tenant runtime React context: RenderMode context provider, TemplateConfig context, and hooks (useRenderMode, useTemplateConfig, useResolvedFont, useColorSystem, useTemplateStylePreset, useTemplateImage)
-- Wire draftPlaceholderClass into existing section components so empty fields show amber outlines in draft mode
-- Add new section components: PropertyGrid (live listings), AgentShowcase, ContactSection, FAQAccordion, NewsletterSignup
-- Expand template catalog from 6 toward 30: add templates 7-10 as starters and fill plus/pro tiers
-- Add named image slots per template (heroImage, aboutImage, ctaBackground, teamPhoto) with default stock image assignments
-- Update StylePresets from 4 names (bold/clean/editorial/warm) to brain-defined 5 names: Vega/Nova/Maia/Myra/Lyra
-- Add internal font-fallback resolution for special UI slots (fontFallbacks[selected]?.subscribeButton || selected)
-- Add form action registry: map section types (ContactSection, PropertyInquiryForm, NewsletterForm) to public tRPC form procedures
 - Connect page-inventory overrides to section composition so getEnabledSections drives the resolver pipeline
-- Add full color system: 20 shadcn tokens per named system with light and dark mode token sets
 - Add rich text delta support (V3 content nodes): implement richTextDelta field in section components
 - Add inline editing primitives: EditableText, EditableRichText, EditableImage, EditableRepeater components
 - Build publish confirmation modal and rollback-friendly replacement UX

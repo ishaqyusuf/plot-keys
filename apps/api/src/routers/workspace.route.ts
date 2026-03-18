@@ -208,9 +208,42 @@ export const workspaceRouter = createTRPCRouter({
 
       const template = getTemplateDefinition(templateKey);
 
+      // Merge contact details into contentJson so contact page / footer / CTA
+      // sections are pre-filled from onboarding without any manual editing.
+      const contactContentOverrides: Record<string, string> = {};
+      if (savedOnboarding?.phone) {
+        contactContentOverrides["contact.phone"] = savedOnboarding.phone;
+      }
+      if (savedOnboarding?.whatsapp) {
+        contactContentOverrides["contact.whatsapp"] = savedOnboarding.whatsapp;
+      }
+      if (savedOnboarding?.contactEmail) {
+        contactContentOverrides["contact.email"] = savedOnboarding.contactEmail;
+      }
+      if (savedOnboarding?.officeAddress) {
+        contactContentOverrides["contact.address"] = savedOnboarding.officeAddress;
+      }
+
+      // Store section visibility flags as content keys so the renderer can
+      // hide/show sections without a separate DB query.
+      const visibilityContent: Record<string, string> = {};
+      if (snapshot) {
+        const { deriveSectionVisibility } = await import("@plotkeys/section-registry");
+        const visibility = deriveSectionVisibility(snapshot);
+        visibilityContent["visibility.agents"] = String(visibility.agents);
+        visibilityContent["visibility.blog"] = String(visibility.blog);
+        visibilityContent["visibility.listings"] = String(visibility.listings);
+        visibilityContent["visibility.projects"] = String(visibility.projects);
+        visibilityContent["visibility.testimonials"] = String(visibility.testimonials);
+      }
+
       const initialSiteConfiguration = personalizedContent && designConfig
         ? {
-            contentJson: personalizedContent,
+            contentJson: {
+              ...personalizedContent,
+              ...contactContentOverrides,
+              ...visibilityContent,
+            },
             name: `${template.name} Draft`,
             subdomain,
             templateKey: template.key,
@@ -218,10 +251,12 @@ export const workspaceRouter = createTRPCRouter({
               ...template.defaultTheme,
               accentColor: designConfig.accentColor,
               backgroundColor: designConfig.backgroundColor,
+              colorSystem: designConfig.colorSystem,
               fontFamily: designConfig.fontFamily,
               headingFontFamily: designConfig.headingFontFamily,
               logo: companyName,
               market,
+              stylePreset: designConfig.stylePreset,
             },
           }
         : createInitialSiteConfigurationInput({

@@ -444,6 +444,7 @@ export function fromDerivedDesignConfig(
   return {
     accentColor: derived.accentColor,
     backgroundColor: derived.backgroundColor,
+    colorSystem: derived.colorSystem,
     fontFamily: derived.fontFamily,
     headingFontFamily: derived.headingFontFamily,
     stylePreset: derived.stylePreset as StylePreset | undefined,

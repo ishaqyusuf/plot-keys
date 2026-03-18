@@ -237,7 +237,7 @@ export async function completeOnboardingAction(formData: FormData) {
     });
 
     clearPendingOnboardingCookie(cookieStore);
-    redirect(`/builder?configId=${result.configId}`);
+    redirect(`/builder?configId=${result.configId}&onboarded=1`);
   } catch (error) {
     redirect(
       createRedirectUrl(authRoutes.onboarding, {

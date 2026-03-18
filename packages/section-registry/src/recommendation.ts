@@ -58,9 +58,18 @@ export type TemplateRecommendation = {
 export type DerivedDesignConfig = {
   accentColor: string;
   backgroundColor: string;
+  /**
+   * Named color system key — matches a key in `colorSystems` from template-config.
+   * Consumers should look this up to get the full light + dark token set.
+   */
+  colorSystem: "forest" | "ocean" | "slate";
   fontFamily: string;
   headingFontFamily: string;
-  stylePreset: "editorial" | "bold" | "warm" | "clean";
+  /**
+   * Named style preset — matches the new brain-defined preset names.
+   * Maps to a key in `stylePresets` from template-config.
+   */
+  stylePreset: "lyra" | "maia" | "myra" | "nova" | "vega";
 };
 
 /** Which page sections to render and in what logical order. */
@@ -240,50 +249,88 @@ export function deriveDesignConfig(
   profile: Pick<DerivedProfile, "designIntent" | "segment">,
   snap: Pick<OnboardingSnapshot, "tone" | "stylePreference">,
 ): DerivedDesignConfig {
-  type DesignPreset = {
-    accentColor: string;
-    backgroundColor: string;
-    fontFamily: string;
-    headingFontFamily: string;
+  /**
+   * Maps the four internal designIntent values to the five named brain presets.
+   *
+   * Mapping rationale:
+   * - editorial → nova (dark luxury) for luxury segment; maia (warm editorial) for others
+   * - bold      → lyra (bold/energetic)
+   * - warm      → maia (warm editorial)
+   * - clean     → vega (minimal/tech) or myra (professional) depending on tone
+   */
+  type DesignPreset = Omit<DerivedDesignConfig, "stylePreset" | "colorSystem"> & {
+    colorSystem: DerivedDesignConfig["colorSystem"];
     stylePreset: DerivedDesignConfig["stylePreset"];
   };
 
-  const presets: Record<DerivedProfile["designIntent"], DesignPreset> = {
+  const intentPresets: Record<DerivedProfile["designIntent"], DesignPreset> = {
     editorial: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      stylePreset: "editorial",
+      // Maia — warm editorial for most; nova overrides for luxury below
+      accentColor: "#d97706",
+      backgroundColor: "#fffbeb",
+      colorSystem: "slate",
+      fontFamily: "Manrope",
+      headingFontFamily: "Fraunces",
+      stylePreset: "maia",
     },
     bold: {
-      accentColor: "#1d4ed8",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
-      stylePreset: "bold",
+      // Lyra — bold and energetic
+      accentColor: "#dc2626",
+      backgroundColor: "#fff7f7",
+      colorSystem: "slate",
+      fontFamily: "Lato",
+      headingFontFamily: "Lato",
+      stylePreset: "lyra",
     },
     warm: {
+      // Maia — warm, generous padding, serif headings
       accentColor: "#b45309",
       backgroundColor: "#fffaf0",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      stylePreset: "warm",
+      colorSystem: "forest",
+      fontFamily: "Manrope",
+      headingFontFamily: "Fraunces",
+      stylePreset: "maia",
     },
     clean: {
-      accentColor: "#334155",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      stylePreset: "clean",
+      // Vega (minimal/tech) or myra (professional) — selected by tone
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      colorSystem: "ocean",
+      fontFamily: "Inter",
+      headingFontFamily: "Inter",
+      stylePreset: "vega",
     },
   };
 
-  // Luxury segment always gets the editorial preset regardless of stated preference
-  const intent =
-    profile.segment === "luxury" ? "editorial" : profile.designIntent;
+  // Luxury segment always gets the nova preset regardless of stated preference
+  const luxuryPreset: DesignPreset = {
+    accentColor: "#92400e",
+    backgroundColor: "#1c1917",
+    colorSystem: "slate",
+    fontFamily: "Playfair Display",
+    headingFontFamily: "Playfair Display",
+    stylePreset: "nova",
+  };
 
-  return presets[intent];
+  // Professional tone within clean intent maps to myra instead of vega
+  const cleanProfessionalPreset: DesignPreset = {
+    accentColor: "#059669",
+    backgroundColor: "#f0fdf4",
+    colorSystem: "forest",
+    fontFamily: "Roboto",
+    headingFontFamily: "Roboto",
+    stylePreset: "myra",
+  };
+
+  if (profile.segment === "luxury") return luxuryPreset;
+
+  const intent = profile.designIntent;
+
+  if (intent === "clean" && snap.tone === "professional") {
+    return cleanProfessionalPreset;
+  }
+
+  return intentPresets[intent];
 }
 
 // ---------------------------------------------------------------------------
@@ -476,6 +523,48 @@ const templateTags: Record<string, TemplateScoringTags> = {
     conversionFocusTags: ["leads", "balanced"],
     designIntentTags: ["warm"],
     segmentTags: ["residential", "rental"],
+  },
+  "template-7": {
+    // Vega Lite — minimal/tech, city starter
+    conversionFocusTags: ["listings", "leads"],
+    designIntentTags: ["clean"],
+    segmentTags: ["mixed", "residential"],
+  },
+  "template-8": {
+    // Nova Basic — bright/trustworthy, family starter
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["warm", "clean"],
+    segmentTags: ["residential", "rental"],
+  },
+  "template-9": {
+    // Lyra Basic — bold/energetic, high-volume sales
+    conversionFocusTags: ["listings", "balanced"],
+    designIntentTags: ["bold"],
+    segmentTags: ["residential", "commercial", "mixed"],
+  },
+  "template-10": {
+    // Myra Basic — professional, growth-focused
+    conversionFocusTags: ["leads", "brand"],
+    designIntentTags: ["clean", "editorial"],
+    segmentTags: ["mixed", "residential"],
+  },
+  "template-11": {
+    // Maia Growth — warm editorial, premium rental
+    conversionFocusTags: ["leads", "balanced"],
+    designIntentTags: ["warm", "editorial"],
+    segmentTags: ["rental", "residential"],
+  },
+  "template-12": {
+    // Horizon Plus — agent-forward, area specialist
+    conversionFocusTags: ["brand", "leads"],
+    designIntentTags: ["clean"],
+    segmentTags: ["residential", "mixed"],
+  },
+  "template-13": {
+    // Nova Pro — dark luxury editorial
+    conversionFocusTags: ["brand", "balanced"],
+    designIntentTags: ["editorial"],
+    segmentTags: ["luxury"],
   },
 };
 
