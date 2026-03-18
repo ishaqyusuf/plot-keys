@@ -23,6 +23,16 @@ import {
   type PropertyGridConfig,
   ContactSection,
   type ContactSectionConfig,
+  FAQAccordionSection,
+  type FAQAccordionConfig,
+  NewsletterSection,
+  type NewsletterConfig,
+  HeroSearchSection,
+  type HeroSearchConfig,
+  WhyChooseUsSection,
+  type WhyChooseUsConfig,
+  ServiceHighlightsSection,
+  type ServiceHighlightsConfig,
 } from "./sections/extended-sections";
 import { getEnabledSections } from "./page-inventory";
 
@@ -44,7 +54,12 @@ export type HomeSectionDefinition =
   | SectionDefinition<CtaBandConfig>
   | SectionDefinition<AgentShowcaseConfig>
   | SectionDefinition<PropertyGridConfig>
-  | SectionDefinition<ContactSectionConfig>;
+  | SectionDefinition<ContactSectionConfig>
+  | SectionDefinition<FAQAccordionConfig>
+  | SectionDefinition<NewsletterConfig>
+  | SectionDefinition<HeroSearchConfig>
+  | SectionDefinition<WhyChooseUsConfig>
+  | SectionDefinition<ServiceHighlightsConfig>;
 
 export type EditableFieldDefinition = {
   aiEnabled?: boolean;
@@ -452,6 +467,76 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     id: "contact-section",
     type: "contact_section",
   }),
+  FAQAccordionSection: () => ({
+    component: FAQAccordionSection,
+    config: {
+      eyebrow: "Common questions",
+      items: [
+        { id: "faq-1", question: "How do I schedule a viewing?", answer: "Contact us through the form or call our support line to arrange a private viewing at your convenience." },
+        { id: "faq-2", question: "What areas do you cover?", answer: "We cover all major residential and commercial districts. Check our listings page for current availability by location." },
+        { id: "faq-3", question: "Do you help with financing?", answer: "We partner with trusted mortgage advisors and can connect you with financing options suited to your budget." },
+        { id: "faq-4", question: "How long does the buying process take?", answer: "Typical timelines range from 30 to 90 days depending on the property type, financing, and legal requirements." },
+      ],
+      title: "Frequently asked questions.",
+    },
+    id: "faq-accordion",
+    type: "faq_accordion",
+  }),
+  NewsletterSection: () => ({
+    component: NewsletterSection,
+    config: {
+      disclaimer: "No spam. Unsubscribe anytime.",
+      placeholder: "Enter your email",
+      submitText: "Subscribe",
+      subtitle: "Get market updates, new listings, and expert insights delivered weekly.",
+      title: "Stay ahead of the market.",
+    },
+    id: "newsletter-strip",
+    type: "newsletter_strip",
+  }),
+  HeroSearchSection: (content) => ({
+    component: HeroSearchSection,
+    config: {
+      ctaHref: "/properties",
+      ctaText: content["hero.ctaText"] ?? "Search now",
+      locationOptions: ["All locations", "Lekki", "Ikoyi", "Victoria Island", "Abuja", "Port Harcourt"],
+      searchPlaceholder: "Enter a city, neighborhood, or address…",
+      subtitle: content["hero.subtitle"] ?? "Search thousands of verified listings across premium locations.",
+      title: content["hero.title"] ?? "Find Your Dream Home",
+    },
+    id: "hero-search",
+    type: "hero_search",
+  }),
+  WhyChooseUsSection: () => ({
+    component: WhyChooseUsSection,
+    config: {
+      eyebrow: "Why choose us",
+      items: [
+        { icon: "🏠", stat: "500+", title: "Properties Sold", description: "Trusted by hundreds of families and investors across the country." },
+        { icon: "⭐", stat: "98%", title: "Client Satisfaction", description: "Consistently rated excellent by buyers and sellers alike." },
+        { icon: "📍", stat: "25+", title: "Neighborhoods", description: "Deep local expertise across the most sought-after locations." },
+        { icon: "🤝", stat: "15+", title: "Years Experience", description: "A proven track record built on relationships and results." },
+      ],
+      title: "Numbers that speak for themselves.",
+    },
+    id: "why-choose-us",
+    type: "why_choose_us",
+  }),
+  ServiceHighlightsSection: () => ({
+    component: ServiceHighlightsSection,
+    config: {
+      description: "From first viewing to final signature, we handle every detail.",
+      eyebrow: "Our services",
+      items: [
+        { icon: "🔍", title: "Property Search", description: "Curated shortlists matched to your lifestyle, budget, and investment goals." },
+        { icon: "📋", title: "Transaction Management", description: "End-to-end support through legal, financial, and closing processes." },
+        { icon: "📈", title: "Market Advisory", description: "Data-driven insights on pricing, timing, and high-growth neighborhoods." },
+      ],
+      title: "Full-service real estate, simplified.",
+    },
+    id: "service-highlights",
+    type: "service_highlights",
+  }),
 };
 
 /**
@@ -500,6 +585,11 @@ export const sectionComponents: Record<
     config: unknown;
     theme: ThemeConfig;
   }) => JSX.Element,
+  faq_accordion: FAQAccordionSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
+  newsletter_strip: NewsletterSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
+  hero_search: HeroSearchSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
+  why_choose_us: WhyChooseUsSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
+  service_highlights: ServiceHighlightsSection as (props: { config: unknown; theme: ThemeConfig }) => JSX.Element,
 };
 
 /**
@@ -1350,6 +1440,396 @@ export const templateCatalog: TemplateDefinition[] = [
     purchasable: true,
     tier: "pro",
   },
+  // ─── Template 31: Sama (starter / search-first / Lekki) ──────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Sama Estates",
+      "Lekki, Lagos",
+      "Search. Discover. Move in.",
+    ),
+    defaultTheme: {
+      accentColor: "#0d9488",
+      backgroundColor: "#f0fdfa",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+      logo: "Sama Estates",
+      market: "Lekki, Lagos",
+      supportLine: "+234 806 100 3101",
+    },
+    description:
+      "Clean, search-driven starter that puts the property search bar front and center.",
+    editableFields: baseEditableFields,
+    key: "template-31",
+    marketingTagline:
+      "Search-first residential starter with prominent property search hero.",
+    name: "Sama",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ─── Template 32: Rania (starter / agent-first / Abuja) ──────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Rania Realty",
+      "Abuja",
+      "Meet the team behind every key",
+    ),
+    defaultTheme: {
+      accentColor: "#6366f1",
+      backgroundColor: "#eef2ff",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Rania Realty",
+      market: "Abuja",
+      supportLine: "+234 806 200 3201",
+    },
+    description:
+      "Boutique starter layout that puts your agents and team front and center.",
+    editableFields: baseEditableFields,
+    key: "template-32",
+    marketingTagline:
+      "Agent-first boutique starter that leads with your team.",
+    name: "Rania",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ─── Template 33: Jihan (starter / minimal / Port Harcourt) ──────────────
+  {
+    defaultContent: createDefaultContent(
+      "Jihan Properties",
+      "Port Harcourt",
+      "Pure listings, zero noise",
+    ),
+    defaultTheme: {
+      accentColor: "#475569",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Epilogue, Inter, sans-serif",
+      logo: "Jihan Properties",
+      market: "Port Harcourt",
+      supportLine: "+234 806 300 3301",
+    },
+    description:
+      "Ultra-clean starter that strips away everything except hero and listings.",
+    editableFields: baseEditableFields,
+    key: "template-33",
+    marketingTagline:
+      "Minimal, listings-only starter with maximum clarity.",
+    name: "Jihan",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ─── Template 34: Nadia (starter / narrative / Ikoyi) ────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Nadia Living",
+      "Ikoyi, Lagos",
+      "Your story, beautifully told",
+    ),
+    defaultTheme: {
+      accentColor: "#c026d3",
+      backgroundColor: "#fdf4ff",
+      fontFamily: "Georgia, serif",
+      headingFontFamily: "'Playfair Display', Georgia, serif",
+      logo: "Nadia Living",
+      market: "Ikoyi, Lagos",
+      supportLine: "+234 806 400 3401",
+    },
+    description:
+      "Narrative-first starter for agencies that lead with their brand story.",
+    editableFields: baseEditableFields,
+    key: "template-34",
+    marketingTagline:
+      "Story-driven starter focused on brand narrative over listings.",
+    name: "Nadia",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ─── Template 35: Walid (starter / stats / Victoria Island) ──────────────
+  {
+    defaultContent: createDefaultContent(
+      "Walid Capital",
+      "Victoria Island, Lagos",
+      "Data-driven confidence",
+    ),
+    defaultTheme: {
+      accentColor: "#1d4ed8",
+      backgroundColor: "#eff6ff",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+      logo: "Walid Capital",
+      market: "Victoria Island, Lagos",
+      supportLine: "+234 806 500 3501",
+    },
+    description:
+      "Statistics-forward starter that leads with market data and numbers.",
+    editableFields: baseEditableFields,
+    key: "template-35",
+    marketingTagline:
+      "Stats-heavy starter for data-confident agencies.",
+    name: "Walid",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ─── Template 36: Tariq (plus / search+stats / Lagos) ────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Tariq Realty",
+      "Lagos",
+      "Search smarter. Live better.",
+    ),
+    defaultTheme: {
+      accentColor: "#0891b2",
+      backgroundColor: "#ecfeff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Tariq Realty",
+      market: "Lagos",
+      supportLine: "+234 807 100 3601",
+    },
+    description:
+      "Complete search-centric plus layout combining search hero with full content sections.",
+    editableFields: baseEditableFields,
+    key: "template-36",
+    marketingTagline:
+      "Full-featured search layout with stats, stories, and social proof.",
+    name: "Tariq",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 37: Soraya (plus / editorial / Lekki) ──────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Soraya Living",
+      "Lekki, Lagos",
+      "Where editorial meets real estate",
+    ),
+    defaultTheme: {
+      accentColor: "#0f766e",
+      backgroundColor: "#f4efe7",
+      fontFamily: "Georgia, serif",
+      headingFontFamily: "'Fraunces', Georgia, serif",
+      logo: "Soraya Living",
+      market: "Lekki, Lagos",
+      supportLine: "+234 807 200 3701",
+    },
+    description:
+      "Editorial plus layout blending story, listings, and agent showcase in a magazine format.",
+    editableFields: baseEditableFields,
+    key: "template-37",
+    marketingTagline:
+      "Magazine-style editorial layout for content-rich brands.",
+    name: "Soraya",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 38: Rashid (plus / investor / Abuja) ───────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Rashid Investments",
+      "Abuja",
+      "Invest with clarity",
+    ),
+    defaultTheme: {
+      accentColor: "#1e40af",
+      backgroundColor: "#f0f9ff",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "Epilogue, Inter, sans-serif",
+      logo: "Rashid Investments",
+      market: "Abuja",
+      supportLine: "+234 807 300 3801",
+    },
+    description:
+      "Investor-focused plus layout leading with market data and a browseable property grid.",
+    editableFields: baseEditableFields,
+    key: "template-38",
+    marketingTagline:
+      "Data-driven investor layout with analytics and property grid.",
+    name: "Rashid",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 39: Dalal (plus / lifestyle / Ikoyi) ───────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Dalal Homes",
+      "Ikoyi, Lagos",
+      "Lifestyle-led living",
+    ),
+    defaultTheme: {
+      accentColor: "#be185d",
+      backgroundColor: "#fdf2f8",
+      fontFamily: "Georgia, serif",
+      headingFontFamily: "'Playfair Display', Georgia, serif",
+      logo: "Dalal Homes",
+      market: "Ikoyi, Lagos",
+      supportLine: "+234 807 400 3901",
+    },
+    description:
+      "Service-oriented plus layout that blends lifestyle branding with lead capture.",
+    editableFields: baseEditableFields,
+    key: "template-39",
+    marketingTagline:
+      "Lifestyle showcase with service highlights and brand storytelling.",
+    name: "Dalal",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 40: Imran (plus / community / Ibadan) ──────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Imran Properties",
+      "Ibadan",
+      "Built on community trust",
+    ),
+    defaultTheme: {
+      accentColor: "#15803d",
+      backgroundColor: "#f0fdf4",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: 'Georgia, "Times New Roman", serif',
+      logo: "Imran Properties",
+      market: "Ibadan",
+      supportLine: "+234 807 500 4001",
+    },
+    description:
+      "Community-trust plus layout combining social proof with agent prominence.",
+    editableFields: baseEditableFields,
+    key: "template-40",
+    marketingTagline:
+      "Community-focused layout with trust signals and team showcase.",
+    name: "Imran",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ─── Template 41: Khalid (pro / enterprise / Lagos) ──────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Khalid Group",
+      "Lagos",
+      "Enterprise-grade real estate",
+    ),
+    defaultTheme: {
+      accentColor: "#1e293b",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Khalid Group",
+      market: "Lagos",
+      supportLine: "+234 808 100 4101",
+    },
+    description:
+      "Maximum-section pro layout with search hero, stats, listings, agents, FAQ, contact, and more.",
+    editableFields: baseEditableFields,
+    key: "template-41",
+    marketingTagline:
+      "Enterprise search portal with maximum sections and full conversion funnel.",
+    name: "Khalid",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 42: Salma (pro / luxury / Banana Island) ───────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Salma Realty",
+      "Banana Island, Lagos",
+      "Luxury, curated and delivered",
+    ),
+    defaultTheme: {
+      accentColor: "#92400e",
+      backgroundColor: "#fffbeb",
+      fontFamily: "Georgia, serif",
+      headingFontFamily: "'Playfair Display', Georgia, serif",
+      logo: "Salma Realty",
+      market: "Banana Island, Lagos",
+      supportLine: "+234 808 200 4201",
+    },
+    description:
+      "Visual-first luxury pro layout showcasing properties through editorial presentation.",
+    editableFields: baseEditableFields,
+    key: "template-42",
+    marketingTagline:
+      "Luxury gallery layout with visual-heavy property showcase.",
+    name: "Salma",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 43: Faisal (pro / investor / Abuja) ────────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Faisal Capital",
+      "Abuja",
+      "Serious investments, serious returns",
+    ),
+    defaultTheme: {
+      accentColor: "#0369a1",
+      backgroundColor: "#f0f9ff",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+      logo: "Faisal Capital",
+      market: "Abuja",
+      supportLine: "+234 808 300 4301",
+    },
+    description:
+      "Data-heavy investor pro with market stats, property grid, FAQ, and service highlights.",
+    editableFields: baseEditableFields,
+    key: "template-43",
+    marketingTagline:
+      "Investor pro layout with deep data, FAQ, and service focus.",
+    name: "Faisal",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 44: Dina (pro / full-funnel / Victoria Island) ─────────────
+  {
+    defaultContent: createDefaultContent(
+      "Dina Realty",
+      "Victoria Island, Lagos",
+      "Every step, handled",
+    ),
+    defaultTheme: {
+      accentColor: "#7c3aed",
+      backgroundColor: "#faf5ff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Epilogue, Inter, sans-serif",
+      logo: "Dina Realty",
+      market: "Victoria Island, Lagos",
+      supportLine: "+234 808 400 4401",
+    },
+    description:
+      "Complete conversion funnel pro layout with services, listings, stories, agents, newsletter, and contact.",
+    editableFields: baseEditableFields,
+    key: "template-44",
+    marketingTagline:
+      "Full marketing funnel with every section for complete conversion.",
+    name: "Dina",
+    purchasable: true,
+    tier: "pro",
+  },
+  // ─── Template 45: Omar (pro / concierge / Lekki) ─────────────────────────
+  {
+    defaultContent: createDefaultContent(
+      "Omar Realty",
+      "Lekki, Lagos",
+      "Premium concierge experience",
+    ),
+    defaultTheme: {
+      accentColor: "#0f766e",
+      backgroundColor: "#0f172a",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+      logo: "Omar Realty",
+      market: "Lekki, Lagos",
+      supportLine: "+234 808 500 4501",
+    },
+    description:
+      "Dark premium pro combining search hero with story and personal agent service.",
+    editableFields: baseEditableFields,
+    key: "template-45",
+    marketingTagline:
+      "Premium concierge layout with search hero and personal service focus.",
+    name: "Omar",
+    purchasable: true,
+    tier: "pro",
+  },
 ];
 
 const fallbackTemplate = templateCatalog[0] as TemplateDefinition;
@@ -1582,15 +2062,21 @@ export {
   AgentShowcaseSection,
   ContactSection,
   FAQAccordionSection,
+  HeroSearchSection,
   NewsletterSection,
   PropertyGridSection,
+  ServiceHighlightsSection,
+  WhyChooseUsSection,
 } from "./sections/extended-sections";
 export type {
   AgentShowcaseConfig,
   ContactSectionConfig,
   FAQAccordionConfig,
+  HeroSearchConfig,
   NewsletterConfig,
   PropertyGridConfig,
+  ServiceHighlightsConfig,
+  WhyChooseUsConfig,
 } from "./sections/extended-sections";
 
 export type {
