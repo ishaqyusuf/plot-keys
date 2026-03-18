@@ -7,6 +7,7 @@ import {
 } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -144,6 +145,7 @@ export default async function TenantWebsiteHomePage({
                 <Link href={`/?subdomain=${subdomain}`}>Refresh preview</Link>
               </Button>
             ) : null}
+            <ThemeToggle />
           </div>
         </div>
 

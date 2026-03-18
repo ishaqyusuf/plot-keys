@@ -42,7 +42,7 @@ function ChevronIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+      className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground"
       fill="none"
       stroke="currentColor"
       strokeLinecap="round"
@@ -68,7 +68,7 @@ const PickerButton = forwardRef<
   return (
     <button
       className={[
-        "relative w-full rounded-md border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+        "relative w-full rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
         className,
       ]
         .filter(Boolean)
@@ -78,7 +78,7 @@ const PickerButton = forwardRef<
       {...props}
     >
       <span className="block text-xs text-muted-foreground">{label}</span>
-      <span className="mt-1 block pr-8 text-sm font-medium text-foreground">
+      <span className="mt-0.5 block pr-7 text-sm font-medium text-foreground">
         {children}
       </span>
       <ChevronIcon />
@@ -142,13 +142,13 @@ function StylePresetMenu({
           <DropdownMenuGroup>
             {presetEntries.map((preset) => (
               <DropdownMenuRadioItem
-                className="items-start rounded-md py-2.5 pr-8"
+                className="items-start rounded-md py-2 pr-8"
                 key={preset.key}
                 value={preset.key}
               >
                 <div className="min-w-0">
                   <p className="font-medium text-foreground">{preset.name}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground capitalize">
+                  <p className="text-xs text-muted-foreground capitalize">
                     {preset.density} · {preset.radius.card}
                   </p>
                 </div>
@@ -235,11 +235,11 @@ function ColorSystemMenu({
           <DropdownMenuGroup>
             {colorSystemEntries.map(([key, system]) => (
               <DropdownMenuRadioItem
-                className="items-start rounded-md py-2.5 pr-8"
+                className="items-start rounded-md py-2 pr-8"
                 key={key}
                 value={key}
               >
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <div className="flex shrink-0 gap-0.5">
                     <span
                       className="size-3 rounded-l-full border border-border/50"
@@ -359,7 +359,7 @@ function FontMenu({
                 </DropdownMenuLabel>
                 {group.fonts.map((font) => (
                   <DropdownMenuRadioItem
-                    className="rounded-md py-2 pr-8"
+                    className="rounded-md py-1.5 pr-8"
                     key={font}
                     value={font}
                   >
@@ -412,14 +412,14 @@ function TemplatePicker({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="relative w-full rounded-md border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="relative w-full rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
           type="button"
         >
           <span className="block text-xs text-muted-foreground">Template</span>
-          <span className="mt-1 block pr-10 text-sm font-medium text-foreground">
+          <span className="mt-0.5 block pr-9 text-sm font-medium text-foreground">
             {currentTemplate?.name ?? currentTemplateKey}
           </span>
-          <Badge className="mt-2" variant="outline">
+          <Badge className="mt-1.5" variant="outline">
             {currentTemplate?.tier ?? "starter"}
           </Badge>
           <ChevronIcon />
@@ -431,7 +431,7 @@ function TemplatePicker({
         side="right"
       >
         <Tabs
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-2"
           onValueChange={(v) => setGroup(v as TemplateGroup)}
           value={group}
         >
@@ -448,11 +448,11 @@ function TemplatePicker({
               <DropdownMenuGroup>
                 {groupTemplates.map((template) => (
                   <DropdownMenuRadioItem
-                    className="items-start rounded-md py-2.5 pr-8"
+                    className="items-start rounded-md py-2 pr-8"
                     key={template.key}
                     value={template.key}
                   >
-                    <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex min-w-0 items-start gap-2.5">
                       <Avatar className="rounded-md" size="sm">
                         <AvatarFallback className="rounded-md bg-muted text-[10px] font-medium">
                           {template.name
@@ -466,7 +466,7 @@ function TemplatePicker({
                           {template.name}
                         </span>
                         {template.marketingTagline && (
-                          <p className="mt-1 truncate text-xs text-muted-foreground">
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
                             {template.marketingTagline}
                           </p>
                         )}
@@ -527,7 +527,7 @@ function ImageSlotsSection({
   if (slots.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-2">
       <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
         Images
       </p>
@@ -537,7 +537,7 @@ function ImageSlotsSection({
             {slot.replace(/([A-Z])/g, " $1").trim()}
           </FieldLabel>
           <Input
-            className="mt-1 text-xs"
+            className="mt-0.5 text-xs"
             placeholder="Paste image URL…"
             value={values[slot] ?? ""}
             onChange={(e) => handleChange(slot, e.target.value)}
@@ -566,7 +566,7 @@ export function BuilderSidebarControls({
   const namedImageSlots = currentTemplate?.namedImageSlots ?? {};
 
   return (
-    <FieldGroup className="flex flex-col gap-3">
+    <FieldGroup className="flex flex-col gap-2">
       <Field>
         <TemplatePicker
           configId={configId}

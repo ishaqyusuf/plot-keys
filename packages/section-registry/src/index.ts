@@ -96,6 +96,8 @@ export type TemplateDefinition = {
   /** Human-readable marketing tagline shown in the template picker. */
   marketingTagline: string;
   name: string;
+  /** Named image defaults exposed to the builder for URL replacement. */
+  namedImageSlots?: Record<string, string>;
   /** Whether this template can be individually purchased without a plan upgrade. */
   purchasable: boolean;
   /** URL of the preview thumbnail used in template cards. */

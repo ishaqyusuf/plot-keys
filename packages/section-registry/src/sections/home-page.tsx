@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import type { RenderMode } from "../types";
 import { EditableText } from "./editing-primitives";
@@ -87,9 +87,9 @@ export type HomeSectionConfig =
 
 function shell(theme: ThemeConfig) {
   return {
-    backgroundColor: theme.backgroundColor,
+    "--section-bg": theme.backgroundColor,
     fontFamily: theme.fontFamily,
-  };
+  } as CSSProperties;
 }
 
 function Eyebrow({
@@ -196,10 +196,7 @@ export function HeroBannerSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
-      <span className="bg-destructive p-4 rounded-full text-slate-950 dark:text-white">
-        adbbsadsandsadsa
-      </span>
+    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
@@ -271,10 +268,13 @@ export function MarketStatsSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="px-6 pb-4 md:px-10" style={shell(theme)}>
+    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 pb-4 md:px-10" style={shell(theme)}>
       <div className="grid gap-4 md:grid-cols-3">
         {config.items.map((item) => (
-          <Surface key={item.label} className="bg-white/88 dark:bg-slate-800/88">
+          <Surface
+            key={item.label}
+            className="bg-white/88 dark:bg-slate-800/88"
+          >
             <div className="px-6 py-5">
               <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 {item.label}
@@ -304,7 +304,7 @@ export function StoryGridSection({
 }) {
   return (
     <section
-      className={`px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`}
+      className={`bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14 ${draftEditableClass(renderMode)}`}
       style={shell(theme)}
     >
       <div className="flex flex-col gap-3">
@@ -363,7 +363,7 @@ export function ListingSpotlightSection({
 }) {
   return (
     <section
-      className="px-6 py-10 md:px-10 md:py-14"
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14"
       id="featured-listings"
       style={shell(theme)}
     >
@@ -375,7 +375,10 @@ export function ListingSpotlightSection({
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
-          <Surface key={item.title} className="overflow-hidden bg-white dark:bg-slate-900">
+          <Surface
+            key={item.title}
+            className="overflow-hidden bg-white dark:bg-slate-900"
+          >
             <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)] p-5">
               <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
                 <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
@@ -393,7 +396,9 @@ export function ListingSpotlightSection({
               >
                 {item.title}
               </h3>
-              <p className="mt-3 text-base text-slate-600 dark:text-slate-400">{item.specs}</p>
+              <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
+                {item.specs}
+              </p>
               <div className="mt-5 flex items-center justify-between gap-4">
                 <p className="text-lg font-semibold text-slate-950 dark:text-white">
                   {item.price}
@@ -418,7 +423,7 @@ export function TestimonialStripSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="px-6 py-10 md:px-10 md:py-14" style={shell(theme)}>
+    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14" style={shell(theme)}>
       <div className="grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
           <Surface
@@ -431,8 +436,12 @@ export function TestimonialStripSection({
                 “{item.quote}”
               </p>
               <div className="mt-6">
-                <p className="font-semibold text-slate-950 dark:text-white">{item.speaker}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{item.role}</p>
+                <p className="font-semibold text-slate-950 dark:text-white">
+                  {item.speaker}
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {item.role}
+                </p>
               </div>
             </div>
           </Surface>
@@ -451,7 +460,7 @@ export function CtaBandSection({
 }) {
   return (
     <section
-      className="px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14"
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-8 pb-10 md:px-10 md:py-10 md:pb-14"
       style={shell(theme)}
     >
       <Surface className="overflow-hidden bg-[linear-gradient(145deg,#102033_0%,#0f766e_100%)] text-white">

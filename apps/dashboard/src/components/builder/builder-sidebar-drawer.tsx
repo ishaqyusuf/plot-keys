@@ -48,16 +48,16 @@ export function BuilderSidebarDrawer({
       <SheetTrigger asChild>
         <Button
           className="xl:hidden"
-          size="icon"
+          size="sm"
           variant="outline"
           aria-label="Open builder settings"
         >
           <Settings2 className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 overflow-y-auto p-0">
-        <SheetHeader className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-6 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+      <SheetContent side="left" className="w-72 overflow-y-auto p-0 sm:w-80">
+        <SheetHeader className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <SheetTitle className="text-xs uppercase tracking-[0.34em] text-muted-foreground font-normal">
               Builder setup
             </SheetTitle>
@@ -65,17 +65,17 @@ export function BuilderSidebarDrawer({
           </div>
         </SheetHeader>
 
-        <div className="space-y-6 p-6">
-          <section className="space-y-4">
-            <div className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
+        <div className="flex flex-col gap-4 p-4">
+          <section className="flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
                   Active configuration
                 </p>
-                <p className="mt-2 text-sm font-semibold text-foreground">
+                <p className="mt-1.5 text-sm font-semibold text-foreground">
                   {activeConfigName}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {totalConfigurations} saved configurations
                 </p>
               </div>
@@ -98,7 +98,7 @@ export function BuilderSidebarDrawer({
 
           <Separator />
 
-          <section className="space-y-2">
+          <section className="flex flex-col gap-1.5">
             <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
               Editable fields
             </p>
@@ -106,7 +106,7 @@ export function BuilderSidebarDrawer({
               Click any section in the preview to reveal its inline field
               editor. Changes are saved per field.
             </p>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-1 flex items-center gap-1.5">
               <Badge variant="outline">{editableFieldCount} fields</Badge>
               <Badge variant="outline">{sectionCount} sections</Badge>
             </div>

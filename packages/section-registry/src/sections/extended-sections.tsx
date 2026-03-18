@@ -11,7 +11,7 @@
  * - NewsletterSection    — Simple newsletter signup strip
  */
 
-import { useState, type JSX } from "react";
+import { useState, type CSSProperties, type JSX } from "react";
 import type { ThemeConfig } from "./home-page";
 
 // ---------------------------------------------------------------------------
@@ -101,7 +101,10 @@ export type NewsletterConfig = {
 // ---------------------------------------------------------------------------
 
 function shell(theme: ThemeConfig) {
-  return { backgroundColor: theme.backgroundColor, fontFamily: theme.fontFamily };
+  return {
+    "--section-bg": theme.backgroundColor,
+    fontFamily: theme.fontFamily,
+  } as CSSProperties;
 }
 
 function SectionTag({ children }: { children: string }) {
@@ -375,7 +378,10 @@ export function ContactSection({
               {config.email && (
                 <li className="flex items-center gap-3">
                   <span className="text-base">✉️</span>
-                  <a href={`mailto:${config.email}`} className="hover:underline">
+                  <a
+                    href={`mailto:${config.email}`}
+                    className="hover:underline"
+                  >
                     {config.email}
                   </a>
                 </li>
@@ -456,12 +462,16 @@ function ContactForm({
           method: "POST",
         });
         if (!res.ok) {
-          const payload = await res.json().catch(() => null) as { error?: string } | null;
+          const payload = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
           throw new Error(payload?.error ?? "Unable to send message.");
         }
         setSubmitted(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to send message.");
+        setError(
+          err instanceof Error ? err.message : "Unable to send message.",
+        );
       } finally {
         setSubmitting(false);
       }
@@ -471,10 +481,7 @@ function ContactForm({
   }
 
   return (
-    <form
-      className="space-y-5"
-      onSubmit={handleSubmit}
-    >
+    <form className="space-y-5" onSubmit={handleSubmit}>
       {error && (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
           {error}
@@ -604,7 +611,10 @@ export function NewsletterSection({
   return (
     <section
       className="px-6 py-14 md:px-10"
-      style={{ backgroundColor: theme.accentColor, fontFamily: theme.fontFamily }}
+      style={{
+        backgroundColor: theme.accentColor,
+        fontFamily: theme.fontFamily,
+      }}
     >
       <div className="mx-auto max-w-2xl text-center">
         <h2
@@ -816,7 +826,10 @@ export function WhyChooseUsSection({
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {config.items.map((item) => (
-            <div key={item.title} className="flex flex-col items-center text-center">
+            <div
+              key={item.title}
+              className="flex flex-col items-center text-center"
+            >
               <div
                 className="flex h-14 w-14 items-center justify-center rounded-full text-2xl"
                 style={{

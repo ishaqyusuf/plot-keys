@@ -17,6 +17,8 @@ import {
 import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
+
 import { BuilderPreviewPanel } from "../../components/builder/builder-preview-panel";
 import { BuilderSidebarControls } from "../../components/builder/builder-sidebar-controls";
 import { BuilderSidebarDrawer } from "../../components/builder/builder-sidebar-drawer";
@@ -148,8 +150,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-background px-3 py-3 md:px-4 md:py-4">
-      <div className="mx-auto grid max-w-[118rem] gap-4 xl:grid-cols-[15.5rem_minmax(0,1fr)]">
+    <main className="min-h-screen bg-background px-2 py-2 md:px-3 md:py-3">
+      <div className="mx-auto grid max-w-464 gap-3 xl:grid-cols-[14rem_minmax(0,1fr)]">
         {(params.saved || params.generated || params.published) && (
           <Alert className="xl:col-start-2 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
@@ -162,10 +164,10 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           </Alert>
         )}
 
-        <aside className="hidden xl:sticky xl:top-4 xl:block xl:h-[calc(100svh-2rem)]">
-          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
-            <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-6 py-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+        <aside className="hidden xl:sticky xl:top-3 xl:block xl:h-[calc(100svh-1.5rem)]">
+          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-(--shadow-soft)">
+            <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
                   Builder setup
                 </p>
@@ -173,17 +175,17 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               </div>
             </div>
 
-            <div className="flex-1 space-y-6 overflow-y-auto p-6">
-              <section className="space-y-4">
-                <div className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+              <section className="flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
                       Active configuration
                     </p>
-                    <p className="mt-2 text-sm font-semibold text-foreground">
+                    <p className="mt-1.5 text-sm font-semibold text-foreground">
                       {activeConfiguration.name}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {configurations.length} saved configurations
                     </p>
                   </div>
@@ -212,7 +214,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
 
               <Separator />
 
-              <section className="space-y-2">
+              <section className="flex flex-col gap-1.5">
                 <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
                   Editable fields
                 </p>
@@ -220,7 +222,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                   Click any section in the preview to reveal its inline field
                   editor. Changes are saved per field.
                 </p>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-1 flex items-center gap-1.5">
                   <Badge variant="outline">
                     {preview.editableFields.length} fields
                   </Badge>
@@ -233,8 +235,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           </div>
         </aside>
 
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <div className="flex flex-wrap items-center gap-2">
               <BuilderSidebarDrawer
                 activeConfigName={activeConfiguration.name}
@@ -255,7 +257,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               <Badge variant="outline">{preview.page.page}</Badge>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <ThemeToggle />
               <PublishConfirmationDialog
                 changedFieldCount={changedFieldCount}
                 configId={activeConfiguration.id}

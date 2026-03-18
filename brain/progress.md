@@ -6,6 +6,10 @@
   - Local publish checkbox state per template.
   - Renders sections using `sectionComponents` registry and `resolveWebsitePresentation`.
 - Compacted `BuilderSidebarControls` spacing (py-3→py-2, gap-5→gap-3).
+- Further compacted builder setup across desktop sidebar and mobile drawer.
+  - Reduced builder shell width, outer padding, section gaps, and metadata card padding in `apps/dashboard/src/app/builder/page.tsx` and `apps/dashboard/src/components/builder/builder-sidebar-drawer.tsx`.
+  - Tightened picker button padding, template rows, tab spacing, and image slot input spacing in `apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`.
+  - Restored optional `namedImageSlots` on `TemplateDefinition` in `packages/section-registry/src/index.ts` so builder image controls remain correctly typed.
 - Made builder page sidebar responsive: hidden below `xl`, replaced with Sheet-based drawer (`BuilderSidebarDrawer`) triggered by Settings2 icon.
 - Updated auth password hashing in `packages/auth/src/index.ts` to use `bcrypt-ts` (`hash`/`compare`) instead of local scrypt-based helpers.
 - Added `bcrypt-ts` dependency in `packages/auth/package.json`.
