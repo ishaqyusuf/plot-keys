@@ -5,7 +5,7 @@
  * Runs server-side after each onboarding step save.
  */
 
-import type { TemplateDefinition } from "./index";
+import type { TenantContentRecord, TemplateDefinition } from "./index";
 import { templateCatalog } from "./index";
 
 // ---------------------------------------------------------------------------
@@ -45,9 +45,41 @@ export type DerivedProfile = {
 };
 
 export type TemplateRecommendation = {
+  /** Whether this template requires a paid plan upgrade. */
+  upgradeRequired: boolean;
+  /** Best accessible fallback key when this template requires an upgrade. */
+  fallbackKey?: string;
   reason: string;
   score: number;
   template: TemplateDefinition;
+};
+
+/** Derived visual design system from onboarding inputs. */
+export type DerivedDesignConfig = {
+  accentColor: string;
+  backgroundColor: string;
+  fontFamily: string;
+  headingFontFamily: string;
+  stylePreset: "editorial" | "bold" | "warm" | "clean";
+};
+
+/** Which page sections to render and in what logical order. */
+export type DerivedPageComposition = {
+  /** Ordered list of section type IDs to include. */
+  sections: string[];
+  /** Whether to lead with listings or with story/brand content. */
+  leadWith: "listings" | "story";
+  /** Whether to emphasise the stats section. */
+  showStats: boolean;
+};
+
+/** Per-module visibility flags driven by onboarding content-readiness answers. */
+export type SectionVisibilityMap = {
+  agents: boolean;
+  blog: boolean;
+  listings: boolean;
+  projects: boolean;
+  testimonials: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -76,12 +108,20 @@ export function buildBusinessSummary(snap: OnboardingSnapshot): string {
     ? (businessTypeLabel[snap.businessType] ?? snap.businessType)
     : "real estate";
 
-  parts.push(snap.companyName ? `${snap.companyName} is a ${type} business` : `A ${type} business`);
+  parts.push(
+    snap.companyName
+      ? `${snap.companyName} is a ${type} business`
+      : `A ${type} business`,
+  );
 
   const locs = (snap.locations ?? []).filter(Boolean);
   if (locs.length > 0) {
     parts.push(
-      `operating in ${locs.length === 1 ? locs[0] : `${locs.slice(0, -1).join(", ")} and ${locs[locs.length - 1]}`}`,
+      `operating in ${
+        locs.length === 1
+          ? locs[0]
+          : `${locs.slice(0, -1).join(", ")} and ${locs[locs.length - 1]}`
+      }`,
     );
   }
 
@@ -90,7 +130,9 @@ export function buildBusinessSummary(snap: OnboardingSnapshot): string {
     parts.push(`specialising in ${types.join(", ")}`);
   }
 
-  const goal = snap.primaryGoal ? (goalLabel[snap.primaryGoal] ?? snap.primaryGoal) : null;
+  const goal = snap.primaryGoal
+    ? (goalLabel[snap.primaryGoal] ?? snap.primaryGoal)
+    : null;
   if (goal) {
     parts.push(`with a focus on ${goal}`);
   }
@@ -162,7 +204,9 @@ export function deriveProfile(snap: OnboardingSnapshot): DerivedProfile {
       snap.hasBlogContent,
     ].filter(Boolean).length;
 
-    const mediumSignals = [snap.hasListings, snap.hasExistingContent].filter(Boolean).length;
+    const mediumSignals = [snap.hasListings, snap.hasExistingContent].filter(
+      Boolean,
+    ).length;
 
     if (richSignals >= 2) return "high";
     if (richSignals >= 1 || mediumSignals >= 1) return "medium";
@@ -175,7 +219,9 @@ export function deriveProfile(snap: OnboardingSnapshot): DerivedProfile {
     templateCatalog,
   );
   const recommendedTemplateKey =
-    recommendations[0]?.template.key ?? templateCatalog[0]?.key ?? "template-1";
+    recommendations[0]?.template.key ??
+    templateCatalog[0]?.key ??
+    "template-1";
 
   return {
     complexity,
@@ -183,6 +229,199 @@ export function deriveProfile(snap: OnboardingSnapshot): DerivedProfile {
     designIntent,
     recommendedTemplateKey,
     segment,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Derived design config (font, color, style preset)
+// ---------------------------------------------------------------------------
+
+export function deriveDesignConfig(
+  profile: Pick<DerivedProfile, "designIntent" | "segment">,
+  snap: Pick<OnboardingSnapshot, "tone" | "stylePreference">,
+): DerivedDesignConfig {
+  type DesignPreset = {
+    accentColor: string;
+    backgroundColor: string;
+    fontFamily: string;
+    headingFontFamily: string;
+    stylePreset: DerivedDesignConfig["stylePreset"];
+  };
+
+  const presets: Record<DerivedProfile["designIntent"], DesignPreset> = {
+    editorial: {
+      accentColor: "#0f766e",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: 'Georgia, "Times New Roman", serif',
+      stylePreset: "editorial",
+    },
+    bold: {
+      accentColor: "#1d4ed8",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+      stylePreset: "bold",
+    },
+    warm: {
+      accentColor: "#b45309",
+      backgroundColor: "#fffaf0",
+      fontFamily: "Satoshi, Avenir Next, sans-serif",
+      headingFontFamily: 'Georgia, "Times New Roman", serif',
+      stylePreset: "warm",
+    },
+    clean: {
+      accentColor: "#334155",
+      backgroundColor: "#f8fafc",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+      stylePreset: "clean",
+    },
+  };
+
+  // Luxury segment always gets the editorial preset regardless of stated preference
+  const intent =
+    profile.segment === "luxury" ? "editorial" : profile.designIntent;
+
+  return presets[intent];
+}
+
+// ---------------------------------------------------------------------------
+// Derived page composition
+// ---------------------------------------------------------------------------
+
+export function derivePageComposition(
+  profile: Pick<DerivedProfile, "conversionFocus" | "segment">,
+  snap: Pick<OnboardingSnapshot, "hasListings" | "hasTestimonials">,
+): DerivedPageComposition {
+  const listingLed =
+    profile.conversionFocus === "listings" ||
+    profile.conversionFocus === "balanced";
+
+  const sections: string[] = [
+    "hero_banner",
+    "market_stats",
+    ...(!listingLed ? ["story_grid"] : []),
+    "listing_spotlight",
+    ...(listingLed ? ["story_grid"] : []),
+    ...(snap.hasTestimonials ? ["testimonial_strip"] : []),
+    "cta_band",
+  ];
+
+  return {
+    leadWith: listingLed ? "listings" : "story",
+    sections,
+    showStats: profile.segment !== "commercial",
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Derived section visibility
+// ---------------------------------------------------------------------------
+
+export function deriveSectionVisibility(
+  snap: Pick<
+    OnboardingSnapshot,
+    | "hasAgents"
+    | "hasBlogContent"
+    | "hasListings"
+    | "hasProjects"
+    | "hasTestimonials"
+  >,
+): SectionVisibilityMap {
+  return {
+    agents: snap.hasAgents === true,
+    blog: snap.hasBlogContent === true,
+    listings: snap.hasListings !== false, // default visible
+    projects: snap.hasProjects === true,
+    testimonials: snap.hasTestimonials === true,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Personalized content generation
+// ---------------------------------------------------------------------------
+
+/** Derives personalized site copy from onboarding data without any AI calls. */
+export function derivePersonalizedContent(
+  snap: OnboardingSnapshot,
+  profile: DerivedProfile,
+): TenantContentRecord {
+  const company = snap.companyName ?? "Our Agency";
+
+  const primaryLocation = (snap.locations ?? []).filter(Boolean)[0] ?? "your area";
+
+  const market =
+    (snap.locations ?? []).filter(Boolean).join(" and ") || primaryLocation;
+
+  // Eyebrow — short premium label
+  const eyebrowMap: Record<DerivedProfile["segment"], string> = {
+    luxury: "Luxury homes and investment addresses",
+    commercial: "Premium commercial spaces for ambitious businesses",
+    residential: "Trusted homes for families and buyers",
+    rental: "Quality rental homes and managed spaces",
+    mixed: "Homes, investments, and spaces you can trust",
+  };
+  const eyebrow = eyebrowMap[profile.segment];
+
+  // Hero title — tone-adjusted
+  const toneAdjective: Record<DerivedProfile["designIntent"], string> = {
+    editorial: "signature",
+    bold: "next",
+    warm: "perfect",
+    clean: "ideal",
+  };
+  const adj = toneAdjective[profile.designIntent];
+  const heroTitle = `Find your ${adj} property in ${primaryLocation}.`;
+
+  // Hero subtitle — from tagline if available, otherwise derived
+  const heroSubtitle = snap.tagline
+    ? `${snap.tagline} — explore trusted properties across ${market} with ${company}.`
+    : `${company} helps buyers, investors, and families discover trusted homes and high-conviction opportunities across ${market}.`;
+
+  // CTA text — goal-adjusted
+  const ctaMap: Record<DerivedProfile["conversionFocus"], string> = {
+    leads: "Book a consultation",
+    listings: "Browse listings",
+    brand: "Meet our team",
+    balanced: "Browse listings",
+  };
+  const ctaText = ctaMap[profile.conversionFocus];
+
+  // Story section
+  const storyTitleMap: Record<DerivedProfile["designIntent"], string> = {
+    editorial: `${company} turns trust into momentum.`,
+    bold: `${company} moves fast and gets results.`,
+    warm: `${company} puts your family first.`,
+    clean: `${company} makes every step clear.`,
+  };
+  const storyTitle = storyTitleMap[profile.designIntent];
+
+  const storyDescMap: Record<DerivedProfile["segment"], string> = {
+    luxury: `We bring unrivalled market knowledge and discretion to every premium mandate — so you always feel one step ahead.`,
+    commercial: `Our team combines deep market insight with sharp negotiation to deliver commercial outcomes that grow businesses.`,
+    residential: `From first viewing to final handover, ${company} guides every family toward a decision they can feel confident in.`,
+    rental: `${company} matches quality tenants with well-managed properties and handles every detail with professionalism.`,
+    mixed: `Whether you're buying, investing, or renting, ${company} brings the same rigour and care to every engagement.`,
+  };
+  const storyDescription = storyDescMap[profile.segment];
+
+  // Final CTA section
+  const ctaFinalTitle = `Start your ${primaryLocation} search with ${company}.`;
+  const ctaFinalBody =
+    profile.conversionFocus === "leads"
+      ? `Book a private consultation or request a tailored shortlist — our team responds within one business day.`
+      : `Browse our latest inventory or reach out for a personalised walkthrough of available properties in ${market}.`;
+
+  return {
+    "cta.body": ctaFinalBody,
+    "cta.title": ctaFinalTitle,
+    "hero.ctaText": ctaText,
+    "hero.eyebrow": eyebrow,
+    "hero.subtitle": heroSubtitle,
+    "hero.title": heroTitle,
+    "story.description": storyDescription,
+    "story.title": storyTitle,
   };
 }
 
@@ -224,7 +463,10 @@ const templateTags: Record<string, TemplateScoringTags> = {
 
 type PartialProfile = Omit<DerivedProfile, "complexity" | "recommendedTemplateKey">;
 
-function scoreTemplate(profile: PartialProfile, template: TemplateDefinition): number {
+function scoreTemplate(
+  profile: PartialProfile,
+  template: TemplateDefinition,
+): number {
   const tags = templateTags[template.key];
   if (!tags) return 0;
 
@@ -240,13 +482,28 @@ function scoreTemplate(profile: PartialProfile, template: TemplateDefinition): n
 export function scoreTemplates(
   profile: PartialProfile,
   catalog: TemplateDefinition[],
+  /** Tiers the caller can access — defaults to all accessible if omitted */
+  accessibleTiers?: Set<string>,
 ): TemplateRecommendation[] {
+  const fallbackKey = catalog.find(
+    (t) => !accessibleTiers || accessibleTiers.has(t.tier),
+  )?.key;
+
   return catalog
     .map((template) => {
       const score = scoreTemplate(profile, template);
       const tags = templateTags[template.key];
       const reason = buildRecommendationReason(profile, template, tags);
-      return { reason, score, template };
+      const upgradeRequired = accessibleTiers
+        ? !accessibleTiers.has(template.tier)
+        : false;
+      return {
+        fallbackKey: upgradeRequired ? fallbackKey : undefined,
+        reason,
+        score,
+        template,
+        upgradeRequired,
+      };
     })
     .sort((a, b) => b.score - a.score);
 }

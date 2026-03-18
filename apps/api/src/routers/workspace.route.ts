@@ -21,6 +21,8 @@ import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
 import {
   buildBusinessSummary,
   createInitialSiteConfigurationInput,
+  deriveDesignConfig,
+  derivePersonalizedContent,
   deriveProfile,
   getTemplateDefinition,
   scoreTemplates,
@@ -141,17 +143,70 @@ export const workspaceRouter = createTRPCRouter({
       await assertSubdomainAvailability(db, subdomain);
       assertTemplateAccess("starter", templateKey);
 
+      // Derive personalized content and design from the onboarding profile
+      const snapshot = savedOnboarding
+        ? {
+            businessType: savedOnboarding.businessType,
+            companyName: savedOnboarding.companyName,
+            hasBlogContent: savedOnboarding.hasBlogContent,
+            hasAgents: savedOnboarding.hasAgents,
+            hasExistingContent: savedOnboarding.hasExistingContent,
+            hasListings: savedOnboarding.hasListings,
+            hasLogo: savedOnboarding.hasLogo,
+            hasProjects: savedOnboarding.hasProjects,
+            hasTestimonials: savedOnboarding.hasTestimonials,
+            locations: savedOnboarding.locations,
+            primaryGoal: savedOnboarding.primaryGoal,
+            propertyTypes: savedOnboarding.propertyTypes,
+            stylePreference: savedOnboarding.stylePreference,
+            tagline: savedOnboarding.tagline,
+            targetAudience: savedOnboarding.targetAudience,
+            tone: savedOnboarding.tone,
+          }
+        : null;
+
+      const profile = snapshot ? deriveProfile(snapshot) : null;
+      const designConfig =
+        profile && snapshot ? deriveDesignConfig(profile, snapshot) : null;
+      const personalizedContent =
+        profile && snapshot
+          ? derivePersonalizedContent(
+              { ...snapshot, locations: [market, ...(snapshot.locations ?? [])] },
+              profile,
+            )
+          : null;
+
+      const template = getTemplateDefinition(templateKey);
+
+      const initialSiteConfiguration = personalizedContent && designConfig
+        ? {
+            contentJson: personalizedContent,
+            name: `${template.name} Draft`,
+            subdomain,
+            templateKey: template.key,
+            themeJson: {
+              ...template.defaultTheme,
+              accentColor: designConfig.accentColor,
+              backgroundColor: designConfig.backgroundColor,
+              fontFamily: designConfig.fontFamily,
+              headingFontFamily: designConfig.headingFontFamily,
+              logo: companyName,
+              market,
+            },
+          }
+        : createInitialSiteConfigurationInput({
+            companyName,
+            market,
+            subdomain,
+            templateKey,
+          });
+
       const siteConfiguration = await createCompanyOnboardingBundle(db, {
         apexDomain: plotkeysRootDomain,
         companyName,
         createdById: ctx.auth.session.user.id,
         dashboardHostname: buildDashboardHostname(subdomain),
-        initialSiteConfiguration: createInitialSiteConfigurationInput({
-          companyName,
-          market,
-          subdomain,
-          templateKey,
-        }),
+        initialSiteConfiguration,
         market,
         sitefrontHostname: buildSitefrontHostname(subdomain),
         subdomain,
@@ -299,6 +354,9 @@ export const workspaceRouter = createTRPCRouter({
         })
       : null;
 
+    // Starter plan access — only "starter" tier templates are accessible without upgrade
+    const accessibleTiers = new Set<string>(["starter"]);
+
     const recommendations = scoreTemplates(
       profile ?? {
         conversionFocus: "leads",
@@ -306,20 +364,69 @@ export const workspaceRouter = createTRPCRouter({
         segment: "mixed",
       },
       templateCatalog,
+      accessibleTiers,
     ).map((r) => ({
       description: r.template.description,
+      fallbackKey: r.fallbackKey,
       key: r.template.key,
       name: r.template.name,
       reason: r.reason,
       score: r.score,
       tier: r.template.tier,
+      upgradeRequired: r.upgradeRequired,
     }));
 
     return {
       profile,
       recommendations,
-      topKey: recommendations[0]?.key ?? "template-1",
+      topKey:
+        recommendations.find((r) => !r.upgradeRequired)?.key ?? "template-1",
     };
+  }),
+  refreshOnboardingProfile: authenticatedProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const userId = ctx.auth.session.user.id;
+
+    const onboarding = await findTenantOnboardingByUserId(db, userId);
+    if (!onboarding) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No onboarding record found.",
+      });
+    }
+
+    const snapshot = {
+      businessType: onboarding.businessType,
+      companyName: onboarding.companyName,
+      hasBlogContent: onboarding.hasBlogContent,
+      hasAgents: onboarding.hasAgents,
+      hasExistingContent: onboarding.hasExistingContent,
+      hasListings: onboarding.hasListings,
+      hasLogo: onboarding.hasLogo,
+      hasProjects: onboarding.hasProjects,
+      hasTestimonials: onboarding.hasTestimonials,
+      locations: onboarding.locations,
+      primaryGoal: onboarding.primaryGoal,
+      propertyTypes: onboarding.propertyTypes,
+      stylePreference: onboarding.stylePreference,
+      tagline: onboarding.tagline,
+      targetAudience: onboarding.targetAudience,
+      tone: onboarding.tone,
+    };
+
+    const profile = deriveProfile(snapshot);
+    const summary = buildBusinessSummary(snapshot);
+
+    await updateOnboardingProfile(db, userId, {
+      businessSummary: summary,
+      complexity: profile.complexity,
+      conversionFocus: profile.conversionFocus,
+      designIntent: profile.designIntent,
+      recommendedTemplateKey: profile.recommendedTemplateKey,
+      segment: profile.segment,
+    });
+
+    return { profile, summary };
   }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)

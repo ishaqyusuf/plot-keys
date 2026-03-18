@@ -509,12 +509,19 @@ export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
 
 export {
   buildBusinessSummary,
+  deriveDesignConfig,
+  derivePageComposition,
+  derivePersonalizedContent,
   deriveProfile,
+  deriveSectionVisibility,
   scoreTemplates,
 } from "./recommendation";
 export type {
+  DerivedDesignConfig,
+  DerivedPageComposition,
   DerivedProfile,
   OnboardingSnapshot,
+  SectionVisibilityMap,
   TemplateRecommendation,
 } from "./recommendation";
 
