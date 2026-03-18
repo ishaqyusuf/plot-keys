@@ -100,10 +100,14 @@ function Eyebrow({
   tone?: "neutral" | "primary" | "accent" | "success";
 }) {
   const tones = {
-    neutral: "border-[color:var(--border)] bg-white/70 text-slate-700",
-    primary: "border-teal-200 bg-teal-50 text-teal-800",
-    accent: "border-amber-200 bg-amber-50 text-amber-800",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    neutral:
+      "border-[color:var(--border)] bg-white/70 text-slate-700 dark:bg-slate-800/70 dark:text-slate-300",
+    primary:
+      "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-700 dark:bg-teal-950/50 dark:text-teal-200",
+    accent:
+      "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200",
+    success:
+      "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200",
   };
 
   return (
@@ -124,7 +128,7 @@ function Surface({
 }) {
   return (
     <div
-      className={`rounded-[var(--radius-lg)] border border-[color:var(--border)] bg-white/82 shadow-[var(--shadow-card)] backdrop-blur-sm ${className}`}
+      className={`rounded-[var(--radius-lg)] border border-[color:var(--border)] bg-white/82 shadow-[var(--shadow-card)] backdrop-blur-sm dark:bg-slate-800/82 ${className}`}
     >
       {children}
     </div>
@@ -144,7 +148,7 @@ function ActionButton({
     primary:
       "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] shadow-[0_18px_36px_rgba(15,118,110,0.24)]",
     secondary:
-      "border border-[color:var(--border)] bg-white/90 text-[color:var(--foreground)]",
+      "border border-[color:var(--border)] bg-white/90 text-[color:var(--foreground)] dark:bg-slate-800/90",
     ghost: "bg-transparent text-[color:var(--foreground)]",
     inverse:
       "bg-[color:var(--surface-inverse)] text-white shadow-[0_18px_36px_rgba(16,32,51,0.22)]",
@@ -193,7 +197,7 @@ export function HeroBannerSection({
 }) {
   return (
     <section className="px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
-      <span className="bg-destructive p-4 rounded-full text-slate-950">
+      <span className="bg-destructive p-4 rounded-full text-slate-950 dark:text-white">
         adbbsadsandsadsa
       </span>
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
@@ -201,14 +205,14 @@ export function HeroBannerSection({
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
           <EditableText
             as="h1"
-            className="mt-6 max-w-4xl text-5xl leading-[0.92] text-slate-950 md:text-7xl"
+            className="mt-6 max-w-4xl text-5xl leading-[0.92] text-slate-950 dark:text-white md:text-7xl"
             contentKey="hero.title"
             style={{ fontFamily: theme.headingFontFamily }}
             value={config.title}
           />
           <EditableText
             as="p"
-            className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl"
+            className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400 md:text-xl"
             contentKey="hero.subtitle"
             value={config.subtitle}
           />
@@ -270,13 +274,13 @@ export function MarketStatsSection({
     <section className="px-6 pb-4 md:px-10" style={shell(theme)}>
       <div className="grid gap-4 md:grid-cols-3">
         {config.items.map((item) => (
-          <Surface key={item.label} className="bg-white/88">
+          <Surface key={item.label} className="bg-white/88 dark:bg-slate-800/88">
             <div className="px-6 py-5">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 {item.label}
               </p>
               <p
-                className="mt-3 text-4xl text-slate-950"
+                className="mt-3 text-4xl text-slate-950 dark:text-white"
                 style={{ fontFamily: theme.headingFontFamily }}
               >
                 {item.value}
@@ -324,7 +328,7 @@ export function StoryGridSection({
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
-          <Surface key={item.title} className="bg-white">
+          <Surface key={item.title} className="bg-white dark:bg-slate-900">
             <div className="px-6 py-6">
               <div
                 className="h-12 w-12 rounded-2xl"
@@ -334,12 +338,12 @@ export function StoryGridSection({
                 }}
               />
               <h3
-                className="mt-5 text-2xl text-slate-950"
+                className="mt-5 text-2xl text-slate-950 dark:text-white"
                 style={{ fontFamily: theme.headingFontFamily }}
               >
                 {item.title}
               </h3>
-              <p className="mt-3 text-base leading-7 text-slate-600">
+              <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-400">
                 {item.body}
               </p>
             </div>
@@ -371,27 +375,27 @@ export function ListingSpotlightSection({
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
-          <Surface key={item.title} className="overflow-hidden bg-white">
-            <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] p-5">
-              <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.32em] text-slate-600">
+          <Surface key={item.title} className="overflow-hidden bg-white dark:bg-slate-900">
+            <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)] p-5">
+              <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
+                <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
                   {item.imageHint}
                 </p>
               </div>
             </div>
             <div className="px-6 py-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 {item.location}
               </p>
               <h3
-                className="mt-3 text-2xl text-slate-950"
+                className="mt-3 text-2xl text-slate-950 dark:text-white"
                 style={{ fontFamily: theme.headingFontFamily }}
               >
                 {item.title}
               </h3>
-              <p className="mt-3 text-base text-slate-600">{item.specs}</p>
+              <p className="mt-3 text-base text-slate-600 dark:text-slate-400">{item.specs}</p>
               <div className="mt-5 flex items-center justify-between gap-4">
-                <p className="text-lg font-semibold text-slate-950">
+                <p className="text-lg font-semibold text-slate-950 dark:text-white">
                   {item.price}
                 </p>
                 <ActionButton href="#" variant="ghost">
@@ -419,16 +423,16 @@ export function TestimonialStripSection({
         {config.items.map((item) => (
           <Surface
             key={`${item.speaker}-${item.role}`}
-            className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]"
+            className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] dark:bg-[linear-gradient(180deg,#1e293b_0%,#0f172a_100%)]"
           >
             <div className="px-6 py-6">
               <Eyebrow tone="accent">Client trust</Eyebrow>
-              <p className="mt-5 text-lg leading-8 text-slate-700">
+              <p className="mt-5 text-lg leading-8 text-slate-700 dark:text-slate-300">
                 “{item.quote}”
               </p>
               <div className="mt-6">
-                <p className="font-semibold text-slate-950">{item.speaker}</p>
-                <p className="text-sm text-slate-500">{item.role}</p>
+                <p className="font-semibold text-slate-950 dark:text-white">{item.speaker}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{item.role}</p>
               </div>
             </div>
           </Surface>
