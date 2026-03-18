@@ -1,5 +1,6 @@
 export * from "./cn";
 export * from "./phone";
+export * from "./pricing";
 export * from "./tenant-domains";
 export * from "./tiers";
 export * from "./vercel-domains";

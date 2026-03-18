@@ -28,6 +28,7 @@ export * from "./queries/property";
 export * from "./queries/site-configuration";
 export * from "./queries/template-license";
 export * from "./queries/tenant-domain";
+export * from "./queries/website";
 export {
   type DatabaseClientOptions,
   type DatabaseProvider,

@@ -152,6 +152,31 @@ export async function countCompaniesByTemplateKey(
   );
 }
 
+/**
+ * Replaces the full `themeJson` with a serialized `TemplateConfig` object.
+ * Use this for structured design updates (e.g. changing the style preset,
+ * accent color, or named image assignments) rather than per-key updates.
+ * Increments the version number.
+ */
+export async function updateSiteConfigurationTheme(
+  db: Db,
+  input: {
+    configId: string;
+    themeJson: Record<string, string>;
+    updatedById: string;
+    version: number;
+  },
+) {
+  return db.siteConfiguration.update({
+    data: {
+      themeJson: input.themeJson,
+      updatedById: input.updatedById,
+      version: input.version + 1,
+    },
+    where: { id: input.configId },
+  });
+}
+
 export async function publishSiteConfiguration(
   db: Db,
   input: {

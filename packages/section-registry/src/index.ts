@@ -644,6 +644,18 @@ export {
   flattenContentNodes,
   liftFlatContent,
 } from "./content-nodes";
+export {
+  applyConfigUpdate,
+  deserializeTemplateConfig,
+  fromDerivedDesignConfig,
+  serializeTemplateConfig,
+  stylePresets,
+} from "./template-config";
+export type {
+  ColorScheme,
+  StylePreset,
+  TemplateConfig,
+} from "./template-config";
 export type {
   ContentNode,
   ContentNodeKind,
