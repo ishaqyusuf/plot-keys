@@ -254,7 +254,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 onUpdateTheme={updateSiteThemeFieldAction}
                 onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
               />
-              <Badge variant="outline">{preview.page.page}</Badge>
+              <Badge variant="outline">{preview.page.pageKey}</Badge>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">

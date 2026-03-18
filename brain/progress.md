@@ -1,6 +1,18 @@
 # Progress
 
-## 2026-03-18
+## 2026-03-18 (latest)
+- Implemented complete page flow for all templates.
+  - Each template now has 4 pages: Home, About, Listings, Contact.
+  - Added `baseAboutSections`, `baseListingsSections`, `baseContactSections` in `page-inventory.ts`.
+  - Added `withBasePages()` helper to compose a full page inventory from a home page definition.
+  - Updated all 21 template inventories (templates 1–6 and 31–45) to use `withBasePages()`.
+  - Generalized `buildHomePage` → `buildPageSections(content, pageKey, templateKey, ...)` in `index.ts`.
+  - Updated `ResolvedWebsitePresentation.page` from `{ page: "home" }` to `{ pageKey: string }`.
+  - Added optional `pageKey` (defaults `"home"`) to `ResolveTemplateOptions` and `resolveWebsitePresentation`.
+  - Updated `preview.page.page` → `preview.page.pageKey` in `apps/dashboard/src/app/builder/page.tsx`.
+  - Added page navigation tab bar to `/builder/preview` showing all pages in the active template.
+  - Browser URL bar in mock browser now shows the actual page slug.
+
 - Added `/builder/preview` client-side testing page for previewing all templates without DB.
   - Template cycling via back/next buttons and dropdown with tabbed tier selector.
   - Local publish checkbox state per template.

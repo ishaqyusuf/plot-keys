@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  getTemplatePageInventory,
   resolveWebsitePresentation,
   sectionComponents,
   type ThemeConfig,
@@ -39,6 +40,7 @@ export default function BuilderPreviewPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [publishedKeys, setPublishedKeys] = useState<Set<string>>(new Set());
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentPageKey, setCurrentPageKey] = useState("home");
 
   const template = templateCatalog[currentIndex] ?? templateCatalog[0];
   const [tabTier, setTabTier] = useState<TemplateTier>(
@@ -46,18 +48,24 @@ export default function BuilderPreviewPage() {
   );
   const groups = useMemo(groupedTemplates, []);
 
+  const templatePages = useMemo(
+    () => (template ? getTemplatePageInventory(template.key).pages : []),
+    [template],
+  );
+
   const preview = useMemo(
     () =>
       template
         ? resolveWebsitePresentation({
             companyName: template.defaultTheme.logo,
             content: template.defaultContent,
+            pageKey: currentPageKey,
             renderMode: "draft",
             subdomain: template.name.toLowerCase(),
             templateKey: template.key,
           })
         : null,
-    [template],
+    [template, currentPageKey],
   );
 
   function goToTemplate(index: number) {
@@ -67,6 +75,7 @@ export default function BuilderPreviewPage() {
     setCurrentIndex(clamped);
     const target = templateCatalog[clamped];
     if (target) setTabTier(target.tier);
+    setCurrentPageKey("home");
   }
 
   function selectTemplate(key: string) {
@@ -75,6 +84,7 @@ export default function BuilderPreviewPage() {
       setCurrentIndex(idx);
       const target = templateCatalog[idx];
       if (target) setTabTier(target.tier);
+      setCurrentPageKey("home");
     }
     setDropdownOpen(false);
   }
@@ -90,6 +100,9 @@ export default function BuilderPreviewPage() {
       return next;
     });
   }
+
+  const currentPageSlug =
+    templatePages.find((p) => p.pageKey === currentPageKey)?.slug ?? "/";
 
   if (!template || !preview) {
     return (
@@ -209,6 +222,30 @@ export default function BuilderPreviewPage() {
         </div>
       </div>
 
+      {/* ── Page navigation tabs ── */}
+      {templatePages.length > 1 && (
+        <div className="border-b border-border/70 bg-background">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="flex items-center gap-1 overflow-x-auto py-1">
+              {templatePages.map((page) => (
+                <button
+                  key={page.pageKey}
+                  type="button"
+                  onClick={() => setCurrentPageKey(page.pageKey)}
+                  className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    currentPageKey === page.pageKey
+                      ? "bg-foreground/10 text-foreground"
+                      : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                  }`}
+                >
+                  {page.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Template preview ── */}
       <div className="mx-auto max-w-7xl px-4 py-6">
         <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
@@ -220,7 +257,7 @@ export default function BuilderPreviewPage() {
               <span className="size-2.5 rounded-full bg-foreground/20" />
             </div>
             <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
-              {template.name.toLowerCase()}.plotkeys.app / preview
+              {template.name.toLowerCase()}.plotkeys.app{currentPageSlug}
             </p>
             <div className="flex items-center gap-2">
               <Badge variant="outline">
