@@ -1,0 +1,54 @@
+enum BillingLineItemKind {
+  subscription       // Recurring plan subscription (starter/plus/pro)
+  template_purchase  // One-off template unlock purchase
+  stock_image        // Stock image license purchase
+  domain_addon       // Custom domain add-on
+  ai_credits         // AI content generation credit pack
+
+  @@map("billing_line_item_kind")
+}
+
+enum BillingLineItemStatus {
+  pending    // Awaiting payment confirmation
+  active     // Paid and currently active
+  cancelled  // Subscription cancelled or purchase refunded
+  expired    // Time-limited entitlement has passed
+
+  @@map("billing_line_item_status")
+}
+
+/// Unified billing line-item model covering subscriptions, template purchases,
+/// stock images, domain add-ons, and AI credit packs.
+/// All billable events produce a record here for consistent revenue tracking.
+model BillingLineItem {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId         String                 @map("company_id") @db.Uuid
+  kind              BillingLineItemKind
+  status            BillingLineItemStatus  @default(pending)
+
+  /// Amount in the smallest currency unit (e.g. kobo for NGN, cents for USD)
+  amountMinorUnits  Int                    @map("amount_minor_units")
+  currency          String                 @default("NGN") @db.Char(3)
+
+  /// External reference from the billing provider (e.g. Paystack transaction ID)
+  providerRef       String?                @map("provider_ref")
+
+  /// Arbitrary metadata: templateKey, imageId, domainHostname, creditsCount, etc.
+  meta              Json                   @default("{}")
+
+  periodStartAt     DateTime?              @map("period_start_at") @db.Timestamptz(6)
+  periodEndAt       DateTime?              @map("period_end_at") @db.Timestamptz(6)
+  paidAt            DateTime?              @map("paid_at") @db.Timestamptz(6)
+  cancelledAt       DateTime?              @map("cancelled_at") @db.Timestamptz(6)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company           Company                @relation(fields: [companyId], references: [id])
+
+  @@index([companyId], map: "billing_line_items_company_id_idx")
+  @@index([companyId, kind], map: "billing_line_items_company_kind_idx")
+  @@index([status], map: "billing_line_items_status_idx")
+  @@index([providerRef], map: "billing_line_items_provider_ref_idx")
+
+  @@map("billing_line_items")
+}

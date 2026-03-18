@@ -16,6 +16,7 @@ import {
   grantTemplateLicense,
   hasTemplateLicense,
   listSyncableTenantDomains,
+  listTenantDomainsForCompany,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
@@ -765,6 +766,29 @@ export const workspaceRouter = createTRPCRouter({
     );
 
     return { queued: true, queuedCount: domains.length };
+  }),
+  getTenantDomainStatus: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const domains = await listTenantDomainsForCompany(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    const hasFailure = domains.some((d) => d.status === "failed");
+    const allProvisioned = domains.every((d) => d.status === "active");
+
+    return {
+      domains: domains.map((d) => ({
+        hostname: d.hostname,
+        id: d.id,
+        kind: d.kind,
+        lastError: d.lastError,
+        provisionedAt: d.provisionedAt,
+        status: d.status,
+      })),
+      hasFailure,
+      allProvisioned,
+    };
   }),
   updateSiteField: membershipProcedure
     .input(updateSiteFieldInputSchema)

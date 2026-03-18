@@ -522,6 +522,7 @@ export function resolveWebsitePresentation({
 export const sampleTheme = fallbackTemplate.defaultTheme;
 export const sampleHomePage = buildHomePage(fallbackTemplate.defaultContent);
 
+export { resolveFontStack, resolveHeadingFontStack } from "./fonts";
 export {
   buildBusinessSummary,
   deriveDesignConfig,

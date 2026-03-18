@@ -1,5 +1,24 @@
 import type { Db } from "../prisma";
 
+/**
+ * Returns all tenant domain records for a company (any status, not deleted).
+ * Used to surface domain provisioning status in the dashboard.
+ */
+export async function listTenantDomainsForCompany(db: Db, companyId: string) {
+  return db.tenantDomain.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      hostname: true,
+      id: true,
+      kind: true,
+      lastError: true,
+      provisionedAt: true,
+      status: true,
+    },
+    where: { companyId, deletedAt: null },
+  });
+}
+
 export async function listSyncableTenantDomains(db: Db, companyId: string) {
   return db.tenantDomain.findMany({
     orderBy: {

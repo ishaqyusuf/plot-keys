@@ -17,6 +17,7 @@ model Company {
   properties         Property[]
   agents             Agent[]
   templateLicenses   TenantTemplateLicense[]
+  billingLineItems   BillingLineItem[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")
