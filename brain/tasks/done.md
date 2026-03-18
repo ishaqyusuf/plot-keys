@@ -7,6 +7,12 @@ This file records completed work milestones.
 - Add concise completion notes with enough context for future readers.
 
 ## Done
+- Built template testing preview page at `/builder/preview` with top nav (back/template picker/next), tabbed plan dropdown, publish toggle checkbox, and full template preview rendering
+- Compacted builder sidebar controls (reduced padding/gaps) and added mobile responsive Sheet drawer for screens below xl breakpoint
+- Added 15 new unique templates (5 per tier) with differentiated section compositions: Sama, Rania, Jihan, Nadia, Walid (starter); Tariq, Soraya, Rashid, Dalal, Imran (plus); Khalid, Salma, Faisal, Dina, Omar (pro)
+- Created 3 new section components: HeroSearchSection (hero with property search bar and location filter), WhyChooseUsSection (4-stat icon grid), ServiceHighlightsSection (3-column service cards)
+- Added dark mode support to all section components in home-page.tsx via dark: Tailwind variants
+- Fixed inline editing not working: wrapped BuilderPreviewPanel sections with WebsiteRuntimeProvider in draft mode so EditableText components receive the correct render mode context
 - Fixed sign-in → onboarding redirect loop by standardizing auth session cookie usage on `plotkeys.session_token` across dashboard middleware, session readers, API redirect resolution, and server actions
 - Fixed NEXT_REDIRECT error across all dashboard server actions by moving `redirect()` outside `try/catch` blocks so Next.js redirect exceptions propagate correctly
 - Switched auth password hashing and verification in `packages/auth` from local scrypt utilities to `bcrypt-ts`

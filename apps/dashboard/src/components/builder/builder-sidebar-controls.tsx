@@ -3,8 +3,8 @@
 import {
   colorSystems,
   stylePresets,
-  templateCatalog,
   type TemplateConfig,
+  templateCatalog,
 } from "@plotkeys/section-registry";
 import { Avatar, AvatarFallback } from "@plotkeys/ui/avatar";
 import { Badge } from "@plotkeys/ui/badge";
@@ -68,7 +68,7 @@ const PickerButton = forwardRef<
   return (
     <button
       className={[
-        "relative w-full rounded-md border border-border/70 bg-background px-3 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+        "relative w-full rounded-md border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
         className,
       ]
         .filter(Boolean)
@@ -412,7 +412,7 @@ function TemplatePicker({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="relative w-full rounded-md border border-border/70 bg-background px-3 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="relative w-full rounded-md border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
           type="button"
         >
           <span className="block text-xs text-muted-foreground">Template</span>
@@ -566,7 +566,7 @@ export function BuilderSidebarControls({
   const namedImageSlots = currentTemplate?.namedImageSlots ?? {};
 
   return (
-    <FieldGroup className="flex flex-col gap-5">
+    <FieldGroup className="flex flex-col gap-3">
       <Field>
         <TemplatePicker
           configId={configId}

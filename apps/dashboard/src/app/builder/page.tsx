@@ -19,6 +19,7 @@ import Link from "next/link";
 
 import { BuilderPreviewPanel } from "../../components/builder/builder-preview-panel";
 import { BuilderSidebarControls } from "../../components/builder/builder-sidebar-controls";
+import { BuilderSidebarDrawer } from "../../components/builder/builder-sidebar-drawer";
 import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../lib/session";
 import {
@@ -113,9 +114,18 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   // Count fields that differ between this draft and the currently-published config.
   const changedFieldCount = (() => {
     if (!publishedConfiguration) return undefined;
-    const draftContent = activeConfiguration.contentJson as Record<string, string>;
-    const liveContent = publishedConfiguration.contentJson as Record<string, string>;
-    const allKeys = new Set([...Object.keys(draftContent), ...Object.keys(liveContent)]);
+    const draftContent = activeConfiguration.contentJson as Record<
+      string,
+      string
+    >;
+    const liveContent = publishedConfiguration.contentJson as Record<
+      string,
+      string
+    >;
+    const allKeys = new Set([
+      ...Object.keys(draftContent),
+      ...Object.keys(liveContent),
+    ]);
     let count = 0;
     for (const key of allKeys) {
       if ((draftContent[key] ?? "") !== (liveContent[key] ?? "")) count++;
@@ -123,8 +133,8 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     return count;
   })();
   const activeTemplateLabel =
-    templateCatalog.find((t) => t.key === activeConfiguration.templateKey)?.name ??
-    activeConfiguration.templateKey;
+    templateCatalog.find((t) => t.key === activeConfiguration.templateKey)
+      ?.name ?? activeConfiguration.templateKey;
 
   const preview = resolveWebsitePresentation({
     companyName: session.activeMembership.companyName,
@@ -152,7 +162,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           </Alert>
         )}
 
-        <aside className="xl:sticky xl:top-4 xl:h-[calc(100svh-2rem)]">
+        <aside className="hidden xl:sticky xl:top-4 xl:block xl:h-[calc(100svh-2rem)]">
           <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
             <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-6 py-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -226,6 +236,22 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 px-1">
             <div className="flex flex-wrap items-center gap-2">
+              <BuilderSidebarDrawer
+                activeConfigName={activeConfiguration.name}
+                activeTemplateLabel={activeTemplateLabel}
+                configId={activeConfiguration.id}
+                configStatus={activeConfiguration.status}
+                currentTemplateKey={activeConfiguration.templateKey}
+                editableFieldCount={preview.editableFields.length}
+                sectionCount={preview.page.sections.length}
+                templateConfig={deserializeTemplateConfig(
+                  activeConfiguration.themeJson as Record<string, string>,
+                )}
+                totalConfigurations={configurations.length}
+                onCreateDraft={createTemplateDraftAction}
+                onUpdateTheme={updateSiteThemeFieldAction}
+                onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
+              />
               <Badge variant="outline">{preview.page.page}</Badge>
             </div>
 
@@ -254,7 +280,9 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
             configId={activeConfiguration.id}
             defaultContent={preview.template.defaultContent}
             editableFields={preview.editableFields}
-            sections={preview.page.sections.map(({ component: _c, ...rest }) => rest)}
+            sections={preview.page.sections.map(
+              ({ component: _c, ...rest }) => rest,
+            )}
             theme={activeConfiguration.themeJson as Record<string, string>}
             onSmartFill={smartFillFieldAction}
             onUpdateField={updateSiteFieldAction}
