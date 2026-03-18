@@ -80,6 +80,30 @@ export async function createSiteConfiguration(
   });
 }
 
+export async function updateSiteConfigurationThemeField(
+  db: Db,
+  input: {
+    configId: string;
+    currentTheme: Record<string, string>;
+    themeKey: string;
+    updatedById: string;
+    value: string;
+    version: number;
+  },
+) {
+  return db.siteConfiguration.update({
+    data: {
+      themeJson: {
+        ...input.currentTheme,
+        [input.themeKey]: input.value,
+      },
+      updatedById: input.updatedById,
+      version: input.version + 1,
+    },
+    where: { id: input.configId },
+  });
+}
+
 export async function updateSiteConfigurationContentField(
   db: Db,
   input: {

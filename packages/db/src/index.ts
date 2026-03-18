@@ -26,6 +26,7 @@ export * from "./queries/company";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
 export * from "./queries/site-configuration";
+export * from "./queries/template-license";
 export * from "./queries/tenant-domain";
 export {
   type DatabaseClientOptions,

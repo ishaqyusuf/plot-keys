@@ -9,13 +9,19 @@ import {
   findCompanyBySlug,
   findLatestDraftForTemplate,
   findLatestSiteConfigurationForCompany,
+  findLicensedTemplateKeys,
   findSiteConfigurationByIdForCompany,
   findTenantOnboardingByUserId,
+  findTemplateLicensesForCompany,
+  grantTemplateLicense,
+  hasTemplateLicense,
   listSyncableTenantDomains,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
+  syncPlanIncludedLicenses,
   updateOnboardingProfile,
   updateSiteConfigurationContentField,
+  updateSiteConfigurationThemeField,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
@@ -89,6 +95,22 @@ function assertTemplateAccess(planTier: SubscriptionTier, templateKey: string) {
       message: templateAccess.message,
     });
   }
+}
+
+/**
+ * License-aware access check: allows access if the company holds a valid
+ * license record for the template, regardless of plan tier.
+ * Falls back to plan-tier check when no license table entry exists.
+ */
+async function assertTemplateAccessWithLicense(
+  db: Db,
+  companyId: string,
+  planTier: SubscriptionTier,
+  templateKey: string,
+) {
+  const licensed = await hasTemplateLicense(db, companyId, templateKey);
+  if (licensed) return; // explicit license overrides plan-tier gating
+  assertTemplateAccess(planTier, templateKey);
 }
 
 async function assertSubdomainAvailability(db: Db, subdomain: string) {
@@ -445,6 +467,81 @@ export const workspaceRouter = createTRPCRouter({
       usageCount: usageCounts[template.key] ?? 0,
     }));
   }),
+  getTemplateLicenses: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const licenses = await findTemplateLicensesForCompany(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+    return licenses.map((l) => ({
+      grantedAt: l.grantedAt,
+      source: l.source,
+      templateKey: l.templateKey,
+    }));
+  }),
+  /**
+   * Claims the free starter-tier template license for the company.
+   * Idempotent — calling it multiple times for the same key is safe.
+   */
+  claimFreeTemplateLicense: membershipProcedure
+    .input(
+      z.object({ templateKey: z.string().trim().min(1, "Template key is required.") }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const template = getTemplateDefinition(input.templateKey);
+
+      if (template.tier !== "starter") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Only starter-tier templates can be claimed as a free pick. Upgrade your plan to access higher-tier templates.",
+        });
+      }
+
+      await grantTemplateLicense(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        grantedById: ctx.auth.session.user.id,
+        source: "free",
+        templateKey: input.templateKey,
+      });
+
+      return { granted: true, templateKey: input.templateKey };
+    }),
+  /**
+   * Syncs plan-included template licenses based on the company's current plan tier.
+   * Call this after a subscription change (upgrade/downgrade).
+   */
+  syncPlanLicenses: membershipProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const company = await findCompanyById(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    if (!company) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+    }
+
+    const { canAccessTemplateTier } = await import("@plotkeys/utils");
+
+    const allowedKeys = templateCatalog
+      .filter((t) => canAccessTemplateTier(company.planTier as "starter" | "plus" | "pro", t.tier))
+      .map((t) => t.key);
+
+    await syncPlanIncludedLicenses(
+      db,
+      ctx.auth.activeMembership.companyId,
+      allowedKeys,
+    );
+
+    const updatedKeys = await findLicensedTemplateKeys(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    return { licensedTemplateKeys: [...updatedKeys] };
+  }),
   createTemplateDraft: membershipProcedure
     .input(createTemplateDraftInputSchema)
     .mutation(async ({ ctx, input }) => {
@@ -461,7 +558,12 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      assertTemplateAccess(company.planTier, input.templateKey);
+      await assertTemplateAccessWithLicense(
+        db,
+        company.id,
+        company.planTier,
+        input.templateKey,
+      );
 
       const existingDraft = await findLatestDraftForTemplate(db, {
         companyId: company.id,
@@ -691,6 +793,78 @@ export const workspaceRouter = createTRPCRouter({
 
       return {
         configId: configuration.id,
+      };
+    }),
+  updateSiteThemeField: membershipProcedure
+    .input(
+      z.object({
+        configId: z.string().trim().min(1, "Configuration id is required."),
+        themeKey: z.string().trim().min(1, "Theme key is required."),
+        value: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const configuration = await findSiteConfigurationByIdForCompany(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        configId: input.configId,
+      });
+
+      if (!configuration) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Template configuration not found.",
+        });
+      }
+
+      await updateSiteConfigurationThemeField(db, {
+        configId: configuration.id,
+        currentTheme: configuration.themeJson as Record<string, string>,
+        themeKey: input.themeKey,
+        updatedById: ctx.auth.session.user.id,
+        value: input.value,
+        version: configuration.version,
+      });
+
+      return { configId: configuration.id };
+    }),
+  getSiteRenderData: authenticatedProcedure
+    .input(
+      z.object({
+        subdomain: z.string().trim().min(1, "Subdomain is required."),
+      }),
+    )
+    .query(async ({ input }) => {
+      const db = getDb();
+
+      const company = await findCompanyBySlug(db, input.subdomain);
+      if (!company) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `No workspace found for subdomain "${input.subdomain}".`,
+        });
+      }
+
+      const configuration = await findLatestSiteConfigurationForCompany(
+        db,
+        company.id,
+      );
+
+      if (!configuration) {
+        return null;
+      }
+
+      return {
+        companyId: company.id,
+        companyName: company.name,
+        configId: configuration.id,
+        content: configuration.contentJson as Record<string, string>,
+        market: company.market,
+        status: configuration.status,
+        subdomain: input.subdomain,
+        templateKey: configuration.templateKey,
+        theme: configuration.themeJson as Record<string, string>,
+        version: configuration.version,
       };
     }),
 });
