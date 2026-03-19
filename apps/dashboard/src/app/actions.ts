@@ -838,3 +838,198 @@ export async function syncDomainsAction() {
   redirect(redirectUrl);
 }
 
+// ─── Team management ──────────────────────────────────────────────────────
+
+export async function inviteMemberAction(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.inviteMember({ email, role });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send invite.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/team?invited=1");
+  }
+}
+
+export async function updateMemberRoleAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.updateMemberRole({ membershipId, role });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update role.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function suspendMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.suspendMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to suspend member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function reactivateMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.reactivateMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to reactivate member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function removeMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.removeMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to remove member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function revokeInviteAction(formData: FormData) {
+  const inviteId = String(formData.get("inviteId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.revokeInvite({ inviteId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to revoke invite.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+// ─── Property media + publish state ──────────────────────────────────────
+
+export async function updatePropertyPublishStateAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const publishState = String(formData.get("publishState") ?? "draft") as
+    | "draft"
+    | "published"
+    | "archived";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.updatePublishState({ propertyId, publishState });
+    revalidatePath("/properties");
+  } catch {
+    // Silent — page reload will show current state
+  }
+}
+
+export async function addPropertyMediaAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const url = String(formData.get("url") ?? "");
+  const kind = (String(formData.get("kind") ?? "image")) as
+    | "image"
+    | "floor_plan"
+    | "virtual_tour";
+  const isCover = formData.get("isCover") === "true";
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
+    revalidatePath("/properties");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to add media.";
+    errorRedirect = createRedirectUrl("/properties", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function deletePropertyMediaAction(formData: FormData) {
+  const mediaId = String(formData.get("mediaId") ?? "");
+  const propertyId = String(formData.get("propertyId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.deleteMedia({ mediaId, propertyId });
+    revalidatePath("/properties");
+  } catch {
+    // Silent
+  }
+}
+
+export async function setPropertyCoverAction(formData: FormData) {
+  const mediaId = String(formData.get("mediaId") ?? "");
+  const propertyId = String(formData.get("propertyId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.setCover({ mediaId, propertyId });
+    revalidatePath("/properties");
+  } catch {
+    // Silent
+  }
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────
+
+export async function markAllNotificationsReadAction() {
+  try {
+    const caller = await createServerCaller();
+    await caller.notifications.markAllRead();
+    revalidatePath("/notifications");
+  } catch {
+    // Silent
+  }
+}
+
+

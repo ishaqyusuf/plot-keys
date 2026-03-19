@@ -1,0 +1,23 @@
+enum PropertyMediaKind {
+  image
+  floor_plan
+  virtual_tour
+
+  @@map("property_media_kind")
+}
+
+/// One media asset (image, floor plan, or virtual tour URL) belonging to a property.
+model PropertyMedia {
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  propertyId String            @map("property_id") @db.Uuid
+  kind       PropertyMediaKind @default(image)
+  url        String
+  isCover    Boolean           @default(false) @map("is_cover")
+  sortOrder  Int               @default(0) @map("sort_order")
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  property   Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId], map: "property_media_property_id_idx")
+  @@index([propertyId, isCover], map: "property_media_property_cover_idx")
+  @@map("property_media")
+}

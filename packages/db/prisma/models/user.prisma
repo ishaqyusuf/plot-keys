@@ -19,6 +19,8 @@ model User {
   accounts                  Account[]
   tenantOnboarding          TenantOnboarding?
   aiUsageLogs               AiUsageLog[]
+  sentTeamInvites           TeamInvite[]        @relation("TeamInviteInvitedBy")
+  notifications             Notification[]
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")

@@ -1,0 +1,7 @@
+enum PropertyPublishState {
+  draft
+  published
+  archived
+
+  @@map("property_publish_state")
+}

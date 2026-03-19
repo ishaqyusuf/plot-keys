@@ -26,6 +26,8 @@ model Company {
   aiUsageLogs        AiUsageLog[]
   aiCreditLedger     AiCreditLedger[]
   analyticsEvents    AnalyticsEvent[]
+  teamInvites        TeamInvite[]
+  notifications      Notification[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")
@@ -33,3 +35,4 @@ model Company {
   @@index([deletedAt], map: "companies_deleted_at_idx")
   @@map("companies")
 }
+

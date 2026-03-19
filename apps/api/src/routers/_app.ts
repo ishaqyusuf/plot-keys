@@ -2,12 +2,18 @@ import { createTRPCRouter } from "../lib.trpc";
 import { authRouter } from "./auth.route";
 import { formsRouter } from "./forms.route";
 import { healthRouter } from "./health.route";
+import { notificationsRouter } from "./notifications.route";
+import { propertyMediaRouter } from "./property-media.route";
+import { teamRouter } from "./team.route";
 import { workspaceRouter } from "./workspace.route";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   forms: formsRouter,
   health: healthRouter,
+  notifications: notificationsRouter,
+  propertyMedia: propertyMediaRouter,
+  team: teamRouter,
   workspace: workspaceRouter,
 });
 

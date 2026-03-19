@@ -27,10 +27,13 @@ export * from "./queries/appointments";
 export * from "./queries/auth";
 export * from "./queries/company";
 export * from "./queries/leads";
+export * from "./queries/notifications";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
+export * from "./queries/property-media";
 export * from "./queries/site-configuration";
 export * from "./queries/stock-image-license";
+export * from "./queries/team";
 export * from "./queries/template-license";
 export * from "./queries/tenant-domain";
 export * from "./queries/website";

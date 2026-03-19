@@ -1,7 +1,7 @@
 model Property {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  companyId    String         @map("company_id") @db.Uuid
-  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId    String               @map("company_id") @db.Uuid
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   title        String
   description  String?
   price        String?
@@ -9,18 +9,21 @@ model Property {
   bedrooms     Int?
   bathrooms    Int?
   specs        String?
-  imageUrl     String?        @map("image_url")
-  status       PropertyStatus @default(active)
-  featured     Boolean        @default(false)
-  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  imageUrl     String?              @map("image_url")
+  status       PropertyStatus       @default(active)
+  publishState PropertyPublishState @default(draft) @map("publish_state")
+  featured     Boolean              @default(false)
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?            @map("deleted_at") @db.Timestamptz(6)
   appointments Appointment[]
+  media        PropertyMedia[]
 
   @@index([companyId], map: "properties_company_id_idx")
   @@index([status], map: "properties_status_idx")
   @@index([featured], map: "properties_featured_idx")
   @@index([deletedAt], map: "properties_deleted_at_idx")
+  @@index([companyId, publishState], map: "properties_company_publish_state_idx")
   @@map("properties")
 }
 

@@ -1,4 +1,5 @@
 import { hasActiveMembership } from "@plotkeys/auth";
+import type { MembershipRole } from "@plotkeys/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 
@@ -48,3 +49,44 @@ export const membershipProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+// Role hierarchy — higher rank means more privileged
+const roleRank: Record<MembershipRole, number> = {
+  platform_admin: 99,
+  owner: 4,
+  admin: 3,
+  agent: 2,
+  staff: 1,
+};
+
+/**
+ * Returns true when `actual` meets or exceeds `required` in the role hierarchy.
+ */
+export function isRoleAtLeast(actual: MembershipRole, required: MembershipRole): boolean {
+  return roleRank[actual] >= roleRank[required];
+}
+
+/**
+ * Throws FORBIDDEN if the caller's role is below the required minimum.
+ * Must be called inside a membershipProcedure context.
+ */
+export function assertMinRole(actual: MembershipRole, required: MembershipRole): void {
+  if (!isRoleAtLeast(actual, required)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: `This action requires ${required} role or above.`,
+    });
+  }
+}
+
+/**
+ * Procedure factory for role-gated endpoints.
+ * Usage: minRoleProcedure("admin")
+ */
+export function minRoleProcedure(required: MembershipRole) {
+  return membershipProcedure.use(({ ctx, next }) => {
+    assertMinRole(ctx.auth.activeMembership.role, required);
+    return next({ ctx });
+  });
+}
+
