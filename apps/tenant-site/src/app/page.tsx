@@ -1,6 +1,12 @@
-import { createPrismaClient, listAgentsForCompany, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listAgentsForCompany,
+  listFeaturedProperties,
+  resolveTenantByHostname,
+} from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
+  deserializeTemplateConfig,
   resolveWebsitePresentation,
   sampleHomePage,
   sampleTheme,
@@ -149,9 +155,12 @@ export default async function TenantWebsiteHomePage({
           </div>
         </div>
 
-        {preview.page.sections.map((section) =>
-          renderSection(section, preview.theme),
-        )}
+        {(() => {
+          const visibleSections = deserializeTemplateConfig(preview.theme).visibleSections;
+          return preview.page.sections
+            .filter((section) => visibleSections?.[section.type] !== false)
+            .map((section) => renderSection(section, preview.theme));
+        })()}
       </div>
     </main>
   );

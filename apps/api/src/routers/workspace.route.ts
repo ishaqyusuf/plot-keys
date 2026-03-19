@@ -1,6 +1,7 @@
 import {
   completeTenantOnboarding,
   countCompaniesByTemplateKey,
+  countLeadsByStatus,
   createAgent,
   createCompanyOnboardingBundle,
   createPrismaClient,
@@ -21,6 +22,7 @@ import {
   grantTemplateLicense,
   hasTemplateLicense,
   listAgentsForCompany,
+  listLeadsForCompany,
   listPropertiesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
@@ -32,6 +34,7 @@ import {
   updateAgent,
   updateCompanyLogo,
   updateCompanyPlan,
+  updateLeadStatus,
   updateOnboardingProfile,
   updateProperty,
   updateSiteConfigurationContentField,
@@ -71,9 +74,11 @@ import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
   createTemplateDraftInputSchema,
+  initializeCheckoutInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
   smartFillFieldInputSchema,
+  updateLeadStatusInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
 
@@ -259,6 +264,25 @@ export const workspaceRouter = createTRPCRouter({
 
       // Mark the onboarding record as completed
       await completeTenantOnboarding(db, ctx.auth.session.user.id);
+
+      // Grant the free template license for the chosen template
+      await grantTemplateLicense(db, {
+        companyId: siteConfiguration.companyId,
+        grantedById: ctx.auth.session.user.id,
+        source: "free",
+        templateKey,
+      });
+
+      // Auto-trigger Vercel domain provisioning in the background
+      if (isVercelDomainProvisioningConfigured()) {
+        runInBackground(
+          domainSyncHandler,
+          { companyId: siteConfiguration.companyId },
+          { baseDelayMs: 2000, maxAttempts: 4 },
+        ).catch(() => {
+          // Domain sync failures are non-blocking; tenants can retry later
+        });
+      }
 
       return {
         configId: siteConfiguration.id,
@@ -1097,14 +1121,23 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const { propertyId, ...data } = input;
-      return updateProperty(db, propertyId, ctx.auth.activeMembership.companyId, data);
+      return updateProperty(
+        db,
+        propertyId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
     }),
 
   deleteProperty: membershipProcedure
     .input(z.object({ propertyId: z.string().trim().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      await deleteProperty(db, input.propertyId, ctx.auth.activeMembership.companyId);
+      await deleteProperty(
+        db,
+        input.propertyId,
+        ctx.auth.activeMembership.companyId,
+      );
       return { deleted: true };
     }),
 
@@ -1118,7 +1151,10 @@ export const workspaceRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!result) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Property not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Property not found.",
+        });
       }
       return { featured: result.featured, propertyId: result.id };
     }),
@@ -1170,7 +1206,12 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const { agentId, ...data } = input;
-      return updateAgent(db, agentId, ctx.auth.activeMembership.companyId, data);
+      return updateAgent(
+        db,
+        agentId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
     }),
 
   deleteAgent: membershipProcedure
@@ -1194,5 +1235,120 @@ export const workspaceRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found." });
       }
       return { agentId: result.id, featured: result.featured };
+    }),
+  listLeads: membershipProcedure
+    .input(
+      z
+        .object({
+          status: z
+            .enum(["new", "contacted", "qualified", "closed"])
+            .optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listLeadsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        { status: input?.status, limit: 100 },
+      );
+    }),
+  getLeadStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countLeadsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+  updateLeadStatus: membershipProcedure
+    .input(updateLeadStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const lead = await updateLeadStatus(db, {
+        leadId: input.leadId,
+        notes: input.notes,
+        status: input.status,
+      });
+      return { leadId: lead.id, status: lead.status };
+    }),
+
+  // ─── Billing ──────────────────────────────────────────────────────────
+
+  getBillingInfo: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const company = await findCompanyById(db, companyId);
+    if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+
+    const recentItems = await db.billingLineItem.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      where: { companyId },
+    });
+
+    return {
+      planEndsAt: company.planEndsAt,
+      planStartedAt: company.planStartedAt,
+      planStatus: company.planStatus,
+      planTier: company.planTier,
+      recentItems: recentItems.map((item) => ({
+        amount: item.amountMinorUnits,
+        createdAt: item.createdAt,
+        currency: item.currency,
+        id: item.id,
+        kind: item.kind,
+        paidAt: item.paidAt,
+        providerRef: item.providerRef,
+        status: item.status,
+      })),
+    };
+  }),
+
+  initializeCheckout: membershipProcedure
+    .input(initializeCheckoutInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { initializeTransaction, getPlanPricing } = await import("@plotkeys/utils");
+
+      const companyId = ctx.auth.activeMembership.companyId;
+      const db = getDb();
+      const company = await findCompanyById(db, companyId);
+      if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+
+      const pricing = getPlanPricing(input.planTier);
+      const price = input.interval === "monthly" ? pricing.monthly : pricing.annual;
+
+      if (price.minorUnits === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot checkout for a free plan.",
+        });
+      }
+
+      const callbackUrl = `${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "https://dashboard.plotkeys.com"}/billing/callback`;
+
+      const tx = await initializeTransaction({
+        amount: price.minorUnits,
+        callbackUrl,
+        email: ctx.auth.session.user.email ?? "",
+        metadata: {
+          companyId,
+          interval: input.interval,
+          planTier: input.planTier,
+        },
+      });
+
+      // Record a pending billing line item
+      await db.billingLineItem.create({
+        data: {
+          amountMinorUnits: price.minorUnits,
+          companyId,
+          currency: "NGN",
+          kind: "subscription",
+          meta: { interval: input.interval, planTier: input.planTier },
+          providerRef: tx.reference,
+          status: "pending",
+        },
+      }).catch(() => null);
+
+      return { authorizationUrl: tx.authorization_url, reference: tx.reference };
     }),
 });

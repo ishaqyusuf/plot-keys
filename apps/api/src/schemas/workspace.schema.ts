@@ -50,6 +50,11 @@ export const changePlanInputSchema = z.object({
   providerRef: z.string().trim().optional(),
 });
 
+export const initializeCheckoutInputSchema = z.object({
+  interval: z.enum(["monthly", "annual"]),
+  planTier: z.enum(["plus", "pro"]),
+});
+
 export const updateSiteFieldInputSchema = z.object({
   configId: z.string().trim().min(1, "Configuration id is required."),
   contentKey: z.string().trim().min(1, "Content key is required."),
@@ -69,6 +74,13 @@ export const smartFillFieldInputSchema = z.object({
   shortDetail: z.string().trim().min(1, "Field detail is required."),
 });
 
+export const updateLeadStatusInputSchema = z.object({
+  leadId: z.string().trim().min(1, "Lead id is required."),
+  notes: z.string().trim().optional(),
+  status: z.enum(["new", "contacted", "qualified", "closed"]),
+});
+
+export type UpdateLeadStatusInput = z.infer<typeof updateLeadStatusInputSchema>;
 export type CompleteOnboardingInput = z.infer<
   typeof completeOnboardingInputSchema
 >;

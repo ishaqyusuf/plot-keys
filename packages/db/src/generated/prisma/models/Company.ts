@@ -254,6 +254,7 @@ export type CompanyWhereInput = {
   agents?: Prisma.AgentListRelationFilter
   templateLicenses?: Prisma.TenantTemplateLicenseListRelationFilter
   billingLineItems?: Prisma.BillingLineItemListRelationFilter
+  leads?: Prisma.LeadListRelationFilter
 }
 
 export type CompanyOrderByWithRelationInput = {
@@ -278,6 +279,7 @@ export type CompanyOrderByWithRelationInput = {
   agents?: Prisma.AgentOrderByRelationAggregateInput
   templateLicenses?: Prisma.TenantTemplateLicenseOrderByRelationAggregateInput
   billingLineItems?: Prisma.BillingLineItemOrderByRelationAggregateInput
+  leads?: Prisma.LeadOrderByRelationAggregateInput
 }
 
 export type CompanyWhereUniqueInput = Prisma.AtLeast<{
@@ -305,6 +307,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   agents?: Prisma.AgentListRelationFilter
   templateLicenses?: Prisma.TenantTemplateLicenseListRelationFilter
   billingLineItems?: Prisma.BillingLineItemListRelationFilter
+  leads?: Prisma.LeadListRelationFilter
 }, "id">
 
 export type CompanyOrderByWithAggregationInput = {
@@ -367,6 +370,7 @@ export type CompanyCreateInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateInput = {
@@ -391,6 +395,7 @@ export type CompanyUncheckedCreateInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUpdateInput = {
@@ -415,6 +420,7 @@ export type CompanyUpdateInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateInput = {
@@ -439,6 +445,7 @@ export type CompanyUncheckedUpdateInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateManyInput = {
@@ -578,6 +585,20 @@ export type EnumCompanyPlanStatusFieldUpdateOperationsInput = {
   set?: $Enums.CompanyPlanStatus
 }
 
+export type CompanyCreateNestedOneWithoutLeadsInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutLeadsInput, Prisma.CompanyUncheckedCreateWithoutLeadsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutLeadsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+}
+
+export type CompanyUpdateOneRequiredWithoutLeadsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutLeadsInput, Prisma.CompanyUncheckedCreateWithoutLeadsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutLeadsInput
+  upsert?: Prisma.CompanyUpsertWithoutLeadsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutLeadsInput, Prisma.CompanyUpdateWithoutLeadsInput>, Prisma.CompanyUncheckedUpdateWithoutLeadsInput>
+}
+
 export type CompanyCreateNestedOneWithoutMembershipsInput = {
   create?: Prisma.XOR<Prisma.CompanyCreateWithoutMembershipsInput, Prisma.CompanyUncheckedCreateWithoutMembershipsInput>
   connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutMembershipsInput
@@ -683,6 +704,7 @@ export type CompanyCreateWithoutAgentsInput = {
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutAgentsInput = {
@@ -706,6 +728,7 @@ export type CompanyUncheckedCreateWithoutAgentsInput = {
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutAgentsInput = {
@@ -745,6 +768,7 @@ export type CompanyUpdateWithoutAgentsInput = {
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutAgentsInput = {
@@ -768,6 +792,7 @@ export type CompanyUncheckedUpdateWithoutAgentsInput = {
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutBillingLineItemsInput = {
@@ -791,6 +816,7 @@ export type CompanyCreateWithoutBillingLineItemsInput = {
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
@@ -814,6 +840,7 @@ export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutBillingLineItemsInput = {
@@ -853,6 +880,7 @@ export type CompanyUpdateWithoutBillingLineItemsInput = {
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
@@ -876,6 +904,119 @@ export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyCreateWithoutLeadsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyUncheckedCreateWithoutLeadsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyCreateOrConnectWithoutLeadsInput = {
+  where: Prisma.CompanyWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutLeadsInput, Prisma.CompanyUncheckedCreateWithoutLeadsInput>
+}
+
+export type CompanyUpsertWithoutLeadsInput = {
+  update: Prisma.XOR<Prisma.CompanyUpdateWithoutLeadsInput, Prisma.CompanyUncheckedUpdateWithoutLeadsInput>
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutLeadsInput, Prisma.CompanyUncheckedCreateWithoutLeadsInput>
+  where?: Prisma.CompanyWhereInput
+}
+
+export type CompanyUpdateToOneWithWhereWithoutLeadsInput = {
+  where?: Prisma.CompanyWhereInput
+  data: Prisma.XOR<Prisma.CompanyUpdateWithoutLeadsInput, Prisma.CompanyUncheckedUpdateWithoutLeadsInput>
+}
+
+export type CompanyUpdateWithoutLeadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyUncheckedUpdateWithoutLeadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutMembershipsInput = {
@@ -899,6 +1040,7 @@ export type CompanyCreateWithoutMembershipsInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutMembershipsInput = {
@@ -922,6 +1064,7 @@ export type CompanyUncheckedCreateWithoutMembershipsInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutMembershipsInput = {
@@ -961,6 +1104,7 @@ export type CompanyUpdateWithoutMembershipsInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutMembershipsInput = {
@@ -984,6 +1128,7 @@ export type CompanyUncheckedUpdateWithoutMembershipsInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutPropertiesInput = {
@@ -1007,6 +1152,7 @@ export type CompanyCreateWithoutPropertiesInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutPropertiesInput = {
@@ -1030,6 +1176,7 @@ export type CompanyUncheckedCreateWithoutPropertiesInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutPropertiesInput = {
@@ -1069,6 +1216,7 @@ export type CompanyUpdateWithoutPropertiesInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutPropertiesInput = {
@@ -1092,6 +1240,7 @@ export type CompanyUncheckedUpdateWithoutPropertiesInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutSiteConfigurationsInput = {
@@ -1115,6 +1264,7 @@ export type CompanyCreateWithoutSiteConfigurationsInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
@@ -1138,6 +1288,7 @@ export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutSiteConfigurationsInput = {
@@ -1177,6 +1328,7 @@ export type CompanyUpdateWithoutSiteConfigurationsInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
@@ -1200,6 +1352,7 @@ export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutTenantDomainsInput = {
@@ -1223,6 +1376,7 @@ export type CompanyCreateWithoutTenantDomainsInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
@@ -1246,6 +1400,7 @@ export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutTenantDomainsInput = {
@@ -1285,6 +1440,7 @@ export type CompanyUpdateWithoutTenantDomainsInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
@@ -1308,6 +1464,7 @@ export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutTemplateLicensesInput = {
@@ -1331,6 +1488,7 @@ export type CompanyCreateWithoutTemplateLicensesInput = {
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
@@ -1354,6 +1512,7 @@ export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutTemplateLicensesInput = {
@@ -1393,6 +1552,7 @@ export type CompanyUpdateWithoutTemplateLicensesInput = {
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
@@ -1416,6 +1576,7 @@ export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutWebsiteInput = {
@@ -1439,6 +1600,7 @@ export type CompanyCreateWithoutWebsiteInput = {
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutWebsiteInput = {
@@ -1462,6 +1624,7 @@ export type CompanyUncheckedCreateWithoutWebsiteInput = {
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
   billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutWebsiteInput = {
@@ -1501,6 +1664,7 @@ export type CompanyUpdateWithoutWebsiteInput = {
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutWebsiteInput = {
@@ -1524,6 +1688,7 @@ export type CompanyUncheckedUpdateWithoutWebsiteInput = {
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 
@@ -1539,6 +1704,7 @@ export type CompanyCountOutputType = {
   agents: number
   templateLicenses: number
   billingLineItems: number
+  leads: number
 }
 
 export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1549,6 +1715,7 @@ export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   agents?: boolean | CompanyCountOutputTypeCountAgentsArgs
   templateLicenses?: boolean | CompanyCountOutputTypeCountTemplateLicensesArgs
   billingLineItems?: boolean | CompanyCountOutputTypeCountBillingLineItemsArgs
+  leads?: boolean | CompanyCountOutputTypeCountLeadsArgs
 }
 
 /**
@@ -1610,6 +1777,13 @@ export type CompanyCountOutputTypeCountBillingLineItemsArgs<ExtArgs extends runt
   where?: Prisma.BillingLineItemWhereInput
 }
 
+/**
+ * CompanyCountOutputType without action
+ */
+export type CompanyCountOutputTypeCountLeadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeadWhereInput
+}
+
 
 export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1633,6 +1807,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   agents?: boolean | Prisma.Company$agentsArgs<ExtArgs>
   templateLicenses?: boolean | Prisma.Company$templateLicensesArgs<ExtArgs>
   billingLineItems?: boolean | Prisma.Company$billingLineItemsArgs<ExtArgs>
+  leads?: boolean | Prisma.Company$leadsArgs<ExtArgs>
   _count?: boolean | Prisma.CompanyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["company"]>
 
@@ -1694,6 +1869,7 @@ export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   agents?: boolean | Prisma.Company$agentsArgs<ExtArgs>
   templateLicenses?: boolean | Prisma.Company$templateLicensesArgs<ExtArgs>
   billingLineItems?: boolean | Prisma.Company$billingLineItemsArgs<ExtArgs>
+  leads?: boolean | Prisma.Company$leadsArgs<ExtArgs>
   _count?: boolean | Prisma.CompanyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CompanyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1710,6 +1886,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     agents: Prisma.$AgentPayload<ExtArgs>[]
     templateLicenses: Prisma.$TenantTemplateLicensePayload<ExtArgs>[]
     billingLineItems: Prisma.$BillingLineItemPayload<ExtArgs>[]
+    leads: Prisma.$LeadPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2127,6 +2304,7 @@ export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends runtime.
   agents<T extends Prisma.Company$agentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$agentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   templateLicenses<T extends Prisma.Company$templateLicensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$templateLicensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantTemplateLicensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   billingLineItems<T extends Prisma.Company$billingLineItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$billingLineItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillingLineItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  leads<T extends Prisma.Company$leadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$leadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2746,6 +2924,30 @@ export type Company$billingLineItemsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.BillingLineItemScalarFieldEnum | Prisma.BillingLineItemScalarFieldEnum[]
+}
+
+/**
+ * Company.leads
+ */
+export type Company$leadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Lead
+   */
+  select?: Prisma.LeadSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Lead
+   */
+  omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  where?: Prisma.LeadWhereInput
+  orderBy?: Prisma.LeadOrderByWithRelationInput | Prisma.LeadOrderByWithRelationInput[]
+  cursor?: Prisma.LeadWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeadScalarFieldEnum | Prisma.LeadScalarFieldEnum[]
 }
 
 /**

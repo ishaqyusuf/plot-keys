@@ -74,6 +74,11 @@ export type BillingLineItem = Prisma.BillingLineItemModel
  */
 export type Company = Prisma.CompanyModel
 /**
+ * Model Lead
+ * 
+ */
+export type Lead = Prisma.LeadModel
+/**
  * Model Membership
  * 
  */

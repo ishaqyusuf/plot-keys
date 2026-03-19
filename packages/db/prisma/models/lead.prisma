@@ -1,0 +1,19 @@
+model Lead {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String     @map("company_id") @db.Uuid
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  source    String     @default("contact_form")
+  status    LeadStatus @default(new)
+  notes     String?
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([companyId], map: "leads_company_id_idx")
+  @@index([companyId, status], map: "leads_company_status_idx")
+  @@index([createdAt], map: "leads_created_at_idx")
+  @@map("leads")
+}

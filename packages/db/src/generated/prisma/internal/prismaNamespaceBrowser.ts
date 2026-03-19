@@ -57,6 +57,7 @@ export const ModelName = {
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
   Company: 'Company',
+  Lead: 'Lead',
   Membership: 'Membership',
   Property: 'Property',
   SiteConfiguration: 'SiteConfiguration',
@@ -185,6 +186,23 @@ export const CompanyScalarFieldEnum = {
 } as const
 
 export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
+
+
+export const LeadScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  message: 'message',
+  source: 'source',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
 
 
 export const MembershipScalarFieldEnum = {
