@@ -1,0 +1,16 @@
+/// License record granting a tenant access to a stock image.
+/// Free images don't need a license; only standard/premium tier images.
+model TenantStockImageLicense {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  imageId     String   @map("image_id")
+  grantedAt   DateTime @default(now()) @map("granted_at") @db.Timestamptz(6)
+  providerRef String?  @map("provider_ref")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, imageId], map: "stock_image_licenses_company_image_uniq")
+  @@index([companyId], map: "stock_image_licenses_company_id_idx")
+  @@map("tenant_stock_image_licenses")
+}

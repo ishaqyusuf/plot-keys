@@ -241,25 +241,25 @@ export default function BuilderPreviewPage() {
                   Color System
                 </p>
                 <div className="grid grid-cols-3 gap-2">
-                  {colorSystems.map((system) => (
+                  {Object.entries(colorSystems).map(([key, system]) => (
                     <button
-                      key={system.id}
+                      key={key}
                       className="flex flex-col items-center gap-1.5 rounded-lg border border-border/70 px-2 py-2 text-xs transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
                       type="button"
-                      title={system.displayName}
+                      title={system.name}
                     >
                       <div className="flex gap-1">
                         <div
                           className="size-3 rounded-full border border-border/50"
-                          style={{ backgroundColor: system.colors.primary }}
+                          style={{ backgroundColor: `hsl(${system.light.primary})` }}
                         />
                         <div
                           className="size-3 rounded-full border border-border/50"
-                          style={{ backgroundColor: system.colors.secondary }}
+                          style={{ backgroundColor: `hsl(${system.light.secondary})` }}
                         />
                       </div>
                       <span className="truncate font-medium text-muted-foreground">
-                        {system.displayName}
+                        {system.name}
                       </span>
                     </button>
                   ))}

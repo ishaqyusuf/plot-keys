@@ -2,6 +2,7 @@ import {
   createPrismaClient,
   listAgentsForCompany,
   listFeaturedProperties,
+  resolvePublishedForCompany,
   resolveTenantByHostname,
 } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
@@ -82,13 +83,8 @@ export default async function TenantWebsiteHomePage({
         : null;
 
     if (company) {
-      const publishedConfiguration = await prisma.siteConfiguration.findFirst({
-        where: {
-          companyId: company.id,
-          deletedAt: null,
-          status: "published",
-        },
-      });
+      // Phase 3: Prefer WebsiteVersion, fallback to SiteConfiguration
+      const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
 
       if (publishedConfiguration) {
         matchedHostname = resolvedTenant?.hostname ?? matchedHostname;

@@ -9,6 +9,10 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Agent'
+export type * from './models/AiUsageLog'
+export type * from './models/AiCreditLedger'
+export type * from './models/AnalyticsEvent'
+export type * from './models/Appointment'
 export type * from './models/Session'
 export type * from './models/Account'
 export type * from './models/Verification'
@@ -18,6 +22,7 @@ export type * from './models/Lead'
 export type * from './models/Membership'
 export type * from './models/Property'
 export type * from './models/SiteConfiguration'
+export type * from './models/TenantStockImageLicense'
 export type * from './models/TenantDomain'
 export type * from './models/TenantOnboarding'
 export type * from './models/TenantTemplateLicense'

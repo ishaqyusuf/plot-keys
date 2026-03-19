@@ -1,0 +1,53 @@
+/// Log of every AI generation call, for usage tracking and credit deduction.
+model AiUsageLog {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String @map("company_id") @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+
+  /// Feature identifier (e.g. "smart_fill", "property_description", "blog_article")
+  feature     String
+  /// Credits consumed by this call
+  creditsUsed Int    @map("credits_used")
+  /// Raw LLM tokens consumed (for analytics)
+  tokensUsed  Int?   @map("tokens_used")
+
+  /// Whether the generation succeeded
+  success Boolean @default(true)
+
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([companyId], map: "ai_usage_logs_company_id_idx")
+  @@index([companyId, feature], map: "ai_usage_logs_company_feature_idx")
+  @@index([createdAt], map: "ai_usage_logs_created_at_idx")
+  @@map("ai_usage_logs")
+}
+
+/// Tracks credit balance changes via a ledger pattern.
+/// Each row is a credit movement (grant or spend).
+model AiCreditLedger {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String @map("company_id") @db.Uuid
+
+  /// Positive = credits added (plan allowance, top-up, promo)
+  /// Negative = credits spent (AI usage)
+  amount Int
+
+  /// Category of credit movement
+  reason      String // "plan_allowance", "top_up", "promo", "usage", "expiry"
+  description String?
+
+  /// Reference to the source (BillingLineItem ID, AiUsageLog ID, etc.)
+  referenceId String? @map("reference_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId], map: "ai_credit_ledger_company_id_idx")
+  @@index([createdAt], map: "ai_credit_ledger_created_at_idx")
+  @@map("ai_credit_ledger")
+}

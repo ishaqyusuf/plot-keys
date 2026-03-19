@@ -1,13 +1,17 @@
 import {
   completeTenantOnboarding,
+  countAppointmentsByStatus,
   countCompaniesByTemplateKey,
   countLeadsByStatus,
   createAgent,
+  createAppointment,
   createCompanyOnboardingBundle,
   createPrismaClient,
   createProperty,
   createSiteConfiguration,
+  deductAiCredits,
   deleteAgent,
+  deleteAppointment,
   deleteProperty,
   type Db,
   findCompanyById,
@@ -19,19 +23,30 @@ import {
   findSiteConfigurationByIdForCompany,
   findTenantOnboardingByUserId,
   findTemplateLicensesForCompany,
+  getAiCreditBalance,
+  getAiUsageStats,
+  getAnalyticsSummary,
+  getPageViewsByDay,
+  grantAiCredits,
+  grantStockImageLicense,
   grantTemplateLicense,
+  hasStockImageLicense,
   hasTemplateLicense,
   listAgentsForCompany,
+  listAppointmentsForCompany,
   listLeadsForCompany,
   listPropertiesForCompany,
+  listStockImageLicensesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
+  logAiUsage,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
   toggleAgentFeatured,
   togglePropertyFeatured,
   updateAgent,
+  updateAppointmentStatus,
   updateCompanyLogo,
   updateCompanyPlan,
   updateLeadStatus,
@@ -73,11 +88,13 @@ import { generateFieldContent } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
+  createAppointmentInputSchema,
   createTemplateDraftInputSchema,
   initializeCheckoutInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
   smartFillFieldInputSchema,
+  updateAppointmentStatusInputSchema,
   updateLeadStatusInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
@@ -849,6 +866,22 @@ export const workspaceRouter = createTRPCRouter({
         templateKey: configuration.templateKey,
       });
 
+      // Deduct credits if AI was actually used
+      if (aiSuggestion) {
+        const deducted = await deductAiCredits(db, {
+          companyId: ctx.auth.activeMembership.companyId,
+          feature: "smart_fill",
+        });
+
+        await logAiUsage(db, {
+          companyId: ctx.auth.activeMembership.companyId,
+          creditsUsed: deducted ? 2 : 0,
+          feature: "smart_fill",
+          meta: { contentKey: input.contentKey },
+          userId: ctx.auth.session.user.id,
+        }).catch(() => null);
+      }
+
       // Fall back to deterministic placeholder when ANTHROPIC_API_KEY is absent
       const suggestion =
         aiSuggestion ??
@@ -1351,4 +1384,173 @@ export const workspaceRouter = createTRPCRouter({
 
       return { authorizationUrl: tx.authorization_url, reference: tx.reference };
     }),
+
+  // ─── Appointments ─────────────────────────────────────────────────────
+
+  listAppointments: membershipProcedure
+    .input(
+      z.object({
+        status: z.string().optional(),
+        upcoming: z.boolean().optional(),
+      }).optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listAppointmentsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        { status: input?.status, upcoming: input?.upcoming, limit: 50 },
+      );
+    }),
+
+  getAppointmentStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countAppointmentsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  createAppointment: membershipProcedure
+    .input(createAppointmentInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createAppointment(db, {
+        agentId: input.agentId,
+        companyId: ctx.auth.activeMembership.companyId,
+        email: input.email,
+        leadId: input.leadId,
+        location: input.location,
+        name: input.name,
+        notes: input.notes,
+        phone: input.phone,
+        propertyId: input.propertyId,
+        scheduledAt: new Date(input.scheduledAt),
+      });
+    }),
+
+  updateAppointmentStatus: membershipProcedure
+    .input(updateAppointmentStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return updateAppointmentStatus(db, {
+        appointmentId: input.appointmentId,
+        notes: input.notes,
+        status: input.status,
+      });
+    }),
+
+  deleteAppointment: membershipProcedure
+    .input(z.object({ appointmentId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return deleteAppointment(db, input.appointmentId);
+    }),
+
+  // ─── Stock Images ─────────────────────────────────────────────────────
+
+  listStockImageLicenses: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return listStockImageLicensesForCompany(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+  }),
+
+  purchaseStockImage: membershipProcedure
+    .input(z.object({ imageId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+      const { getStockImageById } = await import("@plotkeys/section-registry");
+      const { stockImagePrice } = await import("@plotkeys/utils");
+
+      const image = getStockImageById(input.imageId);
+      if (!image) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Image not found." });
+      }
+
+      if (image.licenseTier === "free") {
+        // Free images don't need purchase
+        await grantStockImageLicense(db, { companyId, imageId: input.imageId });
+        return { granted: true, imageId: input.imageId };
+      }
+
+      const alreadyLicensed = await hasStockImageLicense(db, companyId, input.imageId);
+      if (alreadyLicensed) {
+        return { granted: true, imageId: input.imageId };
+      }
+
+      // Record billing line item and grant license
+      await db.billingLineItem.create({
+        data: {
+          amountMinorUnits: stockImagePrice.minorUnits,
+          companyId,
+          currency: "NGN",
+          kind: "stock_image",
+          meta: { imageId: input.imageId, imageTitle: image.title },
+          paidAt: new Date(),
+          status: "active",
+        },
+      });
+
+      await grantStockImageLicense(db, { companyId, imageId: input.imageId });
+
+      return { granted: true, imageId: input.imageId };
+    }),
+
+  // ─── AI Credits ───────────────────────────────────────────────────────
+
+  getAiCreditInfo: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const [balance, usage] = await Promise.all([
+      getAiCreditBalance(db, companyId),
+      getAiUsageStats(db, companyId),
+    ]);
+
+    return { balance, ...usage };
+  }),
+
+  purchaseAiCredits: membershipProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+    const { aiCreditsBlockPrice } = await import("@plotkeys/utils");
+
+    // Record billing
+    const item = await db.billingLineItem.create({
+      data: {
+        amountMinorUnits: aiCreditsBlockPrice.minorUnits,
+        companyId,
+        currency: "NGN",
+        kind: "ai_credits",
+        meta: { credits: aiCreditsBlockPrice.creditsPerBlock },
+        paidAt: new Date(),
+        status: "active",
+      },
+    });
+
+    // Grant credits
+    await grantAiCredits(db, {
+      amount: aiCreditsBlockPrice.creditsPerBlock,
+      companyId,
+      description: `Top-up: ${aiCreditsBlockPrice.creditsPerBlock} credits`,
+      reason: "top_up",
+      referenceId: item.id,
+    });
+
+    return { credited: aiCreditsBlockPrice.creditsPerBlock };
+  }),
+
+  // ─── Analytics ──────────────────────────────────────────────────────
+
+  getAnalytics: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const [summary, pageViewsByDay] = await Promise.all([
+      getAnalyticsSummary(db, companyId),
+      getPageViewsByDay(db, companyId, 30),
+    ]);
+
+    return { ...summary, pageViewsByDay };
+  }),
 });

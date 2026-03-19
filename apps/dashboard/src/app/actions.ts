@@ -732,3 +732,70 @@ export async function initializeCheckoutAction(formData: FormData) {
   redirect(result.authorizationUrl);
 }
 
+// ─── Appointment actions ──────────────────────────────────────────────────
+
+export async function createAppointmentAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "");
+  const email = String(formData.get("email") ?? "");
+  const phone = String(formData.get("phone") ?? "") || undefined;
+  const scheduledAt = String(formData.get("scheduledAt") ?? "");
+  const location = String(formData.get("location") ?? "") || undefined;
+  const agentId = String(formData.get("agentId") ?? "") || undefined;
+  const notes = String(formData.get("notes") ?? "") || undefined;
+
+  const caller = await createServerCaller();
+  await caller.workspace.createAppointment({
+    agentId,
+    email,
+    location,
+    name,
+    notes,
+    phone,
+    scheduledAt: new Date(scheduledAt).toISOString(),
+  });
+
+  revalidatePath("/appointments");
+  redirect("/appointments");
+}
+
+export async function updateAppointmentStatusAction(formData: FormData) {
+  const appointmentId = String(formData.get("appointmentId") ?? "");
+  const status = String(formData.get("status") ?? "") as
+    | "pending"
+    | "confirmed"
+    | "completed"
+    | "cancelled";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateAppointmentStatus({ appointmentId, status });
+    revalidatePath("/appointments");
+  } catch {
+    // non-fatal
+  }
+}
+
+export async function deleteAppointmentAction(formData: FormData) {
+  const appointmentId = String(formData.get("appointmentId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.deleteAppointment({ appointmentId });
+    revalidatePath("/appointments");
+  } catch {
+    // non-fatal
+  }
+}
+
+export async function purchaseAiCreditsAction() {
+  "use server";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.purchaseAiCredits();
+    revalidatePath("/ai-credits");
+  } catch {
+    // non-fatal
+  }
+}
+

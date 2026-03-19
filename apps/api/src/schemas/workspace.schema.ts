@@ -55,6 +55,24 @@ export const initializeCheckoutInputSchema = z.object({
   planTier: z.enum(["plus", "pro"]),
 });
 
+export const createAppointmentInputSchema = z.object({
+  agentId: z.string().uuid().optional(),
+  email: z.string().email(),
+  leadId: z.string().uuid().optional(),
+  location: z.string().trim().optional(),
+  name: z.string().trim().min(1),
+  notes: z.string().trim().optional(),
+  phone: z.string().trim().optional(),
+  propertyId: z.string().uuid().optional(),
+  scheduledAt: z.string().datetime(),
+});
+
+export const updateAppointmentStatusInputSchema = z.object({
+  appointmentId: z.string().uuid(),
+  notes: z.string().trim().optional(),
+  status: z.enum(["pending", "confirmed", "completed", "cancelled"]),
+});
+
 export const updateSiteFieldInputSchema = z.object({
   configId: z.string().trim().min(1, "Configuration id is required."),
   contentKey: z.string().trim().min(1, "Content key is required."),

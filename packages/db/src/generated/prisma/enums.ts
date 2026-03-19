@@ -87,6 +87,16 @@ export const TenantDomainStatus = {
 export type TenantDomainStatus = (typeof TenantDomainStatus)[keyof typeof TenantDomainStatus]
 
 
+export const AppointmentStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  completed: 'completed',
+  cancelled: 'cancelled'
+} as const
+
+export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
+
+
 export const BillingLineItemKind = {
   subscription: 'subscription',
   template_purchase: 'template_purchase',

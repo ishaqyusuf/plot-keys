@@ -1,7 +1,6 @@
-import { compare, hash } from "bcrypt-ts";
+import { hash } from "bcrypt-ts";
 import {
   createPrismaClient,
-  createUser,
   type Db,
   findUserByEmail,
   getSessionUserByTokenUserId,
@@ -71,13 +70,6 @@ async function hashPassword(password: string): Promise<string> {
   return hash(password, BCRYPT_COST);
 }
 
-async function verifyPasswordHash(
-  password: string,
-  storedHash: string,
-): Promise<boolean> {
-  return compare(password, storedHash);
-}
-
 function requireDb() {
   const client = createPrismaClient();
 
@@ -112,25 +104,28 @@ export async function signUpUser(input: {
     throw new Error("An account with that email already exists.");
   }
 
-  const user = await createUser(db, {
-    email,
-    emailVerified: input.emailVerified ?? false,
-    name: input.name,
-    passwordHash: await hashPassword(input.password),
-    phoneNumber: input.phoneNumber,
+  // Use Better Auth to create the user + account in one call
+  const { auth } = await import("./better-auth");
+  const result = await auth.api.signUpEmail({
+    body: {
+      email,
+      name: input.name,
+      password: input.password,
+    },
   });
 
-  // Create a Better Auth account record so the user can sign in via Better Auth
-  await db.account.create({
+  if (!result?.user) {
+    throw new Error("Failed to create account.");
+  }
+
+  // Store extra fields Better Auth doesn't handle
+  const user = await db.user.update({
     data: {
-      id: crypto.randomUUID(),
-      accountId: user.id,
-      providerId: "credential",
-      userId: user.id,
-      password: await hashPassword(input.password),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      emailVerified: input.emailVerified ?? false,
+      passwordHash: await hashPassword(input.password),
+      phoneNumber: input.phoneNumber,
     },
+    where: { id: result.user.id },
   });
 
   const { createEmailVerificationToken } = await import("./tokens");
@@ -166,11 +161,20 @@ export async function signInUser(input: { email: string; password: string }) {
   const db = requireDb();
   const user = await findUserByEmail(db, input.email);
 
-  if (!user || !user.passwordHash) {
+  if (!user) {
     throw new Error("Incorrect email or password.");
   }
 
-  if (!(await verifyPasswordHash(input.password, user.passwordHash))) {
+  // Verify via Better Auth
+  const { auth } = await import("./better-auth");
+  const result = await auth.api.signInEmail({
+    body: {
+      email: input.email.trim().toLowerCase(),
+      password: input.password,
+    },
+  });
+
+  if (!result?.user) {
     throw new Error("Incorrect email or password.");
   }
 
@@ -219,7 +223,11 @@ function getAuthSecret(): string {
  */
 export async function createBetterAuthSession(
   userId: string,
-): Promise<{ sessionToken: string; signedSessionToken: string; expiresAt: Date }> {
+): Promise<{
+  sessionToken: string;
+  signedSessionToken: string;
+  expiresAt: Date;
+}> {
   const db = requireDb();
   const sessionToken = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
@@ -235,7 +243,10 @@ export async function createBetterAuthSession(
     },
   });
 
-  const signedSessionToken = await signCookieValue(sessionToken, getAuthSecret());
+  const signedSessionToken = await signCookieValue(
+    sessionToken,
+    getAuthSecret(),
+  );
 
   return { sessionToken, signedSessionToken, expiresAt };
 }

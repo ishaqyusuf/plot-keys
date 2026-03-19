@@ -238,6 +238,7 @@ export type UserWhereInput = {
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   tenantOnboarding?: Prisma.XOR<Prisma.TenantOnboardingNullableScalarRelationFilter, Prisma.TenantOnboardingWhereInput> | null
+  aiUsageLogs?: Prisma.AiUsageLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -260,6 +261,7 @@ export type UserOrderByWithRelationInput = {
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   tenantOnboarding?: Prisma.TenantOnboardingOrderByWithRelationInput
+  aiUsageLogs?: Prisma.AiUsageLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -285,6 +287,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   tenantOnboarding?: Prisma.XOR<Prisma.TenantOnboardingNullableScalarRelationFilter, Prisma.TenantOnboardingWhereInput> | null
+  aiUsageLogs?: Prisma.AiUsageLogListRelationFilter
 }, "id">
 
 export type UserOrderByWithAggregationInput = {
@@ -341,6 +344,7 @@ export type UserCreateInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -363,6 +367,7 @@ export type UserUncheckedCreateInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -385,6 +390,7 @@ export type UserUpdateInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -407,6 +413,7 @@ export type UserUncheckedUpdateInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -501,6 +508,20 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   image?: Prisma.SortOrder
+}
+
+export type UserCreateNestedOneWithoutAiUsageLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiUsageLogsInput, Prisma.UserUncheckedCreateWithoutAiUsageLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiUsageLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAiUsageLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiUsageLogsInput, Prisma.UserUncheckedCreateWithoutAiUsageLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiUsageLogsInput
+  upsert?: Prisma.UserUpsertWithoutAiUsageLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiUsageLogsInput, Prisma.UserUpdateWithoutAiUsageLogsInput>, Prisma.UserUncheckedUpdateWithoutAiUsageLogsInput>
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -623,6 +644,110 @@ export type UserUpdateOneWithoutUpdatedWebsiteVersionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUpdatedWebsiteVersionsInput, Prisma.UserUpdateWithoutUpdatedWebsiteVersionsInput>, Prisma.UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput>
 }
 
+export type UserCreateWithoutAiUsageLogsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAiUsageLogsInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAiUsageLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiUsageLogsInput, Prisma.UserUncheckedCreateWithoutAiUsageLogsInput>
+}
+
+export type UserUpsertWithoutAiUsageLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAiUsageLogsInput, Prisma.UserUncheckedUpdateWithoutAiUsageLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiUsageLogsInput, Prisma.UserUncheckedCreateWithoutAiUsageLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAiUsageLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAiUsageLogsInput, Prisma.UserUncheckedUpdateWithoutAiUsageLogsInput>
+}
+
+export type UserUpdateWithoutAiUsageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+}
+
 export type UserCreateWithoutSessionsInput = {
   id: string
   email: string
@@ -642,6 +767,7 @@ export type UserCreateWithoutSessionsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -663,6 +789,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -700,6 +827,7 @@ export type UserUpdateWithoutSessionsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -721,6 +849,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -742,6 +871,7 @@ export type UserCreateWithoutAccountsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -763,6 +893,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -800,6 +931,7 @@ export type UserUpdateWithoutAccountsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -821,6 +953,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -842,6 +975,7 @@ export type UserCreateWithoutMembershipsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -863,6 +997,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -900,6 +1035,7 @@ export type UserUpdateWithoutMembershipsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -921,6 +1057,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedSiteConfigurationsInput = {
@@ -942,6 +1079,7 @@ export type UserCreateWithoutCreatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
@@ -963,6 +1101,7 @@ export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSiteConfigurationsInput = {
@@ -989,6 +1128,7 @@ export type UserCreateWithoutUpdatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
@@ -1010,6 +1150,7 @@ export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUpdatedSiteConfigurationsInput = {
@@ -1047,6 +1188,7 @@ export type UserUpdateWithoutCreatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
@@ -1068,6 +1210,7 @@ export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutUpdatedSiteConfigurationsInput = {
@@ -1100,6 +1243,7 @@ export type UserUpdateWithoutUpdatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
@@ -1121,6 +1265,7 @@ export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTenantOnboardingInput = {
@@ -1142,6 +1287,7 @@ export type UserCreateWithoutTenantOnboardingInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTenantOnboardingInput = {
@@ -1163,6 +1309,7 @@ export type UserUncheckedCreateWithoutTenantOnboardingInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTenantOnboardingInput = {
@@ -1200,6 +1347,7 @@ export type UserUpdateWithoutTenantOnboardingInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantOnboardingInput = {
@@ -1221,6 +1369,7 @@ export type UserUncheckedUpdateWithoutTenantOnboardingInput = {
   updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedWebsiteVersionsInput = {
@@ -1242,6 +1391,7 @@ export type UserCreateWithoutCreatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedWebsiteVersionsInput = {
@@ -1263,6 +1413,7 @@ export type UserUncheckedCreateWithoutCreatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedWebsiteVersionsInput = {
@@ -1289,6 +1440,7 @@ export type UserCreateWithoutUpdatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput = {
@@ -1310,6 +1462,7 @@ export type UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUpdatedWebsiteVersionsInput = {
@@ -1347,6 +1500,7 @@ export type UserUpdateWithoutCreatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput = {
@@ -1368,6 +1522,7 @@ export type UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutUpdatedWebsiteVersionsInput = {
@@ -1400,6 +1555,7 @@ export type UserUpdateWithoutUpdatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput = {
@@ -1421,6 +1577,7 @@ export type UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1436,6 +1593,7 @@ export type UserCountOutputType = {
   updatedWebsiteVersions: number
   sessions: number
   accounts: number
+  aiUsageLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1446,6 +1604,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   updatedWebsiteVersions?: boolean | UserCountOutputTypeCountUpdatedWebsiteVersionsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
+  aiUsageLogs?: boolean | UserCountOutputTypeCountAiUsageLogsArgs
 }
 
 /**
@@ -1507,6 +1666,13 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.AccountWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAiUsageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiUsageLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1528,6 +1694,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   tenantOnboarding?: boolean | Prisma.User$tenantOnboardingArgs<ExtArgs>
+  aiUsageLogs?: boolean | Prisma.User$aiUsageLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1583,6 +1750,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   tenantOnboarding?: boolean | Prisma.User$tenantOnboardingArgs<ExtArgs>
+  aiUsageLogs?: boolean | Prisma.User$aiUsageLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1599,6 +1767,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     tenantOnboarding: Prisma.$TenantOnboardingPayload<ExtArgs> | null
+    aiUsageLogs: Prisma.$AiUsageLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2014,6 +2183,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tenantOnboarding<T extends Prisma.User$tenantOnboardingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tenantOnboardingArgs<ExtArgs>>): Prisma.Prisma__TenantOnboardingClient<runtime.Types.Result.GetResult<Prisma.$TenantOnboardingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  aiUsageLogs<T extends Prisma.User$aiUsageLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiUsageLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiUsageLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2631,6 +2801,30 @@ export type User$tenantOnboardingArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.TenantOnboardingInclude<ExtArgs> | null
   where?: Prisma.TenantOnboardingWhereInput
+}
+
+/**
+ * User.aiUsageLogs
+ */
+export type User$aiUsageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiUsageLog
+   */
+  select?: Prisma.AiUsageLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiUsageLog
+   */
+  omit?: Prisma.AiUsageLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiUsageLogInclude<ExtArgs> | null
+  where?: Prisma.AiUsageLogWhereInput
+  orderBy?: Prisma.AiUsageLogOrderByWithRelationInput | Prisma.AiUsageLogOrderByWithRelationInput[]
+  cursor?: Prisma.AiUsageLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiUsageLogScalarFieldEnum | Prisma.AiUsageLogScalarFieldEnum[]
 }
 
 /**

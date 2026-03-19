@@ -7,6 +7,12 @@ This file records completed work milestones.
 - Add concise completion notes with enough context for future readers.
 
 ## Done
+- **AI Credit Tracking** — Created AiUsageLog + AiCreditLedger Prisma models with ledger-pattern balance tracking. Built query functions (balance, deduction, logging, stats). Wired credit deduction into smartFillField tRPC mutation. Added getAiCreditInfo + purchaseAiCredits tRPC procedures. Created `/ai-credits` dashboard page with balance, usage breakdown, and top-up.
+- **Analytics Foundations** — Created AnalyticsEvent Prisma model with company/type/date indexes. Built recordAnalyticsEvent, getAnalyticsSummary, getPageViewsByDay queries. Added tenant-site `/api/track` endpoint with privacy-safe visitor fingerprinting. Added getAnalytics tRPC procedure. Created `/analytics` dashboard page with stat cards, event type breakdown, page view bar chart, and recent events list.
+- **Stock Image Marketplace** — Created TenantStockImageLicense model, grant/check/list queries, listStockImageLicenses + purchaseStockImage tRPC procedures with billing integration
+- **Appointment Scheduling** — Created Appointment model with status enum, full CRUD queries, 5 tRPC procedures, `/appointments` dashboard page with create form, status filtering, and management actions
+- **Website/WebsiteVersion Phase 3 Read Cutover** — Added resolveActiveDraftForCompany/resolvePublishedForCompany read helpers with SiteConfiguration fallback. Updated tenant-site to use new read path.
+- **Better Auth Migration** — Refactored signUpUser to use auth.api.signUpEmail(), signInUser to use auth.api.signInEmail(). Removed manual password verification.
 - Built template testing preview page at `/builder/preview` with top nav (back/template picker/next), tabbed plan dropdown, publish toggle checkbox, and full template preview rendering
 - Compacted builder sidebar controls (reduced padding/gaps) and added mobile responsive Sheet drawer for screens below xl breakpoint
 - Added 15 new unique templates (5 per tier) with differentiated section compositions: Sama, Rania, Jihan, Nadia, Walid (starter); Tariq, Soraya, Rashid, Dalal, Imran (plus); Khalid, Salma, Faisal, Dina, Omar (pro)

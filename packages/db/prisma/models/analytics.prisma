@@ -1,0 +1,37 @@
+/// Lightweight page view / event tracking for tenant websites.
+/// Designed for simple metrics — not a full analytics warehouse.
+model AnalyticsEvent {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String @map("company_id") @db.Uuid
+
+  /// Event type: "page_view", "contact_form", "property_view", "cta_click"
+  eventType String @map("event_type")
+
+  /// Path or page slug that generated the event
+  path String?
+
+  /// Property ID if the event is property-specific
+  propertyId String? @map("property_id") @db.Uuid
+
+  /// Visitor fingerprint (hashed IP + user-agent, not PII)
+  visitorId String? @map("visitor_id")
+
+  /// Referrer URL
+  referrer String?
+
+  /// User-agent string (truncated)
+  userAgent String? @map("user_agent")
+
+  /// Arbitrary event data (utm params, button label, etc.)
+  meta Json @default("{}")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId], map: "analytics_events_company_id_idx")
+  @@index([companyId, eventType], map: "analytics_events_company_type_idx")
+  @@index([companyId, createdAt], map: "analytics_events_company_date_idx")
+  @@index([createdAt], map: "analytics_events_created_at_idx")
+  @@map("analytics_events")
+}

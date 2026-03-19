@@ -1,5 +1,37 @@
 # Progress
 
+## Current State (as of 2026-03-19)
+
+### What's Built & Working
+| Area | Status |
+|------|--------|
+| Onboarding (6 steps, resumable) | ✅ Done |
+| Template catalog (45 templates) | ✅ Done |
+| Billing/pricing (Paystack, 3 tiers) | ✅ Done |
+| Auth (Better Auth, signup/signin) | ✅ Done |
+| Builder (inline edit, publish, preview) | ✅ Done |
+| Dark mode (ThemeProvider) | ✅ Done |
+| Lead capture + dashboard | ✅ Done |
+| Appointment scheduling + dashboard | ✅ Done |
+| AI credits (ledger, smart-fill wired) | ✅ Done |
+| Analytics (events, tracking, dashboard) | ✅ Done |
+| Stock image marketplace | ✅ Done |
+| Website/WebsiteVersion Phase 1-3 | ✅ Done |
+| Section visibility toggles | ✅ Done |
+| Domain auto-sync on onboarding | ✅ Done |
+| Email (Welcome + Verification) | 🟡 Partial |
+| Notifications (event system) | 🟡 Partial |
+| Jobs (custom queue, 4 handlers) | 🟡 Partial |
+| Property/agent data binding | 🟡 Partial |
+| Logo upload | 🟡 Partial |
+| Chat-bot | 🟡 Scaffolded |
+| App-store (WhatsApp only) | 🟡 Scaffolded |
+| Tenant domain management UI | ❌ Not started |
+| Custom domain purchase | ❌ Not started |
+| WebsiteVersion Phase 4 cleanup | ❌ Not started |
+
+---
+
 ## Roadmap Steps 10-21 Completion
 
 ### Step 10: Auto domain sync on onboarding
@@ -43,7 +75,44 @@
 - Created checkout callback page (`/billing/callback`): handles Paystack redirect after payment
 - Added `initializeCheckoutAction` server action: calls tRPC initializeCheckout and redirects to Paystack authorization URL
 
-## 2026-03-19
+## 2026-03-19 (Session 2 — High-Impact Features)
+
+### Better Auth Migration
+- Refactored `signUpUser()` to use `auth.api.signUpEmail()` instead of manual Prisma user creation
+- Refactored `signInUser()` to use `auth.api.signInEmail()` instead of manual bcrypt comparison
+- Removed unused `verifyPasswordHash()` and `compare` import
+
+### Appointment Scheduling
+- Created `appointment.prisma` model with AppointmentStatus enum (scheduled/completed/cancelled/no_show)
+- Built CRUD queries in `packages/db/src/queries/appointments.ts`
+- Added 5 tRPC procedures: listAppointments, getAppointmentStats, createAppointment, updateAppointmentStatus, deleteAppointment
+- Created `/appointments` dashboard page with create form, status filtering, management actions
+- Added server actions: createAppointmentAction, updateAppointmentStatusAction, deleteAppointmentAction
+
+### Website/WebsiteVersion Phase 3 Read Cutover
+- Added `resolveActiveDraftForCompany()` and `resolvePublishedForCompany()` read helpers
+- Both prefer WebsiteVersion, fall back to SiteConfiguration for pre-migration companies
+- Updated tenant-site page.tsx to use `resolvePublishedForCompany()`
+
+### Stock Image Marketplace
+- Created `stock-image-license.prisma` model with unique constraint on companyId+imageId
+- Built grant/check/list query functions
+- Added listStockImageLicenses + purchaseStockImage tRPC procedures with billing line item creation
+
+### AI Credit Tracking
+- Created `ai-credits.prisma` with AiUsageLog and AiCreditLedger models (ledger pattern)
+- Built query functions: getAiCreditBalance, hasEnoughCredits, grantAiCredits, deductAiCredits, logAiUsage, getAiUsageStats
+- Wired credit deduction + usage logging into smartFillField tRPC mutation
+- Added getAiCreditInfo + purchaseAiCredits tRPC procedures
+- Created `/ai-credits` dashboard page with balance display, usage breakdown, top-up button
+
+### Analytics Foundations
+- Created `analytics.prisma` AnalyticsEvent model with company/type/date indexes
+- Built recordAnalyticsEvent, getAnalyticsSummary, getPageViewsByDay query functions
+- Created tenant-site `/api/track` endpoint with privacy-safe visitor fingerprinting (SHA-256 of IP+UA)
+- Added getAnalytics tRPC procedure
+- Created `/analytics` dashboard page with stat cards, event type breakdown, page view bar chart, recent events
+
 - Enhanced Builder Preview page (`/builder/preview`) with:
   - **Sidebar layout**: Added persistent builder config sidebar (hidden below xl breakpoint) with template selector, style presets, color systems, and preview info
   - **Dark mode toggle**: Integrated `ThemeToggle` component in preview header for light/dark mode switching

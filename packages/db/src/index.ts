@@ -21,12 +21,16 @@ export {
   type PrismaDatabaseClient,
 } from "./prisma";
 export * from "./queries/agent";
+export * from "./queries/ai-credits";
+export * from "./queries/analytics";
+export * from "./queries/appointments";
 export * from "./queries/auth";
 export * from "./queries/company";
 export * from "./queries/leads";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
 export * from "./queries/site-configuration";
+export * from "./queries/stock-image-license";
 export * from "./queries/template-license";
 export * from "./queries/tenant-domain";
 export * from "./queries/website";

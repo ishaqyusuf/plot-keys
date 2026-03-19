@@ -21,6 +21,11 @@ model Company {
   templateLicenses   TenantTemplateLicense[]
   billingLineItems   BillingLineItem[]
   leads              Lead[]
+  appointments       Appointment[]
+  stockImageLicenses TenantStockImageLicense[]
+  aiUsageLogs        AiUsageLog[]
+  aiCreditLedger     AiCreditLedger[]
+  analyticsEvents    AnalyticsEvent[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")
