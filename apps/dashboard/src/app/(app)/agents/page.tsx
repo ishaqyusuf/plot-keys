@@ -8,8 +8,8 @@ import {
   CardHeader,
 } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../lib/session";
-import { deleteAgentAction, toggleAgentFeaturedAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { deleteAgentAction, toggleAgentFeaturedAction } from "../../actions";
 import { AgentForm } from "./agent-form";
 
 type AgentsPageProps = {

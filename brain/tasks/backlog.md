@@ -16,6 +16,7 @@ This file holds actionable work that is identified but not currently in progress
 - [ ] **Property/Agent Data Binding** — Wire live property + agent DB data into template section rendering (PropertyGrid, AgentShowcase) so tenant sites show real listings.
 - [ ] **Website/WebsiteVersion Phase 4 Cleanup** — Remove SiteConfiguration as primary model; migrate all reads/writes to WebsiteVersion exclusively; drop legacy fallback paths.
 - [x] **Logo Upload Flow** — Built `/settings` dashboard page with company logo upload using Supabase storage via `/api/upload` route; wired `logoUrl` into template header rendering via `resolveWebsitePresentation`.
+- [x] **Tenant Dashboard System** — Built persistent sidebar navigation (`DashboardSidebar` + `DashboardShell`) with `(app)` route group layout. Revamped home page with stats strip, quick actions, plan upgrade prompt, and platform feature roadmap grid.
 
 ## Phase 2 — Platform Polish & Engagement
 

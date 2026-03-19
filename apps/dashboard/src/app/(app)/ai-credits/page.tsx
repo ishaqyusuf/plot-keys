@@ -5,8 +5,8 @@ import {
 } from "@plotkeys/db";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { requireOnboardedSession } from "../../lib/session";
-import { purchaseAiCreditsAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { purchaseAiCreditsAction } from "../../actions";
 
 export default async function AiCreditsPage() {
   const session = await requireOnboardedSession();

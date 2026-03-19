@@ -27,7 +27,6 @@
 | Tenant domain management UI | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
-| Tenant domain management UI | ❌ Not started |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 cleanup | ❌ Not started |
 
@@ -177,3 +176,26 @@
 - Root cause: `BuilderPreviewPanel` rendered sections without `WebsiteRuntimeProvider`, so `EditableText` components could not detect draft mode via `useIsDraftMode()` hook.
 - Fix: Wrapped the section rendering container with `<WebsiteRuntimeProvider renderMode="draft">` in `builder-preview-panel.tsx`.
 - This enables the amber ring editing affordances and contentEditable behavior on text fields within sections when viewed in the builder.
+
+## 2026-03-19 (Session 4 — Tenant Dashboard System)
+
+### Dashboard route group and sidebar navigation
+- Created `(app)` Next.js route group for all authenticated pages (no URL changes)
+- Moved 11 page directories (agents, ai-credits, analytics, appointments, billing, builder, domains, leads, live, properties, settings) + their sub-pages into `(app)/`
+- Fixed all relative imports across moved files (one extra `../` depth added)
+- Created `DashboardSidebar` client component: 4-group nav (Workspace, Operations, Growth, Platform) with active state via `usePathname`, plan badges for Pro/Plus/Coming features, company info header, sign-out in footer
+- Created `DashboardShell` client component wrapping SidebarProvider + DashboardSidebar + SidebarInset so `(app)/layout.tsx` stays a server component
+- `(app)/layout.tsx` reads planTier from DB and passes to DashboardShell
+
+### Dashboard home page rebuild
+- Replaced dev-focused prototype home page with proper tenant-facing dashboard
+- Header: company name + plan badge + "View site" + "Open builder" CTAs
+- 4-metric stat strip: Properties, Agents, New leads, Appointments (all clickable)
+- 4 quick-action cards: Builder, Analytics, Leads, Billing
+- Plan upgrade prompt for starter users
+- Platform feature roadmap grid (4 sections × features) showing Live/Partial/Plus/Pro/Coming status with icons and descriptions
+
+### Bug fixes
+- Fixed CSS custom property syntax in builder/page.tsx: `shadow-(--shadow-soft)` → `shadow-[var(--shadow-soft)]`
+- Removed duplicate "Tenant domain management UI" entry from brain/progress.md
+- Fixed `domains/page.tsx` locale from `en-US` back to `en-NG` (codebase convention)

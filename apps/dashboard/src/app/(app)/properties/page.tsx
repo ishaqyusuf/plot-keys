@@ -9,11 +9,11 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../lib/session";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   deletePropertyAction,
   togglePropertyFeaturedAction,
-} from "../actions";
+} from "../../actions";
 import { PropertyForm } from "./property-form";
 
 type PropertiesPageProps = {

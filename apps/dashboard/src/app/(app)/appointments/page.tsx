@@ -4,12 +4,12 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 
-import { requireOnboardedSession } from "../../lib/session";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   createAppointmentAction,
   deleteAppointmentAction,
   updateAppointmentStatusAction,
-} from "../actions";
+} from "../../actions";
 
 type AppointmentsPageProps = {
   searchParams?: Promise<{ status?: string; view?: string }>;

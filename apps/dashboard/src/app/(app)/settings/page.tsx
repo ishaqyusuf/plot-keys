@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { LogoUploadForm } from "../../components/settings/logo-upload-form";
-import { requireOnboardedSession } from "../../lib/session";
+import { LogoUploadForm } from "../../../components/settings/logo-upload-form";
+import { requireOnboardedSession } from "../../../lib/session";
 
 type SettingsPageProps = {
   searchParams?: Promise<{ error?: string; saved?: string }>;

@@ -18,8 +18,8 @@ import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { requireOnboardedSession } from "../../lib/session";
-import { initializeCheckoutAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { initializeCheckoutAction } from "../../actions";
 
 type BillingPageProps = {
   searchParams?: Promise<{ interval?: string; success?: string }>;

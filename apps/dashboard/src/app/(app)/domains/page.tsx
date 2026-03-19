@@ -11,8 +11,8 @@ import {
 } from "@plotkeys/ui/card";
 import { isVercelDomainProvisioningConfigured } from "@plotkeys/utils";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../lib/session";
-import { syncDomainsAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { syncDomainsAction } from "../../actions";
 
 type DomainsPageProps = {
   searchParams?: Promise<{ error?: string; synced?: string }>;
@@ -38,7 +38,7 @@ const kindLabel: Record<string, string> = {
 
 function formatDate(date: Date | null) {
   if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-NG", {
     day: "numeric",
     month: "short",
     year: "numeric",

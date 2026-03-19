@@ -3,8 +3,8 @@ import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../lib/session";
-import { updateLeadStatusAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { updateLeadStatusAction } from "../../actions";
 
 type LeadsPageProps = {
   searchParams?: Promise<{ status?: string }>;
