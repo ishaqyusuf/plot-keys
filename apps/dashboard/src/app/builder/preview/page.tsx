@@ -125,7 +125,10 @@ export default function BuilderPreviewPage() {
                 <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
                   Template
                 </p>
-                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenu
+                  open={dropdownOpen}
+                  onOpenChange={setDropdownOpen}
+                >
                   <DropdownMenuTrigger asChild>
                     <button
                       className="relative w-full rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
@@ -166,7 +169,11 @@ export default function BuilderPreviewPage() {
                     >
                       <TabsList className="grid w-full grid-cols-3">
                         {tierOrder.map((tier) => (
-                          <TabsTrigger key={tier} value={tier} className="capitalize">
+                          <TabsTrigger
+                            key={tier}
+                            value={tier}
+                            className="capitalize"
+                          >
                             {tier}
                           </TabsTrigger>
                         ))}
@@ -300,9 +307,15 @@ export default function BuilderPreviewPage() {
 
               {/* Compact Template Picker for Mobile */}
               <div className="xl:hidden">
-                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenu
+                  open={dropdownOpen}
+                  onOpenChange={setDropdownOpen}
+                >
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="gap-2 text-sm font-semibold px-2">
+                    <Button
+                      variant="ghost"
+                      className="gap-2 text-sm font-semibold px-2"
+                    >
                       <span className="truncate">{template.name}</span>
                       <Badge variant="outline" className="capitalize">
                         {template.tier}
@@ -320,7 +333,11 @@ export default function BuilderPreviewPage() {
                     >
                       <TabsList className="grid w-full grid-cols-3">
                         {tierOrder.map((tier) => (
-                          <TabsTrigger key={tier} value={tier} className="capitalize text-xs">
+                          <TabsTrigger
+                            key={tier}
+                            value={tier}
+                            className="capitalize text-xs"
+                          >
                             {tier}
                           </TabsTrigger>
                         ))}
@@ -392,7 +409,9 @@ export default function BuilderPreviewPage() {
                 <Badge variant="outline" className="capitalize">
                   {template.tier}
                 </Badge>
-                <span className="font-medium text-foreground">{template.name}</span>
+                <span className="font-medium text-foreground">
+                  {template.name}
+                </span>
               </div>
               <label
                 htmlFor="preview-published-toggle"
@@ -455,4 +474,3 @@ export default function BuilderPreviewPage() {
     </main>
   );
 }
-
