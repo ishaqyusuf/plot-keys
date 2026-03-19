@@ -17,6 +17,7 @@
     "@plotkeys/db": "workspace:*",
     "@plotkeys/notifications": "workspace:*",
     "@plotkeys/notifications-react": "workspace:*",
+    "@plotkeys/platform-integrations": "workspace:*",
     "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/ui": "workspace:*",
     "@plotkeys/utils": "workspace:*",

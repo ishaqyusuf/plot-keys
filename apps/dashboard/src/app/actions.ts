@@ -799,3 +799,42 @@ export async function purchaseAiCreditsAction() {
   }
 }
 
+// ─── Settings / Logo ──────────────────────────────────────────────────────
+
+export async function setCompanyLogoAction(formData: FormData) {
+  const logoUrl = formData.get("logoUrl");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.setCompanyLogo({
+      logoUrl: logoUrl ? String(logoUrl) : null,
+    });
+    revalidatePath("/settings");
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update logo.";
+    errorRedirect = createRedirectUrl("/settings", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+// ─── Domain management ────────────────────────────────────────────────────
+
+export async function syncDomainsAction() {
+  let redirectUrl = "/domains?synced=1";
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.syncTenantDomains();
+    revalidatePath("/domains");
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Domain sync failed.";
+    redirectUrl = createRedirectUrl("/domains", { error: message });
+  }
+  redirect(redirectUrl);
+}
+

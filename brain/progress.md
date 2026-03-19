@@ -23,7 +23,8 @@
 | Notifications (event system) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
 | Property/agent data binding | 🟡 Partial |
-| Logo upload | 🟡 Partial |
+| Logo upload | ✅ Done |
+| Tenant domain management UI | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Tenant domain management UI | ❌ Not started |
@@ -75,7 +76,26 @@
 - Created checkout callback page (`/billing/callback`): handles Paystack redirect after payment
 - Added `initializeCheckoutAction` server action: calls tRPC initializeCheckout and redirects to Paystack authorization URL
 
-## 2026-03-19 (Session 2 — High-Impact Features)
+## 2026-03-19 (Session 3 — Todos)
+
+### Tenant Domain Management UI
+- Created `/domains` dashboard page with domain list, status badges, error details, and re-sync button
+- Added `syncDomainsAction` server action (redirects to `/domains?synced=1` on success)
+- Updated dashboard home quick-nav from 2 to 4 cards (added Domains + Settings)
+
+### Logo Upload Flow
+- Added `@plotkeys/platform-integrations` dependency to `apps/dashboard`
+- Created `POST /api/upload` API route that validates file type/size and uploads to Supabase logos bucket
+- Created `LogoUploadForm` client component with file picker and URL paste fallback
+- Created `/settings` dashboard page with workspace info and logo upload section
+- Added `setCompanyLogoAction` server action calling existing `setCompanyLogo` tRPC procedure
+
+### Logo rendering in tenant site
+- Added `logoUrl?: string` field to `ThemeConfig` and `TenantThemeRecord`
+- Added `companyLogoUrl` option to `ResolveTemplateOptions`
+- Updated `resolveWebsitePresentation` to propagate `companyLogoUrl` through theme
+- Updated `HeroBannerSection` in `home-page.tsx` to render `<img>` when `theme.logoUrl` is set
+- Wired `company.logoUrl` from `tenant-site/page.tsx`
 
 ### Better Auth Migration
 - Refactored `signUpUser()` to use `auth.api.signUpEmail()` instead of manual Prisma user creation
