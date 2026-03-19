@@ -18,6 +18,24 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Logo Upload Flow** — Built `/settings` dashboard page with company logo upload using Supabase storage via `/api/upload` route; wired `logoUrl` into template header rendering via `resolveWebsitePresentation`.
 - [x] **Tenant Dashboard System** — Built persistent sidebar navigation (`DashboardSidebar` + `DashboardShell`) with `(app)` route group layout. Revamped home page with stats strip, quick actions, plan upgrade prompt, and platform feature roadmap grid.
 
+## Phase 1B — Dashboard Feature Expansion (from dashboard-feature-plan.md)
+
+- [ ] **Team Invites + Role Enforcement** — Build `/team` page, invite flow (email + Membership status=invited), role-change UI, and server-action `requireRole()` enforcement. Plus plan gates invites; Pro removes member cap. See `brain/features/dashboard-feature-plan.md §2.1`.
+- [ ] **Listing Media Gallery** — Add `PropertyMedia` model (images, floor plans, virtual tour URL), multi-image upload via Supabase, drag-to-reorder, cover image selection. Starter: 3 images; Plus: 10; Pro: unlimited.
+- [ ] **Listing Publish States** — Add `publishState` (draft/published/archived) enum to `Property` model and filter public-site rendering by published state only.
+- [ ] **Listing Categories & Types** — Add `type` (residential/commercial/land/industrial) and `subType` to `Property`. Affects public-site section rendering.
+- [ ] **Analytics Expansion** — Extend `/analytics` with 90-day range (Plus+), property-level view counts, traffic source chart (referrer bucketing), and lead source bar chart.
+- [ ] **Notification Model + Bell + Page** — Add persistent `Notification` model; show unread badge in header; build `/notifications` list page; add `/settings/notifications` preference toggles.
+- [ ] **Settings Expansion** — Expand `/settings` into tabs: Company Profile, Branding (colours/fonts), Integrations, Notification Preferences, Danger Zone.
+- [ ] **Customer Model + List + Lead Promotion** — Add `Customer` and `TenantCustomer` Prisma models; build `/customers` list and `/customers/[id]` detail page; add "Convert to customer" action on leads. Plus plan gate.
+- [ ] **Employee List + Detail** — Add `Employee`, `Department` Prisma models; build `/hr/employees` list and `/hr/employees/[id]` detail (personal info, employment, linked agent profile, linked dashboard invite). Starter: up to 5; Plus+: unlimited.
+- [ ] **Department Management** — Add `/hr/departments` page for creating and managing departments used to organise employees.
+- [ ] **Leave Management** — Add `LeaveRequest` model; build leave request submission and approval flow inside HR section. Plus plan gate.
+- [ ] **Payroll Record-Keeping** — Add `PayrollEntry` model; build monthly payroll summary table (record-only, no payment processing). Plus plan gate.
+- [ ] **Listing Analytics Card** — Show per-property views/leads/appointments and conversion funnel on the property detail page. Uses `AnalyticsEvent`. Plus plan gate.
+- [ ] **CSV Export** — Add export actions for leads, appointments, customers, and properties. Plus plan gate.
+- [ ] **Agent Performance Analytics** — Extend `/analytics` or `/agents` with per-agent lead count, appointment count, and closed-deal attribution. Plus plan gate.
+
 ## Phase 2 — Platform Polish & Engagement
 
 - [ ] **Email Template Expansion** — Add transactional emails: new lead notification, appointment confirmation, payment receipt, plan upgrade/downgrade, site published. Currently only Welcome + Verification exist.
