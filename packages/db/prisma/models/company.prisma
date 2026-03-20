@@ -28,6 +28,7 @@ model Company {
   analyticsEvents    AnalyticsEvent[]
   teamInvites        TeamInvite[]
   notifications      Notification[]
+  customers          Customer[]
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")

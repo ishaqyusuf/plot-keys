@@ -222,3 +222,43 @@
 - Updated properties list to link property title to `/properties/[id]`
 - Updated `addPropertyMediaAction`, `deletePropertyMediaAction`, `setPropertyCoverAction` to revalidate both `/properties` and `/properties/[propertyId]` paths
 - Updated `updatePropertyPublishStateAction` to revalidate both paths
+
+## 2026-03-20 (Session 6 — Core Product Gaps + Dashboard Expansion)
+
+### Property/Agent Data Binding Fix
+- Updated `listFeaturedProperties` to filter by `publishState: "published"` (only published listings appear on live tenant sites)
+- Updated `listFeaturedProperties` to include cover media from `PropertyMedia` when `imageUrl` is null (includes `media` relation with cover filter, maps `imageUrl` to cover media URL as fallback)
+
+### Listing Categories & Types
+- Added `PropertyType` enum: residential, commercial, land, industrial, mixed_use
+- Added `type` and `subType` fields to `Property` model
+- Created migration: `20260320093931/migration.sql`
+- Updated `createProperty`/`updateProperty` DB queries to accept `type`/`subType`
+- Updated `createProperty`/`updateProperty` tRPC procedures (workspace.route.ts) with new fields
+- Updated `createPropertyAction`/`updatePropertyAction` server actions to pass type/subType from form
+- Updated `PropertyForm` component to include type selector and subType input
+- Updated properties list page with type filter tabs and type badge per card
+- Added `PropertyTypeValue` type export from `@plotkeys/db`
+
+### Settings Expansion
+- Expanded `/settings` page with:
+  - Company Profile section with editable name and market (owners/admins only)
+  - Workspace read-only section (subdomain, plan with Upgrade button)
+  - Logo upload section (unchanged)
+  - Danger zone with disabled Delete button (owners/admins only)
+- Added `updateCompanyProfile` DB query function
+- Added `updateCompanyProfile` tRPC procedure (admin+ role required)
+- Added `updateCompanyProfileAction` server action
+
+### Customer Model + Lead Promotion
+- Added `CustomerStatus` enum: active, inactive, vip
+- Added `Customer` Prisma model (company, name, email, phone, notes, status, sourceLeadId)
+- Created migration in `20260320093931/migration.sql`
+- Added `Customer` relation to `Company` model
+- Created customer DB queries: createCustomer, listCustomersForCompany, getCustomerById, updateCustomer, softDeleteCustomer, countCustomersByStatus
+- Created `customers.route.ts` tRPC router: list, stats, create, update, delete
+- Registered `customersRouter` in `_app.ts`
+- Added server actions: createCustomerAction, updateCustomerStatusAction, deleteCustomerAction, convertLeadToCustomerAction
+- Created `/customers` dashboard page with stats strip, status filter tabs, customer cards with status management
+- Added "→ Customer" convert button on qualified leads in `/leads` page
+- Updated `DashboardSidebar` Customers link from `#` to `/customers`

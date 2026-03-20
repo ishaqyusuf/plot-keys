@@ -84,7 +84,7 @@ const navGroups: NavGroup[] = [
       },
       {
         badge: "Plus",
-        href: "#",
+        href: "/customers",
         icon: UsersIcon,
         label: "Customers",
       },

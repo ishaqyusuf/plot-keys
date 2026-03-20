@@ -49,6 +49,7 @@ import {
   updateAppointmentStatus,
   updateCompanyLogo,
   updateCompanyPlan,
+  updateCompanyProfile,
   updateLeadStatus,
   updateOnboardingProfile,
   updateProperty,
@@ -79,6 +80,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
+  assertMinRole,
   authenticatedProcedure,
   createTRPCRouter,
   membershipProcedure,
@@ -1100,6 +1102,19 @@ export const workspaceRouter = createTRPCRouter({
       return { companyId: company.id, logoUrl: company.logoUrl };
     }),
 
+  updateCompanyProfile: membershipProcedure
+    .input(
+      z.object({
+        name: z.string().trim().min(1).optional(),
+        market: z.string().trim().optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      assertMinRole(ctx.auth.activeMembership.role, "admin");
+      return updateCompanyProfile(db, ctx.auth.activeMembership.companyId, input);
+    }),
+
   // ─── Properties ───────────────────────────────────────────────────────────
 
   listProperties: membershipProcedure.query(async ({ ctx }) => {
@@ -1120,6 +1135,11 @@ export const workspaceRouter = createTRPCRouter({
         bathrooms: z.number().int().nonnegative().optional().nullable(),
         specs: z.string().trim().optional().nullable(),
         imageUrl: z.string().url().optional().nullable(),
+        type: z
+          .enum(["residential", "commercial", "land", "industrial", "mixed_use"])
+          .optional()
+          .nullable(),
+        subType: z.string().trim().optional().nullable(),
         status: z
           .enum(["active", "sold", "rented", "off_market"])
           .optional()
@@ -1147,6 +1167,11 @@ export const workspaceRouter = createTRPCRouter({
         bathrooms: z.number().int().nonnegative().optional().nullable(),
         specs: z.string().trim().optional().nullable(),
         imageUrl: z.string().url().optional().nullable(),
+        type: z
+          .enum(["residential", "commercial", "land", "industrial", "mixed_use"])
+          .optional()
+          .nullable(),
+        subType: z.string().trim().optional().nullable(),
         status: z.enum(["active", "sold", "rented", "off_market"]).optional(),
         featured: z.boolean().optional(),
       }),

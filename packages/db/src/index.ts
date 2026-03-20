@@ -26,6 +26,7 @@ export * from "./queries/analytics";
 export * from "./queries/appointments";
 export * from "./queries/auth";
 export * from "./queries/company";
+export * from "./queries/customer";
 export * from "./queries/leads";
 export * from "./queries/notifications";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers

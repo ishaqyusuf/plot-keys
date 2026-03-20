@@ -17,7 +17,7 @@ import {
 import { PropertyForm } from "./property-form";
 
 type PropertiesPageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; type?: string }>;
 };
 
 const statusVariant: Record<string, "default" | "outline" | "secondary"> = {
@@ -33,11 +33,20 @@ const publishVariant: Record<string, "default" | "outline" | "secondary" | "dest
   archived: "secondary",
 };
 
+const typeLabels: Record<string, string> = {
+  residential: "Residential",
+  commercial: "Commercial",
+  land: "Land",
+  industrial: "Industrial",
+  mixed_use: "Mixed use",
+};
+
 export default async function PropertiesPage({
   searchParams,
 }: PropertiesPageProps) {
   const session = await requireOnboardedSession();
   const params = (await searchParams) ?? {};
+  const typeFilter = params.type && params.type !== "all" ? params.type : undefined;
 
   const prisma = createPrismaClient().db;
   const properties = prisma
@@ -46,6 +55,7 @@ export default async function PropertiesPage({
         where: {
           companyId: session.activeMembership.companyId,
           deletedAt: null,
+          ...(typeFilter ? { type: typeFilter as "residential" | "commercial" | "land" | "industrial" | "mixed_use" } : {}),
         },
       })
     : [];
@@ -85,6 +95,26 @@ export default async function PropertiesPage({
           </div>
         </div>
 
+        {/* Type filter tabs */}
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          {["all", "residential", "commercial", "land", "industrial", "mixed_use"].map((t) => {
+            const isActive = (t === "all" && !typeFilter) || t === typeFilter;
+            return (
+              <Link
+                key={t}
+                href={t === "all" ? "/properties" : `/properties?type=${t}`}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t === "all" ? "All" : typeLabels[t]}
+              </Link>
+            );
+          })}
+        </div>
+
         {properties.length === 0 ? (
           <Card className="py-16 text-center">
             <CardContent>
@@ -112,6 +142,11 @@ export default async function PropertiesPage({
                         {property.featured && (
                           <Badge variant="default">Featured</Badge>
                         )}
+                        {property.type ? (
+                          <Badge variant="outline" className="capitalize">
+                            {typeLabels[property.type] ?? property.type}
+                          </Badge>
+                        ) : null}
                         <Badge variant={statusVariant[property.status] ?? "outline"}>
                           {property.status.replace("_", " ")}
                         </Badge>

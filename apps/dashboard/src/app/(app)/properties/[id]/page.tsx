@@ -66,12 +66,6 @@ export default async function PropertyDetailPage({
     orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
-  const planTier = session.activeMembership.role;
-  const mediaCap =
-    property.publishState === "published"
-      ? null
-      : null; // caps managed server-side by tier
-
   const canEdit =
     session.activeMembership.role === "owner" ||
     session.activeMembership.role === "admin" ||

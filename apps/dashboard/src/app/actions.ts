@@ -513,6 +513,10 @@ export async function createPropertyAction(formData: FormData) {
         : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | null,
+      subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -550,6 +554,10 @@ export async function updatePropertyAction(formData: FormData) {
         : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | null,
+      subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -800,6 +808,28 @@ export async function purchaseAiCreditsAction() {
 }
 
 // ─── Settings / Logo ──────────────────────────────────────────────────────
+
+export async function updateCompanyProfileAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const market = String(formData.get("market") ?? "").trim() || null;
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateCompanyProfile({ name: name || undefined, market });
+    revalidatePath("/settings");
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update profile.";
+    errorRedirect = createRedirectUrl("/settings", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/settings?saved=1");
+  }
+}
 
 export async function setCompanyLogoAction(formData: FormData) {
   const logoUrl = formData.get("logoUrl");
@@ -1053,6 +1083,92 @@ export async function markAllNotificationsReadAction() {
     revalidatePath("/notifications");
   } catch {
     // Silent
+  }
+}
+
+// ─── Customers ────────────────────────────────────────────────────────────
+
+export async function createCustomerAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const status = (String(formData.get("status") ?? "active")) as "active" | "inactive" | "vip";
+  const sourceLeadId = String(formData.get("sourceLeadId") ?? "").trim() || null;
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.create({ name, email, phone, notes, status, sourceLeadId });
+    revalidatePath("/customers");
+    revalidatePath("/leads");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create customer.";
+    errorRedirect = createRedirectUrl("/customers", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/customers?created=1");
+  }
+}
+
+export async function updateCustomerStatusAction(formData: FormData) {
+  const customerId = String(formData.get("customerId") ?? "");
+  const status = String(formData.get("status") ?? "active") as "active" | "inactive" | "vip";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.update({ customerId, status });
+    revalidatePath("/customers");
+  } catch {
+    // Silent
+  }
+}
+
+export async function deleteCustomerAction(formData: FormData) {
+  const customerId = String(formData.get("customerId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.delete({ customerId });
+    revalidatePath("/customers");
+  } catch {
+    // Silent
+  }
+}
+
+/** Convert a lead to a customer. */
+export async function convertLeadToCustomerAction(formData: FormData) {
+  const leadId = String(formData.get("leadId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.create({
+      name,
+      email,
+      phone,
+      status: "active",
+      sourceLeadId: leadId,
+    });
+    // Also mark the lead as qualified after conversion
+    await caller.workspace.updateLeadStatus({ leadId, status: "qualified" });
+    revalidatePath("/leads");
+    revalidatePath("/customers");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to convert lead.";
+    errorRedirect = createRedirectUrl("/leads", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/customers?created=1");
   }
 }
 

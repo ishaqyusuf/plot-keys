@@ -4,7 +4,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
-import { updateLeadStatusAction } from "../../actions";
+import { convertLeadToCustomerAction, updateLeadStatusAction } from "../../actions";
 
 type LeadsPageProps = {
   searchParams?: Promise<{ status?: string }>;
@@ -161,6 +161,18 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                           />
                           <Button size="sm" type="submit" variant="outline">
                             {flow.label}
+                          </Button>
+                        </form>
+                      ) : null}
+                      {/* Convert qualified lead to customer */}
+                      {lead.status === "qualified" ? (
+                        <form action={convertLeadToCustomerAction}>
+                          <input type="hidden" name="leadId" value={lead.id} />
+                          <input type="hidden" name="name" value={lead.name} />
+                          <input type="hidden" name="email" value={lead.email ?? ""} />
+                          <input type="hidden" name="phone" value={lead.phone ?? ""} />
+                          <Button size="sm" type="submit" variant="default">
+                            → Customer
                           </Button>
                         </form>
                       ) : null}
