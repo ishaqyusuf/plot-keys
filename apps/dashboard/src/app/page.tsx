@@ -154,10 +154,15 @@ export default async function DashboardHomePage({
         </div>
 
         {/* Metrics strip */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {[
             { label: "Properties", value: String(propertyCount ?? 0), href: "/properties" },
             { label: "Agents", value: String(agentCount ?? 0), href: "/agents" },
+            {
+              label: "Domains",
+              value: String(domainStatuses?.length ?? 0),
+              href: "/domains",
+            },
             {
               label: "Live config",
               value: publishedConfig?.name ?? "—",
@@ -191,7 +196,7 @@ export default async function DashboardHomePage({
         </div>
 
         {/* Quick-nav cards */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <Card className="bg-card">
             <CardHeader className="px-6 pt-6 pb-3">
               <CardTitle className="text-lg">Properties</CardTitle>
@@ -215,6 +220,19 @@ export default async function DashboardHomePage({
             <CardContent className="px-6 pb-6">
               <Button asChild variant="secondary">
                 <Link href="/agents">View agents</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-3">
+              <CardTitle className="text-lg">Domains</CardTitle>
+              <CardDescription>
+                View domain provisioning status and trigger re-syncs.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <Button asChild variant="secondary">
+                <Link href="/domains">Manage domains</Link>
               </Button>
             </CardContent>
           </Card>

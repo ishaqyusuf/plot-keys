@@ -689,6 +689,7 @@ export async function syncTenantDomainsAction() {
     await caller.workspace.syncTenantDomains();
 
     revalidatePath("/");
+    revalidatePath("/domains");
     revalidatePath("/live");
   } catch {
     // non-fatal
