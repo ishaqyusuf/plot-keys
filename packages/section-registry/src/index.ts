@@ -82,6 +82,7 @@ export type TenantThemeRecord = Partial<
     | "fontFamily"
     | "headingFontFamily"
     | "logo"
+    | "logoUrl"
     | "market"
     | "supportLine"
   >
@@ -137,6 +138,8 @@ export type ResolvedWebsitePresentation = {
 
 type ResolveTemplateOptions = {
   companyName?: string;
+  /** Public URL of the company logo image, if uploaded. */
+  companyLogoUrl?: string | null;
   content?: TenantContentRecord;
   liveAgents?: LiveAgentItem[];
   liveListings?: LiveListingItem[];
@@ -1962,6 +1965,7 @@ export function createInitialSiteConfigurationInput({
 
 export function resolveWebsitePresentation({
   companyName,
+  companyLogoUrl,
   content,
   liveAgents,
   liveListings,
@@ -1994,6 +1998,7 @@ export function resolveWebsitePresentation({
       ...template.defaultTheme,
       ...theme,
       logo: companyName ?? theme?.logo ?? template.defaultTheme.logo,
+      logoUrl: companyLogoUrl ?? theme?.logoUrl ?? undefined,
       market: market ?? theme?.market ?? template.defaultTheme.market,
       supportLine:
         theme?.supportLine ??

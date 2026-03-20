@@ -1,0 +1,22 @@
+/// Pending email invitation to join a company workspace.
+/// Created when an owner/admin invites a new team member by email.
+/// Consumed when the invitee accepts and a Membership is created.
+model TeamInvite {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId  String         @map("company_id") @db.Uuid
+  email      String
+  role       MembershipRole
+  token      String         @unique
+  expiresAt  DateTime       @map("expires_at") @db.Timestamptz(6)
+  acceptedAt DateTime?      @map("accepted_at") @db.Timestamptz(6)
+  revokedAt  DateTime?      @map("revoked_at") @db.Timestamptz(6)
+  invitedById String?       @map("invited_by_id")
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  company    Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedBy  User?          @relation("TeamInviteInvitedBy", fields: [invitedById], references: [id])
+
+  @@index([token], map: "team_invites_token_idx")
+  @@index([companyId], map: "team_invites_company_id_idx")
+  @@index([email], map: "team_invites_email_idx")
+  @@map("team_invites")
+}

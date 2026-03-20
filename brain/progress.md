@@ -27,6 +27,10 @@
 | Email (Welcome + Verification + New Lead + Site Published) | ✅ Done |
 | Notifications (event system, 10 types) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
+| Listing categories & types | ✅ Done |
+| Settings expansion | ✅ Done |
+| Customer model + lead promotion | ✅ Done |
+| Team invite accept flow | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
@@ -152,7 +156,26 @@
 - Created checkout callback page (`/billing/callback`): handles Paystack redirect after payment
 - Added `initializeCheckoutAction` server action: calls tRPC initializeCheckout and redirects to Paystack authorization URL
 
-## 2026-03-19 (Session 2 — High-Impact Features)
+## 2026-03-19 (Session 3 — Todos)
+
+### Tenant Domain Management UI
+- Created `/domains` dashboard page with domain list, status badges, error details, and re-sync button
+- Added `syncDomainsAction` server action (redirects to `/domains?synced=1` on success)
+- Updated dashboard home quick-nav from 2 to 4 cards (added Domains + Settings)
+
+### Logo Upload Flow
+- Added `@plotkeys/platform-integrations` dependency to `apps/dashboard`
+- Created `POST /api/upload` API route that validates file type/size and uploads to Supabase logos bucket
+- Created `LogoUploadForm` client component with file picker and URL paste fallback
+- Created `/settings` dashboard page with workspace info and logo upload section
+- Added `setCompanyLogoAction` server action calling existing `setCompanyLogo` tRPC procedure
+
+### Logo rendering in tenant site
+- Added `logoUrl?: string` field to `ThemeConfig` and `TenantThemeRecord`
+- Added `companyLogoUrl` option to `ResolveTemplateOptions`
+- Updated `resolveWebsitePresentation` to propagate `companyLogoUrl` through theme
+- Updated `HeroBannerSection` in `home-page.tsx` to render `<img>` when `theme.logoUrl` is set
+- Wired `company.logoUrl` from `tenant-site/page.tsx`
 
 ### Better Auth Migration
 - Refactored `signUpUser()` to use `auth.api.signUpEmail()` instead of manual Prisma user creation
@@ -234,3 +257,89 @@
 - Root cause: `BuilderPreviewPanel` rendered sections without `WebsiteRuntimeProvider`, so `EditableText` components could not detect draft mode via `useIsDraftMode()` hook.
 - Fix: Wrapped the section rendering container with `<WebsiteRuntimeProvider renderMode="draft">` in `builder-preview-panel.tsx`.
 - This enables the amber ring editing affordances and contentEditable behavior on text fields within sections when viewed in the builder.
+
+## 2026-03-19 (Session 4 — Tenant Dashboard System)
+
+### Dashboard route group and sidebar navigation
+- Created `(app)` Next.js route group for all authenticated pages (no URL changes)
+- Moved 11 page directories (agents, ai-credits, analytics, appointments, billing, builder, domains, leads, live, properties, settings) + their sub-pages into `(app)/`
+- Fixed all relative imports across moved files (one extra `../` depth added)
+- Created `DashboardSidebar` client component: 4-group nav (Workspace, Operations, Growth, Platform) with active state via `usePathname`, plan badges for Pro/Plus/Coming features, company info header, sign-out in footer
+- Created `DashboardShell` client component wrapping SidebarProvider + DashboardSidebar + SidebarInset so `(app)/layout.tsx` stays a server component
+- `(app)/layout.tsx` reads planTier from DB and passes to DashboardShell
+
+### Dashboard home page rebuild
+- Replaced dev-focused prototype home page with proper tenant-facing dashboard
+- Header: company name + plan badge + "View site" + "Open builder" CTAs
+- 4-metric stat strip: Properties, Agents, New leads, Appointments (all clickable)
+- 4 quick-action cards: Builder, Analytics, Leads, Billing
+- Plan upgrade prompt for starter users
+- Platform feature roadmap grid (4 sections × features) showing Live/Partial/Plus/Pro/Coming status with icons and descriptions
+
+### Bug fixes
+- Fixed CSS custom property syntax in builder/page.tsx: `shadow-(--shadow-soft)` → `shadow-[var(--shadow-soft)]`
+- Removed duplicate "Tenant domain management UI" entry from brain/progress.md
+- Fixed `domains/page.tsx` locale from `en-US` back to `en-NG` (codebase convention)
+
+## 2026-03-20 (Session 5 — Feature Completion)
+
+### Team Management (Phase 1B)
+- Added `/join/[token]` page for accepting team invites (handles expired/revoked/already-accepted states)
+- Added `acceptInviteAction` server action calling `team.acceptInvite` tRPC procedure
+- Added `/team` link (Users2Icon) and `/notifications` link (BellIcon) to `DashboardSidebar` Platform group
+
+### Notifications Page
+- Created `/notifications` dashboard page with list, unread badge, unread/all filter toggle, and "Mark all read" form button
+- Direct DB query for notifications (no extra tRPC call needed for server page)
+
+### Property Detail Page + Media Gallery
+- Created `/properties/[id]` detail page with:
+  - Property info header with publish state badge
+  - Publish state controls: Publish, Unpublish, Archive, Restore to draft
+  - Media gallery grid: photos, floor plans, virtual tour links
+  - Add media form (URL + type + cover checkbox)
+  - Set cover star button + delete button per media item
+- Updated properties list page to show `publishState` badge on each property card
+- Updated properties list to link property title to `/properties/[id]`
+- Updated `addPropertyMediaAction`, `deletePropertyMediaAction`, `setPropertyCoverAction` to revalidate both `/properties` and `/properties/[propertyId]` paths
+- Updated `updatePropertyPublishStateAction` to revalidate both paths
+
+## 2026-03-20 (Session 6 — Core Product Gaps + Dashboard Expansion)
+
+### Property/Agent Data Binding Fix
+- Updated `listFeaturedProperties` to filter by `publishState: "published"` (only published listings appear on live tenant sites)
+- Updated `listFeaturedProperties` to include cover media from `PropertyMedia` when `imageUrl` is null (includes `media` relation with cover filter, maps `imageUrl` to cover media URL as fallback)
+
+### Listing Categories & Types
+- Added `PropertyType` enum: residential, commercial, land, industrial, mixed_use
+- Added `type` and `subType` fields to `Property` model
+- Created migration: `20260320093931/migration.sql`
+- Updated `createProperty`/`updateProperty` DB queries to accept `type`/`subType`
+- Updated `createProperty`/`updateProperty` tRPC procedures (workspace.route.ts) with new fields
+- Updated `createPropertyAction`/`updatePropertyAction` server actions to pass type/subType from form
+- Updated `PropertyForm` component to include type selector and subType input
+- Updated properties list page with type filter tabs and type badge per card
+- Added `PropertyTypeValue` type export from `@plotkeys/db`
+
+### Settings Expansion
+- Expanded `/settings` page with:
+  - Company Profile section with editable name and market (owners/admins only)
+  - Workspace read-only section (subdomain, plan with Upgrade button)
+  - Logo upload section (unchanged)
+  - Danger zone with disabled Delete button (owners/admins only)
+- Added `updateCompanyProfile` DB query function
+- Added `updateCompanyProfile` tRPC procedure (admin+ role required)
+- Added `updateCompanyProfileAction` server action
+
+### Customer Model + Lead Promotion
+- Added `CustomerStatus` enum: active, inactive, vip
+- Added `Customer` Prisma model (company, name, email, phone, notes, status, sourceLeadId)
+- Created migration in `20260320093931/migration.sql`
+- Added `Customer` relation to `Company` model
+- Created customer DB queries: createCustomer, listCustomersForCompany, getCustomerById, updateCustomer, softDeleteCustomer, countCustomersByStatus
+- Created `customers.route.ts` tRPC router: list, stats, create, update, delete
+- Registered `customersRouter` in `_app.ts`
+- Added server actions: createCustomerAction, updateCustomerStatusAction, deleteCustomerAction, convertLeadToCustomerAction
+- Created `/customers` dashboard page with stats strip, status filter tabs, customer cards with status management
+- Added "→ Customer" convert button on qualified leads in `/leads` page
+- Updated `DashboardSidebar` Customers link from `#` to `/customers`

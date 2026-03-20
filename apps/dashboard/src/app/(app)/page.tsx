@@ -46,34 +46,53 @@ export default async function DashboardHomePage({
   const prisma = createPrismaClient().db;
   const domainProvisioningConfigured = isVercelDomainProvisioningConfigured();
 
-  const [domainStatuses, propertyCount, agentCount, leadCount, appointmentCount, publishedConfig] =
-    await Promise.all([
-      prisma?.tenantDomain.findMany({
-        orderBy: { createdAt: "asc" },
-        where: { companyId: session.activeMembership.companyId, deletedAt: null },
-      }),
-      prisma?.property.count({
-        where: { companyId: session.activeMembership.companyId, deletedAt: null },
-      }),
-      prisma?.agent.count({
-        where: { companyId: session.activeMembership.companyId, deletedAt: null },
-      }),
-      prisma?.lead.count({
-        where: { companyId: session.activeMembership.companyId },
-      }),
-      prisma?.appointment.count({
-        where: { companyId: session.activeMembership.companyId },
-      }),
-      prisma
-        ? resolvePublishedForCompany(prisma, session.activeMembership.companyId)
-        : null,
-    ]);
+  const [
+    domainStatuses,
+    propertyCount,
+    agentCount,
+    leadCount,
+    appointmentCount,
+    publishedConfig,
+  ] = await Promise.all([
+    prisma?.tenantDomain.findMany({
+      orderBy: { createdAt: "asc" },
+      where: {
+        companyId: session.activeMembership.companyId,
+        deletedAt: null,
+      },
+    }),
+    prisma?.property.count({
+      where: { companyId: session.activeMembership.companyId, deletedAt: null },
+    }),
+    prisma?.agent.count({
+      where: { companyId: session.activeMembership.companyId, deletedAt: null },
+    }),
+    prisma?.lead.count({
+      where: { companyId: session.activeMembership.companyId },
+    }),
+    prisma?.appointment.count({
+      where: { companyId: session.activeMembership.companyId },
+    }),
+    prisma
+      ? resolvePublishedForCompany(prisma, session.activeMembership.companyId)
+      : null,
+  ]);
 
   const stats = [
-    { label: "Properties", value: propertyCount ?? 0, href: "/properties", icon: Building2 },
+    {
+      label: "Properties",
+      value: propertyCount ?? 0,
+      href: "/properties",
+      icon: Building2,
+    },
     { label: "Agents", value: agentCount ?? 0, href: "/agents", icon: Users },
     { label: "Leads", value: leadCount ?? 0, href: "/leads", icon: Mail },
-    { label: "Appointments", value: appointmentCount ?? 0, href: "/appointments", icon: Calendar },
+    {
+      label: "Appointments",
+      value: appointmentCount ?? 0,
+      href: "/appointments",
+      icon: Calendar,
+    },
   ];
 
   return (
@@ -140,7 +159,6 @@ export default async function DashboardHomePage({
           );
         })()}
 
-        {/* Page header */}
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-semibold text-foreground">
             Welcome back, {session.activeMembership.companyName}
@@ -150,7 +168,6 @@ export default async function DashboardHomePage({
           </p>
         </div>
 
-        {/* Metrics strip */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <Link key={stat.label} href={stat.href}>
@@ -173,9 +190,7 @@ export default async function DashboardHomePage({
           ))}
         </div>
 
-        {/* Quick actions + Site status */}
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          {/* Quick actions */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Quick Actions</CardTitle>
@@ -229,7 +244,6 @@ export default async function DashboardHomePage({
             </CardContent>
           </Card>
 
-          {/* Site status */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Site Status</CardTitle>
@@ -260,10 +274,13 @@ export default async function DashboardHomePage({
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {publishedConfig.publishedAt
-                        ? new Date(publishedConfig.publishedAt).toLocaleDateString(
-                            "en-GB",
-                            { day: "numeric", month: "short", year: "numeric" },
-                          )
+                        ? new Date(
+                            publishedConfig.publishedAt,
+                          ).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
                         : "Not published yet"}
                     </p>
                   </div>

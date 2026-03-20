@@ -10,6 +10,8 @@ export type ThemeConfig = {
   fontFamily: string;
   headingFontFamily: string;
   logo: string;
+  /** Optional URL for the company logo image. When set, renders an <img> instead of text. */
+  logoUrl?: string;
   market: string;
   supportLine: string;
 };
@@ -224,13 +226,23 @@ export function HeroBannerSection({
         <Surface className="overflow-hidden bg-[color:var(--surface-inverse)] text-white">
           <div className="p-6 md:p-8">
             <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.28em] text-teal-200">
-              <span>
-                {theme.logo && (theme.logo.startsWith("http://") || theme.logo.startsWith("https://")) ? (
-                  <img src={theme.logo} alt="Logo" className="h-8 w-auto object-contain" />
-                ) : (
-                  theme.logo
-                )}
-              </span>
+              {theme.logoUrl ? (
+                <img
+                  alt={theme.logo}
+                  className="h-7 max-w-[140px] object-contain"
+                  src={theme.logoUrl}
+                />
+              ) : theme.logo &&
+                (theme.logo.startsWith("http://") ||
+                  theme.logo.startsWith("https://")) ? (
+                <img
+                  src={theme.logo}
+                  alt="Logo"
+                  className="h-8 w-auto object-contain"
+                />
+              ) : (
+                <span>{theme.logo}</span>
+              )}
               <span>{theme.market}</span>
             </div>
 

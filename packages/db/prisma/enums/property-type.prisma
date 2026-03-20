@@ -1,0 +1,9 @@
+enum PropertyType {
+  residential
+  commercial
+  land
+  industrial
+  mixed_use
+
+  @@map("property_type")
+}

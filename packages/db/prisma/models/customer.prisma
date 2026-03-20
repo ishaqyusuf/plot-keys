@@ -1,0 +1,28 @@
+enum CustomerStatus {
+  active
+  inactive
+  vip
+
+  @@map("customer_status")
+}
+
+/// A contact who has become a customer (converted from a lead or added directly).
+model Customer {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId    String         @map("company_id") @db.Uuid
+  name         String
+  email        String?
+  phone        String?
+  notes        String?
+  status       CustomerStatus @default(active)
+  sourceLeadId String?        @map("source_lead_id") @db.Uuid
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId], map: "customers_company_id_idx")
+  @@index([companyId, status], map: "customers_company_status_idx")
+  @@index([deletedAt], map: "customers_deleted_at_idx")
+  @@map("customers")
+}

@@ -9,11 +9,14 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@plotkeys/ui/sidebar";
 import {
   BarChart3,
+  Bell,
   Bot,
   Building2,
   Calendar,
@@ -23,69 +26,69 @@ import {
   LayoutDashboard,
   Mail,
   Paintbrush,
+  Settings,
+  Sparkles,
+  Store,
+  UserRoundCog,
   Users,
+  UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { SignOutButton } from "../auth/sign-out-button";
 
-const navMain = [
-  { title: "Dashboard", href: "/", icon: Home },
-  { title: "Builder", href: "/builder", icon: Paintbrush },
-  { title: "Live Preview", href: "/live", icon: Globe },
-];
-
-const navManage = [
-  { title: "Properties", href: "/properties", icon: Building2 },
-  { title: "Agents", href: "/agents", icon: Users },
-  { title: "Leads", href: "/leads", icon: Mail },
-  { title: "Appointments", href: "/appointments", icon: Calendar },
-];
-
-const navInsights = [
-  { title: "Analytics", href: "/analytics", icon: BarChart3 },
-  { title: "AI Credits", href: "/ai-credits", icon: Bot },
-  { title: "Billing", href: "/billing", icon: CreditCard },
-];
-
-function NavGroup({
-  label,
-  items,
-  pathname,
-}: {
+type NavItem = {
+  badge?: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
-  items: { title: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
-  pathname: string;
-}) {
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href)
-                }
-                tooltip={item.title}
-              >
-                <Link href={item.href}>
-                  <item.icon className="size-4" />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
-}
+};
+
+type NavGroup = {
+  items: NavItem[];
+  label: string;
+};
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    items: [
+      { href: "/", icon: Home, label: "Dashboard" },
+      { href: "/builder", icon: Paintbrush, label: "Builder" },
+      { href: "/live", icon: Globe, label: "Live Preview" },
+    ],
+  },
+  {
+    label: "Manage",
+    items: [
+      { href: "/properties", icon: Building2, label: "Properties" },
+      { href: "/agents", icon: UsersRound, label: "Agents" },
+      { href: "/leads", icon: Mail, label: "Leads" },
+      { href: "/appointments", icon: Calendar, label: "Appointments" },
+      { href: "/customers", icon: Users, label: "Customers", badge: "Plus" },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { href: "/analytics", icon: BarChart3, label: "Analytics" },
+      { href: "/ai-credits", icon: Sparkles, label: "AI Credits", badge: "AI" },
+      { href: "#", icon: Bot, label: "Chat-bot", badge: "Pro" },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      { href: "/billing", icon: CreditCard, label: "Billing" },
+      { href: "/domains", icon: Globe, label: "Domains" },
+      { href: "/team", icon: UserRoundCog, label: "Team" },
+      { href: "/notifications", icon: Bell, label: "Notifications" },
+      { href: "/settings", icon: Settings, label: "Settings" },
+      { href: "#", icon: Store, label: "App store", badge: "Coming" },
+    ],
+  },
+];
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -113,18 +116,68 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavGroup label="Overview" items={navMain} pathname={pathname} />
-        <NavGroup label="Manage" items={navManage} pathname={pathname} />
-        <NavGroup label="Insights" items={navInsights} pathname={pathname} />
+        {navGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const startsWith =
+                    item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href);
+                  const isDisabled = item.href === "#";
+
+                  return (
+                    <SidebarMenuItem key={item.label}>
+                      <SidebarMenuButton
+                        asChild={!isDisabled}
+                        isActive={isActive || startsWith}
+                        tooltip={item.label}
+                        className={isDisabled ? "cursor-not-allowed opacity-60" : undefined}
+                      >
+                        {isDisabled ? (
+                          <span className="flex items-center gap-2">
+                            <item.icon className="size-4 shrink-0" />
+                            <span>{item.label}</span>
+                          </span>
+                        ) : (
+                          <Link href={item.href}>
+                            <item.icon className="size-4 shrink-0" />
+                            <span>{item.label}</span>
+                          </Link>
+                        )}
+                      </SidebarMenuButton>
+                      {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SignOutButton />
+            <div className="px-2 py-2">
+              <SignOutButton />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
+  );
+}
+
+export function DashboardSidebarSkeleton() {
+  return (
+    <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
+      <div className="px-4 py-4">
+        <div className="h-8 w-32 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
   );
 }

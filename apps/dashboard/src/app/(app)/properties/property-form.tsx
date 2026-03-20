@@ -23,6 +23,8 @@ type Property = {
   bathrooms: number | null;
   specs: string | null;
   imageUrl: string | null;
+  type: string | null;
+  subType: string | null;
   status: string;
   featured: boolean;
 };
@@ -146,6 +148,31 @@ export function PropertyForm(props: PropertyFormProps) {
                 name="imageUrl"
                 placeholder="https://…"
                 type="url"
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel>Property type</FieldLabel>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                defaultValue={property?.type ?? ""}
+                name="type"
+              >
+                <option value="">Select type…</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="land">Land</option>
+                <option value="industrial">Industrial</option>
+                <option value="mixed_use">Mixed use</option>
+              </select>
+            </Field>
+
+            <Field>
+              <FieldLabel>Sub-type</FieldLabel>
+              <Input
+                defaultValue={property?.subType ?? ""}
+                name="subType"
+                placeholder="e.g. Detached, Bungalow, Flat, Office…"
               />
             </Field>
 

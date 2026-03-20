@@ -18,6 +18,17 @@ export async function findCompanyById(db: Db, id: string) {
   });
 }
 
+export async function updateCompanyProfile(
+  db: Db,
+  companyId: string,
+  data: { name?: string; market?: string | null },
+) {
+  return db.company.update({
+    data,
+    where: { id: companyId },
+  });
+}
+
 export async function updateCompanyLogo(
   db: Db,
   companyId: string,

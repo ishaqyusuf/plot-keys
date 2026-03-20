@@ -192,7 +192,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
         )}
 
         <aside className="hidden xl:sticky xl:top-3 xl:block xl:h-[calc(100svh-1.5rem)]">
-          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-(--shadow-soft)">
+          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
             <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">

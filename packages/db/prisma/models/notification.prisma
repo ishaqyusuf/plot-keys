@@ -1,0 +1,19 @@
+/// Persistent in-app notification for a specific user within a company workspace.
+model Notification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  userId    String   @map("user_id")
+  type      String
+  title     String
+  body      String?
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, userId], map: "notifications_company_user_idx")
+  @@index([companyId, userId, isRead], map: "notifications_company_user_read_idx")
+  @@index([createdAt], map: "notifications_created_at_idx")
+  @@map("notifications")
+}

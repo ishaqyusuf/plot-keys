@@ -1,5 +1,7 @@
 import type { Db } from "../prisma";
 
+export type PropertyTypeValue = "residential" | "commercial" | "land" | "industrial" | "mixed_use";
+
 export async function createProperty(
   db: Db,
   data: {
@@ -12,6 +14,8 @@ export async function createProperty(
     bathrooms?: number | null;
     specs?: string | null;
     imageUrl?: string | null;
+    type?: PropertyTypeValue | null;
+    subType?: string | null;
     status?: "active" | "sold" | "rented" | "off_market";
     featured?: boolean;
   },
@@ -27,6 +31,8 @@ export async function createProperty(
       bathrooms: data.bathrooms ?? null,
       specs: data.specs ?? null,
       imageUrl: data.imageUrl ?? null,
+      type: data.type ?? null,
+      subType: data.subType ?? null,
       status: data.status ?? "active",
       featured: data.featured ?? false,
     },
@@ -46,6 +52,8 @@ export async function updateProperty(
     bathrooms?: number | null;
     specs?: string | null;
     imageUrl?: string | null;
+    type?: PropertyTypeValue | null;
+    subType?: string | null;
     status?: "active" | "sold" | "rented" | "off_market";
     featured?: boolean;
   },
@@ -86,15 +94,27 @@ export async function togglePropertyFeatured(
 }
 
 export async function listFeaturedProperties(db: Db, companyId: string) {
-  return db.property.findMany({
+  const properties = await db.property.findMany({
+    include: {
+      media: {
+        where: { isCover: true },
+        take: 1,
+      },
+    },
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     take: 6,
     where: {
       companyId,
       deletedAt: null,
+      publishState: "published",
       status: "active",
     },
   });
+
+  return properties.map((p) => ({
+    ...p,
+    imageUrl: p.imageUrl ?? p.media[0]?.url ?? null,
+  }));
 }
 
 export async function listPropertiesForCompany(

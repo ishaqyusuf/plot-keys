@@ -96,6 +96,7 @@ export default async function TenantWebsiteHomePage({
 
         preview = resolveWebsitePresentation({
           companyName: company.name,
+          companyLogoUrl: company.logoUrl,
           content: publishedConfiguration.contentJson as Record<string, string>,
           liveAgents: agents.map((a) => ({
             bio: a.bio,

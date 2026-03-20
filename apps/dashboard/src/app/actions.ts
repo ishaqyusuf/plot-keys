@@ -512,6 +512,10 @@ export async function createPropertyAction(formData: FormData) {
         : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | null,
+      subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -549,6 +553,10 @@ export async function updatePropertyAction(formData: FormData) {
         : null,
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | null,
+      subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -801,8 +809,41 @@ export async function purchaseAiCreditsAction() {
 
 // ─── Settings actions ─────────────────────────────────────────────────────
 
-export async function setCompanyLogoAction(logoUrl: string | null) {
+export async function updateCompanyProfileAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const market = String(formData.get("market") ?? "").trim() || null;
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateCompanyProfile({
+      name: name || undefined,
+      market,
+    });
+    revalidatePath("/settings");
+    revalidatePath("/");
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to update profile.";
+    errorRedirect = createRedirectUrl("/settings", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/settings?saved=1");
+  }
+}
+
+export async function setCompanyLogoAction(input: FormData | string | null) {
   "use server";
+
+  const logoUrl =
+    input instanceof FormData
+      ? input.get("logoUrl")
+        ? String(input.get("logoUrl"))
+        : null
+      : input;
 
   try {
     const caller = await createServerCaller();
@@ -814,3 +855,322 @@ export async function setCompanyLogoAction(logoUrl: string | null) {
   }
 }
 
+// ─── Domain management ────────────────────────────────────────────────────
+
+export async function syncDomainsAction() {
+  let redirectUrl = "/domains?synced=1";
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.syncTenantDomains();
+    revalidatePath("/domains");
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Domain sync failed.";
+    redirectUrl = createRedirectUrl("/domains", { error: message });
+  }
+  redirect(redirectUrl);
+}
+
+// ─── Team management ──────────────────────────────────────────────────────
+
+export async function acceptInviteAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "").trim();
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.acceptInvite({ token });
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to accept invite.";
+    errorRedirect = createRedirectUrl(`/join/${token}`, { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/");
+  }
+}
+
+export async function inviteMemberAction(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.inviteMember({ email, role });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send invite.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/team?invited=1");
+  }
+}
+
+export async function updateMemberRoleAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.updateMemberRole({ membershipId, role });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update role.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function suspendMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.suspendMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to suspend member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function reactivateMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.reactivateMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to reactivate member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function removeMemberAction(formData: FormData) {
+  const membershipId = String(formData.get("membershipId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.removeMember({ membershipId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to remove member.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function revokeInviteAction(formData: FormData) {
+  const inviteId = String(formData.get("inviteId") ?? "");
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.revokeInvite({ inviteId });
+    revalidatePath("/team");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to revoke invite.";
+    errorRedirect = createRedirectUrl("/team", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+// ─── Property media + publish state ──────────────────────────────────────
+
+export async function updatePropertyPublishStateAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const publishState = String(formData.get("publishState") ?? "draft") as
+    | "draft"
+    | "published"
+    | "archived";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.updatePublishState({ propertyId, publishState });
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch {
+    // Silent — page reload will show current state
+  }
+}
+
+export async function addPropertyMediaAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const url = String(formData.get("url") ?? "");
+  const kind = (String(formData.get("kind") ?? "image")) as
+    | "image"
+    | "floor_plan"
+    | "virtual_tour";
+  const isCover = formData.get("isCover") === "true";
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to add media.";
+    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function deletePropertyMediaAction(formData: FormData) {
+  const mediaId = String(formData.get("mediaId") ?? "");
+  const propertyId = String(formData.get("propertyId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.deleteMedia({ mediaId, propertyId });
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch {
+    // Silent
+  }
+}
+
+export async function setPropertyCoverAction(formData: FormData) {
+  const mediaId = String(formData.get("mediaId") ?? "");
+  const propertyId = String(formData.get("propertyId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.propertyMedia.setCover({ mediaId, propertyId });
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch {
+    // Silent
+  }
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────
+
+export async function markAllNotificationsReadAction() {
+  try {
+    const caller = await createServerCaller();
+    await caller.notifications.markAllRead();
+    revalidatePath("/notifications");
+  } catch {
+    // Silent
+  }
+}
+
+// ─── Customers ────────────────────────────────────────────────────────────
+
+export async function createCustomerAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const status = (String(formData.get("status") ?? "active")) as "active" | "inactive" | "vip";
+  const sourceLeadId = String(formData.get("sourceLeadId") ?? "").trim() || null;
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.create({ name, email, phone, notes, status, sourceLeadId });
+    revalidatePath("/customers");
+    revalidatePath("/leads");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create customer.";
+    errorRedirect = createRedirectUrl("/customers", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/customers?created=1");
+  }
+}
+
+export async function updateCustomerStatusAction(formData: FormData) {
+  const customerId = String(formData.get("customerId") ?? "");
+  const status = String(formData.get("status") ?? "active") as "active" | "inactive" | "vip";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.update({ customerId, status });
+    revalidatePath("/customers");
+  } catch {
+    // Silent
+  }
+}
+
+export async function deleteCustomerAction(formData: FormData) {
+  const customerId = String(formData.get("customerId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.delete({ customerId });
+    revalidatePath("/customers");
+  } catch {
+    // Silent
+  }
+}
+
+/** Convert a lead to a customer. */
+export async function convertLeadToCustomerAction(formData: FormData) {
+  const leadId = String(formData.get("leadId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+
+  let errorRedirect: string | null = null;
+  try {
+    const caller = await createServerCaller();
+    await caller.customers.create({
+      name,
+      email,
+      phone,
+      status: "active",
+      sourceLeadId: leadId,
+    });
+    // Also mark the lead as qualified after conversion
+    await caller.workspace.updateLeadStatus({ leadId, status: "qualified" });
+    revalidatePath("/leads");
+    revalidatePath("/customers");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to convert lead.";
+    errorRedirect = createRedirectUrl("/leads", { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/customers?created=1");
+  }
+}
