@@ -1,6 +1,13 @@
-import { createPrismaClient, listAgentsForCompany, listFeaturedProperties, resolveTenantByHostname } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listAgentsForCompany,
+  listFeaturedProperties,
+  resolvePublishedForCompany,
+  resolveTenantByHostname,
+} from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
+  deserializeTemplateConfig,
   resolveWebsitePresentation,
   sampleHomePage,
   sampleTheme,
@@ -76,13 +83,8 @@ export default async function TenantWebsiteHomePage({
         : null;
 
     if (company) {
-      const publishedConfiguration = await prisma.siteConfiguration.findFirst({
-        where: {
-          companyId: company.id,
-          deletedAt: null,
-          status: "published",
-        },
-      });
+      // Phase 3: Prefer WebsiteVersion, fallback to SiteConfiguration
+      const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
 
       if (publishedConfiguration) {
         matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
@@ -149,9 +151,12 @@ export default async function TenantWebsiteHomePage({
           </div>
         </div>
 
-        {preview.page.sections.map((section) =>
-          renderSection(section, preview.theme),
-        )}
+        {(() => {
+          const visibleSections = deserializeTemplateConfig(preview.theme).visibleSections;
+          return preview.page.sections
+            .filter((section) => visibleSections?.[section.type] !== false)
+            .map((section) => renderSection(section, preview.theme));
+        })()}
       </div>
     </main>
   );

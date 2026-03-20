@@ -52,14 +52,20 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Agent: 'Agent',
+  AiUsageLog: 'AiUsageLog',
+  AiCreditLedger: 'AiCreditLedger',
+  AnalyticsEvent: 'AnalyticsEvent',
+  Appointment: 'Appointment',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
   Company: 'Company',
+  Lead: 'Lead',
   Membership: 'Membership',
   Property: 'Property',
   SiteConfiguration: 'SiteConfiguration',
+  TenantStockImageLicense: 'TenantStockImageLicense',
   TenantDomain: 'TenantDomain',
   TenantOnboarding: 'TenantOnboarding',
   TenantTemplateLicense: 'TenantTemplateLicense',
@@ -101,6 +107,71 @@ export const AgentScalarFieldEnum = {
 } as const
 
 export type AgentScalarFieldEnum = (typeof AgentScalarFieldEnum)[keyof typeof AgentScalarFieldEnum]
+
+
+export const AiUsageLogScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  userId: 'userId',
+  feature: 'feature',
+  creditsUsed: 'creditsUsed',
+  tokensUsed: 'tokensUsed',
+  success: 'success',
+  meta: 'meta',
+  createdAt: 'createdAt'
+} as const
+
+export type AiUsageLogScalarFieldEnum = (typeof AiUsageLogScalarFieldEnum)[keyof typeof AiUsageLogScalarFieldEnum]
+
+
+export const AiCreditLedgerScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  amount: 'amount',
+  reason: 'reason',
+  description: 'description',
+  referenceId: 'referenceId',
+  createdAt: 'createdAt'
+} as const
+
+export type AiCreditLedgerScalarFieldEnum = (typeof AiCreditLedgerScalarFieldEnum)[keyof typeof AiCreditLedgerScalarFieldEnum]
+
+
+export const AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  eventType: 'eventType',
+  path: 'path',
+  propertyId: 'propertyId',
+  visitorId: 'visitorId',
+  referrer: 'referrer',
+  userAgent: 'userAgent',
+  meta: 'meta',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
+
+
+export const AppointmentScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  leadId: 'leadId',
+  agentId: 'agentId',
+  propertyId: 'propertyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  scheduledAt: 'scheduledAt',
+  durationMin: 'durationMin',
+  status: 'status',
+  notes: 'notes',
+  location: 'location',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -187,6 +258,23 @@ export const CompanyScalarFieldEnum = {
 export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
 
 
+export const LeadScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  message: 'message',
+  source: 'source',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
 export const MembershipScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -241,6 +329,18 @@ export const SiteConfigurationScalarFieldEnum = {
 } as const
 
 export type SiteConfigurationScalarFieldEnum = (typeof SiteConfigurationScalarFieldEnum)[keyof typeof SiteConfigurationScalarFieldEnum]
+
+
+export const TenantStockImageLicenseScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  imageId: 'imageId',
+  grantedAt: 'grantedAt',
+  providerRef: 'providerRef',
+  createdAt: 'createdAt'
+} as const
+
+export type TenantStockImageLicenseScalarFieldEnum = (typeof TenantStockImageLicenseScalarFieldEnum)[keyof typeof TenantStockImageLicenseScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {

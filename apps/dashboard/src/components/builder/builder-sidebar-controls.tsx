@@ -20,6 +20,7 @@ import {
 } from "@plotkeys/ui/dropdown-menu";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { Switch } from "@plotkeys/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
@@ -28,6 +29,8 @@ type TemplateGroup = "starter" | "plus" | "pro";
 type BuilderSidebarControlsProps = {
   configId: string;
   currentTemplateKey: string;
+  /** Section types present in the current template page inventory. */
+  sectionTypes?: string[];
   templateConfig: TemplateConfig;
   onCreateDraft: (formData: FormData) => Promise<void>;
   onUpdateTheme: (formData: FormData) => Promise<void>;
@@ -549,12 +552,88 @@ function ImageSlotsSection({
 }
 
 // ---------------------------------------------------------------------------
+// Section Visibility Toggles
+// ---------------------------------------------------------------------------
+
+const sectionLabels: Record<string, string> = {
+  hero_banner: "Hero banner",
+  market_stats: "Market stats",
+  story_grid: "Story grid",
+  listing_spotlight: "Listings spotlight",
+  testimonial_strip: "Testimonials",
+  cta_band: "CTA band",
+  agent_showcase: "Agent showcase",
+  property_grid: "Property grid",
+  contact_section: "Contact",
+  faq_accordion: "FAQ",
+  newsletter: "Newsletter",
+  hero_search: "Hero search",
+  why_choose_us: "Why choose us",
+  service_highlights: "Service highlights",
+};
+
+function SectionVisibilityToggles({
+  configId,
+  onSave,
+  sectionTypes,
+  visibleSections,
+}: {
+  configId: string;
+  onSave: (formData: FormData) => Promise<void>;
+  sectionTypes: string[];
+  visibleSections?: Record<string, boolean>;
+}) {
+  const [visibility, setVisibility] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const type of sectionTypes) {
+      initial[type] = visibleSections?.[type] !== false;
+    }
+    return initial;
+  });
+  const [, startTransition] = useTransition();
+
+  function handleToggle(type: string, checked: boolean) {
+    setVisibility((prev) => ({ ...prev, [type]: checked }));
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("configId", configId);
+      fd.set("themeKey", `sectionVisible.${type}`);
+      fd.set("value", String(checked));
+      await onSave(fd);
+    });
+  }
+
+  if (sectionTypes.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+        Sections
+      </p>
+      {sectionTypes.map((type) => (
+        <div key={type} className="flex items-center justify-between gap-2">
+          <span className="text-xs text-foreground">
+            {sectionLabels[type] ?? type}
+          </span>
+          <Switch
+            checked={visibility[type] !== false}
+            size="sm"
+            onCheckedChange={(checked) => handleToggle(type, checked)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
 
 export function BuilderSidebarControls({
   configId,
   currentTemplateKey,
+  sectionTypes,
   templateConfig,
   onCreateDraft,
   onUpdateTheme,
@@ -622,6 +701,17 @@ export function BuilderSidebarControls({
             namedImageSlots={namedImageSlots}
             namedImages={templateConfig.namedImages}
             onSave={onUpdateTheme}
+          />
+        </Field>
+      )}
+
+      {sectionTypes && sectionTypes.length > 0 && (
+        <Field>
+          <SectionVisibilityToggles
+            configId={configId}
+            onSave={onUpdateTheme}
+            sectionTypes={sectionTypes}
+            visibleSections={templateConfig.visibleSections}
           />
         </Field>
       )}

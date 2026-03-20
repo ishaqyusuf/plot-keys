@@ -27,6 +27,16 @@ export const CompanyPlanStatus = {
 export type CompanyPlanStatus = (typeof CompanyPlanStatus)[keyof typeof CompanyPlanStatus]
 
 
+export const LeadStatus = {
+  new: 'new',
+  contacted: 'contacted',
+  qualified: 'qualified',
+  closed: 'closed'
+} as const
+
+export type LeadStatus = (typeof LeadStatus)[keyof typeof LeadStatus]
+
+
 export const MembershipRole = {
   platform_admin: 'platform_admin',
   owner: 'owner',
@@ -75,6 +85,16 @@ export const TenantDomainStatus = {
 } as const
 
 export type TenantDomainStatus = (typeof TenantDomainStatus)[keyof typeof TenantDomainStatus]
+
+
+export const AppointmentStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  completed: 'completed',
+  cancelled: 'cancelled'
+} as const
+
+export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
 
 
 export const BillingLineItemKind = {

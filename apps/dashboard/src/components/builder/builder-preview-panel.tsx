@@ -5,10 +5,18 @@ import type {
   SerializableSectionData,
   TenantContentRecord,
 } from "@plotkeys/section-registry";
-import { sectionComponents, WebsiteRuntimeProvider } from "@plotkeys/section-registry";
+import {
+  sectionComponents,
+  WebsiteRuntimeProvider,
+} from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
 import type { JSX } from "react";
@@ -21,6 +29,7 @@ type BuilderPreviewPanelProps = {
   editableFields: EditableFieldDefinition[];
   sections: SerializableSectionData[];
   theme: Record<string, string>;
+  visibleSections?: Record<string, boolean>;
   onUpdateField: (formData: FormData) => Promise<void>;
   onSmartFill: (formData: FormData) => Promise<void>;
 };
@@ -244,10 +253,15 @@ export function BuilderPreviewPanel({
   editableFields,
   sections,
   theme,
+  visibleSections,
   onSmartFill,
   onUpdateField,
 }: BuilderPreviewPanelProps) {
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+
+  const filteredSections = visibleSections
+    ? sections.filter((s) => visibleSections[s.type] !== false)
+    : sections;
 
   const content = Object.fromEntries(
     editableFields.map((f) => [
@@ -272,7 +286,7 @@ export function BuilderPreviewPanel({
           {companySlug}.plotkeys.app / builder-preview
         </p>
         <div className="flex items-center gap-2">
-          <Badge variant="outline">{sections.length} sections</Badge>
+          <Badge variant="outline">{filteredSections.length} sections</Badge>
         </div>
       </div>
 
@@ -283,9 +297,12 @@ export function BuilderPreviewPanel({
         <WebsiteRuntimeProvider renderMode="draft">
           <div
             className="overflow-hidden rounded-lg border border-border/70"
-            style={{ backgroundColor: "#f8fafc", fontFamily: "Satoshi, sans-serif" }}
+            style={{
+              backgroundColor: "#f8fafc",
+              fontFamily: "Satoshi, sans-serif",
+            }}
           >
-            {sections.map((section) => (
+            {filteredSections.map((section) => (
               <PreviewSection
                 configId={configId}
                 content={content}

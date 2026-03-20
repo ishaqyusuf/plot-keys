@@ -1,12 +1,17 @@
 import {
   completeTenantOnboarding,
+  countAppointmentsByStatus,
   countCompaniesByTemplateKey,
+  countLeadsByStatus,
   createAgent,
+  createAppointment,
   createCompanyOnboardingBundle,
   createPrismaClient,
   createProperty,
   createSiteConfiguration,
+  deductAiCredits,
   deleteAgent,
+  deleteAppointment,
   deleteProperty,
   type Db,
   findCompanyById,
@@ -18,20 +23,33 @@ import {
   findSiteConfigurationByIdForCompany,
   findTenantOnboardingByUserId,
   findTemplateLicensesForCompany,
+  getAiCreditBalance,
+  getAiUsageStats,
+  getAnalyticsSummary,
+  getPageViewsByDay,
+  grantAiCredits,
+  grantStockImageLicense,
   grantTemplateLicense,
+  hasStockImageLicense,
   hasTemplateLicense,
   listAgentsForCompany,
+  listAppointmentsForCompany,
+  listLeadsForCompany,
   listPropertiesForCompany,
+  listStockImageLicensesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
+  logAiUsage,
   publishSiteConfiguration,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
   toggleAgentFeatured,
   togglePropertyFeatured,
   updateAgent,
+  updateAppointmentStatus,
   updateCompanyLogo,
   updateCompanyPlan,
+  updateLeadStatus,
   updateOnboardingProfile,
   updateProperty,
   updateSiteConfigurationContentField,
@@ -70,10 +88,14 @@ import { generateFieldContent } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
+  createAppointmentInputSchema,
   createTemplateDraftInputSchema,
+  initializeCheckoutInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
   smartFillFieldInputSchema,
+  updateAppointmentStatusInputSchema,
+  updateLeadStatusInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
 
@@ -259,6 +281,25 @@ export const workspaceRouter = createTRPCRouter({
 
       // Mark the onboarding record as completed
       await completeTenantOnboarding(db, ctx.auth.session.user.id);
+
+      // Grant the free template license for the chosen template
+      await grantTemplateLicense(db, {
+        companyId: siteConfiguration.companyId,
+        grantedById: ctx.auth.session.user.id,
+        source: "free",
+        templateKey,
+      });
+
+      // Auto-trigger Vercel domain provisioning in the background
+      if (isVercelDomainProvisioningConfigured()) {
+        runInBackground(
+          domainSyncHandler,
+          { companyId: siteConfiguration.companyId },
+          { baseDelayMs: 2000, maxAttempts: 4 },
+        ).catch(() => {
+          // Domain sync failures are non-blocking; tenants can retry later
+        });
+      }
 
       return {
         configId: siteConfiguration.id,
@@ -825,6 +866,22 @@ export const workspaceRouter = createTRPCRouter({
         templateKey: configuration.templateKey,
       });
 
+      // Deduct credits if AI was actually used
+      if (aiSuggestion) {
+        const deducted = await deductAiCredits(db, {
+          companyId: ctx.auth.activeMembership.companyId,
+          feature: "smart_fill",
+        });
+
+        await logAiUsage(db, {
+          companyId: ctx.auth.activeMembership.companyId,
+          creditsUsed: deducted ? 2 : 0,
+          feature: "smart_fill",
+          meta: { contentKey: input.contentKey },
+          userId: ctx.auth.session.user.id,
+        }).catch(() => null);
+      }
+
       // Fall back to deterministic placeholder when ANTHROPIC_API_KEY is absent
       const suggestion =
         aiSuggestion ??
@@ -1097,14 +1154,23 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const { propertyId, ...data } = input;
-      return updateProperty(db, propertyId, ctx.auth.activeMembership.companyId, data);
+      return updateProperty(
+        db,
+        propertyId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
     }),
 
   deleteProperty: membershipProcedure
     .input(z.object({ propertyId: z.string().trim().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      await deleteProperty(db, input.propertyId, ctx.auth.activeMembership.companyId);
+      await deleteProperty(
+        db,
+        input.propertyId,
+        ctx.auth.activeMembership.companyId,
+      );
       return { deleted: true };
     }),
 
@@ -1118,7 +1184,10 @@ export const workspaceRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!result) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Property not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Property not found.",
+        });
       }
       return { featured: result.featured, propertyId: result.id };
     }),
@@ -1170,7 +1239,12 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const { agentId, ...data } = input;
-      return updateAgent(db, agentId, ctx.auth.activeMembership.companyId, data);
+      return updateAgent(
+        db,
+        agentId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
     }),
 
   deleteAgent: membershipProcedure
@@ -1195,4 +1269,288 @@ export const workspaceRouter = createTRPCRouter({
       }
       return { agentId: result.id, featured: result.featured };
     }),
+  listLeads: membershipProcedure
+    .input(
+      z
+        .object({
+          status: z
+            .enum(["new", "contacted", "qualified", "closed"])
+            .optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listLeadsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        { status: input?.status, limit: 100 },
+      );
+    }),
+  getLeadStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countLeadsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+  updateLeadStatus: membershipProcedure
+    .input(updateLeadStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const lead = await updateLeadStatus(db, {
+        leadId: input.leadId,
+        notes: input.notes,
+        status: input.status,
+      });
+      return { leadId: lead.id, status: lead.status };
+    }),
+
+  // ─── Billing ──────────────────────────────────────────────────────────
+
+  getBillingInfo: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const company = await findCompanyById(db, companyId);
+    if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+
+    const recentItems = await db.billingLineItem.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      where: { companyId },
+    });
+
+    return {
+      planEndsAt: company.planEndsAt,
+      planStartedAt: company.planStartedAt,
+      planStatus: company.planStatus,
+      planTier: company.planTier,
+      recentItems: recentItems.map((item) => ({
+        amount: item.amountMinorUnits,
+        createdAt: item.createdAt,
+        currency: item.currency,
+        id: item.id,
+        kind: item.kind,
+        paidAt: item.paidAt,
+        providerRef: item.providerRef,
+        status: item.status,
+      })),
+    };
+  }),
+
+  initializeCheckout: membershipProcedure
+    .input(initializeCheckoutInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { initializeTransaction, getPlanPricing } = await import("@plotkeys/utils");
+
+      const companyId = ctx.auth.activeMembership.companyId;
+      const db = getDb();
+      const company = await findCompanyById(db, companyId);
+      if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+
+      const pricing = getPlanPricing(input.planTier);
+      const price = input.interval === "monthly" ? pricing.monthly : pricing.annual;
+
+      if (price.minorUnits === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot checkout for a free plan.",
+        });
+      }
+
+      const callbackUrl = `${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "https://dashboard.plotkeys.com"}/billing/callback`;
+
+      const tx = await initializeTransaction({
+        amount: price.minorUnits,
+        callbackUrl,
+        email: ctx.auth.session.user.email ?? "",
+        metadata: {
+          companyId,
+          interval: input.interval,
+          planTier: input.planTier,
+        },
+      });
+
+      // Record a pending billing line item
+      await db.billingLineItem.create({
+        data: {
+          amountMinorUnits: price.minorUnits,
+          companyId,
+          currency: "NGN",
+          kind: "subscription",
+          meta: { interval: input.interval, planTier: input.planTier },
+          providerRef: tx.reference,
+          status: "pending",
+        },
+      }).catch(() => null);
+
+      return { authorizationUrl: tx.authorization_url, reference: tx.reference };
+    }),
+
+  // ─── Appointments ─────────────────────────────────────────────────────
+
+  listAppointments: membershipProcedure
+    .input(
+      z.object({
+        status: z.string().optional(),
+        upcoming: z.boolean().optional(),
+      }).optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listAppointmentsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        { status: input?.status, upcoming: input?.upcoming, limit: 50 },
+      );
+    }),
+
+  getAppointmentStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countAppointmentsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  createAppointment: membershipProcedure
+    .input(createAppointmentInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createAppointment(db, {
+        agentId: input.agentId,
+        companyId: ctx.auth.activeMembership.companyId,
+        email: input.email,
+        leadId: input.leadId,
+        location: input.location,
+        name: input.name,
+        notes: input.notes,
+        phone: input.phone,
+        propertyId: input.propertyId,
+        scheduledAt: new Date(input.scheduledAt),
+      });
+    }),
+
+  updateAppointmentStatus: membershipProcedure
+    .input(updateAppointmentStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return updateAppointmentStatus(db, {
+        appointmentId: input.appointmentId,
+        notes: input.notes,
+        status: input.status,
+      });
+    }),
+
+  deleteAppointment: membershipProcedure
+    .input(z.object({ appointmentId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return deleteAppointment(db, input.appointmentId);
+    }),
+
+  // ─── Stock Images ─────────────────────────────────────────────────────
+
+  listStockImageLicenses: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return listStockImageLicensesForCompany(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+  }),
+
+  purchaseStockImage: membershipProcedure
+    .input(z.object({ imageId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+      const { getStockImageById } = await import("@plotkeys/section-registry");
+      const { stockImagePrice } = await import("@plotkeys/utils");
+
+      const image = getStockImageById(input.imageId);
+      if (!image) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Image not found." });
+      }
+
+      if (image.licenseTier === "free") {
+        // Free images don't need purchase
+        await grantStockImageLicense(db, { companyId, imageId: input.imageId });
+        return { granted: true, imageId: input.imageId };
+      }
+
+      const alreadyLicensed = await hasStockImageLicense(db, companyId, input.imageId);
+      if (alreadyLicensed) {
+        return { granted: true, imageId: input.imageId };
+      }
+
+      // Record billing line item and grant license
+      await db.billingLineItem.create({
+        data: {
+          amountMinorUnits: stockImagePrice.minorUnits,
+          companyId,
+          currency: "NGN",
+          kind: "stock_image",
+          meta: { imageId: input.imageId, imageTitle: image.title },
+          paidAt: new Date(),
+          status: "active",
+        },
+      });
+
+      await grantStockImageLicense(db, { companyId, imageId: input.imageId });
+
+      return { granted: true, imageId: input.imageId };
+    }),
+
+  // ─── AI Credits ───────────────────────────────────────────────────────
+
+  getAiCreditInfo: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const [balance, usage] = await Promise.all([
+      getAiCreditBalance(db, companyId),
+      getAiUsageStats(db, companyId),
+    ]);
+
+    return { balance, ...usage };
+  }),
+
+  purchaseAiCredits: membershipProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+    const { aiCreditsBlockPrice } = await import("@plotkeys/utils");
+
+    // Record billing
+    const item = await db.billingLineItem.create({
+      data: {
+        amountMinorUnits: aiCreditsBlockPrice.minorUnits,
+        companyId,
+        currency: "NGN",
+        kind: "ai_credits",
+        meta: { credits: aiCreditsBlockPrice.creditsPerBlock },
+        paidAt: new Date(),
+        status: "active",
+      },
+    });
+
+    // Grant credits
+    await grantAiCredits(db, {
+      amount: aiCreditsBlockPrice.creditsPerBlock,
+      companyId,
+      description: `Top-up: ${aiCreditsBlockPrice.creditsPerBlock} credits`,
+      reason: "top_up",
+      referenceId: item.id,
+    });
+
+    return { credited: aiCreditsBlockPrice.creditsPerBlock };
+  }),
+
+  // ─── Analytics ──────────────────────────────────────────────────────
+
+  getAnalytics: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const [summary, pageViewsByDay] = await Promise.all([
+      getAnalyticsSummary(db, companyId),
+      getPageViewsByDay(db, companyId, 30),
+    ]);
+
+    return { ...summary, pageViewsByDay };
+  }),
 });

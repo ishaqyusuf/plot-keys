@@ -1,4 +1,5 @@
 export * from "./cn";
+export * from "./paystack";
 export * from "./phone";
 export * from "./pricing";
 export * from "./tenant-domains";

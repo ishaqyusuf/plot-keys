@@ -1,0 +1,43 @@
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+
+  @@map("appointment_status")
+}
+
+/// Appointment booked by a lead or prospect for a property viewing
+/// or general consultation with an agent.
+model Appointment {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId  String  @map("company_id") @db.Uuid
+  leadId     String? @map("lead_id") @db.Uuid
+  agentId    String? @map("agent_id") @db.Uuid
+  propertyId String? @map("property_id") @db.Uuid
+
+  /// Visitor / prospect details (may not be a captured lead)
+  name  String
+  email String
+  phone String?
+
+  scheduledAt DateTime          @map("scheduled_at") @db.Timestamptz(6)
+  durationMin Int               @default(30) @map("duration_min")
+  status      AppointmentStatus @default(pending)
+  notes       String?
+  location    String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company  Company   @relation(fields: [companyId], references: [id])
+  lead     Lead?     @relation(fields: [leadId], references: [id])
+  agent    Agent?    @relation(fields: [agentId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([companyId], map: "appointments_company_id_idx")
+  @@index([companyId, scheduledAt], map: "appointments_company_scheduled_idx")
+  @@index([agentId], map: "appointments_agent_id_idx")
+  @@index([status], map: "appointments_status_idx")
+  @@map("appointments")
+}

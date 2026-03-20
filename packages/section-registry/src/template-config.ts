@@ -341,6 +341,12 @@ export type TemplateConfig = {
   stylePreset?: StylePreset;
   /** Support tagline or contact line shown in the footer/header. */
   supportLine?: string;
+  /**
+   * Section visibility overrides. Keys are section type strings;
+   * values are booleans indicating whether the section is visible.
+   * Sections not present default to visible (true).
+   */
+  visibleSections?: Record<string, boolean>;
 };
 
 // ---------------------------------------------------------------------------
@@ -369,6 +375,12 @@ export function serializeTemplateConfig(
     }
   }
 
+  if (config.visibleSections) {
+    for (const [section, visible] of Object.entries(config.visibleSections)) {
+      output[`sectionVisible.${section}`] = String(visible);
+    }
+  }
+
   return output;
 }
 
@@ -376,11 +388,15 @@ export function deserializeTemplateConfig(
   raw: Record<string, string>,
 ): TemplateConfig {
   const namedImages: Record<string, string> = {};
+  const visibleSections: Record<string, boolean> = {};
 
   for (const [key, value] of Object.entries(raw)) {
     if (key.startsWith("namedImage.")) {
       const slot = key.slice("namedImage.".length);
       namedImages[slot] = value;
+    } else if (key.startsWith("sectionVisible.")) {
+      const section = key.slice("sectionVisible.".length);
+      visibleSections[section] = value !== "false";
     }
   }
 
@@ -395,6 +411,8 @@ export function deserializeTemplateConfig(
     namedImages: Object.keys(namedImages).length > 0 ? namedImages : undefined,
     stylePreset: raw.stylePreset as StylePreset | undefined,
     supportLine: raw.supportLine,
+    visibleSections:
+      Object.keys(visibleSections).length > 0 ? visibleSections : undefined,
   };
 }
 
@@ -419,10 +437,15 @@ export function applyConfigUpdate(
     ? { ...(existing.namedImages ?? {}), ...update.namedImages }
     : existing.namedImages;
 
+  const mergedVisibleSections = update.visibleSections
+    ? { ...(existing.visibleSections ?? {}), ...update.visibleSections }
+    : existing.visibleSections;
+
   return {
     ...existing,
     ...update,
     namedImages: mergedNamedImages,
+    visibleSections: mergedVisibleSections,
   };
 }
 

@@ -23,6 +23,7 @@ type BuilderSidebarDrawerProps = {
   currentTemplateKey: string;
   editableFieldCount: number;
   sectionCount: number;
+  sectionTypes?: string[];
   templateConfig: TemplateConfig;
   totalConfigurations: number;
   onCreateDraft: (formData: FormData) => Promise<void>;
@@ -37,6 +38,7 @@ export function BuilderSidebarDrawer({
   currentTemplateKey,
   editableFieldCount,
   sectionCount,
+  sectionTypes,
   templateConfig,
   totalConfigurations,
   onCreateDraft,
@@ -89,6 +91,7 @@ export function BuilderSidebarDrawer({
             <BuilderSidebarControls
               configId={configId}
               currentTemplateKey={currentTemplateKey}
+              sectionTypes={sectionTypes}
               templateConfig={templateConfig}
               onCreateDraft={onCreateDraft}
               onUpdateTheme={onUpdateTheme}

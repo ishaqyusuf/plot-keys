@@ -254,7 +254,7 @@ export async function createCompanyOnboardingBundle(
       ],
     });
 
-    return tx.siteConfiguration.create({
+    const siteConfig = await tx.siteConfiguration.create({
       data: {
         ...input.initialSiteConfiguration,
         companyId: company.id,
@@ -264,5 +264,36 @@ export async function createCompanyOnboardingBundle(
         updatedById: input.createdById,
       },
     });
+
+    // Phase 2 dual-write: mirror into Website + WebsiteVersion
+    const website = await tx.website.create({
+      data: {
+        companyId: company.id,
+        subdomain: input.subdomain,
+        templateKey: input.initialSiteConfiguration.templateKey,
+      },
+    });
+
+    const version = await tx.websiteVersion.create({
+      data: {
+        contentJson: input.initialSiteConfiguration.contentJson,
+        createdById: input.createdById,
+        legacyConfigId: siteConfig.id,
+        name: input.initialSiteConfiguration.name,
+        publishedAt: new Date(),
+        status: "published",
+        themeJson: input.initialSiteConfiguration.themeJson,
+        updatedById: input.createdById,
+        versionNumber: 1,
+        websiteId: website.id,
+      },
+    });
+
+    await tx.website.update({
+      data: { publishedVersionId: version.id },
+      where: { id: website.id },
+    });
+
+    return siteConfig;
   });
 }

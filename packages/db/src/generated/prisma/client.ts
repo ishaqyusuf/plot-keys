@@ -47,6 +47,29 @@ export { Prisma }
  */
 export type Agent = Prisma.AgentModel
 /**
+ * Model AiUsageLog
+ * Log of every AI generation call, for usage tracking and credit deduction.
+ */
+export type AiUsageLog = Prisma.AiUsageLogModel
+/**
+ * Model AiCreditLedger
+ * Tracks credit balance changes via a ledger pattern.
+ * Each row is a credit movement (grant or spend).
+ */
+export type AiCreditLedger = Prisma.AiCreditLedgerModel
+/**
+ * Model AnalyticsEvent
+ * Lightweight page view / event tracking for tenant websites.
+ * Designed for simple metrics — not a full analytics warehouse.
+ */
+export type AnalyticsEvent = Prisma.AnalyticsEventModel
+/**
+ * Model Appointment
+ * Appointment booked by a lead or prospect for a property viewing
+ * or general consultation with an agent.
+ */
+export type Appointment = Prisma.AppointmentModel
+/**
  * Model Session
  * 
  */
@@ -74,6 +97,11 @@ export type BillingLineItem = Prisma.BillingLineItemModel
  */
 export type Company = Prisma.CompanyModel
 /**
+ * Model Lead
+ * 
+ */
+export type Lead = Prisma.LeadModel
+/**
  * Model Membership
  * 
  */
@@ -88,6 +116,12 @@ export type Property = Prisma.PropertyModel
  * 
  */
 export type SiteConfiguration = Prisma.SiteConfigurationModel
+/**
+ * Model TenantStockImageLicense
+ * License record granting a tenant access to a stock image.
+ * Free images don't need a license; only standard/premium tier images.
+ */
+export type TenantStockImageLicense = Prisma.TenantStockImageLicenseModel
 /**
  * Model TenantDomain
  * 

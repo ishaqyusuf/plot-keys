@@ -203,6 +203,9 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 <BuilderSidebarControls
                   configId={activeConfiguration.id}
                   currentTemplateKey={activeConfiguration.templateKey}
+                  sectionTypes={preview.page.sections.map(
+                    ({ component: _c, ...rest }) => rest.type,
+                  )}
                   templateConfig={deserializeTemplateConfig(
                     activeConfiguration.themeJson as Record<string, string>,
                   )}
@@ -246,6 +249,9 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 currentTemplateKey={activeConfiguration.templateKey}
                 editableFieldCount={preview.editableFields.length}
                 sectionCount={preview.page.sections.length}
+                sectionTypes={preview.page.sections.map(
+                  ({ component: _c, ...rest }) => rest.type,
+                )}
                 templateConfig={deserializeTemplateConfig(
                   activeConfiguration.themeJson as Record<string, string>,
                 )}
@@ -287,6 +293,11 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               ({ component: _c, ...rest }) => rest,
             )}
             theme={activeConfiguration.themeJson as Record<string, string>}
+            visibleSections={
+              deserializeTemplateConfig(
+                activeConfiguration.themeJson as Record<string, string>,
+              ).visibleSections
+            }
             onSmartFill={smartFillFieldAction}
             onUpdateField={updateSiteFieldAction}
           />

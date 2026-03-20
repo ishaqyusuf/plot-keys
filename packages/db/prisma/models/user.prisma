@@ -1,26 +1,26 @@
 model User {
-  id          String         @id
-  email       String
-  phoneNumber String?        @map("phone_number")
-  passwordHash String?       @map("password_hash")
-  emailVerified Boolean      @default(false) @map("email_verified")
-  name        String?
-  globalRole  MembershipRole @default(staff) @map("global_role")
-  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
-  image       String?
-  memberships Membership[]
+  id                        String              @id
+  email                     String
+  phoneNumber               String?             @map("phone_number")
+  passwordHash              String?             @map("password_hash")
+  emailVerified             Boolean             @default(false) @map("email_verified")
+  name                      String?
+  globalRole                MembershipRole      @default(staff) @map("global_role")
+  createdAt                 DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                 DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  image                     String?
+  memberships               Membership[]
   createdSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationCreatedBy")
   updatedSiteConfigurations SiteConfiguration[] @relation("SiteConfigurationUpdatedBy")
   createdWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionCreatedBy")
   updatedWebsiteVersions    WebsiteVersion[]    @relation("WebsiteVersionUpdatedBy")
-  sessions    Session[]
-  accounts    Account[]
-  tenantOnboarding TenantOnboarding?
+  sessions                  Session[]
+  accounts                  Account[]
+  tenantOnboarding          TenantOnboarding?
+  aiUsageLogs               AiUsageLog[]
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")
-
   @@map("users")
 }

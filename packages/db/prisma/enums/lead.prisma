@@ -1,0 +1,8 @@
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  closed
+
+  @@map("lead_status")
+}

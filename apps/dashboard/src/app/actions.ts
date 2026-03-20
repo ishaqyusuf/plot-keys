@@ -683,19 +683,119 @@ export async function toggleAgentFeaturedAction(formData: FormData) {
 }
 
 export async function syncTenantDomainsAction() {
-  let redirectUrl: string;
+  let redirectUrl = "/?domains=1";
   try {
     const caller = await createServerCaller();
     await caller.workspace.syncTenantDomains();
 
     revalidatePath("/");
     revalidatePath("/live");
-    redirectUrl = "/?domains=1";
-  } catch (error) {
-    redirectUrl = `/?error=${encodeURIComponent(
-      error instanceof Error ? error.message : "Unable to sync tenant domains.",
-    )}`;
+  } catch {
+    // non-fatal
   }
-
   redirect(redirectUrl);
 }
+
+// ─── Lead actions ─────────────────────────────────────────────────────────
+
+export async function updateLeadStatusAction(formData: FormData) {
+  const leadId = String(formData.get("leadId") ?? "");
+  const status = String(formData.get("status") ?? "") as
+    | "new"
+    | "contacted"
+    | "qualified"
+    | "closed";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateLeadStatus({ leadId, status });
+    revalidatePath("/leads");
+  } catch {
+    // non-fatal
+  }
+}
+
+// ─── Billing actions ──────────────────────────────────────────────────────
+
+export async function initializeCheckoutAction(formData: FormData) {
+  const planTier = String(formData.get("planTier") ?? "") as "plus" | "pro";
+  const interval = String(formData.get("interval") ?? "monthly") as
+    | "monthly"
+    | "annual";
+
+  const caller = await createServerCaller();
+  const result = await caller.workspace.initializeCheckout({
+    interval,
+    planTier,
+  });
+
+  redirect(result.authorizationUrl);
+}
+
+// ─── Appointment actions ──────────────────────────────────────────────────
+
+export async function createAppointmentAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "");
+  const email = String(formData.get("email") ?? "");
+  const phone = String(formData.get("phone") ?? "") || undefined;
+  const scheduledAt = String(formData.get("scheduledAt") ?? "");
+  const location = String(formData.get("location") ?? "") || undefined;
+  const agentId = String(formData.get("agentId") ?? "") || undefined;
+  const notes = String(formData.get("notes") ?? "") || undefined;
+
+  const caller = await createServerCaller();
+  await caller.workspace.createAppointment({
+    agentId,
+    email,
+    location,
+    name,
+    notes,
+    phone,
+    scheduledAt: new Date(scheduledAt).toISOString(),
+  });
+
+  revalidatePath("/appointments");
+  redirect("/appointments");
+}
+
+export async function updateAppointmentStatusAction(formData: FormData) {
+  const appointmentId = String(formData.get("appointmentId") ?? "");
+  const status = String(formData.get("status") ?? "") as
+    | "pending"
+    | "confirmed"
+    | "completed"
+    | "cancelled";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.updateAppointmentStatus({ appointmentId, status });
+    revalidatePath("/appointments");
+  } catch {
+    // non-fatal
+  }
+}
+
+export async function deleteAppointmentAction(formData: FormData) {
+  const appointmentId = String(formData.get("appointmentId") ?? "");
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.deleteAppointment({ appointmentId });
+    revalidatePath("/appointments");
+  } catch {
+    // non-fatal
+  }
+}
+
+export async function purchaseAiCreditsAction() {
+  "use server";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.purchaseAiCredits();
+    revalidatePath("/ai-credits");
+  } catch {
+    // non-fatal
+  }
+}
+
