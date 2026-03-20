@@ -1,4 +1,8 @@
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listAgentsForCompany,
+  listFeaturedProperties,
+} from "@plotkeys/db";
 import { resolvePublishedForCompany } from "@plotkeys/db/queries/website";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import { resolveWebsitePresentation } from "@plotkeys/section-registry";
@@ -123,9 +127,30 @@ export default async function LivePage({ searchParams }: LivePageProps) {
     );
   }
 
+  // Fetch live property + agent data for PropertyGrid and AgentShowcase sections
+  const [featuredProperties, agents] = await Promise.all([
+    listFeaturedProperties(prisma, company.id),
+    listAgentsForCompany(prisma, company.id, { limit: 10 }),
+  ]);
+
   const presentation = resolveWebsitePresentation({
     companyName: company.name,
     content: publishedConfiguration.contentJson,
+    liveAgents: agents.map((a) => ({
+      bio: a.bio,
+      id: a.id,
+      imageUrl: a.imageUrl,
+      name: a.name,
+      title: a.title,
+    })),
+    liveListings: featuredProperties.map((p) => ({
+      id: p.id,
+      imageUrl: p.imageUrl,
+      location: p.location,
+      price: p.price,
+      specs: p.specs,
+      title: p.title,
+    })),
     market: company.market ?? company.name,
     subdomain: company.slug,
     templateKey: publishedConfiguration.templateKey,

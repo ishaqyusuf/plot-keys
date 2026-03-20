@@ -91,6 +91,45 @@ export default async function DashboardHomePage({
           </Alert>
         ) : null}
 
+        {/* Domain status warnings */}
+        {(() => {
+          const failedDomains = (domainStatuses ?? []).filter((d) => d.status === "failed");
+          const pendingDomains = (domainStatuses ?? []).filter((d) => d.status === "pending" || d.status === "provisioning");
+          if (failedDomains.length === 0 && pendingDomains.length === 0) return null;
+          return (
+            <div className="mb-6 flex flex-col gap-3">
+              {failedDomains.length > 0 ? (
+                <Alert variant="destructive">
+                  <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                    <span>
+                      {failedDomains.length} domain{failedDomains.length > 1 ? "s" : ""} failed provisioning:{" "}
+                      {failedDomains.map((d) => d.hostname).join(", ")}
+                    </span>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href="/domains">View domains</Link>
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+              {pendingDomains.length > 0 ? (
+                <Alert className="border-amber-500/20 bg-amber-500/10 text-foreground">
+                  <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                    <span>
+                      {pendingDomains.length} domain{pendingDomains.length > 1 ? "s" : ""} awaiting provisioning:{" "}
+                      {pendingDomains.map((d) => d.hostname).join(", ")}
+                    </span>
+                    <form action={syncTenantDomainsAction}>
+                      <Button size="sm" type="submit" variant="outline">
+                        Provision now
+                      </Button>
+                    </form>
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+            </div>
+          );
+        })()}
+
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <Card className="bg-card">
             <CardHeader className="px-8 pt-8 md:px-10 md:pt-10">

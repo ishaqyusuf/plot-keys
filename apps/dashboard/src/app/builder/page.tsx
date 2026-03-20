@@ -1,4 +1,8 @@
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listAgentsForCompany,
+  listFeaturedProperties,
+} from "@plotkeys/db";
 import {
   resolveActiveDraftForCompany,
   resolvePublishedForCompany,
@@ -139,9 +143,32 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     templateCatalog.find((t) => t.key === activeConfiguration.templateKey)
       ?.name ?? activeConfiguration.templateKey;
 
+  // Fetch live property + agent data for PropertyGrid and AgentShowcase sections
+  const [featuredProperties, agents] = await Promise.all([
+    listFeaturedProperties(prisma, session.activeMembership.companyId),
+    listAgentsForCompany(prisma, session.activeMembership.companyId, {
+      limit: 10,
+    }),
+  ]);
+
   const preview = resolveWebsitePresentation({
     companyName: session.activeMembership.companyName,
     content: activeConfiguration.contentJson,
+    liveAgents: agents.map((a) => ({
+      bio: a.bio,
+      id: a.id,
+      imageUrl: a.imageUrl,
+      name: a.name,
+      title: a.title,
+    })),
+    liveListings: featuredProperties.map((p) => ({
+      id: p.id,
+      imageUrl: p.imageUrl,
+      location: p.location,
+      price: p.price,
+      specs: p.specs,
+      title: p.title,
+    })),
     market: session.activeMembership.companyName,
     renderMode: "draft",
     subdomain: session.activeMembership.companySlug,
