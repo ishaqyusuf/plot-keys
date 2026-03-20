@@ -127,7 +127,7 @@ export type { RenderMode } from "./types";
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
   page: {
-    page: "home";
+    pageKey: string;
     sections: HomeSectionDefinition[];
   };
   renderMode: RenderMode;
@@ -141,6 +141,8 @@ type ResolveTemplateOptions = {
   liveAgents?: LiveAgentItem[];
   liveListings?: LiveListingItem[];
   market?: string;
+  /** Which page to render. Defaults to "home" when omitted. */
+  pageKey?: string;
   /** Defaults to "live" when omitted. */
   renderMode?: RenderMode;
   subdomain?: string;
@@ -690,21 +692,24 @@ export type SerializableSectionData = {
 };
 
 /**
- * Builds the home page section list driven by the page-inventory for the
- * given template. Per-template overrides (e.g. Meridian leads with listings)
- * are respected automatically.
+ * Builds the section list for the given page, driven by the page-inventory for
+ * the given template. Per-template overrides (e.g. Meridian leads with listings)
+ * are respected automatically. Falls back to the default home section set when
+ * the home page has no enabled slots. Non-home pages return an empty section
+ * list when no slots are defined (treated as a blank page by the caller).
  */
-function buildHomePage(
+function buildPageSections(
   content: TenantContentRecord,
+  pageKey: string,
   templateKey: string,
   liveListings?: LiveListingItem[],
   liveAgents?: LiveAgentItem[],
   subdomain?: string,
 ): {
-  page: "home";
+  pageKey: string;
   sections: HomeSectionDefinition[];
 } {
-  const slots = getEnabledSections(templateKey, "home");
+  const slots = getEnabledSections(templateKey, pageKey);
 
   const sections: HomeSectionDefinition[] = slots
     .map((slot) => {
@@ -715,12 +720,14 @@ function buildHomePage(
     })
     .filter((s): s is HomeSectionDefinition => s !== null);
 
-  // Fallback: if no inventory slots matched, render the default set
-  if (sections.length === 0) {
+  // Fallback: if no inventory slots matched and we asked for home, render the default set.
+  // Non-home pages intentionally return an empty section list when the template has not
+  // defined any slots for that page — the caller treats an empty page as a blank canvas.
+  if (sections.length === 0 && pageKey === "home") {
     return buildDefaultHomePage(content, liveListings, liveAgents, subdomain);
   }
 
-  return { page: "home", sections };
+  return { pageKey, sections };
 }
 
 /** Fallback for unknown template keys — renders the standard 5-section home. */
@@ -729,7 +736,7 @@ function buildDefaultHomePage(
   liveListings?: LiveListingItem[],
   liveAgents?: LiveAgentItem[],
   subdomain?: string,
-): { page: "home"; sections: HomeSectionDefinition[] } {
+): { pageKey: string; sections: HomeSectionDefinition[] } {
   const defaultOrder = [
     "HeroBannerSection",
     "MarketStatsSection",
@@ -739,7 +746,7 @@ function buildDefaultHomePage(
     "CtaBandSection",
   ];
   return {
-    page: "home",
+    pageKey: "home",
     sections: defaultOrder
       .map((type) =>
         sectionBuilders[type]?.(content, liveListings, liveAgents, subdomain),
@@ -1959,6 +1966,7 @@ export function resolveWebsitePresentation({
   liveAgents,
   liveListings,
   market,
+  pageKey = "home",
   renderMode = "live",
   subdomain,
   templateKey,
@@ -1972,8 +1980,9 @@ export function resolveWebsitePresentation({
 
   return {
     editableFields: template.editableFields,
-    page: buildHomePage(
+    page: buildPageSections(
       mergedContent,
+      pageKey,
       templateKey,
       liveListings,
       liveAgents,
@@ -2016,8 +2025,9 @@ export function draftPlaceholderClass(
 }
 
 export const sampleTheme = fallbackTemplate.defaultTheme;
-export const sampleHomePage = buildHomePage(
+export const sampleHomePage = buildPageSections(
   fallbackTemplate.defaultContent,
+  "home",
   fallbackTemplate.key,
 );
 

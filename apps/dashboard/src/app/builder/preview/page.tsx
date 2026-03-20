@@ -44,6 +44,7 @@ export default function BuilderPreviewPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [publishedKeys, setPublishedKeys] = useState<Set<string>>(new Set());
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentPageKey, setCurrentPageKey] = useState("home");
 
   const template = templateCatalog[currentIndex] ?? templateCatalog[0];
   const [tabTier, setTabTier] = useState<TemplateTier>(
@@ -51,18 +52,24 @@ export default function BuilderPreviewPage() {
   );
   const groups = useMemo(groupedTemplates, []);
 
+  const templatePages = useMemo(
+    () => (template ? getTemplatePageInventory(template.key).pages : []),
+    [template],
+  );
+
   const preview = useMemo(
     () =>
       template
         ? resolveWebsitePresentation({
             companyName: template.defaultTheme.logo,
             content: template.defaultContent,
+            pageKey: currentPageKey,
             renderMode: "draft",
             subdomain: template.name.toLowerCase(),
             templateKey: template.key,
           })
         : null,
-    [template],
+    [template, currentPageKey],
   );
 
   function goToTemplate(index: number) {
@@ -72,6 +79,7 @@ export default function BuilderPreviewPage() {
     setCurrentIndex(clamped);
     const target = templateCatalog[clamped];
     if (target) setTabTier(target.tier);
+    setCurrentPageKey("home");
   }
 
   function selectTemplate(key: string) {
@@ -80,6 +88,7 @@ export default function BuilderPreviewPage() {
       setCurrentIndex(idx);
       const target = templateCatalog[idx];
       if (target) setTabTier(target.tier);
+      setCurrentPageKey("home");
     }
     setDropdownOpen(false);
   }
@@ -95,6 +104,9 @@ export default function BuilderPreviewPage() {
       return next;
     });
   }
+
+  const currentPageSlug =
+    templatePages.find((p) => p.pageKey === currentPageKey)?.slug ?? "/";
 
   if (!template || !preview) {
     return (

@@ -220,400 +220,425 @@ const testimonialsSlot = { ...requireSlot("testimonials"), defaultEnabled: true 
 const ctaSlot = requireSlot("cta");
 
 // ---------------------------------------------------------------------------
+// Base page compositions for non-home pages
+// Shared across all templates unless a template supplies its own override.
+// ---------------------------------------------------------------------------
+
+/** About page — company story, differentiators, team, and social proof. */
+const baseAboutSections: SectionSlot[] = [
+  { ...heroSlot, id: "about-hero", sortOrder: 10 },
+  { ...storySlot, id: "about-story", sortOrder: 20 },
+  { ...whyChooseUsSlot, id: "about-why-choose-us", sortOrder: 30 },
+  { ...marketStatsSlot, id: "about-market-stats", sortOrder: 40 },
+  { ...agentShowcaseSlot, id: "about-agents", sortOrder: 50 },
+  { ...testimonialsSlot, id: "about-testimonials", sortOrder: 60 },
+  { ...ctaSlot, id: "about-cta", sortOrder: 70 },
+];
+
+/** Listings page — search, property grid, and call-to-action. */
+const baseListingsSections: SectionSlot[] = [
+  { ...heroSearchSlot, id: "listings-hero-search", sortOrder: 10 },
+  { ...propertyGridSlot, id: "listings-grid", sortOrder: 20 },
+  { ...ctaSlot, id: "listings-cta", sortOrder: 30 },
+];
+
+/** Contact page — contact form, FAQ, and CTA. */
+const baseContactSections: SectionSlot[] = [
+  { ...contactSlot, id: "contact-form", sortOrder: 10 },
+  { ...faqSlot, id: "contact-faq", sortOrder: 20 },
+  { ...ctaSlot, id: "contact-cta", sortOrder: 30 },
+];
+
+// ---------------------------------------------------------------------------
 // Template-specific page inventories
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Helper — compose a full page set from a home page definition.
+// Every template gets the same About / Listings / Contact pages by default.
+// Individual templates may override any page by replacing the entry.
+// ---------------------------------------------------------------------------
+
+/**
+ * Composes the full page inventory for a template from its home page definition
+ * plus the shared About, Listings, and Contact pages.
+ *
+ * @param homePage - The template-specific home page definition.
+ * @returns An ordered array of all pages: Home, About, Listings, Contact.
+ */
+function withBasePages(homePage: PageDefinition): PageDefinition[] {
+  return [
+    homePage,
+    {
+      label: "About",
+      pageKey: "about",
+      sections: baseAboutSections,
+      slug: "/about",
+    },
+    {
+      label: "Listings",
+      pageKey: "listings",
+      sections: baseListingsSections,
+      slug: "/listings",
+    },
+    {
+      label: "Contact",
+      pageKey: "contact",
+      sections: baseContactSections,
+      slug: "/contact",
+    },
+  ];
+}
+
 /** template-1 "Aster Grove" — clean residential starter */
 const template1Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: baseHomeSections,
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections,
+    slug: "/",
+  }),
   templateKey: "template-1",
 };
 
 /** template-2 "Atlas Urban" — bold commercial plus */
 const template2Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: baseHomeSections.map((s) =>
-        s.id === "testimonials" ? { ...s, defaultEnabled: true } : s,
-      ),
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections.map((s) =>
+      s.id === "testimonials" ? { ...s, defaultEnabled: true } : s,
+    ),
+    slug: "/",
+  }),
   templateKey: "template-2",
 };
 
 /** template-3 "Palmstone" — warm family pro */
 const template3Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: baseHomeSections,
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections,
+    slug: "/",
+  }),
   templateKey: "template-3",
 };
 
 /** template-4 "Meridian" — clean residential plus */
 const template4Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      // Meridian leads with listings — bump featured-listings to top
-      sections: baseHomeSections
-        .map((s) =>
-          s.id === "featured-listings" ? { ...s, sortOrder: 5 } : s,
-        )
-        .sort((a, b) => a.sortOrder - b.sortOrder),
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    // Meridian leads with listings — bump featured-listings to top
+    sections: baseHomeSections
+      .map((s) =>
+        s.id === "featured-listings" ? { ...s, sortOrder: 5 } : s,
+      )
+      .sort((a, b) => a.sortOrder - b.sortOrder),
+    slug: "/",
+  }),
   templateKey: "template-4",
 };
 
 /** template-5 "Thornfield" — bold commercial pro */
 const template5Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: baseHomeSections.map((s) =>
-        s.id === "testimonials" ? { ...s, defaultEnabled: true } : s,
-      ),
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections.map((s) =>
+      s.id === "testimonials" ? { ...s, defaultEnabled: true } : s,
+    ),
+    slug: "/",
+  }),
   templateKey: "template-5",
 };
 
 /** template-6 "Crestview" — warm family pro */
 const template6Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: baseHomeSections,
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections,
+    slug: "/",
+  }),
   templateKey: "template-6",
 };
 
 /** template-31 "Sama" — HeroSearch → FeaturedListings → WhyChooseUs → CTA */
 const template31Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSearchSlot, sortOrder: 10 },
-        { ...featuredListingsSlot, sortOrder: 20, defaultEnabled: true },
-        { ...whyChooseUsSlot, sortOrder: 30 },
-        { ...ctaSlot, sortOrder: 40 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSearchSlot, sortOrder: 10 },
+      { ...featuredListingsSlot, sortOrder: 20, defaultEnabled: true },
+      { ...whyChooseUsSlot, sortOrder: 30 },
+      { ...ctaSlot, sortOrder: 40 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-31",
 };
 
 /** template-32 "Rania" — Hero → AgentShowcase → Testimonials → Listings → CTA */
 const template32Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...agentShowcaseSlot, sortOrder: 20 },
-        { ...testimonialsSlot, sortOrder: 30 },
-        { ...featuredListingsSlot, sortOrder: 40, defaultEnabled: true },
-        { ...ctaSlot, sortOrder: 50 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...agentShowcaseSlot, sortOrder: 20 },
+      { ...testimonialsSlot, sortOrder: 30 },
+      { ...featuredListingsSlot, sortOrder: 40, defaultEnabled: true },
+      { ...ctaSlot, sortOrder: 50 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-32",
 };
 
 /** template-33 "Jihan" — Hero → PropertyGrid → CTA */
 const template33Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...propertyGridSlot, sortOrder: 20 },
-        { ...ctaSlot, sortOrder: 30 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...propertyGridSlot, sortOrder: 20 },
+      { ...ctaSlot, sortOrder: 30 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-33",
 };
 
 /** template-34 "Nadia" — Hero → Story → Testimonials → ServiceHighlights → CTA */
 const template34Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...storySlot, sortOrder: 20 },
-        { ...testimonialsSlot, sortOrder: 30 },
-        { ...serviceHighlightsSlot, sortOrder: 40 },
-        { ...ctaSlot, sortOrder: 50 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...storySlot, sortOrder: 20 },
+      { ...testimonialsSlot, sortOrder: 30 },
+      { ...serviceHighlightsSlot, sortOrder: 40 },
+      { ...ctaSlot, sortOrder: 50 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-34",
 };
 
 /** template-35 "Walid" — Hero → MarketStats → FeaturedListings → MarketStats(2) → CTA */
 const template35Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...marketStatsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...marketStatsSlot, id: "market-stats-2", sortOrder: 40 },
-        { ...ctaSlot, sortOrder: 50 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...marketStatsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...marketStatsSlot, id: "market-stats-2", sortOrder: 40 },
+      { ...ctaSlot, sortOrder: 50 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-35",
 };
 
 /** template-36 "Tariq" — HeroSearch → MarketStats → FeaturedListings → Story → WhyChooseUs → Testimonials → CTA */
 const template36Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSearchSlot, sortOrder: 10 },
-        { ...marketStatsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...storySlot, sortOrder: 40 },
-        { ...whyChooseUsSlot, sortOrder: 50 },
-        { ...testimonialsSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSearchSlot, sortOrder: 10 },
+      { ...marketStatsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...storySlot, sortOrder: 40 },
+      { ...whyChooseUsSlot, sortOrder: 50 },
+      { ...testimonialsSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-36",
 };
 
 /** template-37 "Soraya" — Hero → Story → FeaturedListings → AgentShowcase → Testimonials → Newsletter → CTA */
 const template37Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...storySlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...agentShowcaseSlot, sortOrder: 40 },
-        { ...testimonialsSlot, sortOrder: 50 },
-        { ...newsletterSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...storySlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...agentShowcaseSlot, sortOrder: 40 },
+      { ...testimonialsSlot, sortOrder: 50 },
+      { ...newsletterSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-37",
 };
 
 /** template-38 "Rashid" — Hero → MarketStats → PropertyGrid → WhyChooseUs → FAQ → CTA */
 const template38Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...marketStatsSlot, sortOrder: 20 },
-        { ...propertyGridSlot, sortOrder: 30 },
-        { ...whyChooseUsSlot, sortOrder: 40 },
-        { ...faqSlot, sortOrder: 50 },
-        { ...ctaSlot, sortOrder: 60 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...marketStatsSlot, sortOrder: 20 },
+      { ...propertyGridSlot, sortOrder: 30 },
+      { ...whyChooseUsSlot, sortOrder: 40 },
+      { ...faqSlot, sortOrder: 50 },
+      { ...ctaSlot, sortOrder: 60 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-38",
 };
 
 /** template-39 "Dalal" — Hero → ServiceHighlights → FeaturedListings → Story → Testimonials → Contact → CTA */
 const template39Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...serviceHighlightsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...storySlot, sortOrder: 40 },
-        { ...testimonialsSlot, sortOrder: 50 },
-        { ...contactSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...serviceHighlightsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...storySlot, sortOrder: 40 },
+      { ...testimonialsSlot, sortOrder: 50 },
+      { ...contactSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-39",
 };
 
 /** template-40 "Imran" — Hero → WhyChooseUs → FeaturedListings → AgentShowcase → Testimonials → Newsletter → CTA */
 const template40Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...whyChooseUsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...agentShowcaseSlot, sortOrder: 40 },
-        { ...testimonialsSlot, sortOrder: 50 },
-        { ...newsletterSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...whyChooseUsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...agentShowcaseSlot, sortOrder: 40 },
+      { ...testimonialsSlot, sortOrder: 50 },
+      { ...newsletterSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-40",
 };
 
 /** template-41 "Khalid" — HeroSearch → MarketStats → FeaturedListings → WhyChooseUs → AgentShowcase → Testimonials → FAQ → Contact → CTA */
 const template41Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSearchSlot, sortOrder: 10 },
-        { ...marketStatsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...whyChooseUsSlot, sortOrder: 40 },
-        { ...agentShowcaseSlot, sortOrder: 50 },
-        { ...testimonialsSlot, sortOrder: 60 },
-        { ...faqSlot, sortOrder: 70 },
-        { ...contactSlot, sortOrder: 80 },
-        { ...ctaSlot, sortOrder: 90 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSearchSlot, sortOrder: 10 },
+      { ...marketStatsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...whyChooseUsSlot, sortOrder: 40 },
+      { ...agentShowcaseSlot, sortOrder: 50 },
+      { ...testimonialsSlot, sortOrder: 60 },
+      { ...faqSlot, sortOrder: 70 },
+      { ...contactSlot, sortOrder: 80 },
+      { ...ctaSlot, sortOrder: 90 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-41",
 };
 
 /** template-42 "Salma" — Hero → FeaturedListings → Story → Testimonials → PropertyGrid → AgentShowcase → CTA */
 const template42Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...featuredListingsSlot, sortOrder: 20, defaultEnabled: true },
-        { ...storySlot, sortOrder: 30 },
-        { ...testimonialsSlot, sortOrder: 40 },
-        { ...propertyGridSlot, sortOrder: 50 },
-        { ...agentShowcaseSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...featuredListingsSlot, sortOrder: 20, defaultEnabled: true },
+      { ...storySlot, sortOrder: 30 },
+      { ...testimonialsSlot, sortOrder: 40 },
+      { ...propertyGridSlot, sortOrder: 50 },
+      { ...agentShowcaseSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-42",
 };
 
 /** template-43 "Faisal" — Hero → MarketStats → PropertyGrid → WhyChooseUs → FAQ → ServiceHighlights → Contact → CTA */
 const template43Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...marketStatsSlot, sortOrder: 20 },
-        { ...propertyGridSlot, sortOrder: 30 },
-        { ...whyChooseUsSlot, sortOrder: 40 },
-        { ...faqSlot, sortOrder: 50 },
-        { ...serviceHighlightsSlot, sortOrder: 60 },
-        { ...contactSlot, sortOrder: 70 },
-        { ...ctaSlot, sortOrder: 80 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...marketStatsSlot, sortOrder: 20 },
+      { ...propertyGridSlot, sortOrder: 30 },
+      { ...whyChooseUsSlot, sortOrder: 40 },
+      { ...faqSlot, sortOrder: 50 },
+      { ...serviceHighlightsSlot, sortOrder: 60 },
+      { ...contactSlot, sortOrder: 70 },
+      { ...ctaSlot, sortOrder: 80 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-43",
 };
 
 /** template-44 "Dina" — Hero → ServiceHighlights → FeaturedListings → Story → WhyChooseUs → Testimonials → AgentShowcase → Newsletter → Contact → CTA */
 const template44Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSlot, sortOrder: 10 },
-        { ...serviceHighlightsSlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...storySlot, sortOrder: 40 },
-        { ...whyChooseUsSlot, sortOrder: 50 },
-        { ...testimonialsSlot, sortOrder: 60 },
-        { ...agentShowcaseSlot, sortOrder: 70 },
-        { ...newsletterSlot, sortOrder: 80 },
-        { ...contactSlot, sortOrder: 90 },
-        { ...ctaSlot, sortOrder: 100 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSlot, sortOrder: 10 },
+      { ...serviceHighlightsSlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...storySlot, sortOrder: 40 },
+      { ...whyChooseUsSlot, sortOrder: 50 },
+      { ...testimonialsSlot, sortOrder: 60 },
+      { ...agentShowcaseSlot, sortOrder: 70 },
+      { ...newsletterSlot, sortOrder: 80 },
+      { ...contactSlot, sortOrder: 90 },
+      { ...ctaSlot, sortOrder: 100 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-44",
 };
 
 /** template-45 "Omar" — HeroSearch → Story → FeaturedListings → AgentShowcase → Testimonials → FAQ → CTA */
 const template45Inventory: TemplatePageInventory = {
-  pages: [
-    {
-      label: "Home",
-      pageKey: "home",
-      sections: [
-        { ...heroSearchSlot, sortOrder: 10 },
-        { ...storySlot, sortOrder: 20 },
-        { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
-        { ...agentShowcaseSlot, sortOrder: 40 },
-        { ...testimonialsSlot, sortOrder: 50 },
-        { ...faqSlot, sortOrder: 60 },
-        { ...ctaSlot, sortOrder: 70 },
-      ],
-      slug: "/",
-    },
-  ],
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: [
+      { ...heroSearchSlot, sortOrder: 10 },
+      { ...storySlot, sortOrder: 20 },
+      { ...featuredListingsSlot, sortOrder: 30, defaultEnabled: true },
+      { ...agentShowcaseSlot, sortOrder: 40 },
+      { ...testimonialsSlot, sortOrder: 50 },
+      { ...faqSlot, sortOrder: 60 },
+      { ...ctaSlot, sortOrder: 70 },
+    ],
+    slug: "/",
+  }),
   templateKey: "template-45",
 };
 
