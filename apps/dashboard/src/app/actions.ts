@@ -800,3 +800,18 @@ export async function purchaseAiCreditsAction() {
   }
 }
 
+// ─── Settings actions ─────────────────────────────────────────────────────
+
+export async function setCompanyLogoAction(logoUrl: string | null) {
+  "use server";
+
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.setCompanyLogo({ logoUrl });
+    revalidatePath("/");
+    revalidatePath("/settings");
+  } catch {
+    // non-fatal
+  }
+}
+

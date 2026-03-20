@@ -196,7 +196,7 @@ export default async function DashboardHomePage({
         </div>
 
         {/* Quick-nav cards */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="bg-card">
             <CardHeader className="px-6 pt-6 pb-3">
               <CardTitle className="text-lg">Properties</CardTitle>
@@ -233,6 +233,19 @@ export default async function DashboardHomePage({
             <CardContent className="px-6 pb-6">
               <Button asChild variant="secondary">
                 <Link href="/domains">Manage domains</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardHeader className="px-6 pt-6 pb-3">
+              <CardTitle className="text-lg">Settings</CardTitle>
+              <CardDescription>
+                Upload your logo and manage company branding.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <Button asChild variant="secondary">
+                <Link href="/settings">Open settings</Link>
               </Button>
             </CardContent>
           </Card>
