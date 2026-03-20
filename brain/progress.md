@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-19)
+## Current State (as of 2026-03-20)
 
 ### What's Built & Working
 | Area | Status |
@@ -16,21 +16,48 @@
 | AI credits (ledger, smart-fill wired) | ✅ Done |
 | Analytics (events, tracking, dashboard) | ✅ Done |
 | Stock image marketplace | ✅ Done |
-| Website/WebsiteVersion Phase 1-3 | ✅ Done |
+| Website/WebsiteVersion Phase 1-4 (reads) | ✅ Done |
 | Section visibility toggles | ✅ Done |
 | Domain auto-sync on onboarding | ✅ Done |
+| Tenant domain management UI (`/domains`) | ✅ Done |
+| Logo upload (`/settings`) | ✅ Done |
 | Email (Welcome + Verification) | 🟡 Partial |
 | Notifications (event system) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
 | Property/agent data binding | 🟡 Partial |
-| Logo upload | 🟡 Partial |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
-| Tenant domain management UI | ❌ Not started |
 | Custom domain purchase | ❌ Not started |
-| WebsiteVersion Phase 4 cleanup | ❌ Not started |
+| WebsiteVersion Phase 4 (writes) | ❌ Not started |
 
 ---
+
+## 2026-03-20 (Session 3 — High-Priority Phase 1)
+
+### Tenant Domain Management UI
+- Created `/domains` dashboard page with full domain listing, status badges (active/pending/provisioning/failed/detached), error display
+- Added status filter tabs and summary stats strip (total/active/failed)
+- Added re-sync button with `syncTenantDomainsAction` (revalidates `/domains`)
+- Added Domains metric card + quick-nav card to dashboard home
+
+### Logo Upload Flow
+- Added `@plotkeys/platform-integrations` dependency to dashboard
+- Created `LogoUpload` client component with dual mode: file upload (Supabase storage) and URL paste fallback
+- Created `setCompanyLogoAction` server action calling `workspace.setCompanyLogo` tRPC procedure
+- Created `/settings` page with company info display and logo upload section
+- Updated HeroBannerSection to render logo as `<img>` when value is an HTTP URL, text otherwise
+- Added Settings quick-nav card to dashboard home
+
+### WebsiteVersion Phase 4 Cleanup (reads)
+- Removed SiteConfiguration fallback from `resolveActiveDraftForCompany()` in `packages/db/src/queries/website.ts`
+- Removed SiteConfiguration fallback from `resolvePublishedForCompany()` in `packages/db/src/queries/website.ts`
+- Added `legacyConfigId` to draft return shape for builder action compatibility
+- Updated builder page to read from WebsiteVersion via `resolveActiveDraftForCompany()` (configId for actions still comes from SiteConfiguration via legacyConfigId link)
+- Updated dashboard home page to use `resolvePublishedForCompany()` instead of direct SiteConfiguration query
+- Updated live page to use `resolvePublishedForCompany()` instead of direct SiteConfiguration query
+- Updated `ensureBuilderConfigurationExists()` to check WebsiteVersion existence
+- Added `./queries/website` export to `@plotkeys/db` package
+- Note: Write paths still go through SiteConfiguration with Phase 2 dual-write (WebsiteVersion stays in sync)
 
 ## Roadmap Steps 10-21 Completion
 

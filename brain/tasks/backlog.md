@@ -11,11 +11,11 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Phase 1 — Core Product Gaps (High Impact)
 
-- [ ] **Tenant Domain Management UI** — Create `/domains` dashboard page showing provisioned domains, status (pending/active/error), and manual re-sync button. Backend is ready.
+- [x] **Tenant Domain Management UI** — `/domains` dashboard page with domain listing, status filtering, summary stats, and manual re-sync button. ✅ Done
 - [ ] **Custom Domain Purchase Flow** — Registrar API integration (Namecheap/GoDaddy), domain search, DNS provisioning, SSL, renewal tracking. Large scope.
 - [ ] **Property/Agent Data Binding** — Wire live property + agent DB data into template section rendering (PropertyGrid, AgentShowcase) so tenant sites show real listings.
-- [ ] **Website/WebsiteVersion Phase 4 Cleanup** — Remove SiteConfiguration as primary model; migrate all reads/writes to WebsiteVersion exclusively; drop legacy fallback paths.
-- [ ] **Logo Upload Flow** — Build dashboard UI for company logo upload using Supabase storage; wire into template header/footer rendering.
+- [x] **Website/WebsiteVersion Phase 4 Cleanup** — Removed SiteConfiguration fallback paths from read helpers; builder, dashboard home, live page, and actions now read from WebsiteVersion exclusively. Writes still dual-write for backward compat. ✅ Done (reads)
+- [x] **Logo Upload Flow** — `/settings` page with file upload (Supabase storage) + URL fallback; `setCompanyLogoAction` server action; logo rendered as image in HeroBannerSection when URL provided. ✅ Done
 
 ## Phase 2 — Platform Polish & Engagement
 
