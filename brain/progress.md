@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-19)
+## Current State (as of 2026-03-20)
 
 ### What's Built & Working
 | Area | Status |
@@ -29,6 +29,16 @@
 | Tenant domain management UI | ❌ Not started |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 cleanup | ❌ Not started |
+
+---
+
+## 2026-03-20 (Brain Template Catalog Update)
+
+### Template Catalog Brain Documentation
+- Updated `brain/modules/templates-catalog.md`: full per-template record for all 45 templates — description, plan/tier, purchasable flag, default market, accent colour, font pairing, pages, ordered home-page section composition, forms, and primary CTA links.
+- Updated `brain/modules/sections-inventory.md`: split into implemented (14 live components) and planned sections. Added type keys, descriptions, form endpoints, and content key references for all implemented sections.
+- Updated `brain/modules/pages-inventory.md`: clarified which pages are currently implemented (Home only for all templates), added per-template note about page inventory registry coverage, and retained planned page list.
+- Updated `brain/modules/page-to-section-matrix.md`: added full per-template home page section matrix for all 45 templates in render order.
 
 ---
 
