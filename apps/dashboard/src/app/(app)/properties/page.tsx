@@ -27,6 +27,12 @@ const statusVariant: Record<string, "default" | "outline" | "secondary"> = {
   sold: "outline",
 };
 
+const publishVariant: Record<string, "default" | "outline" | "secondary" | "destructive"> = {
+  draft: "outline",
+  published: "default",
+  archived: "secondary",
+};
+
 export default async function PropertiesPage({
   searchParams,
 }: PropertiesPageProps) {
@@ -96,13 +102,21 @@ export default async function PropertiesPage({
                     <div>
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">
-                          {property.title}
+                          <Link
+                            href={`/properties/${property.id}`}
+                            className="hover:underline underline-offset-2"
+                          >
+                            {property.title}
+                          </Link>
                         </CardTitle>
                         {property.featured && (
                           <Badge variant="default">Featured</Badge>
                         )}
                         <Badge variant={statusVariant[property.status] ?? "outline"}>
                           {property.status.replace("_", " ")}
+                        </Badge>
+                        <Badge variant={publishVariant[property.publishState] ?? "outline"}>
+                          {property.publishState}
                         </Badge>
                       </div>
                       <p className="mt-0.5 text-sm text-muted-foreground">

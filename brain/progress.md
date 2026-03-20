@@ -199,3 +199,26 @@
 - Fixed CSS custom property syntax in builder/page.tsx: `shadow-(--shadow-soft)` → `shadow-[var(--shadow-soft)]`
 - Removed duplicate "Tenant domain management UI" entry from brain/progress.md
 - Fixed `domains/page.tsx` locale from `en-US` back to `en-NG` (codebase convention)
+
+## 2026-03-20 (Session 5 — Feature Completion)
+
+### Team Management (Phase 1B)
+- Added `/join/[token]` page for accepting team invites (handles expired/revoked/already-accepted states)
+- Added `acceptInviteAction` server action calling `team.acceptInvite` tRPC procedure
+- Added `/team` link (Users2Icon) and `/notifications` link (BellIcon) to `DashboardSidebar` Platform group
+
+### Notifications Page
+- Created `/notifications` dashboard page with list, unread badge, unread/all filter toggle, and "Mark all read" form button
+- Direct DB query for notifications (no extra tRPC call needed for server page)
+
+### Property Detail Page + Media Gallery
+- Created `/properties/[id]` detail page with:
+  - Property info header with publish state badge
+  - Publish state controls: Publish, Unpublish, Archive, Restore to draft
+  - Media gallery grid: photos, floor plans, virtual tour links
+  - Add media form (URL + type + cover checkbox)
+  - Set cover star button + delete button per media item
+- Updated properties list page to show `publishState` badge on each property card
+- Updated properties list to link property title to `/properties/[id]`
+- Updated `addPropertyMediaAction`, `deletePropertyMediaAction`, `setPropertyCoverAction` to revalidate both `/properties` and `/properties/[propertyId]` paths
+- Updated `updatePropertyPublishStateAction` to revalidate both paths

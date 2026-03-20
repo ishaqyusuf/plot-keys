@@ -16,6 +16,7 @@ import {
 } from "@plotkeys/ui/sidebar";
 import {
   BarChart3Icon,
+  BellIcon,
   BotIcon,
   BriefcaseIcon,
   BuildingIcon,
@@ -30,6 +31,7 @@ import {
   SettingsIcon,
   SparklesIcon,
   UsersIcon,
+  Users2Icon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -93,6 +95,8 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/billing", icon: CreditCardIcon, label: "Billing" },
       { href: "/domains", icon: GlobeIcon, label: "Domains" },
+      { href: "/team", icon: Users2Icon, label: "Team" },
+      { href: "/notifications", icon: BellIcon, label: "Notifications" },
       {
         badge: "Coming",
         href: "#",

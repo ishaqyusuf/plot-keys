@@ -840,6 +840,26 @@ export async function syncDomainsAction() {
 
 // ─── Team management ──────────────────────────────────────────────────────
 
+export async function acceptInviteAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "").trim();
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    await caller.team.acceptInvite({ token });
+    revalidatePath("/");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to accept invite.";
+    errorRedirect = createRedirectUrl(`/join/${token}`, { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  } else {
+    redirect("/");
+  }
+}
+
 export async function inviteMemberAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
@@ -965,6 +985,7 @@ export async function updatePropertyPublishStateAction(formData: FormData) {
     const caller = await createServerCaller();
     await caller.propertyMedia.updatePublishState({ propertyId, publishState });
     revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
   } catch {
     // Silent — page reload will show current state
   }
@@ -984,9 +1005,10 @@ export async function addPropertyMediaAction(formData: FormData) {
     const caller = await createServerCaller();
     await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
     revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to add media.";
-    errorRedirect = createRedirectUrl("/properties", { error: message });
+    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, { error: message });
   }
 
   if (errorRedirect) {
@@ -1002,6 +1024,7 @@ export async function deletePropertyMediaAction(formData: FormData) {
     const caller = await createServerCaller();
     await caller.propertyMedia.deleteMedia({ mediaId, propertyId });
     revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
   } catch {
     // Silent
   }
@@ -1015,6 +1038,7 @@ export async function setPropertyCoverAction(formData: FormData) {
     const caller = await createServerCaller();
     await caller.propertyMedia.setCover({ mediaId, propertyId });
     revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
   } catch {
     // Silent
   }

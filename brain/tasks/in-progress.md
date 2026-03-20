@@ -9,5 +9,11 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-No active work items. All 21 roadmap steps and 6 high-impact features are complete.
-The tenant dashboard system (sidebar + roadmap home page) has been implemented.
+No active work items. Phase 1B features completed:
+- Team management (invite, roles, suspend, remove)
+- Join invite page (/join/[token])
+- Notifications page (/notifications)
+- Property detail + media gallery + publish state (/properties/[id])
+- Sidebar links for Team and Notifications
+
+Next: Custom Domain Purchase Flow or further Phase 1B items (Analytics Expansion, etc.)
