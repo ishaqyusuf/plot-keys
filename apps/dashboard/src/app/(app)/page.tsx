@@ -1,4 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { resolvePublishedForCompany } from "@plotkeys/db/queries/website";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -63,15 +64,9 @@ export default async function DashboardHomePage({
       prisma?.appointment.count({
         where: { companyId: session.activeMembership.companyId },
       }),
-      prisma?.siteConfiguration.findFirst({
-        orderBy: { updatedAt: "desc" },
-        select: { name: true, status: true, updatedAt: true },
-        where: {
-          companyId: session.activeMembership.companyId,
-          deletedAt: null,
-          status: "published",
-        },
-      }),
+      prisma
+        ? resolvePublishedForCompany(prisma, session.activeMembership.companyId)
+        : null,
     ]);
 
   const stats = [
@@ -95,6 +90,55 @@ export default async function DashboardHomePage({
             <AlertDescription>Tenant domain sync completed.</AlertDescription>
           </Alert>
         ) : null}
+
+        {(() => {
+          const domains = domainStatuses ?? [];
+          const failedDomains = domains.filter((d) => d.status === "failed");
+          const pendingDomains = domains.filter(
+            (d) => d.status === "pending" || d.status === "provisioning",
+          );
+
+          if (failedDomains.length === 0 && pendingDomains.length === 0) {
+            return null;
+          }
+
+          return (
+            <div className="mb-6 flex flex-col gap-3">
+              {failedDomains.length > 0 ? (
+                <Alert variant="destructive">
+                  <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                    <span>
+                      {failedDomains.length} domain
+                      {failedDomains.length > 1 ? "s" : ""} failed
+                      provisioning:{" "}
+                      {failedDomains.map((d) => d.hostname).join(", ")}
+                    </span>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href="/domains">View domains</Link>
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+              {pendingDomains.length > 0 ? (
+                <Alert className="border-amber-500/20 bg-amber-500/10 text-foreground">
+                  <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                    <span>
+                      {pendingDomains.length} domain
+                      {pendingDomains.length > 1 ? "s" : ""} awaiting
+                      provisioning:{" "}
+                      {pendingDomains.map((d) => d.hostname).join(", ")}
+                    </span>
+                    <form action={syncTenantDomainsAction}>
+                      <Button size="sm" type="submit" variant="outline">
+                        Provision now
+                      </Button>
+                    </form>
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+            </div>
+          );
+        })()}
 
         {/* Page header */}
         <div className="mb-8">
@@ -215,10 +259,12 @@ export default async function DashboardHomePage({
                       Last published
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(publishedConfig.updatedAt).toLocaleDateString(
-                        "en-GB",
-                        { day: "numeric", month: "short", year: "numeric" },
-                      )}
+                      {publishedConfig.publishedAt
+                        ? new Date(publishedConfig.publishedAt).toLocaleDateString(
+                            "en-GB",
+                            { day: "numeric", month: "short", year: "numeric" },
+                          )
+                        : "Not published yet"}
                     </p>
                   </div>
                 </div>

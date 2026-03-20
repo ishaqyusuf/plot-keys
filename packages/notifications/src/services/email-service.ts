@@ -1,7 +1,11 @@
 import { render } from "@plotkeys/email/render";
 import VerificationEmail from "@plotkeys/email/emails/verification";
 import WelcomeEmail from "@plotkeys/email/emails/welcome";
+import NewLeadEmail from "@plotkeys/email/emails/new-lead";
+import SitePublishedEmail from "@plotkeys/email/emails/site-published";
 import {
+  defaultNewLeadSubject,
+  defaultSitePublishedSubject,
   defaultVerificationSubject,
   defaultWelcomeSubject,
 } from "@plotkeys/email";
@@ -116,6 +120,53 @@ async function buildEmailPayload(dispatch: NotificationChannelDispatch) {
           </div>
         `,
         subject: `Finish setting up ${payload.companyName}`,
+      };
+    }
+    case "new_lead_captured": {
+      const payload = dispatch.payload as {
+        companyName: string;
+        dashboardUrl: string;
+        fullName: string;
+        leadEmail: string;
+        leadMessage?: string;
+        leadName: string;
+      };
+
+      return {
+        html: await render(
+          NewLeadEmail({
+            companyName: payload.companyName,
+            dashboardUrl: payload.dashboardUrl,
+            fullName: payload.fullName,
+            leadEmail: payload.leadEmail,
+            leadMessage: payload.leadMessage,
+            leadName: payload.leadName,
+          }),
+        ),
+        subject: defaultNewLeadSubject(payload.companyName),
+      };
+    }
+    case "site_published": {
+      const payload = dispatch.payload as {
+        companyName: string;
+        configName: string;
+        fullName: string;
+        siteUrl: string;
+      };
+
+      return {
+        html: await render(
+          SitePublishedEmail({
+            companyName: payload.companyName,
+            configName: payload.configName,
+            fullName: payload.fullName,
+            siteUrl: payload.siteUrl,
+          }),
+        ),
+        subject: defaultSitePublishedSubject(
+          payload.companyName,
+          payload.configName,
+        ),
       };
     }
     default:

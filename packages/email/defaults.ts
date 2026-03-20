@@ -25,3 +25,14 @@ export function defaultWelcomeBody(companyName: string, siteHostname: string) {
 }
 
 export const DEFAULT_WELCOME_BUTTON_TEXT = "Continue onboarding";
+
+export function defaultNewLeadSubject(companyName: string) {
+  return `New lead captured for ${companyName}`;
+}
+
+export function defaultSitePublishedSubject(
+  companyName: string,
+  configName: string,
+) {
+  return `${companyName} website published: ${configName}`;
+}

@@ -1,4 +1,12 @@
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listAgentsForCompany,
+  listFeaturedProperties,
+} from "@plotkeys/db";
+import {
+  resolveActiveDraftForCompany,
+  resolvePublishedForCompany,
+} from "@plotkeys/db/queries/website";
 import {
   deserializeTemplateConfig,
   resolveWebsitePresentation,
@@ -66,29 +74,33 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   }
 
   const params = (await searchParams) ?? {};
-  const configurations = await prisma.siteConfiguration.findMany({
-    orderBy: [
-      {
-        status: "asc",
-      },
-      {
-        updatedAt: "desc",
-      },
-    ],
-    where: {
-      companyId: session.activeMembership.companyId,
-      deletedAt: null,
-    },
-  });
 
-  const activeConfiguration =
-    configurations.find(
-      (configuration) => configuration.id === params.configId,
-    ) ??
-    configurations.find(
-      (configuration) => configuration.status === "published",
-    ) ??
-    configurations[0];
+  // Phase 4: Read from WebsiteVersion (primary source)
+  const [activeDraft, publishedVersion] = await Promise.all([
+    resolveActiveDraftForCompany(prisma, session.activeMembership.companyId),
+    resolvePublishedForCompany(prisma, session.activeMembership.companyId),
+  ]);
+
+  // The builder needs a SiteConfiguration ID for actions (write path still
+  // goes through SiteConfiguration with dual-write to keep both in sync).
+  // Use the legacyConfigId link when available, otherwise fall back to
+  // looking up the SiteConfiguration directly.
+  const legacyConfigId = activeDraft?.legacyConfigId ?? null;
+  const siteConfiguration = legacyConfigId
+    ? await prisma.siteConfiguration.findFirst({
+        select: { id: true, version: true },
+        where: { id: legacyConfigId, deletedAt: null },
+      })
+    : await prisma.siteConfiguration.findFirst({
+        orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+        select: { id: true, version: true },
+        where: {
+          companyId: session.activeMembership.companyId,
+          deletedAt: null,
+        },
+      });
+
+  const activeConfiguration = activeDraft;
 
   if (!activeConfiguration) {
     return (
@@ -109,21 +121,14 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     );
   }
 
-  const publishedConfiguration = configurations.find(
-    (c) => c.status === "published" && c.id !== activeConfiguration.id,
-  );
+  // The configId used for actions — maps to the SiteConfiguration record
+  const configId = siteConfiguration?.id ?? activeConfiguration.id;
 
-  // Count fields that differ between this draft and the currently-published config.
+  // Count fields that differ between this draft and the currently-published version.
   const changedFieldCount = (() => {
-    if (!publishedConfiguration) return undefined;
-    const draftContent = activeConfiguration.contentJson as Record<
-      string,
-      string
-    >;
-    const liveContent = publishedConfiguration.contentJson as Record<
-      string,
-      string
-    >;
+    if (!publishedVersion) return undefined;
+    const draftContent = activeConfiguration.contentJson;
+    const liveContent = publishedVersion.contentJson;
     const allKeys = new Set([
       ...Object.keys(draftContent),
       ...Object.keys(liveContent),
@@ -138,15 +143,37 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
     templateCatalog.find((t) => t.key === activeConfiguration.templateKey)
       ?.name ?? activeConfiguration.templateKey;
 
+  // Fetch live property + agent data for PropertyGrid and AgentShowcase sections
+  const [featuredProperties, agents] = await Promise.all([
+    listFeaturedProperties(prisma, session.activeMembership.companyId),
+    listAgentsForCompany(prisma, session.activeMembership.companyId, {
+      limit: 10,
+    }),
+  ]);
+
   const preview = resolveWebsitePresentation({
     companyName: session.activeMembership.companyName,
-    content: activeConfiguration.contentJson as Record<string, string>,
+    content: activeConfiguration.contentJson,
+    liveAgents: agents.map((a) => ({
+      bio: a.bio,
+      id: a.id,
+      imageUrl: a.imageUrl,
+      name: a.name,
+      title: a.title,
+    })),
+    liveListings: featuredProperties.map((p) => ({
+      id: p.id,
+      imageUrl: p.imageUrl,
+      location: p.location,
+      price: p.price,
+      specs: p.specs,
+      title: p.title,
+    })),
     market: session.activeMembership.companyName,
     renderMode: "draft",
-    subdomain:
-      activeConfiguration.subdomain ?? session.activeMembership.companySlug,
+    subdomain: session.activeMembership.companySlug,
     templateKey: activeConfiguration.templateKey,
-    theme: activeConfiguration.themeJson as Record<string, string>,
+    theme: activeConfiguration.themeJson,
   });
 
   return (
@@ -186,7 +213,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                       {activeConfiguration.name}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {configurations.length} saved configurations
+                      Version {activeConfiguration.versionNumber ?? 1}
                     </p>
                   </div>
                   <Badge
@@ -201,13 +228,13 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 </div>
 
                 <BuilderSidebarControls
-                  configId={activeConfiguration.id}
+                  configId={configId}
                   currentTemplateKey={activeConfiguration.templateKey}
                   sectionTypes={preview.page.sections.map(
                     ({ component: _c, ...rest }) => rest.type,
                   )}
                   templateConfig={deserializeTemplateConfig(
-                    activeConfiguration.themeJson as Record<string, string>,
+                    activeConfiguration.themeJson,
                   )}
                   onCreateDraft={createTemplateDraftAction}
                   onUpdateTheme={updateSiteThemeFieldAction}
@@ -244,7 +271,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               <BuilderSidebarDrawer
                 activeConfigName={activeConfiguration.name}
                 activeTemplateLabel={activeTemplateLabel}
-                configId={activeConfiguration.id}
+                configId={configId}
                 configStatus={activeConfiguration.status}
                 currentTemplateKey={activeConfiguration.templateKey}
                 editableFieldCount={preview.editableFields.length}
@@ -253,9 +280,9 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                   ({ component: _c, ...rest }) => rest.type,
                 )}
                 templateConfig={deserializeTemplateConfig(
-                  activeConfiguration.themeJson as Record<string, string>,
+                  activeConfiguration.themeJson,
                 )}
-                totalConfigurations={configurations.length}
+                totalConfigurations={activeConfiguration.versionNumber}
                 onCreateDraft={createTemplateDraftAction}
                 onUpdateTheme={updateSiteThemeFieldAction}
                 onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
@@ -267,7 +294,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
               <ThemeToggle />
               <PublishConfirmationDialog
                 changedFieldCount={changedFieldCount}
-                configId={activeConfiguration.id}
+                configId={configId}
                 currentName={activeConfiguration.name}
                 onPublish={publishSiteConfigurationAction}
               />
@@ -286,16 +313,16 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
 
           <BuilderPreviewPanel
             companySlug={session.activeMembership.companySlug}
-            configId={activeConfiguration.id}
+            configId={configId}
             defaultContent={preview.template.defaultContent}
             editableFields={preview.editableFields}
             sections={preview.page.sections.map(
               ({ component: _c, ...rest }) => rest,
             )}
-            theme={activeConfiguration.themeJson as Record<string, string>}
+            theme={activeConfiguration.themeJson}
             visibleSections={
               deserializeTemplateConfig(
-                activeConfiguration.themeJson as Record<string, string>,
+                activeConfiguration.themeJson,
               ).visibleSections
             }
             onSmartFill={smartFillFieldAction}
