@@ -18,8 +18,8 @@ import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { requireOnboardedSession } from "../../lib/session";
-import { initializeCheckoutAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { initializeCheckoutAction } from "../../actions";
 
 type BillingPageProps = {
   searchParams?: Promise<{ interval?: string; success?: string }>;
@@ -81,12 +81,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/">← Dashboard</Link>
-              </Button>
-            </div>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
+            <h1 className="font-serif text-3xl font-semibold text-foreground">
               Billing &amp; Plans
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">

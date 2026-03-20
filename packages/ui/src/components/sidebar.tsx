@@ -1,4 +1,5 @@
 /* biome-ignore-all lint/suspicious/noDocumentCookie: shadcn sidebar persists collapse state with a simple cookie write. */
+"use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";

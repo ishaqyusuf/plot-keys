@@ -14,7 +14,7 @@ import { extractTenantHostname } from "@plotkeys/utils";
 import Link from "next/link";
 import type { JSX } from "react";
 
-import { requireOnboardedSession } from "../../lib/session";
+import { requireOnboardedSession } from "../../../lib/session";
 
 function renderLiveSection(
   section: HomeSectionDefinition,

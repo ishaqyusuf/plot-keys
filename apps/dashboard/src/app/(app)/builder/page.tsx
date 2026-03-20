@@ -19,11 +19,11 @@ import Link from "next/link";
 
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 
-import { BuilderPreviewPanel } from "../../components/builder/builder-preview-panel";
-import { BuilderSidebarControls } from "../../components/builder/builder-sidebar-controls";
-import { BuilderSidebarDrawer } from "../../components/builder/builder-sidebar-drawer";
-import { PublishConfirmationDialog } from "../../components/builder/publish-confirmation-dialog";
-import { requireOnboardedSession } from "../../lib/session";
+import { BuilderPreviewPanel } from "../../../components/builder/builder-preview-panel";
+import { BuilderSidebarControls } from "../../../components/builder/builder-sidebar-controls";
+import { BuilderSidebarDrawer } from "../../../components/builder/builder-sidebar-drawer";
+import { PublishConfirmationDialog } from "../../../components/builder/publish-confirmation-dialog";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   createTemplateDraftAction,
   publishSiteConfigurationAction,
@@ -31,7 +31,7 @@ import {
   updateSiteFieldAction,
   updateSiteThemeFieldAction,
   updateSiteThemeFieldSilentAction,
-} from "../actions";
+} from "../../actions";
 
 type BuilderPageProps = {
   searchParams?: Promise<{

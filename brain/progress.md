@@ -19,6 +19,7 @@
 | Website/WebsiteVersion Phase 1-3 | ✅ Done |
 | Section visibility toggles | ✅ Done |
 | Domain auto-sync on onboarding | ✅ Done |
+| **Dashboard sidebar navigation** | ✅ Done |
 | Email (Welcome + Verification) | 🟡 Partial |
 | Notifications (event system) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
@@ -39,6 +40,19 @@
 - Updated `brain/modules/sections-inventory.md`: split into implemented (14 live components) and planned sections. Added type keys, descriptions, form endpoints, and content key references for all implemented sections.
 - Updated `brain/modules/pages-inventory.md`: clarified which pages are currently implemented (Home only for all templates), added per-template note about page inventory registry coverage, and retained planned page list.
 - Updated `brain/modules/page-to-section-matrix.md`: added full per-template home page section matrix for all 45 templates in render order.
+
+## 2026-03-20 — Tenant Dashboard Phase
+
+### Dashboard Sidebar Navigation
+- Created `(app)` route group in `apps/dashboard/src/app/` for all authenticated pages
+- Built `DashboardSidebar` component at `src/components/nav/dashboard-sidebar.tsx` using shadcn sidebar primitives
+- Nav groups: Overview (Home, Builder, Live Preview), Manage (Properties, Agents, Leads, Appointments), Insights (Analytics, AI Credits, Billing)
+- Added `(app)/layout.tsx` wrapping all authenticated pages with `SidebarProvider` + `DashboardSidebar` + `SidebarInset`
+- Added header bar with `SidebarTrigger` (mobile hamburger) and `ThemeToggle`
+- Moved 11 page directories into `(app)/` route group, updated all relative imports
+- Removed "← Dashboard" back links from sub-pages (sidebar handles navigation)
+- Redesigned dashboard home page: metrics strip (properties/agents/leads/appointments), quick action cards, site status card
+- Fixed missing `"use client"` directive on `packages/ui/src/components/sidebar.tsx`
 
 ---
 

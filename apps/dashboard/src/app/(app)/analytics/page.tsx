@@ -4,7 +4,7 @@ import {
   getPageViewsByDay,
 } from "@plotkeys/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { requireOnboardedSession } from "../../lib/session";
+import { requireOnboardedSession } from "../../../lib/session";
 
 function formatDateTime(date: Date) {
   return new Intl.DateTimeFormat("en-NG", {

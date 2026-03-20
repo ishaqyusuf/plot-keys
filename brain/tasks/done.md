@@ -7,6 +7,8 @@ This file records completed work milestones.
 - Add concise completion notes with enough context for future readers.
 
 ## Done
+
+- **Tenant Dashboard Phase** — Created `(app)` route group with sidebar navigation layout. Built `DashboardSidebar` component using shadcn sidebar primitives with grouped nav links (Overview: Home/Builder/Live, Manage: Properties/Agents/Leads/Appointments, Insights: Analytics/AI Credits/Billing). Moved all authenticated pages into `(app)/` route group. Removed redundant back links. Redesigned dashboard home page with metrics strip, quick actions, and site status. Added header bar with mobile sidebar trigger and theme toggle. Fixed missing `use client` directive on sidebar.tsx.
 - **AI Credit Tracking** — Created AiUsageLog + AiCreditLedger Prisma models with ledger-pattern balance tracking. Built query functions (balance, deduction, logging, stats). Wired credit deduction into smartFillField tRPC mutation. Added getAiCreditInfo + purchaseAiCredits tRPC procedures. Created `/ai-credits` dashboard page with balance, usage breakdown, and top-up.
 - **Analytics Foundations** — Created AnalyticsEvent Prisma model with company/type/date indexes. Built recordAnalyticsEvent, getAnalyticsSummary, getPageViewsByDay queries. Added tenant-site `/api/track` endpoint with privacy-safe visitor fingerprinting. Added getAnalytics tRPC procedure. Created `/analytics` dashboard page with stat cards, event type breakdown, page view bar chart, and recent events list.
 - **Stock Image Marketplace** — Created TenantStockImageLicense model, grant/check/list queries, listStockImageLicenses + purchaseStockImage tRPC procedures with billing integration

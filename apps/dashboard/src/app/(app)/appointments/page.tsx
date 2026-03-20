@@ -4,12 +4,12 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 
-import { requireOnboardedSession } from "../../lib/session";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   createAppointmentAction,
   deleteAppointmentAction,
   updateAppointmentStatusAction,
-} from "../actions";
+} from "../../actions";
 
 type AppointmentsPageProps = {
   searchParams?: Promise<{ status?: string; view?: string }>;
@@ -90,12 +90,7 @@ export default async function AppointmentsPage({
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/">← Dashboard</Link>
-              </Button>
-            </div>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
+            <h1 className="font-serif text-3xl font-semibold text-foreground">
               Appointments
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
