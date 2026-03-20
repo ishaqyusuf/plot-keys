@@ -11,7 +11,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useState, useTransition } from "react";
-import { createPropertyAction, updatePropertyAction } from "../actions";
+import { createPropertyAction, updatePropertyAction } from "../../actions";
 
 type Property = {
   id: string;

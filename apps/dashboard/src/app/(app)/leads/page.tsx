@@ -3,8 +3,8 @@ import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../lib/session";
-import { updateLeadStatusAction } from "../actions";
+import { requireOnboardedSession } from "../../../lib/session";
+import { updateLeadStatusAction } from "../../actions";
 
 type LeadsPageProps = {
   searchParams?: Promise<{ status?: string }>;
@@ -75,12 +75,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/">← Dashboard</Link>
-              </Button>
-            </div>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
+            <h1 className="font-serif text-3xl font-semibold text-foreground">
               Leads
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
