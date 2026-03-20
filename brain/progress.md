@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-19)
+## Current State (as of 2026-03-20)
 
 ### What's Built & Working
 | Area | Status |
@@ -19,6 +19,7 @@
 | Website/WebsiteVersion Phase 1-3 | ✅ Done |
 | Section visibility toggles | ✅ Done |
 | Domain auto-sync on onboarding | ✅ Done |
+| **Dashboard sidebar navigation** | ✅ Done |
 | Email (Welcome + Verification) | 🟡 Partial |
 | Notifications (event system) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
@@ -29,6 +30,21 @@
 | Tenant domain management UI | ❌ Not started |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 cleanup | ❌ Not started |
+
+---
+
+## 2026-03-20 — Tenant Dashboard Phase
+
+### Dashboard Sidebar Navigation
+- Created `(app)` route group in `apps/dashboard/src/app/` for all authenticated pages
+- Built `DashboardSidebar` component at `src/components/nav/dashboard-sidebar.tsx` using shadcn sidebar primitives
+- Nav groups: Overview (Home, Builder, Live Preview), Manage (Properties, Agents, Leads, Appointments), Insights (Analytics, AI Credits, Billing)
+- Added `(app)/layout.tsx` wrapping all authenticated pages with `SidebarProvider` + `DashboardSidebar` + `SidebarInset`
+- Added header bar with `SidebarTrigger` (mobile hamburger) and `ThemeToggle`
+- Moved 11 page directories into `(app)/` route group, updated all relative imports
+- Removed "← Dashboard" back links from sub-pages (sidebar handles navigation)
+- Redesigned dashboard home page: metrics strip (properties/agents/leads/appointments), quick action cards, site status card
+- Fixed missing `"use client"` directive on `packages/ui/src/components/sidebar.tsx`
 
 ---
 
