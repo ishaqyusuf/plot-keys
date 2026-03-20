@@ -213,7 +213,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                       {activeConfiguration.name}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Version {activeConfiguration.versionNumber}
+                      Version {activeConfiguration.versionNumber ?? 1}
                     </p>
                   </div>
                   <Badge

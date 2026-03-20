@@ -13,17 +13,17 @@ This file holds actionable work that is identified but not currently in progress
 
 - [x] **Tenant Domain Management UI** — `/domains` dashboard page with domain listing, status filtering, summary stats, and manual re-sync button. ✅ Done
 - [ ] **Custom Domain Purchase Flow** — Registrar API integration (Namecheap/GoDaddy), domain search, DNS provisioning, SSL, renewal tracking. Large scope.
-- [ ] **Property/Agent Data Binding** — Wire live property + agent DB data into template section rendering (PropertyGrid, AgentShowcase) so tenant sites show real listings.
+- [x] **Property/Agent Data Binding** — Builder and live pages now fetch featured properties and agents and pass them as `liveListings`/`liveAgents` to `resolveWebsitePresentation()`. PropertyGrid and AgentShowcase sections render real DB data. ✅ Done
 - [x] **Website/WebsiteVersion Phase 4 Cleanup** — Removed SiteConfiguration fallback paths from read helpers; builder, dashboard home, live page, and actions now read from WebsiteVersion exclusively. Writes still dual-write for backward compat. ✅ Done (reads)
 - [x] **Logo Upload Flow** — `/settings` page with file upload (Supabase storage) + URL fallback; `setCompanyLogoAction` server action; logo rendered as image in HeroBannerSection when URL provided. ✅ Done
 
 ## Phase 2 — Platform Polish & Engagement
 
-- [ ] **Email Template Expansion** — Add transactional emails: new lead notification, appointment confirmation, payment receipt, plan upgrade/downgrade, site published. Currently only Welcome + Verification exist.
+- [x] **Email Template Expansion** — Added `new-lead.tsx` and `site-published.tsx` email templates; created `new_lead_captured` and `site_published` notification type definitions; wired email dispatch in EmailService. ✅ Done (new lead + site published)
 - [ ] **Notification Dashboard UI** — Create `/notifications` page showing notification history; allow tenants to configure which events trigger emails.
 - [ ] **Tenant Onboarding Improvements** — Allow rerunning template recommendation when core inputs change; add AI bootstrap for hero/intro/CTA copy from onboarding data.
 - [ ] **SubmitButton + Form Standardization** — Add shared `SubmitButton` primitive in `packages/ui`; standardize dashboard forms on `useZodForm` + `Controller` pattern.
-- [ ] **Tenant Domain Status Surfaces** — Add inline status badges on dashboard home for pending/failed domain provisioning so failures don't stay silent.
+- [x] **Tenant Domain Status Surfaces** — Inline alerts on dashboard home for failed (destructive) and pending (amber) domains with action buttons. ✅ Done
 
 ## Phase 3 — Growth & Monetization
 

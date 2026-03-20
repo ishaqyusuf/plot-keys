@@ -21,14 +21,40 @@
 | Domain auto-sync on onboarding | ✅ Done |
 | Tenant domain management UI (`/domains`) | ✅ Done |
 | Logo upload (`/settings`) | ✅ Done |
-| Email (Welcome + Verification) | 🟡 Partial |
-| Notifications (event system) | 🟡 Partial |
+| Property/agent data binding | ✅ Done |
+| Domain status surfaces (dashboard home) | ✅ Done |
+| Email (Welcome + Verification + New Lead + Site Published) | ✅ Done |
+| Notifications (event system, 10 types) | 🟡 Partial |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
-| Property/agent data binding | 🟡 Partial |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+
+---
+
+## 2026-03-20 (Session 4 — Next Phase)
+
+### Property/Agent Data Binding
+- Wired `listFeaturedProperties()` and `listAgentsForCompany()` into builder page `resolveWebsitePresentation()` call
+- Wired same into live page `resolveWebsitePresentation()` call
+- PropertyGridSection and AgentShowcaseSection now render real DB data from properties and agents tables
+- Pattern matches tenant-site approach already working in `apps/tenant-site/src/app/page.tsx`
+
+### Tenant Domain Status Surfaces
+- Added inline alerts on dashboard home page for failed and pending domains
+- Failed domains show destructive alert with "View domains" link
+- Pending domains show amber alert with "Provision now" form button
+- Alerts dynamically computed from existing `domainStatuses` query data
+
+### Email Template Expansion
+- Created `packages/email/emails/new-lead.tsx` — React Email template for new lead notifications with lead details section
+- Created `packages/email/emails/site-published.tsx` — React Email template for site publish confirmation
+- Added `defaultNewLeadSubject()` and `defaultSitePublishedSubject()` to `packages/email/defaults.ts`
+- Created `new_lead_captured` notification type definition with email + in_app channels
+- Created `site_published` notification type definition with email + in_app channels
+- Registered both in `plotKeysNotificationTypes` registry (now 10 types total)
+- Added `new_lead_captured` and `site_published` email dispatch handlers in `EmailService.buildEmailPayload()`
 
 ---
 
