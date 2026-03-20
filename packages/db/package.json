@@ -11,7 +11,8 @@
     "./queries/onboarding": "./src/queries/onboarding.ts",
     "./queries/site-configuration": "./src/queries/site-configuration.ts",
     "./queries/template-license": "./src/queries/template-license.ts",
-    "./queries/tenant-domain": "./src/queries/tenant-domain.ts"
+    "./queries/tenant-domain": "./src/queries/tenant-domain.ts",
+    "./queries/website": "./src/queries/website.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

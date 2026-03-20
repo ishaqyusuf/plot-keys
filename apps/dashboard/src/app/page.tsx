@@ -1,4 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { resolvePublishedForCompany } from "@plotkeys/db/queries/website";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -70,11 +71,9 @@ export default async function DashboardHomePage({
     prisma?.agent.count({
       where: { companyId: session.activeMembership.companyId, deletedAt: null },
     }),
-    prisma?.siteConfiguration.findFirst({
-      orderBy: { updatedAt: "desc" },
-      select: { name: true, status: true, updatedAt: true },
-      where: { companyId: session.activeMembership.companyId, deletedAt: null, status: "published" },
-    }),
+    prisma
+      ? resolvePublishedForCompany(prisma, session.activeMembership.companyId)
+      : null,
   ]);
 
   return (
@@ -170,8 +169,8 @@ export default async function DashboardHomePage({
             },
             {
               label: "Last published",
-              value: publishedConfig
-                ? new Date(publishedConfig.updatedAt).toLocaleDateString("en-GB", {
+              value: publishedConfig?.publishedAt
+                ? new Date(publishedConfig.publishedAt).toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",

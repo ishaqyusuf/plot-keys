@@ -12,6 +12,7 @@ import {
   verifyUserEmail,
 } from "@plotkeys/auth";
 import { createPrismaClient } from "@plotkeys/db";
+import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
 import { normalizeSubdomainLabel } from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
@@ -409,15 +410,13 @@ export async function ensureBuilderConfigurationExists() {
       redirect("/sign-in?error=DATABASE_URL is not configured.");
     }
 
-    const configuration = await prisma.siteConfiguration.findFirst({
-      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-      where: {
-        companyId: session.activeMembership.companyId,
-        deletedAt: null,
-      },
-    });
+    // Phase 4: Check WebsiteVersion instead of SiteConfiguration
+    const draft = await resolveActiveDraftForCompany(
+      prisma,
+      session.activeMembership.companyId,
+    );
 
-    if (!configuration) {
+    if (!draft) {
       redirect(`/builder?configId=${result.configId}`);
     }
   } catch {}

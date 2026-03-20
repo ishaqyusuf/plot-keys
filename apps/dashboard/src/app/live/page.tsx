@@ -1,4 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { resolvePublishedForCompany } from "@plotkeys/db/queries/website";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
@@ -101,13 +102,7 @@ export default async function LivePage({ searchParams }: LivePageProps) {
     );
   }
 
-  const publishedConfiguration = await prisma.siteConfiguration.findFirst({
-    where: {
-      companyId: company.id,
-      deletedAt: null,
-      status: "published",
-    },
-  });
+  const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
 
   if (!publishedConfiguration) {
     return (
@@ -130,11 +125,11 @@ export default async function LivePage({ searchParams }: LivePageProps) {
 
   const presentation = resolveWebsitePresentation({
     companyName: company.name,
-    content: publishedConfiguration.contentJson as Record<string, string>,
+    content: publishedConfiguration.contentJson,
     market: company.market ?? company.name,
     subdomain: company.slug,
     templateKey: publishedConfiguration.templateKey,
-    theme: publishedConfiguration.themeJson as Record<string, string>,
+    theme: publishedConfiguration.themeJson,
   });
 
   return (
