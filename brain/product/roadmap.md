@@ -59,6 +59,9 @@ This file tracks the likely implementation sequence at a product level.
 - Uniqueness and template popularity insights
 
 ## Phase 6: Expansion
+- Construction project management foundation
+- Customer project interface for active developments
+- Project budgeting, QS, and site workforce workflows
 - AI lead reply assistant
 - AI recommendations
 - AI layout suggestions

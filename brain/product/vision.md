@@ -63,9 +63,11 @@ Build the operating system for real-estate companies: one platform to manage ope
 
 ## Core Platform Modules
 - Company management
+- Construction project management
 - Property listings
 - Agent management
 - Client CRM
+- Customer project interface
 - Website generator
 - Property media
 - Lead management

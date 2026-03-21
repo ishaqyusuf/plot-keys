@@ -29,3 +29,7 @@ This file maps near-term engineering execution in a practical order.
 19. Build company and property management foundations that feed derived website content
 20. Add lead capture and appointments
 21. Add unified billing across subscriptions, templates, stock images, domains, and AI credits
+22. Define construction project management domain model and feature boundaries
+23. Build internal construction project core for Plus and Pro tenants
+24. Add project budgets, site workforce, and project payroll workflows
+25. Add customer-facing project interface for approved progress visibility
