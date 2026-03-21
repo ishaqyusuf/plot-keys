@@ -102,10 +102,12 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
               {stats.total} employee{stats.total !== 1 ? "s" : ""}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/hr/departments">Departments</Link>
-          </Button>
-          <ExportCsvButton exportAction={exportEmployeesCsvAction} filename="employees.csv" />
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/hr/departments">Departments</Link>
+            </Button>
+            <ExportCsvButton exportAction={exportEmployeesCsvAction} filename="employees.csv" />
+          </div>
         </div>
 
         {/* Status filter */}

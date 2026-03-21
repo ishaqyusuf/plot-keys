@@ -258,3 +258,108 @@ export async function getLeadSourceBreakdown(
     .map((r) => ({ source: r.source ?? "unknown", count: r._count.id }))
     .sort((a, b) => b.count - a.count);
 }
+
+// ---------------------------------------------------------------------------
+// Property detail analytics
+// ---------------------------------------------------------------------------
+
+export async function getPropertyDetailAnalytics(
+  db: Db,
+  companyId: string,
+  propertyId: string,
+) {
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const [views30, views7, leadsCount, appointmentsCount] = await Promise.all([
+    db.analyticsEvent.count({
+      where: {
+        companyId,
+        propertyId,
+        eventType: "property_view",
+        createdAt: { gte: since30 },
+      },
+    }),
+    db.analyticsEvent.count({
+      where: {
+        companyId,
+        propertyId,
+        eventType: "property_view",
+        createdAt: { gte: since7 },
+      },
+    }),
+    db.lead.count({
+      where: {
+        companyId,
+        source: { contains: propertyId },
+      },
+    }),
+    db.appointment.count({
+      where: {
+        companyId,
+        propertyId,
+      },
+    }),
+  ]);
+
+  return {
+    views30,
+    views7,
+    leadsCount,
+    appointmentsCount,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Agent performance analytics
+// ---------------------------------------------------------------------------
+
+export async function getAgentPerformanceStats(
+  db: Db,
+  companyId: string,
+) {
+  const agents = await db.agent.findMany({
+    where: { companyId, deletedAt: null },
+    select: { id: true, name: true, title: true },
+    orderBy: { name: "asc" },
+  });
+
+  const agentIds = agents.map((a) => a.id);
+
+  if (agentIds.length === 0) return [];
+
+  const [allAppointmentsByAgent, completedAppointmentsByAgent] = await Promise.all([
+    db.appointment.groupBy({
+      by: ["agentId"],
+      _count: { id: true },
+      where: {
+        companyId,
+        agentId: { in: agentIds },
+      },
+    }),
+    db.appointment.groupBy({
+      by: ["agentId"],
+      _count: { id: true },
+      where: {
+        companyId,
+        agentId: { in: agentIds },
+        status: "completed",
+      },
+    }),
+  ]);
+
+  const appointmentMap = new Map(
+    allAppointmentsByAgent.map((r) => [r.agentId, r._count.id]),
+  );
+  const completedMap = new Map(
+    completedAppointmentsByAgent.map((r) => [r.agentId, r._count.id]),
+  );
+
+  return agents.map((agent) => ({
+    id: agent.id,
+    name: agent.name,
+    title: agent.title,
+    totalAppointments: appointmentMap.get(agent.id) ?? 0,
+    completedAppointments: completedMap.get(agent.id) ?? 0,
+  }));
+}
