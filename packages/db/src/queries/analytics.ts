@@ -150,6 +150,11 @@ export async function getTopPages(
 // Traffic source breakdown (referrer bucketing)
 // ---------------------------------------------------------------------------
 
+/** Check if hostname is exactly domain or a subdomain of it. */
+function isDomain(hostname: string, domain: string): boolean {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
 function bucketReferrer(referrer: string | null): string {
   if (!referrer) return "Direct";
   let hostname: string;
@@ -158,15 +163,14 @@ function bucketReferrer(referrer: string | null): string {
   } catch {
     hostname = referrer.toLowerCase();
   }
-  if (hostname.includes("google")) return "Google";
+  if (isDomain(hostname, "google.com") || isDomain(hostname, "google.co")) return "Google";
   if (
-    hostname.endsWith("facebook.com") ||
-    hostname.endsWith("twitter.com") ||
-    hostname.endsWith("instagram.com") ||
-    hostname.endsWith("linkedin.com") ||
-    hostname.endsWith("tiktok.com") ||
-    hostname === "x.com" ||
-    hostname.endsWith(".x.com")
+    isDomain(hostname, "facebook.com") ||
+    isDomain(hostname, "twitter.com") ||
+    isDomain(hostname, "instagram.com") ||
+    isDomain(hostname, "linkedin.com") ||
+    isDomain(hostname, "tiktok.com") ||
+    isDomain(hostname, "x.com")
   )
     return "Social";
   return "Other";
