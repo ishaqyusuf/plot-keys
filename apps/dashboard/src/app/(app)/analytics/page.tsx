@@ -6,6 +6,7 @@ import {
   getPropertyAnalytics,
   getTopPages,
   getTrafficSources,
+  getAgentPerformanceStats,
 } from "@plotkeys/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
@@ -25,7 +26,7 @@ export default async function AnalyticsPage() {
   const companyId = session.activeMembership.companyId;
   const prisma = createPrismaClient().db;
 
-  const [summary, pageViews, topPages, trafficSources, propertyViews, leadSources] =
+  const [summary, pageViews, topPages, trafficSources, propertyViews, leadSources, agentStats] =
     await Promise.all([
       getAnalyticsSummary(prisma, companyId),
       getPageViewsByDay(prisma, companyId, 30),
@@ -33,6 +34,7 @@ export default async function AnalyticsPage() {
       getTrafficSources(prisma, companyId),
       getPropertyAnalytics(prisma, companyId),
       getLeadSourceBreakdown(prisma, companyId),
+      getAgentPerformanceStats(prisma, companyId),
     ]);
 
   const maxViews = Math.max(...pageViews.map((d) => d.count), 1);
@@ -317,6 +319,42 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Agent Performance */}
+      {agentStats.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {agentStats.map((agent) => (
+                <div
+                  key={agent.id}
+                  className="flex items-center justify-between border-b py-2 last:border-0"
+                >
+                  <div>
+                    <span className="text-sm font-medium">{agent.name}</span>
+                    {agent.title && (
+                      <span className="text-muted-foreground ml-2 text-xs">
+                        {agent.title}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-muted-foreground">
+                      {agent.totalAppointments} appt{agent.totalAppointments !== 1 ? "s" : ""}
+                    </span>
+                    <span className="text-green-600 font-medium">
+                      {agent.completedAppointments} completed
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Events */}
       <Card>

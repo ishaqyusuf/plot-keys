@@ -4,7 +4,8 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
-import { convertLeadToCustomerAction, updateLeadStatusAction } from "../../actions";
+import { convertLeadToCustomerAction, exportLeadsCsvAction, updateLeadStatusAction } from "../../actions";
+import { ExportCsvButton } from "../../../components/export-csv-button";
 
 type LeadsPageProps = {
   searchParams?: Promise<{ status?: string }>;
@@ -82,6 +83,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
               {stats.total} lead{stats.total !== 1 ? "s" : ""} captured
             </p>
           </div>
+          <ExportCsvButton exportAction={exportLeadsCsvAction} filename="leads.csv" />
         </div>
 
         {/* Stats bar */}

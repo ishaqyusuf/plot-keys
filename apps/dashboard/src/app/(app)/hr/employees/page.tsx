@@ -6,9 +6,11 @@ import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
+import { ExportCsvButton } from "../../../../components/export-csv-button";
 import {
   createEmployeeAction,
   deleteEmployeeAction,
+  exportEmployeesCsvAction,
   updateEmployeeAction,
 } from "../../../actions";
 
@@ -103,6 +105,7 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
           <Button asChild variant="outline" size="sm">
             <Link href="/hr/departments">Departments</Link>
           </Button>
+          <ExportCsvButton exportAction={exportEmployeesCsvAction} filename="employees.csv" />
         </div>
 
         {/* Status filter */}

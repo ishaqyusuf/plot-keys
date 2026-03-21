@@ -8,9 +8,11 @@ import Link from "next/link";
 import {
   createCustomerAction,
   deleteCustomerAction,
+  exportCustomersCsvAction,
   updateCustomerStatusAction,
 } from "../../actions";
 import { requireOnboardedSession } from "../../../lib/session";
+import { ExportCsvButton } from "../../../components/export-csv-button";
 
 type CustomersPageProps = {
   searchParams?: Promise<{ error?: string; created?: string; filter?: string }>;
@@ -97,6 +99,9 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
             <p className="mt-1 text-sm text-muted-foreground">
               {total} customer{total !== 1 ? "s" : ""} total
             </p>
+            <div className="mt-2">
+              <ExportCsvButton exportAction={exportCustomersCsvAction} filename="customers.csv" />
+            </div>
           </div>
 
           {/* Add customer form */}

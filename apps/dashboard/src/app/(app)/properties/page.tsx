@@ -10,8 +10,10 @@ import {
 } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
+import { ExportCsvButton } from "../../../components/export-csv-button";
 import {
   deletePropertyAction,
+  exportPropertiesCsvAction,
   togglePropertyFeaturedAction,
 } from "../../actions";
 import { PropertyForm } from "./property-form";
@@ -81,6 +83,7 @@ export default async function PropertiesPage({
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <ExportCsvButton exportAction={exportPropertiesCsvAction} filename="properties.csv" />
             <Button asChild size="sm" variant="outline">
               <a href={siteUrl} rel="noopener noreferrer" target="_blank">
                 View site ↗
