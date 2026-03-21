@@ -405,3 +405,281 @@ export async function createProjectDocument(
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Budget
+// ---------------------------------------------------------------------------
+
+export async function getOrCreateProjectBudget(
+  db: Db,
+  projectId: string,
+) {
+  const existing = await db.projectBudget.findUnique({ where: { projectId } });
+  if (existing) return existing;
+  return db.projectBudget.create({
+    data: { projectId },
+  });
+}
+
+export async function updateProjectBudget(
+  db: Db,
+  budgetId: string,
+  data: {
+    approvedBudgetMinor?: number;
+    forecastBudgetMinor?: number;
+    actualBudgetMinor?: number;
+    currency?: string;
+    notes?: string | null;
+  },
+) {
+  return db.projectBudget.update({ where: { id: budgetId }, data });
+}
+
+export async function getProjectBudgetWithLineItems(
+  db: Db,
+  projectId: string,
+) {
+  return db.projectBudget.findUnique({
+    where: { projectId },
+    include: {
+      lineItems: { orderBy: { createdAt: "asc" } },
+    },
+  });
+}
+
+export async function createProjectBudgetLineItem(
+  db: Db,
+  input: {
+    projectId: string;
+    budgetId: string;
+    category: string;
+    description: string;
+    quantity?: number | null;
+    unitRateMinor?: number | null;
+    estimatedMinor?: number;
+    actualMinor?: number;
+    notes?: string | null;
+  },
+) {
+  return db.projectBudgetLineItem.create({
+    data: {
+      projectId: input.projectId,
+      budgetId: input.budgetId,
+      category: input.category,
+      description: input.description,
+      quantity: input.quantity ?? null,
+      unitRateMinor: input.unitRateMinor ?? null,
+      estimatedMinor: input.estimatedMinor ?? 0,
+      actualMinor: input.actualMinor ?? 0,
+      notes: input.notes ?? null,
+    },
+  });
+}
+
+export async function updateProjectBudgetLineItem(
+  db: Db,
+  lineItemId: string,
+  data: {
+    category?: string;
+    description?: string;
+    quantity?: number | null;
+    unitRateMinor?: number | null;
+    estimatedMinor?: number;
+    actualMinor?: number;
+    notes?: string | null;
+  },
+) {
+  return db.projectBudgetLineItem.update({ where: { id: lineItemId }, data });
+}
+
+export async function deleteProjectBudgetLineItem(
+  db: Db,
+  lineItemId: string,
+) {
+  return db.projectBudgetLineItem.delete({ where: { id: lineItemId } });
+}
+
+// ---------------------------------------------------------------------------
+// Workers
+// ---------------------------------------------------------------------------
+
+export async function listProjectWorkers(
+  db: Db,
+  projectId: string,
+  options: {
+    status?: "active" | "off_project" | "completed";
+  } = {},
+) {
+  return db.projectWorker.findMany({
+    where: {
+      projectId,
+      ...(options.status ? { status: options.status } : {}),
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export async function createProjectWorker(
+  db: Db,
+  input: {
+    projectId: string;
+    employeeId?: string | null;
+    contractorName?: string | null;
+    fullName: string;
+    role: string;
+    payBasis?: "daily" | "weekly" | "fixed_contract" | "milestone_based";
+    payRateMinor?: number;
+    currency?: string;
+    notes?: string | null;
+  },
+) {
+  return db.projectWorker.create({
+    data: {
+      projectId: input.projectId,
+      employeeId: input.employeeId ?? null,
+      contractorName: input.contractorName ?? null,
+      fullName: input.fullName,
+      role: input.role,
+      payBasis: input.payBasis ?? "daily",
+      payRateMinor: input.payRateMinor ?? 0,
+      currency: input.currency ?? "NGN",
+      notes: input.notes ?? null,
+    },
+  });
+}
+
+export async function updateProjectWorker(
+  db: Db,
+  workerId: string,
+  data: {
+    fullName?: string;
+    role?: string;
+    payBasis?: "daily" | "weekly" | "fixed_contract" | "milestone_based";
+    payRateMinor?: number;
+    status?: "active" | "off_project" | "completed";
+    notes?: string | null;
+  },
+) {
+  return db.projectWorker.update({ where: { id: workerId }, data });
+}
+
+export async function deleteProjectWorker(db: Db, workerId: string) {
+  return db.projectWorker.delete({ where: { id: workerId } });
+}
+
+// ---------------------------------------------------------------------------
+// Payroll Runs
+// ---------------------------------------------------------------------------
+
+export async function listProjectPayrollRuns(db: Db, projectId: string) {
+  return db.projectPayrollRun.findMany({
+    where: { projectId },
+    include: {
+      _count: { select: { entries: true } },
+    },
+    orderBy: { periodStart: "desc" },
+  });
+}
+
+export async function getProjectPayrollRunWithEntries(
+  db: Db,
+  runId: string,
+) {
+  return db.projectPayrollRun.findUnique({
+    where: { id: runId },
+    include: {
+      entries: {
+        include: { worker: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+}
+
+export async function createProjectPayrollRun(
+  db: Db,
+  input: {
+    projectId: string;
+    periodStart: Date;
+    periodEnd: Date;
+    currency?: string;
+    notes?: string | null;
+  },
+) {
+  return db.projectPayrollRun.create({
+    data: {
+      projectId: input.projectId,
+      periodStart: input.periodStart,
+      periodEnd: input.periodEnd,
+      currency: input.currency ?? "NGN",
+      notes: input.notes ?? null,
+    },
+  });
+}
+
+export async function updateProjectPayrollRun(
+  db: Db,
+  runId: string,
+  data: {
+    status?: "draft" | "confirmed" | "paid";
+    totalGrossMinor?: number;
+    totalNetMinor?: number;
+    notes?: string | null;
+  },
+) {
+  return db.projectPayrollRun.update({ where: { id: runId }, data });
+}
+
+export async function deleteProjectPayrollRun(db: Db, runId: string) {
+  return db.projectPayrollRun.delete({ where: { id: runId } });
+}
+
+// ---------------------------------------------------------------------------
+// Payroll Entries
+// ---------------------------------------------------------------------------
+
+export async function upsertProjectPayrollEntry(
+  db: Db,
+  input: {
+    payrollRunId: string;
+    workerId: string;
+    attendanceUnits?: number;
+    grossMinor?: number;
+    deductionMinor?: number;
+    advanceMinor?: number;
+    netMinor?: number;
+    paymentStatus?: "pending" | "paid" | "partial";
+    notes?: string | null;
+  },
+) {
+  const data = {
+    attendanceUnits: input.attendanceUnits ?? 0,
+    grossMinor: input.grossMinor ?? 0,
+    deductionMinor: input.deductionMinor ?? 0,
+    advanceMinor: input.advanceMinor ?? 0,
+    netMinor: input.netMinor ?? 0,
+    paymentStatus: input.paymentStatus ?? "pending",
+    notes: input.notes ?? null,
+  };
+  return db.projectPayrollEntry.upsert({
+    where: {
+      payrollRunId_workerId: {
+        payrollRunId: input.payrollRunId,
+        workerId: input.workerId,
+      },
+    },
+    update: data,
+    create: {
+      payrollRunId: input.payrollRunId,
+      workerId: input.workerId,
+      ...data,
+    },
+  });
+}
+
+export async function deleteProjectPayrollEntry(
+  db: Db,
+  entryId: string,
+) {
+  return db.projectPayrollEntry.delete({ where: { id: entryId } });
+}

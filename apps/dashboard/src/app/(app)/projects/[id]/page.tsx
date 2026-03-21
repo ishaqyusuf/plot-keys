@@ -169,6 +169,12 @@ export default async function ProjectDetailPage({
               />
             )}
             <Button asChild variant="outline" size="sm">
+              <Link href={`/projects/${project.id}/budget`}>Budget</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/projects/${project.id}/workforce`}>Workforce</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
               <Link href="/projects">← Projects</Link>
             </Button>
           </div>

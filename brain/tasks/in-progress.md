@@ -9,16 +9,16 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-### Construction Project Management — Phase 1 (Internal Project Core)
-- [x] Created Prisma enums: ProjectStatus, ProjectType, ProjectPhaseStatus, ProjectMilestoneStatus, ProjectDocumentKind, ProjectDocumentVisibility, ProjectUpdateKind, ProjectIssueSeverity, ProjectIssueStatus, ProjectRole, ProjectAssignmentStatus
-- [x] Created Prisma models: Project, ProjectPhase, ProjectMilestone, ProjectDocument, ProjectUpdate, ProjectIssue, ProjectAssignment
-- [x] Added Company→projects and Membership→projectAssignments relations
-- [x] Created project query module with CRUD for all entities (packages/db/src/queries/project.ts)
-- [x] Exported project queries from @plotkeys/db index and package.json exports map
-- [x] Created tRPC projects router (apps/api/src/routers/projects.route.ts) with all mutations and queries
-- [x] Created client components using useMutation for all project forms and actions
-- [x] Created /projects list page with create form, status filters, and project cards
-- [x] Created /projects/[id] detail page with phases, milestones, updates, issues, and team sections
-- [x] Added "Construction" nav group with Projects item to dashboard sidebar
+### Construction Project Management — Phase 2 (Finance and Workforce)
+- [x] Added Phase 2 Prisma enums: ProjectWorkerPayBasis, ProjectWorkerStatus, ProjectPayrollRunStatus, ProjectWorkerPaymentStatus
+- [x] Added Phase 2 Prisma models: ProjectBudget, ProjectBudgetLineItem, ProjectWorker, ProjectPayrollRun, ProjectPayrollEntry
+- [x] Updated Project model with relations to budget, workers, and payrollRuns
+- [x] Extended project.ts query module: budget CRUD, worker CRUD, payroll run CRUD, payroll entry upsert/delete
+- [x] Extended projects tRPC router: getBudget, updateBudget, addBudgetLineItem, updateBudgetLineItem, deleteBudgetLineItem, listWorkers, addWorker, updateWorker, removeWorker, listPayrollRuns, getPayrollRun, createPayrollRun, updatePayrollRun, deletePayrollRun, upsertPayrollEntry, deletePayrollEntry
+- [x] Created project-budget.tsx client components: BudgetSummaryCard, BudgetLineItemList, AddBudgetLineItemForm
+- [x] Created project-workforce.tsx client components: WorkerList, AddWorkerForm, PayrollRunList, CreatePayrollRunForm
+- [x] Created /projects/[id]/budget page
+- [x] Created /projects/[id]/workforce page
+- [x] Updated project detail page with Budget and Workforce navigation links
 
-Next: Run migration, test pages, or continue with Phase 2 (Budget and Workforce).
+Next: Run migration (`prisma migrate dev`), then continue with Phase 3 (Customer Visibility) or Phase 4 (AI and Integrations).

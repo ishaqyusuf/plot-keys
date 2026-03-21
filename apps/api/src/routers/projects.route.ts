@@ -2,18 +2,35 @@ import {
   assignMemberToProject,
   countProjectsByStatus,
   createProject,
+  createProjectBudgetLineItem,
   createProjectIssue,
   createProjectMilestone,
+  createProjectPayrollRun,
   createProjectPhase,
   createProjectUpdate,
+  createProjectWorker,
   deleteProject,
+  deleteProjectBudgetLineItem,
+  deleteProjectPayrollEntry,
+  deleteProjectPayrollRun,
+  deleteProjectWorker,
+  getOrCreateProjectBudget,
+  getProjectBudgetWithLineItems,
   getProjectById,
+  getProjectPayrollRunWithEntries,
+  listProjectPayrollRuns,
+  listProjectWorkers,
   listProjectsForCompany,
   removeAssignmentFromProject,
   updateProject,
+  updateProjectBudget,
+  updateProjectBudgetLineItem,
   updateProjectIssue,
   updateProjectMilestone,
+  updateProjectPayrollRun,
   updateProjectPhase,
+  updateProjectWorker,
+  upsertProjectPayrollEntry,
 } from "@plotkeys/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -62,6 +79,16 @@ const projectRoleEnum = z.enum([
   "site_supervisor",
   "viewer",
 ]);
+
+const workerPayBasisEnum = z.enum([
+  "daily",
+  "weekly",
+  "fixed_contract",
+  "milestone_based",
+]);
+const workerStatusEnum = z.enum(["active", "off_project", "completed"]);
+const payrollRunStatusEnum = z.enum(["draft", "confirmed", "paid"]);
+const workerPaymentStatusEnum = z.enum(["pending", "paid", "partial"]);
 
 // ---------------------------------------------------------------------------
 // Router
@@ -515,5 +542,552 @@ export const projectsRouter = createTRPCRouter({
 
       await removeAssignmentFromProject(db, input.assignmentId);
       return { removed: true };
+    }),
+
+  // -------------------------------------------------------------------------
+  // Budget
+  // -------------------------------------------------------------------------
+
+  /** Get or create the budget summary for a project. */
+  getBudget: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return getProjectBudgetWithLineItems(db, input.projectId);
+    }),
+
+  /** Update the budget summary totals. */
+  updateBudget: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        approvedBudgetMinor: z.number().int().min(0).optional(),
+        forecastBudgetMinor: z.number().int().min(0).optional(),
+        actualBudgetMinor: z.number().int().min(0).optional(),
+        currency: z.string().optional(),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      const budget = await getOrCreateProjectBudget(db, input.projectId);
+      return updateProjectBudget(db, budget.id, {
+        approvedBudgetMinor: input.approvedBudgetMinor,
+        forecastBudgetMinor: input.forecastBudgetMinor,
+        actualBudgetMinor: input.actualBudgetMinor,
+        currency: input.currency,
+        notes: input.notes,
+      });
+    }),
+
+  /** Add a budget line item. */
+  addBudgetLineItem: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        category: z.string().min(1),
+        description: z.string().min(1),
+        quantity: z.number().nullable().optional(),
+        unitRateMinor: z.number().int().nullable().optional(),
+        estimatedMinor: z.number().int().min(0).default(0),
+        actualMinor: z.number().int().min(0).default(0),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      const budget = await getOrCreateProjectBudget(db, input.projectId);
+      return createProjectBudgetLineItem(db, {
+        projectId: input.projectId,
+        budgetId: budget.id,
+        category: input.category,
+        description: input.description,
+        quantity: input.quantity,
+        unitRateMinor: input.unitRateMinor,
+        estimatedMinor: input.estimatedMinor,
+        actualMinor: input.actualMinor,
+        notes: input.notes,
+      });
+    }),
+
+  /** Update a budget line item. */
+  updateBudgetLineItem: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        lineItemId: z.string().uuid(),
+        category: z.string().optional(),
+        description: z.string().optional(),
+        quantity: z.number().nullable().optional(),
+        unitRateMinor: z.number().int().nullable().optional(),
+        estimatedMinor: z.number().int().min(0).optional(),
+        actualMinor: z.number().int().min(0).optional(),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return updateProjectBudgetLineItem(db, input.lineItemId, {
+        category: input.category,
+        description: input.description,
+        quantity: input.quantity,
+        unitRateMinor: input.unitRateMinor,
+        estimatedMinor: input.estimatedMinor,
+        actualMinor: input.actualMinor,
+        notes: input.notes,
+      });
+    }),
+
+  /** Delete a budget line item. */
+  deleteBudgetLineItem: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        lineItemId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      await deleteProjectBudgetLineItem(db, input.lineItemId);
+      return { deleted: true };
+    }),
+
+  // -------------------------------------------------------------------------
+  // Workers
+  // -------------------------------------------------------------------------
+
+  /** List all workers on a project. */
+  listWorkers: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        status: workerStatusEnum.optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return listProjectWorkers(db, input.projectId, {
+        status: input.status,
+      });
+    }),
+
+  /** Add a worker to a project. */
+  addWorker: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        fullName: z.string().min(1),
+        role: z.string().min(1),
+        payBasis: workerPayBasisEnum.optional().default("daily"),
+        payRateMinor: z.number().int().min(0).default(0),
+        currency: z.string().default("NGN"),
+        contractorName: z.string().nullable().optional(),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return createProjectWorker(db, {
+        projectId: input.projectId,
+        fullName: input.fullName,
+        role: input.role,
+        payBasis: input.payBasis,
+        payRateMinor: input.payRateMinor,
+        currency: input.currency,
+        contractorName: input.contractorName,
+        notes: input.notes,
+      });
+    }),
+
+  /** Update a project worker. */
+  updateWorker: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        workerId: z.string().uuid(),
+        fullName: z.string().optional(),
+        role: z.string().optional(),
+        payBasis: workerPayBasisEnum.optional(),
+        payRateMinor: z.number().int().min(0).optional(),
+        status: workerStatusEnum.optional(),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return updateProjectWorker(db, input.workerId, {
+        fullName: input.fullName,
+        role: input.role,
+        payBasis: input.payBasis,
+        payRateMinor: input.payRateMinor,
+        status: input.status,
+        notes: input.notes,
+      });
+    }),
+
+  /** Remove a worker from a project. */
+  removeWorker: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        workerId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      await deleteProjectWorker(db, input.workerId);
+      return { removed: true };
+    }),
+
+  // -------------------------------------------------------------------------
+  // Payroll Runs
+  // -------------------------------------------------------------------------
+
+  /** List all payroll runs for a project. */
+  listPayrollRuns: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return listProjectPayrollRuns(db, input.projectId);
+    }),
+
+  /** Get a payroll run with its entries. */
+  getPayrollRun: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        runId: z.string().uuid(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return getProjectPayrollRunWithEntries(db, input.runId);
+    }),
+
+  /** Create a new payroll run for a project. */
+  createPayrollRun: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        periodStart: z.string(),
+        periodEnd: z.string(),
+        currency: z.string().default("NGN"),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return createProjectPayrollRun(db, {
+        projectId: input.projectId,
+        periodStart: new Date(input.periodStart),
+        periodEnd: new Date(input.periodEnd),
+        currency: input.currency,
+        notes: input.notes,
+      });
+    }),
+
+  /** Update a payroll run status or totals. */
+  updatePayrollRun: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        runId: z.string().uuid(),
+        status: payrollRunStatusEnum.optional(),
+        totalGrossMinor: z.number().int().min(0).optional(),
+        totalNetMinor: z.number().int().min(0).optional(),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return updateProjectPayrollRun(db, input.runId, {
+        status: input.status,
+        totalGrossMinor: input.totalGrossMinor,
+        totalNetMinor: input.totalNetMinor,
+        notes: input.notes,
+      });
+    }),
+
+  /** Delete a payroll run. */
+  deletePayrollRun: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        runId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      await deleteProjectPayrollRun(db, input.runId);
+      return { deleted: true };
+    }),
+
+  /** Upsert a payroll entry (worker within a run). */
+  upsertPayrollEntry: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        runId: z.string().uuid(),
+        workerId: z.string().uuid(),
+        attendanceUnits: z.number().min(0).default(0),
+        grossMinor: z.number().int().min(0).default(0),
+        deductionMinor: z.number().int().min(0).default(0),
+        advanceMinor: z.number().int().min(0).default(0),
+        netMinor: z.number().int().min(0).default(0),
+        paymentStatus: workerPaymentStatusEnum.optional().default("pending"),
+        notes: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return upsertProjectPayrollEntry(db, {
+        payrollRunId: input.runId,
+        workerId: input.workerId,
+        attendanceUnits: input.attendanceUnits,
+        grossMinor: input.grossMinor,
+        deductionMinor: input.deductionMinor,
+        advanceMinor: input.advanceMinor,
+        netMinor: input.netMinor,
+        paymentStatus: input.paymentStatus,
+        notes: input.notes,
+      });
+    }),
+
+  /** Delete a payroll entry. */
+  deletePayrollEntry: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        entryId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      await deleteProjectPayrollEntry(db, input.entryId);
+      return { deleted: true };
     }),
 });
