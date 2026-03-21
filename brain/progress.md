@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-20)
+## Current State (as of 2026-03-21)
 
 ### What's Built & Working
 | Area | Status |
@@ -15,6 +15,7 @@
 | Appointment scheduling + dashboard | ✅ Done |
 | AI credits (ledger, smart-fill wired) | ✅ Done |
 | Analytics (events, tracking, dashboard) | ✅ Done |
+| Analytics expansion (top pages, traffic sources, property views, lead sources) | ✅ Done |
 | Stock image marketplace | ✅ Done |
 | Website/WebsiteVersion Phase 1-4 (reads) | ✅ Done |
 | Section visibility toggles | ✅ Done |
@@ -31,10 +32,43 @@
 | Settings expansion | ✅ Done |
 | Customer model + lead promotion | ✅ Done |
 | Team invite accept flow | ✅ Done |
+| HR module (Employee + Department models, pages) | ✅ Done |
+| CSV export actions | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| Leave management UI | ❌ Not started |
+| Payroll page | ❌ Not started |
+
+---
+
+## 2026-03-21 — Phase 2: Analytics Expansion + HR Module
+
+### Analytics Expansion
+- Added `getTopPages()` query — groups page views by path, returns top 10
+- Added `getTrafficSources()` query — buckets referrer into Direct/Google/Social/Other
+- Added `getPropertyAnalytics()` query — property-level view counts
+- Added `getLeadSourceBreakdown()` query — lead counts grouped by source
+- Updated analytics page: 4-card stats strip (events, visitors, page views, leads), top pages table, traffic sources bars, property views list, lead source bars
+
+### HR Module
+- Created Prisma enums: `EmploymentType`, `EmployeeStatus`, `LeaveType`, `LeaveRequestStatus`, `PayrollStatus`
+- Created Prisma models: `Department`, `Employee`, `LeaveRequest`, `PayrollEntry`
+- Updated `Company` model with relations to departments, employees, payroll entries
+- Created query modules: `department.ts` (CRUD + employee counts), `employee.ts` (CRUD + status/department counts)
+- Built `/hr/employees` page: add form, status filter tabs, department filter, status badges, employment type badges
+- Built `/hr/departments` page: add form, employee counts, link to filtered employee list
+- Added server actions: `createEmployeeAction`, `updateEmployeeAction`, `deleteEmployeeAction`, `createDepartmentAction`, `updateDepartmentAction`, `deleteDepartmentAction`
+
+### CSV Export
+- Added `toCsvRow()` helper with proper CSV escaping
+- Added export actions: `exportLeadsCsvAction`, `exportPropertiesCsvAction`, `exportCustomersCsvAction`, `exportAppointmentsCsvAction`, `exportEmployeesCsvAction`
+
+### Sidebar Navigation
+- Added HR & Team nav group with Employees (Briefcase icon), Departments (Network icon), Team links
+- Moved Team from Platform to HR & Team group
+- Removed Notifications and Settings from Platform group separation
 
 ---
 

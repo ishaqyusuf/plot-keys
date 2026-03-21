@@ -9,11 +9,27 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-No active work items. Phase 1B features completed:
-- Team management (invite, roles, suspend, remove)
-- Join invite page (/join/[token])
-- Notifications page (/notifications)
-- Property detail + media gallery + publish state (/properties/[id])
-- Sidebar links for Team and Notifications
+Phase 2 features in progress:
 
-Next: Custom Domain Purchase Flow or further Phase 1B items (Analytics Expansion, etc.)
+### Analytics Expansion
+- [x] Added top pages query (group by path, top 10)
+- [x] Added traffic source bucketing (Direct, Google, Social, Other)
+- [x] Added property-level view counts
+- [x] Added lead source breakdown
+- [x] Updated analytics page with new stat cards and sections
+
+### HR Module
+- [x] Added Employee, Department, LeaveRequest, PayrollEntry Prisma models
+- [x] Added employment-related enums
+- [x] Added employee and department DB query modules
+- [x] Built /hr/employees page with add form, status filters
+- [x] Built /hr/departments page with add form and employee counts
+
+### CSV Export
+- [x] Added export actions for leads, properties, customers, appointments, employees
+
+### Sidebar Navigation
+- [x] Added HR & Team nav group (Employees, Departments, Team)
+- [x] Reorganized Platform group
+
+Next: Leave management UI, payroll page, or analytics 90-day range toggle.

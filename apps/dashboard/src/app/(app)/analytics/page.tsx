@@ -8,6 +8,7 @@ import {
   getTrafficSources,
 } from "@plotkeys/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
 
 function formatDateTime(date: Date) {
@@ -257,9 +258,13 @@ export default async function AnalyticsPage() {
                       <span className="text-muted-foreground text-xs font-medium">
                         {i + 1}.
                       </span>
-                      <span className="text-sm font-medium font-mono truncate max-w-48">
+                      <Link
+                        href={`/properties/${pv.propertyId}`}
+                        className="text-sm font-medium font-mono truncate max-w-48 hover:underline"
+                        title={pv.propertyId}
+                      >
                         {pv.propertyId.slice(0, 8)}…
-                      </span>
+                      </Link>
                     </div>
                     <span className="text-muted-foreground text-sm">
                       {pv.views.toLocaleString()} views
