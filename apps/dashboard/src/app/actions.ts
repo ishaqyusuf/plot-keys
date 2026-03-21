@@ -1461,3 +1461,180 @@ export async function exportEmployeesCsvAction() {
 
   return [header, ...rows].join("\n");
 }
+
+// ---------------------------------------------------------------------------
+// HR — Leave request management
+// ---------------------------------------------------------------------------
+
+export async function createLeaveRequestAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const employeeId = String(formData.get("employeeId") ?? "").trim();
+  const leaveType = String(formData.get("leaveType") ?? "annual") as
+    | "annual"
+    | "sick"
+    | "maternity"
+    | "paternity"
+    | "unpaid"
+    | "compassionate";
+  const startDateRaw = String(formData.get("startDate") ?? "").trim();
+  const endDateRaw = String(formData.get("endDate") ?? "").trim();
+  const reason = String(formData.get("reason") ?? "").trim() || null;
+
+  if (!employeeId || !startDateRaw || !endDateRaw) {
+    redirect(createRedirectUrl("/hr/leave", { error: "Employee, start date, and end date are required." }));
+  }
+
+  // Verify employee belongs to this company
+  const employee = await prisma.employee.findFirst({
+    where: { id: employeeId, companyId, deletedAt: null },
+  });
+  if (!employee) {
+    redirect(createRedirectUrl("/hr/leave", { error: "Employee not found." }));
+  }
+
+  await prisma.leaveRequest.create({
+    data: {
+      employeeId,
+      leaveType,
+      startDate: new Date(startDateRaw),
+      endDate: new Date(endDateRaw),
+      reason,
+    },
+  });
+
+  revalidatePath("/hr/leave");
+  redirect("/hr/leave?created=1");
+}
+
+export async function approveLeaveRequestAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
+
+  // Verify the leave request belongs to an employee of this company
+  const request = await prisma.leaveRequest.findFirst({
+    where: { id: leaveRequestId, employee: { companyId } },
+  });
+  if (!request) return;
+
+  await prisma.leaveRequest.update({
+    where: { id: leaveRequestId },
+    data: {
+      status: "approved",
+      approvedById: session.user.id,
+      approvedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/hr/leave");
+}
+
+export async function rejectLeaveRequestAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
+
+  const request = await prisma.leaveRequest.findFirst({
+    where: { id: leaveRequestId, employee: { companyId } },
+  });
+  if (!request) return;
+
+  await prisma.leaveRequest.update({
+    where: { id: leaveRequestId },
+    data: { status: "rejected" },
+  });
+
+  revalidatePath("/hr/leave");
+}
+
+export async function cancelLeaveRequestAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
+
+  const request = await prisma.leaveRequest.findFirst({
+    where: { id: leaveRequestId, employee: { companyId } },
+  });
+  if (!request) return;
+
+  await prisma.leaveRequest.update({
+    where: { id: leaveRequestId },
+    data: { status: "cancelled" },
+  });
+
+  revalidatePath("/hr/leave");
+}
+
+// ---------------------------------------------------------------------------
+// HR — Payroll management
+// ---------------------------------------------------------------------------
+
+export async function createPayrollEntryAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const employeeId = String(formData.get("employeeId") ?? "").trim();
+  const periodYear = Number.parseInt(String(formData.get("periodYear") ?? ""), 10);
+  const periodMonth = Number.parseInt(String(formData.get("periodMonth") ?? ""), 10);
+  const grossAmount = Number.parseInt(String(formData.get("grossAmount") ?? "0"), 10);
+  const netAmount = Number.parseInt(String(formData.get("netAmount") ?? "0"), 10);
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+
+  if (!employeeId || !periodYear || !periodMonth) {
+    redirect(createRedirectUrl("/hr/payroll", { error: "Employee, year, and month are required." }));
+  }
+
+  // Verify employee belongs to this company
+  const employee = await prisma.employee.findFirst({
+    where: { id: employeeId, companyId, deletedAt: null },
+  });
+  if (!employee) {
+    redirect(createRedirectUrl("/hr/payroll", { error: "Employee not found." }));
+  }
+
+  await prisma.payrollEntry.create({
+    data: {
+      companyId,
+      employeeId,
+      periodYear,
+      periodMonth,
+      grossAmount,
+      netAmount,
+      notes,
+    },
+  });
+
+  revalidatePath("/hr/payroll");
+  redirect(`/hr/payroll?year=${periodYear}&month=${periodMonth}&created=1`);
+}
+
+export async function markPayrollPaidAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const payrollEntryId = String(formData.get("payrollEntryId") ?? "");
+
+  await prisma.payrollEntry.update({
+    where: { id: payrollEntryId, companyId },
+    data: { status: "paid", paidAt: new Date() },
+  });
+
+  revalidatePath("/hr/payroll");
+}

@@ -30,6 +30,8 @@ export * from "./queries/customer";
 export * from "./queries/department";
 export * from "./queries/employee";
 export * from "./queries/leads";
+export * from "./queries/leave-request";
+export * from "./queries/payroll";
 export * from "./queries/notifications";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
