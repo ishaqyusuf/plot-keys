@@ -41,6 +41,19 @@ Allow each company to launch and manage a professional website using predefined 
 - Preview and published rendering should use the same resolver pipeline and differ only by selected configuration ID.
 - Editable content should resolve from tenant `contentJson` keyed by stable `contentKey` values.
 - Derived content should resolve from relational records such as company profile, listings, or agents and should not be inline-editable.
+- Preview and configure modes must preserve real template navigation behavior by resolving internal links through a builder-safe query parameter such as `?path=/target-route` instead of attempting a hard route transition out of the editor context.
+- Preview and configure modes must never execute live business actions such as form submission, checkout, booking, lead capture mutation, or destructive dashboard operations.
+- Interactive buttons and links should still feel navigable in preview, but action execution must be intercepted and replaced with editor-safe behavior.
+
+## Preview And Configure Mode Rules
+- The builder should support a path-aware preview state so users can navigate the template as if it were a real site while staying inside the editor shell.
+- Internal template links should write the destination into a query parameter such as `?path=/`, `?path=/about`, or `?path=/properties`.
+- The preview renderer should read the active `path` query and render the matching template page within the same builder/preview surface.
+- Browser history should remain usable while navigating preview pages.
+- External links may open normally, but internal tenant-site routes should remain inside preview/configure mode.
+- Forms, booking flows, contact actions, CTA buttons, and payment actions must be rendered in a disabled or intercepted preview-safe mode.
+- Preview-safe actions may show hover feedback, pointer affordance, or editor hints, but must not mutate production or draft business data unless the action is explicitly an editing action.
+- Action interception rules should be shared so every section does not implement its own ad hoc preview-mode logic.
 
 ## Example Shape
 ```json
@@ -175,6 +188,7 @@ Allow each company to launch and manage a professional website using predefined 
 - Derived live business content such as listings is not connected yet.
 - Preview-before-purchase flows and paid unlock handling are not implemented yet.
 - Free-pick tracking for Plus and Pro template allowances is not implemented yet.
+- Builder-safe action interception for preview/configure mode is not implemented yet.
 
 ## Current Data Model
 - Platform template
@@ -250,11 +264,20 @@ type EditableFieldDefinition = {
 ## Current Remaining Flow Work
 1. Replace the local auth/session implementation with Better Auth runtime wiring
 2. Add inline hover editing and click-to-focus preview editing
-3. Connect derived data sections from company, property, and agent records
-4. Add publish confirmation UX
-5. Add preview-before-purchase flows and paid unlock handling for locked premium templates
-6. Track free-pick claims and other tenant-level template entitlement records
-7. Decide when to move platform templates from code into Prisma-backed records
+3. Add path-aware preview navigation using query state such as `?path=/...`
+4. Add builder-safe interception for forms, CTA buttons, and other runtime actions in preview/configure mode
+5. Connect derived data sections from company, property, and agent records
+6. Add publish confirmation UX
+7. Add preview-before-purchase flows and paid unlock handling for locked premium templates
+8. Track free-pick claims and other tenant-level template entitlement records
+9. Decide when to move platform templates from code into Prisma-backed records
+
+## UI Component Standard
+- Builder and template-facing editor UI should prefer shadcn/ui components and composition patterns as the default system.
+- When a needed surface can be built from existing shadcn primitives, do not create custom one-off UI wrappers first.
+- Use shadcn component composition for dialogs, drawers, tabs, cards, forms, alerts, tables, dropdowns, and other editor chrome where practical.
+- Custom template visuals are still allowed inside the website preview itself, but builder/configure controls should stay aligned with shadcn patterns for consistency and maintainability.
+- Follow the local shadcn skill and project conventions when implementing or refactoring builder UI.
 
 ## Validation Goals
 - A brand-new tenant never lands in an empty website-builder state.

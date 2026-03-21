@@ -43,6 +43,9 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 - Users configure templates through controlled preset selections rather than raw token editing.
 - Paid stock images may appear as watermarked previews in edit mode, but never on the live site without a license.
 - AI content generation should update only draft content nodes after user acceptance.
+- Preview/configure-mode navigation should support internal page traversal through editor-managed path state rather than leaving the builder runtime.
+- Preview/configure-mode actions must be intercepted so template evaluation never triggers real lead capture, payment, booking, or other business mutations.
+- Builder-side management UI should default to shadcn/ui-based composition for consistency and maintainability.
 
 ## Access Model
 - Starter
@@ -181,8 +184,38 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 - The broader marketplace, version graph, stock-image marketplace, logo system, and unified billing center are still planned rather than implemented.
 - The imported reference docs describe the target direction and should be treated as design guidance until corresponding code and schema land.
 
+## Current Template Gap
+- Most live templates are currently differentiated more by theme, copy defaults, and marketing positioning than by truly distinct page systems or information architecture.
+- All 45 live templates currently ship with only a single implemented `Home` page.
+- Several templates reuse the same home-page section composition or fall back to a shared base composition.
+- This means the current template library has breadth in branding presets, but not yet enough structural uniqueness for users who want a site that feels materially different from other tenants.
+- The working evidence for this gap is documented in:
+  - [brain/modules/templates-catalog.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/templates-catalog.md)
+  - [brain/modules/pages-inventory.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/pages-inventory.md)
+
+## Template Uniqueness Direction
+- Future template work should improve both visual uniqueness and structural uniqueness.
+- Structural uniqueness should include:
+  - distinct page inventories per template family
+  - different home-page section compositions
+  - varied navigation models
+  - business-model-specific page sets such as listings-heavy, developer/project-focused, rental-management, or luxury/editorial
+- A template should not be considered meaningfully unique if the only differences are colors, fonts, seed copy, or image choices.
+- Template usage counts should remain visible, but uniqueness should be improved primarily by stronger template families and multi-page depth rather than marketing copy alone.
+
+## Template Family Direction
+- The catalog should evolve toward a smaller number of stronger template families, each with clearer structural identity.
+- Example family directions:
+  - listing-first agency templates
+  - luxury editorial templates
+  - developer and project-led templates
+  - rental/property-management templates
+  - corporate real-estate templates
+- Each family should have a defined page inventory, section system, and conversion strategy before variants are multiplied.
+
 ## Open Items
 - TODO: Decide whether `SiteConfiguration` continues as the primary website aggregate or becomes a bridge toward `Website` plus `WebsiteVersion`
 - TODO: Decide when template definitions move from code into relational records
 - TODO: Finalize license shapes for `FREE`, `PLAN_INCLUDED`, `PURCHASED`, and `ADMIN_GRANTED`
 - TODO: Define billing provider and purchase lifecycle ownership for templates and stock images
+- TODO: Define the minimum standard for calling a template "unique" across page inventory, section composition, and navigation structure

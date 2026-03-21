@@ -2,7 +2,7 @@
 model AiUsageLog {
   id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   companyId String @map("company_id") @db.Uuid
-  userId    String @map("user_id") @db.Uuid
+  userId    String @map("user_id")
 
   /// Feature identifier (e.g. "smart_fill", "property_description", "blog_article")
   feature     String

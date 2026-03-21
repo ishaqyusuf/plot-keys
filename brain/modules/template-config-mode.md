@@ -129,6 +129,27 @@ Section config includes:
 - section variants
 - data bindings
 
+## Preview Navigation Behavior
+
+Template config mode should preserve internal template navigation while keeping the user inside the editor.
+
+- Internal links should resolve through builder query state such as `?path=/`, `?path=/about`, or `?path=/properties`.
+- The active `path` should control which page is rendered in preview.
+- Navigating inside preview should not exit configure mode or lose unsaved editing context.
+- Preview path state should be shareable and restorable when possible.
+
+## Safe Interaction Rules
+
+Template config mode is a simulation environment, not a live runtime.
+
+- Action buttons must not execute their real production behavior in configure mode.
+- Contact forms, newsletter forms, booking actions, payment actions, and other mutations must be intercepted.
+- Safe behavior may include:
+  - no-op interaction
+  - editor hint or toast
+  - opening the related editable configuration surface
+- Interactive elements should remain visually realistic enough for design review, but must not mutate live data or trigger user-facing workflows.
+
 ## Runtime Resolution
 
 At runtime, the system resolves:
@@ -174,3 +195,9 @@ Images
 - named image slots with upload and preview
 
 This keeps the experience simple for non-technical users.
+
+## UI System Guidance
+
+- Configure mode controls should be built primarily with shadcn/ui primitives and composition patterns.
+- Prefer shadcn components for tabs, dialogs, sheets, cards, inputs, selects, alerts, tables, and navigation controls.
+- Avoid bespoke editor control patterns when shadcn composition can provide the same behavior cleanly.

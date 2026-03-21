@@ -51,10 +51,15 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **App Store Expansion** — Created `/app-store` dashboard page with integration cards (GA, Facebook Pixel, WhatsApp, Calendly) showing connect/disconnect status. Created `IntegrationScripts` component that injects GA4 and Facebook Pixel `<Script>` tags into tenant sites. Sidebar App Store link now functional. ✅ Done
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
 - [ ] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting.
+- [ ] **Template Family Differentiation** — Reduce shared/fallback template structures; define stronger template families with distinct home-page composition, navigation patterns, and conversion strategy instead of mostly theme-level variation.
 
 ## Phase 4 — Scale & Infrastructure
 
 - [ ] **Multi-page Website Support** — Extend WebsiteVersion to support multiple pages (About, Services, Blog) beyond single-page sites.
+- [ ] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content.
+- [ ] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell.
+- [ ] **Preview-Safe Action Interception** — Intercept template CTAs, forms, booking, and payment actions in preview/configure mode so interactive elements feel real but do not execute live workflows.
+- [ ] **Builder UI Shadcn Standardization** — Refactor builder/configure-mode controls toward shadcn/ui primitives and composition patterns as the default editor UI system.
 - [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
 - [ ] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head.
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
