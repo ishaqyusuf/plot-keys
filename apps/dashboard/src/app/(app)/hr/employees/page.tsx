@@ -4,6 +4,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { ExportCsvButton } from "../../../../components/export-csv-button";
@@ -193,7 +194,7 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
                 <Input id="salaryAmount" name="salaryAmount" type="number" placeholder="0" />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit">Add Employee</Button>
+                <SubmitButton loadingLabel="Adding…">Add Employee</SubmitButton>
               </div>
             </form>
           </CardContent>

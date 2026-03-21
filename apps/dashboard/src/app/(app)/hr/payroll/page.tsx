@@ -4,6 +4,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
@@ -217,7 +218,7 @@ export default async function PayrollPage({ searchParams }: PayrollPageProps) {
                 <Input id="notes" name="notes" placeholder="Optional notes" />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit">Add Entry</Button>
+                <SubmitButton loadingLabel="Adding…">Add Entry</SubmitButton>
               </div>
             </form>
           </CardContent>

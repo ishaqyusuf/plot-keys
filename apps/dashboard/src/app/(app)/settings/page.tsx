@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { LogoUploadForm } from "../../../components/settings/logo-upload-form";
 import { requireOnboardedSession } from "../../../lib/session";
@@ -93,9 +94,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     placeholder="e.g. Lagos, Abuja, Port Harcourt"
                   />
                 </div>
-                <Button type="submit" size="sm">
+                <SubmitButton size="sm" loadingLabel="Saving…">
                   Save profile
-                </Button>
+                </SubmitButton>
               </form>
             ) : (
               <div className="grid gap-4">
@@ -177,6 +178,23 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <LogoUploadForm currentLogoUrl={company?.logoUrl ?? null} />
+          </CardContent>
+        </Card>
+
+        {/* Notification preferences */}
+        <Card className="mb-6 bg-card">
+          <CardHeader className="px-6 pt-6 pb-4">
+            <CardTitle>Notification preferences</CardTitle>
+            <CardDescription>
+              Choose which events trigger in-app and email notifications.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-6 pb-6">
+            <Button asChild size="sm" variant="outline">
+              <Link href="/settings/notifications">
+                Manage notification preferences
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 

@@ -5,6 +5,7 @@ import {
 } from "@plotkeys/db";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { requireOnboardedSession } from "../../../lib/session";
 import { purchaseAiCreditsAction } from "../../actions";
 
@@ -68,7 +69,7 @@ export default async function AiCreditsPage() {
             Smart Fill. Credits never expire.
           </p>
           <form action={purchaseAiCreditsAction}>
-            <Button type="submit">Buy 100 Credits</Button>
+            <SubmitButton loadingLabel="Purchasing…">Buy 100 Credits</SubmitButton>
           </form>
         </CardContent>
       </Card>

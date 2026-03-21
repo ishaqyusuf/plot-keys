@@ -1,11 +1,15 @@
+"use client";
+
 import { useFormStatus } from "react-dom";
 
 import { cn } from "../lib/utils";
 import { Button } from "./button";
-import type { ButtonProps } from "./button";
 import { Spinner } from "./spinner";
 
-type SubmitButtonProps = Omit<ButtonProps, "type"> & {
+type SubmitButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  "type"
+> & {
   loadingLabel?: string;
 };
 

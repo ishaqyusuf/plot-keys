@@ -4,6 +4,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
@@ -184,7 +185,7 @@ export default async function LeavePage({ searchParams }: LeavePageProps) {
                 <Input id="reason" name="reason" placeholder="Optional reason for leave" />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit">Submit Request</Button>
+                <SubmitButton loadingLabel="Submitting…">Submit Request</SubmitButton>
               </div>
             </form>
           </CardContent>

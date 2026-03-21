@@ -3,6 +3,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
@@ -59,7 +60,7 @@ export default async function DepartmentsPage() {
                 <Input id="description" name="description" placeholder="Optional description" />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit">Add Department</Button>
+                <SubmitButton loadingLabel="Adding…">Add Department</SubmitButton>
               </div>
             </form>
           </CardContent>

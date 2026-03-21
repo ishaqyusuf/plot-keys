@@ -1,0 +1,16 @@
+model NotificationPreference {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  userId    String   @map("user_id")
+  type      String
+  inApp     Boolean  @default(true) @map("in_app")
+  email     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId, type], map: "notification_preferences_company_user_type_uniq")
+  @@index([companyId, userId], map: "notification_preferences_company_user_idx")
+  @@map("notification_preferences")
+}

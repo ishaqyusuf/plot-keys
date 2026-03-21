@@ -1638,3 +1638,36 @@ export async function markPayrollPaidAction(formData: FormData) {
 
   revalidatePath("/hr/payroll");
 }
+
+// ---------------------------------------------------------------------------
+// Notification preferences
+// ---------------------------------------------------------------------------
+
+export async function updateNotificationPreferenceAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const userId = session.user.id;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const type = String(formData.get("type") ?? "");
+  const channel = String(formData.get("channel") ?? "");
+  const enabled = String(formData.get("enabled") ?? "true") === "true";
+  const currentInApp = String(formData.get("currentInApp") ?? "true") === "true";
+  const currentEmail = String(formData.get("currentEmail") ?? "true") === "true";
+
+  if (!type || !channel) return;
+
+  const inApp = channel === "inApp" ? enabled : currentInApp;
+  const email = channel === "email" ? enabled : currentEmail;
+
+  await prisma.notificationPreference.upsert({
+    where: {
+      companyId_userId_type: { companyId, userId, type },
+    },
+    create: { companyId, userId, type, inApp, email },
+    update: { inApp, email },
+  });
+
+  revalidatePath("/settings/notifications");
+}

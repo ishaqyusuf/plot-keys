@@ -21,6 +21,7 @@ model User {
   aiUsageLogs               AiUsageLog[]
   sentTeamInvites           TeamInvite[]        @relation("TeamInviteInvitedBy")
   notifications             Notification[]
+  notificationPreferences   NotificationPreference[]
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")
