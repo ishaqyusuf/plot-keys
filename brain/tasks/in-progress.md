@@ -9,29 +9,23 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-Phase 2 features — all complete:
+Phase 2 continued — Notification Bell, Preferences, SubmitButton:
 
-### Leave Management
-- [x] Added leave-request.ts DB query module (CRUD + status counts)
-- [x] Built /hr/leave page with submission form, approval/rejection/cancel workflow
-- [x] Added server actions: createLeaveRequestAction, approveLeaveRequestAction, rejectLeaveRequestAction, cancelLeaveRequestAction
-- [x] Added Leave link to sidebar with Plus badge
+### Notification Bell in Header
+- [x] Created NotificationBell client component with popover dropdown (5 recent, unread badge)
+- [x] Wired into dashboard layout header with server-side data fetch
+- [x] Shows relative time formatting and unread highlighting
 
-### Payroll
-- [x] Added payroll.ts DB query module (CRUD + period summary + available periods)
-- [x] Built /hr/payroll page with monthly records, period selector, mark paid flow
-- [x] Added server actions: createPayrollEntryAction, markPayrollPaidAction
-- [x] Added Payroll link to sidebar with Plus badge
+### Notification Preferences
+- [x] Created NotificationPreference Prisma model with (company, user, type) unique constraint
+- [x] Created notification-preference query module (list, upsert, get)
+- [x] Built /settings/notifications page with per-type in-app/email toggles
+- [x] Added updateNotificationPreferenceAction server action
+- [x] Added link to preferences from /settings page
 
-### CSV Export UI
-- [x] Created ExportCsvButton client component with download trigger
-- [x] Added export buttons to Leads, Properties, Customers, Appointments, Employees pages
+### SubmitButton Adoption
+- [x] Fixed SubmitButton component: added "use client" directive, fixed ButtonProps import
+- [x] Replaced plain Button type="submit" with SubmitButton in 6 pages: leave, employees, departments, payroll, settings, ai-credits
+- [x] All forms now show loading spinner during server action execution
 
-### Listing Analytics Card
-- [x] Added per-property analytics card (7d/30d views, appointments) to /properties/[id]
-
-### Agent Performance Analytics
-- [x] Added getAgentPerformanceStats() query
-- [x] Added agent performance section to analytics page (total/completed appointments per agent)
-
-Next: Notification Dashboard UI, Form Standardization, or Custom Domain Purchase.
+Next: Tenant Onboarding Improvements, Multi-page website support, or further notification wiring.

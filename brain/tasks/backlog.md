@@ -39,9 +39,9 @@ This file holds actionable work that is identified but not currently in progress
 ## Phase 2 — Platform Polish & Engagement
 
 - [x] **Email Template Expansion** — Added `new-lead.tsx` and `site-published.tsx` email templates; created `new_lead_captured` and `site_published` notification type definitions; wired email dispatch in EmailService. ✅ Done (new lead + site published)
-- [ ] **Notification Dashboard UI** — Create `/notifications` page showing notification history; allow tenants to configure which events trigger emails.
+- [x] **Notification Dashboard UI** — `/notifications` page exists with history/filtering; notification bell in header with popover dropdown and unread badge; `/settings/notifications` preferences page with per-type in-app/email toggles; `NotificationPreference` Prisma model. ✅ Done
 - [ ] **Tenant Onboarding Improvements** — Allow rerunning template recommendation when core inputs change; add AI bootstrap for hero/intro/CTA copy from onboarding data.
-- [ ] **SubmitButton + Form Standardization** — Add shared `SubmitButton` primitive in `packages/ui`; standardize dashboard forms on `useZodForm` + `Controller` pattern.
+- [x] **SubmitButton + Form Standardization** — SubmitButton primitive in `packages/ui` with auto-pending state; adopted across 6 dashboard form pages (leave, employees, departments, payroll, settings, ai-credits). ✅ Done
 - [x] **Tenant Domain Status Surfaces** — Inline alerts on dashboard home for failed (destructive) and pending (amber) domains with action buttons. ✅ Done
 
 ## Phase 3 — Growth & Monetization

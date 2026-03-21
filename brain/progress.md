@@ -26,7 +26,9 @@
 | Property/agent data binding | ✅ Done |
 | Domain status surfaces (dashboard home) | ✅ Done |
 | Email (Welcome + Verification + New Lead + Site Published) | ✅ Done |
-| Notifications (event system, 10 types) | 🟡 Partial |
+| Notifications (event system, 10 types) | ✅ Done |
+| Notification bell in header + preferences page | ✅ Done |
+| SubmitButton adoption (6 forms) | ✅ Done |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
 | Listing categories & types | ✅ Done |
 | Settings expansion | ✅ Done |
@@ -42,6 +44,38 @@
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+
+---
+
+## 2026-03-21 — Phase 2 Continued: Notification Bell, Preferences, SubmitButton
+
+### Notification Bell in Header
+- Created `NotificationBell` client component with Popover dropdown
+- Shows unread count badge (red dot with number, "9+" for 10+)
+- Popover shows 5 most recent notifications with relative timestamps, unread highlighting, optional links
+- "View all notifications" link at bottom
+- Wired into `(app)/layout.tsx` with server-side data fetch via `getNotificationBellData()`
+
+### Notification Preferences Page
+- Created `NotificationPreference` Prisma model with unique constraint on (companyId, userId, type)
+- Added relations to `User` and `Company` models
+- Created `notification-preference.ts` query module (list, upsert, get)
+- Built `/settings/notifications` page with 6 configurable notification types
+- Each type has in-app and email toggle buttons (pill-style) with server action toggle
+- Added `updateNotificationPreferenceAction` server action using upsert pattern
+- Added "Notification preferences" link card to `/settings` page
+
+### SubmitButton Adoption
+- Added `"use client"` directive to `packages/ui/src/components/submit-button.tsx`
+- Fixed `ButtonProps` import to use `React.ComponentProps<typeof Button>` instead of non-existent `ButtonProps`
+- Replaced `<Button type="submit">` with `<SubmitButton>` in 6 pages:
+  - `/hr/leave` — Submit Request
+  - `/hr/employees` — Add Employee
+  - `/hr/departments` — Add Department
+  - `/hr/payroll` — Add Entry
+  - `/settings` — Save profile
+  - `/ai-credits` — Buy 100 Credits
+- All forms now show loading spinner and disable button during server action execution
 
 ---
 
