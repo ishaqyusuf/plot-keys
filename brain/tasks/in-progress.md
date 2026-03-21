@@ -9,27 +9,29 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-Phase 2 features in progress:
+Phase 2 features — all complete:
 
-### Analytics Expansion
-- [x] Added top pages query (group by path, top 10)
-- [x] Added traffic source bucketing (Direct, Google, Social, Other)
-- [x] Added property-level view counts
-- [x] Added lead source breakdown
-- [x] Updated analytics page with new stat cards and sections
+### Leave Management
+- [x] Added leave-request.ts DB query module (CRUD + status counts)
+- [x] Built /hr/leave page with submission form, approval/rejection/cancel workflow
+- [x] Added server actions: createLeaveRequestAction, approveLeaveRequestAction, rejectLeaveRequestAction, cancelLeaveRequestAction
+- [x] Added Leave link to sidebar with Plus badge
 
-### HR Module
-- [x] Added Employee, Department, LeaveRequest, PayrollEntry Prisma models
-- [x] Added employment-related enums
-- [x] Added employee and department DB query modules
-- [x] Built /hr/employees page with add form, status filters
-- [x] Built /hr/departments page with add form and employee counts
+### Payroll
+- [x] Added payroll.ts DB query module (CRUD + period summary + available periods)
+- [x] Built /hr/payroll page with monthly records, period selector, mark paid flow
+- [x] Added server actions: createPayrollEntryAction, markPayrollPaidAction
+- [x] Added Payroll link to sidebar with Plus badge
 
-### CSV Export
-- [x] Added export actions for leads, properties, customers, appointments, employees
+### CSV Export UI
+- [x] Created ExportCsvButton client component with download trigger
+- [x] Added export buttons to Leads, Properties, Customers, Appointments, Employees pages
 
-### Sidebar Navigation
-- [x] Added HR & Team nav group (Employees, Departments, Team)
-- [x] Reorganized Platform group
+### Listing Analytics Card
+- [x] Added per-property analytics card (7d/30d views, appointments) to /properties/[id]
 
-Next: Leave management UI, payroll page, or analytics 90-day range toggle.
+### Agent Performance Analytics
+- [x] Added getAgentPerformanceStats() query
+- [x] Added agent performance section to analytics page (total/completed appointments per agent)
+
+Next: Notification Dashboard UI, Form Standardization, or Custom Domain Purchase.

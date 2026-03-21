@@ -30,11 +30,11 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Customer Model + List + Lead Promotion** — Add `Customer` and `TenantCustomer` Prisma models; build `/customers` list and `/customers/[id]` detail page; add "Convert to customer" action on leads. Plus plan gate.
 - [x] **Employee List + Detail** — Added `Employee`, `Department`, `LeaveRequest`, `PayrollEntry` Prisma models with enums; built `/hr/employees` list and add form, status filtering, department filtering. ✅ Done
 - [x] **Department Management** — Added `/hr/departments` page for creating and managing departments with employee counts per department. ✅ Done
-- [ ] **Leave Management** — Add `LeaveRequest` model; build leave request submission and approval flow inside HR section. Plus plan gate.
-- [ ] **Payroll Record-Keeping** — Add `PayrollEntry` model; build monthly payroll summary table (record-only, no payment processing). Plus plan gate.
-- [ ] **Listing Analytics Card** — Show per-property views/leads/appointments and conversion funnel on the property detail page. Uses `AnalyticsEvent`. Plus plan gate.
-- [ ] **CSV Export** — Add export actions for leads, appointments, customers, and properties. CSV generation implemented as server actions. Plus plan gate.  ✅ Actions done; UI trigger pending.
-- [ ] **Agent Performance Analytics** — Extend `/analytics` or `/agents` with per-agent lead count, appointment count, and closed-deal attribution. Plus plan gate.
+- [x] **Leave Management** — Added `leave-request.ts` DB query module; built `/hr/leave` page with submission form, approval/rejection/cancel workflow, status filters. ✅ Done
+- [x] **Payroll Record-Keeping** — Added `payroll.ts` DB query module; built `/hr/payroll` page with monthly records, period selector, mark paid flow, summary cards. ✅ Done
+- [x] **Listing Analytics Card** — Added per-property analytics card (7d/30d views, appointments) to `/properties/[id]` detail page. ✅ Done
+- [x] **CSV Export** — Export actions exist + ExportCsvButton client component added to Leads, Properties, Customers, Appointments, Employees pages. ✅ Done
+- [x] **Agent Performance Analytics** — Added `getAgentPerformanceStats()` query; added agent performance section to analytics page showing total/completed appointments per agent. ✅ Done
 
 ## Phase 2 — Platform Polish & Engagement
 

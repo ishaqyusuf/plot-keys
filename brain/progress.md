@@ -33,13 +33,49 @@
 | Customer model + lead promotion | ✅ Done |
 | Team invite accept flow | ✅ Done |
 | HR module (Employee + Department models, pages) | ✅ Done |
-| CSV export actions | ✅ Done |
+| CSV export actions + UI download buttons | ✅ Done |
+| Leave management (submission + approval flow) | ✅ Done |
+| Payroll page (monthly records + mark paid) | ✅ Done |
+| Listing analytics card (property detail) | ✅ Done |
+| Agent performance analytics | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
-| Leave management UI | ❌ Not started |
-| Payroll page | ❌ Not started |
+
+---
+
+## 2026-03-21 — Phase 2 Continued: Leave, Payroll, CSV UI, Listing Analytics, Agent Performance
+
+### Leave Management
+- Created `leave-request.ts` DB query module: CRUD, status counts, approval/rejection
+- Built `/hr/leave` page: submission form (employee select, type, dates, reason), status filters (pending/approved/rejected/cancelled), approve/reject/cancel workflow
+- Added 4 server actions: `createLeaveRequestAction`, `approveLeaveRequestAction`, `rejectLeaveRequestAction`, `cancelLeaveRequestAction`
+- All actions verify employee belongs to company before operating
+
+### Payroll
+- Created `payroll.ts` DB query module: CRUD, period summary, available periods, mark paid
+- Built `/hr/payroll` page: monthly records, period selector tabs, summary cards (entries/gross/net/status), add entry form, mark paid flow
+- Added 2 server actions: `createPayrollEntryAction`, `markPayrollPaidAction`
+- Currency formatting with Intl.NumberFormat for NGN
+
+### CSV Export UI
+- Created `ExportCsvButton` client component: uses `useTransition`, creates Blob download, uses `URL.createObjectURL`
+- Added export buttons to: Leads, Properties, Customers, Appointments, Employees list pages
+- Each button calls its corresponding export server action and triggers download
+
+### Listing Analytics Card
+- Added per-property analytics card to `/properties/[id]` detail page
+- Shows 3 metrics: Views (30 days), Views (7 days), Appointments
+- Uses `prisma.analyticsEvent.count` and `prisma.appointment.count` for data
+
+### Agent Performance Analytics
+- Added `getAgentPerformanceStats()` query in payroll.ts
+- Added agent performance section to analytics page: total appointments, completed appointments per agent
+- Query joins agents with appointment groupBy counts
+
+### Sidebar
+- Added Leave (CalendarOff icon) and Payroll (Receipt icon) to HR & Team nav group with Plus badges
 
 ---
 
