@@ -25,6 +25,7 @@ import {
   CreditCard,
   FileText,
   Globe,
+  HardHat,
   Home,
   LayoutDashboard,
   Mail,
@@ -72,6 +73,12 @@ const navGroups: NavGroup[] = [
       { href: "/leads", icon: Mail, label: "Leads" },
       { href: "/appointments", icon: Calendar, label: "Appointments" },
       { href: "/customers", icon: Users, label: "Customers", badge: "Plus" },
+    ],
+  },
+  {
+    label: "Construction",
+    items: [
+      { href: "/projects", icon: HardHat, label: "Projects", badge: "Plus" },
     ],
   },
   {
