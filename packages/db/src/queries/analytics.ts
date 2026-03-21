@@ -152,15 +152,21 @@ export async function getTopPages(
 
 function bucketReferrer(referrer: string | null): string {
   if (!referrer) return "Direct";
-  const lower = referrer.toLowerCase();
-  if (lower.includes("google")) return "Google";
+  let hostname: string;
+  try {
+    hostname = new URL(referrer).hostname.toLowerCase();
+  } catch {
+    hostname = referrer.toLowerCase();
+  }
+  if (hostname.includes("google")) return "Google";
   if (
-    lower.includes("facebook") ||
-    lower.includes("twitter") ||
-    lower.includes("instagram") ||
-    lower.includes("linkedin") ||
-    lower.includes("tiktok") ||
-    lower.includes("x.com")
+    hostname.endsWith("facebook.com") ||
+    hostname.endsWith("twitter.com") ||
+    hostname.endsWith("instagram.com") ||
+    hostname.endsWith("linkedin.com") ||
+    hostname.endsWith("tiktok.com") ||
+    hostname === "x.com" ||
+    hostname.endsWith(".x.com")
   )
     return "Social";
   return "Other";
