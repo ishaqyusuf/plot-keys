@@ -1881,7 +1881,7 @@ export async function createProjectPhaseAction(formData: FormData) {
     data: {
       projectId,
       name,
-      order: orderRaw ? Number.parseInt(orderRaw, 10) : 0,
+      order: orderRaw ? (Number.isNaN(Number.parseInt(orderRaw, 10)) ? 0 : Number.parseInt(orderRaw, 10)) : 0,
     },
   });
 
@@ -2024,6 +2024,14 @@ export async function createProjectUpdateAction(formData: FormData) {
     );
   }
 
+  const progressParsed = progressRaw
+    ? Number.parseInt(progressRaw, 10)
+    : null;
+  const progressPercent =
+    progressParsed != null && !Number.isNaN(progressParsed)
+      ? Math.max(0, Math.min(100, progressParsed))
+      : null;
+
   await prisma.projectUpdate.create({
     data: {
       projectId,
@@ -2031,9 +2039,7 @@ export async function createProjectUpdateAction(formData: FormData) {
       kind,
       summary,
       details,
-      progressPercent: progressRaw
-        ? Number.parseInt(progressRaw, 10)
-        : null,
+      progressPercent,
     },
   });
 

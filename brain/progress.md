@@ -447,3 +447,14 @@
 - Created `/customers` dashboard page with stats strip, status filter tabs, customer cards with status management
 - Added "→ Customer" convert button on qualified leads in `/leads` page
 - Updated `DashboardSidebar` Customers link from `#` to `/customers`
+
+### Construction Project Management — Phase 1
+- Created Prisma enums file (`packages/db/prisma/enums/project.prisma`) with 11 enums: ProjectStatus, ProjectType, ProjectPhaseStatus, ProjectMilestoneStatus, ProjectDocumentKind, ProjectDocumentVisibility, ProjectUpdateKind, ProjectIssueSeverity, ProjectIssueStatus, ProjectRole, ProjectAssignmentStatus
+- Created 7 Prisma model files: Project, ProjectPhase, ProjectMilestone, ProjectDocument, ProjectUpdate, ProjectIssue, ProjectAssignment
+- Added `projects` relation to Company model, `projectAssignments` to Membership model
+- Created project query module (`packages/db/src/queries/project.ts`) with full CRUD for projects, phases, milestones, updates, issues, assignments, and documents
+- Exported project queries from `@plotkeys/db` index and package.json exports map
+- Added 12 server actions: createProjectAction, updateProjectAction, deleteProjectAction, createProjectPhaseAction, updateProjectPhaseAction, createProjectMilestoneAction, updateProjectMilestoneAction, createProjectUpdateAction, createProjectIssueAction, updateProjectIssueAction, assignProjectMemberAction, removeProjectMemberAction
+- Created `/projects` list page with create form, status filter tabs (draft, active, paused, delayed, completed, archived), and project cards with counts
+- Created `/projects/[id]` detail page with executive header, stats cards, phases tracker, milestones, updates timeline, issues log, and team assignment sections
+- Added "Construction" nav group with HardHat icon to dashboard sidebar

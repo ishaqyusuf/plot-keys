@@ -98,6 +98,15 @@ const updateKindLabels: Record<string, string> = {
   weekly: "Weekly",
 };
 
+const roleLabels: Record<string, string> = {
+  finance_reviewer: "Finance Reviewer",
+  project_manager: "Project Manager",
+  project_owner: "Project Owner",
+  qs_manager: "QS Manager",
+  site_supervisor: "Site Supervisor",
+  viewer: "Viewer",
+};
+
 function formatDate(date: Date | null) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("en-NG", {
@@ -709,7 +718,7 @@ export default async function ProjectDetailPage({
                           assignment.membership.user.email}
                       </span>
                       <Badge variant="outline">
-                        {assignment.projectRole.replace(/_/g, " ")}
+                        {roleLabels[assignment.projectRole] ?? assignment.projectRole}
                       </Badge>
                     </div>
                   </div>
