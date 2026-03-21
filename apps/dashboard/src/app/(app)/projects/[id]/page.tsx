@@ -2,23 +2,27 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
-import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboardedSession } from "../../../../lib/session";
+import { UpdateProjectStatusButton } from "../../../../components/projects/project-actions";
+import { CreateIssueForm, IssueList } from "../../../../components/projects/project-issues";
 import {
-  assignProjectMemberAction,
-  createProjectIssueAction,
-  createProjectMilestoneAction,
-  createProjectPhaseAction,
-  createProjectUpdateAction,
-  updateProjectAction,
-  updateProjectIssueAction,
-  updateProjectMilestoneAction,
-  updateProjectPhaseAction,
-} from "../../../actions";
+  CreateMilestoneForm,
+  MilestoneList,
+} from "../../../../components/projects/project-milestones";
+import {
+  CreatePhaseForm,
+  PhaseList,
+} from "../../../../components/projects/project-phases";
+import {
+  AssignMemberForm,
+  TeamList,
+} from "../../../../components/projects/project-team";
+import {
+  CreateUpdateForm,
+  UpdatesList,
+} from "../../../../components/projects/project-updates";
 
 type ProjectDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -39,74 +43,6 @@ const statusConfig: Record<
   paused: { label: "Paused", variant: "secondary" },
 };
 
-const phaseStatusConfig: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "outline" | "secondary" | "destructive";
-  }
-> = {
-  completed: { label: "Completed", variant: "default" },
-  in_progress: { label: "In Progress", variant: "secondary" },
-  not_started: { label: "Not Started", variant: "outline" },
-  on_hold: { label: "On Hold", variant: "destructive" },
-};
-
-const milestoneStatusConfig: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "outline" | "secondary" | "destructive";
-  }
-> = {
-  completed: { label: "Completed", variant: "default" },
-  in_progress: { label: "In Progress", variant: "secondary" },
-  overdue: { label: "Overdue", variant: "destructive" },
-  pending: { label: "Pending", variant: "outline" },
-};
-
-const issueStatusConfig: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "outline" | "secondary" | "destructive";
-  }
-> = {
-  closed: { label: "Closed", variant: "outline" },
-  in_progress: { label: "In Progress", variant: "secondary" },
-  open: { label: "Open", variant: "destructive" },
-  resolved: { label: "Resolved", variant: "default" },
-};
-
-const severityConfig: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "outline" | "secondary" | "destructive";
-  }
-> = {
-  critical: { label: "Critical", variant: "destructive" },
-  high: { label: "High", variant: "destructive" },
-  low: { label: "Low", variant: "outline" },
-  medium: { label: "Medium", variant: "secondary" },
-};
-
-const updateKindLabels: Record<string, string> = {
-  daily: "Daily",
-  general: "General",
-  milestone: "Milestone",
-  weekly: "Weekly",
-};
-
-const roleLabels: Record<string, string> = {
-  finance_reviewer: "Finance Reviewer",
-  project_manager: "Project Manager",
-  project_owner: "Project Owner",
-  qs_manager: "QS Manager",
-  site_supervisor: "Site Supervisor",
-  viewer: "Viewer",
-};
-
 function formatDate(date: Date | null) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("en-NG", {
@@ -114,20 +50,6 @@ function formatDate(date: Date | null) {
     month: "short",
     year: "numeric",
   }).format(date);
-}
-
-function formatRelativeTime(date: Date) {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return formatDate(date);
 }
 
 export default async function ProjectDetailPage({
@@ -232,22 +154,19 @@ export default async function ProjectDetailPage({
           </div>
           <div className="flex items-center gap-2">
             {project.status === "draft" && (
-              <form action={updateProjectAction}>
-                <input type="hidden" name="projectId" value={project.id} />
-                <input type="hidden" name="status" value="active" />
-                <Button size="sm" type="submit">
-                  Activate
-                </Button>
-              </form>
+              <UpdateProjectStatusButton
+                projectId={project.id}
+                status="active"
+                label="Activate"
+              />
             )}
             {project.status === "active" && (
-              <form action={updateProjectAction}>
-                <input type="hidden" name="projectId" value={project.id} />
-                <input type="hidden" name="status" value="completed" />
-                <Button size="sm" type="submit" variant="secondary">
-                  Mark Complete
-                </Button>
-              </form>
+              <UpdateProjectStatusButton
+                projectId={project.id}
+                status="completed"
+                label="Mark Complete"
+                variant="secondary"
+              />
             )}
             <Button asChild variant="outline" size="sm">
               <Link href="/projects">← Projects</Link>
@@ -292,97 +211,12 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.phases.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {project.phases.map((phase) => (
-                  <div
-                    key={phase.id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{phase.name}</span>
-                      <Badge
-                        variant={
-                          phaseStatusConfig[phase.status]?.variant ?? "outline"
-                        }
-                      >
-                        {phaseStatusConfig[phase.status]?.label ?? phase.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {phase.status === "not_started" && (
-                        <form action={updateProjectPhaseAction}>
-                          <input
-                            type="hidden"
-                            name="phaseId"
-                            value={phase.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="projectId"
-                            value={project.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="in_progress"
-                          />
-                          <Button size="sm" type="submit" variant="outline">
-                            Start
-                          </Button>
-                        </form>
-                      )}
-                      {phase.status === "in_progress" && (
-                        <form action={updateProjectPhaseAction}>
-                          <input
-                            type="hidden"
-                            name="phaseId"
-                            value={phase.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="projectId"
-                            value={project.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="completed"
-                          />
-                          <Button size="sm" type="submit" variant="outline">
-                            Complete
-                          </Button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <PhaseList phases={project.phases} projectId={project.id} />
             )}
-            <form
-              action={createProjectPhaseAction}
-              className="flex items-end gap-2"
-            >
-              <input type="hidden" name="projectId" value={project.id} />
-              <div className="flex-1">
-                <Label htmlFor="phaseName">Add Phase</Label>
-                <Input
-                  id="phaseName"
-                  name="name"
-                  required
-                  placeholder="e.g. Foundation"
-                />
-              </div>
-              <div className="w-20">
-                <Label htmlFor="phaseOrder">Order</Label>
-                <Input
-                  id="phaseOrder"
-                  name="order"
-                  type="number"
-                  defaultValue={project.phases.length}
-                />
-              </div>
-              <SubmitButton loadingLabel="Adding…">Add</SubmitButton>
-            </form>
+            <CreatePhaseForm
+              projectId={project.id}
+              nextOrder={project.phases.length}
+            />
           </CardContent>
         </Card>
 
@@ -393,105 +227,15 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.milestones.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {project.milestones.map((milestone) => (
-                  <div
-                    key={milestone.id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {milestone.name}
-                        </span>
-                        <Badge
-                          variant={
-                            milestoneStatusConfig[milestone.status]?.variant ??
-                            "outline"
-                          }
-                        >
-                          {milestoneStatusConfig[milestone.status]?.label ??
-                            milestone.status}
-                        </Badge>
-                        {milestone.phase && (
-                          <Badge variant="outline">
-                            {milestone.phase.name}
-                          </Badge>
-                        )}
-                      </div>
-                      {milestone.dueDate && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          Due: {formatDate(milestone.dueDate)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {milestone.status === "pending" && (
-                        <form action={updateProjectMilestoneAction}>
-                          <input
-                            type="hidden"
-                            name="milestoneId"
-                            value={milestone.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="projectId"
-                            value={project.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="completed"
-                          />
-                          <Button size="sm" type="submit" variant="outline">
-                            Complete
-                          </Button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <MilestoneList
+                milestones={project.milestones}
+                projectId={project.id}
+              />
             )}
-            <form
-              action={createProjectMilestoneAction}
-              className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-            >
-              <input type="hidden" name="projectId" value={project.id} />
-              <div>
-                <Label htmlFor="milestoneName">Add Milestone</Label>
-                <Input
-                  id="milestoneName"
-                  name="name"
-                  required
-                  placeholder="e.g. Foundation complete"
-                />
-              </div>
-              <div>
-                <Label htmlFor="milestoneDueDate">Due Date</Label>
-                <Input id="milestoneDueDate" name="dueDate" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="milestonePhase">Phase</Label>
-                <select
-                  id="milestonePhase"
-                  name="phaseId"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="">No phase</option>
-                  {project.phases.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="sm:col-span-3">
-                <SubmitButton loadingLabel="Adding…">
-                  Add Milestone
-                </SubmitButton>
-              </div>
-            </form>
+            <CreateMilestoneForm
+              projectId={project.id}
+              phases={project.phases}
+            />
           </CardContent>
         </Card>
 
@@ -502,86 +246,9 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.updates.length > 0 && (
-              <div className="mb-4 space-y-3">
-                {project.updates.map((update) => (
-                  <div key={update.id} className="rounded-md border p-3">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {updateKindLabels[update.kind] ?? update.kind}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatRelativeTime(update.postedAt)}
-                      </span>
-                      {update.progressPercent != null && (
-                        <Badge variant="secondary">
-                          {update.progressPercent}%
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="mt-1 text-sm font-medium">
-                      {update.summary}
-                    </p>
-                    {update.details && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {update.details}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <UpdatesList updates={project.updates} />
             )}
-            <form
-              action={createProjectUpdateAction}
-              className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-            >
-              <input type="hidden" name="projectId" value={project.id} />
-              <div>
-                <Label htmlFor="updateSummary">Summary *</Label>
-                <Input
-                  id="updateSummary"
-                  name="summary"
-                  required
-                  placeholder="What happened?"
-                />
-              </div>
-              <div>
-                <Label htmlFor="updateKind">Type</Label>
-                <select
-                  id="updateKind"
-                  name="kind"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="general">General</option>
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="milestone">Milestone</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="updateDetails">Details</Label>
-                <Input
-                  id="updateDetails"
-                  name="details"
-                  placeholder="Additional notes"
-                />
-              </div>
-              <div>
-                <Label htmlFor="updateProgress">Progress %</Label>
-                <Input
-                  id="updateProgress"
-                  name="progressPercent"
-                  type="number"
-                  min="0"
-                  max="100"
-                  placeholder="0-100"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Posting…">
-                  Post Update
-                </SubmitButton>
-              </div>
-            </form>
+            <CreateUpdateForm projectId={project.id} />
           </CardContent>
         </Card>
 
@@ -592,110 +259,9 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.issues.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {project.issues.map((issue) => (
-                  <div
-                    key={issue.id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {issue.title}
-                        </span>
-                        <Badge
-                          variant={
-                            issueStatusConfig[issue.status]?.variant ??
-                            "outline"
-                          }
-                        >
-                          {issueStatusConfig[issue.status]?.label ??
-                            issue.status}
-                        </Badge>
-                        <Badge
-                          variant={
-                            severityConfig[issue.severity]?.variant ?? "outline"
-                          }
-                        >
-                          {severityConfig[issue.severity]?.label ??
-                            issue.severity}
-                        </Badge>
-                      </div>
-                      {issue.description && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {issue.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {issue.status === "open" && (
-                        <form action={updateProjectIssueAction}>
-                          <input
-                            type="hidden"
-                            name="issueId"
-                            value={issue.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="projectId"
-                            value={project.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="resolved"
-                          />
-                          <Button size="sm" type="submit" variant="outline">
-                            Resolve
-                          </Button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <IssueList issues={project.issues} projectId={project.id} />
             )}
-            <form
-              action={createProjectIssueAction}
-              className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-            >
-              <input type="hidden" name="projectId" value={project.id} />
-              <div>
-                <Label htmlFor="issueTitle">Title *</Label>
-                <Input
-                  id="issueTitle"
-                  name="title"
-                  required
-                  placeholder="Issue title"
-                />
-              </div>
-              <div>
-                <Label htmlFor="issueSeverity">Severity</Label>
-                <select
-                  id="issueSeverity"
-                  name="severity"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="critical">Critical</option>
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="issueDesc">Description</Label>
-                <Input
-                  id="issueDesc"
-                  name="description"
-                  placeholder="Details about the issue"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Reporting…">
-                  Report Issue
-                </SubmitButton>
-              </div>
-            </form>
+            <CreateIssueForm projectId={project.id} />
           </CardContent>
         </Card>
 
@@ -706,68 +272,13 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.assignments.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {project.assignments.map((assignment) => (
-                  <div
-                    key={assignment.id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {assignment.membership.user.name ??
-                          assignment.membership.user.email}
-                      </span>
-                      <Badge variant="outline">
-                        {roleLabels[assignment.projectRole] ?? assignment.projectRole}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <TeamList assignments={project.assignments} />
             )}
-            {teamMembers.filter((m) => !assignedMemberIds.has(m.id)).length >
-              0 && (
-              <form
-                action={assignProjectMemberAction}
-                className="flex items-end gap-2"
-              >
-                <input type="hidden" name="projectId" value={project.id} />
-                <div className="flex-1">
-                  <Label htmlFor="membershipId">Assign Member</Label>
-                  <select
-                    id="membershipId"
-                    name="membershipId"
-                    required
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                  >
-                    <option value="">Select member</option>
-                    {teamMembers
-                      .filter((m) => !assignedMemberIds.has(m.id))
-                      .map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.user.name ?? m.user.email}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="w-48">
-                  <Label htmlFor="projectRole">Role</Label>
-                  <select
-                    id="projectRole"
-                    name="projectRole"
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                  >
-                    <option value="viewer">Viewer</option>
-                    <option value="site_supervisor">Site Supervisor</option>
-                    <option value="project_manager">Project Manager</option>
-                    <option value="project_owner">Project Owner</option>
-                    <option value="qs_manager">QS Manager</option>
-                    <option value="finance_reviewer">Finance Reviewer</option>
-                  </select>
-                </div>
-                <SubmitButton loadingLabel="Assigning…">Assign</SubmitButton>
-              </form>
-            )}
+            <AssignMemberForm
+              projectId={project.id}
+              teamMembers={teamMembers}
+              assignedMemberIds={assignedMemberIds}
+            />
           </CardContent>
         </Card>
       </div>

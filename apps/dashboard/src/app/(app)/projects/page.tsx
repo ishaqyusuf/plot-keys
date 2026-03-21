@@ -2,16 +2,13 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
-import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
+import { CreateProjectForm } from "../../../components/projects/create-project-form";
 import {
-  createProjectAction,
-  deleteProjectAction,
-  updateProjectAction,
-} from "../../actions";
+  DeleteProjectButton,
+  UpdateProjectStatusButton,
+} from "../../../components/projects/project-actions";
 
 type ProjectsPageProps = {
   searchParams?: Promise<{ status?: string }>;
@@ -142,74 +139,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             <CardTitle>Create Project</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              action={createProjectAction}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-            >
-              <div>
-                <Label htmlFor="name">Project Name *</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  placeholder="e.g. Lekki Phase 2 Estate"
-                />
-              </div>
-              <div>
-                <Label htmlFor="code">Project Code</Label>
-                <Input id="code" name="code" placeholder="e.g. LK-P2-001" />
-              </div>
-              <div>
-                <Label htmlFor="type">Type</Label>
-                <select
-                  id="type"
-                  name="type"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="">Select type</option>
-                  <option value="building">Building</option>
-                  <option value="estate">Estate</option>
-                  <option value="fit_out">Fit-out</option>
-                  <option value="infrastructure">Infrastructure</option>
-                  <option value="renovation">Renovation</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  placeholder="e.g. Lekki, Lagos"
-                />
-              </div>
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input id="startDate" name="startDate" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="targetCompletionDate">
-                  Target Completion Date
-                </Label>
-                <Input
-                  id="targetCompletionDate"
-                  name="targetCompletionDate"
-                  type="date"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  placeholder="Brief description of the project"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Creating…">
-                  Create Project
-                </SubmitButton>
-              </div>
-            </form>
+            <CreateProjectForm />
           </CardContent>
         </Card>
 
@@ -282,31 +212,16 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {project.status === "draft" && (
-                      <form action={updateProjectAction}>
-                        <input
-                          type="hidden"
-                          name="projectId"
-                          value={project.id}
-                        />
-                        <input type="hidden" name="status" value="active" />
-                        <Button size="sm" type="submit" variant="default">
-                          Activate
-                        </Button>
-                      </form>
+                      <UpdateProjectStatusButton
+                        projectId={project.id}
+                        status="active"
+                        label="Activate"
+                      />
                     )}
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/projects/${project.id}`}>View</Link>
                     </Button>
-                    <form action={deleteProjectAction}>
-                      <input
-                        type="hidden"
-                        name="projectId"
-                        value={project.id}
-                      />
-                      <Button size="sm" type="submit" variant="destructive">
-                        Delete
-                      </Button>
-                    </form>
+                    <DeleteProjectButton projectId={project.id} />
                   </div>
                 </CardHeader>
               </Card>
