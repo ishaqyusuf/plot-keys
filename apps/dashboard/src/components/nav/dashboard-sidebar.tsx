@@ -18,6 +18,7 @@ import {
   BarChart3,
   Bell,
   Bot,
+  Briefcase,
   Building2,
   Calendar,
   CreditCard,
@@ -25,6 +26,7 @@ import {
   Home,
   LayoutDashboard,
   Mail,
+  Network,
   Paintbrush,
   Settings,
   Sparkles,
@@ -70,6 +72,14 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "HR & Team",
+    items: [
+      { href: "/hr/employees", icon: Briefcase, label: "Employees" },
+      { href: "/hr/departments", icon: Network, label: "Departments" },
+      { href: "/team", icon: UserRoundCog, label: "Team" },
+    ],
+  },
+  {
     label: "Insights",
     items: [
       { href: "/analytics", icon: BarChart3, label: "Analytics" },
@@ -82,7 +92,6 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/billing", icon: CreditCard, label: "Billing" },
       { href: "/domains", icon: Globe, label: "Domains" },
-      { href: "/team", icon: UserRoundCog, label: "Team" },
       { href: "/notifications", icon: Bell, label: "Notifications" },
       { href: "/settings", icon: Settings, label: "Settings" },
       { href: "#", icon: Store, label: "App store", badge: "Coming" },

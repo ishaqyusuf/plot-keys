@@ -1,0 +1,23 @@
+model PayrollEntry {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId    String        @map("company_id") @db.Uuid
+  employeeId   String        @map("employee_id") @db.Uuid
+  periodYear   Int           @map("period_year")
+  periodMonth  Int           @map("period_month")
+  grossAmount  Int           @map("gross_amount")
+  netAmount    Int           @map("net_amount")
+  currency     String        @default("NGN")
+  status       PayrollStatus @default(pending)
+  paidAt       DateTime?     @map("paid_at") @db.Timestamptz(6)
+  notes        String?
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee     Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, employeeId, periodYear, periodMonth], map: "payroll_entries_company_employee_period_uniq")
+  @@index([companyId], map: "payroll_entries_company_id_idx")
+  @@index([employeeId], map: "payroll_entries_employee_id_idx")
+  @@index([companyId, periodYear, periodMonth], map: "payroll_entries_company_period_idx")
+  @@map("payroll_entries")
+}

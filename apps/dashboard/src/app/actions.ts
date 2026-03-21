@@ -1174,3 +1174,290 @@ export async function convertLeadToCustomerAction(formData: FormData) {
     redirect("/customers?created=1");
   }
 }
+
+// ---------------------------------------------------------------------------
+// HR — Employee management
+// ---------------------------------------------------------------------------
+
+export async function createEmployeeAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const title = String(formData.get("title") ?? "").trim() || null;
+  const departmentId = String(formData.get("departmentId") ?? "").trim() || null;
+  const employmentType = (String(formData.get("employmentType") ?? "full_time")) as
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "intern";
+  const startDateRaw = String(formData.get("startDate") ?? "").trim();
+  const salaryRaw = String(formData.get("salaryAmount") ?? "").trim();
+
+  if (!name) {
+    redirect(createRedirectUrl("/hr/employees", { error: "Name is required." }));
+  }
+
+  await prisma.employee.create({
+    data: {
+      companyId,
+      name,
+      email,
+      phone,
+      title,
+      departmentId,
+      employmentType,
+      startDate: startDateRaw ? new Date(startDateRaw) : null,
+      salaryAmount: salaryRaw ? Number.parseInt(salaryRaw, 10) : null,
+    },
+  });
+
+  revalidatePath("/hr/employees");
+  redirect("/hr/employees?created=1");
+}
+
+export async function updateEmployeeAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const employeeId = String(formData.get("employeeId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const title = String(formData.get("title") ?? "").trim() || null;
+  const departmentId = String(formData.get("departmentId") ?? "").trim() || null;
+  const employmentType = (String(formData.get("employmentType") ?? "full_time")) as
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "intern";
+  const status = (String(formData.get("status") ?? "active")) as
+    | "active"
+    | "on_leave"
+    | "suspended"
+    | "terminated";
+
+  await prisma.employee.update({
+    where: { id: employeeId, companyId },
+    data: { name, email, phone, title, departmentId, employmentType, status },
+  });
+
+  revalidatePath("/hr/employees");
+}
+
+export async function deleteEmployeeAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const employeeId = String(formData.get("employeeId") ?? "");
+
+  await prisma.employee.update({
+    where: { id: employeeId, companyId },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/hr/employees");
+}
+
+// ---------------------------------------------------------------------------
+// HR — Department management
+// ---------------------------------------------------------------------------
+
+export async function createDepartmentAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+
+  if (!name) {
+    redirect(createRedirectUrl("/hr/departments", { error: "Name is required." }));
+  }
+
+  await prisma.department.create({
+    data: { companyId, name, description },
+  });
+
+  revalidatePath("/hr/departments");
+  redirect("/hr/departments?created=1");
+}
+
+export async function updateDepartmentAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const departmentId = String(formData.get("departmentId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+
+  await prisma.department.update({
+    where: { id: departmentId, companyId },
+    data: { name, description },
+  });
+
+  revalidatePath("/hr/departments");
+}
+
+export async function deleteDepartmentAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const departmentId = String(formData.get("departmentId") ?? "");
+
+  await prisma.department.update({
+    where: { id: departmentId, companyId },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/hr/departments");
+}
+
+// ---------------------------------------------------------------------------
+// CSV Export
+// ---------------------------------------------------------------------------
+
+function toCsvRow(fields: (string | number | boolean | null | undefined)[]): string {
+  return fields
+    .map((f) => {
+      const str = f == null ? "" : String(f);
+      // Escape double quotes and wrap in quotes if necessary
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    })
+    .join(",");
+}
+
+export async function exportLeadsCsvAction() {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const leads = await prisma.lead.findMany({
+    where: { companyId },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const header = toCsvRow(["Name", "Email", "Phone", "Source", "Status", "Message", "Created At"]);
+  const rows = leads.map((l) =>
+    toCsvRow([l.name, l.email, l.phone, l.source, l.status, l.message, l.createdAt.toISOString()]),
+  );
+
+  return [header, ...rows].join("\n");
+}
+
+export async function exportPropertiesCsvAction() {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const properties = await prisma.property.findMany({
+    where: { companyId, deletedAt: null },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const header = toCsvRow([
+    "Title", "Location", "Price", "Type", "Status", "Publish State", "Bedrooms", "Bathrooms", "Featured", "Created At",
+  ]);
+  const rows = properties.map((p) =>
+    toCsvRow([
+      p.title, p.location, p.price, p.type, p.status, p.publishState,
+      p.bedrooms, p.bathrooms, p.featured ? "Yes" : "No", p.createdAt.toISOString(),
+    ]),
+  );
+
+  return [header, ...rows].join("\n");
+}
+
+export async function exportCustomersCsvAction() {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const customers = await prisma.customer.findMany({
+    where: { companyId, deletedAt: null },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const header = toCsvRow(["Name", "Email", "Phone", "Status", "Notes", "Created At"]);
+  const rows = customers.map((c) =>
+    toCsvRow([c.name, c.email, c.phone, c.status, c.notes, c.createdAt.toISOString()]),
+  );
+
+  return [header, ...rows].join("\n");
+}
+
+export async function exportAppointmentsCsvAction() {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const appointments = await prisma.appointment.findMany({
+    where: { companyId },
+    include: {
+      property: { select: { title: true } },
+      agent: { select: { name: true } },
+    },
+    orderBy: { scheduledAt: "desc" },
+  });
+
+  const header = toCsvRow([
+    "Client Name", "Client Email", "Client Phone", "Property", "Agent",
+    "Scheduled At", "Status", "Notes", "Created At",
+  ]);
+  const rows = appointments.map((a) =>
+    toCsvRow([
+      a.clientName, a.clientEmail, a.clientPhone, a.property?.title,
+      a.agent?.name, a.scheduledAt.toISOString(), a.status, a.notes,
+      a.createdAt.toISOString(),
+    ]),
+  );
+
+  return [header, ...rows].join("\n");
+}
+
+export async function exportEmployeesCsvAction() {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const employees = await prisma.employee.findMany({
+    where: { companyId, deletedAt: null },
+    include: { department: { select: { name: true } } },
+    orderBy: { name: "asc" },
+  });
+
+  const header = toCsvRow([
+    "Name", "Email", "Phone", "Title", "Department", "Employment Type",
+    "Status", "Start Date", "Created At",
+  ]);
+  const rows = employees.map((e) =>
+    toCsvRow([
+      e.name, e.email, e.phone, e.title, e.department?.name,
+      e.employmentType, e.status, e.startDate?.toISOString(),
+      e.createdAt.toISOString(),
+    ]),
+  );
+
+  return [header, ...rows].join("\n");
+}

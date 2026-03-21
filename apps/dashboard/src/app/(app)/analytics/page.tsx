@@ -1,7 +1,11 @@
 import {
   createPrismaClient,
   getAnalyticsSummary,
+  getLeadSourceBreakdown,
   getPageViewsByDay,
+  getPropertyAnalytics,
+  getTopPages,
+  getTrafficSources,
 } from "@plotkeys/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { requireOnboardedSession } from "../../../lib/session";
@@ -20,10 +24,15 @@ export default async function AnalyticsPage() {
   const companyId = session.activeMembership.companyId;
   const prisma = createPrismaClient().db;
 
-  const [summary, pageViews] = await Promise.all([
-    getAnalyticsSummary(prisma, companyId),
-    getPageViewsByDay(prisma, companyId, 30),
-  ]);
+  const [summary, pageViews, topPages, trafficSources, propertyViews, leadSources] =
+    await Promise.all([
+      getAnalyticsSummary(prisma, companyId),
+      getPageViewsByDay(prisma, companyId, 30),
+      getTopPages(prisma, companyId),
+      getTrafficSources(prisma, companyId),
+      getPropertyAnalytics(prisma, companyId),
+      getLeadSourceBreakdown(prisma, companyId),
+    ]);
 
   const maxViews = Math.max(...pageViews.map((d) => d.count), 1);
 
@@ -37,7 +46,7 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-muted-foreground text-sm font-medium">
@@ -65,11 +74,31 @@ export default async function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-muted-foreground text-sm font-medium">
-              Event Types
+              Page Views
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{summary.byType.length}</p>
+            <p className="text-3xl font-bold">
+              {(
+                summary.byType.find((t) => t.eventType === "page_view")
+                  ?.count ?? 0
+              ).toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
+              Leads Captured
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {(
+                summary.byType.find((t) => t.eventType === "contact_form")
+                  ?.count ?? 0
+              ).toLocaleString()}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -127,6 +156,162 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Top Pages and Traffic Sources side by side */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Top Pages */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Pages</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topPages.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No page view data yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {topPages.map((page, i) => (
+                  <div
+                    key={page.path}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground text-xs font-medium">
+                        {i + 1}.
+                      </span>
+                      <span className="text-sm font-medium">{page.path}</span>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                      {page.views.toLocaleString()} views
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Traffic Sources */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Traffic Sources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {trafficSources.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No traffic data yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {trafficSources.map((src) => {
+                  const total = trafficSources.reduce(
+                    (sum, s) => sum + s.count,
+                    0,
+                  );
+                  const pct =
+                    total > 0 ? Math.round((src.count / total) * 100) : 0;
+                  return (
+                    <div key={src.source}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{src.source}</span>
+                        <span className="text-muted-foreground">
+                          {src.count.toLocaleString()} ({pct}%)
+                        </span>
+                      </div>
+                      <div className="bg-muted mt-1 h-2 overflow-hidden rounded-full">
+                        <div
+                          className="bg-primary h-full rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Property Views and Lead Sources side by side */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Property Views */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Most Viewed Properties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {propertyViews.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No property view data yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {propertyViews.map((pv, i) => (
+                  <div
+                    key={pv.propertyId}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground text-xs font-medium">
+                        {i + 1}.
+                      </span>
+                      <span className="text-sm font-medium font-mono truncate max-w-48">
+                        {pv.propertyId.slice(0, 8)}…
+                      </span>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                      {pv.views.toLocaleString()} views
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Lead Sources */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lead Sources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {leadSources.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No lead data yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {leadSources.map((ls) => {
+                  const total = leadSources.reduce(
+                    (sum, s) => sum + s.count,
+                    0,
+                  );
+                  const pct =
+                    total > 0 ? Math.round((ls.count / total) * 100) : 0;
+                  return (
+                    <div key={ls.source}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{ls.source}</span>
+                        <span className="text-muted-foreground">
+                          {ls.count.toLocaleString()} ({pct}%)
+                        </span>
+                      </div>
+                      <div className="bg-muted mt-1 h-2 overflow-hidden rounded-full">
+                        <div
+                          className="bg-primary h-full rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Recent Events */}
       <Card>

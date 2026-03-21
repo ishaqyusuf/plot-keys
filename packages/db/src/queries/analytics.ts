@@ -116,3 +116,135 @@ export async function getPageViewsByDay(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, count]) => ({ count, date }));
 }
+
+// ---------------------------------------------------------------------------
+// Top pages by view count
+// ---------------------------------------------------------------------------
+
+export async function getTopPages(
+  db: Db,
+  companyId: string,
+  options?: { since?: Date; limit?: number },
+) {
+  const since =
+    options?.since ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const limit = options?.limit ?? 10;
+
+  const rows = await db.analyticsEvent.groupBy({
+    by: ["path"],
+    _count: true,
+    where: {
+      companyId,
+      createdAt: { gte: since },
+      eventType: "page_view",
+      path: { not: null },
+    },
+    orderBy: { _count: { path: "desc" } },
+    take: limit,
+  });
+
+  return rows.map((r) => ({ path: r.path!, views: r._count }));
+}
+
+// ---------------------------------------------------------------------------
+// Traffic source breakdown (referrer bucketing)
+// ---------------------------------------------------------------------------
+
+function bucketReferrer(referrer: string | null): string {
+  if (!referrer) return "Direct";
+  const lower = referrer.toLowerCase();
+  if (lower.includes("google")) return "Google";
+  if (
+    lower.includes("facebook") ||
+    lower.includes("twitter") ||
+    lower.includes("instagram") ||
+    lower.includes("linkedin") ||
+    lower.includes("tiktok") ||
+    lower.includes("x.com")
+  )
+    return "Social";
+  return "Other";
+}
+
+export async function getTrafficSources(
+  db: Db,
+  companyId: string,
+  options?: { since?: Date },
+) {
+  const since =
+    options?.since ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const events = await db.analyticsEvent.findMany({
+    select: { referrer: true },
+    where: {
+      companyId,
+      createdAt: { gte: since },
+      eventType: "page_view",
+    },
+  });
+
+  const buckets: Record<string, number> = {};
+  for (const event of events) {
+    const bucket = bucketReferrer(event.referrer);
+    buckets[bucket] = (buckets[bucket] ?? 0) + 1;
+  }
+
+  return Object.entries(buckets)
+    .sort(([, a], [, b]) => b - a)
+    .map(([source, count]) => ({ source, count }));
+}
+
+// ---------------------------------------------------------------------------
+// Property-level analytics
+// ---------------------------------------------------------------------------
+
+export async function getPropertyAnalytics(
+  db: Db,
+  companyId: string,
+  options?: { since?: Date; limit?: number },
+) {
+  const since =
+    options?.since ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const limit = options?.limit ?? 10;
+
+  const rows = await db.analyticsEvent.groupBy({
+    by: ["propertyId"],
+    _count: true,
+    where: {
+      companyId,
+      createdAt: { gte: since },
+      eventType: "property_view",
+      propertyId: { not: null },
+    },
+    orderBy: { _count: { propertyId: "desc" } },
+    take: limit,
+  });
+
+  return rows.map((r) => ({ propertyId: r.propertyId!, views: r._count }));
+}
+
+// ---------------------------------------------------------------------------
+// Lead source breakdown
+// ---------------------------------------------------------------------------
+
+export async function getLeadSourceBreakdown(
+  db: Db,
+  companyId: string,
+  options?: { since?: Date },
+) {
+  const since =
+    options?.since ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const rows = await db.lead.groupBy({
+    by: ["source"],
+    _count: { id: true },
+    where: {
+      companyId,
+      createdAt: { gte: since },
+    },
+  });
+
+  return rows
+    .map((r) => ({ source: r.source ?? "unknown", count: r._count.id }))
+    .sort((a, b) => b.count - a.count);
+}
