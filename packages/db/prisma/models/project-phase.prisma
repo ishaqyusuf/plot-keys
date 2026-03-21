@@ -1,0 +1,17 @@
+model ProjectPhase {
+  id         String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId  String             @map("project_id") @db.Uuid
+  name       String
+  order      Int                @default(0)
+  status     ProjectPhaseStatus @default(not_started)
+  startDate  DateTime?          @map("start_date") @db.Date
+  endDate    DateTime?          @map("end_date") @db.Date
+  createdAt  DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project    Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestones ProjectMilestone[]
+
+  @@index([projectId], map: "project_phases_project_id_idx")
+  @@index([projectId, order], map: "project_phases_project_order_idx")
+  @@map("project_phases")
+}

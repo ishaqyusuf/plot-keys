@@ -1,0 +1,104 @@
+enum ProjectStatus {
+  draft
+  active
+  paused
+  delayed
+  completed
+  archived
+
+  @@map("project_status")
+}
+
+enum ProjectType {
+  building
+  estate
+  fit_out
+  infrastructure
+  renovation
+
+  @@map("project_type")
+}
+
+enum ProjectPhaseStatus {
+  not_started
+  in_progress
+  completed
+  on_hold
+
+  @@map("project_phase_status")
+}
+
+enum ProjectMilestoneStatus {
+  pending
+  in_progress
+  completed
+  overdue
+
+  @@map("project_milestone_status")
+}
+
+enum ProjectDocumentKind {
+  drawing
+  contract
+  permit
+  invoice
+  receipt
+  site_report
+  inspection
+  handover
+  other
+
+  @@map("project_document_kind")
+}
+
+enum ProjectDocumentVisibility {
+  internal
+  shared
+
+  @@map("project_document_visibility")
+}
+
+enum ProjectUpdateKind {
+  daily
+  weekly
+  milestone
+  general
+
+  @@map("project_update_kind")
+}
+
+enum ProjectIssueSeverity {
+  low
+  medium
+  high
+  critical
+
+  @@map("project_issue_severity")
+}
+
+enum ProjectIssueStatus {
+  open
+  in_progress
+  resolved
+  closed
+
+  @@map("project_issue_status")
+}
+
+enum ProjectRole {
+  project_owner
+  project_manager
+  qs_manager
+  finance_reviewer
+  site_supervisor
+  viewer
+
+  @@map("project_role")
+}
+
+enum ProjectAssignmentStatus {
+  active
+  removed
+
+  @@map("project_assignment_status")
+}

@@ -1,0 +1,18 @@
+model ProjectDocument {
+  id           String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId    String                    @map("project_id") @db.Uuid
+  kind         ProjectDocumentKind       @default(other)
+  title        String
+  fileUrl      String                    @map("file_url")
+  visibility   ProjectDocumentVisibility @default(internal)
+  versionLabel String?                   @map("version_label")
+  uploadedById String?                   @map("uploaded_by_id")
+  approvedById String?                   @map("approved_by_id")
+  createdAt    DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project      Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId], map: "project_documents_project_id_idx")
+  @@index([projectId, kind], map: "project_documents_project_kind_idx")
+  @@map("project_documents")
+}

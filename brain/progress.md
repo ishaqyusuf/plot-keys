@@ -447,3 +447,16 @@
 - Created `/customers` dashboard page with stats strip, status filter tabs, customer cards with status management
 - Added "→ Customer" convert button on qualified leads in `/leads` page
 - Updated `DashboardSidebar` Customers link from `#` to `/customers`
+
+### Construction Project Management — Phase 1
+- Created Prisma enums file (`packages/db/prisma/enums/project.prisma`) with 11 enums: ProjectStatus, ProjectType, ProjectPhaseStatus, ProjectMilestoneStatus, ProjectDocumentKind, ProjectDocumentVisibility, ProjectUpdateKind, ProjectIssueSeverity, ProjectIssueStatus, ProjectRole, ProjectAssignmentStatus
+- Created 7 Prisma model files: Project, ProjectPhase, ProjectMilestone, ProjectDocument, ProjectUpdate, ProjectIssue, ProjectAssignment
+- Added `projects` relation to Company model, `projectAssignments` to Membership model
+- Created project query module (`packages/db/src/queries/project.ts`) with full CRUD for projects, phases, milestones, updates, issues, assignments, and documents
+- Exported project queries from `@plotkeys/db` index and package.json exports map
+- Created `projects.route.ts` tRPC router with all mutations and queries (list, get, stats, create, update, delete + phases, milestones, updates, issues, team assignments)
+- Registered `projectsRouter` in `_app.ts`
+- Created 6 client components using `useMutation` in `apps/dashboard/src/components/projects/` (create-project-form, project-actions, project-phases, project-milestones, project-updates, project-issues, project-team)
+- Refactored `/projects` list page to use client components for mutations
+- Refactored `/projects/[id]` detail page to use client components for mutations
+- Added "Construction" nav group with HardHat icon to dashboard sidebar

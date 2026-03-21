@@ -1,0 +1,16 @@
+model ProjectAssignment {
+  id           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId    String                  @map("project_id") @db.Uuid
+  membershipId String                  @map("membership_id") @db.Uuid
+  projectRole  ProjectRole             @default(viewer) @map("project_role")
+  status       ProjectAssignmentStatus @default(active)
+  createdAt    DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project      Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  membership   Membership              @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, membershipId], map: "project_assignments_project_membership_uniq")
+  @@index([projectId], map: "project_assignments_project_id_idx")
+  @@index([membershipId], map: "project_assignments_membership_id_idx")
+  @@map("project_assignments")
+}

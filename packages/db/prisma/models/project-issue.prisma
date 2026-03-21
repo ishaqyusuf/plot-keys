@@ -1,0 +1,18 @@
+model ProjectIssue {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId String               @map("project_id") @db.Uuid
+  title     String
+  description String?
+  severity  ProjectIssueSeverity @default(medium)
+  status    ProjectIssueStatus   @default(open)
+  ownerId   String?              @map("owner_id")
+  openedAt  DateTime             @default(now()) @map("opened_at") @db.Timestamptz(6)
+  closedAt  DateTime?            @map("closed_at") @db.Timestamptz(6)
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project   Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId], map: "project_issues_project_id_idx")
+  @@index([projectId, status], map: "project_issues_project_status_idx")
+  @@map("project_issues")
+}
