@@ -60,6 +60,11 @@
 - `packages/supabase/src/index.ts`: Implemented optional Supabase runtime helpers for env loading and storage operations.
 - `trigger.config.*`: Planned Trigger.dev configuration once jobs are added.
 
+## Workflows
+- `brain/workflows/stitch-template-generation.md`: Prompt + 8-step transfer checklist for generating new section components on Stitch and integrating them into `packages/section-registry`.
+- `brain/workflows/onboarding-flow.md`: Tenant onboarding step definitions and DB persistence contract.
+- `brain/workflows/template-install-flow.md`: Template license, install, and version creation flow.
+
 ## Notes
 - Repository now includes the initial monorepo scaffold plus Brain docs.
 - Repo structure should continue to evolve as real business modules are implemented.

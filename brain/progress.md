@@ -47,6 +47,16 @@
 
 ---
 
+## 2026-03-21 — Stitch Template Generation Workflow
+
+### Added
+- Created `brain/workflows/stitch-template-generation.md`
+- Defines the reusable Stitch prompt for generating new section components
+- Documents the 8-step transfer checklist (paste → export → index → brain → content-nodes → page-inventory → smoke test → brain update)
+- Includes variable reference table and a worked MapPreviewSection example
+
+---
+
 ## 2026-03-21 — Phase 2 Continued: Notification Bell, Preferences, SubmitButton
 
 ### Notification Bell in Header
