@@ -454,7 +454,9 @@
 - Added `projects` relation to Company model, `projectAssignments` to Membership model
 - Created project query module (`packages/db/src/queries/project.ts`) with full CRUD for projects, phases, milestones, updates, issues, assignments, and documents
 - Exported project queries from `@plotkeys/db` index and package.json exports map
-- Added 12 server actions: createProjectAction, updateProjectAction, deleteProjectAction, createProjectPhaseAction, updateProjectPhaseAction, createProjectMilestoneAction, updateProjectMilestoneAction, createProjectUpdateAction, createProjectIssueAction, updateProjectIssueAction, assignProjectMemberAction, removeProjectMemberAction
-- Created `/projects` list page with create form, status filter tabs (draft, active, paused, delayed, completed, archived), and project cards with counts
-- Created `/projects/[id]` detail page with executive header, stats cards, phases tracker, milestones, updates timeline, issues log, and team assignment sections
+- Created `projects.route.ts` tRPC router with all mutations and queries (list, get, stats, create, update, delete + phases, milestones, updates, issues, team assignments)
+- Registered `projectsRouter` in `_app.ts`
+- Created 6 client components using `useMutation` in `apps/dashboard/src/components/projects/` (create-project-form, project-actions, project-phases, project-milestones, project-updates, project-issues, project-team)
+- Refactored `/projects` list page to use client components for mutations
+- Refactored `/projects/[id]` detail page to use client components for mutations
 - Added "Construction" nav group with HardHat icon to dashboard sidebar
