@@ -24,24 +24,24 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Listing Media Gallery** — Add `PropertyMedia` model (images, floor plans, virtual tour URL), multi-image upload via Supabase, drag-to-reorder, cover image selection. Starter: 3 images; Plus: 10; Pro: unlimited.
 - [x] **Listing Publish States** — Add `publishState` (draft/published/archived) enum to `Property` model and filter public-site rendering by published state only.
 - [x] **Listing Categories & Types** — Add `type` (residential/commercial/land/industrial) and `subType` to `Property`. Affects public-site section rendering.
-- [ ] **Analytics Expansion** — Extend `/analytics` with 90-day range (Plus+), property-level view counts, traffic source chart (referrer bucketing), and lead source bar chart.
+- [x] **Analytics Expansion** — Extended `/analytics` with top pages, traffic source bucketing, property-level views, and lead source breakdown. ✅ Done
 - [x] **Notification Model + Bell + Page** — Add persistent `Notification` model; show unread badge in header; build `/notifications` list page; add `/settings/notifications` preference toggles.
 - [x] **Settings Expansion** — Expand `/settings` into tabs: Company Profile, Branding (colours/fonts), Integrations, Notification Preferences, Danger Zone.
 - [x] **Customer Model + List + Lead Promotion** — Add `Customer` and `TenantCustomer` Prisma models; build `/customers` list and `/customers/[id]` detail page; add "Convert to customer" action on leads. Plus plan gate.
-- [ ] **Employee List + Detail** — Add `Employee`, `Department` Prisma models; build `/hr/employees` list and `/hr/employees/[id]` detail (personal info, employment, linked agent profile, linked dashboard invite). Starter: up to 5; Plus+: unlimited.
-- [ ] **Department Management** — Add `/hr/departments` page for creating and managing departments used to organise employees.
-- [ ] **Leave Management** — Add `LeaveRequest` model; build leave request submission and approval flow inside HR section. Plus plan gate.
-- [ ] **Payroll Record-Keeping** — Add `PayrollEntry` model; build monthly payroll summary table (record-only, no payment processing). Plus plan gate.
-- [ ] **Listing Analytics Card** — Show per-property views/leads/appointments and conversion funnel on the property detail page. Uses `AnalyticsEvent`. Plus plan gate.
-- [ ] **CSV Export** — Add export actions for leads, appointments, customers, and properties. Plus plan gate.
-- [ ] **Agent Performance Analytics** — Extend `/analytics` or `/agents` with per-agent lead count, appointment count, and closed-deal attribution. Plus plan gate.
+- [x] **Employee List + Detail** — Added `Employee`, `Department`, `LeaveRequest`, `PayrollEntry` Prisma models with enums; built `/hr/employees` list and add form, status filtering, department filtering. ✅ Done
+- [x] **Department Management** — Added `/hr/departments` page for creating and managing departments with employee counts per department. ✅ Done
+- [x] **Leave Management** — Added `leave-request.ts` DB query module; built `/hr/leave` page with submission form, approval/rejection/cancel workflow, status filters. ✅ Done
+- [x] **Payroll Record-Keeping** — Added `payroll.ts` DB query module; built `/hr/payroll` page with monthly records, period selector, mark paid flow, summary cards. ✅ Done
+- [x] **Listing Analytics Card** — Added per-property analytics card (7d/30d views, appointments) to `/properties/[id]` detail page. ✅ Done
+- [x] **CSV Export** — Export actions exist + ExportCsvButton client component added to Leads, Properties, Customers, Appointments, Employees pages. ✅ Done
+- [x] **Agent Performance Analytics** — Added `getAgentPerformanceStats()` query; added agent performance section to analytics page showing total/completed appointments per agent. ✅ Done
 
 ## Phase 2 — Platform Polish & Engagement
 
 - [x] **Email Template Expansion** — Added `new-lead.tsx` and `site-published.tsx` email templates; created `new_lead_captured` and `site_published` notification type definitions; wired email dispatch in EmailService. ✅ Done (new lead + site published)
-- [ ] **Notification Dashboard UI** — Create `/notifications` page showing notification history; allow tenants to configure which events trigger emails.
+- [x] **Notification Dashboard UI** — `/notifications` page exists with history/filtering; notification bell in header with popover dropdown and unread badge; `/settings/notifications` preferences page with per-type in-app/email toggles; `NotificationPreference` Prisma model. ✅ Done
 - [ ] **Tenant Onboarding Improvements** — Allow rerunning template recommendation when core inputs change; add AI bootstrap for hero/intro/CTA copy from onboarding data.
-- [ ] **SubmitButton + Form Standardization** — Add shared `SubmitButton` primitive in `packages/ui`; standardize dashboard forms on `useZodForm` + `Controller` pattern.
+- [x] **SubmitButton + Form Standardization** — SubmitButton primitive in `packages/ui` with auto-pending state; adopted across 6 dashboard form pages (leave, employees, departments, payroll, settings, ai-credits). ✅ Done
 - [x] **Tenant Domain Status Surfaces** — Inline alerts on dashboard home for failed (destructive) and pending (amber) domains with action buttons. ✅ Done
 
 ## Phase 3 — Growth & Monetization

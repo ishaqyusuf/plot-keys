@@ -1,0 +1,44 @@
+enum EmploymentType {
+  full_time
+  part_time
+  contract
+  intern
+
+  @@map("employment_type")
+}
+
+enum EmployeeStatus {
+  active
+  on_leave
+  suspended
+  terminated
+
+  @@map("employee_status")
+}
+
+enum LeaveType {
+  annual
+  sick
+  maternity
+  paternity
+  unpaid
+  compassionate
+
+  @@map("leave_type")
+}
+
+enum LeaveRequestStatus {
+  pending
+  approved
+  rejected
+  cancelled
+
+  @@map("leave_request_status")
+}
+
+enum PayrollStatus {
+  pending
+  paid
+
+  @@map("payroll_status")
+}

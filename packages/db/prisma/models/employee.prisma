@@ -1,0 +1,29 @@
+model Employee {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId        String         @map("company_id") @db.Uuid
+  departmentId     String?        @map("department_id") @db.Uuid
+  agentId          String?        @map("agent_id") @db.Uuid
+  name             String
+  email            String?
+  phone            String?
+  title            String?
+  employmentType   EmploymentType @default(full_time) @map("employment_type")
+  status           EmployeeStatus @default(active)
+  startDate        DateTime?      @map("start_date") @db.Date
+  probationEndDate DateTime?      @map("probation_end_date") @db.Date
+  salaryAmount     Int?           @map("salary_amount")
+  salaryCurrency   String?        @default("NGN") @map("salary_currency")
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  company          Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department       Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  leaveRequests    LeaveRequest[]
+  payrollEntries   PayrollEntry[]
+
+  @@index([companyId], map: "employees_company_id_idx")
+  @@index([companyId, departmentId], map: "employees_company_department_idx")
+  @@index([companyId, status], map: "employees_company_status_idx")
+  @@index([deletedAt], map: "employees_deleted_at_idx")
+  @@map("employees")
+}

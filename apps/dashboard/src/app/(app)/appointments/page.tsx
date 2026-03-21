@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 
 import { requireOnboardedSession } from "../../../lib/session";
+import { ExportCsvButton } from "../../../components/export-csv-button";
 import {
   createAppointmentAction,
   deleteAppointmentAction,
+  exportAppointmentsCsvAction,
   updateAppointmentStatusAction,
 } from "../../actions";
 
@@ -98,6 +100,7 @@ export default async function AppointmentsPage({
               {(stats.total ?? 0) !== 1 ? "s" : ""} total
             </p>
           </div>
+          <ExportCsvButton exportAction={exportAppointmentsCsvAction} filename="appointments.csv" />
         </div>
 
         {/* Stats / filters */}

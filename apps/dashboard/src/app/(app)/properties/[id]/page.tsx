@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import {
+  BarChart3,
   ImageIcon,
   StarIcon,
   Trash2Icon,
@@ -65,6 +66,35 @@ export default async function PropertyDetailPage({
     where: { propertyId: id },
     orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
   });
+
+  // Property-level analytics
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const [views30, views7, appointmentsCount] = await Promise.all([
+    prisma.analyticsEvent.count({
+      where: {
+        companyId: session.activeMembership.companyId,
+        propertyId: id,
+        eventType: "property_view",
+        createdAt: { gte: since30 },
+      },
+    }),
+    prisma.analyticsEvent.count({
+      where: {
+        companyId: session.activeMembership.companyId,
+        propertyId: id,
+        eventType: "property_view",
+        createdAt: { gte: since7 },
+      },
+    }),
+    prisma.appointment.count({
+      where: {
+        companyId: session.activeMembership.companyId,
+        propertyId: id,
+      },
+    }),
+  ]);
 
   const canEdit =
     session.activeMembership.role === "owner" ||
@@ -172,6 +202,30 @@ export default async function PropertyDetailPage({
             </CardContent>
           </Card>
         ) : null}
+
+        {/* Analytics Card */}
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <BarChart3 className="size-4 text-muted-foreground" />
+            <CardTitle className="text-base">Listing Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-2xl font-bold">{views30}</p>
+                <p className="text-xs text-muted-foreground">Views (30 days)</p>
+              </div>
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-2xl font-bold">{views7}</p>
+                <p className="text-xs text-muted-foreground">Views (7 days)</p>
+              </div>
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-2xl font-bold">{appointmentsCount}</p>
+                <p className="text-xs text-muted-foreground">Appointments</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Media gallery */}
         <Card>

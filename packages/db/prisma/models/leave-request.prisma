@@ -1,0 +1,18 @@
+model LeaveRequest {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId   String             @map("employee_id") @db.Uuid
+  leaveType    LeaveType          @map("leave_type")
+  startDate    DateTime           @map("start_date") @db.Date
+  endDate      DateTime           @map("end_date") @db.Date
+  reason       String?
+  status       LeaveRequestStatus @default(pending)
+  approvedById String?            @map("approved_by_id") @db.Uuid
+  approvedAt   DateTime?          @map("approved_at") @db.Timestamptz(6)
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  employee     Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId], map: "leave_requests_employee_id_idx")
+  @@index([employeeId, status], map: "leave_requests_employee_status_idx")
+  @@map("leave_requests")
+}

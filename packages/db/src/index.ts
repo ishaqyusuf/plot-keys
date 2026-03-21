@@ -27,11 +27,17 @@ export * from "./queries/appointments";
 export * from "./queries/auth";
 export * from "./queries/company";
 export * from "./queries/customer";
+export * from "./queries/department";
+export * from "./queries/employee";
 export * from "./queries/leads";
+export * from "./queries/leave-request";
+export * from "./queries/payroll";
 export * from "./queries/notifications";
+export * from "./queries/notification-preference";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
 export * from "./queries/property-media";
+export * from "./queries/reports";
 export * from "./queries/site-configuration";
 export * from "./queries/stock-image-license";
 export * from "./queries/team";

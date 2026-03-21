@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-20)
+## Current State (as of 2026-03-21)
 
 ### What's Built & Working
 | Area | Status |
@@ -15,6 +15,7 @@
 | Appointment scheduling + dashboard | ✅ Done |
 | AI credits (ledger, smart-fill wired) | ✅ Done |
 | Analytics (events, tracking, dashboard) | ✅ Done |
+| Analytics expansion (top pages, traffic sources, property views, lead sources) | ✅ Done |
 | Stock image marketplace | ✅ Done |
 | Website/WebsiteVersion Phase 1-4 (reads) | ✅ Done |
 | Section visibility toggles | ✅ Done |
@@ -25,16 +26,119 @@
 | Property/agent data binding | ✅ Done |
 | Domain status surfaces (dashboard home) | ✅ Done |
 | Email (Welcome + Verification + New Lead + Site Published) | ✅ Done |
-| Notifications (event system, 10 types) | 🟡 Partial |
+| Notifications (event system, 10 types) | ✅ Done |
+| Notification bell in header + preferences page | ✅ Done |
+| SubmitButton adoption (6 forms) | ✅ Done |
 | Jobs (custom queue, 4 handlers) | 🟡 Partial |
 | Listing categories & types | ✅ Done |
 | Settings expansion | ✅ Done |
 | Customer model + lead promotion | ✅ Done |
 | Team invite accept flow | ✅ Done |
+| HR module (Employee + Department models, pages) | ✅ Done |
+| CSV export actions + UI download buttons | ✅ Done |
+| Leave management (submission + approval flow) | ✅ Done |
+| Payroll page (monthly records + mark paid) | ✅ Done |
+| Listing analytics card (property detail) | ✅ Done |
+| Agent performance analytics | ✅ Done |
 | Chat-bot | 🟡 Scaffolded |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+
+---
+
+## 2026-03-21 — Phase 2 Continued: Notification Bell, Preferences, SubmitButton
+
+### Notification Bell in Header
+- Created `NotificationBell` client component with Popover dropdown
+- Shows unread count badge (red dot with number, "9+" for 10+)
+- Popover shows 5 most recent notifications with relative timestamps, unread highlighting, optional links
+- "View all notifications" link at bottom
+- Wired into `(app)/layout.tsx` with server-side data fetch via `getNotificationBellData()`
+
+### Notification Preferences Page
+- Created `NotificationPreference` Prisma model with unique constraint on (companyId, userId, type)
+- Added relations to `User` and `Company` models
+- Created `notification-preference.ts` query module (list, upsert, get)
+- Built `/settings/notifications` page with 6 configurable notification types
+- Each type has in-app and email toggle buttons (pill-style) with server action toggle
+- Added `updateNotificationPreferenceAction` server action using upsert pattern
+- Added "Notification preferences" link card to `/settings` page
+
+### SubmitButton Adoption
+- Added `"use client"` directive to `packages/ui/src/components/submit-button.tsx`
+- Fixed `ButtonProps` import to use `React.ComponentProps<typeof Button>` instead of non-existent `ButtonProps`
+- Replaced `<Button type="submit">` with `<SubmitButton>` in 6 pages:
+  - `/hr/leave` — Submit Request
+  - `/hr/employees` — Add Employee
+  - `/hr/departments` — Add Department
+  - `/hr/payroll` — Add Entry
+  - `/settings` — Save profile
+  - `/ai-credits` — Buy 100 Credits
+- All forms now show loading spinner and disable button during server action execution
+
+---
+
+## 2026-03-21 — Phase 2 Continued: Leave, Payroll, CSV UI, Listing Analytics, Agent Performance
+
+### Leave Management
+- Created `leave-request.ts` DB query module: CRUD, status counts, approval/rejection
+- Built `/hr/leave` page: submission form (employee select, type, dates, reason), status filters (pending/approved/rejected/cancelled), approve/reject/cancel workflow
+- Added 4 server actions: `createLeaveRequestAction`, `approveLeaveRequestAction`, `rejectLeaveRequestAction`, `cancelLeaveRequestAction`
+- All actions verify employee belongs to company before operating
+
+### Payroll
+- Created `payroll.ts` DB query module: CRUD, period summary, available periods, mark paid
+- Built `/hr/payroll` page: monthly records, period selector tabs, summary cards (entries/gross/net/status), add entry form, mark paid flow
+- Added 2 server actions: `createPayrollEntryAction`, `markPayrollPaidAction`
+- Currency formatting with Intl.NumberFormat for NGN
+
+### CSV Export UI
+- Created `ExportCsvButton` client component: uses `useTransition`, creates Blob download, uses `URL.createObjectURL`
+- Added export buttons to: Leads, Properties, Customers, Appointments, Employees list pages
+- Each button calls its corresponding export server action and triggers download
+
+### Listing Analytics Card
+- Added per-property analytics card to `/properties/[id]` detail page
+- Shows 3 metrics: Views (30 days), Views (7 days), Appointments
+- Uses `prisma.analyticsEvent.count` and `prisma.appointment.count` for data
+
+### Agent Performance Analytics
+- Added `getAgentPerformanceStats()` query in payroll.ts
+- Added agent performance section to analytics page: total appointments, completed appointments per agent
+- Query joins agents with appointment groupBy counts
+
+### Sidebar
+- Added Leave (CalendarOff icon) and Payroll (Receipt icon) to HR & Team nav group with Plus badges
+
+---
+
+## 2026-03-21 — Phase 2: Analytics Expansion + HR Module
+
+### Analytics Expansion
+- Added `getTopPages()` query — groups page views by path, returns top 10
+- Added `getTrafficSources()` query — buckets referrer into Direct/Google/Social/Other
+- Added `getPropertyAnalytics()` query — property-level view counts
+- Added `getLeadSourceBreakdown()` query — lead counts grouped by source
+- Updated analytics page: 4-card stats strip (events, visitors, page views, leads), top pages table, traffic sources bars, property views list, lead source bars
+
+### HR Module
+- Created Prisma enums: `EmploymentType`, `EmployeeStatus`, `LeaveType`, `LeaveRequestStatus`, `PayrollStatus`
+- Created Prisma models: `Department`, `Employee`, `LeaveRequest`, `PayrollEntry`
+- Updated `Company` model with relations to departments, employees, payroll entries
+- Created query modules: `department.ts` (CRUD + employee counts), `employee.ts` (CRUD + status/department counts)
+- Built `/hr/employees` page: add form, status filter tabs, department filter, status badges, employment type badges
+- Built `/hr/departments` page: add form, employee counts, link to filtered employee list
+- Added server actions: `createEmployeeAction`, `updateEmployeeAction`, `deleteEmployeeAction`, `createDepartmentAction`, `updateDepartmentAction`, `deleteDepartmentAction`
+
+### CSV Export
+- Added `toCsvRow()` helper with proper CSV escaping
+- Added export actions: `exportLeadsCsvAction`, `exportPropertiesCsvAction`, `exportCustomersCsvAction`, `exportAppointmentsCsvAction`, `exportEmployeesCsvAction`
+
+### Sidebar Navigation
+- Added HR & Team nav group with Employees (Briefcase icon), Departments (Network icon), Team links
+- Moved Team from Platform to HR & Team group
+- Removed Notifications and Settings from Platform group separation
 
 ---
 
