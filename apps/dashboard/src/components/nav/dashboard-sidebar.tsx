@@ -23,6 +23,7 @@ import {
   Calendar,
   CalendarOff,
   CreditCard,
+  FileText,
   Globe,
   Home,
   LayoutDashboard,
@@ -87,6 +88,7 @@ const navGroups: NavGroup[] = [
     label: "Insights",
     items: [
       { href: "/analytics", icon: BarChart3, label: "Analytics" },
+      { href: "/reports", icon: FileText, label: "Reports", badge: "Plus" },
       { href: "/ai-credits", icon: Sparkles, label: "AI Credits", badge: "AI" },
       { href: "#", icon: Bot, label: "Chat-bot", badge: "Pro" },
     ],

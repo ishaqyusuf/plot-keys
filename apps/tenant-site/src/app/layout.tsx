@@ -1,14 +1,85 @@
 import "@plotkeys/ui/globals.css";
 
+import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
 import { NotificationsProvider } from "@plotkeys/notifications-react";
 import { ThemeProvider } from "@plotkeys/ui/theme-provider";
+import { extractTenantHostname } from "@plotkeys/utils";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
   title: "PlotKeys Tenant Site",
   description: "Structured tenant website renderer for PlotKeys",
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const prisma = createPrismaClient().db;
+
+  if (!prisma) return fallbackMetadata;
+
+  const tenantHostname =
+    requestHeaders.get("x-tenant-hostname") || null;
+  const tenantSubdomain =
+    requestHeaders.get("x-tenant-subdomain") || null;
+
+  // Resolve company from hostname or subdomain
+  let company: {
+    name: string;
+    market: string | null;
+    logoUrl: string | null;
+    slug: string;
+  } | null = null;
+
+  if (tenantHostname) {
+    const resolved = await resolveTenantByHostname(prisma, tenantHostname);
+    if (resolved) {
+      company = await prisma.company.findFirst({
+        where: { id: resolved.companyId, deletedAt: null },
+        select: { name: true, market: true, logoUrl: true, slug: true },
+      });
+    }
+  }
+
+  if (!company && tenantSubdomain) {
+    company = await prisma.company.findFirst({
+      where: { slug: tenantSubdomain, deletedAt: null },
+      select: { name: true, market: true, logoUrl: true, slug: true },
+    });
+  }
+
+  if (!company) return fallbackMetadata;
+
+  const title = company.name;
+  const description = company.market
+    ? `${company.name} — Real estate in ${company.market}. Browse properties, meet agents, and schedule viewings.`
+    : `${company.name} — Browse properties, meet agents, and schedule viewings.`;
+
+  const metadata: Metadata = {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: company.name,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+
+  if (company.logoUrl) {
+    metadata.openGraph!.images = [{ url: company.logoUrl, alt: company.name }];
+    metadata.twitter!.images = [company.logoUrl];
+    metadata.icons = { icon: company.logoUrl };
+  }
+
+  return metadata;
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

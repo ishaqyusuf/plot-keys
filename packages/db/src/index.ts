@@ -37,6 +37,7 @@ export * from "./queries/notification-preference";
 export * from "./queries/onboarding"; // includes createCompanyOnboardingBundle + tenant onboarding helpers
 export * from "./queries/property";
 export * from "./queries/property-media";
+export * from "./queries/reports";
 export * from "./queries/site-configuration";
 export * from "./queries/stock-image-license";
 export * from "./queries/team";

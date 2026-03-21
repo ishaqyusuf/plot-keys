@@ -198,6 +198,23 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </CardContent>
         </Card>
 
+        {/* Integrations */}
+        <Card className="mb-6 bg-card">
+          <CardHeader className="px-6 pt-6 pb-4">
+            <CardTitle>Integrations</CardTitle>
+            <CardDescription>
+              Connect Google Analytics, Facebook Pixel, WhatsApp, and more.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-6 pb-6">
+            <Button asChild size="sm" variant="outline">
+              <Link href="/settings/integrations">
+                Manage integrations
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Danger zone */}
         {canEdit ? (
           <Card className="border-destructive/30 bg-card">

@@ -1,0 +1,14 @@
+model CompanyIntegration {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId         String   @map("company_id") @db.Uuid
+  googleAnalyticsId String?  @map("google_analytics_id")
+  facebookPixelId   String?  @map("facebook_pixel_id")
+  whatsappPhone     String?  @map("whatsapp_phone")
+  calendlyUrl       String?  @map("calendly_url")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId], map: "company_integrations_company_id_uniq")
+  @@map("company_integrations")
+}

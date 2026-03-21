@@ -33,6 +33,7 @@ model Company {
   employees          Employee[]
   payrollEntries     PayrollEntry[]
   notificationPreferences NotificationPreference[]
+  integration         CompanyIntegration?
 
   @@index([slug], map: "companies_slug_idx")
   @@index([planTier], map: "companies_plan_tier_idx")

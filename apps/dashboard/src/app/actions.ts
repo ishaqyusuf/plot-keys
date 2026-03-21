@@ -1671,3 +1671,86 @@ export async function updateNotificationPreferenceAction(formData: FormData) {
 
   revalidatePath("/settings/notifications");
 }
+
+// ---------------------------------------------------------------------------
+// Reports CSV exports
+// ---------------------------------------------------------------------------
+
+export async function exportBusinessSummaryCsvAction(
+  year: number,
+  month: number,
+): Promise<string> {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import("@plotkeys/db");
+  const summary = await getMonthlyBusinessSummary(prisma, companyId, { year, month });
+  return businessSummaryToCsv(summary);
+}
+
+export async function exportAgentReportCsvAction(
+  year: number,
+  month: number,
+): Promise<string> {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import("@plotkeys/db");
+  const report = await getAgentPerformanceReport(prisma, companyId, { year, month });
+  return agentPerformanceToCsv(report);
+}
+
+export async function exportListingsReportCsvAction(): Promise<string> {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const { getListingsReport, listingsReportToCsv } = await import("@plotkeys/db");
+  const report = await getListingsReport(prisma, companyId);
+  return listingsReportToCsv(report);
+}
+
+// ---------------------------------------------------------------------------
+// Integrations settings
+// ---------------------------------------------------------------------------
+
+export async function updateIntegrationsAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const googleAnalyticsId =
+    String(formData.get("googleAnalyticsId") ?? "").trim() || null;
+  const facebookPixelId =
+    String(formData.get("facebookPixelId") ?? "").trim() || null;
+  const whatsappPhone =
+    String(formData.get("whatsappPhone") ?? "").trim() || null;
+  const calendlyUrl =
+    String(formData.get("calendlyUrl") ?? "").trim() || null;
+
+  await prisma.companyIntegration.upsert({
+    where: { companyId },
+    create: {
+      companyId,
+      googleAnalyticsId,
+      facebookPixelId,
+      whatsappPhone,
+      calendlyUrl,
+    },
+    update: {
+      googleAnalyticsId,
+      facebookPixelId,
+      whatsappPhone,
+      calendlyUrl,
+    },
+  });
+
+  revalidatePath("/settings/integrations");
+  redirect("/settings/integrations?saved=1");
+}
