@@ -107,7 +107,7 @@ const navGroups: NavGroup[] = [
       { href: "/domains", icon: Globe, label: "Domains" },
       { href: "/notifications", icon: Bell, label: "Notifications" },
       { href: "/settings", icon: Settings, label: "Settings" },
-      { href: "#", icon: Store, label: "App store", badge: "Coming" },
+      { href: "/app-store", icon: Store, label: "App store" },
     ],
   },
 ];

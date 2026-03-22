@@ -9,6 +9,7 @@ import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
 import { ChatWidget } from "../components/chat-widget";
+import { IntegrationScripts } from "../components/integration-scripts";
 
 const fallbackMetadata: Metadata = {
   title: "PlotKeys Tenant Site",
@@ -18,6 +19,32 @@ const fallbackMetadata: Metadata = {
 async function resolveSubdomain(): Promise<string | null> {
   const requestHeaders = await headers();
   return requestHeaders.get("x-tenant-subdomain") || null;
+}
+
+async function resolveIntegrations(subdomain: string | null): Promise<{
+  googleAnalyticsId?: string | null;
+  facebookPixelId?: string | null;
+}> {
+  if (!subdomain) return {};
+  const prisma = createPrismaClient().db;
+  if (!prisma) return {};
+
+  const company = await prisma.company.findFirst({
+    where: { slug: subdomain, deletedAt: null },
+    select: { id: true },
+  });
+
+  if (!company) return {};
+
+  const integration = await prisma.companyIntegration.findUnique({
+    where: { companyId: company.id },
+    select: { googleAnalyticsId: true, facebookPixelId: true },
+  });
+
+  return {
+    googleAnalyticsId: integration?.googleAnalyticsId,
+    facebookPixelId: integration?.facebookPixelId,
+  };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -90,6 +117,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const subdomain = await resolveSubdomain();
+  const integrations = await resolveIntegrations(subdomain);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -102,6 +130,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           <NotificationsProvider>{children}</NotificationsProvider>
           {subdomain && <ChatWidget subdomain={subdomain} />}
+          <IntegrationScripts
+            googleAnalyticsId={integrations.googleAnalyticsId}
+            facebookPixelId={integrations.facebookPixelId}
+          />
         </ThemeProvider>
       </body>
     </html>
