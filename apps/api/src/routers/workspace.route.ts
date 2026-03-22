@@ -60,7 +60,8 @@ import {
   updateSiteConfigurationThemeField,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
-import { domainSyncHandler, runInBackground } from "@plotkeys/jobs";
+import { domainSyncHandler, triggerJob } from "@plotkeys/jobs";
+import { domainSyncTask } from "@plotkeys/jobs/tasks";
 import {
   buildBusinessSummary,
   createInitialSiteConfigurationInput,
@@ -297,7 +298,8 @@ export const workspaceRouter = createTRPCRouter({
 
       // Auto-trigger Vercel domain provisioning in the background
       if (isVercelDomainProvisioningConfigured()) {
-        runInBackground(
+        triggerJob(
+          domainSyncTask,
           domainSyncHandler,
           { companyId: siteConfiguration.companyId },
           { baseDelayMs: 2000, maxAttempts: 4 },
@@ -1151,7 +1153,8 @@ export const workspaceRouter = createTRPCRouter({
     }
 
     // Queue domain sync as a background job with exponential backoff retries
-    await runInBackground(
+    await triggerJob(
+      domainSyncTask,
       domainSyncHandler,
       { companyId: ctx.auth.activeMembership.companyId },
       {

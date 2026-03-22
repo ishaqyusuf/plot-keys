@@ -7,6 +7,11 @@
  */
 
 import { createPrismaClient } from "@plotkeys/db";
+import {
+  notificationDispatchHandler,
+  triggerJob,
+} from "@plotkeys/jobs";
+import { notificationDispatchTask } from "@plotkeys/jobs/tasks";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -66,15 +71,29 @@ async function resolveCompanyBySubdomain(subdomain: string) {
 export const formsRouter = createTRPCRouter({
   /**
    * General contact form submission from a public tenant site.
-   * In production this would send a notification email or webhook —
-   * for now it validates and acknowledges without side effects.
+   * Dispatches a notification job to email the company owner.
    */
   submitContact: publicProcedure
     .input(contactInputSchema)
     .mutation(async ({ input }) => {
-      await resolveCompanyBySubdomain(input.subdomain);
+      const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      // TODO: trigger email notification / CRM hook via Trigger.dev job
+      triggerJob(
+        notificationDispatchTask,
+        notificationDispatchHandler,
+        {
+          kind: "contact_form" as const,
+          data: {
+            companyId: company.id,
+            email: input.email,
+            message: input.message,
+            name: input.name,
+            phone: input.phone,
+          },
+        },
+      ).catch(() => {
+        // Notification delivery failures are non-blocking
+      });
 
       return {
         received: true,
@@ -84,13 +103,30 @@ export const formsRouter = createTRPCRouter({
 
   /**
    * Property inquiry form — tied to a specific listing or a general request.
+   * Dispatches a notification job to email the company owner and receipt to inquirer.
    */
   submitInquiry: publicProcedure
     .input(inquiryInputSchema)
     .mutation(async ({ input }) => {
-      await resolveCompanyBySubdomain(input.subdomain);
+      const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      // TODO: trigger lead-capture notification via Trigger.dev job
+      triggerJob(
+        notificationDispatchTask,
+        notificationDispatchHandler,
+        {
+          kind: "property_inquiry" as const,
+          data: {
+            companyId: company.id,
+            email: input.email,
+            message: input.message,
+            name: input.name,
+            phone: input.phone,
+            propertyId: input.propertyRef,
+          },
+        },
+      ).catch(() => {
+        // Notification delivery failures are non-blocking
+      });
 
       return {
         received: true,
@@ -100,13 +136,27 @@ export const formsRouter = createTRPCRouter({
 
   /**
    * Newsletter / mailing-list sign-up from a public tenant site.
+   * Dispatches a notification job to send a welcome email.
    */
   submitNewsletterSignup: publicProcedure
     .input(newsletterInputSchema)
     .mutation(async ({ input }) => {
-      await resolveCompanyBySubdomain(input.subdomain);
+      const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      // TODO: add to mailing list provider via Trigger.dev job
+      triggerJob(
+        notificationDispatchTask,
+        notificationDispatchHandler,
+        {
+          kind: "newsletter_signup" as const,
+          data: {
+            companyId: company.id,
+            email: input.email,
+            name: input.name,
+          },
+        },
+      ).catch(() => {
+        // Notification delivery failures are non-blocking
+      });
 
       return {
         received: true,
