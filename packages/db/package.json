@@ -13,7 +13,8 @@
     "./queries/template-license": "./src/queries/template-license.ts",
     "./queries/tenant-domain": "./src/queries/tenant-domain.ts",
     "./queries/website": "./src/queries/website.ts",
-    "./queries/project": "./src/queries/project.ts"
+    "./queries/project": "./src/queries/project.ts",
+    "./queries/project-finance": "./src/queries/project-finance.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

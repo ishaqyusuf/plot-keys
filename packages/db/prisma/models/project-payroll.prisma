@@ -1,0 +1,37 @@
+model ProjectPayrollRun {
+  id              String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId       String                      @map("project_id") @db.Uuid
+  periodStart     DateTime                    @map("period_start") @db.Date
+  periodEnd       DateTime                    @map("period_end") @db.Date
+  status          ProjectPayrollRunStatus     @default(draft)
+  totalGrossMinor Int                         @default(0) @map("total_gross_minor")
+  totalNetMinor   Int                         @default(0) @map("total_net_minor")
+  createdAt       DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project         Project                     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  entries         ProjectPayrollEntry[]
+
+  @@index([projectId], map: "project_payroll_runs_project_id_idx")
+  @@index([projectId, status], map: "project_payroll_runs_project_status_idx")
+  @@map("project_payroll_runs")
+}
+
+model ProjectPayrollEntry {
+  id              String                              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollRunId    String                              @map("payroll_run_id") @db.Uuid
+  workerId        String                              @map("worker_id") @db.Uuid
+  attendanceUnits Float?                              @map("attendance_units")
+  grossMinor      Int                                 @default(0) @map("gross_minor")
+  deductionMinor  Int                                 @default(0) @map("deduction_minor")
+  advanceMinor    Int                                 @default(0) @map("advance_minor")
+  netMinor        Int                                 @default(0) @map("net_minor")
+  paymentStatus   ProjectPayrollEntryPaymentStatus    @default(pending) @map("payment_status")
+  createdAt       DateTime                            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  payrollRun      ProjectPayrollRun                   @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  worker          ProjectWorker                       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([payrollRunId], map: "project_payroll_entries_run_id_idx")
+  @@index([workerId], map: "project_payroll_entries_worker_id_idx")
+  @@map("project_payroll_entries")
+}

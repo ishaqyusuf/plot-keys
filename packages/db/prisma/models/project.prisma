@@ -20,6 +20,9 @@ model Project {
   updates              ProjectUpdate[]
   issues               ProjectIssue[]
   assignments          ProjectAssignment[]
+  budget               ProjectBudget?
+  workers              ProjectWorker[]
+  payrollRuns          ProjectPayrollRun[]
 
   @@index([companyId], map: "projects_company_id_idx")
   @@index([companyId, status], map: "projects_company_status_idx")

@@ -6,11 +6,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { UpdateProjectStatusButton } from "../../../../components/projects/project-actions";
+import {
+  BudgetLineItemList,
+  BudgetSummary,
+  CreateBudgetLineForm,
+} from "../../../../components/projects/project-budget";
 import { CreateIssueForm, IssueList } from "../../../../components/projects/project-issues";
 import {
   CreateMilestoneForm,
   MilestoneList,
 } from "../../../../components/projects/project-milestones";
+import {
+  CreatePayrollRunForm,
+  PayrollRunList,
+} from "../../../../components/projects/project-payroll";
 import {
   CreatePhaseForm,
   PhaseList,
@@ -23,6 +32,10 @@ import {
   CreateUpdateForm,
   UpdatesList,
 } from "../../../../components/projects/project-updates";
+import {
+  CreateWorkerForm,
+  WorkerList,
+} from "../../../../components/projects/project-workers";
 
 type ProjectDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -115,6 +128,36 @@ export default async function ProjectDetailPage({
   const assignedMemberIds = new Set(
     project.assignments.map((a) => a.membershipId),
   );
+
+  // Fetch budget data
+  const budget = await prisma.projectBudget.findUnique({
+    where: { projectId },
+    include: {
+      lineItems: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  // Fetch workers
+  const workers = await prisma.projectWorker.findMany({
+    where: { projectId },
+    include: {
+      employee: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  // Fetch payroll runs
+  const payrollRuns = await prisma.projectPayrollRun.findMany({
+    where: { projectId },
+    include: {
+      _count: { select: { entries: true } },
+    },
+    orderBy: { periodStart: "desc" },
+  });
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
@@ -279,6 +322,61 @@ export default async function ProjectDetailPage({
               teamMembers={teamMembers}
               assignedMemberIds={assignedMemberIds}
             />
+          </CardContent>
+        </Card>
+
+        {/* Budget Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Budget</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BudgetSummary budget={budget} projectId={project.id} />
+            {budget && budget.lineItems.length > 0 && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-semibold">Line Items</h4>
+                <BudgetLineItemList
+                  lineItems={budget.lineItems}
+                  projectId={project.id}
+                  currency={budget.currency}
+                />
+              </div>
+            )}
+            {budget && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-semibold">Add Line Item</h4>
+                <CreateBudgetLineForm
+                  projectId={project.id}
+                  budgetId={budget.id}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Workers Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Site Workers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {workers.length > 0 && (
+              <WorkerList workers={workers} projectId={project.id} />
+            )}
+            <CreateWorkerForm projectId={project.id} />
+          </CardContent>
+        </Card>
+
+        {/* Payroll Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Project Payroll</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {payrollRuns.length > 0 && (
+              <PayrollRunList runs={payrollRuns} projectId={project.id} />
+            )}
+            <CreatePayrollRunForm projectId={project.id} />
           </CardContent>
         </Card>
       </div>

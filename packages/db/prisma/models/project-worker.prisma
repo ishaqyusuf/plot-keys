@@ -1,0 +1,19 @@
+model ProjectWorker {
+  id              String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId       String                  @map("project_id") @db.Uuid
+  employeeId      String?                 @map("employee_id") @db.Uuid
+  fullName        String                  @map("full_name")
+  role            String?
+  payBasis        ProjectWorkerPayBasis   @default(daily) @map("pay_basis")
+  payRateMinor    Int                     @default(0) @map("pay_rate_minor")
+  status          ProjectWorkerStatus     @default(active)
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project         Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employee        Employee?               @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  payrollEntries  ProjectPayrollEntry[]
+
+  @@index([projectId], map: "project_workers_project_id_idx")
+  @@index([projectId, status], map: "project_workers_project_status_idx")
+  @@map("project_workers")
+}
