@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tasks": "./src/tasks/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
@@ -14,7 +15,8 @@
     "@anthropic-ai/sdk": "^0.79.0",
     "@plotkeys/db": "workspace:*",
     "@plotkeys/section-registry": "workspace:*",
-    "@plotkeys/utils": "workspace:*"
+    "@plotkeys/utils": "workspace:*",
+    "@trigger.dev/sdk": "^3.3.14"
   },
   "devDependencies": {
     "@plotkeys/tsconfig": "workspace:*",

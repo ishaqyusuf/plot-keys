@@ -183,18 +183,18 @@ Give a company one operational system to manage a building or estate project end
 - Project team and project roles
 - Internal updates and issue log
 
-### Phase 2 — Finance and Workforce
+### Phase 2 — Finance and Workforce ✅
 - Budget summary and line items
 - Site worker records
 - Project payroll runs and entries
 - Financial reporting basics
 
-### Phase 3 — Customer Visibility
+### Phase 3 — Customer Visibility ✅
 - Controlled project sharing to linked customers
 - Customer-safe updates and milestone progress
 - Shared documents and notices
 
-### Phase 4 — AI and Integrations
+### Phase 4 — AI and Integrations ✅
 - AI summaries, extraction, and risk support
 - QS/BOQ assistance
 - Architectural quick-view analysis

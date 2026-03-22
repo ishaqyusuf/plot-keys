@@ -1,36 +1,33 @@
 model ProjectBudget {
-  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId            String                 @unique @map("project_id") @db.Uuid
-  currency             String                 @default("NGN")
-  approvedBudgetMinor  Int                    @default(0) @map("approved_budget_minor")
-  forecastBudgetMinor  Int                    @default(0) @map("forecast_budget_minor")
-  actualBudgetMinor    Int                    @default(0) @map("actual_budget_minor")
-  notes                String?
-  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
-  project              Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  lineItems            ProjectBudgetLineItem[]
+  id                  String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId           String                  @unique @map("project_id") @db.Uuid
+  currency            String                  @default("NGN")
+  approvedBudgetMinor Int                     @default(0) @map("approved_budget_minor")
+  forecastBudgetMinor Int                     @default(0) @map("forecast_budget_minor")
+  actualBudgetMinor   Int                     @default(0) @map("actual_budget_minor")
+  createdAt           DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project             Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lineItems           ProjectBudgetLineItem[]
 
   @@index([projectId], map: "project_budgets_project_id_idx")
   @@map("project_budgets")
 }
 
 model ProjectBudgetLineItem {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId       String        @map("project_id") @db.Uuid
-  budgetId        String        @map("budget_id") @db.Uuid
-  category        String
-  description     String
-  quantity        Decimal?      @db.Decimal(12, 3)
-  unitRateMinor   Int?          @map("unit_rate_minor")
-  estimatedMinor  Int           @default(0) @map("estimated_minor")
-  actualMinor     Int           @default(0) @map("actual_minor")
-  notes           String?
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
-  budget          ProjectBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  budgetId       String                    @map("budget_id") @db.Uuid
+  category       ProjectBudgetLineCategory @default(other)
+  description    String
+  quantity       Float?
+  unitRateMinor  Int?                      @map("unit_rate_minor")
+  estimatedMinor Int                       @default(0) @map("estimated_minor")
+  actualMinor    Int                       @default(0) @map("actual_minor")
+  notes          String?
+  createdAt      DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  budget         ProjectBudget             @relation(fields: [budgetId], references: [id], onDelete: Cascade)
 
   @@index([budgetId], map: "project_budget_line_items_budget_id_idx")
-  @@index([projectId], map: "project_budget_line_items_project_id_idx")
   @@map("project_budget_line_items")
 }

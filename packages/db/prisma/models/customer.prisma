@@ -20,6 +20,8 @@ model Customer {
   updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz(6)
   company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  projectAccess  ProjectCustomerAccess[]
+  projectNotices ProjectCustomerNotice[]
 
   @@index([companyId], map: "customers_company_id_idx")
   @@index([companyId, status], map: "customers_company_status_idx")

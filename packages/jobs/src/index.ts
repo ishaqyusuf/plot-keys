@@ -7,6 +7,7 @@ export const jobIds = {
 
 export { runInBackground, runWithRetry } from "./queue";
 export type { JobHandler, JobRecord, JobStatus, RetryOptions } from "./queue";
+export { isTriggerConfigured, triggerJob } from "./trigger";
 export { domainSyncHandler } from "./handlers/domain-sync";
 export type { DomainSyncPayload } from "./handlers/domain-sync";
 export { notificationDispatchHandler } from "./handlers/notification-dispatch";

@@ -1,16 +1,17 @@
 model ProjectMilestone {
-  id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId   String                 @map("project_id") @db.Uuid
-  phaseId     String?                @map("phase_id") @db.Uuid
-  name        String
-  status      ProjectMilestoneStatus @default(pending)
-  dueDate     DateTime?              @map("due_date") @db.Date
-  completedAt DateTime?              @map("completed_at") @db.Timestamptz(6)
-  notes       String?
-  createdAt   DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
-  project     Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  phase       ProjectPhase?          @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId       String                 @map("project_id") @db.Uuid
+  phaseId         String?                @map("phase_id") @db.Uuid
+  name            String
+  status          ProjectMilestoneStatus @default(pending)
+  dueDate         DateTime?              @map("due_date") @db.Date
+  completedAt     DateTime?              @map("completed_at") @db.Timestamptz(6)
+  notes           String?
+  customerVisible Boolean                @default(false) @map("customer_visible")
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project         Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phase           ProjectPhase?          @relation(fields: [phaseId], references: [id], onDelete: SetNull)
 
   @@index([projectId], map: "project_milestones_project_id_idx")
   @@index([projectId, status], map: "project_milestones_project_status_idx")

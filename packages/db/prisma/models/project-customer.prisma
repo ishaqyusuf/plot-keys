@@ -1,0 +1,35 @@
+model ProjectCustomerAccess {
+  id         String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId  String                    @map("project_id") @db.Uuid
+  customerId String                    @map("customer_id") @db.Uuid
+  level      ProjectCustomerAccessLevel @default(overview)
+  enabledAt  DateTime                  @default(now()) @map("enabled_at") @db.Timestamptz(6)
+  disabledAt DateTime?                 @map("disabled_at") @db.Timestamptz(6)
+  createdAt  DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project    Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  customer   Customer                  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, customerId], map: "project_customer_access_project_customer_uniq")
+  @@index([projectId], map: "project_customer_access_project_id_idx")
+  @@index([customerId], map: "project_customer_access_customer_id_idx")
+  @@map("project_customer_access")
+}
+
+model ProjectCustomerNotice {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId  String   @map("project_id") @db.Uuid
+  customerId String   @map("customer_id") @db.Uuid
+  title      String
+  body       String
+  postedAt   DateTime @default(now()) @map("posted_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([projectId], map: "project_customer_notices_project_id_idx")
+  @@index([customerId], map: "project_customer_notices_customer_id_idx")
+  @@index([projectId, postedAt], map: "project_customer_notices_project_posted_idx")
+  @@map("project_customer_notices")
+}

@@ -40,15 +40,15 @@ This file holds actionable work that is identified but not currently in progress
 
 - [x] **Email Template Expansion** — Added `new-lead.tsx` and `site-published.tsx` email templates; created `new_lead_captured` and `site_published` notification type definitions; wired email dispatch in EmailService. ✅ Done (new lead + site published)
 - [x] **Notification Dashboard UI** — `/notifications` page exists with history/filtering; notification bell in header with popover dropdown and unread badge; `/settings/notifications` preferences page with per-type in-app/email toggles; `NotificationPreference` Prisma model. ✅ Done
-- [ ] **Tenant Onboarding Improvements** — Allow rerunning template recommendation when core inputs change; add AI bootstrap for hero/intro/CTA copy from onboarding data.
+- [x] **Tenant Onboarding Improvements** — Re-run template recommendation from builder page when core inputs change (business type, goal, style, tone); AI bootstrap for hero/intro/CTA copy from onboarding data (15 credits). ✅ Done
 - [x] **SubmitButton + Form Standardization** — SubmitButton primitive in `packages/ui` with auto-pending state; adopted across 6 dashboard form pages (leave, employees, departments, payroll, settings, ai-credits). ✅ Done
 - [x] **Tenant Domain Status Surfaces** — Inline alerts on dashboard home for failed (destructive) and pending (amber) domains with action buttons. ✅ Done
 
 ## Phase 3 — Growth & Monetization
 
-- [ ] **Trigger.dev Job Integration** — Replace custom queue handlers with real Trigger.dev tasks; add retry logic and monitoring for domainSync, planSync, siteContentGeneration, notificationDispatch.
-- [ ] **Chat-bot LLM Integration** — Connect chat-bot to Anthropic/OpenAI for tenant-site visitor Q&A; add UI widget for tenant sites.
-- [ ] **App Store Expansion** — Add integrations beyond WhatsApp: Google Analytics, Facebook Pixel, Calendly, property listing portals.
+- [x] **Trigger.dev Job Integration** — Added `@trigger.dev/sdk`, created 4 task definitions (domain-sync, plan-sync, notification-dispatch, site-content-generation) with per-task retry config, `triggerJob()` dual-mode dispatch (Trigger.dev when configured, in-memory fallback), `trigger.config.ts` at root, wired form submissions to dispatch notification jobs. ✅ Done
+- [x] **Chat-bot LLM Integration** — Expanded `@plotkeys/chat-bot` with Anthropic Claude Haiku 4.5 chat completion, context-aware system prompt (company, properties, agents, business summary). Added `chat` tRPC router with `sendMessage` mutation. Created `/api/chat` route in tenant-site. Built floating `ChatWidget` component with message thread, typing indicator. Widget injected into tenant-site layout via server-resolved subdomain. ✅ Done
+- [x] **App Store Expansion** — Created `/app-store` dashboard page with integration cards (GA, Facebook Pixel, WhatsApp, Calendly) showing connect/disconnect status. Created `IntegrationScripts` component that injects GA4 and Facebook Pixel `<Script>` tags into tenant sites. Sidebar App Store link now functional. ✅ Done
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
 - [ ] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting.
 

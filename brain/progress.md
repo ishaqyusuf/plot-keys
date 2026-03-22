@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-21)
+## Current State (as of 2026-03-22)
 
 ### What's Built & Working
 | Area | Status |
@@ -29,7 +29,7 @@
 | Notifications (event system, 10 types) | ✅ Done |
 | Notification bell in header + preferences page | ✅ Done |
 | SubmitButton adoption (6 forms) | ✅ Done |
-| Jobs (custom queue, 4 handlers) | 🟡 Partial |
+| Jobs (custom queue, 4 handlers) | ✅ Done (Trigger.dev) |
 | Listing categories & types | ✅ Done |
 | Settings expansion | ✅ Done |
 | Customer model + lead promotion | ✅ Done |
@@ -40,10 +40,201 @@
 | Payroll page (monthly records + mark paid) | ✅ Done |
 | Listing analytics card (property detail) | ✅ Done |
 | Agent performance analytics | ✅ Done |
-| Chat-bot | 🟡 Scaffolded |
-| App-store (WhatsApp only) | 🟡 Scaffolded |
+| Chat-bot | ✅ Done (LLM + Widget) |
+| App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
+| Construction Phase 3 (Customer Visibility) | ✅ Done |
+| Construction Phase 4 (AI & Integrations) | ✅ Done |
+| Tenant Onboarding Improvements | ✅ Done |
+| Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-22 — App Store Expansion
+
+### Dashboard App Store Page (`/app-store`)
+- Integration cards for Google Analytics, Facebook Pixel, WhatsApp Business, Calendly
+- Each card shows connection status (Connected/Not connected badge)
+- Links to `/settings/integrations` for credential configuration
+- External docs links for each integration
+
+### Tenant-Site Integration Script Injection
+- `IntegrationScripts` client component at `apps/tenant-site/src/components/integration-scripts.tsx`
+- Injects GA4 `<Script>` tag (gtag.js + config) when `googleAnalyticsId` is configured
+- Injects Facebook Pixel `<Script>` tag (fbevents.js + PageView tracking) when `facebookPixelId` is configured
+- Uses Next.js `<Script>` with `strategy="afterInteractive"` for non-blocking load
+- Integration data fetched in tenant-site `layout.tsx` via `resolveIntegrations()` helper
+
+### Sidebar Navigation
+- App Store sidebar item changed from disabled `#` link to active `/app-store` route
+- Removed "Coming" badge
+
+---
+
+## 2026-03-22 — Chat-bot LLM Integration
+
+### Chat-bot Package (`packages/chat-bot`)
+- Expanded with Anthropic Claude Haiku 4.5 integration
+- `getChatCompletion()` — sends conversation with company-context system prompt, returns AI reply
+- `buildChatBotSystemPrompt()` — builds context from company name, market, properties (up to 10), agents (up to 10), business summary
+- Types: `ChatBotMessage`, `ChatBotContext`, `ChatBotResponse`
+- Added `@anthropic-ai/sdk` dependency
+
+### API Chat Router (`apps/api/src/routers/chat.route.ts`)
+- `chat.sendMessage` public mutation — resolves company from subdomain, builds context from properties/agents/onboarding, calls `getChatCompletion()`
+- Validates messages (min 1, max 50, 2000 chars per message)
+- Returns `{ reply: string }`
+
+### Tenant-Site Chat (`apps/tenant-site`)
+- `/api/chat` route — standalone API endpoint for chat (follows existing contact/track pattern)
+- `ChatWidget` client component — floating button (bottom-right), slide-up chat panel, message thread, typing indicator, auto-scroll
+- Widget added to root layout — only renders when subdomain is resolved via server-side header check
+
+---
+
+## 2026-03-22 — Trigger.dev Job Integration
+
+### Task Definitions
+- Created 4 Trigger.dev task definitions in `packages/jobs/src/tasks/`:
+  - `domainSyncTask` (id: `domains.connection.sync`) — 4 retries, 2s base delay
+  - `planSyncTask` (id: `plans.sync`) — 4 retries, 2s base delay
+  - `notificationDispatchTask` (id: `notifications.dispatch`) — 3 retries, 1s base delay
+  - `siteContentGenerationTask` (id: `website.content.generate`) — 3 retries, 3s base delay
+
+### Dispatch Utility
+- Added `triggerJob()` in `packages/jobs/src/trigger.ts` — dual-mode dispatch
+- Uses Trigger.dev `tasks.trigger()` when `TRIGGER_SECRET_KEY` is set
+- Falls back to in-memory `runInBackground()` for local dev / environments without Trigger.dev
+- Added `isTriggerConfigured()` helper
+
+### Configuration
+- Created `trigger.config.ts` at monorepo root with project config and default retry settings
+- Added `@trigger.dev/sdk` dependency to `packages/jobs`
+- Added `./tasks` subpath export in `packages/jobs/package.json`
+
+### Workspace Route Updates
+- Replaced `runInBackground(domainSyncHandler, ...)` with `triggerJob(domainSyncTask, domainSyncHandler, ...)`
+- Both call sites (onboarding completion + manual domain sync) now use `triggerJob()`
+
+### Form Notification Wiring
+- `submitContact` now dispatches `contact_form` notification job
+- `submitInquiry` now dispatches `property_inquiry` notification job
+- `submitNewsletterSignup` now dispatches `newsletter_signup` notification job
+- All use `triggerJob()` with fire-and-forget pattern (non-blocking)
+
+---
+
+## 2026-03-22 — Tenant Onboarding Improvements
+
+### Re-run Template Recommendations
+- Added `updateOnboardingInputs` tRPC mutation in workspace.route.ts
+- Accepts optional businessType, primaryGoal, stylePreference, tone updates
+- Re-derives profile (segment, designIntent, conversionFocus, complexity) and returns updated recommendations
+- `RecommendTemplatePanel` dialog component on builder sidebar with dropdowns for all 4 inputs
+
+### AI Content Bootstrap
+- Added `generateOnboardingContent()` to `lib.ai.ts` using Claude Haiku 4.5
+- Generates 8 content fields: hero.eyebrow, hero.title, hero.subtitle, cta.headline, cta.description, cta.buttonLabel, story.title, story.description
+- Returns JSON object, merged into active draft WebsiteVersion + dual-write to legacy SiteConfiguration
+- Added `bootstrapAiContent` tRPC mutation (15 credits, deduction + usage logging)
+- `AiContentBootstrapButton` component on builder sidebar
+- Added `onboarding_content: 15` to AI_CREDIT_COSTS
+
+### Builder Page Updates
+- Added "Onboarding tools" section to builder sidebar with both buttons
+- Fetches onboarding record server-side to pre-populate the RecommendTemplatePanel dropdowns
+
+---
+
+## 2026-03-22 — Construction Phase 4: AI and Integrations
+
+### AI Project Summary
+- Added `generateProjectSummary()` to `lib.ai.ts` using Claude Haiku 4.5
+- Generates 3-5 paragraph executive summary covering status, milestones, issues, budget, and recommendations
+- Deducts 10 AI credits per generation (`project_summary` feature)
+
+### AI Risk Flags
+- Added `generateProjectRiskFlags()` to `lib.ai.ts`
+- Detects overdue milestones, budget overruns (actual > approved), high-severity unresolved issues, stale projects
+- Returns structured JSON array with severity, title, and detail per risk
+- Deducts 5 AI credits per analysis (`project_risk_flags` feature)
+
+### AI Customer Update Draft
+- Added `generateCustomerUpdateDraft()` to `lib.ai.ts`
+- Generates customer-safe progress update from internal project data
+- Strips internal issues, delays, budget, payroll details — focuses on milestones and progress
+- Deducts 5 AI credits per generation (`project_customer_draft` feature)
+
+### Technical
+- Added `ProjectAiContext` type to `lib.ai.ts` for structured project data input to AI
+- Added `buildProjectAiContext()` helper in projects router for data assembly
+- Added 3 tRPC mutation procedures: `generateSummary`, `getRiskFlags`, `generateCustomerDraft`
+- Created `project-ai.tsx` client component with `ProjectAiInsights` card, `GenerateSummaryButton`, `RiskFlagsButton`, `GenerateCustomerDraftButton`
+- Updated `/projects/[id]` detail page with AI Insights section (between Payroll and Customer Access)
+- Credit deduction and usage logging on each successful AI generation
+
+---
+
+## 2026-03-22 — Construction Phase 3: Customer Project Visibility
+
+### Customer Access Management
+- Added `ProjectCustomerAccess` model linking customers to projects with access levels (overview, detailed)
+- Added `ProjectCustomerAccessLevel` enum (overview, detailed)
+- Grant/revoke access per customer per project with upsert pattern
+- Staff can list customers with access and manage access levels
+
+### Customer-Visible Content Controls
+- Added `customerVisible` boolean to `ProjectUpdate` model (default false)
+- Added `customerVisible` boolean to `ProjectMilestone` model (default false)
+- Share/Hide toggle buttons on milestones and updates in staff dashboard
+- Documents already support `visibility: shared` for customer access
+
+### Customer Notices
+- Added `ProjectCustomerNotice` model for staff-to-customer project notices
+- Staff can send titled notices to specific customers with project access
+- Notice creation form integrated into project detail page
+
+### Technical
+- Created `project-customer.ts` query module with 10 functions (access CRUD, customer-safe reads, visibility toggles)
+- Added 7 tRPC procedures to projects router (listCustomerAccess, grantCustomerAccess, revokeCustomerAccess, createCustomerNotice, deleteCustomerNotice, toggleMilestoneVisibility, toggleUpdateVisibility)
+- Created `project-customer-access.tsx` component (CustomerAccessList, GrantCustomerAccessForm, SendNoticeForm)
+- Updated MilestoneList and UpdatesList with "Share"/"Hide" buttons and "Customer Visible" badges
+- Updated `/projects/[id]` detail page with Customer Access card section
+
+---
+
+## 2026-03-22 — Construction Phase 2: Budget, Workers, Payroll
+
+### Budget Tracking
+- Added `ProjectBudget` model with approved/forecast/actual amounts
+- Added `ProjectBudgetLineItem` model with category, quantity, rates, estimated/actual
+- Added `ProjectBudgetLineCategory` enum (preliminaries, substructure, superstructure, mep, finishing, external_works, contingency, professional_fees, other)
+- Budget upsert pattern: one budget per project with line items
+- Budget summary shows approved, forecast, actual, and variance
+- Line item management with category badges, estimated/actual amounts
+
+### Site Workers
+- Added `ProjectWorker` model linked to Project and optionally to Employee
+- Added `ProjectWorkerPayBasis` enum (daily, weekly, monthly, fixed_contract, milestone_based)
+- Added `ProjectWorkerStatus` enum (active, inactive, terminated)
+- Worker list with status management and pay info display
+- Create worker form with name, role, pay basis, and pay rate
+
+### Project Payroll
+- Added `ProjectPayrollRun` model with period dates and status tracking
+- Added `ProjectPayrollEntry` model linked to payroll run and worker
+- Added `ProjectPayrollRunStatus` enum (draft, finalized, paid)
+- Added `ProjectPayrollEntryPaymentStatus` enum (pending, paid, on_hold)
+- Payroll run list with finalize/mark-paid workflow
+- Create payroll run form with period date selection
+
+### Technical
+- Created `project-finance.ts` query module in packages/db with full CRUD
+- Added 15 tRPC procedures to the projects router
+- Created 3 client components: project-budget.tsx, project-workers.tsx, project-payroll.tsx
+- Updated `/projects/[id]` detail page with Budget, Site Workers, and Project Payroll card sections
 
 ---
 
