@@ -45,6 +45,35 @@
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
+| Construction Phase 3 (Customer Visibility) | ✅ Done |
+
+---
+
+## 2026-03-22 — Construction Phase 3: Customer Project Visibility
+
+### Customer Access Management
+- Added `ProjectCustomerAccess` model linking customers to projects with access levels (overview, detailed)
+- Added `ProjectCustomerAccessLevel` enum (overview, detailed)
+- Grant/revoke access per customer per project with upsert pattern
+- Staff can list customers with access and manage access levels
+
+### Customer-Visible Content Controls
+- Added `customerVisible` boolean to `ProjectUpdate` model (default false)
+- Added `customerVisible` boolean to `ProjectMilestone` model (default false)
+- Share/Hide toggle buttons on milestones and updates in staff dashboard
+- Documents already support `visibility: shared` for customer access
+
+### Customer Notices
+- Added `ProjectCustomerNotice` model for staff-to-customer project notices
+- Staff can send titled notices to specific customers with project access
+- Notice creation form integrated into project detail page
+
+### Technical
+- Created `project-customer.ts` query module with 10 functions (access CRUD, customer-safe reads, visibility toggles)
+- Added 7 tRPC procedures to projects router (listCustomerAccess, grantCustomerAccess, revokeCustomerAccess, createCustomerNotice, deleteCustomerNotice, toggleMilestoneVisibility, toggleUpdateVisibility)
+- Created `project-customer-access.tsx` component (CustomerAccessList, GrantCustomerAccessForm, SendNoticeForm)
+- Updated MilestoneList and UpdatesList with "Share"/"Hide" buttons and "Customer Visible" badges
+- Updated `/projects/[id]` detail page with Customer Access card section
 
 ---
 

@@ -33,3 +33,4 @@ This file maps near-term engineering execution in a practical order.
 23. Build internal construction project core for Plus and Pro tenants
 24. Add project budgets, site workforce, and project payroll workflows
 25. Add customer-facing project interface for approved progress visibility
+26. Add AI-powered project reporting and integrations (Phase 4)

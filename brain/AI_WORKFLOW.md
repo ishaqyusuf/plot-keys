@@ -31,7 +31,7 @@ This file defines how AI agents should work in this repository before and after 
 - Task movement -> update task files
 
 ## "Next High Priority Task" Protocol
-When the user prompts **"next high priority task"**, follow this sequence:
+When the user prompts with any of these (or similar variations): **"next high priority task"**, **"next task"**, **"what's next"**, follow this sequence:
 
 1. Read `brain/tasks/in-progress.md`, `brain/tasks/backlog.md`, `brain/tasks/roadmap.md`, and `brain/progress.md` to identify the next uncompleted task in priority order.
 2. Priority order: roadmap sequence → backlog phase order → feature plan phase order.
