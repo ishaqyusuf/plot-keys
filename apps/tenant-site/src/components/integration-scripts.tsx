@@ -7,6 +7,11 @@ type IntegrationScriptsProps = {
   facebookPixelId?: string | null;
 };
 
+/** Strip everything except alphanumerics and hyphens to prevent script injection. */
+function sanitizeId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9-]/g, "");
+}
+
 /**
  * Injects third-party tracking scripts (GA4, Facebook Pixel) into
  * the tenant site based on the company's configured integrations.
@@ -19,25 +24,28 @@ export function IntegrationScripts({
 }: IntegrationScriptsProps) {
   if (!googleAnalyticsId && !facebookPixelId) return null;
 
+  const safeGaId = googleAnalyticsId ? sanitizeId(googleAnalyticsId) : null;
+  const safeFbId = facebookPixelId ? sanitizeId(facebookPixelId) : null;
+
   return (
     <>
       {/* Google Analytics 4 */}
-      {googleAnalyticsId && (
+      {safeGaId && (
         <>
           <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(googleAnalyticsId)}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${safeGaId}`}
             strategy="afterInteractive"
           />
           <Script id="ga4-init" strategy="afterInteractive">
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${googleAnalyticsId.replace(/'/g, "")}');`}
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${safeGaId}');`}
           </Script>
         </>
       )}
 
       {/* Facebook Pixel */}
-      {facebookPixelId && (
+      {safeFbId && (
         <Script id="fb-pixel-init" strategy="afterInteractive">
-          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${facebookPixelId.replace(/'/g, "")}');fbq('track','PageView');`}
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${safeFbId}');fbq('track','PageView');`}
         </Script>
       )}
     </>

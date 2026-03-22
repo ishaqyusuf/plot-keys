@@ -48,7 +48,7 @@ This file holds actionable work that is identified but not currently in progress
 
 - [x] **Trigger.dev Job Integration** — Added `@trigger.dev/sdk`, created 4 task definitions (domain-sync, plan-sync, notification-dispatch, site-content-generation) with per-task retry config, `triggerJob()` dual-mode dispatch (Trigger.dev when configured, in-memory fallback), `trigger.config.ts` at root, wired form submissions to dispatch notification jobs. ✅ Done
 - [x] **Chat-bot LLM Integration** — Expanded `@plotkeys/chat-bot` with Anthropic Claude Haiku 4.5 chat completion, context-aware system prompt (company, properties, agents, business summary). Added `chat` tRPC router with `sendMessage` mutation. Created `/api/chat` route in tenant-site. Built floating `ChatWidget` component with message thread, typing indicator. Widget injected into tenant-site layout via server-resolved subdomain. ✅ Done
-- [ ] **App Store Expansion** — Add integrations beyond WhatsApp: Google Analytics, Facebook Pixel, Calendly, property listing portals.
+- [x] **App Store Expansion** — Created `/app-store` dashboard page with integration cards (GA, Facebook Pixel, WhatsApp, Calendly) showing connect/disconnect status. Created `IntegrationScripts` component that injects GA4 and Facebook Pixel `<Script>` tags into tenant sites. Sidebar App Store link now functional. ✅ Done
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
 - [ ] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting.
 

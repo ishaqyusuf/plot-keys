@@ -31,19 +31,16 @@ async function resolveIntegrations(subdomain: string | null): Promise<{
 
   const company = await prisma.company.findFirst({
     where: { slug: subdomain, deletedAt: null },
-    select: { id: true },
-  });
-
-  if (!company) return {};
-
-  const integration = await prisma.companyIntegration.findUnique({
-    where: { companyId: company.id },
-    select: { googleAnalyticsId: true, facebookPixelId: true },
+    select: {
+      integration: {
+        select: { googleAnalyticsId: true, facebookPixelId: true },
+      },
+    },
   });
 
   return {
-    googleAnalyticsId: integration?.googleAnalyticsId,
-    facebookPixelId: integration?.facebookPixelId,
+    googleAnalyticsId: company?.integration?.googleAnalyticsId,
+    facebookPixelId: company?.integration?.facebookPixelId,
   };
 }
 

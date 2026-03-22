@@ -41,7 +41,7 @@
 | Listing analytics card (property detail) | ✅ Done |
 | Agent performance analytics | ✅ Done |
 | Chat-bot | ✅ Done (LLM + Widget) |
-| App-store (WhatsApp only) | 🟡 Scaffolded |
+| App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -49,6 +49,27 @@
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-22 — App Store Expansion
+
+### Dashboard App Store Page (`/app-store`)
+- Integration cards for Google Analytics, Facebook Pixel, WhatsApp Business, Calendly
+- Each card shows connection status (Connected/Not connected badge)
+- Links to `/settings/integrations` for credential configuration
+- External docs links for each integration
+
+### Tenant-Site Integration Script Injection
+- `IntegrationScripts` client component at `apps/tenant-site/src/components/integration-scripts.tsx`
+- Injects GA4 `<Script>` tag (gtag.js + config) when `googleAnalyticsId` is configured
+- Injects Facebook Pixel `<Script>` tag (fbevents.js + PageView tracking) when `facebookPixelId` is configured
+- Uses Next.js `<Script>` with `strategy="afterInteractive"` for non-blocking load
+- Integration data fetched in tenant-site `layout.tsx` via `resolveIntegrations()` helper
+
+### Sidebar Navigation
+- App Store sidebar item changed from disabled `#` link to active `/app-store` route
+- Removed "Coming" badge
 
 ---
 
