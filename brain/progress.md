@@ -47,6 +47,29 @@
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
+| Tenant Onboarding Improvements | ✅ Done |
+
+---
+
+## 2026-03-22 — Tenant Onboarding Improvements
+
+### Re-run Template Recommendations
+- Added `updateOnboardingInputs` tRPC mutation in workspace.route.ts
+- Accepts optional businessType, primaryGoal, stylePreference, tone updates
+- Re-derives profile (segment, designIntent, conversionFocus, complexity) and returns updated recommendations
+- `RecommendTemplatePanel` dialog component on builder sidebar with dropdowns for all 4 inputs
+
+### AI Content Bootstrap
+- Added `generateOnboardingContent()` to `lib.ai.ts` using Claude Haiku 4.5
+- Generates 8 content fields: hero.eyebrow, hero.title, hero.subtitle, cta.headline, cta.description, cta.buttonLabel, story.title, story.description
+- Returns JSON object, merged into active draft WebsiteVersion + dual-write to legacy SiteConfiguration
+- Added `bootstrapAiContent` tRPC mutation (15 credits, deduction + usage logging)
+- `AiContentBootstrapButton` component on builder sidebar
+- Added `onboarding_content: 15` to AI_CREDIT_COSTS
+
+### Builder Page Updates
+- Added "Onboarding tools" section to builder sidebar with both buttons
+- Fetches onboarding record server-side to pre-populate the RecommendTemplatePanel dropdowns
 
 ---
 
