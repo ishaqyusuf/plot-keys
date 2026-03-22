@@ -47,7 +47,7 @@ This file holds actionable work that is identified but not currently in progress
 ## Phase 3 — Growth & Monetization
 
 - [x] **Trigger.dev Job Integration** — Added `@trigger.dev/sdk`, created 4 task definitions (domain-sync, plan-sync, notification-dispatch, site-content-generation) with per-task retry config, `triggerJob()` dual-mode dispatch (Trigger.dev when configured, in-memory fallback), `trigger.config.ts` at root, wired form submissions to dispatch notification jobs. ✅ Done
-- [ ] **Chat-bot LLM Integration** — Connect chat-bot to Anthropic/OpenAI for tenant-site visitor Q&A; add UI widget for tenant sites.
+- [x] **Chat-bot LLM Integration** — Expanded `@plotkeys/chat-bot` with Anthropic Claude Haiku 4.5 chat completion, context-aware system prompt (company, properties, agents, business summary). Added `chat` tRPC router with `sendMessage` mutation. Created `/api/chat` route in tenant-site. Built floating `ChatWidget` component with message thread, typing indicator. Widget injected into tenant-site layout via server-resolved subdomain. ✅ Done
 - [ ] **App Store Expansion** — Add integrations beyond WhatsApp: Google Analytics, Facebook Pixel, Calendly, property listing portals.
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
 - [ ] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting.

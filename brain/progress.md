@@ -40,7 +40,7 @@
 | Payroll page (monthly records + mark paid) | ✅ Done |
 | Listing analytics card (property detail) | ✅ Done |
 | Agent performance analytics | ✅ Done |
-| Chat-bot | 🟡 Scaffolded |
+| Chat-bot | ✅ Done (LLM + Widget) |
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
@@ -49,6 +49,27 @@
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-22 — Chat-bot LLM Integration
+
+### Chat-bot Package (`packages/chat-bot`)
+- Expanded with Anthropic Claude Haiku 4.5 integration
+- `getChatCompletion()` — sends conversation with company-context system prompt, returns AI reply
+- `buildChatBotSystemPrompt()` — builds context from company name, market, properties (up to 10), agents (up to 10), business summary
+- Types: `ChatBotMessage`, `ChatBotContext`, `ChatBotResponse`
+- Added `@anthropic-ai/sdk` dependency
+
+### API Chat Router (`apps/api/src/routers/chat.route.ts`)
+- `chat.sendMessage` public mutation — resolves company from subdomain, builds context from properties/agents/onboarding, calls `getChatCompletion()`
+- Validates messages (min 1, max 50, 2000 chars per message)
+- Returns `{ reply: string }`
+
+### Tenant-Site Chat (`apps/tenant-site`)
+- `/api/chat` route — standalone API endpoint for chat (follows existing contact/track pattern)
+- `ChatWidget` client component — floating button (bottom-right), slide-up chat panel, message thread, typing indicator, auto-scroll
+- Widget added to root layout — only renders when subdomain is resolved via server-side header check
 
 ---
 
