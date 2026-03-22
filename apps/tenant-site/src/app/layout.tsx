@@ -8,10 +8,17 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
+import { ChatWidget } from "../components/chat-widget";
+
 const fallbackMetadata: Metadata = {
   title: "PlotKeys Tenant Site",
   description: "Structured tenant website renderer for PlotKeys",
 };
+
+async function resolveSubdomain(): Promise<string | null> {
+  const requestHeaders = await headers();
+  return requestHeaders.get("x-tenant-subdomain") || null;
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -81,7 +88,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return metadata;
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const subdomain = await resolveSubdomain();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -92,6 +101,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           enableSystem
         >
           <NotificationsProvider>{children}</NotificationsProvider>
+          {subdomain && <ChatWidget subdomain={subdomain} />}
         </ThemeProvider>
       </body>
     </html>

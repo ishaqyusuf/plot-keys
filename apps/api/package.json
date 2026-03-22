@@ -19,6 +19,7 @@
     "@anthropic-ai/sdk": "^0.79.0",
     "@hono/node-server": "^1.13.0",
     "@plotkeys/auth": "workspace:*",
+    "@plotkeys/chat-bot": "workspace:*",
     "@plotkeys/db": "workspace:*",
     "@plotkeys/jobs": "workspace:*",
     "@plotkeys/notifications": "workspace:*",
