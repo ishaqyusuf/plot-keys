@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-21)
+## Current State (as of 2026-03-22)
 
 ### What's Built & Working
 | Area | Status |
@@ -44,6 +44,40 @@
 | App-store (WhatsApp only) | 🟡 Scaffolded |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
+
+---
+
+## 2026-03-22 — Construction Phase 2: Budget, Workers, Payroll
+
+### Budget Tracking
+- Added `ProjectBudget` model with approved/forecast/actual amounts
+- Added `ProjectBudgetLineItem` model with category, quantity, rates, estimated/actual
+- Added `ProjectBudgetLineCategory` enum (preliminaries, substructure, superstructure, mep, finishing, external_works, contingency, professional_fees, other)
+- Budget upsert pattern: one budget per project with line items
+- Budget summary shows approved, forecast, actual, and variance
+- Line item management with category badges, estimated/actual amounts
+
+### Site Workers
+- Added `ProjectWorker` model linked to Project and optionally to Employee
+- Added `ProjectWorkerPayBasis` enum (daily, weekly, monthly, fixed_contract, milestone_based)
+- Added `ProjectWorkerStatus` enum (active, inactive, terminated)
+- Worker list with status management and pay info display
+- Create worker form with name, role, pay basis, and pay rate
+
+### Project Payroll
+- Added `ProjectPayrollRun` model with period dates and status tracking
+- Added `ProjectPayrollEntry` model linked to payroll run and worker
+- Added `ProjectPayrollRunStatus` enum (draft, finalized, paid)
+- Added `ProjectPayrollEntryPaymentStatus` enum (pending, paid, on_hold)
+- Payroll run list with finalize/mark-paid workflow
+- Create payroll run form with period date selection
+
+### Technical
+- Created `project-finance.ts` query module in packages/db with full CRUD
+- Added 15 tRPC procedures to the projects router
+- Created 3 client components: project-budget.tsx, project-workers.tsx, project-payroll.tsx
+- Updated `/projects/[id]` detail page with Budget, Site Workers, and Project Payroll card sections
 
 ---
 

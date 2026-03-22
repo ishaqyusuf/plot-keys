@@ -9,16 +9,4 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-### Construction Project Management — Phase 1 (Internal Project Core)
-- [x] Created Prisma enums: ProjectStatus, ProjectType, ProjectPhaseStatus, ProjectMilestoneStatus, ProjectDocumentKind, ProjectDocumentVisibility, ProjectUpdateKind, ProjectIssueSeverity, ProjectIssueStatus, ProjectRole, ProjectAssignmentStatus
-- [x] Created Prisma models: Project, ProjectPhase, ProjectMilestone, ProjectDocument, ProjectUpdate, ProjectIssue, ProjectAssignment
-- [x] Added Company→projects and Membership→projectAssignments relations
-- [x] Created project query module with CRUD for all entities (packages/db/src/queries/project.ts)
-- [x] Exported project queries from @plotkeys/db index and package.json exports map
-- [x] Created tRPC projects router (apps/api/src/routers/projects.route.ts) with all mutations and queries
-- [x] Created client components using useMutation for all project forms and actions
-- [x] Created /projects list page with create form, status filters, and project cards
-- [x] Created /projects/[id] detail page with phases, milestones, updates, issues, and team sections
-- [x] Added "Construction" nav group with Projects item to dashboard sidebar
-
-Next: Run migration, test pages, or continue with Phase 2 (Budget and Workforce).
+(No active tasks.)
