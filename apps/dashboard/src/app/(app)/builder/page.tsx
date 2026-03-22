@@ -1,5 +1,6 @@
 import {
   createPrismaClient,
+  findTenantOnboardingByUserId,
   listAgentsForCompany,
   listFeaturedProperties,
 } from "@plotkeys/db";
@@ -30,6 +31,10 @@ import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { BuilderPreviewPanel } from "../../../components/builder/builder-preview-panel";
 import { BuilderSidebarControls } from "../../../components/builder/builder-sidebar-controls";
 import { BuilderSidebarDrawer } from "../../../components/builder/builder-sidebar-drawer";
+import {
+  AiContentBootstrapButton,
+  RecommendTemplatePanel,
+} from "../../../components/builder/onboarding-tools";
 import { PublishConfirmationDialog } from "../../../components/builder/publish-confirmation-dialog";
 import { requireOnboardedSession } from "../../../lib/session";
 import {
@@ -144,11 +149,12 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
       ?.name ?? activeConfiguration.templateKey;
 
   // Fetch live property + agent data for PropertyGrid and AgentShowcase sections
-  const [featuredProperties, agents] = await Promise.all([
+  const [featuredProperties, agents, onboarding] = await Promise.all([
     listFeaturedProperties(prisma, session.activeMembership.companyId),
     listAgentsForCompany(prisma, session.activeMembership.companyId, {
       limit: 10,
     }),
+    findTenantOnboardingByUserId(prisma, session.user.id),
   ]);
 
   const preview = resolveWebsitePresentation({
@@ -260,6 +266,21 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                     {preview.page.sections.length} sections
                   </Badge>
                 </div>
+              </section>
+
+              <Separator />
+
+              <section className="flex flex-col gap-2">
+                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                  Onboarding tools
+                </p>
+                <AiContentBootstrapButton />
+                <RecommendTemplatePanel
+                  currentBusinessType={onboarding?.businessType}
+                  currentPrimaryGoal={onboarding?.primaryGoal}
+                  currentStylePreference={onboarding?.stylePreference}
+                  currentTone={onboarding?.tone}
+                />
               </section>
             </div>
           </div>

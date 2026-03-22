@@ -76,6 +76,103 @@ export async function generateFieldContent(
 }
 
 // ---------------------------------------------------------------------------
+// Onboarding AI — Bootstrap hero/intro/CTA copy from onboarding context
+// ---------------------------------------------------------------------------
+
+export type OnboardingContentContext = {
+  businessSummary?: string | null;
+  businessType?: string | null;
+  companyName: string;
+  designIntent?: string | null;
+  locations?: string[];
+  market?: string | null;
+  primaryGoal?: string | null;
+  segment?: string | null;
+  tagline?: string | null;
+  tone?: string | null;
+};
+
+/**
+ * Generates hero title, hero subtitle, CTA text, and story section copy
+ * from onboarding context using Claude Haiku 4.5.
+ * Returns null if the API key is not configured.
+ */
+export async function generateOnboardingContent(
+  ctx: OnboardingContentContext,
+): Promise<Record<string, string> | null> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return null;
+  }
+
+  const client = getAnthropicClient();
+
+  const market =
+    ctx.market ??
+    (ctx.locations ?? []).filter(Boolean).join(", ") ??
+    "your area";
+
+  const contextBlock = [
+    `Company: ${ctx.companyName}`,
+    ctx.tagline ? `Tagline: ${ctx.tagline}` : null,
+    ctx.businessType ? `Business type: ${ctx.businessType}` : null,
+    ctx.segment ? `Segment: ${ctx.segment}` : null,
+    ctx.designIntent ? `Design intent: ${ctx.designIntent}` : null,
+    ctx.primaryGoal ? `Primary goal: ${ctx.primaryGoal}` : null,
+    ctx.tone ? `Tone: ${ctx.tone}` : null,
+    `Market: ${market}`,
+    ctx.businessSummary
+      ? `Business profile: ${ctx.businessSummary}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const userMessage = [
+    contextBlock,
+    "",
+    "Generate website copy for this real-estate business. Return ONLY a JSON object with these exact keys:",
+    "",
+    '  "hero.eyebrow": A short premium label (5-10 words) that appears above the hero title.',
+    '  "hero.title": A compelling hero headline (6-12 words) that speaks to the target audience.',
+    '  "hero.subtitle": A supporting paragraph (1-2 sentences) expanding on the hero title.',
+    '  "cta.headline": A call-to-action section title (4-8 words).',
+    '  "cta.description": A brief CTA description (1-2 sentences) encouraging action.',
+    '  "cta.buttonLabel": A CTA button label (2-4 words).',
+    '  "story.title": A brand story section heading (5-10 words).',
+    '  "story.description": A brand story paragraph (2-3 sentences) about the company.',
+    "",
+    "Guidelines:",
+    "- Write in a confident, professional tone appropriate for the business segment.",
+    "- Reference the company name and market where natural.",
+    "- Match the specified design intent and tone.",
+    "- Do NOT use generic filler or placeholder text.",
+    "",
+    "Return ONLY valid JSON — no markdown, no explanation, no wrapping.",
+  ].join("\n");
+
+  const response = await client.messages.create({
+    max_tokens: 512,
+    messages: [{ role: "user", content: userMessage }],
+    model: "claude-haiku-4-5",
+    system:
+      "You are a real-estate website copywriter specializing in brand-first websites. " +
+      "Generate polished, segment-appropriate copy. Return only a JSON object with the requested keys.",
+  });
+
+  const textBlock = response.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") return null;
+
+  try {
+    const parsed = JSON.parse(textBlock.text.trim());
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+      return null;
+    return parsed as Record<string, string>;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Project AI — Summary, Risk Flags, Customer Draft
 // ---------------------------------------------------------------------------
 

@@ -30,6 +30,7 @@ import {
   grantAiCredits,
   grantStockImageLicense,
   grantTemplateLicense,
+  hasEnoughCredits,
   hasStockImageLicense,
   hasTemplateLicense,
   listAgentsForCompany,
@@ -41,6 +42,7 @@ import {
   listTenantDomainsForCompany,
   logAiUsage,
   publishSiteConfiguration,
+  resolveActiveDraftForCompany,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
   toggleAgentFeatured,
@@ -50,6 +52,7 @@ import {
   updateCompanyLogo,
   updateCompanyPlan,
   updateCompanyProfile,
+  updateDraftVersion,
   updateLeadStatus,
   updateOnboardingProfile,
   updateProperty,
@@ -86,7 +89,7 @@ import {
   membershipProcedure,
   publicProcedure,
 } from "../lib.trpc";
-import { generateFieldContent } from "../lib.ai";
+import { generateFieldContent, generateOnboardingContent } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
@@ -519,6 +522,230 @@ export const workspaceRouter = createTRPCRouter({
 
     return { profile, summary };
   }),
+
+  /**
+   * Update core onboarding inputs (business type, primary goal, style, tone)
+   * post-onboarding, re-derive profile, and return updated recommendations.
+   */
+  updateOnboardingInputs: membershipProcedure
+    .input(
+      z.object({
+        businessType: z.string().optional(),
+        primaryGoal: z.string().optional(),
+        stylePreference: z.string().optional(),
+        tone: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const userId = ctx.auth.session.user.id;
+
+      const onboarding = await findTenantOnboardingByUserId(db, userId);
+      if (!onboarding) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No onboarding record found.",
+        });
+      }
+
+      // Merge new inputs with existing data
+      const updated = await saveOnboardingStepProgress(db, {
+        userId,
+        ...(input.businessType !== undefined
+          ? { businessType: input.businessType }
+          : {}),
+        ...(input.primaryGoal !== undefined
+          ? { primaryGoal: input.primaryGoal }
+          : {}),
+        ...(input.stylePreference !== undefined
+          ? { stylePreference: input.stylePreference }
+          : {}),
+        ...(input.tone !== undefined ? { tone: input.tone } : {}),
+      });
+
+      // Re-derive profile
+      const snapshot = {
+        businessType: updated.businessType,
+        companyName: updated.companyName,
+        hasBlogContent: updated.hasBlogContent,
+        hasAgents: updated.hasAgents,
+        hasExistingContent: updated.hasExistingContent,
+        hasListings: updated.hasListings,
+        hasLogo: updated.hasLogo,
+        hasProjects: updated.hasProjects,
+        hasTestimonials: updated.hasTestimonials,
+        locations: updated.locations,
+        primaryGoal: updated.primaryGoal,
+        propertyTypes: updated.propertyTypes,
+        stylePreference: updated.stylePreference,
+        tagline: updated.tagline,
+        targetAudience: updated.targetAudience,
+        tone: updated.tone,
+      };
+
+      const profile = deriveProfile(snapshot);
+      const summary = buildBusinessSummary(snapshot);
+
+      await updateOnboardingProfile(db, userId, {
+        businessSummary: summary,
+        complexity: profile.complexity,
+        conversionFocus: profile.conversionFocus,
+        designIntent: profile.designIntent,
+        recommendedTemplateKey: profile.recommendedTemplateKey,
+        segment: profile.segment,
+      });
+
+      // Return updated recommendations
+      const accessibleTiers = new Set<string>(["starter"]);
+      const recommendations = scoreTemplates(
+        profile,
+        templateCatalog,
+        accessibleTiers,
+      ).map((r) => ({
+        description: r.template.description,
+        key: r.template.key,
+        name: r.template.name,
+        reason: r.reason,
+        score: r.score,
+        tier: r.template.tier,
+        upgradeRequired: r.upgradeRequired,
+      }));
+
+      return {
+        profile,
+        recommendations,
+        summary,
+        topKey:
+          recommendations.find((r) => !r.upgradeRequired)?.key ??
+          "template-1",
+      };
+    }),
+
+  /**
+   * AI bootstrap: generates hero/intro/CTA copy from onboarding context,
+   * updates the active draft WebsiteVersion, and deducts AI credits.
+   */
+  bootstrapAiContent: membershipProcedure
+    .mutation(async ({ ctx }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const company = await findCompanyById(db, companyId);
+      if (!company) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Company not found.",
+        });
+      }
+
+      const onboarding = await findTenantOnboardingByUserId(
+        db,
+        ctx.auth.session.user.id,
+      );
+      if (!onboarding) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No onboarding record found.",
+        });
+      }
+
+      // Check credits
+      const enough = await hasEnoughCredits(db, companyId, "onboarding_content");
+      if (!enough) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Insufficient AI credits. AI content bootstrap costs 15 credits.",
+        });
+      }
+
+      // Resolve active draft
+      const draft = await resolveActiveDraftForCompany(db, companyId);
+      if (!draft) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No active draft found. Create a template draft first.",
+        });
+      }
+
+      // Generate AI content
+      const generated = await generateOnboardingContent({
+        businessSummary: onboarding.businessSummary,
+        businessType: onboarding.businessType,
+        companyName: company.name,
+        designIntent: onboarding.designIntent,
+        locations: onboarding.locations,
+        market: onboarding.market,
+        primaryGoal: onboarding.primaryGoal,
+        segment: onboarding.segment,
+        tagline: onboarding.tagline,
+        tone: onboarding.tone,
+      });
+
+      if (!generated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "AI content generation failed. Ensure ANTHROPIC_API_KEY is configured.",
+        });
+      }
+
+      // Merge AI content into existing draft content
+      const mergedContent = {
+        ...draft.contentJson,
+        ...generated,
+      };
+
+      // Update the WebsiteVersion draft
+      await updateDraftVersion(db, {
+        contentJson: mergedContent,
+        updatedById: ctx.auth.session.user.id,
+        versionId: draft.id,
+      });
+
+      // Also update SiteConfiguration if linked (dual-write)
+      if (draft.legacyConfigId) {
+        const legacyConfig = await findSiteConfigurationByIdForCompany(db, {
+          companyId,
+          configId: draft.legacyConfigId,
+        });
+        if (legacyConfig) {
+          for (const [key, value] of Object.entries(generated)) {
+            await updateSiteConfigurationContentField(db, {
+              configId: legacyConfig.id,
+              contentKey: key,
+              currentContent: legacyConfig.contentJson as Record<
+                string,
+                string
+              >,
+              updatedById: ctx.auth.session.user.id,
+              value,
+              version: legacyConfig.version,
+            });
+          }
+        }
+      }
+
+      // Deduct credits and log usage
+      await deductAiCredits(db, {
+        companyId,
+        feature: "onboarding_content",
+      });
+
+      await logAiUsage(db, {
+        companyId,
+        creditsUsed: 15,
+        feature: "onboarding_content",
+        meta: { fieldsGenerated: Object.keys(generated) },
+        userId: ctx.auth.session.user.id,
+      }).catch(() => null);
+
+      return {
+        fieldsUpdated: Object.keys(generated),
+        success: true,
+      };
+    }),
+
   getTemplateCatalog: authenticatedProcedure.query(async () => {
     const db = getDb();
     const usageCounts = await countCompaniesByTemplateKey(db);
