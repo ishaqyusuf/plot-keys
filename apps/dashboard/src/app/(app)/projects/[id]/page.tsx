@@ -11,6 +11,11 @@ import {
   BudgetSummary,
   CreateBudgetLineForm,
 } from "../../../../components/projects/project-budget";
+import {
+  CustomerAccessList,
+  GrantCustomerAccessForm,
+  SendNoticeForm,
+} from "../../../../components/projects/project-customer-access";
 import { CreateIssueForm, IssueList } from "../../../../components/projects/project-issues";
 import {
   CreateMilestoneForm,
@@ -159,6 +164,28 @@ export default async function ProjectDetailPage({
     orderBy: { periodStart: "desc" },
   });
 
+  // Fetch customer access records
+  const customerAccess = await prisma.projectCustomerAccess.findMany({
+    where: { projectId, disabledAt: null },
+    include: {
+      customer: {
+        select: { id: true, name: true, email: true, phone: true, status: true },
+      },
+    },
+    orderBy: { enabledAt: "desc" },
+  });
+
+  const grantedCustomerIds = new Set(
+    customerAccess.map((a) => a.customerId),
+  );
+
+  // Fetch all company customers for the grant form
+  const customers = await prisma.customer.findMany({
+    where: { companyId, deletedAt: null },
+    select: { id: true, name: true, email: true },
+    orderBy: { name: "asc" },
+  });
+
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-5xl">
@@ -289,7 +316,7 @@ export default async function ProjectDetailPage({
           </CardHeader>
           <CardContent>
             {project.updates.length > 0 && (
-              <UpdatesList updates={project.updates} />
+              <UpdatesList updates={project.updates} projectId={project.id} />
             )}
             <CreateUpdateForm projectId={project.id} />
           </CardContent>
@@ -377,6 +404,35 @@ export default async function ProjectDetailPage({
               <PayrollRunList runs={payrollRuns} projectId={project.id} />
             )}
             <CreatePayrollRunForm projectId={project.id} />
+          </CardContent>
+        </Card>
+
+        {/* Customer Access Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Customer Access</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {customerAccess.length > 0 && (
+              <CustomerAccessList
+                accessList={customerAccess}
+                projectId={project.id}
+              />
+            )}
+            <GrantCustomerAccessForm
+              projectId={project.id}
+              customers={customers}
+              grantedCustomerIds={grantedCustomerIds}
+            />
+            {customerAccess.length > 0 && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-semibold">Send Notice</h4>
+                <SendNoticeForm
+                  projectId={project.id}
+                  accessList={customerAccess}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -33,6 +33,7 @@ export * from "./queries/leads";
 export * from "./queries/leave-request";
 export * from "./queries/payroll";
 export * from "./queries/project";
+export * from "./queries/project-customer";
 export * from "./queries/project-finance";
 export * from "./queries/notifications";
 export * from "./queries/notification-preference";

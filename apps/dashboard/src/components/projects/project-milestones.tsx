@@ -32,6 +32,7 @@ type Milestone = {
   name: string;
   status: string;
   dueDate: Date | null;
+  customerVisible: boolean;
   phase: { id: string; name: string } | null;
 };
 
@@ -68,6 +69,14 @@ export function MilestoneList({
     }),
   );
 
+  const visibilityMutation = useMutation(
+    trpc.projects.toggleMilestoneVisibility.mutationOptions({
+      onSuccess() {
+        router.refresh();
+      },
+    }),
+  );
+
   return (
     <div className="mb-4 space-y-2">
       {milestones.map((milestone) => (
@@ -89,6 +98,9 @@ export function MilestoneList({
               {milestone.phase && (
                 <Badge variant="outline">{milestone.phase.name}</Badge>
               )}
+              {milestone.customerVisible && (
+                <Badge variant="secondary">Customer Visible</Badge>
+              )}
             </div>
             {milestone.dueDate && (
               <p className="mt-0.5 text-xs text-muted-foreground">
@@ -97,6 +109,20 @@ export function MilestoneList({
             )}
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={visibilityMutation.isPending}
+              onClick={() =>
+                visibilityMutation.mutate({
+                  projectId,
+                  milestoneId: milestone.id,
+                  visible: !milestone.customerVisible,
+                })
+              }
+            >
+              {milestone.customerVisible ? "Hide" : "Share"}
+            </Button>
             {milestone.status === "pending" && (
               <Button
                 size="sm"

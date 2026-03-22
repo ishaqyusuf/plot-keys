@@ -6,6 +6,7 @@ model ProjectUpdate {
   summary         String
   details         String?
   progressPercent Int?              @map("progress_percent")
+  customerVisible Boolean           @default(false) @map("customer_visible")
   postedAt        DateTime          @default(now()) @map("posted_at") @db.Timestamptz(6)
   createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)

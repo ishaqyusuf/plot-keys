@@ -150,3 +150,10 @@ enum ProjectBudgetLineCategory {
 
   @@map("project_budget_line_category")
 }
+
+enum ProjectCustomerAccessLevel {
+  overview
+  detailed
+
+  @@map("project_customer_access_level")
+}

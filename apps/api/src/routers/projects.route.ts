@@ -3,6 +3,7 @@ import {
   countProjectsByStatus,
   createBudgetLineItem,
   createProject,
+  createProjectCustomerNotice,
   createProjectIssue,
   createProjectMilestone,
   createProjectPayrollEntry,
@@ -12,14 +13,20 @@ import {
   createProjectWorker,
   deleteBudgetLineItem,
   deleteProject,
+  deleteProjectCustomerNotice,
   deleteProjectWorker,
   getProjectBudget,
   getProjectById,
   getProjectPayrollRun,
+  grantCustomerProjectAccess,
+  listCustomerAccessForProject,
   listProjectPayrollRuns,
   listProjectsForCompany,
   listProjectWorkers,
   removeAssignmentFromProject,
+  revokeCustomerProjectAccess,
+  toggleMilestoneCustomerVisibility,
+  toggleUpdateCustomerVisibility,
   updateBudgetLineItem,
   updateProject,
   updateProjectIssue,
@@ -99,6 +106,7 @@ const budgetLineCategoryEnum = z.enum([
   "professional_fees",
   "other",
 ]);
+const customerAccessLevelEnum = z.enum(["overview", "detailed"]);
 
 // ---------------------------------------------------------------------------
 // Router
@@ -1021,5 +1029,211 @@ export const projectsRouter = createTRPCRouter({
 
       const { projectId: _, entryId, ...data } = input;
       return updateProjectPayrollEntry(db, entryId, data);
+    }),
+
+  // -------------------------------------------------------------------------
+  // Customer Access
+  // -------------------------------------------------------------------------
+
+  /** List customers with access to a project. */
+  listCustomerAccess: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) return [];
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project) return [];
+
+      return listCustomerAccessForProject(db, input.projectId);
+    }),
+
+  /** Grant a customer access to view a project. */
+  grantCustomerAccess: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        customerId: z.string().uuid(),
+        level: customerAccessLevelEnum.optional().default("overview"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return grantCustomerProjectAccess(db, {
+        projectId: input.projectId,
+        customerId: input.customerId,
+        level: input.level,
+      });
+    }),
+
+  /** Revoke a customer's access to a project. */
+  revokeCustomerAccess: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        customerId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return revokeCustomerProjectAccess(db, input.projectId, input.customerId);
+    }),
+
+  /** Send a notice to a customer about a project. */
+  createCustomerNotice: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        customerId: z.string().uuid(),
+        title: z.string().trim().min(1, "Title is required."),
+        body: z.string().trim().min(1, "Body is required."),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return createProjectCustomerNotice(db, {
+        projectId: input.projectId,
+        customerId: input.customerId,
+        title: input.title,
+        body: input.body,
+      });
+    }),
+
+  /** Delete a customer notice. */
+  deleteCustomerNotice: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        noticeId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      await deleteProjectCustomerNotice(db, input.noticeId);
+      return { deleted: true };
+    }),
+
+  // -------------------------------------------------------------------------
+  // Visibility Toggles
+  // -------------------------------------------------------------------------
+
+  /** Toggle whether a milestone is visible to customers. */
+  toggleMilestoneVisibility: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        milestoneId: z.string().uuid(),
+        visible: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return toggleMilestoneCustomerVisibility(
+        db,
+        input.milestoneId,
+        input.visible,
+      );
+    }),
+
+  /** Toggle whether an update is visible to customers. */
+  toggleUpdateVisibility: membershipProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        updateId: z.string().uuid(),
+        visible: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      return toggleUpdateCustomerVisibility(db, input.updateId, input.visible);
     }),
 });

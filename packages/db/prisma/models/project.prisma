@@ -23,6 +23,8 @@ model Project {
   budget               ProjectBudget?
   workers              ProjectWorker[]
   payrollRuns          ProjectPayrollRun[]
+  customerAccess       ProjectCustomerAccess[]
+  customerNotices      ProjectCustomerNotice[]
 
   @@index([companyId], map: "projects_company_id_idx")
   @@index([companyId, status], map: "projects_company_status_idx")

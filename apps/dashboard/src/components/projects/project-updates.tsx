@@ -26,6 +26,7 @@ type ProjectUpdateItem = {
   summary: string;
   details: string | null;
   progressPercent: number | null;
+  customerVisible: boolean;
   postedAt: Date;
 };
 
@@ -55,21 +56,57 @@ function formatRelativeTime(date: Date) {
 // Updates list
 // ---------------------------------------------------------------------------
 
-export function UpdatesList({ updates }: { updates: ProjectUpdateItem[] }) {
+export function UpdatesList({
+  updates,
+  projectId,
+}: {
+  updates: ProjectUpdateItem[];
+  projectId: string;
+}) {
+  const router = useRouter();
+  const trpc = useTRPC();
+
+  const visibilityMutation = useMutation(
+    trpc.projects.toggleUpdateVisibility.mutationOptions({
+      onSuccess() {
+        router.refresh();
+      },
+    }),
+  );
+
   return (
     <div className="mb-4 space-y-3">
       {updates.map((update) => (
         <div key={update.id} className="rounded-md border p-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
-              {updateKindLabels[update.kind] ?? update.kind}
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTime(update.postedAt)}
-            </span>
-            {update.progressPercent != null && (
-              <Badge variant="secondary">{update.progressPercent}%</Badge>
-            )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">
+                {updateKindLabels[update.kind] ?? update.kind}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTime(update.postedAt)}
+              </span>
+              {update.progressPercent != null && (
+                <Badge variant="secondary">{update.progressPercent}%</Badge>
+              )}
+              {update.customerVisible && (
+                <Badge variant="secondary">Customer Visible</Badge>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={visibilityMutation.isPending}
+              onClick={() =>
+                visibilityMutation.mutate({
+                  projectId,
+                  updateId: update.id,
+                  visible: !update.customerVisible,
+                })
+              }
+            >
+              {update.customerVisible ? "Hide" : "Share"}
+            </Button>
           </div>
           <p className="mt-1 text-sm font-medium">{update.summary}</p>
           {update.details && (

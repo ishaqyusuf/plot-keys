@@ -14,6 +14,7 @@
     "./queries/tenant-domain": "./src/queries/tenant-domain.ts",
     "./queries/website": "./src/queries/website.ts",
     "./queries/project": "./src/queries/project.ts",
+    "./queries/project-customer": "./src/queries/project-customer.ts",
     "./queries/project-finance": "./src/queries/project-finance.ts"
   },
   "scripts": {
