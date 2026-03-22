@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { UpdateProjectStatusButton } from "../../../../components/projects/project-actions";
+import { ProjectAiInsights } from "../../../../components/projects/project-ai";
 import {
   BudgetLineItemList,
   BudgetSummary,
@@ -406,6 +407,9 @@ export default async function ProjectDetailPage({
             <CreatePayrollRunForm projectId={project.id} />
           </CardContent>
         </Card>
+
+        {/* AI Insights Section */}
+        <ProjectAiInsights projectId={project.id} />
 
         {/* Customer Access Section */}
         <Card className="mb-8">

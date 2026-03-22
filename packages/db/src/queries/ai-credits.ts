@@ -9,6 +9,9 @@ export const AI_CREDIT_COSTS: Record<string, number> = {
   full_website: 50,
   homepage_content: 20,
   lead_response: 3,
+  project_customer_draft: 5,
+  project_risk_flags: 5,
+  project_summary: 10,
   property_description: 5,
   smart_fill: 2,
 };

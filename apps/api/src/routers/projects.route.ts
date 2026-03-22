@@ -11,18 +11,22 @@ import {
   createProjectPhase,
   createProjectUpdate,
   createProjectWorker,
+  deductAiCredits,
   deleteBudgetLineItem,
   deleteProject,
   deleteProjectCustomerNotice,
   deleteProjectWorker,
+  findCompanyById,
   getProjectBudget,
   getProjectById,
   getProjectPayrollRun,
   grantCustomerProjectAccess,
+  hasEnoughCredits,
   listCustomerAccessForProject,
   listProjectPayrollRuns,
   listProjectsForCompany,
   listProjectWorkers,
+  logAiUsage,
   removeAssignmentFromProject,
   revokeCustomerProjectAccess,
   toggleMilestoneCustomerVisibility,
@@ -40,6 +44,12 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  type ProjectAiContext,
+  generateCustomerUpdateDraft,
+  generateProjectRiskFlags,
+  generateProjectSummary,
+} from "../lib.ai";
 import { createTRPCRouter, membershipProcedure } from "../lib.trpc";
 
 // ---------------------------------------------------------------------------
@@ -1236,4 +1246,244 @@ export const projectsRouter = createTRPCRouter({
 
       return toggleUpdateCustomerVisibility(db, input.updateId, input.visible);
     }),
+
+  // -------------------------------------------------------------------------
+  // AI — Summary, Risk Flags, Customer Draft (Pro plan)
+  // -------------------------------------------------------------------------
+
+  /** Generate an AI executive summary of the project. Deducts project_summary credits. */
+  generateSummary: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      const enough = await hasEnoughCredits(
+        db,
+        ctx.auth.activeMembership.companyId,
+        "project_summary",
+      );
+      if (!enough)
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient AI credits for project summary.",
+        });
+
+      const budget = await getProjectBudget(db, input.projectId);
+
+      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const companyName = company?.name ?? "Company";
+
+      const aiCtx = buildProjectAiContext(project, budget, companyName);
+
+      const summary = await generateProjectSummary(aiCtx);
+      if (!summary)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "AI service unavailable. Check ANTHROPIC_API_KEY.",
+        });
+
+      await deductAiCredits(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        feature: "project_summary",
+        referenceId: input.projectId,
+      });
+
+      await logAiUsage(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        creditsUsed: 10,
+        feature: "project_summary",
+        meta: { projectId: input.projectId },
+        userId: ctx.auth.session.user.id,
+      }).catch(() => null);
+
+      return { summary };
+    }),
+
+  /** Analyze project for risk flags. Deducts project_risk_flags credits. */
+  getRiskFlags: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      const enough = await hasEnoughCredits(
+        db,
+        ctx.auth.activeMembership.companyId,
+        "project_risk_flags",
+      );
+      if (!enough)
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient AI credits for risk analysis.",
+        });
+
+      const budget = await getProjectBudget(db, input.projectId);
+
+      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const companyName = company?.name ?? "Company";
+
+      const aiCtx = buildProjectAiContext(project, budget, companyName);
+
+      const flags = await generateProjectRiskFlags(aiCtx);
+      if (flags === null)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "AI service unavailable. Check ANTHROPIC_API_KEY.",
+        });
+
+      await deductAiCredits(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        feature: "project_risk_flags",
+        referenceId: input.projectId,
+      });
+
+      await logAiUsage(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        creditsUsed: 5,
+        feature: "project_risk_flags",
+        meta: { projectId: input.projectId },
+        userId: ctx.auth.session.user.id,
+      }).catch(() => null);
+
+      return { flags };
+    }),
+
+  /** Generate a customer-safe progress update draft. Deducts project_customer_draft credits. */
+  generateCustomerDraft: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      const project = await getProjectById(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+      if (!project)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+
+      const enough = await hasEnoughCredits(
+        db,
+        ctx.auth.activeMembership.companyId,
+        "project_customer_draft",
+      );
+      if (!enough)
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient AI credits for customer update draft.",
+        });
+
+      const budget = await getProjectBudget(db, input.projectId);
+
+      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const companyName = company?.name ?? "Company";
+
+      const aiCtx = buildProjectAiContext(project, budget, companyName);
+
+      const draft = await generateCustomerUpdateDraft(aiCtx);
+      if (!draft)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "AI service unavailable. Check ANTHROPIC_API_KEY.",
+        });
+
+      await deductAiCredits(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        feature: "project_customer_draft",
+        referenceId: input.projectId,
+      });
+
+      await logAiUsage(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        creditsUsed: 5,
+        feature: "project_customer_draft",
+        meta: { projectId: input.projectId },
+        userId: ctx.auth.session.user.id,
+      }).catch(() => null);
+
+      return { draft };
+    }),
 });
+
+// ---------------------------------------------------------------------------
+// Helper — Build AI context from project data
+// ---------------------------------------------------------------------------
+
+function buildProjectAiContext(
+  project: NonNullable<Awaited<ReturnType<typeof getProjectById>>>,
+  budget: Awaited<ReturnType<typeof getProjectBudget>>,
+  companyName: string,
+): ProjectAiContext {
+  return {
+    companyName,
+    projectName: project.name,
+    projectStatus: project.status,
+    projectType: project.type,
+    location: project.location,
+    startDate: project.startDate?.toISOString().split("T")[0] ?? null,
+    targetCompletionDate:
+      project.targetCompletionDate?.toISOString().split("T")[0] ?? null,
+    phases: project.phases.map((p) => ({
+      name: p.name,
+      status: p.status,
+    })),
+    milestones: project.milestones.map((m) => ({
+      name: m.name,
+      status: m.status,
+      dueDate: m.dueDate?.toISOString().split("T")[0] ?? null,
+      completedAt: m.completedAt?.toISOString().split("T")[0] ?? null,
+    })),
+    recentUpdates: project.updates.map((u) => ({
+      kind: u.kind,
+      summary: u.summary,
+      details: u.details,
+      progressPercent: u.progressPercent,
+      postedAt: u.postedAt.toISOString().split("T")[0],
+    })),
+    openIssues: project.issues
+      .filter((i) => i.status === "open" || i.status === "in_progress")
+      .map((i) => ({
+        title: i.title,
+        severity: i.severity,
+        status: i.status,
+      })),
+    budget: budget
+      ? {
+          approvedMinor: budget.approvedBudgetMinor,
+          forecastMinor: budget.forecastBudgetMinor,
+          actualMinor: budget.actualBudgetMinor,
+          currency: budget.currency,
+        }
+      : null,
+  };
+}
