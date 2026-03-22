@@ -46,6 +46,36 @@
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
+| Construction Phase 4 (AI & Integrations) | ✅ Done |
+
+---
+
+## 2026-03-22 — Construction Phase 4: AI and Integrations
+
+### AI Project Summary
+- Added `generateProjectSummary()` to `lib.ai.ts` using Claude Haiku 4.5
+- Generates 3-5 paragraph executive summary covering status, milestones, issues, budget, and recommendations
+- Deducts 10 AI credits per generation (`project_summary` feature)
+
+### AI Risk Flags
+- Added `generateProjectRiskFlags()` to `lib.ai.ts`
+- Detects overdue milestones, budget overruns (actual > approved), high-severity unresolved issues, stale projects
+- Returns structured JSON array with severity, title, and detail per risk
+- Deducts 5 AI credits per analysis (`project_risk_flags` feature)
+
+### AI Customer Update Draft
+- Added `generateCustomerUpdateDraft()` to `lib.ai.ts`
+- Generates customer-safe progress update from internal project data
+- Strips internal issues, delays, budget, payroll details — focuses on milestones and progress
+- Deducts 5 AI credits per generation (`project_customer_draft` feature)
+
+### Technical
+- Added `ProjectAiContext` type to `lib.ai.ts` for structured project data input to AI
+- Added `buildProjectAiContext()` helper in projects router for data assembly
+- Added 3 tRPC mutation procedures: `generateSummary`, `getRiskFlags`, `generateCustomerDraft`
+- Created `project-ai.tsx` client component with `ProjectAiInsights` card, `GenerateSummaryButton`, `RiskFlagsButton`, `GenerateCustomerDraftButton`
+- Updated `/projects/[id]` detail page with AI Insights section (between Payroll and Customer Access)
+- Credit deduction and usage logging on each successful AI generation
 
 ---
 

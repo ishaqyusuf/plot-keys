@@ -194,7 +194,7 @@ Give a company one operational system to manage a building or estate project end
 - Customer-safe updates and milestone progress
 - Shared documents and notices
 
-### Phase 4 — AI and Integrations
+### Phase 4 — AI and Integrations ✅
 - AI summaries, extraction, and risk support
 - QS/BOQ assistance
 - Architectural quick-view analysis
