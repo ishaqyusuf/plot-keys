@@ -102,3 +102,36 @@ enum ProjectAssignmentStatus {
 
   @@map("project_assignment_status")
 }
+
+enum ProjectWorkerPayBasis {
+  daily
+  weekly
+  fixed_contract
+  milestone_based
+
+  @@map("project_worker_pay_basis")
+}
+
+enum ProjectWorkerStatus {
+  active
+  off_project
+  completed
+
+  @@map("project_worker_status")
+}
+
+enum ProjectPayrollRunStatus {
+  draft
+  confirmed
+  paid
+
+  @@map("project_payroll_run_status")
+}
+
+enum ProjectWorkerPaymentStatus {
+  pending
+  paid
+  partial
+
+  @@map("project_worker_payment_status")
+}

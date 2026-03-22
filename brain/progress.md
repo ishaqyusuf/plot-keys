@@ -460,3 +460,16 @@
 - Refactored `/projects` list page to use client components for mutations
 - Refactored `/projects/[id]` detail page to use client components for mutations
 - Added "Construction" nav group with HardHat icon to dashboard sidebar
+
+### Construction Project Management — Phase 2 (Finance and Workforce)
+- Added 4 new Prisma enums to `project.prisma`: ProjectWorkerPayBasis, ProjectWorkerStatus, ProjectPayrollRunStatus, ProjectWorkerPaymentStatus
+- Created `project-budget.prisma` model file with ProjectBudget and ProjectBudgetLineItem models
+- Created `project-workforce.prisma` model file with ProjectWorker, ProjectPayrollRun, and ProjectPayrollEntry models
+- Updated Project model with relations to budget, workers, and payrollRuns
+- Extended `packages/db/src/queries/project.ts` with budget, worker, and payroll queries (getOrCreateProjectBudget, updateProjectBudget, getProjectBudgetWithLineItems, createProjectBudgetLineItem, updateProjectBudgetLineItem, deleteProjectBudgetLineItem, listProjectWorkers, createProjectWorker, updateProjectWorker, deleteProjectWorker, listProjectPayrollRuns, getProjectPayrollRunWithEntries, createProjectPayrollRun, updateProjectPayrollRun, deleteProjectPayrollRun, upsertProjectPayrollEntry, deleteProjectPayrollEntry)
+- Extended `projects.route.ts` tRPC router with 16 new Phase 2 procedures for budget, workers, and payroll runs
+- Created `project-budget.tsx` client component with BudgetSummaryCard (totals + update form), BudgetLineItemList (with delete), AddBudgetLineItemForm
+- Created `project-workforce.tsx` client component with WorkerList (with status toggle + remove), AddWorkerForm, PayrollRunList (with confirm/mark paid/delete), CreatePayrollRunForm
+- Created `/projects/[id]/budget` page showing budget summary and line items
+- Created `/projects/[id]/workforce` page showing workers and payroll runs
+- Updated `/projects/[id]` detail page header with Budget and Workforce navigation buttons
