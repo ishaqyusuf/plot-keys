@@ -29,7 +29,7 @@
 | Notifications (event system, 10 types) | ✅ Done |
 | Notification bell in header + preferences page | ✅ Done |
 | SubmitButton adoption (6 forms) | ✅ Done |
-| Jobs (custom queue, 4 handlers) | 🟡 Partial |
+| Jobs (custom queue, 4 handlers) | ✅ Done (Trigger.dev) |
 | Listing categories & types | ✅ Done |
 | Settings expansion | ✅ Done |
 | Customer model + lead promotion | ✅ Done |
@@ -48,6 +48,39 @@
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
+| Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-22 — Trigger.dev Job Integration
+
+### Task Definitions
+- Created 4 Trigger.dev task definitions in `packages/jobs/src/tasks/`:
+  - `domainSyncTask` (id: `domains.connection.sync`) — 4 retries, 2s base delay
+  - `planSyncTask` (id: `plans.sync`) — 4 retries, 2s base delay
+  - `notificationDispatchTask` (id: `notifications.dispatch`) — 3 retries, 1s base delay
+  - `siteContentGenerationTask` (id: `website.content.generate`) — 3 retries, 3s base delay
+
+### Dispatch Utility
+- Added `triggerJob()` in `packages/jobs/src/trigger.ts` — dual-mode dispatch
+- Uses Trigger.dev `tasks.trigger()` when `TRIGGER_SECRET_KEY` is set
+- Falls back to in-memory `runInBackground()` for local dev / environments without Trigger.dev
+- Added `isTriggerConfigured()` helper
+
+### Configuration
+- Created `trigger.config.ts` at monorepo root with project config and default retry settings
+- Added `@trigger.dev/sdk` dependency to `packages/jobs`
+- Added `./tasks` subpath export in `packages/jobs/package.json`
+
+### Workspace Route Updates
+- Replaced `runInBackground(domainSyncHandler, ...)` with `triggerJob(domainSyncTask, domainSyncHandler, ...)`
+- Both call sites (onboarding completion + manual domain sync) now use `triggerJob()`
+
+### Form Notification Wiring
+- `submitContact` now dispatches `contact_form` notification job
+- `submitInquiry` now dispatches `property_inquiry` notification job
+- `submitNewsletterSignup` now dispatches `newsletter_signup` notification job
+- All use `triggerJob()` with fire-and-forget pattern (non-blocking)
 
 ---
 

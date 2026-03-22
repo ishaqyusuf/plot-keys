@@ -46,7 +46,7 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Phase 3 — Growth & Monetization
 
-- [ ] **Trigger.dev Job Integration** — Replace custom queue handlers with real Trigger.dev tasks; add retry logic and monitoring for domainSync, planSync, siteContentGeneration, notificationDispatch.
+- [x] **Trigger.dev Job Integration** — Added `@trigger.dev/sdk`, created 4 task definitions (domain-sync, plan-sync, notification-dispatch, site-content-generation) with per-task retry config, `triggerJob()` dual-mode dispatch (Trigger.dev when configured, in-memory fallback), `trigger.config.ts` at root, wired form submissions to dispatch notification jobs. ✅ Done
 - [ ] **Chat-bot LLM Integration** — Connect chat-bot to Anthropic/OpenAI for tenant-site visitor Q&A; add UI widget for tenant sites.
 - [ ] **App Store Expansion** — Add integrations beyond WhatsApp: Google Analytics, Facebook Pixel, Calendly, property listing portals.
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
