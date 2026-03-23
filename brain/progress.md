@@ -43,6 +43,7 @@
 | Chat-bot | ✅ Done (LLM + Widget) |
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | AI-Powered Content Generation (property descriptions) | ✅ Done |
+| Template Usage Analytics | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -50,6 +51,21 @@
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-23 — Template Usage Analytics
+
+### How it works
+- `countCompaniesByTemplateKey()` in `packages/db` counts distinct companies per `templateKey` in non-deleted `SiteConfiguration` records (draft + published only)
+- `workspace.getTemplateCatalog` tRPC procedure already returned `usageCount` per template
+- **Builder template picker** (`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`):
+  - `TemplatePicker` now calls `useQuery(trpc.workspace.getTemplateCatalog)` client-side
+  - Builds `usageCountMap: Record<string, number>` from the result
+  - Each template dropdown item now shows `<Users2 icon> X tenants` below the marketing tagline
+- **Preview page** (`apps/dashboard/src/app/(app)/builder/preview/page.tsx`):
+  - Same `useQuery` + `usageCountMap` pattern added to both desktop sidebar and mobile dropdown template pickers
+  - Both picker instances show usage count per template item
 
 ---
 

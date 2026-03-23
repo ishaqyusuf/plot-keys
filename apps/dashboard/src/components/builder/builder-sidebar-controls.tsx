@@ -22,7 +22,11 @@ import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Switch } from "@plotkeys/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { Users2 } from "lucide-react";
 import { forwardRef, useRef, useState, useTransition } from "react";
+
+import { useTRPC } from "../../trpc/client";
 
 type TemplateGroup = "starter" | "plus" | "pro";
 
@@ -392,6 +396,15 @@ function TemplatePicker({
   currentTemplateKey: string;
   onCreateDraft: (formData: FormData) => Promise<void>;
 }) {
+  const trpc = useTRPC();
+  const { data: catalogWithCounts } = useQuery(
+    trpc.workspace.getTemplateCatalog.queryOptions(),
+  );
+
+  const usageCountMap = Object.fromEntries(
+    (catalogWithCounts ?? []).map((t) => [t.key, t.usageCount]),
+  );
+
   const currentTemplate = templateCatalog.find(
     (t) => t.key === currentTemplateKey,
   );
@@ -449,34 +462,43 @@ function TemplatePicker({
               value={currentTemplateKey}
             >
               <DropdownMenuGroup>
-                {groupTemplates.map((template) => (
-                  <DropdownMenuRadioItem
-                    className="items-start rounded-md py-2 pr-8"
-                    key={template.key}
-                    value={template.key}
-                  >
-                    <div className="flex min-w-0 items-start gap-2.5">
-                      <Avatar className="rounded-md" size="sm">
-                        <AvatarFallback className="rounded-md bg-muted text-[10px] font-medium">
-                          {template.name
-                            .split(" ")
-                            .map((p) => p[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <span className="truncate font-medium text-foreground">
-                          {template.name}
-                        </span>
-                        {template.marketingTagline && (
-                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                            {template.marketingTagline}
+                {groupTemplates.map((template) => {
+                  const count = usageCountMap[template.key] ?? 0;
+                  return (
+                    <DropdownMenuRadioItem
+                      className="items-start rounded-md py-2 pr-8"
+                      key={template.key}
+                      value={template.key}
+                    >
+                      <div className="flex min-w-0 items-start gap-2.5">
+                        <Avatar className="rounded-md" size="sm">
+                          <AvatarFallback className="rounded-md bg-muted text-[10px] font-medium">
+                            {template.name
+                              .split(" ")
+                              .map((p) => p[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <span className="truncate font-medium text-foreground">
+                            {template.name}
+                          </span>
+                          {template.marketingTagline && (
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                              {template.marketingTagline}
+                            </p>
+                          )}
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground/70">
+                            <Users2 className="size-3" />
+                            {count === 1
+                              ? "1 tenant"
+                              : `${count} tenants`}
                           </p>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  </DropdownMenuRadioItem>
-                ))}
+                    </DropdownMenuRadioItem>
+                  );
+                })}
               </DropdownMenuGroup>
             </DropdownMenuRadioGroup>
           </TabsContent>

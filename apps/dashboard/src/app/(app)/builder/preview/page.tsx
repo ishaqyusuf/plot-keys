@@ -24,9 +24,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { Separator } from "@plotkeys/ui/separator";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, Users2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+
+import { useTRPC } from "../../../../trpc/client";
 
 type TemplateTier = "starter" | "plus" | "pro";
 
@@ -41,6 +44,14 @@ function groupedTemplates() {
 }
 
 export default function BuilderPreviewPage() {
+  const trpc = useTRPC();
+  const { data: catalogWithCounts } = useQuery(
+    trpc.workspace.getTemplateCatalog.queryOptions(),
+  );
+  const usageCountMap = Object.fromEntries(
+    (catalogWithCounts ?? []).map((t) => [t.key, t.usageCount]),
+  );
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [publishedKeys, setPublishedKeys] = useState<Set<string>>(new Set());
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -197,24 +208,31 @@ export default function BuilderPreviewPage() {
                             onValueChange={selectTemplate}
                           >
                             <DropdownMenuGroup>
-                              {groups[tier].map((t) => (
-                                <DropdownMenuRadioItem
-                                  key={t.key}
-                                  value={t.key}
-                                  className="items-start rounded-md py-2 pr-8"
-                                >
-                                  <div className="min-w-0">
-                                    <p className="font-medium text-foreground">
-                                      {t.name}
-                                    </p>
-                                    {t.marketingTagline && (
-                                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                        {t.marketingTagline}
+                              {groups[tier].map((t) => {
+                                const count = usageCountMap[t.key] ?? 0;
+                                return (
+                                  <DropdownMenuRadioItem
+                                    key={t.key}
+                                    value={t.key}
+                                    className="items-start rounded-md py-2 pr-8"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="font-medium text-foreground">
+                                        {t.name}
                                       </p>
-                                    )}
-                                  </div>
-                                </DropdownMenuRadioItem>
-                              ))}
+                                      {t.marketingTagline && (
+                                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                          {t.marketingTagline}
+                                        </p>
+                                      )}
+                                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground/70">
+                                        <Users2 className="size-3" />
+                                        {count === 1 ? "1 tenant" : `${count} tenants`}
+                                      </p>
+                                    </div>
+                                  </DropdownMenuRadioItem>
+                                );
+                              })}
                             </DropdownMenuGroup>
                           </DropdownMenuRadioGroup>
                         </TabsContent>
@@ -361,24 +379,31 @@ export default function BuilderPreviewPage() {
                             onValueChange={selectTemplate}
                           >
                             <DropdownMenuGroup>
-                              {groups[tier].map((t) => (
-                                <DropdownMenuRadioItem
-                                  key={t.key}
-                                  value={t.key}
-                                  className="items-start rounded-md py-2 pr-8"
-                                >
-                                  <div className="min-w-0">
-                                    <p className="font-medium text-foreground">
-                                      {t.name}
-                                    </p>
-                                    {t.marketingTagline && (
-                                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                        {t.marketingTagline}
+                              {groups[tier].map((t) => {
+                                const count = usageCountMap[t.key] ?? 0;
+                                return (
+                                  <DropdownMenuRadioItem
+                                    key={t.key}
+                                    value={t.key}
+                                    className="items-start rounded-md py-2 pr-8"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="font-medium text-foreground">
+                                        {t.name}
                                       </p>
-                                    )}
-                                  </div>
-                                </DropdownMenuRadioItem>
-                              ))}
+                                      {t.marketingTagline && (
+                                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                          {t.marketingTagline}
+                                        </p>
+                                      )}
+                                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground/70">
+                                        <Users2 className="size-3" />
+                                        {count === 1 ? "1 tenant" : `${count} tenants`}
+                                      </p>
+                                    </div>
+                                  </DropdownMenuRadioItem>
+                                );
+                              })}
                             </DropdownMenuGroup>
                           </DropdownMenuRadioGroup>
                         </TabsContent>
