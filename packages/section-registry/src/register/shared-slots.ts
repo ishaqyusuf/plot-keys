@@ -160,30 +160,32 @@ export const slot = {
 // Universal pages shared by all families and all plans
 // ---------------------------------------------------------------------------
 
-export const universalPages = [
+import type { RegisterPageDefinition } from "./types";
+
+export const universalPages: RegisterPageDefinition[] = [
   { label: "Login", pageKey: "login", slug: "/login", sections: [] },
   { label: "Sign Up", pageKey: "signup", slug: "/signup", sections: [] },
   { label: "404", pageKey: "not-found", slug: "/404", sections: [] },
   { label: "Privacy Policy", pageKey: "privacy", slug: "/privacy", sections: [] },
   { label: "Terms of Service", pageKey: "terms", slug: "/terms", sections: [] },
-] as const;
+];
 
 // ---------------------------------------------------------------------------
 // Saved listings + inquiry basket (Plus+ user account pages)
 // ---------------------------------------------------------------------------
 
-export const savedListingsPage = {
+export const savedListingsPage: RegisterPageDefinition = {
   label: "Saved Listings",
+  minTier: "plus",
   pageKey: "saved",
   sections: [],
   slug: "/saved",
-  minTier: "plus" as const,
-} as const;
+};
 
-export const inquiryBasketPage = {
+export const inquiryBasketPage: RegisterPageDefinition = {
   label: "Inquiry Basket",
+  minTier: "plus",
   pageKey: "inquire",
   sections: [],
   slug: "/inquire",
-  minTier: "plus" as const,
-} as const;
+};

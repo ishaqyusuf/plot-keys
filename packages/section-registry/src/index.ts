@@ -123,7 +123,20 @@ export type LiveAgentItem = {
   title?: string | null;
 };
 
-export type { RenderMode } from "./types";
+export type { RenderMode, TenantResource } from "./types";
+
+// ---------------------------------------------------------------------------
+// Plan-based template register
+// ---------------------------------------------------------------------------
+export {
+  templateFamilyRegistry,
+  registerTemplateCatalog,
+  getRegisterTemplate,
+  getRegisterFamily,
+  getRegisterTemplateForBusiness,
+  getAccessibleRegisterTemplates,
+  getFamilyMetaForBusinessType,
+} from "./register/index";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
