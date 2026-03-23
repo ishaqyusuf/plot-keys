@@ -173,6 +173,81 @@ export async function generateOnboardingContent(
 }
 
 // ---------------------------------------------------------------------------
+// Property AI — Description generation
+// ---------------------------------------------------------------------------
+
+export type PropertyDescriptionContext = {
+  bathrooms?: number | null;
+  bedrooms?: number | null;
+  companyName?: string | null;
+  location?: string | null;
+  market?: string | null;
+  price?: string | null;
+  specs?: string | null;
+  subType?: string | null;
+  title: string;
+  type?: string | null;
+};
+
+/**
+ * Generates a polished property listing description using Claude Haiku 4.5.
+ * Returns null if the API key is not configured.
+ */
+export async function generatePropertyDescription(
+  ctx: PropertyDescriptionContext,
+): Promise<string | null> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return null;
+  }
+
+  const client = getAnthropicClient();
+
+  const contextLines = [
+    `Property: ${ctx.title}`,
+    ctx.type ? `Type: ${ctx.type}` : null,
+    ctx.subType ? `Sub-type: ${ctx.subType}` : null,
+    ctx.location ? `Location: ${ctx.location}` : null,
+    ctx.price ? `Price: ${ctx.price}` : null,
+    ctx.bedrooms != null ? `Bedrooms: ${ctx.bedrooms}` : null,
+    ctx.bathrooms != null ? `Bathrooms: ${ctx.bathrooms}` : null,
+    ctx.specs ? `Additional specs: ${ctx.specs}` : null,
+    ctx.companyName ? `Listed by: ${ctx.companyName}` : null,
+    ctx.market ? `Market: ${ctx.market}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const userMessage = [
+    contextLines,
+    "",
+    "Write a compelling property listing description (3-5 sentences) that:",
+    "- Highlights the key features and appeal of this property",
+    "- Uses vivid but professional language suited to the property type",
+    "- Mentions the location and any standout attributes",
+    "- Ends with a subtle call to interest (e.g. ideal for families, investors, etc.)",
+    "",
+    "Return only the description text. No headings, no bullet points, no extra commentary.",
+  ]
+    .join("\n")
+    .trim();
+
+  const response = await client.messages.create({
+    max_tokens: 256,
+    messages: [{ role: "user", content: userMessage }],
+    model: "claude-haiku-4-5",
+    system:
+      "You are a professional real-estate copywriter. Write concise, engaging property listing descriptions. " +
+      "Be specific about features, avoid generic filler, and match tone to the property type and price point. " +
+      "Return only the description text — no markdown, no labels, no extra commentary.",
+  });
+
+  const textBlock = response.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") return null;
+
+  return textBlock.text.trim();
+}
+
+// ---------------------------------------------------------------------------
 // Project AI — Summary, Risk Flags, Customer Draft
 // ---------------------------------------------------------------------------
 

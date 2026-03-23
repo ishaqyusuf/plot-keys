@@ -90,7 +90,7 @@ import {
   membershipProcedure,
   publicProcedure,
 } from "../lib.trpc";
-import { generateFieldContent, generateOnboardingContent } from "../lib.ai";
+import { generateFieldContent, generateOnboardingContent, generatePropertyDescription } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
@@ -1445,6 +1445,74 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
       return { featured: result.featured, propertyId: result.id };
+    }),
+
+  /**
+   * AI-generate a property listing description from the property's current
+   * data (title, type, location, price, bedrooms, bathrooms, specs).
+   * Costs 5 AI credits.
+   */
+  generatePropertyDescription: membershipProcedure
+    .input(z.object({ propertyId: z.string().trim().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const property = await db.property.findFirst({
+        where: { id: input.propertyId, companyId, deletedAt: null },
+      });
+      if (!property) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Property not found.",
+        });
+      }
+
+      const enough = await hasEnoughCredits(db, companyId, "property_description");
+      if (!enough) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient AI credits. Generating a property description costs 5 credits.",
+        });
+      }
+
+      const company = await findCompanyById(db, companyId);
+
+      const description = await generatePropertyDescription({
+        bathrooms: property.bathrooms,
+        bedrooms: property.bedrooms,
+        companyName: company?.name ?? null,
+        location: property.location,
+        market: company?.market ?? null,
+        price: property.price,
+        specs: property.specs,
+        subType: property.subType,
+        title: property.title,
+        type: property.type,
+      });
+
+      if (!description) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "AI description generation failed. Ensure ANTHROPIC_API_KEY is configured.",
+        });
+      }
+
+      // Save the generated description to the property record
+      await updateProperty(db, input.propertyId, companyId, { description });
+
+      // Deduct credits and log usage
+      await deductAiCredits(db, { companyId, feature: "property_description", referenceId: input.propertyId });
+      await logAiUsage(db, {
+        companyId,
+        creditsUsed: 5,
+        feature: "property_description",
+        meta: { propertyId: input.propertyId },
+        success: true,
+        userId: ctx.auth.session.user.id,
+      });
+
+      return { description, propertyId: input.propertyId };
     }),
 
   // ─── Agents ───────────────────────────────────────────────────────────────

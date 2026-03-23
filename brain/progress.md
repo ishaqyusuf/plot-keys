@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-22)
+## Current State (as of 2026-03-23)
 
 ### What's Built & Working
 | Area | Status |
@@ -42,6 +42,7 @@
 | Agent performance analytics | ✅ Done |
 | Chat-bot | ✅ Done (LLM + Widget) |
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
+| AI-Powered Content Generation (property descriptions) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -49,6 +50,29 @@
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-23 — AI-Powered Content Generation (Property Descriptions)
+
+### AI Function (`apps/api/src/lib.ai.ts`)
+- Added `generatePropertyDescription()` using Claude Haiku 4.5
+- Context: title, type, subType, location, price, bedrooms, bathrooms, specs, companyName, market
+- Returns a 3-5 sentence polished property listing description
+
+### tRPC Procedure (`workspace.generatePropertyDescription`)
+- Input: `{ propertyId: string }`
+- Loads property and company context
+- Checks 5 AI credits before calling AI
+- Saves generated description back to the property record via `updateProperty()`
+- Deducts 5 AI credits and logs usage to `AiUsageLog`
+
+### UI Component (`PropertyDescriptionGenerator`)
+- Client component at `apps/dashboard/src/components/properties/property-description-generator.tsx`
+- "✨ AI-generate description" button on property detail page (`/properties/[id]`)
+- Shows pending, error, and success states
+- Triggers `router.refresh()` on success to display updated description
+- Visible only to owner/admin/agent roles (via server-side `canEdit` guard)
 
 ---
 

@@ -23,6 +23,7 @@ import {
   updatePropertyPublishStateAction,
 } from "../../../actions";
 import { requireOnboardedSession } from "../../../../lib/session";
+import { PropertyDescriptionGenerator } from "../../../../components/properties/property-description-generator";
 
 type PropertyDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -192,16 +193,21 @@ export default async function PropertyDetailPage({
         </div>
 
         {/* Description */}
-        {property.description ? (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-base">Description</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              {property.description}
-            </CardContent>
-          </Card>
-        ) : null}
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <CardTitle className="text-base">Description</CardTitle>
+            {canEdit ? (
+              <PropertyDescriptionGenerator propertyId={id} />
+            ) : null}
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            {property.description ? (
+              property.description
+            ) : (
+              <p className="italic">No description yet. Use AI to generate one or edit the property to add one manually.</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Analytics Card */}
         <Card className="mb-8">
