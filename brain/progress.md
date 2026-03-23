@@ -1,6 +1,6 @@
 # Progress
 
-## Current State (as of 2026-03-22)
+## Current State (as of 2026-03-23)
 
 ### What's Built & Working
 | Area | Status |
@@ -44,6 +44,7 @@
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| **Plan-based template register (18 templates)** | 🔄 Design complete — implementation pending |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |

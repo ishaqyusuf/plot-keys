@@ -213,9 +213,22 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   - corporate real-estate templates
 - Each family should have a defined page inventory, section system, and conversion strategy before variants are multiplied.
 
+## Template Register (2026-03-23)
+
+A new plan-based template register is being built at `packages/section-registry/src/register/`. Full specification in `brain/modules/template-register-plan.md`. Key decisions:
+
+- **18 templates** — 6 company-type families × 3 plan tiers (Starter / Plus / Pro)
+- **Arabic/MENA naming accent** — consistent with existing catalog (Noor, Bana, Wafi, Faris, Thuraya, Sakan)
+- **One name per family** — plan variants live under one folder: `noor/common/`, `noor/starter/`, `noor/plus/`, `noor/pro/`
+- **Full page inventories** — all pages per family/plan including Login, Sign Up, Saved Listings, Inquiry Basket, 404, Privacy, Terms
+- **Formal content injection contract** — `dataSource` + `requiredResources` on `SectionSlot`; `resolvePage()` resolver; two content channels (static text vs live DB data)
+- **4th render mode** — `"template"` added to `RenderMode` for marketplace browse (placeholder data, intercepted clicks)
+- **Three non-negotiable standards** — editable boundary (static only), UI system split (sections = raw Tailwind + CSS vars; overlays = shadcn), mobile responsive baseline (mandatory for all tiers)
+
 ## Open Items
 - TODO: Decide whether `SiteConfiguration` continues as the primary website aggregate or becomes a bridge toward `Website` plus `WebsiteVersion`
 - TODO: Decide when template definitions move from code into relational records
 - TODO: Finalize license shapes for `FREE`, `PLAN_INCLUDED`, `PURCHASED`, and `ADMIN_GRANTED`
 - TODO: Define billing provider and purchase lifecycle ownership for templates and stock images
-- TODO: Define the minimum standard for calling a template "unique" across page inventory, section composition, and navigation structure
+- TODO: Implement `EditableText` AI icon + action bar (separate task from register)
+- TODO: Implement `ClickGuard` + `InlineOverview` panel (separate task from register)
