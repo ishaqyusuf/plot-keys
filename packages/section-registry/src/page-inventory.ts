@@ -1,3 +1,5 @@
+import type { TenantResource } from "./types";
+
 /**
  * Page inventory and section-matrix definitions.
  *
@@ -18,6 +20,12 @@
 export type SectionSlot = {
   /** Content keys this section reads. Helps the builder highlight relevant fields. */
   contentKeys: string[];
+  /**
+   * Which live tenant DB resource feeds the dynamic items in this section.
+   * Sections with a dataSource render display-only items — never editable
+   * inline in the builder. Editable text (contentKeys) is separate.
+   */
+  dataSource?: TenantResource;
   /** Human-readable label for the section in the builder sidebar. */
   label: string;
   /**
@@ -27,6 +35,11 @@ export type SectionSlot = {
   defaultEnabled: boolean;
   /** Stable identifier — must be unique within the page. */
   id: string;
+  /**
+   * Section is auto-hidden when any of these resources are empty for the tenant.
+   * Prevents empty placeholder sections from going live.
+   */
+  requiredResources?: TenantResource[];
   /** Section component type key (maps to the section registry). */
   sectionType: string;
   /** Display order in the page (lower = higher on page). */
