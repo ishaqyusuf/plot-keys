@@ -241,7 +241,7 @@ export type AiUsageLogWhereInput = {
   NOT?: Prisma.AiUsageLogWhereInput | Prisma.AiUsageLogWhereInput[]
   id?: Prisma.UuidFilter<"AiUsageLog"> | string
   companyId?: Prisma.UuidFilter<"AiUsageLog"> | string
-  userId?: Prisma.UuidFilter<"AiUsageLog"> | string
+  userId?: Prisma.StringFilter<"AiUsageLog"> | string
   feature?: Prisma.StringFilter<"AiUsageLog"> | string
   creditsUsed?: Prisma.IntFilter<"AiUsageLog"> | number
   tokensUsed?: Prisma.IntNullableFilter<"AiUsageLog"> | number | null
@@ -272,7 +272,7 @@ export type AiUsageLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AiUsageLogWhereInput[]
   NOT?: Prisma.AiUsageLogWhereInput | Prisma.AiUsageLogWhereInput[]
   companyId?: Prisma.UuidFilter<"AiUsageLog"> | string
-  userId?: Prisma.UuidFilter<"AiUsageLog"> | string
+  userId?: Prisma.StringFilter<"AiUsageLog"> | string
   feature?: Prisma.StringFilter<"AiUsageLog"> | string
   creditsUsed?: Prisma.IntFilter<"AiUsageLog"> | number
   tokensUsed?: Prisma.IntNullableFilter<"AiUsageLog"> | number | null
@@ -306,7 +306,7 @@ export type AiUsageLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AiUsageLogScalarWhereWithAggregatesInput | Prisma.AiUsageLogScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"AiUsageLog"> | string
   companyId?: Prisma.UuidWithAggregatesFilter<"AiUsageLog"> | string
-  userId?: Prisma.UuidWithAggregatesFilter<"AiUsageLog"> | string
+  userId?: Prisma.StringWithAggregatesFilter<"AiUsageLog"> | string
   feature?: Prisma.StringWithAggregatesFilter<"AiUsageLog"> | string
   creditsUsed?: Prisma.IntWithAggregatesFilter<"AiUsageLog"> | number
   tokensUsed?: Prisma.IntNullableWithAggregatesFilter<"AiUsageLog"> | number | null
@@ -597,7 +597,7 @@ export type AiUsageLogScalarWhereInput = {
   NOT?: Prisma.AiUsageLogScalarWhereInput | Prisma.AiUsageLogScalarWhereInput[]
   id?: Prisma.UuidFilter<"AiUsageLog"> | string
   companyId?: Prisma.UuidFilter<"AiUsageLog"> | string
-  userId?: Prisma.UuidFilter<"AiUsageLog"> | string
+  userId?: Prisma.StringFilter<"AiUsageLog"> | string
   feature?: Prisma.StringFilter<"AiUsageLog"> | string
   creditsUsed?: Prisma.IntFilter<"AiUsageLog"> | number
   tokensUsed?: Prisma.IntNullableFilter<"AiUsageLog"> | number | null

@@ -10,8 +10,9 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { createAgentAction, updateAgentAction } from "../../actions";
+import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
 
 type Agent = {
   id: string;
@@ -25,13 +26,12 @@ type Agent = {
   displayOrder: number | null;
 };
 
-type AgentFormProps =
-  | { mode: "create" }
-  | { mode: "edit"; agent: Agent };
+type AgentFormProps = { mode: "create" } | { mode: "edit"; agent: Agent };
 
 export function AgentForm(props: AgentFormProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const agent = props.mode === "edit" ? props.agent : null;
 
@@ -51,7 +51,10 @@ export function AgentForm(props: AgentFormProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={props.mode === "create" ? "default" : "outline"}>
+        <Button
+          size="sm"
+          variant={props.mode === "create" ? "default" : "outline"}
+        >
           {props.mode === "create" ? "Add agent" : "Edit"}
         </Button>
       </DialogTrigger>
@@ -62,10 +65,8 @@ export function AgentForm(props: AgentFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {agent && (
-            <input name="agentId" type="hidden" value={agent.id} />
-          )}
+        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+          {agent && <input name="agentId" type="hidden" value={agent.id} />}
 
           <FieldGroup>
             <Field>
@@ -150,19 +151,26 @@ export function AgentForm(props: AgentFormProps) {
             </div>
           </FieldGroup>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button onClick={() => setOpen(false)} type="button" variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={pending} type="submit">
-              {pending
-                ? props.mode === "create"
-                  ? "Adding…"
-                  : "Saving…"
-                : props.mode === "create"
-                  ? "Add agent"
-                  : "Save changes"}
-            </Button>
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton formRef={formRef} />
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setOpen(false)}
+                type="button"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending
+                  ? props.mode === "create"
+                    ? "Adding…"
+                    : "Saving…"
+                  : props.mode === "create"
+                    ? "Add agent"
+                    : "Save changes"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

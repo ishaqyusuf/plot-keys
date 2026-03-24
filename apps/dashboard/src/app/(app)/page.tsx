@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { DevTenantFabLoader } from "../../components/dev/dev-tenant-fab-loader";
 import { requireOnboardedSession } from "../../lib/session";
 import {
   ensureBuilderConfigurationExists,
@@ -96,8 +97,10 @@ export default async function DashboardHomePage({
   ];
 
   return (
-    <main className="px-4 py-6 md:px-8 md:py-10">
-      <div className="mx-auto max-w-6xl">
+    <>
+      <DevTenantFabLoader />
+      <main className="px-4 py-6 md:px-8 md:py-10">
+        <div className="mx-auto max-w-6xl">
         {params.error ? (
           <Alert className="mb-6" variant="destructive">
             <AlertDescription>{params.error}</AlertDescription>
@@ -190,7 +193,7 @@ export default async function DashboardHomePage({
           ))}
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Quick Actions</CardTitle>
@@ -339,8 +342,9 @@ export default async function DashboardHomePage({
               </form>
             </CardContent>
           </Card>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

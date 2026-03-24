@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { NotificationContactKind } from "./contacts";
 import type {
   NotificationChannel,
@@ -8,21 +8,16 @@ import type {
 } from "./core-types";
 import {
   authEmailVerified,
-  type AuthEmailVerifiedPayload,
   authVerificationRequested,
-  type AuthVerificationRequestedPayload,
   builderRouteHint,
   newLeadCaptured,
-  type NewLeadCapturedPayload,
   onboardingReminder,
-  type OnboardingReminderPayload,
   signupSuccessful,
-  type SignupSuccessfulPayload,
   siteConfigurationSaved,
   sitePublished,
-  type SitePublishedPayload,
   sitePublishRequiresReview,
   subscriberLeadCreated,
+  workspaceInvitationSent,
 } from "./types";
 
 type BuiltNotificationInput = Omit<NotificationInput, "action">;
@@ -144,4 +139,5 @@ export const plotKeysNotificationTypes = defineNotificationTypes({
   site_publish_requires_review: sitePublishRequiresReview,
   site_published: sitePublished,
   subscriber_lead_created: subscriberLeadCreated,
+  workspace_invitation_sent: workspaceInvitationSent,
 });

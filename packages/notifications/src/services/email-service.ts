@@ -1,14 +1,16 @@
-import { render } from "@plotkeys/email/render";
-import VerificationEmail from "@plotkeys/email/emails/verification";
-import WelcomeEmail from "@plotkeys/email/emails/welcome";
-import NewLeadEmail from "@plotkeys/email/emails/new-lead";
-import SitePublishedEmail from "@plotkeys/email/emails/site-published";
 import {
   defaultNewLeadSubject,
   defaultSitePublishedSubject,
   defaultVerificationSubject,
   defaultWelcomeSubject,
+  defaultWorkspaceInvitationSubject,
 } from "@plotkeys/email";
+import NewLeadEmail from "@plotkeys/email/emails/new-lead";
+import SitePublishedEmail from "@plotkeys/email/emails/site-published";
+import VerificationEmail from "@plotkeys/email/emails/verification";
+import WelcomeEmail from "@plotkeys/email/emails/welcome";
+import WorkspaceInvitationEmail from "@plotkeys/email/emails/workspace-invitation";
+import { render } from "@plotkeys/email/render";
 import type { NotificationChannelDispatch } from "../core-types";
 
 type ResendEmailPayload = {
@@ -50,7 +52,9 @@ async function sendEmail(payload: ResendEmailPayload) {
   if (!response.ok) {
     const errorText = await response.text();
 
-    throw new Error(`Resend request failed with ${response.status}: ${errorText}`);
+    throw new Error(
+      `Resend request failed with ${response.status}: ${errorText}`,
+    );
   }
 }
 
@@ -167,6 +171,27 @@ async function buildEmailPayload(dispatch: NotificationChannelDispatch) {
           payload.companyName,
           payload.configName,
         ),
+      };
+    }
+    case "workspace_invitation_sent": {
+      const payload = dispatch.payload as {
+        companyName: string;
+        inviteUrl: string;
+        inviterName: string;
+        recipientEmail: string;
+        roleLabel: string;
+      };
+
+      return {
+        html: await render(
+          WorkspaceInvitationEmail({
+            companyName: payload.companyName,
+            inviteUrl: payload.inviteUrl,
+            inviterName: payload.inviterName,
+            roleLabel: payload.roleLabel,
+          }),
+        ),
+        subject: defaultWorkspaceInvitationSubject(payload.companyName),
       };
     }
     default:

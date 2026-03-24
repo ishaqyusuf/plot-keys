@@ -35,6 +35,7 @@
 | Customer model + lead promotion | ✅ Done |
 | Team invite accept flow | ✅ Done |
 | HR module (Employee + Department models, pages) | ✅ Done |
+| Invite-driven agent/employee onboarding | ✅ Done |
 | CSV export actions + UI download buttons | ✅ Done |
 | Leave management (submission + approval flow) | ✅ Done |
 | Payroll page (monthly records + mark paid) | ✅ Done |
@@ -44,7 +45,8 @@
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
-| **Plan-based template register (18 templates)** | 🔄 Design complete — implementation pending |
+| **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
+| **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
@@ -54,6 +56,24 @@
 ---
 
 ## 2026-03-22 — App Store Expansion
+
+## 2026-03-24 — Invite-Driven Agent and Employee Onboarding
+
+### Admin Flows
+- Replaced direct-create agent and employee entry points with invite forms that only require an email address.
+- Agents page and Employees page now show pending role-specific invites and let admins revoke them.
+- Team/member invites now send real invitation emails through the shared notifications + email pipeline.
+
+### Invite Acceptance + Profile Completion
+- Updated `/join/[token]` so invitees can sign in or create an account with redirect preservation back to the invite link.
+- Accepting an `agent` invite now routes into a profile-completion form that creates or updates the agent record.
+- Accepting a `staff` invite now routes into a profile-completion form that creates or updates the employee record.
+- Invite acceptance now validates that the signed-in account email matches the invited email before membership is created.
+
+### Notifications + Email
+- Added `workspace_invitation_sent` notification type for invite delivery.
+- Added a dedicated workspace invitation email template and subject/default copy helpers.
+- Added dashboard-side invite notification orchestration to send invitation emails after the team invite record is created.
 
 ### Dashboard App Store Page (`/app-store`)
 - Integration cards for Google Analytics, Facebook Pixel, WhatsApp Business, Calendly

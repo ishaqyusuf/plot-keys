@@ -208,6 +208,7 @@ export type MembershipWhereInput = {
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  projectAssignments?: Prisma.ProjectAssignmentListRelationFilter
 }
 
 export type MembershipOrderByWithRelationInput = {
@@ -221,6 +222,7 @@ export type MembershipOrderByWithRelationInput = {
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  projectAssignments?: Prisma.ProjectAssignmentOrderByRelationAggregateInput
 }
 
 export type MembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -237,6 +239,7 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  projectAssignments?: Prisma.ProjectAssignmentListRelationFilter
 }, "id">
 
 export type MembershipOrderByWithAggregationInput = {
@@ -276,6 +279,7 @@ export type MembershipCreateInput = {
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateInput = {
@@ -287,6 +291,7 @@ export type MembershipUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUpdateInput = {
@@ -298,6 +303,7 @@ export type MembershipUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateInput = {
@@ -309,6 +315,7 @@ export type MembershipUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipCreateManyInput = {
@@ -385,6 +392,11 @@ export type MembershipMinOrderByAggregateInput = {
   deletedAt?: Prisma.SortOrder
 }
 
+export type MembershipScalarRelationFilter = {
+  is?: Prisma.MembershipWhereInput
+  isNot?: Prisma.MembershipWhereInput
+}
+
 export type MembershipCreateNestedManyWithoutCompanyInput = {
   create?: Prisma.XOR<Prisma.MembershipCreateWithoutCompanyInput, Prisma.MembershipUncheckedCreateWithoutCompanyInput> | Prisma.MembershipCreateWithoutCompanyInput[] | Prisma.MembershipUncheckedCreateWithoutCompanyInput[]
   connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutCompanyInput | Prisma.MembershipCreateOrConnectWithoutCompanyInput[]
@@ -433,6 +445,20 @@ export type EnumMembershipRoleFieldUpdateOperationsInput = {
 
 export type EnumMembershipStatusFieldUpdateOperationsInput = {
   set?: $Enums.MembershipStatus
+}
+
+export type MembershipCreateNestedOneWithoutProjectAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProjectAssignmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutProjectAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProjectAssignmentsInput
+  upsert?: Prisma.MembershipUpsertWithoutProjectAssignmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutProjectAssignmentsInput, Prisma.MembershipUpdateWithoutProjectAssignmentsInput>, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
 }
 
 export type MembershipCreateNestedManyWithoutUserInput = {
@@ -485,6 +511,7 @@ export type MembershipCreateWithoutCompanyInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutCompanyInput = {
@@ -495,6 +522,7 @@ export type MembershipUncheckedCreateWithoutCompanyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutCompanyInput = {
@@ -537,6 +565,66 @@ export type MembershipScalarWhereInput = {
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
 }
 
+export type MembershipCreateWithoutProjectAssignmentsInput = {
+  id?: string
+  role?: $Enums.MembershipRole
+  status?: $Enums.MembershipStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+}
+
+export type MembershipUncheckedCreateWithoutProjectAssignmentsInput = {
+  id?: string
+  companyId: string
+  userId: string
+  role?: $Enums.MembershipRole
+  status?: $Enums.MembershipStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MembershipCreateOrConnectWithoutProjectAssignmentsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+}
+
+export type MembershipUpsertWithoutProjectAssignmentsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutProjectAssignmentsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
+}
+
+export type MembershipUpdateWithoutProjectAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutProjectAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type MembershipCreateWithoutUserInput = {
   id?: string
   role?: $Enums.MembershipRole
@@ -545,6 +633,7 @@ export type MembershipCreateWithoutUserInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutUserInput = {
@@ -555,6 +644,7 @@ export type MembershipUncheckedCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutUserInput = {
@@ -601,6 +691,7 @@ export type MembershipUpdateWithoutCompanyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutCompanyInput = {
@@ -611,6 +702,7 @@ export type MembershipUncheckedUpdateWithoutCompanyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutCompanyInput = {
@@ -641,6 +733,7 @@ export type MembershipUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutUserInput = {
@@ -651,6 +744,7 @@ export type MembershipUncheckedUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutUserInput = {
@@ -664,6 +758,35 @@ export type MembershipUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type MembershipCountOutputType
+ */
+
+export type MembershipCountOutputType = {
+  projectAssignments: number
+}
+
+export type MembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  projectAssignments?: boolean | MembershipCountOutputTypeCountProjectAssignmentsArgs
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MembershipCountOutputType
+   */
+  select?: Prisma.MembershipCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountProjectAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProjectAssignmentWhereInput
+}
+
 
 export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -676,6 +799,8 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  projectAssignments?: boolean | Prisma.Membership$projectAssignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
 export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -719,6 +844,8 @@ export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  projectAssignments?: boolean | Prisma.Membership$projectAssignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
@@ -734,6 +861,7 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     company: Prisma.$CompanyPayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
+    projectAssignments: Prisma.$ProjectAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1140,6 +1268,7 @@ export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  projectAssignments<T extends Prisma.Membership$projectAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$projectAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1575,6 +1704,30 @@ export type MembershipDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Memberships to delete.
    */
   limit?: number
+}
+
+/**
+ * Membership.projectAssignments
+ */
+export type Membership$projectAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProjectAssignment
+   */
+  select?: Prisma.ProjectAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProjectAssignment
+   */
+  omit?: Prisma.ProjectAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProjectAssignmentInclude<ExtArgs> | null
+  where?: Prisma.ProjectAssignmentWhereInput
+  orderBy?: Prisma.ProjectAssignmentOrderByWithRelationInput | Prisma.ProjectAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.ProjectAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProjectAssignmentScalarFieldEnum | Prisma.ProjectAssignmentScalarFieldEnum[]
 }
 
 /**

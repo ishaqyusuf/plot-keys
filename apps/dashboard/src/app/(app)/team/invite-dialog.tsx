@@ -10,18 +10,24 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { inviteMemberAction } from "../../actions";
+import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
 
 const roleOptions = [
   { value: "admin", label: "Admin", description: "Full access except billing" },
-  { value: "agent", label: "Agent", description: "Listings, leads & appointments" },
+  {
+    value: "agent",
+    label: "Agent",
+    description: "Listings, leads & appointments",
+  },
   { value: "staff", label: "Staff", description: "Read-only access" },
 ] as const;
 
 export function InviteMemberDialog() {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,7 +47,7 @@ export function InviteMemberDialog() {
         <DialogHeader>
           <DialogTitle>Invite team member</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
           <FieldGroup>
             <Field>
               <FieldLabel>Email address *</FieldLabel>
@@ -67,13 +73,20 @@ export function InviteMemberDialog() {
               </select>
             </Field>
           </FieldGroup>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button onClick={() => setOpen(false)} type="button" variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={pending} type="submit">
-              {pending ? "Sending…" : "Send invite"}
-            </Button>
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton formRef={formRef} />
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setOpen(false)}
+                type="button"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending ? "Sending…" : "Send invite"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

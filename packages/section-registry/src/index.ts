@@ -128,6 +128,11 @@ export type { RenderMode, TenantResource } from "./types";
 // ---------------------------------------------------------------------------
 // Plan-based template register
 // ---------------------------------------------------------------------------
+import {
+  getRegisterTemplate as _getRegisterTemplate,
+  resolveFamilySectionComponents as _resolveFamilySectionComponents,
+} from "./register/index";
+
 export {
   templateFamilyRegistry,
   registerTemplateCatalog,
@@ -136,7 +141,9 @@ export {
   getRegisterTemplateForBusiness,
   getAccessibleRegisterTemplates,
   getFamilyMetaForBusinessType,
+  resolveFamilySectionComponents,
 } from "./register/index";
+export type { SectionComponentOverrides } from "./register/index";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
@@ -1995,16 +2002,36 @@ export function resolveWebsitePresentation({
     ...content,
   };
 
+  const builtPage = buildPageSections(
+    mergedContent,
+    pageKey,
+    templateKey,
+    liveListings,
+    liveAgents,
+    subdomain,
+  );
+
+  // Apply family-specific component overrides when the templateKey maps to a
+  // register family (e.g. "noor-starter" → family "agency"). Old template keys
+  // (e.g. "template-1") return undefined family → no overrides, generic fallback.
+  const registerVariant = _getRegisterTemplate(templateKey);
+  const familyOverrides = _resolveFamilySectionComponents(registerVariant?.family);
+
+  // Swap in family-branded components where the override map provides one.
+  // When familyOverrides is empty (stub or old template key) this is a no-op.
+  const page = {
+    ...builtPage,
+    sections: builtPage.sections.map((s) => ({
+      ...s,
+      component:
+        (familyOverrides[s.type] as typeof s.component | undefined) ??
+        s.component,
+    })) as HomeSectionDefinition[],
+  };
+
   return {
     editableFields: template.editableFields,
-    page: buildPageSections(
-      mergedContent,
-      pageKey,
-      templateKey,
-      liveListings,
-      liveAgents,
-      subdomain,
-    ),
+    page,
     renderMode,
     template,
     theme: {

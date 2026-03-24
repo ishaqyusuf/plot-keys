@@ -10,8 +10,9 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { createPropertyAction, updatePropertyAction } from "../../actions";
+import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
 
 type Property = {
   id: string;
@@ -36,6 +37,7 @@ type PropertyFormProps =
 export function PropertyForm(props: PropertyFormProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const property = props.mode === "edit" ? props.property : null;
 
@@ -55,7 +57,10 @@ export function PropertyForm(props: PropertyFormProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={props.mode === "create" ? "default" : "outline"}>
+        <Button
+          size="sm"
+          variant={props.mode === "create" ? "default" : "outline"}
+        >
           {props.mode === "create" ? "Add property" : "Edit"}
         </Button>
       </DialogTrigger>
@@ -66,7 +71,7 @@ export function PropertyForm(props: PropertyFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
           {property && (
             <input name="propertyId" type="hidden" value={property.id} />
           )}
@@ -203,23 +208,26 @@ export function PropertyForm(props: PropertyFormProps) {
             </Field>
           </FieldGroup>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              onClick={() => setOpen(false)}
-              type="button"
-              variant="ghost"
-            >
-              Cancel
-            </Button>
-            <Button disabled={pending} type="submit">
-              {pending
-                ? props.mode === "create"
-                  ? "Adding…"
-                  : "Saving…"
-                : props.mode === "create"
-                  ? "Add property"
-                  : "Save changes"}
-            </Button>
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton formRef={formRef} />
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setOpen(false)}
+                type="button"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending
+                  ? props.mode === "create"
+                    ? "Adding…"
+                    : "Saving…"
+                  : props.mode === "create"
+                    ? "Add property"
+                    : "Save changes"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

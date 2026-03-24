@@ -47,6 +47,8 @@ export async function countUnreadNotifications(
   db: Db,
   input: { companyId: string; userId: string },
 ) {
+  // db.notification
+
   return db.notification.count({
     where: {
       companyId: input.companyId,

@@ -92,20 +92,135 @@ export type Verification = Prisma.VerificationModel
  */
 export type BillingLineItem = Prisma.BillingLineItemModel
 /**
+ * Model CompanyIntegration
+ * 
+ */
+export type CompanyIntegration = Prisma.CompanyIntegrationModel
+/**
  * Model Company
  * 
  */
 export type Company = Prisma.CompanyModel
+/**
+ * Model Customer
+ * A contact who has become a customer (converted from a lead or added directly).
+ */
+export type Customer = Prisma.CustomerModel
+/**
+ * Model Department
+ * 
+ */
+export type Department = Prisma.DepartmentModel
+/**
+ * Model Employee
+ * 
+ */
+export type Employee = Prisma.EmployeeModel
 /**
  * Model Lead
  * 
  */
 export type Lead = Prisma.LeadModel
 /**
+ * Model LeaveRequest
+ * 
+ */
+export type LeaveRequest = Prisma.LeaveRequestModel
+/**
  * Model Membership
  * 
  */
 export type Membership = Prisma.MembershipModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model Notification
+ * Persistent in-app notification for a specific user within a company workspace.
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model PayrollEntry
+ * 
+ */
+export type PayrollEntry = Prisma.PayrollEntryModel
+/**
+ * Model ProjectAssignment
+ * 
+ */
+export type ProjectAssignment = Prisma.ProjectAssignmentModel
+/**
+ * Model ProjectBudget
+ * 
+ */
+export type ProjectBudget = Prisma.ProjectBudgetModel
+/**
+ * Model ProjectBudgetLineItem
+ * 
+ */
+export type ProjectBudgetLineItem = Prisma.ProjectBudgetLineItemModel
+/**
+ * Model ProjectCustomerAccess
+ * 
+ */
+export type ProjectCustomerAccess = Prisma.ProjectCustomerAccessModel
+/**
+ * Model ProjectCustomerNotice
+ * 
+ */
+export type ProjectCustomerNotice = Prisma.ProjectCustomerNoticeModel
+/**
+ * Model ProjectDocument
+ * 
+ */
+export type ProjectDocument = Prisma.ProjectDocumentModel
+/**
+ * Model ProjectIssue
+ * 
+ */
+export type ProjectIssue = Prisma.ProjectIssueModel
+/**
+ * Model ProjectMilestone
+ * 
+ */
+export type ProjectMilestone = Prisma.ProjectMilestoneModel
+/**
+ * Model ProjectPayrollRun
+ * 
+ */
+export type ProjectPayrollRun = Prisma.ProjectPayrollRunModel
+/**
+ * Model ProjectPayrollEntry
+ * 
+ */
+export type ProjectPayrollEntry = Prisma.ProjectPayrollEntryModel
+/**
+ * Model ProjectPhase
+ * 
+ */
+export type ProjectPhase = Prisma.ProjectPhaseModel
+/**
+ * Model ProjectUpdate
+ * 
+ */
+export type ProjectUpdate = Prisma.ProjectUpdateModel
+/**
+ * Model ProjectWorker
+ * 
+ */
+export type ProjectWorker = Prisma.ProjectWorkerModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model PropertyMedia
+ * One media asset (image, floor plan, or virtual tour URL) belonging to a property.
+ */
+export type PropertyMedia = Prisma.PropertyMediaModel
 /**
  * Model Property
  * 
@@ -122,6 +237,13 @@ export type SiteConfiguration = Prisma.SiteConfigurationModel
  * Free images don't need a license; only standard/premium tier images.
  */
 export type TenantStockImageLicense = Prisma.TenantStockImageLicenseModel
+/**
+ * Model TeamInvite
+ * Pending email invitation to join a company workspace.
+ * Created when an owner/admin invites a new team member by email.
+ * Consumed when the invitee accepts and a Membership is created.
+ */
+export type TeamInvite = Prisma.TeamInviteModel
 /**
  * Model TenantDomain
  * 

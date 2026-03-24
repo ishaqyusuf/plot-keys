@@ -28,6 +28,7 @@ import { Textarea } from "@plotkeys/ui/textarea";
 import { canAccessTemplateTier } from "@plotkeys/utils";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { DevOnboardingFabLoader } from "../../components/dev/dev-onboarding-fab-loader";
 import { FlowShell } from "../../components/flow-shell";
 import { TagInput } from "../../components/tag-input";
 import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
@@ -162,6 +163,10 @@ export default async function OnboardingPage({
 
   return (
     <>
+      <DevOnboardingFabLoader
+        currentStepId={currentStepId}
+        subdomain={subdomain}
+      />
       <OnboardingSignupNotification
         companyName={companyName || session.user.name || ""}
         dashboardHostname={

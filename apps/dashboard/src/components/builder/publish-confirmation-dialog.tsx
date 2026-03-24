@@ -14,6 +14,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useRef, useState } from "react";
+import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
 
 type PublishConfirmationDialogProps = {
   changedFieldCount?: number;
@@ -94,9 +95,11 @@ export function PublishConfirmationDialog({
         {currentLiveName && (
           <p className="text-xs text-muted-foreground">
             Currently live:{" "}
-            <span className="font-medium text-foreground">{currentLiveName}</span>
-            {" "}— it will be archived and can be re-published from the
-            configuration list.
+            <span className="font-medium text-foreground">
+              {currentLiveName}
+            </span>{" "}
+            — it will be archived and can be re-published from the configuration
+            list.
           </p>
         )}
 
@@ -112,15 +115,18 @@ export function PublishConfirmationDialog({
               />
             </Field>
           </FieldGroup>
-          <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="ghost">
-                Cancel
+          <DialogFooter className="mt-4 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton formRef={formRef} />
+            <div className="flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button disabled={pending} type="submit">
+                {pending ? "Publishing…" : "Publish now"}
               </Button>
-            </DialogClose>
-            <Button disabled={pending} type="submit">
-              {pending ? "Publishing…" : "Publish now"}
-            </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

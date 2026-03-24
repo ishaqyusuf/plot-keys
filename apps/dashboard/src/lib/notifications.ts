@@ -1,4 +1,8 @@
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  countUnreadNotifications,
+  createPrismaClient,
+  listNotificationsForUser,
+} from "@plotkeys/db";
 import { getCurrentAppSession } from "./session";
 
 /**
@@ -14,25 +18,10 @@ export async function getNotificationBellData() {
 
   const companyId = session.activeMembership.companyId;
   const userId = session.user.id;
-
+  // prisma.notification
   const [unreadCount, recent] = await Promise.all([
-    prisma.notification.count({
-      where: { companyId, userId, isRead: false },
-    }),
-    prisma.notification.findMany({
-      where: { companyId, userId },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        type: true,
-        link: true,
-        isRead: true,
-        createdAt: true,
-      },
-    }),
+    countUnreadNotifications(prisma, { companyId, userId }),
+    listNotificationsForUser(prisma, { companyId, userId, take: 5 }),
   ]);
 
   return {

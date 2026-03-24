@@ -47,7 +47,10 @@ export type PropertyMinAggregateOutputType = {
   bathrooms: number | null
   specs: string | null
   imageUrl: string | null
+  type: $Enums.PropertyType | null
+  subType: string | null
   status: $Enums.PropertyStatus | null
+  publishState: $Enums.PropertyPublishState | null
   featured: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,7 +68,10 @@ export type PropertyMaxAggregateOutputType = {
   bathrooms: number | null
   specs: string | null
   imageUrl: string | null
+  type: $Enums.PropertyType | null
+  subType: string | null
   status: $Enums.PropertyStatus | null
+  publishState: $Enums.PropertyPublishState | null
   featured: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -83,7 +89,10 @@ export type PropertyCountAggregateOutputType = {
   bathrooms: number
   specs: number
   imageUrl: number
+  type: number
+  subType: number
   status: number
+  publishState: number
   featured: number
   createdAt: number
   updatedAt: number
@@ -113,7 +122,10 @@ export type PropertyMinAggregateInputType = {
   bathrooms?: true
   specs?: true
   imageUrl?: true
+  type?: true
+  subType?: true
   status?: true
+  publishState?: true
   featured?: true
   createdAt?: true
   updatedAt?: true
@@ -131,7 +143,10 @@ export type PropertyMaxAggregateInputType = {
   bathrooms?: true
   specs?: true
   imageUrl?: true
+  type?: true
+  subType?: true
   status?: true
+  publishState?: true
   featured?: true
   createdAt?: true
   updatedAt?: true
@@ -149,7 +164,10 @@ export type PropertyCountAggregateInputType = {
   bathrooms?: true
   specs?: true
   imageUrl?: true
+  type?: true
+  subType?: true
   status?: true
+  publishState?: true
   featured?: true
   createdAt?: true
   updatedAt?: true
@@ -254,7 +272,10 @@ export type PropertyGroupByOutputType = {
   bathrooms: number | null
   specs: string | null
   imageUrl: string | null
+  type: $Enums.PropertyType | null
+  subType: string | null
   status: $Enums.PropertyStatus
+  publishState: $Enums.PropertyPublishState
   featured: boolean
   createdAt: Date
   updatedAt: Date
@@ -295,13 +316,17 @@ export type PropertyWhereInput = {
   bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   specs?: Prisma.StringNullableFilter<"Property"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
+  subType?: Prisma.StringNullableFilter<"Property"> | string | null
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
+  media?: Prisma.PropertyMediaListRelationFilter
 }
 
 export type PropertyOrderByWithRelationInput = {
@@ -315,13 +340,17 @@ export type PropertyOrderByWithRelationInput = {
   bathrooms?: Prisma.SortOrderInput | Prisma.SortOrder
   specs?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  type?: Prisma.SortOrderInput | Prisma.SortOrder
+  subType?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
+  media?: Prisma.PropertyMediaOrderByRelationAggregateInput
 }
 
 export type PropertyWhereUniqueInput = Prisma.AtLeast<{
@@ -338,13 +367,17 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   specs?: Prisma.StringNullableFilter<"Property"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
+  subType?: Prisma.StringNullableFilter<"Property"> | string | null
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
+  media?: Prisma.PropertyMediaListRelationFilter
 }, "id">
 
 export type PropertyOrderByWithAggregationInput = {
@@ -358,7 +391,10 @@ export type PropertyOrderByWithAggregationInput = {
   bathrooms?: Prisma.SortOrderInput | Prisma.SortOrder
   specs?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  type?: Prisma.SortOrderInput | Prisma.SortOrder
+  subType?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -384,7 +420,10 @@ export type PropertyScalarWhereWithAggregatesInput = {
   bathrooms?: Prisma.IntNullableWithAggregatesFilter<"Property"> | number | null
   specs?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  type?: Prisma.EnumPropertyTypeNullableWithAggregatesFilter<"Property"> | $Enums.PropertyType | null
+  subType?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   status?: Prisma.EnumPropertyStatusWithAggregatesFilter<"Property"> | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateWithAggregatesFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolWithAggregatesFilter<"Property"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
@@ -401,13 +440,17 @@ export type PropertyCreateInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateInput = {
@@ -421,12 +464,16 @@ export type PropertyUncheckedCreateInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUpdateInput = {
@@ -439,13 +486,17 @@ export type PropertyUpdateInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateInput = {
@@ -459,12 +510,16 @@ export type PropertyUncheckedUpdateInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyInput = {
@@ -478,7 +533,10 @@ export type PropertyCreateManyInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -495,7 +553,10 @@ export type PropertyUpdateManyMutationInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -513,7 +574,10 @@ export type PropertyUncheckedUpdateManyInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -535,6 +599,11 @@ export type PropertyOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type PropertyScalarRelationFilter = {
+  is?: Prisma.PropertyWhereInput
+  isNot?: Prisma.PropertyWhereInput
+}
+
 export type PropertyCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
@@ -546,7 +615,10 @@ export type PropertyCountOrderByAggregateInput = {
   bathrooms?: Prisma.SortOrder
   specs?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  type?: Prisma.SortOrder
+  subType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -569,7 +641,10 @@ export type PropertyMaxOrderByAggregateInput = {
   bathrooms?: Prisma.SortOrder
   specs?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  type?: Prisma.SortOrder
+  subType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -587,7 +662,10 @@ export type PropertyMinOrderByAggregateInput = {
   bathrooms?: Prisma.SortOrder
   specs?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  type?: Prisma.SortOrder
+  subType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -657,8 +735,30 @@ export type PropertyUncheckedUpdateManyWithoutCompanyNestedInput = {
   deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
 }
 
+export type PropertyCreateNestedOneWithoutMediaInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMediaInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutMediaNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMediaInput
+  upsert?: Prisma.PropertyUpsertWithoutMediaInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutMediaInput, Prisma.PropertyUpdateWithoutMediaInput>, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
+}
+
+export type NullableEnumPropertyTypeFieldUpdateOperationsInput = {
+  set?: $Enums.PropertyType | null
+}
+
 export type EnumPropertyStatusFieldUpdateOperationsInput = {
   set?: $Enums.PropertyStatus
+}
+
+export type EnumPropertyPublishStateFieldUpdateOperationsInput = {
+  set?: $Enums.PropertyPublishState
 }
 
 export type PropertyCreateWithoutAppointmentsInput = {
@@ -671,12 +771,16 @@ export type PropertyCreateWithoutAppointmentsInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutAppointmentsInput = {
@@ -690,11 +794,15 @@ export type PropertyUncheckedCreateWithoutAppointmentsInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  media?: Prisma.PropertyMediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutAppointmentsInput = {
@@ -723,12 +831,16 @@ export type PropertyUpdateWithoutAppointmentsInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutAppointmentsInput = {
@@ -742,11 +854,15 @@ export type PropertyUncheckedUpdateWithoutAppointmentsInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  media?: Prisma.PropertyMediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateWithoutCompanyInput = {
@@ -759,12 +875,16 @@ export type PropertyCreateWithoutCompanyInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutCompanyInput = {
@@ -777,12 +897,16 @@ export type PropertyUncheckedCreateWithoutCompanyInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutCompanyInput = {
@@ -825,11 +949,118 @@ export type PropertyScalarWhereInput = {
   bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   specs?: Prisma.StringNullableFilter<"Property"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
+  subType?: Prisma.StringNullableFilter<"Property"> | string | null
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+}
+
+export type PropertyCreateWithoutMediaInput = {
+  id?: string
+  title: string
+  description?: string | null
+  price?: string | null
+  location: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  specs?: string | null
+  imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
+  status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
+  featured?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutMediaInput = {
+  id?: string
+  companyId: string
+  title: string
+  description?: string | null
+  price?: string | null
+  location: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  specs?: string | null
+  imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
+  status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
+  featured?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutMediaInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+}
+
+export type PropertyUpsertWithoutMediaInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutMediaInput, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutMediaInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutMediaInput, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
+}
+
+export type PropertyUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyCompanyInput = {
@@ -842,7 +1073,10 @@ export type PropertyCreateManyCompanyInput = {
   bathrooms?: number | null
   specs?: string | null
   imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
   status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -859,12 +1093,16 @@ export type PropertyUpdateWithoutCompanyInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutCompanyInput = {
@@ -877,12 +1115,16 @@ export type PropertyUncheckedUpdateWithoutCompanyInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutCompanyInput = {
@@ -895,7 +1137,10 @@ export type PropertyUncheckedUpdateManyWithoutCompanyInput = {
   bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -909,10 +1154,12 @@ export type PropertyUncheckedUpdateManyWithoutCompanyInput = {
 
 export type PropertyCountOutputType = {
   appointments: number
+  media: number
 }
 
 export type PropertyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   appointments?: boolean | PropertyCountOutputTypeCountAppointmentsArgs
+  media?: boolean | PropertyCountOutputTypeCountMediaArgs
 }
 
 /**
@@ -932,6 +1179,13 @@ export type PropertyCountOutputTypeCountAppointmentsArgs<ExtArgs extends runtime
   where?: Prisma.AppointmentWhereInput
 }
 
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyMediaWhereInput
+}
+
 
 export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -944,13 +1198,17 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   bathrooms?: boolean
   specs?: boolean
   imageUrl?: boolean
+  type?: boolean
+  subType?: boolean
   status?: boolean
+  publishState?: boolean
   featured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Property$appointmentsArgs<ExtArgs>
+  media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
@@ -965,7 +1223,10 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   bathrooms?: boolean
   specs?: boolean
   imageUrl?: boolean
+  type?: boolean
+  subType?: boolean
   status?: boolean
+  publishState?: boolean
   featured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -984,7 +1245,10 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   bathrooms?: boolean
   specs?: boolean
   imageUrl?: boolean
+  type?: boolean
+  subType?: boolean
   status?: boolean
+  publishState?: boolean
   featured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1003,17 +1267,21 @@ export type PropertySelectScalar = {
   bathrooms?: boolean
   specs?: boolean
   imageUrl?: boolean
+  type?: boolean
+  subType?: boolean
   status?: boolean
+  publishState?: boolean
   featured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "title" | "description" | "price" | "location" | "bedrooms" | "bathrooms" | "specs" | "imageUrl" | "status" | "featured" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "title" | "description" | "price" | "location" | "bedrooms" | "bathrooms" | "specs" | "imageUrl" | "type" | "subType" | "status" | "publishState" | "featured" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Property$appointmentsArgs<ExtArgs>
+  media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1028,6 +1296,7 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     company: Prisma.$CompanyPayload<ExtArgs>
     appointments: Prisma.$AppointmentPayload<ExtArgs>[]
+    media: Prisma.$PropertyMediaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1040,7 +1309,10 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     bathrooms: number | null
     specs: string | null
     imageUrl: string | null
+    type: $Enums.PropertyType | null
+    subType: string | null
     status: $Enums.PropertyStatus
+    publishState: $Enums.PropertyPublishState
     featured: boolean
     createdAt: Date
     updatedAt: Date
@@ -1441,6 +1713,7 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   appointments<T extends Prisma.Property$appointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  media<T extends Prisma.Property$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1480,7 +1753,10 @@ export interface PropertyFieldRefs {
   readonly bathrooms: Prisma.FieldRef<"Property", 'Int'>
   readonly specs: Prisma.FieldRef<"Property", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Property", 'String'>
+  readonly type: Prisma.FieldRef<"Property", 'PropertyType'>
+  readonly subType: Prisma.FieldRef<"Property", 'String'>
   readonly status: Prisma.FieldRef<"Property", 'PropertyStatus'>
+  readonly publishState: Prisma.FieldRef<"Property", 'PropertyPublishState'>
   readonly featured: Prisma.FieldRef<"Property", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Property", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Property", 'DateTime'>
@@ -1907,6 +2183,30 @@ export type Property$appointmentsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AppointmentScalarFieldEnum | Prisma.AppointmentScalarFieldEnum[]
+}
+
+/**
+ * Property.media
+ */
+export type Property$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyMedia
+   */
+  select?: Prisma.PropertyMediaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyMedia
+   */
+  omit?: Prisma.PropertyMediaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyMediaInclude<ExtArgs> | null
+  where?: Prisma.PropertyMediaWhereInput
+  orderBy?: Prisma.PropertyMediaOrderByWithRelationInput | Prisma.PropertyMediaOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyMediaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyMediaScalarFieldEnum | Prisma.PropertyMediaScalarFieldEnum[]
 }
 
 /**

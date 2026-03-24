@@ -14,6 +14,7 @@
  */
 
 import type { TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
+import type { SectionComponentOverrides } from "./ui-types";
 import type { TemplateTier } from "../index";
 
 // ---------------------------------------------------------------------------
@@ -30,6 +31,7 @@ export { sakanFamilyMeta, sakanStarter, sakanPlus, sakanPro, sakanVariants } fro
 // Re-export types for consumers
 export type { TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
 export type { ContentFieldDef, PlaceholderData, NavConfig, FooterConfig, RegisterPageDefinition, RegisterSectionSlot } from "./types";
+export type { SectionComponentOverrides } from "./ui-types";
 
 // ---------------------------------------------------------------------------
 // Internal imports for registry construction
@@ -41,6 +43,14 @@ import { wafiFamilyMeta, wafiVariants } from "./wafi/index";
 import { farisFamilyMeta, farisVariants } from "./faris/index";
 import { thurayaFamilyMeta, thurayaVariants } from "./thuraya/index";
 import { sakanFamilyMeta, sakanVariants } from "./sakan/index";
+
+// UI component override maps — one per family
+import { noorSectionComponents } from "./noor/ui/index";
+import { banaSectionComponents } from "./bana/ui/index";
+import { wafiSectionComponents } from "./wafi/ui/index";
+import { farisSectionComponents } from "./faris/ui/index";
+import { thurayaSectionComponents } from "./thuraya/ui/index";
+import { sakanSectionComponents } from "./sakan/ui/index";
 
 // ---------------------------------------------------------------------------
 // Family registry — grouped by genre/family key
@@ -146,4 +156,36 @@ export function getFamilyMetaForBusinessType(
   return Object.values(templateFamilyRegistry).find(
     (f) => f.meta.businessType === businessType,
   )?.meta;
+}
+
+// ---------------------------------------------------------------------------
+// Family UI component resolution
+// ---------------------------------------------------------------------------
+
+const familySectionComponentMap: Record<TemplateFamilyKey, SectionComponentOverrides> = {
+  agency:    noorSectionComponents,
+  developer: banaSectionComponents,
+  manager:   wafiSectionComponents,
+  solo:      farisSectionComponents,
+  luxury:    thurayaSectionComponents,
+  rental:    sakanSectionComponents,
+};
+
+/**
+ * Returns the section component override map for a given template family.
+ * Each entry in the map replaces the generic sectionComponent for that
+ * section type with a family-branded design.
+ *
+ * Returns an empty map when family is undefined (no overrides applied,
+ * generic components are used as-is — safe fallback for old template keys).
+ *
+ * @example
+ * const overrides = resolveFamilySectionComponents("agency");
+ * const Component = overrides["hero_banner"] ?? sectionComponents["hero_banner"];
+ */
+export function resolveFamilySectionComponents(
+  family: TemplateFamilyKey | undefined,
+): SectionComponentOverrides {
+  if (!family) return {};
+  return familySectionComponentMap[family] ?? {};
 }
