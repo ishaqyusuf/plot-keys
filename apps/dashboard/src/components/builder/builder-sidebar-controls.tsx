@@ -2,8 +2,11 @@
 
 import {
   colorSystems,
+  getParentTemplateForVariationKey,
+  getVariationForTemplateKey,
   stylePresets,
   type TemplateConfig,
+  type TemplateVariation,
   templateCatalog,
 } from "@plotkeys/section-registry";
 import { Avatar, AvatarFallback } from "@plotkeys/ui/avatar";
@@ -383,6 +386,16 @@ function FontMenu({
 // Template Picker
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolves the "effective" template key for the picker radio group.
+ * Variation keys (e.g. "template-1") resolve to their parent template key
+ * ("template-classic") so the picker highlights the correct parent row.
+ */
+function resolvePickerTemplateKey(currentKey: string): string {
+  const parent = getParentTemplateForVariationKey(currentKey);
+  return parent?.key ?? currentKey;
+}
+
 function TemplatePicker({
   configId,
   currentTemplateKey,
@@ -392,11 +405,15 @@ function TemplatePicker({
   currentTemplateKey: string;
   onCreateDraft: (formData: FormData) => Promise<void>;
 }) {
-  const currentTemplate = templateCatalog.find(
-    (t) => t.key === currentTemplateKey,
-  );
+  // If the stored key is a variation key, resolve to the parent template for display.
+  const parentKey = resolvePickerTemplateKey(currentTemplateKey);
+  const currentVariation = getVariationForTemplateKey(currentTemplateKey);
+  const currentTemplate =
+    templateCatalog.find((t) => t.key === parentKey) ??
+    templateCatalog.find((t) => t.key === currentTemplateKey);
+
   const [group, setGroup] = useState<TemplateGroup>(
-    (currentTemplate?.tier as TemplateGroup) ?? "starter",
+    (currentVariation?.tier ?? currentTemplate?.tier ?? "starter") as TemplateGroup,
   );
   const [, startTransition] = useTransition();
 
@@ -404,12 +421,31 @@ function TemplatePicker({
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
-      fd.set("templateKey", templateKey);
+      // When selecting a parent template that has variations, default to the
+      // first starter variation so a concrete key is stored in the DB.
+      const template = templateCatalog.find((t) => t.key === templateKey);
+      const defaultKey =
+        template?.variations?.find((v) => v.tier === "starter")?.key ??
+        templateKey;
+      fd.set("templateKey", defaultKey);
       await onCreateDraft(fd);
     });
   }
 
-  const groupTemplates = templateCatalog.filter((t) => t.tier === group);
+  // Templates that are not variation-only are shown in the tier tabs.
+  // "Classic" appears in all three tabs so users can discover it regardless of tier.
+  const classicTemplate = templateCatalog.find((t) => t.key === "template-classic");
+  const nonVariantTemplates = templateCatalog.filter(
+    (t) => !t.variations && t.tier === group,
+  );
+  const groupTemplates = classicTemplate
+    ? [classicTemplate, ...nonVariantTemplates]
+    : nonVariantTemplates;
+
+  const displayName = currentVariation
+    ? `Classic — ${currentVariation.name}`
+    : (currentTemplate?.name ?? currentTemplateKey);
+  const displayTier = currentVariation?.tier ?? currentTemplate?.tier ?? "starter";
 
   return (
     <DropdownMenu>
@@ -420,10 +456,10 @@ function TemplatePicker({
         >
           <span className="block text-xs text-muted-foreground">Template</span>
           <span className="mt-0.5 block pr-9 text-sm font-medium text-foreground">
-            {currentTemplate?.name ?? currentTemplateKey}
+            {displayName}
           </span>
           <Badge className="mt-1.5" variant="outline">
-            {currentTemplate?.tier ?? "starter"}
+            {displayTier}
           </Badge>
           <ChevronIcon />
         </button>
@@ -446,7 +482,7 @@ function TemplatePicker({
           <TabsContent className="mt-0" value={group}>
             <DropdownMenuRadioGroup
               onValueChange={handleSelectTemplate}
-              value={currentTemplateKey}
+              value={parentKey}
             >
               <DropdownMenuGroup>
                 {groupTemplates.map((template) => (
@@ -483,6 +519,90 @@ function TemplatePicker({
         </Tabs>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variation Picker — shown below the template picker when the active template
+// has colour/typography variations (i.e. when Classic is the active template).
+// ---------------------------------------------------------------------------
+
+function VariationPicker({
+  configId,
+  currentVariationKey,
+  variations,
+  onSelectVariation,
+}: {
+  configId: string;
+  currentVariationKey: string;
+  variations: TemplateVariation[];
+  onSelectVariation: (formData: FormData) => Promise<void>;
+}) {
+  const [activeGroup, setActiveGroup] = useState<TemplateGroup>(() => {
+    const current = variations.find((v) => v.key === currentVariationKey);
+    return (current?.tier ?? "starter") as TemplateGroup;
+  });
+  const [, startTransition] = useTransition();
+
+  function handleSelect(variationKey: string) {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("configId", configId);
+      fd.set("templateKey", variationKey);
+      await onSelectVariation(fd);
+    });
+  }
+
+  const groupVariations = variations.filter((v) => v.tier === activeGroup);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+        Classic Style
+      </p>
+      <div className="flex gap-1">
+        {(["starter", "plus", "pro"] as TemplateGroup[]).map((tier) => (
+          <button
+            key={tier}
+            type="button"
+            onClick={() => setActiveGroup(tier)}
+            className={[
+              "flex-1 rounded px-1.5 py-0.5 text-xs capitalize transition-colors",
+              activeGroup === tier
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted",
+            ].join(" ")}
+          >
+            {tier}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-5 gap-1.5 pt-0.5">
+        {groupVariations.map((variation) => (
+          <button
+            key={variation.key}
+            title={variation.name}
+            type="button"
+            onClick={() => handleSelect(variation.key)}
+            className={[
+              "group relative flex flex-col items-center gap-1 rounded-md p-1 transition-colors hover:bg-muted/60",
+              currentVariationKey === variation.key
+                ? "ring-2 ring-primary ring-offset-1"
+                : "",
+            ].join(" ")}
+          >
+            {/* Colour swatch */}
+            <span
+              className="block size-7 rounded-full border border-black/10 shadow-sm"
+              style={{ backgroundColor: variation.accentColor }}
+            />
+            <span className="block w-full truncate text-center text-[9px] text-muted-foreground">
+              {variation.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -639,10 +759,14 @@ export function BuilderSidebarControls({
   onUpdateTheme,
   onUpdateThemeSilent,
 }: BuilderSidebarControlsProps) {
-  const currentTemplate = templateCatalog.find(
-    (t) => t.key === currentTemplateKey,
-  );
-  const namedImageSlots = currentTemplate?.namedImageSlots ?? {};
+  // If the stored key is a variation key, resolve to the parent template for namedImageSlots etc.
+  const parentTemplate =
+    getParentTemplateForVariationKey(currentTemplateKey) ??
+    templateCatalog.find((t) => t.key === currentTemplateKey);
+  const namedImageSlots = parentTemplate?.namedImageSlots ?? {};
+
+  // Variations from the parent template (Classic = template-1 … template-30).
+  const currentVariations = parentTemplate?.variations ?? null;
 
   return (
     <FieldGroup className="flex flex-col gap-2">
@@ -653,6 +777,17 @@ export function BuilderSidebarControls({
           onCreateDraft={onCreateDraft}
         />
       </Field>
+
+      {currentVariations && currentVariations.length > 0 && (
+        <Field>
+          <VariationPicker
+            configId={configId}
+            currentVariationKey={currentTemplateKey}
+            variations={currentVariations}
+            onSelectVariation={onCreateDraft}
+          />
+        </Field>
+      )}
 
       <Field>
         <StylePresetMenu

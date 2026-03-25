@@ -303,7 +303,23 @@ function withBasePages(homePage: PageDefinition): PageDefinition[] {
   ];
 }
 
-/** template-1 "Aster Grove" — clean residential starter */
+/**
+ * Classic layout inventory — shared by the `template-classic` parent and all
+ * 30 colour/typography variation keys (template-1 … template-30).
+ * Registers under "template-classic"; the lookup helper falls back here for
+ * any variation key not individually registered (template-7 … template-30).
+ */
+const templateClassicInventory: TemplatePageInventory = {
+  pages: withBasePages({
+    label: "Home",
+    pageKey: "home",
+    sections: baseHomeSections,
+    slug: "/",
+  }),
+  templateKey: "template-classic",
+};
+
+/** template-1 "Zara" — maps to Classic layout (backward compat alias) */
 const template1Inventory: TemplatePageInventory = {
   pages: withBasePages({
     label: "Home",
@@ -660,6 +676,9 @@ const template45Inventory: TemplatePageInventory = {
 // ---------------------------------------------------------------------------
 
 const pageInventoryRegistry: Record<string, TemplatePageInventory> = {
+  // Classic parent + backward-compat variation aliases (template-1 … template-6
+  // had minor per-template tweaks; template-7 … template-30 fall back to classic).
+  "template-classic": templateClassicInventory,
   "template-1": template1Inventory,
   "template-2": template2Inventory,
   "template-3": template3Inventory,
@@ -690,7 +709,7 @@ const pageInventoryRegistry: Record<string, TemplatePageInventory> = {
 export function getTemplatePageInventory(
   templateKey: string,
 ): TemplatePageInventory {
-  return pageInventoryRegistry[templateKey] ?? template1Inventory;
+  return pageInventoryRegistry[templateKey] ?? templateClassicInventory;
 }
 
 /**

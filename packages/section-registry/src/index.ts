@@ -88,6 +88,39 @@ export type TenantThemeRecord = Partial<
   >
 >;
 
+/**
+ * A colour/typography variation of a template that shares the same page
+ * structure as the parent template. Variation keys double as the stored
+ * `templateKey` in the DB for backward compatibility.
+ *
+ * The parent template's page inventory and section layout are shared;
+ * only the theme values (accent, background, fonts) differ.
+ */
+export type TemplateVariation = {
+  /** Accent colour hex, e.g. "#0f766e". */
+  accentColor: string;
+  /** Background colour hex, e.g. "#f8fafc". */
+  backgroundColor: string;
+  /** Short description of the visual character of this variation. */
+  description: string;
+  /** Body font family string. */
+  fontFamily: string;
+  /** Heading font family string. */
+  headingFontFamily: string;
+  /**
+   * Unique key — stored as `templateKey` in the DB.
+   * Allows backward compat: existing tenants keep their variation key and the
+   * system resolves the parent template automatically.
+   */
+  key: string;
+  /** Human-readable variation name shown in the style picker. */
+  name: string;
+  /** Whether this variation requires a paid plan purchase to unlock. */
+  purchasable: boolean;
+  /** Plan tier gate for this variation. */
+  tier: TemplateTier;
+};
+
 export type TemplateDefinition = {
   defaultContent: TenantContentRecord;
   defaultTheme: ThemeConfig;
@@ -104,6 +137,12 @@ export type TemplateDefinition = {
   /** URL of the preview thumbnail used in template cards. */
   previewImageUrl?: string;
   tier: TemplateTier;
+  /**
+   * When present, this template supports colour/typography variations.
+   * Each variation shares the same page structure but has its own theme.
+   * The variation `key` is what gets stored in the DB as `templateKey`.
+   */
+  variations?: TemplateVariation[];
 };
 
 export type LiveListingItem = {
@@ -782,11 +821,355 @@ function buildDefaultHomePage(
 // Template catalog
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Classic template — 30 colour/typography variations sharing the same
+// baseHomeSections page structure. Each variation key (template-1 … template-30)
+// maps directly to what is stored as `templateKey` in the DB, preserving full
+// backward compatibility for existing tenants.
+// ---------------------------------------------------------------------------
+
+const classicVariations: TemplateVariation[] = [
+  // ── Starter variations ────────────────────────────────────────────────────
+  {
+    accentColor: "#0f766e",
+    backgroundColor: "#f8fafc",
+    description: "Premium luxury positioning with calm, editorial presentation.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-1",
+    name: "Zara",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#0369a1",
+    backgroundColor: "#f0f9ff",
+    description: "Lightweight, clean starter for high-volume residential agencies.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Inter, system-ui, sans-serif",
+    key: "template-7",
+    name: "Nura",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#1e293b",
+    backgroundColor: "#f8fafc",
+    description: "Bold, professional starter for urban and commercial-leaning agencies.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-8",
+    name: "Siraj",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#1d4ed8",
+    backgroundColor: "#f8fafc",
+    description: "Energetic, lead-focused starter for growing agencies.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+    key: "template-9",
+    name: "Saba",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#0f766e",
+    backgroundColor: "#f0fdf4",
+    description: "Clean, trustworthy starter ideal for rental and property management brands.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Inter, system-ui, sans-serif",
+    key: "template-10",
+    name: "Reem",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#d97706",
+    backgroundColor: "#fffbeb",
+    description: "Warm, family-friendly starter for community-rooted agencies.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "Georgia, serif",
+    key: "template-14",
+    name: "Hana",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#7c3aed",
+    backgroundColor: "#faf5ff",
+    description: "Bright, conversion-optimised starter that drives enquiries fast.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Epilogue, Inter, sans-serif",
+    key: "template-15",
+    name: "Farah",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#059669",
+    backgroundColor: "#f0fdf4",
+    description: "Trustworthy, no-nonsense starter for honest mid-market agencies.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+    key: "template-16",
+    name: "Dara",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#9f1239",
+    backgroundColor: "#fff1f2",
+    description: "Boutique-elegant starter for curated, high-care residential brands.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Playfair Display', Georgia, serif",
+    key: "template-17",
+    name: "Layla",
+    purchasable: false,
+    tier: "starter",
+  },
+  {
+    accentColor: "#0891b2",
+    backgroundColor: "#ecfeff",
+    description: "Fresh, lifestyle-led starter for agencies targeting young urban buyers.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Inter, system-ui, sans-serif",
+    key: "template-18",
+    name: "Jouri",
+    purchasable: false,
+    tier: "starter",
+  },
+  // ── Plus variations ───────────────────────────────────────────────────────
+  {
+    accentColor: "#1d4ed8",
+    backgroundColor: "#f8fafc",
+    description: "Sharper city-led positioning for modern urban inventory.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-2",
+    name: "Leila",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#0369a1",
+    backgroundColor: "#f0f9ff",
+    description: "Clean, listing-first layout for high-volume residential markets.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Inter, system-ui, sans-serif",
+    key: "template-4",
+    name: "Kiran",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#0f766e",
+    backgroundColor: "#f4efe7",
+    description: "Editorial, lifestyle-driven layout for brand-first agencies.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Playfair Display', Georgia, serif",
+    key: "template-11",
+    name: "Mira",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#0369a1",
+    backgroundColor: "#f0f9ff",
+    description: "Versatile, data-forward layout for mixed-portfolio agencies.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Epilogue, Inter, sans-serif",
+    key: "template-12",
+    name: "Rand",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#0f766e",
+    backgroundColor: "#f0fdfa",
+    description: "Brand storytelling layout for aspirational residential positioning.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Playfair Display', Georgia, serif",
+    key: "template-19",
+    name: "Amal",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#2563eb",
+    backgroundColor: "#eff6ff",
+    description: "Data-rich, clear layout for agencies with deep market insight.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Epilogue, Inter, sans-serif",
+    key: "template-20",
+    name: "Bayan",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#be185d",
+    backgroundColor: "#fdf2f8",
+    description: "Warm, elegant plus layout for boutique and lifestyle-driven agencies.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Fraunces', Georgia, serif",
+    key: "template-21",
+    name: "Yasmin",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#0369a1",
+    backgroundColor: "#f0f9ff",
+    description: "Fresh, forward-looking layout for agencies with a growth story to tell.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-22",
+    name: "Sahar",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#15803d",
+    backgroundColor: "#f0fdf4",
+    description: "Community-rooted layout for agencies built on long-term client trust.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-23",
+    name: "Tamar",
+    purchasable: true,
+    tier: "plus",
+  },
+  {
+    accentColor: "#334155",
+    backgroundColor: "#f8fafc",
+    description: "Minimal, graceful layout that lets properties and brand speak clearly.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-24",
+    name: "Zain",
+    purchasable: true,
+    tier: "plus",
+  },
+  // ── Pro variations ────────────────────────────────────────────────────────
+  {
+    accentColor: "#b45309",
+    backgroundColor: "#fffaf0",
+    description: "Warm, trust-led presentation for family and investor audiences.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-3",
+    name: "Cedar",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#1e293b",
+    backgroundColor: "#f8fafc",
+    description: "Bold, data-confident presentation for commercial and investor audiences.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-5",
+    name: "Anbar",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#16a34a",
+    backgroundColor: "#f0fdf4",
+    description: "Warm, community-led layout for family-focused mid-market agencies.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-6",
+    name: "Duha",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#1e293b",
+    backgroundColor: "#0f172a",
+    description: "Dark, premium pro layout for luxury and high-end commercial brands.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-13",
+    name: "Noor",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#b45309",
+    backgroundColor: "#fffbeb",
+    description: "Sun-lit luxury pro layout for premium warm-market residential mandates.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Playfair Display', Georgia, serif",
+    key: "template-25",
+    name: "Shams",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#0f766e",
+    backgroundColor: "#f0fdfa",
+    description: "Full-featured pro layout for established agencies with broad service offerings.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "Satoshi, Avenir Next, sans-serif",
+    key: "template-26",
+    name: "Karim",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#1e40af",
+    backgroundColor: "#f0f9ff",
+    description: "Trusted-advisor pro layout for agencies where relationships drive everything.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: 'Georgia, "Times New Roman", serif',
+    key: "template-27",
+    name: "Rafiq",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#92400e",
+    backgroundColor: "#fef3c7",
+    description: "Rich, warm luxury pro for heritage residential and high-value investor markets.",
+    fontFamily: "Georgia, serif",
+    headingFontFamily: "'Fraunces', Georgia, serif",
+    key: "template-28",
+    name: "Amber",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#a21caf",
+    backgroundColor: "#fdf4ff",
+    description: "Premium pro layout for exclusive, invitation-only or ultra-high-net-worth audiences.",
+    fontFamily: "Satoshi, Avenir Next, sans-serif",
+    headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
+    key: "template-29",
+    name: "Saffron",
+    purchasable: true,
+    tier: "pro",
+  },
+  {
+    accentColor: "#be123c",
+    backgroundColor: "#fff1f2",
+    description: "Coastal-inspired pro layout for aspirational waterfront and high-rise markets.",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headingFontFamily: "Epilogue, Inter, sans-serif",
+    key: "template-30",
+    name: "Coral",
+    purchasable: true,
+    tier: "pro",
+  },
+];
+
 export const templateCatalog: TemplateDefinition[] = [
+  // ─── Classic — 30 colour/typography variations, same baseHomeSections layout ──
   {
     defaultContent: createDefaultContent(
-      "Zara Realty",
-      "Lekki, Lagos",
+      "Your Company",
+      "Lagos",
       "Luxury homes and investment addresses",
     ),
     defaultTheme: {
@@ -794,766 +1177,20 @@ export const templateCatalog: TemplateDefinition[] = [
       backgroundColor: "#f8fafc",
       fontFamily: "Satoshi, Avenir Next, sans-serif",
       headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Zara Realty",
-      market: "Lekki, Lagos",
-      supportLine: "+234 803 000 1204",
-    },
-    description:
-      "Premium luxury positioning with calm, editorial presentation.",
-    editableFields: baseEditableFields,
-    key: "template-1",
-    marketingTagline:
-      "A calm, editorial layout built for luxury and premium residential brands.",
-    name: "Zara",
-    purchasable: false,
-    tier: "starter",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Leila Homes",
-      "Ikoyi, Lagos",
-      "Modern homes for city-focused buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#1d4ed8",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Leila Homes",
-      market: "Ikoyi, Lagos",
-      supportLine: "+234 803 555 0141",
-    },
-    description: "Sharper city-led positioning for modern urban inventory.",
-    editableFields: baseEditableFields,
-    key: "template-2",
-    marketingTagline:
-      "Bold, listing-first layout for urban agencies and commercial portfolios.",
-    name: "Leila",
-    purchasable: true,
-    tier: "plus",
-  },
-  {
-    defaultContent: createDefaultContent(
-      "Cedar Properties",
-      "Abuja",
-      "Trusted family homes and investment-ready spaces",
-    ),
-    defaultTheme: {
-      accentColor: "#b45309",
-      backgroundColor: "#fffaf0",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Cedar Properties",
-      market: "Abuja",
-      supportLine: "+234 809 222 4431",
-    },
-    description:
-      "Warm, trust-led presentation for family and investor audiences.",
-    editableFields: baseEditableFields,
-    key: "template-3",
-    marketingTagline:
-      "Warm, trust-driven layout ideal for family buyers and investor audiences.",
-    name: "Cedar",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 4: Meridian Estates (residential / clean / listings) ───
-  {
-    defaultContent: createDefaultContent(
-      "Kiran Estates",
-      "Port Harcourt",
-      "Prime residential and commercial addresses",
-    ),
-    defaultTheme: {
-      accentColor: "#0369a1",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Kiran Estates",
-      market: "Port Harcourt",
-      supportLine: "+234 803 444 7700",
-    },
-    description:
-      "Clean, listing-first layout for high-volume residential markets.",
-    editableFields: baseEditableFields,
-    key: "template-4",
-    marketingTagline:
-      "Listing-first, data-backed layout for residential sales agencies.",
-    name: "Kiran",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 5: Thornfield (investor / bold / commercial) ───────────
-  {
-    defaultContent: createDefaultContent(
-      "Anbar Capital",
-      "Victoria Island, Lagos",
-      "Investment-grade commercial and mixed-use assets",
-    ),
-    defaultTheme: {
-      accentColor: "#1e293b",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Anbar Capital",
-      market: "Victoria Island, Lagos",
-      supportLine: "+234 1 234 5678",
-    },
-    description:
-      "Bold, data-confident presentation for commercial and investor audiences.",
-    editableFields: baseEditableFields,
-    key: "template-5",
-    marketingTagline:
-      "High-conviction layout built for commercial and investment-grade mandates.",
-    name: "Anbar",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 6: Crestview (family / warm / mid-market) ──────────────
-  {
-    defaultContent: createDefaultContent(
-      "Duha Homes",
-      "Abuja",
-      "Quality family homes across Abuja's best neighbourhoods",
-    ),
-    defaultTheme: {
-      accentColor: "#16a34a",
-      backgroundColor: "#f0fdf4",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Duha Homes",
-      market: "Abuja",
-      supportLine: "+234 802 100 4321",
-    },
-    description:
-      "Warm, community-led layout for family-focused mid-market agencies.",
-    editableFields: baseEditableFields,
-    key: "template-6",
-    marketingTagline:
-      "Welcoming, community-driven layout for family-first residential agencies.",
-    name: "Duha",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 7: Vega Lite (starter / clean / volume residential) ─────
-  {
-    defaultContent: createDefaultContent(
-      "Nura Realty",
-      "Lagos",
-      "Straightforward listings for every budget",
-    ),
-    defaultTheme: {
-      accentColor: "#0369a1",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Nura Realty",
+      logo: "Your Company",
       market: "Lagos",
-      supportLine: "+234 803 100 0200",
+      supportLine: "",
     },
     description:
-      "Lightweight, clean starter for high-volume residential agencies.",
+      "The original PlotKeys layout — Hero, Market Stats, Listings, Story, and CTA. Choose from 30 colour and typography variations.",
     editableFields: baseEditableFields,
-    key: "template-7",
+    key: "template-classic",
     marketingTagline:
-      "Simple, clean layout that puts your listings first without the fluff.",
-    name: "Nura",
+      "The original PlotKeys layout — 30 colour and font variations to match your brand.",
+    name: "Classic",
     purchasable: false,
     tier: "starter",
-  },
-  // ─── Template 8: Nova Basic (starter / bold / urban professional) ─────
-  {
-    defaultContent: createDefaultContent(
-      "Siraj Homes",
-      "Abuja",
-      "Modern properties for urban professionals",
-    ),
-    defaultTheme: {
-      accentColor: "#1e293b",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Siraj Homes",
-      market: "Abuja",
-      supportLine: "+234 809 000 0301",
-    },
-    description:
-      "Bold, professional starter for urban and commercial-leaning agencies.",
-    editableFields: baseEditableFields,
-    key: "template-8",
-    marketingTagline:
-      "Bold and professional — a confident first impression for modern agencies.",
-    name: "Siraj",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 9: Lyra Basic (starter / bold / growth) ─────────────────
-  {
-    defaultContent: createDefaultContent(
-      "Saba Properties",
-      "Port Harcourt",
-      "Growth-focused real estate for ambitious buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#1d4ed8",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
-      logo: "Saba Properties",
-      market: "Port Harcourt",
-      supportLine: "+234 803 200 0401",
-    },
-    description: "Energetic, lead-focused starter for growing agencies.",
-    editableFields: baseEditableFields,
-    key: "template-9",
-    marketingTagline:
-      "High-energy layout built to convert browsers into enquiries.",
-    name: "Saba",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 10: Myra Basic (starter / clean / rental & property mgmt) ──
-  {
-    defaultContent: createDefaultContent(
-      "Reem Realty",
-      "Lagos",
-      "Reliable rentals and managed properties",
-    ),
-    defaultTheme: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f0fdf4",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Reem Realty",
-      market: "Lagos",
-      supportLine: "+234 803 300 0501",
-    },
-    description:
-      "Clean, trustworthy starter ideal for rental and property management brands.",
-    editableFields: baseEditableFields,
-    key: "template-10",
-    marketingTagline:
-      "Calm and credible — built for rental agencies and property managers.",
-    name: "Reem",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 11: Maia Growth (plus / editorial / brand + leads) ──────
-  {
-    defaultContent: createDefaultContent(
-      "Mira Living",
-      "Lekki, Lagos",
-      "Where lifestyle meets real estate",
-    ),
-    defaultTheme: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f4efe7",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Playfair Display', Georgia, serif",
-      logo: "Mira Living",
-      market: "Lekki, Lagos",
-      supportLine: "+234 803 400 0601",
-    },
-    description: "Editorial, lifestyle-driven layout for brand-first agencies.",
-    editableFields: baseEditableFields,
-    key: "template-11",
-    marketingTagline:
-      "Lifestyle-led editorial layout that makes your brand unforgettable.",
-    name: "Mira",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 12: Horizon Plus (plus / clean / mixed portfolio) ───────
-  {
-    defaultContent: createDefaultContent(
-      "Rand Realty",
-      "Abuja",
-      "Diverse property portfolio for every goal",
-    ),
-    defaultTheme: {
-      accentColor: "#0369a1",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Epilogue, Inter, sans-serif",
-      logo: "Rand Realty",
-      market: "Abuja",
-      supportLine: "+234 803 500 0701",
-    },
-    description: "Versatile, data-forward layout for mixed-portfolio agencies.",
-    editableFields: baseEditableFields,
-    key: "template-12",
-    marketingTagline:
-      "Balanced and data-forward — handles sales, rentals, and commercial with ease.",
-    name: "Rand",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 13: Nova Pro (pro / bold / luxury commercial) ──────────
-  {
-    defaultContent: createDefaultContent(
-      "Noor Capital",
-      "Victoria Island, Lagos",
-      "Premium commercial and luxury residential mandates",
-    ),
-    defaultTheme: {
-      accentColor: "#1e293b",
-      backgroundColor: "#0f172a",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Noor Capital",
-      market: "Victoria Island, Lagos",
-      supportLine: "+234 1 700 0080",
-    },
-    description:
-      "Dark, premium pro layout for luxury and high-end commercial brands.",
-    editableFields: baseEditableFields,
-    key: "template-13",
-    marketingTagline:
-      "Dark, high-conviction layout reserved for luxury and commercial leaders.",
-    name: "Noor",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 14: Hana (starter / warm / family / Ibadan) ───────────────
-  {
-    defaultContent: createDefaultContent(
-      "Hana Realty",
-      "Ibadan",
-      "Warm family homes for community-rooted buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#d97706",
-      backgroundColor: "#fffbeb",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "Georgia, serif",
-      logo: "Hana Realty",
-      market: "Ibadan",
-      supportLine: "+234 803 600 0801",
-    },
-    description: "Warm, family-friendly starter for community-rooted agencies.",
-    editableFields: baseEditableFields,
-    key: "template-14",
-    marketingTagline:
-      "A warm, family-centred starter for agencies rooted in community trust.",
-    name: "Hana",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 15: Farah (starter / bold+clean / conversion / Lagos) ──────
-  {
-    defaultContent: createDefaultContent(
-      "Farah Realty",
-      "Lagos",
-      "Fast, conversion-focused homes for smart buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#7c3aed",
-      backgroundColor: "#faf5ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Epilogue, Inter, sans-serif",
-      logo: "Farah Realty",
-      market: "Lagos",
-      supportLine: "+234 803 700 0901",
-    },
-    description:
-      "Bright, conversion-optimised starter that drives enquiries fast.",
-    editableFields: baseEditableFields,
-    key: "template-15",
-    marketingTagline:
-      "Bright and conversion-focused — built to turn visitors into enquiries.",
-    name: "Farah",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 16: Dara (starter / clean / trustworthy / Enugu) ───────────
-  {
-    defaultContent: createDefaultContent(
-      "Dara Properties",
-      "Enugu",
-      "Honest, straightforward homes for mid-market buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#059669",
-      backgroundColor: "#f0fdf4",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
-      logo: "Dara Properties",
-      market: "Enugu",
-      supportLine: "+234 803 800 1001",
-    },
-    description:
-      "Trustworthy, no-nonsense starter for honest mid-market agencies.",
-    editableFields: baseEditableFields,
-    key: "template-16",
-    marketingTagline:
-      "No-nonsense, trustworthy starter for agencies that put honesty first.",
-    name: "Dara",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 17: Layla (starter / editorial+warm / boutique / Port Harcourt) ──
-  {
-    defaultContent: createDefaultContent(
-      "Layla Homes",
-      "Port Harcourt",
-      "Curated, boutique homes for discerning buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#9f1239",
-      backgroundColor: "#fff1f2",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Playfair Display', Georgia, serif",
-      logo: "Layla Homes",
-      market: "Port Harcourt",
-      supportLine: "+234 803 900 1101",
-    },
-    description:
-      "Boutique-elegant starter for curated, high-care residential brands.",
-    editableFields: baseEditableFields,
-    key: "template-17",
-    marketingTagline:
-      "Boutique-elegant starter for residential brands with a curated, personal touch.",
-    name: "Layla",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 18: Jouri (starter / clean+bold / lifestyle / Lagos) ────────
-  {
-    defaultContent: createDefaultContent(
-      "Jouri Realty",
-      "Lagos",
-      "Fresh lifestyle homes for young urban buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#0891b2",
-      backgroundColor: "#ecfeff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Inter, system-ui, sans-serif",
-      logo: "Jouri Realty",
-      market: "Lagos",
-      supportLine: "+234 804 000 1201",
-    },
-    description:
-      "Fresh, lifestyle-led starter for agencies targeting young urban buyers.",
-    editableFields: baseEditableFields,
-    key: "template-18",
-    marketingTagline:
-      "Fresh and lifestyle-led — built for agencies targeting young urban buyers.",
-    name: "Jouri",
-    purchasable: false,
-    tier: "starter",
-  },
-  // ─── Template 19: Amal (plus / editorial / brand storytelling / Lekki) ───
-  {
-    defaultContent: createDefaultContent(
-      "Amal Living",
-      "Lekki, Lagos",
-      "Aspirational homes with brand-first storytelling",
-    ),
-    defaultTheme: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f0fdfa",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Playfair Display', Georgia, serif",
-      logo: "Amal Living",
-      market: "Lekki, Lagos",
-      supportLine: "+234 804 100 1301",
-    },
-    description:
-      "Brand storytelling layout for aspirational residential positioning.",
-    editableFields: baseEditableFields,
-    key: "template-19",
-    marketingTagline:
-      "Brand storytelling layout for aspirational residential agencies with a clear voice.",
-    name: "Amal",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 20: Bayan (plus / clean / data-forward / Abuja) ────────────
-  {
-    defaultContent: createDefaultContent(
-      "Bayan Properties",
-      "Abuja",
-      "Data-rich market insight for serious buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#2563eb",
-      backgroundColor: "#eff6ff",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Epilogue, Inter, sans-serif",
-      logo: "Bayan Properties",
-      market: "Abuja",
-      supportLine: "+234 804 200 1401",
-    },
-    description:
-      "Data-rich, clear layout for agencies with deep market insight.",
-    editableFields: baseEditableFields,
-    key: "template-20",
-    marketingTagline:
-      "Data-forward plus layout for agencies with deep market knowledge to share.",
-    name: "Bayan",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 21: Yasmin (plus / warm+editorial / boutique / VI Lagos) ───
-  {
-    defaultContent: createDefaultContent(
-      "Yasmin Realty",
-      "Victoria Island, Lagos",
-      "Warm, boutique homes for lifestyle-led buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#be185d",
-      backgroundColor: "#fdf2f8",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Fraunces', Georgia, serif",
-      logo: "Yasmin Realty",
-      market: "Victoria Island, Lagos",
-      supportLine: "+234 804 300 1501",
-    },
-    description:
-      "Warm, elegant plus layout for boutique and lifestyle-driven agencies.",
-    editableFields: baseEditableFields,
-    key: "template-21",
-    marketingTagline:
-      "Warm and elegant plus layout for boutique agencies with a lifestyle-first brand.",
-    name: "Yasmin",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 22: Sahar (plus / clean+bold / growth story / Abuja) ───────
-  {
-    defaultContent: createDefaultContent(
-      "Sahar Estates",
-      "Abuja",
-      "Forward-looking homes for agencies with a growth story",
-    ),
-    defaultTheme: {
-      accentColor: "#0369a1",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Sahar Estates",
-      market: "Abuja",
-      supportLine: "+234 804 400 1601",
-    },
-    description:
-      "Fresh, forward-looking layout for agencies with a growth story to tell.",
-    editableFields: baseEditableFields,
-    key: "template-22",
-    marketingTagline:
-      "Fresh, growth-oriented plus layout for agencies ready to announce their momentum.",
-    name: "Sahar",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 23: Tamar (plus / warm / community trust / Ibadan) ─────────
-  {
-    defaultContent: createDefaultContent(
-      "Tamar Properties",
-      "Ibadan",
-      "Community-rooted trust for long-term clients",
-    ),
-    defaultTheme: {
-      accentColor: "#15803d",
-      backgroundColor: "#f0fdf4",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Tamar Properties",
-      market: "Ibadan",
-      supportLine: "+234 804 500 1701",
-    },
-    description:
-      "Community-rooted layout for agencies built on long-term client trust.",
-    editableFields: baseEditableFields,
-    key: "template-23",
-    marketingTagline:
-      "Community-rooted plus layout for agencies where trust is the real product.",
-    name: "Tamar",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 24: Zain (plus / clean+bold / minimal / Lagos) ─────────────
-  {
-    defaultContent: createDefaultContent(
-      "Zain Realty",
-      "Lagos",
-      "Graceful, minimal homes that let the property speak",
-    ),
-    defaultTheme: {
-      accentColor: "#334155",
-      backgroundColor: "#f8fafc",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Zain Realty",
-      market: "Lagos",
-      supportLine: "+234 804 600 1801",
-    },
-    description:
-      "Minimal, graceful layout that lets properties and brand speak clearly.",
-    editableFields: baseEditableFields,
-    key: "template-24",
-    marketingTagline:
-      "Graceful and minimal — a plus layout that lets your properties do the talking.",
-    name: "Zain",
-    purchasable: true,
-    tier: "plus",
-  },
-  // ─── Template 25: Shams (pro / warm+editorial / bright luxury / Lekki) ───
-  {
-    defaultContent: createDefaultContent(
-      "Shams Realty",
-      "Lekki, Lagos",
-      "Sun-lit luxury homes for premium warm-market buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#b45309",
-      backgroundColor: "#fffbeb",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Playfair Display', Georgia, serif",
-      logo: "Shams Realty",
-      market: "Lekki, Lagos",
-      supportLine: "+234 804 700 1901",
-    },
-    description:
-      "Sun-lit luxury pro layout for premium warm-market residential mandates.",
-    editableFields: baseEditableFields,
-    key: "template-25",
-    marketingTagline:
-      "Warm luxury pro layout for agencies serving the premium residential market.",
-    name: "Shams",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 26: Karim (pro / clean+editorial / full-featured / Abuja) ──
-  {
-    defaultContent: createDefaultContent(
-      "Karim Estates",
-      "Abuja",
-      "Full-service homes for established agencies",
-    ),
-    defaultTheme: {
-      accentColor: "#0f766e",
-      backgroundColor: "#f0fdfa",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "Satoshi, Avenir Next, sans-serif",
-      logo: "Karim Estates",
-      market: "Abuja",
-      supportLine: "+234 804 800 2001",
-    },
-    description:
-      "Full-featured pro layout for established agencies with broad service offerings.",
-    editableFields: baseEditableFields,
-    key: "template-26",
-    marketingTagline:
-      "Full-featured pro layout for established agencies with a broad, confident offer.",
-    name: "Karim",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 27: Rafiq (pro / editorial+warm / trusted advisor / Lagos) ──
-  {
-    defaultContent: createDefaultContent(
-      "Rafiq Properties",
-      "Lagos",
-      "Trusted advisor homes where relationships drive everything",
-    ),
-    defaultTheme: {
-      accentColor: "#1e40af",
-      backgroundColor: "#f0f9ff",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: 'Georgia, "Times New Roman", serif',
-      logo: "Rafiq Properties",
-      market: "Lagos",
-      supportLine: "+234 804 900 2101",
-    },
-    description:
-      "Trusted-advisor pro layout for agencies where relationships drive everything.",
-    editableFields: baseEditableFields,
-    key: "template-27",
-    marketingTagline:
-      "Trusted-advisor pro layout for agencies where long-term relationships are the edge.",
-    name: "Rafiq",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 28: Amber (pro / warm / rich luxury / VI Lagos) ────────────
-  {
-    defaultContent: createDefaultContent(
-      "Amber Realty",
-      "Victoria Island, Lagos",
-      "Rich heritage homes for high-value investors",
-    ),
-    defaultTheme: {
-      accentColor: "#92400e",
-      backgroundColor: "#fef3c7",
-      fontFamily: "Georgia, serif",
-      headingFontFamily: "'Fraunces', Georgia, serif",
-      logo: "Amber Realty",
-      market: "Victoria Island, Lagos",
-      supportLine: "+234 805 000 2201",
-    },
-    description:
-      "Rich, warm luxury pro for heritage residential and high-value investor markets.",
-    editableFields: baseEditableFields,
-    key: "template-28",
-    marketingTagline:
-      "Rich, warm luxury pro layout for heritage residential and investor-grade mandates.",
-    name: "Amber",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 29: Saffron (pro / bold+editorial / exclusive / Ikoyi) ──────
-  {
-    defaultContent: createDefaultContent(
-      "Saffron Realty",
-      "Ikoyi, Lagos",
-      "Premium homes for exclusive, invitation-only buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#a21caf",
-      backgroundColor: "#fdf4ff",
-      fontFamily: "Satoshi, Avenir Next, sans-serif",
-      headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
-      logo: "Saffron Realty",
-      market: "Ikoyi, Lagos",
-      supportLine: "+234 805 100 2301",
-    },
-    description:
-      "Premium pro layout for exclusive, invitation-only or ultra-high-net-worth audiences.",
-    editableFields: baseEditableFields,
-    key: "template-29",
-    marketingTagline:
-      "Premium pro layout for exclusive agencies serving ultra-high-net-worth clients.",
-    name: "Saffron",
-    purchasable: true,
-    tier: "pro",
-  },
-  // ─── Template 30: Coral (pro / bold+clean / coastal / Lagos Island) ───────
-  {
-    defaultContent: createDefaultContent(
-      "Coral Realty",
-      "Lagos Island",
-      "Coastal, aspirational homes for waterfront and high-rise buyers",
-    ),
-    defaultTheme: {
-      accentColor: "#be123c",
-      backgroundColor: "#fff1f2",
-      fontFamily: "Inter, system-ui, sans-serif",
-      headingFontFamily: "Epilogue, Inter, sans-serif",
-      logo: "Coral Realty",
-      market: "Lagos Island",
-      supportLine: "+234 805 200 2401",
-    },
-    description:
-      "Coastal-inspired pro layout for aspirational waterfront and high-rise markets.",
-    editableFields: baseEditableFields,
-    key: "template-30",
-    marketingTagline:
-      "Coastal-inspired pro layout for waterfront and high-rise aspirational markets.",
-    name: "Coral",
-    purchasable: true,
-    tier: "pro",
+    variations: classicVariations,
   },
   // ─── Template 31: Sama (starter / search-first / Lekki) ──────────────────
   {
@@ -1946,11 +1583,77 @@ export const templateCatalog: TemplateDefinition[] = [
 
 const fallbackTemplate = templateCatalog[0] as TemplateDefinition;
 
+/**
+ * Returns the TemplateVariation for a given key, or undefined when the key is
+ * not a variation key (i.e. it maps directly to a top-level template).
+ */
+export function getVariationForTemplateKey(
+  key: string,
+): TemplateVariation | undefined {
+  for (const template of templateCatalog) {
+    if (!template.variations) continue;
+    const variation = template.variations.find((v) => v.key === key);
+    if (variation) return variation;
+  }
+  return undefined;
+}
+
+/**
+ * Returns the parent TemplateDefinition for a given variation key, or undefined
+ * when the key is not a variation key.
+ */
+export function getParentTemplateForVariationKey(
+  key: string,
+): TemplateDefinition | undefined {
+  for (const template of templateCatalog) {
+    if (!template.variations) continue;
+    if (template.variations.some((v) => v.key === key)) return template;
+  }
+  return undefined;
+}
+
+/**
+ * Resolves a `TemplateDefinition` for the given key.
+ *
+ * - Direct match: returns the template as-is.
+ * - Variation key (e.g. "template-1"…"template-30"): returns the parent
+ *   template with `defaultTheme` overridden by the variation's theme values,
+ *   and `key`/`name`/`tier`/`purchasable` reflecting the variation. This
+ *   preserves full backward compatibility — existing tenants that stored a
+ *   variation key as their `templateKey` continue to resolve correctly.
+ * - Unknown key: falls back to the first template in the catalog.
+ */
 export function getTemplateDefinition(templateKey: string): TemplateDefinition {
-  return (
-    templateCatalog.find((template) => template.key === templateKey) ??
-    fallbackTemplate
-  );
+  const direct = templateCatalog.find((t) => t.key === templateKey);
+  if (direct) return direct;
+
+  // Check if it is a variation key
+  for (const template of templateCatalog) {
+    if (!template.variations) continue;
+    const variation = template.variations.find((v) => v.key === templateKey);
+    if (variation) {
+      return {
+        ...template,
+        defaultTheme: {
+          ...template.defaultTheme,
+          accentColor: variation.accentColor,
+          backgroundColor: variation.backgroundColor,
+          fontFamily: variation.fontFamily,
+          headingFontFamily: variation.headingFontFamily,
+        },
+        description: variation.description,
+        key: variation.key,
+        name: variation.name,
+        purchasable: variation.purchasable,
+        tier: variation.tier,
+        // Strip variations from the resolved definition so callers
+        // that check for variations don't get confused.
+        variations: undefined,
+      };
+    }
+  }
+
+  return fallbackTemplate;
 }
 
 export function createInitialSiteConfigurationInput({
