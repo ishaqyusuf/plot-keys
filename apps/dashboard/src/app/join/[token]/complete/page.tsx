@@ -11,6 +11,7 @@ import {
 } from "@plotkeys/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { WORK_ROLE_LABELS } from "@plotkeys/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuthenticatedSession } from "../../../../lib/session";
@@ -100,6 +101,15 @@ export default async function InviteProfilePage({
             <strong className="capitalize">
               {isAgentInvite ? "agent" : "employee"}
             </strong>
+            {!isAgentInvite ? (
+              <>
+                {" "}
+                in{" "}
+                <strong>
+                  {WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole}
+                </strong>
+              </>
+            ) : null}
             .
           </CardDescription>
         </CardHeader>

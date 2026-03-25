@@ -12,7 +12,9 @@ export type TRPCContext = {
   headers: Headers;
 };
 
-async function resolveAuthContext(headers: Headers): Promise<AuthSessionContext> {
+async function resolveAuthContext(
+  headers: Headers,
+): Promise<AuthSessionContext> {
   try {
     const session = await getAppSessionFromBetterAuth(headers);
 
@@ -25,6 +27,7 @@ async function resolveAuthContext(headers: Headers): Promise<AuthSessionContext>
         ? {
             companyId: session.activeMembership.companyId,
             role: session.activeMembership.role,
+            workRole: session.activeMembership.workRole,
           }
         : null,
       session: {
@@ -41,7 +44,9 @@ async function resolveAuthContext(headers: Headers): Promise<AuthSessionContext>
   }
 }
 
-export async function buildRequestContext(headers: Headers): Promise<TRPCContext> {
+export async function buildRequestContext(
+  headers: Headers,
+): Promise<TRPCContext> {
   const db = createDatabaseClient();
 
   return {

@@ -50,6 +50,7 @@ type BuilderPageProps = {
   searchParams?: Promise<{
     configId?: string;
     generated?: string;
+    onboarding?: string;
     published?: string;
     saved?: string;
   }>;
@@ -185,10 +186,12 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   return (
     <main className="min-h-screen bg-background px-2 py-2 md:px-3 md:py-3">
       <div className="mx-auto grid max-w-464 gap-3 xl:grid-cols-[14rem_minmax(0,1fr)]">
-        {(params.saved || params.generated || params.published) && (
+        {(params.saved || params.generated || params.published || params.onboarding) && (
           <Alert className="xl:col-start-2 border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>
-              {params.published
+              {params.onboarding
+                ? "Step 06 continues here. Configure your website look and text, then use Publish current configuration when you are ready to launch the live site."
+                : params.published
                 ? "The selected template is now published."
                 : params.generated
                   ? "A smart-fill suggestion was applied to the field."
@@ -319,6 +322,11 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
                 currentName={activeConfiguration.name}
                 onPublish={publishSiteConfigurationAction}
               />
+              {params.onboarding ? (
+                <Badge className="border-primary/30 bg-primary/10 text-primary" variant="outline">
+                  Final onboarding step
+                </Badge>
+              ) : null}
               <Button asChild variant="secondary">
                 <Link href="/">Back to dashboard</Link>
               </Button>

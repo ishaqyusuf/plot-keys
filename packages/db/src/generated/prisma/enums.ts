@@ -334,6 +334,20 @@ export const TenantDomainStatus = {
 export type TenantDomainStatus = (typeof TenantDomainStatus)[keyof typeof TenantDomainStatus]
 
 
+export const WorkRole = {
+  operations: 'operations',
+  sales_agent: 'sales_agent',
+  sales_manager: 'sales_manager',
+  hr: 'hr',
+  finance: 'finance',
+  marketing: 'marketing',
+  project_manager: 'project_manager',
+  executive: 'executive'
+} as const
+
+export type WorkRole = (typeof WorkRole)[keyof typeof WorkRole]
+
+
 export const AppointmentStatus = {
   pending: 'pending',
   confirmed: 'confirmed',

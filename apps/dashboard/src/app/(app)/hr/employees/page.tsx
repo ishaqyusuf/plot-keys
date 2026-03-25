@@ -11,7 +11,9 @@ import {
 } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { EMPLOYEE_WORK_ROLE_VALUES, WORK_ROLE_LABELS } from "@plotkeys/utils";
 import Link from "next/link";
+import { DevFormQuickFillButton } from "../../../../components/dev/dev-form-quick-fill-button";
 import { ExportCsvButton } from "../../../../components/export-csv-button";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
@@ -50,6 +52,11 @@ const employmentTypeLabels: Record<string, string> = {
   intern: "Intern",
   part_time: "Part-time",
 };
+
+const employeeWorkRoleOptions = EMPLOYEE_WORK_ROLE_VALUES.map((value) => ({
+  label: WORK_ROLE_LABELS[value],
+  value,
+}));
 
 function formatDate(date: Date | null) {
   if (!date) return "—";
@@ -188,9 +195,11 @@ export default async function EmployeesPage({
           <CardContent>
             <form
               action={inviteEmployeeAction}
-              className="flex flex-col gap-4 sm:flex-row"
+              className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_15rem_auto]"
+              data-dev-quick-fill-label="Invite employee"
+              data-dev-quick-fill-profile="invite-employee"
             >
-              <div className="flex-1">
+              <div>
                 <Label htmlFor="employee-email">Email address</Label>
                 <Input
                   id="employee-email"
@@ -200,8 +209,26 @@ export default async function EmployeesPage({
                   type="email"
                 />
               </div>
+              <div>
+                <Label htmlFor="employee-work-role">Role</Label>
+                <select
+                  id="employee-work-role"
+                  name="workRole"
+                  defaultValue="operations"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                >
+                  {employeeWorkRoleOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex items-end">
-                <Button type="submit">Send invite</Button>
+                <div className="flex gap-2">
+                  <DevFormQuickFillButton profile="invite-employee" />
+                  <Button type="submit">Send invite</Button>
+                </div>
               </div>
             </form>
           </CardContent>
@@ -217,7 +244,8 @@ export default async function EmployeesPage({
                       {invite.email}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Pending employee setup
+                      Pending employee setup ·{" "}
+                      {WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole}
                     </p>
                   </div>
                   <form action={revokeInviteAction}>
@@ -262,6 +290,9 @@ export default async function EmployeesPage({
                         {employmentTypeLabels[emp.employmentType] ??
                           emp.employmentType}
                       </Badge>
+                      <Badge variant="secondary">
+                        {WORK_ROLE_LABELS[emp.workRole] ?? emp.workRole}
+                      </Badge>
                     </div>
                     <p className="mt-0.5 text-sm text-muted-foreground">
                       {emp.title ?? "No title"}
@@ -279,6 +310,11 @@ export default async function EmployeesPage({
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
+                        <input
+                          type="hidden"
+                          name="workRole"
+                          value={emp.workRole}
+                        />
                         <input type="hidden" name="status" value="on_leave" />
                         <Button size="sm" type="submit" variant="outline">
                           Set On Leave
@@ -289,6 +325,11 @@ export default async function EmployeesPage({
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
+                        <input
+                          type="hidden"
+                          name="workRole"
+                          value={emp.workRole}
+                        />
                         <input type="hidden" name="status" value="active" />
                         <Button size="sm" type="submit" variant="outline">
                           Reactivate

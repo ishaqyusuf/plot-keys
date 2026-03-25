@@ -4,8 +4,9 @@ import { buildRequestContext } from "@plotkeys/api/context";
 import { appRouter } from "@plotkeys/api/router";
 import {
   authRoutes,
-  authSessionCookieName,
   createBetterAuthSession,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
   resolvePostVerificationRoute,
   signInUser,
   signUpUser,
@@ -13,7 +14,13 @@ import {
 } from "@plotkeys/auth";
 import { createPrismaClient } from "@plotkeys/db";
 import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
-import { normalizeSubdomainLabel } from "@plotkeys/utils";
+import {
+  EMPLOYEE_WORK_ROLE_VALUES,
+  isWorkRole,
+  normalizeSubdomainLabel,
+  resolveDashboardSessionScope,
+  WORK_ROLE_LABELS,
+} from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -23,6 +30,7 @@ import {
   requireOnboardedSession,
 } from "../lib/session";
 import {
+  clearAuthSessionCookie,
   clearPendingOnboardingCookie,
   readPendingOnboardingCookie,
 } from "../lib/session-cookie";
@@ -69,22 +77,40 @@ async function assertSubdomainAvailability(
 
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const sessionScope =
+    resolveDashboardSessionScope(host) ?? platformSessionScope;
   const { signedSessionToken, expiresAt } =
     await createBetterAuthSession(userId);
 
-  cookieStore.set(authSessionCookieName, signedSessionToken, {
-    expires: expiresAt,
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  cookieStore.set(
+    getScopedAuthSessionCookieName(sessionScope),
+    signedSessionToken,
+    {
+      expires: expiresAt,
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  );
 }
 
 async function createServerCaller() {
   const headerStore = await headers();
+  const cookieStore = await cookies();
+  const requestHeaders = new Headers(headerStore);
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
 
-  return appRouter.createCaller(await buildRequestContext(headerStore));
+  if (cookieHeader) {
+    requestHeaders.set("cookie", cookieHeader);
+  }
+
+  return appRouter.createCaller(await buildRequestContext(requestHeaders));
 }
 
 function getDashboardAppUrl() {
@@ -108,6 +134,7 @@ async function inviteWorkspaceUser(input: {
   redirectPath: string;
   role: "admin" | "agent" | "staff";
   successRedirect: string;
+  workRole?: string | null;
 }) {
   const session = await requireOnboardedSession();
   const prisma = createPrismaClient().db;
@@ -118,6 +145,7 @@ async function inviteWorkspaceUser(input: {
     const result = await caller.team.inviteMember({
       email: input.email,
       role: input.role,
+      workRole: input.workRole,
     });
 
     const company = prisma
@@ -132,7 +160,10 @@ async function inviteWorkspaceUser(input: {
       inviteUrl: new URL(result.inviteUrl, getDashboardAppUrl()).toString(),
       inviterName: session.user.name ?? session.user.email,
       recipientEmail: input.email.trim().toLowerCase(),
-      roleLabel: getInviteRoleLabel(input.role),
+      roleLabel:
+        input.workRole && isWorkRole(input.workRole)
+          ? WORK_ROLE_LABELS[input.workRole]
+          : getInviteRoleLabel(input.role),
     });
 
     revalidatePath(input.redirectPath);
@@ -241,8 +272,10 @@ export async function verifyEmailAction(formData: FormData) {
 
 export async function signOutAction() {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
 
-  cookieStore.delete(authSessionCookieName);
+  clearAuthSessionCookie(cookieStore, host);
   clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }
@@ -300,7 +333,7 @@ export async function completeOnboardingAction(formData: FormData) {
     });
 
     clearPendingOnboardingCookie(cookieStore);
-    redirectUrl = `/builder?configId=${result.configId}`;
+    redirectUrl = `/builder?configId=${result.configId}&onboarding=1`;
   } catch (error) {
     redirectUrl = createRedirectUrl(authRoutes.onboarding, {
       error:
@@ -493,7 +526,6 @@ export async function saveOnboardingStepAction(formData: FormData) {
   try {
     const caller = await createServerCaller();
 
-    // biome-ignore lint/suspicious/noExplicitAny: dynamic input built per-step
     const input: Record<string, any> = {
       currentStep: nextStep || step,
     };
@@ -998,12 +1030,17 @@ export async function inviteAgentAction(formData: FormData) {
 
 export async function inviteEmployeeAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
+  const rawWorkRole = String(formData.get("workRole") ?? "").trim();
+  const workRole = EMPLOYEE_WORK_ROLE_VALUES.includes(rawWorkRole as never)
+    ? rawWorkRole
+    : "operations";
 
   await inviteWorkspaceUser({
     email,
     redirectPath: "/hr/employees",
     role: "staff",
     successRedirect: "/hr/employees?invited=1",
+    workRole,
   });
 }
 
@@ -1106,6 +1143,7 @@ export async function completeInviteProfileAction(formData: FormData) {
           name,
           phone,
           title,
+          workRole: invite.workRole,
         },
         where: { id: existingEmployee.id },
       });
@@ -1117,6 +1155,7 @@ export async function completeInviteProfileAction(formData: FormData) {
           name,
           phone,
           title,
+          workRole: invite.workRole,
         },
       });
     }
@@ -1429,6 +1468,7 @@ export async function createEmployeeAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim() || null;
+  const rawWorkRole = String(formData.get("workRole") ?? "").trim();
   const departmentId =
     String(formData.get("departmentId") ?? "").trim() || null;
   const employmentType = String(
@@ -1436,6 +1476,7 @@ export async function createEmployeeAction(formData: FormData) {
   ) as "full_time" | "part_time" | "contract" | "intern";
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
   const salaryRaw = String(formData.get("salaryAmount") ?? "").trim();
+  const workRole = isWorkRole(rawWorkRole) ? rawWorkRole : "operations";
 
   if (!name) {
     redirect(
@@ -1450,6 +1491,7 @@ export async function createEmployeeAction(formData: FormData) {
       email,
       phone,
       title,
+      workRole,
       departmentId,
       employmentType,
       startDate: startDateRaw ? new Date(startDateRaw) : null,
@@ -1469,23 +1511,55 @@ export async function updateEmployeeAction(formData: FormData) {
 
   const employeeId = String(formData.get("employeeId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").trim() || null;
-  const title = String(formData.get("title") ?? "").trim() || null;
+  const rawEmail = formData.get("email");
+  const rawPhone = formData.get("phone");
+  const rawTitle = formData.get("title");
+  const rawWorkRole = formData.get("workRole");
+  const rawDepartmentId = formData.get("departmentId");
+  const rawEmploymentType = formData.get("employmentType");
+  const rawStatus = formData.get("status");
+  const email = rawEmail === null ? undefined : String(rawEmail).trim() || null;
+  const phone = rawPhone === null ? undefined : String(rawPhone).trim() || null;
+  const title = rawTitle === null ? undefined : String(rawTitle).trim() || null;
   const departmentId =
-    String(formData.get("departmentId") ?? "").trim() || null;
-  const employmentType = String(
-    formData.get("employmentType") ?? "full_time",
-  ) as "full_time" | "part_time" | "contract" | "intern";
-  const status = String(formData.get("status") ?? "active") as
-    | "active"
-    | "on_leave"
-    | "suspended"
-    | "terminated";
+    rawDepartmentId === null
+      ? undefined
+      : String(rawDepartmentId).trim() || null;
+  const employmentType =
+    rawEmploymentType === null
+      ? undefined
+      : (String(rawEmploymentType).trim() as
+          | "full_time"
+          | "part_time"
+          | "contract"
+          | "intern");
+  const status =
+    rawStatus === null
+      ? undefined
+      : (String(rawStatus).trim() as
+          | "active"
+          | "on_leave"
+          | "suspended"
+          | "terminated");
+  const workRole =
+    rawWorkRole === null
+      ? undefined
+      : isWorkRole(String(rawWorkRole).trim())
+        ? String(rawWorkRole).trim()
+        : "operations";
 
   await prisma.employee.update({
     where: { id: employeeId, companyId },
-    data: { name, email, phone, title, departmentId, employmentType, status },
+    data: {
+      name,
+      email,
+      phone,
+      title,
+      workRole,
+      departmentId,
+      employmentType,
+      status,
+    },
   });
 
   revalidatePath("/hr/employees");
@@ -2026,9 +2100,8 @@ export async function exportBusinessSummaryCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import(
-    "@plotkeys/db"
-  );
+  const { getMonthlyBusinessSummary, businessSummaryToCsv } =
+    await import("@plotkeys/db");
   const summary = await getMonthlyBusinessSummary(prisma, companyId, {
     year,
     month,
@@ -2045,9 +2118,8 @@ export async function exportAgentReportCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import(
-    "@plotkeys/db"
-  );
+  const { getAgentPerformanceReport, agentPerformanceToCsv } =
+    await import("@plotkeys/db");
   const report = await getAgentPerformanceReport(prisma, companyId, {
     year,
     month,
@@ -2061,9 +2133,8 @@ export async function exportListingsReportCsvAction(): Promise<string> {
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getListingsReport, listingsReportToCsv } = await import(
-    "@plotkeys/db"
-  );
+  const { getListingsReport, listingsReportToCsv } =
+    await import("@plotkeys/db");
   const report = await getListingsReport(prisma, companyId);
   return listingsReportToCsv(report);
 }

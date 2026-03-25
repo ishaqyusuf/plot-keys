@@ -1,13 +1,13 @@
 import { sessionBridgeInputSchema } from "@plotkeys/auth/shared";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
-  clearPendingOnboardingCookie,
   clearAuthSessionCookie,
-  setPendingOnboardingCookie,
+  clearPendingOnboardingCookie,
   setAuthSessionCookie,
+  setPendingOnboardingCookie,
 } from "../../../lib/session-cookie";
 
 const sessionPayloadSchema = sessionBridgeInputSchema.extend({
@@ -23,8 +23,10 @@ export async function POST(request: Request) {
   try {
     const body = sessionPayloadSchema.parse(await request.json());
     const cookieStore = await cookies();
+    const host =
+      request.headers.get("x-forwarded-host") ?? request.headers.get("host");
 
-    setAuthSessionCookie(cookieStore, body.sessionToken);
+    setAuthSessionCookie(cookieStore, body.sessionToken, host);
     if (body.onboarding) {
       setPendingOnboardingCookie(cookieStore, body.onboarding);
     }
@@ -43,8 +45,10 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
 
-  clearAuthSessionCookie(cookieStore);
+  clearAuthSessionCookie(cookieStore, host);
   clearPendingOnboardingCookie(cookieStore);
 
   return NextResponse.json({ ok: true });

@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "bun --watch src/index.ts",
-    "dev:portless": "portless api.plotkeys bun --watch src/index.ts",
+    "dev": "node ../../scripts/with-workspace-env.mjs bun --watch src/index.ts",
+    "dev:portless": "node ../../scripts/with-workspace-env.mjs portless api.plotkeys bun --watch src/index.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },

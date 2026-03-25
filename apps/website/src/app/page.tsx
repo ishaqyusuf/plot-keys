@@ -9,6 +9,8 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { SectionHeading } from "@plotkeys/ui/section-heading";
+import { buildPlatformAppUrl } from "@plotkeys/utils";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 import { DevTenantFab } from "../components/dev/dev-tenant-fab";
@@ -110,22 +112,30 @@ const pricingPlans = [
 ];
 
 export default async function MarketingHomePage() {
-  const prisma = createPrismaClient().db;
-  const tenants = prisma
-    ? await prisma.company.findMany({
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          name: true,
-          planTier: true,
-          slug: true,
-        },
-        where: {
-          deletedAt: null,
-          isActive: true,
-        },
-      })
-    : [];
+  const headerStore = await headers();
+  const prisma = createPrismaClient().db!;
+  const tenants = await prisma.company.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      planTier: true,
+      slug: true,
+    },
+    where: {
+      deletedAt: null,
+      isActive: true,
+    },
+  });
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const protocol =
+    headerStore.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+  const currentOrigin = host ? `${protocol}://${host}` : null;
+  const createWorkspaceHref = buildPlatformAppUrl({
+    currentOrigin,
+    pathname: "/sign-up",
+  });
 
   return (
     <>
@@ -171,7 +181,7 @@ export default async function MarketingHomePage() {
                   Launch
                 </a>
                 <Button asChild variant="secondary">
-                  <Link href="/login">Sign in</Link>
+                  <Link href={createWorkspaceHref}>Create workspace</Link>
                 </Button>
               </nav>
             </header>
@@ -197,7 +207,7 @@ export default async function MarketingHomePage() {
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Button asChild className="px-6 py-3.5">
-                    <Link href="/signup">Create workspace</Link>
+                    <Link href={createWorkspaceHref}>Create workspace</Link>
                   </Button>
                   <Button asChild variant="secondary" className="px-6 py-3.5">
                     <Link href="#features">Explore platform</Link>
@@ -445,7 +455,9 @@ export default async function MarketingHomePage() {
 
                     <div className="mt-6">
                       <Button asChild className="w-full" variant="default">
-                        <Link href="/signup">{`Choose ${plan.tier}`}</Link>
+                        <Link href={createWorkspaceHref}>
+                          {`Choose ${plan.tier}`}
+                        </Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -496,7 +508,7 @@ export default async function MarketingHomePage() {
               <CardContent className="px-6">
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button asChild className="px-6 py-3.5">
-                    <Link href="/signup">Create workspace</Link>
+                    <Link href={createWorkspaceHref}>Create workspace</Link>
                   </Button>
                   <Button asChild variant="secondary" className="px-6 py-3.5">
                     <Link href="/contact">Talk to sales</Link>

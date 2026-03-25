@@ -1,21 +1,34 @@
-import { hash } from "bcrypt-ts";
 import {
   createPrismaClient,
   type Db,
   findUserByEmail,
   getSessionUserByTokenUserId,
+  resolveTenantByHostname,
   verifyUserEmailByIdentity,
 } from "@plotkeys/db";
-import { z } from "zod";
-import { authCookiePrefix, authRoutes } from "./shared";
+import {
+  extractDashboardTenantSlug,
+  resolveDashboardLandingRoute,
+  resolveDashboardSessionScope,
+} from "@plotkeys/utils";
+import { hash } from "bcrypt-ts";
+import {
+  authCookiePrefix,
+  authRoutes,
+  authSessionCookieName,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
+} from "./shared";
 
 export { auth } from "./better-auth";
 export {
   authCookiePrefix,
   authRoutes,
   authSessionCookieName,
-  sessionBridgeInputSchema,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
   type SessionBridgeInput,
+  sessionBridgeInputSchema,
 } from "./shared";
 
 export type OnboardingStatus = "not_started" | "in_progress" | "completed";
@@ -35,9 +48,123 @@ export type AuthenticatedUser = {
   phoneNumber?: string | null;
 };
 
+async function resolveRequestedTenantSlug(
+  headers: Headers,
+  db: Db,
+): Promise<string | null> {
+  const forwardedTenantSlug = headers.get("x-tenant-subdomain");
+
+  if (forwardedTenantSlug) {
+    return forwardedTenantSlug.trim().toLowerCase();
+  }
+
+  const forwardedTenantHostname = headers.get("x-tenant-hostname");
+
+  if (forwardedTenantHostname) {
+    const resolvedTenant = await resolveTenantByHostname(
+      db,
+      forwardedTenantHostname,
+    );
+    return resolvedTenant?.companySlug ?? null;
+  }
+
+  const host =
+    headers.get("x-forwarded-host") ??
+    headers.get("host") ??
+    headers.get("origin");
+
+  return host ? extractDashboardTenantSlug(host) : null;
+}
+
+function resolveSessionCookieScope(headers: Headers) {
+  const forwardedTenantSlug = headers.get("x-tenant-subdomain");
+
+  if (forwardedTenantSlug) {
+    return forwardedTenantSlug.trim().toLowerCase();
+  }
+
+  const forwardedTenantHostname = headers.get("x-tenant-hostname");
+
+  if (forwardedTenantHostname) {
+    return (
+      resolveDashboardSessionScope(forwardedTenantHostname) ??
+      platformSessionScope
+    );
+  }
+
+  const host =
+    headers.get("x-forwarded-host") ??
+    headers.get("host") ??
+    headers.get("origin");
+
+  return resolveDashboardSessionScope(host) ?? platformSessionScope;
+}
+
+function getCookieValueFromHeader(cookieHeader: string, cookieName: string) {
+  for (const part of cookieHeader.split(";")) {
+    const trimmed = part.trim();
+
+    if (trimmed.startsWith(`${cookieName}=`)) {
+      return trimmed.slice(cookieName.length + 1);
+    }
+  }
+
+  return null;
+}
+
+function removeCookieFromHeader(cookieHeader: string, cookieName: string) {
+  return cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => !part.startsWith(`${cookieName}=`))
+    .join("; ");
+}
+
+async function withResolvedSessionCookie(headers: Headers) {
+  const normalizedHeaders = new Headers(headers);
+  const cookieHeader = headers.get("cookie") ?? "";
+
+  if (!cookieHeader) {
+    return normalizedHeaders;
+  }
+
+  const scopedCookieName = getScopedAuthSessionCookieName(
+    resolveSessionCookieScope(headers),
+  );
+  const scopedCookieValue = getCookieValueFromHeader(
+    cookieHeader,
+    scopedCookieName,
+  );
+  const legacyCookieValue = getCookieValueFromHeader(
+    cookieHeader,
+    authSessionCookieName,
+  );
+
+  if (!scopedCookieValue && !legacyCookieValue) {
+    return normalizedHeaders;
+  }
+
+  const cookieWithoutCanonicalSession = removeCookieFromHeader(
+    cookieHeader,
+    authSessionCookieName,
+  );
+  const resolvedSessionCookie = `${authSessionCookieName}=${scopedCookieValue ?? legacyCookieValue}`;
+
+  normalizedHeaders.set(
+    "cookie",
+    cookieWithoutCanonicalSession
+      ? `${cookieWithoutCanonicalSession}; ${resolvedSessionCookie}`
+      : resolvedSessionCookie,
+  );
+
+  return normalizedHeaders;
+}
+
 export type ActiveMembership = {
   companyId: string;
   role: import("@plotkeys/db").MembershipRole;
+  workRole: string;
 };
 
 export type AuthSessionContext = {
@@ -221,9 +348,7 @@ function getAuthSecret(): string {
  * The dashboard must set the cookie to `signedSessionToken` so that
  * Better Auth's `getSignedCookie` can verify it on subsequent requests.
  */
-export async function createBetterAuthSession(
-  userId: string,
-): Promise<{
+export async function createBetterAuthSession(userId: string): Promise<{
   sessionToken: string;
   signedSessionToken: string;
   expiresAt: Date;
@@ -255,22 +380,29 @@ export async function getAppSessionFromBetterAuth(
   headers: Headers,
 ): Promise<AppSession | null> {
   const { auth } = await import("./better-auth");
+  const db = requireDb();
 
   try {
-    const result = await auth.api.getSession({ headers });
+    const result = await auth.api.getSession({
+      headers: await withResolvedSessionCookie(headers),
+    });
 
     if (!result?.session) {
       return null;
     }
 
-    const db = requireDb();
     const user = await getSessionUserByTokenUserId(db, result.user.id);
+    const requestedTenantSlug = await resolveRequestedTenantSlug(headers, db);
 
     if (!user) {
       return null;
     }
 
-    const membership = user.memberships[0] ?? null;
+    const membership = requestedTenantSlug
+      ? (user.memberships.find(
+          (candidate) => candidate.company.slug === requestedTenantSlug,
+        ) ?? null)
+      : (user.memberships[0] ?? null);
 
     return {
       activeMembership: membership
@@ -279,6 +411,7 @@ export async function getAppSessionFromBetterAuth(
             companyName: membership.company.name,
             companySlug: membership.company.slug,
             role: membership.role,
+            workRole: membership.workRole,
           }
         : null,
       onboardingStatus: membership ? "completed" : "not_started",
@@ -293,6 +426,16 @@ export async function getAppSessionFromBetterAuth(
   } catch {
     return null;
   }
+}
+
+export function resolvePostLoginRoute(
+  activeMembership: ActiveMembership | null | undefined,
+) {
+  if (!activeMembership) {
+    return authRoutes.onboarding;
+  }
+
+  return resolveDashboardLandingRoute(activeMembership.workRole);
 }
 
 export function hasActiveMembership(

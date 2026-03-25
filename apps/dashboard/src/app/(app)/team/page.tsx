@@ -3,15 +3,16 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader } from "@plotkeys/ui/card";
+import { WORK_ROLE_LABELS } from "@plotkeys/utils";
 import Link from "next/link";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
-  removeMemberAction,
   reactivateMemberAction,
+  removeMemberAction,
   revokeInviteAction,
   suspendMemberAction,
   updateMemberRoleAction,
 } from "../../actions";
-import { requireOnboardedSession } from "../../../lib/session";
 import { InviteMemberDialog } from "./invite-dialog";
 
 type TeamPageProps = {
@@ -32,7 +33,10 @@ const roleVariant: Record<string, "default" | "secondary" | "outline"> = {
   staff: "outline",
 };
 
-const statusVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "default" | "secondary" | "outline" | "destructive"
+> = {
   active: "default",
   invited: "secondary",
   suspended: "destructive",
@@ -66,7 +70,9 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
       ? prisma.membership.findMany({
           where: { companyId, deletedAt: null },
           include: {
-            user: { select: { id: true, name: true, email: true, image: true } },
+            user: {
+              select: { id: true, name: true, email: true, image: true },
+            },
           },
           orderBy: [{ role: "asc" }, { createdAt: "asc" }],
         })
@@ -91,7 +97,9 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
     currentUserRole === "owner" ||
     currentUserRole === "admin" ||
     currentUserRole === "platform_admin";
-  const atCap = cap !== null && members.filter((m) => m.status !== "suspended").length >= cap;
+  const atCap =
+    cap !== null &&
+    members.filter((m) => m.status !== "suspended").length >= cap;
 
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
 
@@ -106,7 +114,9 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
 
         {params.invited ? (
           <Alert className="mb-6">
-            <AlertDescription>Invite sent! The recipient will receive a link to join.</AlertDescription>
+            <AlertDescription>
+              Invite sent! The recipient will receive a link to join.
+            </AlertDescription>
           </Alert>
         ) : null}
 
@@ -115,10 +125,14 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
             <Button asChild size="sm" variant="ghost">
               <Link href="/">← Dashboard</Link>
             </Button>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">Team</h1>
+            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
+              Team
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {members.length} member{members.length !== 1 ? "s" : ""}
-              {cap !== null ? ` · ${planTier} plan allows up to ${cap}` : " · Unlimited"}
+              {cap !== null
+                ? ` · ${planTier} plan allows up to ${cap}`
+                : " · Unlimited"}
             </p>
           </div>
           {canInvite && !atCap ? <InviteMemberDialog /> : null}
@@ -155,20 +169,28 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
                         <Badge variant={roleVariant[m.role] ?? "outline"}>
                           {roleLabels[m.role] ?? m.role}
                         </Badge>
+                        <Badge variant="outline">
+                          {WORK_ROLE_LABELS[m.workRole] ?? m.workRole}
+                        </Badge>
                         {m.status !== "active" ? (
                           <Badge variant={statusVariant[m.status] ?? "outline"}>
                             {m.status}
                           </Badge>
                         ) : null}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{m.user.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {m.user.email}
+                      </p>
                     </div>
                   </div>
 
                   {canEdit ? (
                     <div className="flex shrink-0 items-center gap-2">
                       {/* Role selector */}
-                      <form action={updateMemberRoleAction} className="flex items-center gap-2">
+                      <form
+                        action={updateMemberRoleAction}
+                        className="flex items-center gap-2"
+                      >
                         <input type="hidden" name="membershipId" value={m.id} />
                         <select
                           className="rounded-md border border-input bg-background px-2 py-1 text-xs"
@@ -187,7 +209,11 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
                       {/* Suspend / reactivate */}
                       {m.status === "active" ? (
                         <form action={suspendMemberAction}>
-                          <input type="hidden" name="membershipId" value={m.id} />
+                          <input
+                            type="hidden"
+                            name="membershipId"
+                            value={m.id}
+                          />
                           <Button
                             size="sm"
                             type="submit"
@@ -199,7 +225,11 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
                         </form>
                       ) : m.status === "suspended" ? (
                         <form action={reactivateMemberAction}>
-                          <input type="hidden" name="membershipId" value={m.id} />
+                          <input
+                            type="hidden"
+                            name="membershipId"
+                            value={m.id}
+                          />
                           <Button size="sm" type="submit" variant="outline">
                             Reactivate
                           </Button>
@@ -241,8 +271,15 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
                     <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-foreground truncate">{inv.email}</p>
-                          <Badge variant="outline">{roleLabels[inv.role] ?? inv.role}</Badge>
+                          <p className="font-medium text-foreground truncate">
+                            {inv.email}
+                          </p>
+                          <Badge variant="outline">
+                            {roleLabels[inv.role] ?? inv.role}
+                          </Badge>
+                          <Badge variant="outline">
+                            {WORK_ROLE_LABELS[inv.workRole] ?? inv.workRole}
+                          </Badge>
                           <Badge variant="secondary">Pending</Badge>
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground break-all">
@@ -283,7 +320,8 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
           <Card className="py-16 text-center">
             <CardContent>
               <p className="text-muted-foreground">
-                No team members yet. Invite a colleague to collaborate on this workspace.
+                No team members yet. Invite a colleague to collaborate on this
+                workspace.
               </p>
             </CardContent>
           </Card>

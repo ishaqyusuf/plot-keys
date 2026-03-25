@@ -9,8 +9,10 @@ import {
 
 export async function GET(request: Request) {
   const cookieStore = await cookies();
+  const host =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
 
-  clearAuthSessionCookie(cookieStore);
+  clearAuthSessionCookie(cookieStore, host);
   clearPendingOnboardingCookie(cookieStore);
 
   return NextResponse.redirect(new URL(authRoutes.signIn, request.url));

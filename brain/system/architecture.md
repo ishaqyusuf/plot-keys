@@ -110,11 +110,17 @@ This file records the intended high-level architecture and boundaries between ap
 - The current website-builder implementation effectively combines website root, draft state, live state, theme overrides, and editable content inside `SiteConfiguration`, while future docs point toward a richer `Website`/`WebsiteVersion` model.
 - Tenant subdomain ownership is now modeled explicitly through Prisma `TenantDomain` records.
 - Current hostname direction:
-  - public website target: `{subdomain}.plotkeys.com`
-  - dashboard target: `dashboard.{subdomain}.plotkeys.com`
+  - local public website target: `{subdomain}.tenant.plotkeys.localhost`
+  - local dashboard target: `dashboard.{subdomain}.app.plotkeys.localhost`
+  - production public website target: `{subdomain}.plotkeys.com`
+  - production dashboard target: `dashboard.{subdomain}.plotkeys.com`
+  - production custom public target: `{tenantDomain.com}`
+  - production custom dashboard target: `dashboard.{tenantDomain.com}`
 - Locale should continue to follow the Midday-style path segment pattern inside each app.
 - Vercel domain attachment can now be triggered from the dashboard through a server action that syncs pending or failed tenant domains against the configured Vercel projects.
 - Public website rendering can now resolve the tenant by hostname when a matching `TenantDomain` record exists, with slug/query fallback still present for previews and local development.
+- Dashboard tenant auth and session scoping now resolve against dashboard-prefixed hosts only; the legacy `{subdomain}.plotkeys.com` dashboard alias is no longer accepted.
+- Tenant domain provisioning is now modeled as explicit paired hostnames, so first-party and custom registrations attach both the public hostname and the dashboard hostname separately.
 - Notifications now use a split-package pattern: framework-agnostic models in `packages/notifications` and React hooks/provider rendering in `packages/notifications-react`.
 - The notifications core is moving toward the GND pattern by centering typed `notificationType` definitions rather than app-local string usage.
 - Notification definitions can now declare channel targets such as `email`, `whatsapp`, and `in_app`, while `packages/notifications` now exposes a GND-style `payload-utils` trigger layer, separate file-based definitions in `types/`, and a `services/` directory so app code triggers domain notifications through a service boundary instead of assembling dispatch payloads inline. Concrete WhatsApp provider calls now route through `packages/app-store`.

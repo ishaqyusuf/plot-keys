@@ -8,49 +8,22 @@
  *    resolve the tenant without depending on query params.
  *
  * Host patterns handled:
- *   {slug}.plotkeys.com   → subdomain = {slug}, hostname = {slug}.plotkeys.com
- *   custom-domain.com     → subdomain = null,   hostname = custom-domain.com
+ *   {slug}.plotkeys.com                 → subdomain = {slug}, hostname = {slug}.plotkeys.com
+ *   {slug}.tenant.plotkeys.localhost    → subdomain = {slug}, hostname = {slug}.tenant.plotkeys.localhost
+ *   custom-domain.com                   → subdomain = null,   hostname = custom-domain.com
  *   localhost             → no injection (dev fallback via query params)
  *
  * The page component continues to accept ?subdomain= / ?hostname= query
  * params as a dev-mode fallback so local previews still work without DNS.
  */
 
+import { resolveTenantSiteHostContext } from "@plotkeys/utils";
 import { type NextRequest, NextResponse } from "next/server";
-
-const PLOTKEYS_DOMAIN = "plotkeys.com";
-
-/** Known first-party management subdomains that are NOT tenant sites. */
-const PLATFORM_SUBDOMAINS = new Set(["www", "dashboard", "api", "mail"]);
-
-function resolveHostContext(host: string): {
-  tenantSubdomain: string | null;
-  tenantHostname: string | null;
-} {
-  const hostname = host.toLowerCase().replace(/:\d+$/, "");
-
-  if (!hostname || hostname === "localhost") {
-    return { tenantHostname: null, tenantSubdomain: null };
-  }
-
-  if (hostname.endsWith(`.${PLOTKEYS_DOMAIN}`)) {
-    const subdomain = hostname.slice(0, -(PLOTKEYS_DOMAIN.length + 1));
-
-    // Ignore multi-part or platform-owned subdomains (e.g. dashboard.acme.plotkeys.com)
-    if (subdomain.includes(".") || PLATFORM_SUBDOMAINS.has(subdomain)) {
-      return { tenantHostname: null, tenantSubdomain: null };
-    }
-
-    return { tenantHostname: hostname, tenantSubdomain: subdomain };
-  }
-
-  // Custom domain — store the full hostname; subdomain unknown until DB lookup
-  return { tenantHostname: hostname, tenantSubdomain: null };
-}
 
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
-  const { tenantHostname, tenantSubdomain } = resolveHostContext(host);
+  const { tenantHostname, tenantSubdomain } =
+    resolveTenantSiteHostContext(host);
 
   const requestHeaders = new Headers(request.headers);
 

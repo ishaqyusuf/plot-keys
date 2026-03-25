@@ -22,9 +22,11 @@ This file tracks authorization and permission expectations.
 - Authentication should be implemented with Better Auth.
 - Authorization should resolve from company membership records, not only from a global user role.
 - Every authenticated request should resolve an active company context before tenant-scoped procedures run.
+- Authorization continues to resolve from `Membership.role`, while employee persona and landing behavior resolve from `Membership.workRole`.
 
 ## Open Items
 - Initial role model: `platform_admin`, `owner`, `admin`, `agent`, `staff`
+- Standardized work-role model: `operations`, `sales_agent`, `sales_manager`, `hr`, `finance`, `marketing`, `project_manager`, `executive`
 - Better Auth should manage identity and sessions; application tables should manage company memberships
 - Current API scaffold can now resolve auth context from either request headers or the session cookie when mounted through the dashboard-owned `/api/trpc` route
 - Current auth implementation detail: dashboard auth forms now call same-origin tRPC auth mutations and persist the returned signed session token through a temporary same-origin dashboard session route

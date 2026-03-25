@@ -20,6 +20,16 @@ This file defines the shared design-system foundation for PlotKeys across the da
 - `apps/website`: consumes shared marketing-facing primitives and layouts
 - `apps/tenant-site`: consumes theme-aware public components that can adapt per tenant
 
+## App-Level Documentation Rule
+- Every runnable frontend app must keep its own `DESIGN_SYSTEM.md` file beside the app code.
+- Current required app docs:
+  - `apps/dashboard/DESIGN_SYSTEM.md`
+  - `apps/website/DESIGN_SYSTEM.md`
+  - `apps/tenant-site/DESIGN_SYSTEM.md`
+- `apps/tenant-site` is a template-driven system, so its document should describe renderer and theming rules rather than pretending it has one fixed branded UI language.
+- Any meaningful visual-system, component-usage, theming, or layout-rule change in an app should update that app's `DESIGN_SYSTEM.md` in the same workstream.
+- Shared token or cross-app design changes should also update this file.
+
 ## Tooling Ownership
 - Shared Tailwind entry styles should live in `packages/ui` alongside the token contract they expose.
 - `packages/ui` should export the shared PostCSS configuration used to compile shared styles.

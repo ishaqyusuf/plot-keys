@@ -8,6 +8,7 @@ import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { buildTenantDashboardUrl } from "@plotkeys/utils";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -66,6 +67,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
         const params = new URLSearchParams({
           company: result.onboarding.company,
           email: result.email,
+          signup: "successful",
           subdomain: result.onboarding.subdomain,
           token: result.verificationToken,
         });
@@ -73,7 +75,15 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           params.set("redirect", redirectTo);
         }
 
-        router.push(`${result.redirectTo}?${params.toString()}`);
+        const tenantOnboardingUrl = buildTenantDashboardUrl(
+          result.onboarding.subdomain,
+          {
+            currentOrigin: window.location.origin,
+            pathname: "/onboarding",
+          },
+        );
+
+        router.push(`${tenantOnboardingUrl}?${params.toString()}`);
         router.refresh();
       },
     }),

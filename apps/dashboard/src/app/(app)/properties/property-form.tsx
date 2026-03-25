@@ -11,8 +11,8 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useRef, useState, useTransition } from "react";
-import { createPropertyAction, updatePropertyAction } from "../../actions";
 import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+import { createPropertyAction, updatePropertyAction } from "../../actions";
 
 type Property = {
   id: string;
@@ -71,7 +71,13 @@ export function PropertyForm(props: PropertyFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+        <form
+          className="space-y-4"
+          data-dev-quick-fill-label="New property"
+          data-dev-quick-fill-profile="new-property"
+          onSubmit={handleSubmit}
+          ref={formRef}
+        >
           {property && (
             <input name="propertyId" type="hidden" value={property.id} />
           )}
@@ -209,7 +215,7 @@ export function PropertyForm(props: PropertyFormProps) {
           </FieldGroup>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton formRef={formRef} />
+            <DevFormQuickFillButton profile="new-property" />
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setOpen(false)}

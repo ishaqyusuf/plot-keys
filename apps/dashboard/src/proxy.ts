@@ -10,16 +10,30 @@
  *    (session verification happens inside server components / tRPC context).
  *
  * Host patterns handled:
- *   dashboard.{slug}.plotkeys.com  → tenant slug = {slug}
- *   {slug}.plotkeys.com            → tenant slug = {slug} (legacy / alias)
- *   localhost / 127.x.x.x          → no tenant slug injected
+ *   dashboard.{slug}.plotkeys.com      -> tenant slug = {slug}
+ *   dashboard.{slug}.app.plotkeys.localhost:1355 -> tenant slug = {slug}
+ *   dashboard.{tenantDomain.com}       -> tenant hostname lookup via DB
+ *   localhost / 127.x.x.x              -> no tenant slug injected
  */
 
-import { authRoutes, authSessionCookieName } from "@plotkeys/auth/shared";
+import {
+  authRoutes,
+  authSessionCookieName,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
+} from "@plotkeys/auth/shared";
+import {
+  createPrismaClient,
+  findCompanyBySlug,
+  resolveTenantByHostname,
+} from "@plotkeys/db";
+import {
+  extractDashboardHostname,
+  extractDashboardTenantSlug,
+  isTenantDashboardHost,
+  resolveDashboardSessionScope,
+} from "@plotkeys/utils";
 import { type NextRequest, NextResponse } from "next/server";
-
-const PLOTKEYS_DOMAIN = "plotkeys.com";
-const DASHBOARD_SUBDOMAIN = "dashboard";
 
 /** Routes that do NOT require an authenticated session. */
 const PUBLIC_PREFIXES = [
@@ -31,50 +45,103 @@ const PUBLIC_PREFIXES = [
   "/favicon",
 ];
 
+const PLATFORM_ONLY_PREFIXES = [authRoutes.signUp];
+
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-function extractTenantSlug(host: string): string | null {
-  const hostname = host.toLowerCase().replace(/:\d+$/, "");
-
-  if (!hostname || hostname === "localhost") {
-    return null;
-  }
-
-  if (hostname.endsWith(`.${PLOTKEYS_DOMAIN}`)) {
-    const withoutRoot = hostname.slice(0, -(PLOTKEYS_DOMAIN.length + 1));
-    const parts = withoutRoot.split(".");
-
-    // dashboard.{slug}.plotkeys.com → parts = ["dashboard", "{slug}"]
-    if (parts.length === 2 && parts[0] === DASHBOARD_SUBDOMAIN) {
-      return parts[1] ?? null;
-    }
-
-    // {slug}.plotkeys.com (dashboard deployed at root subdomain)
-    if (parts.length === 1 && parts[0] !== DASHBOARD_SUBDOMAIN) {
-      return parts[0] ?? null;
-    }
-  }
-
-  return null;
+function isOnboardingPath(pathname: string): boolean {
+  return pathname === authRoutes.onboarding;
 }
 
 function hasSessionCookie(request: NextRequest): boolean {
-  return !!request.cookies.get(authSessionCookieName)?.value;
+  const sessionScope = resolveDashboardSessionScope(
+    request.headers.get("host"),
+  );
+  const cookieName = getScopedAuthSessionCookieName(
+    sessionScope ?? platformSessionScope,
+  );
+
+  return (
+    !!request.cookies.get(cookieName)?.value ||
+    (sessionScope !== null &&
+      !!request.cookies.get(authSessionCookieName)?.value)
+  );
 }
 
-export function proxy(request: NextRequest) {
+async function isTenantAlreadyOnboarded(input: {
+  tenantHostname: string | null;
+  tenantSlug: string | null;
+}) {
+  const prisma = createPrismaClient().db;
+
+  if (!prisma) {
+    return false;
+  }
+
+  if (input.tenantSlug) {
+    const company = await findCompanyBySlug(prisma, input.tenantSlug);
+    return Boolean(company);
+  }
+
+  if (input.tenantHostname) {
+    const resolvedTenant = await resolveTenantByHostname(
+      prisma,
+      input.tenantHostname,
+    );
+    return Boolean(resolvedTenant);
+  }
+
+  return false;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") ?? "";
-  const tenantSlug = extractTenantSlug(host);
-
-  // Build forwarded request with tenant context header
+  const tenantHostname = extractDashboardHostname(host);
+  const tenantSlug = extractDashboardTenantSlug(host);
+  const isTenantMode = isTenantDashboardHost(host);
   const requestHeaders = new Headers(request.headers);
+
+  if (tenantHostname) {
+    requestHeaders.set("x-tenant-hostname", tenantHostname);
+  }
   if (tenantSlug) {
     requestHeaders.set("x-tenant-subdomain", tenantSlug);
   }
   requestHeaders.set("x-pathname", pathname);
+
+  if (
+    isTenantMode &&
+    PLATFORM_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    const signInUrl = new URL(authRoutes.signIn, request.url);
+    return NextResponse.redirect(signInUrl);
+  }
+
+  if (!isTenantMode && pathname.startsWith(authRoutes.signIn)) {
+    const signUpUrl = new URL(authRoutes.signUp, request.url);
+    return NextResponse.redirect(signUpUrl);
+  }
+
+  if (
+    isTenantMode &&
+    isOnboardingPath(pathname) &&
+    !hasSessionCookie(request)
+  ) {
+    const tenantAlreadyOnboarded = await isTenantAlreadyOnboarded({
+      tenantHostname,
+      tenantSlug,
+    });
+
+    if (tenantAlreadyOnboarded) {
+      const signInUrl = new URL(authRoutes.signIn, request.url);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   // Gate non-public routes behind the session cookie check.
   // Full session validation happens inside server components.

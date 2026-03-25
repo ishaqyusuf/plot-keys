@@ -29,6 +29,7 @@ export type MembershipMinAggregateOutputType = {
   companyId: string | null
   userId: string | null
   role: $Enums.MembershipRole | null
+  workRole: $Enums.WorkRole | null
   status: $Enums.MembershipStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -40,6 +41,7 @@ export type MembershipMaxAggregateOutputType = {
   companyId: string | null
   userId: string | null
   role: $Enums.MembershipRole | null
+  workRole: $Enums.WorkRole | null
   status: $Enums.MembershipStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -51,6 +53,7 @@ export type MembershipCountAggregateOutputType = {
   companyId: number
   userId: number
   role: number
+  workRole: number
   status: number
   createdAt: number
   updatedAt: number
@@ -64,6 +67,7 @@ export type MembershipMinAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -75,6 +79,7 @@ export type MembershipMaxAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -86,6 +91,7 @@ export type MembershipCountAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -170,6 +176,7 @@ export type MembershipGroupByOutputType = {
   companyId: string
   userId: string
   role: $Enums.MembershipRole
+  workRole: $Enums.WorkRole
   status: $Enums.MembershipStatus
   createdAt: Date
   updatedAt: Date
@@ -202,6 +209,7 @@ export type MembershipWhereInput = {
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
@@ -216,6 +224,7 @@ export type MembershipOrderByWithRelationInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -233,6 +242,7 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
@@ -247,6 +257,7 @@ export type MembershipOrderByWithAggregationInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -264,6 +275,7 @@ export type MembershipScalarWhereWithAggregatesInput = {
   companyId?: Prisma.UuidWithAggregatesFilter<"Membership"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleWithAggregatesFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleWithAggregatesFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusWithAggregatesFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
@@ -273,6 +285,7 @@ export type MembershipScalarWhereWithAggregatesInput = {
 export type MembershipCreateInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -287,6 +300,7 @@ export type MembershipUncheckedCreateInput = {
   companyId: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -297,6 +311,7 @@ export type MembershipUncheckedCreateInput = {
 export type MembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -311,6 +326,7 @@ export type MembershipUncheckedUpdateInput = {
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -323,6 +339,7 @@ export type MembershipCreateManyInput = {
   companyId: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -332,6 +349,7 @@ export type MembershipCreateManyInput = {
 export type MembershipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -343,6 +361,7 @@ export type MembershipUncheckedUpdateManyInput = {
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -364,6 +383,7 @@ export type MembershipCountOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -375,6 +395,7 @@ export type MembershipMaxOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -386,6 +407,7 @@ export type MembershipMinOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -506,6 +528,7 @@ export type MembershipUncheckedUpdateManyWithoutUserNestedInput = {
 export type MembershipCreateWithoutCompanyInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -518,6 +541,7 @@ export type MembershipUncheckedCreateWithoutCompanyInput = {
   id?: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -559,6 +583,7 @@ export type MembershipScalarWhereInput = {
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
@@ -568,6 +593,7 @@ export type MembershipScalarWhereInput = {
 export type MembershipCreateWithoutProjectAssignmentsInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -581,6 +607,7 @@ export type MembershipUncheckedCreateWithoutProjectAssignmentsInput = {
   companyId: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -606,6 +633,7 @@ export type MembershipUpdateToOneWithWhereWithoutProjectAssignmentsInput = {
 export type MembershipUpdateWithoutProjectAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -619,6 +647,7 @@ export type MembershipUncheckedUpdateWithoutProjectAssignmentsInput = {
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -628,6 +657,7 @@ export type MembershipUncheckedUpdateWithoutProjectAssignmentsInput = {
 export type MembershipCreateWithoutUserInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -640,6 +670,7 @@ export type MembershipUncheckedCreateWithoutUserInput = {
   id?: string
   companyId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -677,6 +708,7 @@ export type MembershipCreateManyCompanyInput = {
   id?: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -686,6 +718,7 @@ export type MembershipCreateManyCompanyInput = {
 export type MembershipUpdateWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -698,6 +731,7 @@ export type MembershipUncheckedUpdateWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -709,6 +743,7 @@ export type MembershipUncheckedUpdateManyWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -719,6 +754,7 @@ export type MembershipCreateManyUserInput = {
   id?: string
   companyId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -728,6 +764,7 @@ export type MembershipCreateManyUserInput = {
 export type MembershipUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -740,6 +777,7 @@ export type MembershipUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -751,6 +789,7 @@ export type MembershipUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -793,6 +832,7 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -808,6 +848,7 @@ export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -821,6 +862,7 @@ export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -834,13 +876,14 @@ export type MembershipSelectScalar = {
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "userId" | "role" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
+export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "userId" | "role" | "workRole" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -868,6 +911,7 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     companyId: string
     userId: string
     role: $Enums.MembershipRole
+    workRole: $Enums.WorkRole
     status: $Enums.MembershipStatus
     createdAt: Date
     updatedAt: Date
@@ -1302,6 +1346,7 @@ export interface MembershipFieldRefs {
   readonly companyId: Prisma.FieldRef<"Membership", 'String'>
   readonly userId: Prisma.FieldRef<"Membership", 'String'>
   readonly role: Prisma.FieldRef<"Membership", 'MembershipRole'>
+  readonly workRole: Prisma.FieldRef<"Membership", 'WorkRole'>
   readonly status: Prisma.FieldRef<"Membership", 'MembershipStatus'>
   readonly createdAt: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Membership", 'DateTime'>

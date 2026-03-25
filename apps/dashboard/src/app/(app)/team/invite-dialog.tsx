@@ -11,8 +11,8 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useRef, useState, useTransition } from "react";
-import { inviteMemberAction } from "../../actions";
 import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+import { inviteMemberAction } from "../../actions";
 
 const roleOptions = [
   { value: "admin", label: "Admin", description: "Full access except billing" },
@@ -47,7 +47,13 @@ export function InviteMemberDialog() {
         <DialogHeader>
           <DialogTitle>Invite team member</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+        <form
+          className="space-y-4"
+          data-dev-quick-fill-label="Invite team member"
+          data-dev-quick-fill-profile="invite-member"
+          onSubmit={handleSubmit}
+          ref={formRef}
+        >
           <FieldGroup>
             <Field>
               <FieldLabel>Email address *</FieldLabel>
@@ -74,7 +80,7 @@ export function InviteMemberDialog() {
             </Field>
           </FieldGroup>
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton formRef={formRef} />
+            <DevFormQuickFillButton profile="invite-member" />
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setOpen(false)}

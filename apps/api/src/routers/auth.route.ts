@@ -1,8 +1,8 @@
 import {
   authSessionCookieName,
-  authRoutes,
   createBetterAuthSession,
   getAppSessionFromBetterAuth,
+  resolvePostLoginRoute,
   signInUser,
   signUpUser,
   verifyUserEmail,
@@ -10,9 +10,17 @@ import {
 import {
   createPrismaClient,
   findCompanyBySlug,
+  findTenantOnboardingByUserId,
+  getSessionUserByTokenUserId,
+  resolveTenantByHostname,
   upsertTenantOnboarding,
 } from "@plotkeys/db";
-import { normalizeSubdomainLabel } from "@plotkeys/utils";
+import {
+  buildSitefrontHostname,
+  buildTenantDashboardUrl,
+  extractDashboardTenantSlug,
+  normalizeSubdomainLabel,
+} from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 
 import {
@@ -77,34 +85,107 @@ async function assertSubdomainAvailability(
   }
 }
 
-async function resolvePostAuthRedirect(userId: string) {
-  const { signedSessionToken, sessionToken } = await createBetterAuthSession(userId);
+async function resolvePostAuthRedirect(
+  userId: string,
+  tenantSlug?: string | null,
+) {
+  const { signedSessionToken } = await createBetterAuthSession(userId);
 
   // Build synthetic headers so we can load the session from the DB
   const syntheticHeaders = new Headers({
     cookie: `${authSessionCookieName}=${signedSessionToken}`,
   });
+  if (tenantSlug) {
+    syntheticHeaders.set("x-tenant-subdomain", tenantSlug);
+  }
   const appSession = await getAppSessionFromBetterAuth(syntheticHeaders);
 
   return {
-    redirectTo: appSession?.activeMembership
-      ? authRoutes.dashboardHome
-      : authRoutes.onboarding,
+    redirectTo: resolvePostLoginRoute(appSession?.activeMembership),
     sessionToken: signedSessionToken,
   };
+}
+
+async function getRequestedTenantSlug(
+  db: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
+  headers: Headers,
+) {
+  const forwardedTenantSlug = headers.get("x-tenant-subdomain");
+
+  if (forwardedTenantSlug) {
+    return normalizeSubdomainLabel(forwardedTenantSlug);
+  }
+
+  const forwardedTenantHostname = headers.get("x-tenant-hostname");
+
+  if (forwardedTenantHostname) {
+    const resolvedTenant = await resolveTenantByHostname(
+      db,
+      forwardedTenantHostname,
+    );
+    return resolvedTenant?.companySlug ?? null;
+  }
+
+  const host = headers.get("x-forwarded-host") ?? headers.get("host") ?? "";
+  const tenantSlug = extractDashboardTenantSlug(host);
+
+  return tenantSlug ? normalizeSubdomainLabel(tenantSlug) : null;
+}
+
+async function assertTenantScopedAuthAccess(input: {
+  db: NonNullable<ReturnType<typeof createPrismaClient>["db"]>;
+  requestedTenantSlug: string;
+  userId: string;
+}) {
+  const [user, onboarding] = await Promise.all([
+    getSessionUserByTokenUserId(input.db, input.userId),
+    findTenantOnboardingByUserId(input.db, input.userId),
+  ]);
+
+  const hasMembershipForTenant =
+    user?.memberships.some(
+      (membership) => membership.company.slug === input.requestedTenantSlug,
+    ) ?? false;
+  const canResumeOnboarding =
+    onboarding?.completedAt == null &&
+    onboarding?.subdomain === input.requestedTenantSlug;
+
+  if (!hasMembershipForTenant && !canResumeOnboarding) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message:
+        "This account does not have access to the current tenant workspace.",
+    });
+  }
 }
 
 export const authRouter = createTRPCRouter({
   signIn: publicProcedure
     .input(signInInputSchema)
-    .mutation(async ({ input }) => {
-      try {
-        const user = await signInUser(input);
+    .mutation(async ({ ctx, input }) => {
+      const db = requireDb();
+      const requestedTenantSlug = await getRequestedTenantSlug(db, ctx.headers);
 
-        return resolvePostAuthRedirect(user.id);
-      } catch (error) {
+      if (!requestedTenantSlug) {
         throw new TRPCError({
           code: "BAD_REQUEST",
+          message:
+            "Sign in from your tenant workspace URL. The shared app host only supports signup.",
+        });
+      }
+
+      try {
+        const user = await signInUser(input);
+        await assertTenantScopedAuthAccess({
+          db,
+          requestedTenantSlug,
+          userId: user.id,
+        });
+
+        return resolvePostAuthRedirect(user.id, requestedTenantSlug);
+      } catch (error) {
+        throw new TRPCError({
+          code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
           message:
             error instanceof Error
               ? error.message
@@ -144,6 +225,7 @@ export const authRouter = createTRPCRouter({
           email: user.email,
           fullName: input.name.trim(),
           phoneNumber: user.phoneNumber,
+          subdomain,
           token: verificationToken,
           userId: user.id,
         });
@@ -154,7 +236,9 @@ export const authRouter = createTRPCRouter({
             company: input.company.trim(),
             subdomain,
           },
-          redirectTo: authRoutes.signUpSuccess,
+          redirectTo: buildTenantDashboardUrl(subdomain, {
+            pathname: "/onboarding",
+          }),
           verificationToken,
         };
       } catch (error) {
@@ -173,9 +257,36 @@ export const authRouter = createTRPCRouter({
     }),
   verifyEmail: publicProcedure
     .input(verifyEmailInputSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const db = requireDb();
+      const requestedTenantSlug = await getRequestedTenantSlug(db, ctx.headers);
+
+      if (requestedTenantSlug && input.subdomain) {
+        const inputSubdomain = normalizeSubdomainLabel(input.subdomain);
+
+        if (inputSubdomain !== requestedTenantSlug) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Verification must continue on the matching tenant host.",
+          });
+        }
+      }
+
       try {
         const user = await verifyUserEmail(input.token);
+        const resolvedTenantSlug = requestedTenantSlug
+          ? requestedTenantSlug
+          : input.subdomain
+            ? normalizeSubdomainLabel(input.subdomain)
+            : null;
+
+        if (resolvedTenantSlug) {
+          await assertTenantScopedAuthAccess({
+            db,
+            requestedTenantSlug: resolvedTenantSlug,
+            userId: user.id,
+          });
+        }
 
         if (input.company && input.subdomain) {
           const subdomain = normalizeSubdomainLabel(input.subdomain);
@@ -185,15 +296,15 @@ export const authRouter = createTRPCRouter({
             email: user.email,
             fullName: user.name ?? "Workspace owner",
             phoneNumber: user.phoneNumber,
-            siteHostname: `${subdomain}.plotkeys.com`,
+            siteHostname: buildSitefrontHostname(subdomain),
             userId: user.id,
           });
         }
 
-        return resolvePostAuthRedirect(user.id);
+        return resolvePostAuthRedirect(user.id, resolvedTenantSlug);
       } catch (error) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
           message:
             error instanceof Error
               ? error.message

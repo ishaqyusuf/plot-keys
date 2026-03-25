@@ -2,9 +2,9 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Input } from "@plotkeys/ui/input";
-import { useState, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useState } from "react";
 
-const SYSTEM_SUGGESTIONS = [
+export const TAG_INPUT_SYSTEM_SUGGESTIONS = [
   "First-time buyers",
   "Investors",
   "Diaspora clients",
@@ -49,7 +49,7 @@ export function TagInput({
     }
   };
 
-  const availableSuggestions = SYSTEM_SUGGESTIONS.filter(
+  const availableSuggestions = TAG_INPUT_SYSTEM_SUGGESTIONS.filter(
     (s) => !tags.includes(s),
   );
 
@@ -66,6 +66,8 @@ export function TagInput({
           {tags.map((tag) => (
             <Badge
               key={tag}
+              data-dev-tag-selected="true"
+              data-tag-value={tag}
               variant="secondary"
               className="cursor-pointer gap-1 pr-1"
               onClick={() => removeTag(tag)}
@@ -93,6 +95,8 @@ export function TagInput({
           {availableSuggestions.map((suggestion) => (
             <Badge
               key={suggestion}
+              data-dev-tag-suggestion="true"
+              data-tag-value={suggestion}
               variant="outline"
               className="cursor-pointer transition-colors hover:bg-accent"
               onClick={() => addTag(suggestion)}

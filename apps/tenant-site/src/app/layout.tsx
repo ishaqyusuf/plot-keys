@@ -3,7 +3,6 @@ import "@plotkeys/ui/globals.css";
 import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
 import { NotificationsProvider } from "@plotkeys/notifications-react";
 import { ThemeProvider } from "@plotkeys/ui/theme-provider";
-import { extractTenantHostname } from "@plotkeys/utils";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
@@ -50,10 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!prisma) return fallbackMetadata;
 
-  const tenantHostname =
-    requestHeaders.get("x-tenant-hostname") || null;
-  const tenantSubdomain =
-    requestHeaders.get("x-tenant-subdomain") || null;
+  const tenantHostname = requestHeaders.get("x-tenant-hostname") || null;
+  const tenantSubdomain = requestHeaders.get("x-tenant-subdomain") || null;
 
   // Resolve company from hostname or subdomain
   let company: {
@@ -112,7 +109,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return metadata;
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const subdomain = await resolveSubdomain();
   const integrations = await resolveIntegrations(subdomain);
 

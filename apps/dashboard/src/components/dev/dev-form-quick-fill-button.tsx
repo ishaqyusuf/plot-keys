@@ -1,33 +1,48 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
-import type { RefObject } from "react";
+import { useRef, useState } from "react";
 
-import { fillForm } from "./dev-form-quick-fill-fab";
+import { type QuickFillProfile, runQuickFill } from "./quick-fill";
 
 type DevFormQuickFillButtonProps = {
-  formRef: RefObject<HTMLFormElement | null>;
+  profile: QuickFillProfile;
 };
 
 export function DevFormQuickFillButton({
-  formRef,
+  profile,
 }: DevFormQuickFillButtonProps) {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [busy, setBusy] = useState(false);
+
   if (process.env.NODE_ENV !== "development") {
     return null;
   }
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={() => {
-        if (formRef.current) {
-          fillForm(formRef.current);
-        }
-      }}
-    >
-      Quick fill
-    </Button>
+    <div ref={anchorRef}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={busy}
+        onClick={async () => {
+          const form = anchorRef.current?.closest("form");
+
+          if (!(form instanceof HTMLFormElement)) {
+            return;
+          }
+
+          setBusy(true);
+          try {
+            await runQuickFill(form, profile);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {busy ? "Filling..." : "Quick fill"}
+      </Button>
+    </div>
   );
 }

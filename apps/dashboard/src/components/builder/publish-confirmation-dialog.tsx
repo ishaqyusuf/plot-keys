@@ -103,7 +103,12 @@ export function PublishConfirmationDialog({
           </p>
         )}
 
-        <form onSubmit={handleSubmit} ref={formRef}>
+        <form
+          data-dev-quick-fill-label="Publish configuration"
+          data-dev-quick-fill-profile="publish-configuration"
+          onSubmit={handleSubmit}
+          ref={formRef}
+        >
           <FieldGroup className="py-2">
             <Field>
               <FieldLabel>Configuration name</FieldLabel>
@@ -116,7 +121,7 @@ export function PublishConfirmationDialog({
             </Field>
           </FieldGroup>
           <DialogFooter className="mt-4 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton formRef={formRef} />
+            <DevFormQuickFillButton profile="publish-configuration" />
             <div className="flex justify-end gap-2">
               <DialogClose asChild>
                 <Button type="button" variant="ghost">

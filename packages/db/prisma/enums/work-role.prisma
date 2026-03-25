@@ -1,0 +1,12 @@
+enum WorkRole {
+  operations
+  sales_agent
+  sales_manager
+  hr
+  finance
+  marketing
+  project_manager
+  executive
+
+  @@map("work_role")
+}

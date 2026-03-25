@@ -24,7 +24,13 @@ const DevLoginFab =
     ? dynamic(() => import("../dev/dev-login-fab").then((m) => m.DevLoginFab))
     : null;
 
-export function SignInForm({ initialError }: { initialError?: string }) {
+export function SignInForm({
+  initialError,
+  showCreateAccount = true,
+}: {
+  initialError?: string;
+  showCreateAccount?: boolean;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const trpc = useTRPC();
@@ -64,6 +70,11 @@ export function SignInForm({ initialError }: { initialError?: string }) {
     >
       {DevLoginFab && <DevLoginFab onFill={(values) => form.reset(values)} />}
 
+      <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm leading-7 text-muted-foreground">
+        Sign-in is scoped to the current tenant host. Dev account autofill only
+        shows saved accounts that match this workspace.
+      </div>
+
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="sign-in-email">Email address</FieldLabel>
@@ -93,21 +104,27 @@ export function SignInForm({ initialError }: { initialError?: string }) {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button disabled={signInMutation.isPending} type="submit">
+      <div className="flex flex-col gap-3">
+        <Button
+          className="h-11 w-full"
+          disabled={signInMutation.isPending}
+          type="submit"
+        >
           {signInMutation.isPending ? "Signing in..." : "Sign in"}
         </Button>
-        <Button asChild variant="secondary">
-          <Link
-            href={
-              redirectTo
-                ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
-                : authRoutes.signUp
-            }
-          >
-            Create account
-          </Link>
-        </Button>
+        {showCreateAccount ? (
+          <Button asChild className="w-full" variant="secondary">
+            <Link
+              href={
+                redirectTo
+                  ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
+                  : authRoutes.signUp
+              }
+            >
+              Create account
+            </Link>
+          </Button>
+        ) : null}
       </div>
     </form>
   );

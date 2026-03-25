@@ -13,11 +13,13 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@plotkeys/ui/input-group";
+import {
+  buildDashboardHostname,
+  buildSitefrontHostname,
+  plotkeysRootDomain,
+} from "@plotkeys/utils";
 import type { ComponentProps } from "react";
 import { useId, useState } from "react";
-
-const plotkeysRootDomain = "plotkeys.com";
-const dashboardLabel = "dashboard";
 
 type SubdomainFieldProps = {
   defaultValue?: string;
@@ -47,8 +49,8 @@ export function SubdomainField({
   const inputId = id ?? generatedId;
   const [subdomain, setSubdomain] = useState(defaultValue);
   const previewValue = normalizePreviewValue(subdomain) || "your-brand";
-  const websiteHostname = `${previewValue}.${plotkeysRootDomain}`;
-  const dashboardHostname = `${dashboardLabel}.${previewValue}.${plotkeysRootDomain}`;
+  const websiteHostname = buildSitefrontHostname(previewValue);
+  const dashboardHostname = buildDashboardHostname(previewValue);
 
   return (
     <FieldGroup>

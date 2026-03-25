@@ -3,8 +3,23 @@ import type { Db } from "../prisma";
 
 const INVITE_TTL_HOURS = 72;
 
+function resolveDefaultWorkRoleForMembershipRole(role: MembershipRole) {
+  if (role === "agent") {
+    return "sales_agent";
+  }
+
+  if (role === "owner" || role === "platform_admin") {
+    return "executive";
+  }
+
+  return "operations";
+}
+
 function generateInviteToken(): string {
-  return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+  return (
+    crypto.randomUUID().replace(/-/g, "") +
+    crypto.randomUUID().replace(/-/g, "")
+  );
 }
 
 export async function listMembershipsForCompany(db: Db, companyId: string) {
@@ -33,6 +48,7 @@ export async function createTeamInvite(
     companyId: string;
     email: string;
     role: MembershipRole;
+    workRole?: string | null;
     invitedById: string;
   },
 ) {
@@ -57,6 +73,8 @@ export async function createTeamInvite(
       companyId: input.companyId,
       email: input.email.trim().toLowerCase(),
       role: input.role,
+      workRole:
+        input.workRole ?? resolveDefaultWorkRoleForMembershipRole(input.role),
       token,
       expiresAt,
       invitedById: input.invitedById,
@@ -131,6 +149,7 @@ export async function acceptTeamInvite(
         companyId: invite.companyId,
         userId: input.userId,
         role: invite.role,
+        workRole: invite.workRole,
         status: "active",
       },
     }),

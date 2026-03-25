@@ -25,19 +25,25 @@ import {
   SelectValue,
 } from "@plotkeys/ui/select";
 import { Textarea } from "@plotkeys/ui/textarea";
-import { canAccessTemplateTier } from "@plotkeys/utils";
-import { cookies } from "next/headers";
-import Link from "next/link";
-import { DevOnboardingFabLoader } from "../../components/dev/dev-onboarding-fab-loader";
-import { FlowShell } from "../../components/flow-shell";
-import { TagInput } from "../../components/tag-input";
-import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
-import { requireAuthenticatedSession } from "../../lib/session";
-import { readPendingOnboardingCookie } from "../../lib/session-cookie";
 import {
-  completeOnboardingAction,
-  saveOnboardingStepAction,
-} from "../actions";
+  buildTenantDashboardUrl,
+  canAccessTemplateTier,
+} from "@plotkeys/utils";
+import { Badge } from "@plotkeys/ui/badge";
+import { cookies, headers } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { DevOnboardingQuickFillButton } from "../../components/dev/dev-onboarding-quick-fill-button";
+import { VerifyEmailForm } from "../../components/auth/verify-email-form";
+import { FlowShell } from "../../components/flow-shell";
+import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
+import { TagInput } from "../../components/tag-input";
+import {
+  getCurrentAppSession,
+  getTenantSlugFromHost,
+} from "../../lib/session";
+import { readPendingOnboardingCookie } from "../../lib/session-cookie";
+import { completeOnboardingAction, saveOnboardingStepAction } from "../actions";
 
 // ---------------------------------------------------------------------------
 // Step definitions
@@ -78,18 +84,128 @@ function prevStepPath(current: StepId): string | null {
 type OnboardingPageProps = {
   searchParams?: Promise<{
     company?: string;
+    email?: string;
     error?: string;
     signup?: string;
     step?: string;
     subdomain?: string;
+    token?: string;
   }>;
 };
 
 export default async function OnboardingPage({
   searchParams,
 }: OnboardingPageProps) {
-  const session = await requireAuthenticatedSession();
   const params = (await searchParams) ?? {};
+  const tenantSlug = await getTenantSlugFromHost();
+  const session = await getCurrentAppSession();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const protocol =
+    headerStore.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+  const currentOrigin = host ? `${protocol}://${host}` : null;
+
+  if (!session) {
+    if (tenantSlug && params.token) {
+      const verificationLink = new URL(
+        buildTenantDashboardUrl(params.subdomain ?? tenantSlug, {
+          currentOrigin,
+          pathname: "/onboarding",
+        }),
+      );
+
+      if (params.company) {
+        verificationLink.searchParams.set("company", params.company);
+      }
+      if (params.email) {
+        verificationLink.searchParams.set("email", params.email);
+      }
+      if (params.subdomain) {
+        verificationLink.searchParams.set("subdomain", params.subdomain);
+      }
+      verificationLink.searchParams.set("token", params.token);
+
+      return (
+        <FlowShell
+          badge="Flow 02"
+          description="Email verification now continues on the tenant workspace host so onboarding stays scoped to the right company from the first click."
+          sidePanel={
+            <>
+              <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
+                Handoff contract
+              </p>
+              <div className="mt-6 grid gap-3">
+                {[
+                  "Verification happens on the tenant workspace host.",
+                  "Successful verification continues directly into onboarding.",
+                  "The shared app host is only used to create new workspaces.",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-[calc(var(--radius-md)-0.1rem)] border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-4 text-sm leading-7 text-primary-foreground/85"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </>
+          }
+          title="Verify the account before tenant onboarding begins."
+        >
+          <div className="flex flex-col gap-5">
+            <Badge variant="secondary">Verification pending</Badge>
+            <p className="max-w-2xl text-base leading-8 text-muted-foreground">
+              We created the account for{" "}
+              <strong>{params.email ?? "your email address"}</strong>. Check
+              your email and use the verification link we sent there. That link
+              brings you back to this tenant dashboard and continues onboarding.
+            </p>
+
+            {process.env.NODE_ENV === "development" ? (
+              <Alert className="border-primary/20 bg-primary/5">
+                <AlertDescription className="flex flex-col gap-3">
+                  <span>
+                    Dev shortcut: use the same verification link from the email
+                    for quick testing.
+                  </span>
+                  <span className="break-all font-mono text-xs text-foreground/80">
+                    {verificationLink.toString()}
+                  </span>
+                  <div>
+                    <Button asChild size="sm" variant="secondary">
+                      <Link href={verificationLink.toString()}>
+                        Open verification link
+                      </Link>
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : null}
+
+            <VerifyEmailForm
+              initialError={params.error}
+              onboarding={
+                params.company && params.subdomain
+                  ? {
+                      company: params.company,
+                      subdomain: params.subdomain,
+                    }
+                  : undefined
+              }
+              token={params.token ?? ""}
+            />
+          </div>
+        </FlowShell>
+      );
+    }
+
+    if (tenantSlug) {
+      redirect(authRoutes.signIn);
+    }
+
+    redirect(authRoutes.signUp);
+  }
 
   if (session.activeMembership) {
     return (
@@ -119,6 +235,20 @@ export default async function OnboardingPage({
     pendingOnboarding?.subdomain ??
     params.subdomain ??
     "";
+  if (subdomain && !tenantSlug) {
+    redirect(
+      buildTenantDashboardUrl(subdomain, {
+        currentOrigin,
+        pathname: "/onboarding",
+      }),
+    );
+  }
+
+  if (tenantSlug && tenantSlug !== subdomain) {
+    redirect(
+      `${authRoutes.signIn}?error=${encodeURIComponent("This onboarding flow belongs to a different tenant workspace.")}`,
+    );
+  }
 
   // Resolve which step to show
   const rawStep = params.step ?? savedOnboarding?.currentStep ?? "business-identity";
@@ -163,14 +293,12 @@ export default async function OnboardingPage({
 
   return (
     <>
-      <DevOnboardingFabLoader
-        currentStepId={currentStepId}
-        subdomain={subdomain}
-      />
       <OnboardingSignupNotification
         companyName={companyName || session.user.name || ""}
         dashboardHostname={
-          subdomain ? `dashboard.${subdomain}.plotkeys.com` : ""
+          subdomain
+            ? buildTenantDashboardUrl(subdomain).replace(/^https?:\/\//, "")
+            : ""
         }
         email={session.user.email ?? "owner@plotkeys.app"}
         fullName={session.user.name ?? "Workspace owner"}
@@ -384,7 +512,13 @@ function BusinessIdentityStep({
   saved: SavedOnboarding;
 }) {
   return (
-    <form action={saveOnboardingStepAction} className="flex flex-col gap-6">
+    <form
+      action={saveOnboardingStepAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Business identity"
+      data-dev-quick-fill-profile="onboarding-business-identity"
+    >
+      <DevOnboardingQuickFillButton stepId="business-identity" />
       <input type="hidden" name="currentStep" value="business-identity" />
       <input type="hidden" name="nextStep" value={nextStep} />
       <FieldGroup>
@@ -468,7 +602,13 @@ function MarketFocusStep({
   const savedPropertyTypes = new Set(saved?.propertyTypes ?? []);
 
   return (
-    <form action={saveOnboardingStepAction} className="flex flex-col gap-6">
+    <form
+      action={saveOnboardingStepAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Market focus"
+      data-dev-quick-fill-profile="onboarding-market-focus"
+    >
+      <DevOnboardingQuickFillButton stepId="market-focus" />
       <input type="hidden" name="currentStep" value="market-focus" />
       <input type="hidden" name="nextStep" value={nextStep} />
       <FieldGroup>
@@ -535,7 +675,13 @@ function BrandStyleStep({
   saved: SavedOnboarding;
 }) {
   return (
-    <form action={saveOnboardingStepAction} className="flex flex-col gap-6">
+    <form
+      action={saveOnboardingStepAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Brand style"
+      data-dev-quick-fill-profile="onboarding-brand-style"
+    >
+      <DevOnboardingQuickFillButton stepId="brand-style" />
       <input type="hidden" name="currentStep" value="brand-style" />
       <input type="hidden" name="nextStep" value={nextStep} />
       <FieldGroup>
@@ -612,7 +758,13 @@ function ContactOperationsStep({
   saved: SavedOnboarding;
 }) {
   return (
-    <form action={saveOnboardingStepAction} className="flex flex-col gap-6">
+    <form
+      action={saveOnboardingStepAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Contact operations"
+      data-dev-quick-fill-profile="onboarding-contact-operations"
+    >
+      <DevOnboardingQuickFillButton stepId="contact-operations" />
       <input type="hidden" name="currentStep" value="contact-operations" />
       <input type="hidden" name="nextStep" value={nextStep} />
       <FieldGroup>
@@ -686,7 +838,13 @@ function ContentReadinessStep({
   saved: SavedOnboarding;
 }) {
   return (
-    <form action={saveOnboardingStepAction} className="flex flex-col gap-6">
+    <form
+      action={saveOnboardingStepAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Content readiness"
+      data-dev-quick-fill-profile="onboarding-content-readiness"
+    >
+      <DevOnboardingQuickFillButton stepId="content-readiness" />
       <input type="hidden" name="currentStep" value="content-readiness" />
       <input type="hidden" name="nextStep" value={nextStep} />
       <div className="grid gap-3">
@@ -738,7 +896,13 @@ function LaunchStep({
     saved?.templateKey ?? topRecommendedKey ?? saved?.recommendedTemplateKey ?? "template-1";
 
   return (
-    <form action={completeOnboardingAction} className="flex flex-col gap-6">
+    <form
+      action={completeOnboardingAction}
+      className="flex flex-col gap-6"
+      data-dev-quick-fill-label="Onboarding · Launch"
+      data-dev-quick-fill-profile="onboarding-launch"
+    >
+      <DevOnboardingQuickFillButton stepId="launch" />
       <Card className="border-border/60 bg-muted/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Reserved during signup</CardTitle>
@@ -832,7 +996,9 @@ function LaunchStep({
             </Select>
           )}
           <FieldDescription>
-            Start from a predefined section layout — still fully editable in the builder.
+            Start from a predefined section layout. The next screen opens the
+            template configuration editor where you can adjust the look, text,
+            and sections before publishing.
           </FieldDescription>
         </Field>
       </FieldGroup>
@@ -846,6 +1012,22 @@ function LaunchStep({
         </Card>
       ) : null}
 
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="grid gap-2 px-4 py-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">
+            What happens after this step
+          </p>
+          <p>
+            We will create your workspace and open the template configuration
+            screen.
+          </p>
+          <p>
+            There you can customize website text, colours, sections, and then
+            use the publish button to make the site live.
+          </p>
+        </CardContent>
+      </Card>
+
       {!companyName || !subdomain ? (
         <Alert variant="destructive">
           <AlertDescription>
@@ -857,7 +1039,7 @@ function LaunchStep({
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button disabled={!companyName || !subdomain} type="submit">
-          Launch my workspace
+          Open template configuration
         </Button>
         {backPath ? (
           <Button asChild variant="secondary">

@@ -12,6 +12,9 @@ if (process.env.NODE_ENV === "production") {
  * so the parent can reset the react-hook-form instance.
  */
 
+import { extractDashboardTenantSlug } from "@plotkeys/utils";
+import { useMemo } from "react";
+
 import { useDevToolsStore } from "../../stores/dev-tools";
 import { DevFabShell } from "./dev-fab-shell";
 
@@ -22,16 +25,31 @@ type Props = {
 
 export function DevLoginFab({ onFill }: Props) {
   const accounts = useDevToolsStore((s) => s.accounts);
+  const currentTenantSlug =
+    typeof window === "undefined"
+      ? null
+      : extractDashboardTenantSlug(window.location.host);
+  const visibleAccounts = useMemo(() => {
+    if (!currentTenantSlug) {
+      return accounts;
+    }
+
+    return accounts.filter(
+      (account) => account.subdomain === currentTenantSlug,
+    );
+  }, [accounts, currentTenantSlug]);
 
   return (
     <DevFabShell label="Accounts">
       <div className="divide-y divide-amber-100 dark:divide-amber-900/50">
-        {accounts.length === 0 && (
+        {visibleAccounts.length === 0 && (
           <p className="px-4 py-3 font-mono text-xs text-amber-600 dark:text-amber-400">
-            No saved accounts.
+            {currentTenantSlug
+              ? `No saved accounts for ${currentTenantSlug}.`
+              : "No saved accounts."}
           </p>
         )}
-        {accounts.map((account) => (
+        {visibleAccounts.map((account) => (
           <button
             key={account.email}
             type="button"

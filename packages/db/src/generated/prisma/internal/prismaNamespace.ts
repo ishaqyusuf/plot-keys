@@ -4038,6 +4038,7 @@ export const EmployeeScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   title: 'title',
+  workRole: 'workRole',
   employmentType: 'employmentType',
   status: 'status',
   startDate: 'startDate',
@@ -4091,6 +4092,7 @@ export const MembershipScalarFieldEnum = {
   companyId: 'companyId',
   userId: 'userId',
   role: 'role',
+  workRole: 'workRole',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -4446,6 +4448,7 @@ export const TeamInviteScalarFieldEnum = {
   companyId: 'companyId',
   email: 'email',
   role: 'role',
+  workRole: 'workRole',
   token: 'token',
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
@@ -4782,6 +4785,20 @@ export type EnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'CustomerStatus[]'
  */
 export type ListEnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CustomerStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'WorkRole'
+ */
+export type EnumWorkRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkRole'>
+    
+
+
+/**
+ * Reference to a field of type 'WorkRole[]'
+ */
+export type ListEnumWorkRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkRole[]'>
     
 
 

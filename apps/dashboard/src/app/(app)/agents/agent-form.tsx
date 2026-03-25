@@ -11,8 +11,8 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useRef, useState, useTransition } from "react";
-import { createAgentAction, updateAgentAction } from "../../actions";
 import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+import { createAgentAction, updateAgentAction } from "../../actions";
 
 type Agent = {
   id: string;
@@ -65,7 +65,13 @@ export function AgentForm(props: AgentFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+        <form
+          className="space-y-4"
+          data-dev-quick-fill-label="New agent"
+          data-dev-quick-fill-profile="new-agent"
+          onSubmit={handleSubmit}
+          ref={formRef}
+        >
           {agent && <input name="agentId" type="hidden" value={agent.id} />}
 
           <FieldGroup>
@@ -152,7 +158,7 @@ export function AgentForm(props: AgentFormProps) {
           </FieldGroup>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton formRef={formRef} />
+            <DevFormQuickFillButton profile="new-agent" />
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setOpen(false)}

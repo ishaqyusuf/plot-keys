@@ -2,12 +2,12 @@
   "name": "@plotkeys/tenant-site",
   "private": true,
   "scripts": {
-    "build": "next build --turbopack",
+    "build": "node ../../scripts/with-workspace-env.mjs next build --turbopack",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev": "next dev --turbopack -p 3903",
-    "dev:portless": "portless tenant.plotkeys next dev --turbopack",
+    "dev": "node ../../scripts/with-workspace-env.mjs PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-3903} TZ=UTC portless tenant.plotkeys next dev --turbopack",
+    "dev:portless": "node ../../scripts/with-workspace-env.mjs portless tenant.plotkeys next dev --turbopack",
     "lint": "biome check .",
-    "start": "next start",
+    "start": "node ../../scripts/with-workspace-env.mjs next start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

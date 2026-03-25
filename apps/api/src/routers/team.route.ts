@@ -13,6 +13,7 @@ import {
   suspendMember,
   updateMemberRole,
 } from "@plotkeys/db";
+import { WORK_ROLE_VALUES } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -62,6 +63,7 @@ export const teamRouter = createTRPCRouter({
       z.object({
         email: z.string().email(),
         role: z.enum(["admin", "agent", "staff"]),
+        workRole: z.enum(WORK_ROLE_VALUES).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -118,6 +120,7 @@ export const teamRouter = createTRPCRouter({
         companyId,
         email: emailLower,
         role: input.role as MembershipRole,
+        workRole: input.workRole ?? null,
         invitedById: ctx.auth.session.user.id,
       });
 

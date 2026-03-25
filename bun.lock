@@ -95,6 +95,7 @@
         "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications-react": "workspace:*",
         "@plotkeys/ui": "workspace:*",
+        "@plotkeys/utils": "workspace:*",
         "next": "^16.1.5",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -119,6 +120,7 @@
       "name": "@plotkeys/auth",
       "dependencies": {
         "@plotkeys/db": "workspace:*",
+        "@plotkeys/utils": "workspace:*",
         "bcrypt-ts": "^7.1.0",
         "better-auth": "^1.1.0",
         "zod": "^3.23.0",
