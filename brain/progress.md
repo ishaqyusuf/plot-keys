@@ -47,11 +47,32 @@
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
+| **Classic template variation system** | ✅ Done — templates 1-30 collapsed into `template-classic` with 30 colour/typography variations + builder VariationPicker |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+
+---
+
+## 2026-03-25 — Classic Template Variation System
+
+### Section-Registry (`packages/section-registry/src/index.ts`)
+- Added `TemplateVariation` type: per-variation `accentColor`, `backgroundColor`, `fontFamily`, `headingFontFamily`, `tier`, `purchasable`, `key`, `name`, `description`.
+- Added `variations?: TemplateVariation[]` field to `TemplateDefinition`.
+- Collapsed 30 structurally-identical templates (template-1…template-30, all using `baseHomeSections`) into a single `template-classic` catalog entry backed by `classicVariations` array (30 items, 10 starter + 10 plus + 10 pro).
+- `getTemplateDefinition(key)`: if `key` is a variation key (template-1…30), returns parent+variation merged definition — **zero DB migration needed**.
+- New helpers: `getVariationForTemplateKey`, `getParentTemplateForVariationKey`.
+- `templateCatalog` reduced from 45 entries to 16 (1 Classic + 15 structurally unique templates 31-45).
+
+### Page Inventory (`packages/section-registry/src/page-inventory.ts`)
+- Added `templateClassicInventory` registered under `"template-classic"`.
+- Changed fallback from `template1Inventory` to `templateClassicInventory`.
+
+### Builder Sidebar (`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`)
+- `TemplatePicker`: Classic shows in all tier tabs; trigger label shows "Classic — {variationName}" when a variation is active; picking Classic defaults to first starter variation.
+- New `VariationPicker` component: rendered below TemplatePicker when active template has variations. Shows a tier tab row (starter/plus/pro) + 5-col coloured swatch grid with name labels. Active variation highlighted with primary ring.
 
 ---
 
