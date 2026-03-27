@@ -10,8 +10,14 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useRef, useState, useTransition } from "react";
+import { useState } from "react";
+import { z } from "zod";
 import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+import {
+  createQuickFillAdapter,
+  QuickFill,
+} from "../../../components/dev/quick-fill";
+import { useZodForm } from "../../../hooks/use-zod-form";
 import { createPropertyAction, updatePropertyAction } from "../../actions";
 
 type Property = {
@@ -34,25 +40,80 @@ type PropertyFormProps =
   | { mode: "create" }
   | { mode: "edit"; property: Property };
 
+const propertyFormSchema = z.object({
+  bathrooms: z.string().optional(),
+  bedrooms: z.string().optional(),
+  description: z.string().optional(),
+  featured: z.enum(["false", "true"]),
+  imageUrl: z.string().url("Enter a valid URL.").or(z.literal("")),
+  location: z.string().optional(),
+  price: z.string().optional(),
+  specs: z.string().optional(),
+  status: z.enum(["active", "sold", "rented", "off_market"]),
+  subType: z.string().optional(),
+  title: z.string().trim().min(1, "Title is required."),
+  type: z.enum([
+    "",
+    "residential",
+    "commercial",
+    "land",
+    "industrial",
+    "mixed_use",
+  ]),
+});
+
+type PropertyFormValues = z.infer<typeof propertyFormSchema>;
+
 export function PropertyForm(props: PropertyFormProps) {
   const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-  const formRef = useRef<HTMLFormElement>(null);
-
+  const [pending, setPending] = useState(false);
   const property = props.mode === "edit" ? props.property : null;
+  const form = useZodForm(propertyFormSchema, {
+    defaultValues: {
+      bathrooms: property?.bathrooms?.toString() ?? "",
+      bedrooms: property?.bedrooms?.toString() ?? "",
+      description: property?.description ?? "",
+      featured: property?.featured ? "true" : "false",
+      imageUrl: property?.imageUrl ?? "",
+      location: property?.location ?? "",
+      price: property?.price ?? "",
+      specs: property?.specs ?? "",
+      status: (property?.status ?? "active") as PropertyFormValues["status"],
+      subType: property?.subType ?? "",
+      title: property?.title ?? "",
+      type: (property?.type ?? "") as PropertyFormValues["type"],
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
+  async function handleSubmit(values: PropertyFormValues) {
+    setPending(true);
+    try {
+      const formData = new FormData();
+      formData.set("title", values.title.trim());
+      formData.set("price", values.price?.trim() ?? "");
+      formData.set("location", values.location?.trim() ?? "");
+      formData.set("bedrooms", values.bedrooms?.trim() ?? "");
+      formData.set("bathrooms", values.bathrooms?.trim() ?? "");
+      formData.set("specs", values.specs?.trim() ?? "");
+      formData.set("description", values.description?.trim() ?? "");
+      formData.set("imageUrl", values.imageUrl.trim());
+      formData.set("type", values.type);
+      formData.set("subType", values.subType?.trim() ?? "");
+      formData.set("status", values.status);
+      formData.set("featured", values.featured);
+
       if (props.mode === "edit") {
+        formData.set("propertyId", property!.id);
         await updatePropertyAction(formData);
       } else {
         await createPropertyAction(formData);
       }
-      setOpen(false);
-    });
+    } finally {
+      setPending(false);
+    }
   }
+
+  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
@@ -71,43 +132,30 @@ export function PropertyForm(props: PropertyFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form
-          className="space-y-4"
-          data-dev-quick-fill-label="New property"
-          data-dev-quick-fill-profile="new-property"
-          onSubmit={handleSubmit}
-          ref={formRef}
-        >
-          {property && (
-            <input name="propertyId" type="hidden" value={property.id} />
-          )}
-
+        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <FieldGroup>
             <Field>
               <FieldLabel>Title *</FieldLabel>
               <Input
-                defaultValue={property?.title ?? ""}
-                name="title"
                 placeholder="e.g. 3-Bedroom Detached, Lekki Phase 1"
                 required
+                {...form.register("title")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Price</FieldLabel>
               <Input
-                defaultValue={property?.price ?? ""}
-                name="price"
                 placeholder="e.g. ₦45,000,000"
+                {...form.register("price")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Location</FieldLabel>
               <Input
-                defaultValue={property?.location ?? ""}
-                name="location"
                 placeholder="e.g. Lekki Phase 1, Lagos"
+                {...form.register("location")}
               />
             </Field>
 
@@ -115,21 +163,19 @@ export function PropertyForm(props: PropertyFormProps) {
               <Field>
                 <FieldLabel>Bedrooms</FieldLabel>
                 <Input
-                  defaultValue={property?.bedrooms ?? ""}
                   min={0}
-                  name="bedrooms"
                   placeholder="3"
                   type="number"
+                  {...form.register("bedrooms")}
                 />
               </Field>
               <Field>
                 <FieldLabel>Bathrooms</FieldLabel>
                 <Input
-                  defaultValue={property?.bathrooms ?? ""}
                   min={0}
-                  name="bathrooms"
                   placeholder="2"
                   type="number"
+                  {...form.register("bathrooms")}
                 />
               </Field>
             </div>
@@ -137,28 +183,25 @@ export function PropertyForm(props: PropertyFormProps) {
             <Field>
               <FieldLabel>Specs / highlights</FieldLabel>
               <Input
-                defaultValue={property?.specs ?? ""}
-                name="specs"
                 placeholder="e.g. 3 bed · 2 bath · 200sqm"
+                {...form.register("specs")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Description</FieldLabel>
               <Input
-                defaultValue={property?.description ?? ""}
-                name="description"
                 placeholder="Short property description…"
+                {...form.register("description")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Image URL</FieldLabel>
               <Input
-                defaultValue={property?.imageUrl ?? ""}
-                name="imageUrl"
                 placeholder="https://…"
                 type="url"
+                {...form.register("imageUrl")}
               />
             </Field>
 
@@ -166,8 +209,7 @@ export function PropertyForm(props: PropertyFormProps) {
               <FieldLabel>Property type</FieldLabel>
               <select
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                defaultValue={property?.type ?? ""}
-                name="type"
+                {...form.register("type")}
               >
                 <option value="">Select type…</option>
                 <option value="residential">Residential</option>
@@ -181,9 +223,8 @@ export function PropertyForm(props: PropertyFormProps) {
             <Field>
               <FieldLabel>Sub-type</FieldLabel>
               <Input
-                defaultValue={property?.subType ?? ""}
-                name="subType"
                 placeholder="e.g. Detached, Bungalow, Flat, Office…"
+                {...form.register("subType")}
               />
             </Field>
 
@@ -191,8 +232,7 @@ export function PropertyForm(props: PropertyFormProps) {
               <FieldLabel>Status</FieldLabel>
               <select
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                defaultValue={property?.status ?? "active"}
-                name="status"
+                {...form.register("status")}
               >
                 <option value="active">Active</option>
                 <option value="sold">Sold</option>
@@ -205,8 +245,7 @@ export function PropertyForm(props: PropertyFormProps) {
               <FieldLabel>Featured</FieldLabel>
               <select
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                defaultValue={property?.featured ? "true" : "false"}
-                name="featured"
+                {...form.register("featured")}
               >
                 <option value="false">No</option>
                 <option value="true">Yes — show on homepage</option>
@@ -215,7 +254,7 @@ export function PropertyForm(props: PropertyFormProps) {
           </FieldGroup>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton profile="new-property" />
+            <DevFormQuickFillButton onFill={() => quickFill.newProperty()} />
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setOpen(false)}

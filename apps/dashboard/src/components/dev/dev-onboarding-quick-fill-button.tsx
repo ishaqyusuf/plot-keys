@@ -7,31 +7,13 @@ if (process.env.NODE_ENV === "production") {
 }
 
 import { DevFormQuickFillButton } from "./dev-form-quick-fill-button";
-import type { QuickFillProfile } from "./quick-fill";
-
-type StepId =
-  | "business-identity"
-  | "market-focus"
-  | "brand-style"
-  | "contact-operations"
-  | "content-readiness"
-  | "launch";
-
-const STEP_PROFILE: Record<StepId, QuickFillProfile> = {
-  "brand-style": "onboarding-brand-style",
-  "business-identity": "onboarding-business-identity",
-  "contact-operations": "onboarding-contact-operations",
-  "content-readiness": "onboarding-content-readiness",
-  launch: "onboarding-launch",
-  "market-focus": "onboarding-market-focus",
-};
 
 type DevOnboardingQuickFillButtonProps = {
-  stepId: StepId;
+  onFill: () => void | Promise<void>;
 };
 
 export function DevOnboardingQuickFillButton({
-  stepId,
+  onFill,
 }: DevOnboardingQuickFillButtonProps) {
-  return <DevFormQuickFillButton profile={STEP_PROFILE[stepId]} />;
+  return <DevFormQuickFillButton onFill={onFill} />;
 }

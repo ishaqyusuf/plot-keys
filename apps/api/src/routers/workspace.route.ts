@@ -9,20 +9,19 @@ import {
   createPrismaClient,
   createProperty,
   createSiteConfiguration,
+  type Db,
   deductAiCredits,
   deleteAgent,
   deleteAppointment,
   deleteProperty,
-  type Db,
   findCompanyById,
   findCompanyBySlug,
   findLatestDraftForTemplate,
-  listFeaturedProperties,
   findLatestSiteConfigurationForCompany,
   findLicensedTemplateKeys,
   findSiteConfigurationByIdForCompany,
-  findTenantOnboardingByUserId,
   findTemplateLicensesForCompany,
+  findTenantOnboardingByUserId,
   getAiCreditBalance,
   getAiUsageStats,
   getAnalyticsSummary,
@@ -35,6 +34,7 @@ import {
   hasTemplateLicense,
   listAgentsForCompany,
   listAppointmentsForCompany,
+  listFeaturedProperties,
   listLeadsForCompany,
   listPropertiesForCompany,
   listStockImageLicensesForCompany,
@@ -58,7 +58,6 @@ import {
   updateProperty,
   updateSiteConfigurationContentField,
   updateSiteConfigurationThemeField,
-  upsertTenantOnboarding,
 } from "@plotkeys/db";
 import { domainSyncHandler, triggerJob } from "@plotkeys/jobs";
 import { domainSyncTask } from "@plotkeys/jobs/tasks";
@@ -82,7 +81,7 @@ import {
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
+import { generateFieldContent, generateOnboardingContent } from "../lib.ai";
 import {
   assertMinRole,
   authenticatedProcedure,
@@ -90,7 +89,6 @@ import {
   membershipProcedure,
   publicProcedure,
 } from "../lib.trpc";
-import { generateFieldContent, generateOnboardingContent } from "../lib.ai";
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
@@ -142,6 +140,24 @@ function assertTemplateAccess(planTier: SubscriptionTier, templateKey: string) {
   }
 }
 
+async function getTemplateAccessWithLicense(
+  db: Db,
+  companyId: string,
+  planTier: SubscriptionTier,
+  templateKey: string,
+) {
+  const template = getTemplateDefinition(templateKey);
+  const templateAccess = describeTemplateAccess(planTier, template.tier);
+  const licensed = await hasTemplateLicense(db, companyId, templateKey);
+
+  return {
+    ...templateAccess,
+    allowed: licensed || templateAccess.allowed,
+    licensed,
+    templateTier: template.tier,
+  };
+}
+
 /**
  * License-aware access check: allows access if the company holds a valid
  * license record for the template, regardless of plan tier.
@@ -153,9 +169,43 @@ async function assertTemplateAccessWithLicense(
   planTier: SubscriptionTier,
   templateKey: string,
 ) {
-  const licensed = await hasTemplateLicense(db, companyId, templateKey);
-  if (licensed) return; // explicit license overrides plan-tier gating
-  assertTemplateAccess(planTier, templateKey);
+  const templateAccess = await getTemplateAccessWithLicense(
+    db,
+    companyId,
+    planTier,
+    templateKey,
+  );
+
+  if (templateAccess.allowed) return;
+
+  throw new TRPCError({
+    code: "FORBIDDEN",
+    message: `${templateAccess.message} Upgrade your plan before editing or publishing this template.`,
+  });
+}
+
+async function assertCompanyCanUseTemplate(
+  db: Db,
+  companyId: string,
+  templateKey: string,
+) {
+  const company = await findCompanyById(db, companyId);
+
+  if (!company) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Company not found.",
+    });
+  }
+
+  await assertTemplateAccessWithLicense(
+    db,
+    company.id,
+    company.planTier,
+    templateKey,
+  );
+
+  return company;
 }
 
 async function assertSubdomainAvailability(db: Db, subdomain: string) {
@@ -618,8 +668,7 @@ export const workspaceRouter = createTRPCRouter({
         recommendations,
         summary,
         topKey:
-          recommendations.find((r) => !r.upgradeRequired)?.key ??
-          "template-1",
+          recommendations.find((r) => !r.upgradeRequired)?.key ?? "template-1",
       };
     }),
 
@@ -627,126 +676,129 @@ export const workspaceRouter = createTRPCRouter({
    * AI bootstrap: generates hero/intro/CTA copy from onboarding context,
    * updates the active draft WebsiteVersion, and deducts AI credits.
    */
-  bootstrapAiContent: membershipProcedure
-    .mutation(async ({ ctx }) => {
-      const db = getDb();
-      const companyId = ctx.auth.activeMembership.companyId;
+  bootstrapAiContent: membershipProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
 
-      const company = await findCompanyById(db, companyId);
-      if (!company) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Company not found.",
-        });
-      }
-
-      const onboarding = await findTenantOnboardingByUserId(
-        db,
-        ctx.auth.session.user.id,
-      );
-      if (!onboarding) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No onboarding record found.",
-        });
-      }
-
-      // Check credits
-      const enough = await hasEnoughCredits(db, companyId, "onboarding_content");
-      if (!enough) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "Insufficient AI credits. AI content bootstrap costs 15 credits.",
-        });
-      }
-
-      // Resolve active draft
-      const draft = await resolveActiveDraftForCompany(db, companyId);
-      if (!draft) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No active draft found. Create a template draft first.",
-        });
-      }
-
-      // Generate AI content
-      const generated = await generateOnboardingContent({
-        businessSummary: onboarding.businessSummary,
-        businessType: onboarding.businessType,
-        companyName: company.name,
-        designIntent: onboarding.designIntent,
-        locations: onboarding.locations,
-        market: onboarding.market,
-        primaryGoal: onboarding.primaryGoal,
-        segment: onboarding.segment,
-        tagline: onboarding.tagline,
-        tone: onboarding.tone,
+    const company = await findCompanyById(db, companyId);
+    if (!company) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Company not found.",
       });
+    }
 
-      if (!generated) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "AI content generation failed. Ensure ANTHROPIC_API_KEY is configured.",
-        });
-      }
-
-      // Merge AI content into existing draft content
-      const mergedContent = {
-        ...draft.contentJson,
-        ...generated,
-      };
-
-      // Update the WebsiteVersion draft
-      await updateDraftVersion(db, {
-        contentJson: mergedContent,
-        updatedById: ctx.auth.session.user.id,
-        versionId: draft.id,
+    const onboarding = await findTenantOnboardingByUserId(
+      db,
+      ctx.auth.session.user.id,
+    );
+    if (!onboarding) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No onboarding record found.",
       });
+    }
 
-      // Also update SiteConfiguration if linked (dual-write)
-      if (draft.legacyConfigId) {
-        const legacyConfig = await findSiteConfigurationByIdForCompany(db, {
-          companyId,
-          configId: draft.legacyConfigId,
-        });
-        if (legacyConfig) {
-          for (const [key, value] of Object.entries(generated)) {
-            await updateSiteConfigurationContentField(db, {
-              configId: legacyConfig.id,
-              contentKey: key,
-              currentContent: legacyConfig.contentJson as Record<
-                string,
-                string
-              >,
-              updatedById: ctx.auth.session.user.id,
-              value,
-              version: legacyConfig.version,
-            });
-          }
+    // Check credits
+    const enough = await hasEnoughCredits(db, companyId, "onboarding_content");
+    if (!enough) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message:
+          "Insufficient AI credits. AI content bootstrap costs 15 credits.",
+      });
+    }
+
+    // Resolve active draft
+    const draft = await resolveActiveDraftForCompany(db, companyId);
+    if (!draft) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No active draft found. Create a template draft first.",
+      });
+    }
+
+    await assertTemplateAccessWithLicense(
+      db,
+      company.id,
+      company.planTier,
+      draft.templateKey,
+    );
+
+    // Generate AI content
+    const generated = await generateOnboardingContent({
+      businessSummary: onboarding.businessSummary,
+      businessType: onboarding.businessType,
+      companyName: company.name,
+      designIntent: onboarding.designIntent,
+      locations: onboarding.locations,
+      market: onboarding.market,
+      primaryGoal: onboarding.primaryGoal,
+      segment: onboarding.segment,
+      tagline: onboarding.tagline,
+      tone: onboarding.tone,
+    });
+
+    if (!generated) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          "AI content generation failed. Ensure ANTHROPIC_API_KEY is configured.",
+      });
+    }
+
+    // Merge AI content into existing draft content
+    const mergedContent = {
+      ...draft.contentJson,
+      ...generated,
+    };
+
+    // Update the WebsiteVersion draft
+    await updateDraftVersion(db, {
+      contentJson: mergedContent,
+      updatedById: ctx.auth.session.user.id,
+      versionId: draft.id,
+    });
+
+    // Also update SiteConfiguration if linked (dual-write)
+    if (draft.legacyConfigId) {
+      const legacyConfig = await findSiteConfigurationByIdForCompany(db, {
+        companyId,
+        configId: draft.legacyConfigId,
+      });
+      if (legacyConfig) {
+        for (const [key, value] of Object.entries(generated)) {
+          await updateSiteConfigurationContentField(db, {
+            configId: legacyConfig.id,
+            contentKey: key,
+            currentContent: legacyConfig.contentJson as Record<string, string>,
+            updatedById: ctx.auth.session.user.id,
+            value,
+            version: legacyConfig.version,
+          });
         }
       }
+    }
 
-      // Deduct credits and log usage
-      await deductAiCredits(db, {
-        companyId,
-        feature: "onboarding_content",
-      });
+    // Deduct credits and log usage
+    await deductAiCredits(db, {
+      companyId,
+      feature: "onboarding_content",
+    });
 
-      await logAiUsage(db, {
-        companyId,
-        creditsUsed: 15,
-        feature: "onboarding_content",
-        meta: { fieldsGenerated: Object.keys(generated) },
-        userId: ctx.auth.session.user.id,
-      }).catch(() => null);
+    await logAiUsage(db, {
+      companyId,
+      creditsUsed: 15,
+      feature: "onboarding_content",
+      meta: { fieldsGenerated: Object.keys(generated) },
+      userId: ctx.auth.session.user.id,
+    }).catch(() => null);
 
-      return {
-        fieldsUpdated: Object.keys(generated),
-        success: true,
-      };
-    }),
+    return {
+      fieldsUpdated: Object.keys(generated),
+      success: true,
+    };
+  }),
 
   getTemplateCatalog: authenticatedProcedure.query(async () => {
     const db = getDb();
@@ -1039,6 +1091,12 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
+      await assertCompanyCanUseTemplate(
+        db,
+        ctx.auth.activeMembership.companyId,
+        configuration.templateKey,
+      );
+
       await publishSiteConfiguration(db, {
         companyId: ctx.auth.activeMembership.companyId,
         configId: configuration.id,
@@ -1067,6 +1125,12 @@ export const workspaceRouter = createTRPCRouter({
           message: "Template configuration not found.",
         });
       }
+
+      await assertCompanyCanUseTemplate(
+        db,
+        ctx.auth.activeMembership.companyId,
+        configuration.templateKey,
+      );
 
       const company = await findCompanyById(
         db,
@@ -1204,6 +1268,12 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
+      await assertCompanyCanUseTemplate(
+        db,
+        ctx.auth.activeMembership.companyId,
+        configuration.templateKey,
+      );
+
       await updateSiteConfigurationContentField(db, {
         configId: configuration.id,
         contentKey: input.contentKey,
@@ -1238,6 +1308,12 @@ export const workspaceRouter = createTRPCRouter({
           message: "Template configuration not found.",
         });
       }
+
+      await assertCompanyCanUseTemplate(
+        db,
+        ctx.auth.activeMembership.companyId,
+        configuration.templateKey,
+      );
 
       await updateSiteConfigurationThemeField(db, {
         configId: configuration.id,
@@ -1342,7 +1418,11 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       assertMinRole(ctx.auth.activeMembership.role, "admin");
-      return updateCompanyProfile(db, ctx.auth.activeMembership.companyId, input);
+      return updateCompanyProfile(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input,
+      );
     }),
 
   // ─── Properties ───────────────────────────────────────────────────────────
@@ -1366,7 +1446,13 @@ export const workspaceRouter = createTRPCRouter({
         specs: z.string().trim().optional().nullable(),
         imageUrl: z.string().url().optional().nullable(),
         type: z
-          .enum(["residential", "commercial", "land", "industrial", "mixed_use"])
+          .enum([
+            "residential",
+            "commercial",
+            "land",
+            "industrial",
+            "mixed_use",
+          ])
           .optional()
           .nullable(),
         subType: z.string().trim().optional().nullable(),
@@ -1398,7 +1484,13 @@ export const workspaceRouter = createTRPCRouter({
         specs: z.string().trim().optional().nullable(),
         imageUrl: z.string().url().optional().nullable(),
         type: z
-          .enum(["residential", "commercial", "land", "industrial", "mixed_use"])
+          .enum([
+            "residential",
+            "commercial",
+            "land",
+            "industrial",
+            "mixed_use",
+          ])
           .optional()
           .nullable(),
         subType: z.string().trim().optional().nullable(),
@@ -1536,11 +1628,10 @@ export const workspaceRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const db = getDb();
-      return listLeadsForCompany(
-        db,
-        ctx.auth.activeMembership.companyId,
-        { status: input?.status, limit: 100 },
-      );
+      return listLeadsForCompany(db, ctx.auth.activeMembership.companyId, {
+        status: input?.status,
+        limit: 100,
+      });
     }),
   getLeadStats: membershipProcedure.query(async ({ ctx }) => {
     const db = getDb();
@@ -1565,7 +1656,8 @@ export const workspaceRouter = createTRPCRouter({
     const companyId = ctx.auth.activeMembership.companyId;
 
     const company = await findCompanyById(db, companyId);
-    if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+    if (!company)
+      throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
 
     const recentItems = await db.billingLineItem.findMany({
       orderBy: { createdAt: "desc" },
@@ -1594,15 +1686,22 @@ export const workspaceRouter = createTRPCRouter({
   initializeCheckout: membershipProcedure
     .input(initializeCheckoutInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const { initializeTransaction, getPlanPricing } = await import("@plotkeys/utils");
+      const { initializeTransaction, getPlanPricing } = await import(
+        "@plotkeys/utils"
+      );
 
       const companyId = ctx.auth.activeMembership.companyId;
       const db = getDb();
       const company = await findCompanyById(db, companyId);
-      if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+      if (!company)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Company not found.",
+        });
 
       const pricing = getPlanPricing(input.planTier);
-      const price = input.interval === "monthly" ? pricing.monthly : pricing.annual;
+      const price =
+        input.interval === "monthly" ? pricing.monthly : pricing.annual;
 
       if (price.minorUnits === 0) {
         throw new TRPCError({
@@ -1611,12 +1710,25 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      const callbackUrl = `${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "https://dashboard.plotkeys.com"}/billing/callback`;
+      const callbackUrl =
+        input.callbackUrl ??
+        `${process.env.DASHBOARD_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901"}/billing/callback`;
+      const checkoutEmail =
+        process.env.NODE_ENV === "development" && process.env.TEST_EMAIL
+          ? process.env.TEST_EMAIL
+          : (ctx.auth.session.user.email ?? "");
+
+      if (!checkoutEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A billing email address is required to start checkout.",
+        });
+      }
 
       const tx = await initializeTransaction({
         amount: price.minorUnits,
         callbackUrl,
-        email: ctx.auth.session.user.email ?? "",
+        email: checkoutEmail,
         metadata: {
           companyId,
           interval: input.interval,
@@ -1625,29 +1737,36 @@ export const workspaceRouter = createTRPCRouter({
       });
 
       // Record a pending billing line item
-      await db.billingLineItem.create({
-        data: {
-          amountMinorUnits: price.minorUnits,
-          companyId,
-          currency: "NGN",
-          kind: "subscription",
-          meta: { interval: input.interval, planTier: input.planTier },
-          providerRef: tx.reference,
-          status: "pending",
-        },
-      }).catch(() => null);
+      await db.billingLineItem
+        .create({
+          data: {
+            amountMinorUnits: price.minorUnits,
+            companyId,
+            currency: "NGN",
+            kind: "subscription",
+            meta: { interval: input.interval, planTier: input.planTier },
+            providerRef: tx.reference,
+            status: "pending",
+          },
+        })
+        .catch(() => null);
 
-      return { authorizationUrl: tx.authorization_url, reference: tx.reference };
+      return {
+        authorizationUrl: tx.authorization_url,
+        reference: tx.reference,
+      };
     }),
 
   // ─── Appointments ─────────────────────────────────────────────────────
 
   listAppointments: membershipProcedure
     .input(
-      z.object({
-        status: z.string().optional(),
-        upcoming: z.boolean().optional(),
-      }).optional(),
+      z
+        .object({
+          status: z.string().optional(),
+          upcoming: z.boolean().optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const db = getDb();
@@ -1728,7 +1847,11 @@ export const workspaceRouter = createTRPCRouter({
         return { granted: true, imageId: input.imageId };
       }
 
-      const alreadyLicensed = await hasStockImageLicense(db, companyId, input.imageId);
+      const alreadyLicensed = await hasStockImageLicense(
+        db,
+        companyId,
+        input.imageId,
+      );
       if (alreadyLicensed) {
         return { granted: true, imageId: input.imageId };
       }

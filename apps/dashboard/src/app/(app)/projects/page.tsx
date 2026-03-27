@@ -1,4 +1,5 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
@@ -11,7 +12,7 @@ import {
 } from "../../../components/projects/project-actions";
 
 type ProjectsPageProps = {
-  searchParams?: Promise<{ status?: string }>;
+  searchParams?: Promise<{ error?: string; status?: string }>;
 };
 
 const statusConfig: Record<
@@ -96,6 +97,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-5xl">
+        {params.error ? (
+          <Alert className="mb-6" variant="destructive">
+            <AlertDescription>{params.error}</AlertDescription>
+          </Alert>
+        ) : null}
+
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl font-semibold text-foreground">

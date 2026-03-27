@@ -38,7 +38,9 @@ export function DevLoginFab({ onFill }: Props) {
       (account) => account.subdomain === currentTenantSlug,
     );
   }, [accounts, currentTenantSlug]);
-
+  console.log({
+    accounts,
+  });
   return (
     <DevFabShell label="Accounts">
       <div className="divide-y divide-amber-100 dark:divide-amber-900/50">

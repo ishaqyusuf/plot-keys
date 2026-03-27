@@ -12,12 +12,8 @@ import {
   sampleHomePage,
   sampleTheme,
 } from "@plotkeys/section-registry";
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
-import Link from "next/link";
 import type { JSX } from "react";
 
 function renderSection(
@@ -59,6 +55,8 @@ export default async function TenantWebsiteHomePage({
   const requestedHostname = tenantHostname;
   const subdomain = tenantSubdomain;
   let matchedHostname: string | null = requestedHostname;
+  let resolvedCompanySlug: string | null = subdomain;
+  let hasPublishedSite = false;
 
   let preview = {
     page: sampleHomePage,
@@ -83,10 +81,16 @@ export default async function TenantWebsiteHomePage({
         : null;
 
     if (company) {
+      resolvedCompanySlug = company.slug;
+
       // Phase 3: Prefer WebsiteVersion, fallback to SiteConfiguration
-      const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
+      const publishedConfiguration = await resolvePublishedForCompany(
+        prisma,
+        company.id,
+      );
 
       if (publishedConfiguration) {
+        hasPublishedSite = true;
         matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
 
         const [featuredProperties, agents] = await Promise.all([
@@ -123,41 +127,35 @@ export default async function TenantWebsiteHomePage({
     }
   }
 
+  const visibleSections = deserializeTemplateConfig(
+    preview.theme,
+  ).visibleSections;
+  const renderedSections = preview.page.sections
+    .filter((section) => visibleSections?.[section.type] !== false)
+    .map((section) => renderSection(section, preview.theme));
+
+  if (hasPublishedSite) {
+    return renderedSections;
+  }
+
   return (
-    <main className="min-h-screen px-4 py-5 md:px-6 md:py-6">
-      <div className="mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] border border-border bg-card shadow-[var(--shadow-soft)] backdrop-blur">
-        <div className="flex flex-col gap-3 border-b border-border bg-card px-6 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between md:px-10">
+    <main className="min-h-screen bg-background px-4 py-5 md:px-6 md:py-6">
+      <div className="mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] border border-dashed border-border/80 bg-card/70 shadow-[var(--shadow-soft)] backdrop-blur">
+        <div className="flex flex-col gap-3 border-b border-border/80 bg-card px-6 py-4 text-sm text-muted-foreground md:px-10">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-              Tenant website preview
+              Preview fallback
             </p>
             <p className="mt-1">
               {matchedHostname
-                ? `Published view for ${matchedHostname}`
-                : subdomain
-                  ? `Published view for ${subdomain}.plotkeys.com`
+                ? `No published tenant site was found for ${matchedHostname} yet.`
+                : resolvedCompanySlug
+                  ? `No published tenant site was found for ${resolvedCompanySlug}.plotkeys.com yet.`
                   : "Use the tenant hostname or add ?subdomain=company-slug to load a published tenant site."}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="default">
-              {subdomain ? "Published config" : "Sample template"}
-            </Badge>
-            {subdomain ? (
-              <Button asChild size="sm" variant="secondary">
-                <Link href={`/?subdomain=${subdomain}`}>Refresh preview</Link>
-              </Button>
-            ) : null}
-            <ThemeToggle />
-          </div>
         </div>
-
-        {(() => {
-          const visibleSections = deserializeTemplateConfig(preview.theme).visibleSections;
-          return preview.page.sections
-            .filter((section) => visibleSections?.[section.type] !== false)
-            .map((section) => renderSection(section, preview.theme));
-        })()}
+        {renderedSections}
       </div>
     </main>
   );

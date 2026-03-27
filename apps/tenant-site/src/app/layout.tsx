@@ -11,8 +11,8 @@ import { ChatWidget } from "../components/chat-widget";
 import { IntegrationScripts } from "../components/integration-scripts";
 
 const fallbackMetadata: Metadata = {
-  title: "PlotKeys Tenant Site",
-  description: "Structured tenant website renderer for PlotKeys",
+  title: "PlotKeys",
+  description: "Browse properties, meet agents, and schedule viewings.",
 };
 
 async function resolveSubdomain(): Promise<string | null> {

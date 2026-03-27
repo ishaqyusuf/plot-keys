@@ -11,6 +11,7 @@
 import type { SubscriptionTier } from "./tiers";
 
 export type BillingInterval = "monthly" | "annual";
+export const planTrialDays = 14;
 
 export type PlanPrice = {
   /** Human-readable formatted price string. */
@@ -36,64 +37,64 @@ export type PlanPricing = {
 // ---------------------------------------------------------------------------
 
 /**
- * Starter — free forever.
- * Includes: 1 template (starter tier), basic site builder, subdomain.
+ * Launch (internal tier: starter) — paid entry tier.
+ * Includes: 1 live website, starter-tier templates, core listing/leads flow.
  */
 export const starterPricing: PlanPricing = {
   annual: {
-    formatted: "Free",
+    formatted: "₦192,000/yr",
     interval: "annual",
-    minorUnits: 0,
-    monthlyEquivalentMinorUnits: 0,
+    minorUnits: 19_200_000, // 192,000 NGN × 100
+    monthlyEquivalentMinorUnits: 1_600_000, // 16,000/month effective
   },
-  annualDiscountPercent: 0,
+  annualDiscountPercent: 20,
   monthly: {
-    formatted: "Free",
+    formatted: "₦20,000/mo",
     interval: "monthly",
-    minorUnits: 0,
-    monthlyEquivalentMinorUnits: 0,
+    minorUnits: 2_000_000, // 20,000 NGN × 100
+    monthlyEquivalentMinorUnits: 2_000_000,
   },
   tier: "starter",
 };
 
 /**
- * Plus — ₦15,000/month or ₦144,000/year (20% off).
- * Includes: starter + plus templates, custom domain, estate management, WhatsApp.
+ * Growth (internal tier: plus) — recommended operating tier.
+ * Includes: launch + custom domain, stronger operations, light AI allowance.
  */
 export const plusPricing: PlanPricing = {
   annual: {
-    formatted: "₦144,000/yr",
+    formatted: "₦432,000/yr",
     interval: "annual",
-    minorUnits: 14_400_000, // 144,000 NGN × 100
-    monthlyEquivalentMinorUnits: 1_200_000, // 12,000/month effective
+    minorUnits: 43_200_000, // 432,000 NGN × 100
+    monthlyEquivalentMinorUnits: 3_600_000, // 36,000/month effective
   },
   annualDiscountPercent: 20,
   monthly: {
-    formatted: "₦15,000/mo",
+    formatted: "₦45,000/mo",
     interval: "monthly",
-    minorUnits: 1_500_000, // 15,000 NGN × 100
-    monthlyEquivalentMinorUnits: 1_500_000,
+    minorUnits: 4_500_000, // 45,000 NGN × 100
+    monthlyEquivalentMinorUnits: 4_500_000,
   },
   tier: "plus",
 };
 
 /**
- * Pro — ₦35,000/month or ₦336,000/year (20% off).
- * Includes: all templates, AI tools, payment integrations, priority support.
+ * Scale (internal tier: pro) — premium operating layer.
+ * Includes: growth + all templates, larger AI allocation, priority support.
  */
 export const proPricing: PlanPricing = {
   annual: {
-    formatted: "₦336,000/yr",
+    formatted: "₦864,000/yr",
     interval: "annual",
-    minorUnits: 33_600_000, // 336,000 NGN × 100
-    monthlyEquivalentMinorUnits: 2_800_000, // 28,000/month effective
+    minorUnits: 86_400_000, // 864,000 NGN × 100
+    monthlyEquivalentMinorUnits: 7_200_000, // 72,000/month effective
   },
   annualDiscountPercent: 20,
   monthly: {
-    formatted: "₦35,000/mo",
+    formatted: "₦90,000/mo",
     interval: "monthly",
-    minorUnits: 3_500_000, // 35,000 NGN × 100
-    monthlyEquivalentMinorUnits: 3_500_000,
+    minorUnits: 9_000_000, // 90,000 NGN × 100
+    monthlyEquivalentMinorUnits: 9_000_000,
   },
   tier: "pro",
 };
@@ -146,13 +147,13 @@ export function getPlanPricing(tier: SubscriptionTier): PlanPricing {
 /**
  * Prorated credit rules (for future billing provider integration):
  *
- * UPGRADE (e.g. Starter → Plus, Plus → Pro):
+ * UPGRADE (e.g. Launch → Growth, Growth → Scale):
  *   - Effective immediately.
  *   - Bill the difference for the remaining period (prorated).
  *   - New plan-included template licenses granted immediately.
  *   - Billing provider ref stored in `billing_line_items.provider_ref`.
  *
- * DOWNGRADE (e.g. Pro → Plus, Plus → Starter):
+ * DOWNGRADE (e.g. Scale → Growth, Growth → Launch):
  *   - Effective at the end of the current billing period (no refund).
  *   - Access to higher-tier templates retained until period end.
  *   - After period end: `changePlan` job runs, revokes higher-tier
@@ -172,6 +173,8 @@ export function getPlanPricing(tier: SubscriptionTier): PlanPricing {
  *     webhook and the plan sync job.
  */
 export const billingRules = {
+  /** Days in the default free trial window for new subscriptions. */
+  trialDays: planTrialDays,
   /** Days of grace after a payment fails before access is revoked. */
   gracePeriodDays: 7,
   /** Whether upgrades take effect immediately. */

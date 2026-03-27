@@ -15,15 +15,15 @@ export const templateTiers = ["starter", "plus", "pro"] as const;
 export type TemplateTier = (typeof templateTiers)[number];
 
 export const tierLabels: Record<SubscriptionTier, string> = {
-  plus: "Plus",
-  pro: "Pro",
-  starter: "Starter",
+  plus: "Growth",
+  pro: "Scale",
+  starter: "Launch",
 };
 
 export const templateTierLabels: Record<TemplateTier, string> = {
-  plus: "Plus",
-  pro: "Pro",
-  starter: "Starter",
+  plus: "Growth",
+  pro: "Scale",
+  starter: "Launch",
 };
 
 export type PlanFeatureKey =

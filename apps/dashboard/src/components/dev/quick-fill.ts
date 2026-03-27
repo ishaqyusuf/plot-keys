@@ -3,10 +3,12 @@
 import { TAG_INPUT_SYSTEM_SUGGESTIONS } from "../tag-input";
 
 export type QuickFillProfile =
+  | "auth-sign-up"
   | "generic"
   | "invite-employee"
   | "invite-member"
   | "new-agent"
+  | "new-project"
   | "new-property"
   | "onboarding-brand-style"
   | "onboarding-business-identity"
@@ -28,6 +30,7 @@ type QuickFillPayloads = {
   inviteRoles: string[];
   locations: string[];
   primaryGoals: string[];
+  projectTypes: string[];
   propertyStatuses: string[];
   propertySubTypes: string[];
   propertyTypes: string[];
@@ -36,6 +39,24 @@ type QuickFillPayloads = {
   taglines: string[];
   targetAudienceSets: string[][];
   tones: string[];
+};
+
+type QuickFillValues = Record<string, unknown>;
+
+export type QuickFillFormAdapter<
+  TValues extends QuickFillValues = QuickFillValues,
+> = {
+  getValues: () => TValues;
+  reset: (values: TValues | QuickFillValues) => void;
+  setValue: (
+    name: string,
+    value: unknown,
+    options?: {
+      shouldDirty?: boolean;
+      shouldTouch?: boolean;
+      shouldValidate?: boolean;
+    },
+  ) => void;
 };
 
 const DEFAULT_PAYLOADS: QuickFillPayloads = {
@@ -52,15 +73,68 @@ const DEFAULT_PAYLOADS: QuickFillPayloads = {
     "mixed",
   ],
   colors: ["Deep navy", "Forest green", "Warm sand", "Charcoal and gold"],
-  companyPrefixes: ["Aster", "Harbor", "Cedar", "Summit", "Golden"],
-  companySuffixes: ["Grove", "Stone", "Point", "Haven", "Crest"],
-  companyTypes: ["Realty", "Properties", "Homes", "Advisory", "Estates"],
+  companyPrefixes: [
+    "Aster",
+    "Atlas",
+    "Blue",
+    "Cedar",
+    "Crown",
+    "Emerald",
+    "Golden",
+    "Grand",
+    "Harbor",
+    "Key",
+    "Maple",
+    "Oak",
+    "Prime",
+    "Royal",
+    "Silver",
+    "Skyline",
+    "Sterling",
+    "Summit",
+    "Urban",
+    "Victory",
+  ],
+  companySuffixes: [
+    "Bay",
+    "Bridge",
+    "Crest",
+    "Court",
+    "Edge",
+    "Field",
+    "Garden",
+    "Gate",
+    "Grove",
+    "Heights",
+    "Haven",
+    "Hill",
+    "View",
+    "Park",
+    "Place",
+    "Point",
+    "Square",
+    "Stone",
+    "Terrace",
+    "Vale",
+  ],
+  companyTypes: [
+    "Advisory",
+    "Assets",
+    "Estates",
+    "Homes",
+    "Holdings",
+    "Living",
+    "Properties",
+    "Realty",
+    "Residences",
+    "Spaces",
+  ],
   contentReadinessFlags: [
     ["hasLogo", "hasListings", "hasTestimonials"],
     ["hasLogo", "hasAgents", "hasExistingContent"],
     ["hasListings", "hasProjects", "hasBlogContent"],
   ],
-  employeeRoles: ["operations", "sales", "marketing", "finance"],
+  employeeRoles: ["operations", "sales_agent", "marketing", "finance"],
   inviteRoles: ["admin", "agent", "staff"],
   locations: [
     "Lekki, Lagos",
@@ -74,6 +148,13 @@ const DEFAULT_PAYLOADS: QuickFillPayloads = {
     "showcase-listings",
     "build-brand",
     "all-of-above",
+  ],
+  projectTypes: [
+    "building",
+    "estate",
+    "fit_out",
+    "infrastructure",
+    "renovation",
   ],
   propertyStatuses: ["active", "sold", "rented", "off_market"],
   propertySubTypes: [
@@ -118,22 +199,15 @@ function randomId() {
   return Math.random().toString(36).slice(2, 7);
 }
 
-function waitForTick() {
-  return new Promise((resolve) => window.setTimeout(resolve, 0));
+function formatDateInput(value: Date) {
+  return value.toISOString().slice(0, 10);
 }
 
-function setNativeValue(
-  element: HTMLInputElement | HTMLTextAreaElement,
-  value: string,
-) {
-  const prototype =
-    element instanceof HTMLTextAreaElement
-      ? HTMLTextAreaElement.prototype
-      : HTMLInputElement.prototype;
-  const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
-  descriptor?.set?.call(element, value);
-  element.dispatchEvent(new Event("input", { bubbles: true }));
-  element.dispatchEvent(new Event("change", { bubbles: true }));
+function toSlugPart(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
 }
 
 type QuickFillSeed = ReturnType<typeof createQuickFillSeed>;
@@ -147,55 +221,87 @@ function createQuickFillSeed(payloads: QuickFillPayloads) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+  const companyParts = company.split(/\s+/);
+  const brandSlug =
+    companyParts.slice(0, 2).map(toSlugPart).filter(Boolean).join("") ||
+    safeCompanySlug.replace(/-/g, "");
   const firstName = pickRandom([
-    "Amara",
-    "Tunde",
-    "Zainab",
-    "Chinedu",
+    "Amira",
+    "Layla",
+    "Noor",
+    "Yasmin",
     "Mariam",
+    "Omar",
+    "Khalid",
+    "Zayd",
+    "Tariq",
+    "Samir",
   ]);
   const lastName = pickRandom([
-    "Okafor",
-    "Balogun",
-    "Adebayo",
-    "Nwosu",
-    "Bello",
+    "Haddad",
+    "Khalil",
+    "Nasser",
+    "Farouk",
+    "Rahman",
+    "Malik",
+    "Saleh",
+    "Karim",
+    "Hamdan",
+    "Mansour",
   ]);
   const fullName = `${firstName} ${lastName}`;
   const location = pickRandom(payloads.locations);
+  const projectType = pickRandom(payloads.projectTypes);
+  const projectName = `${company} ${pickRandom([
+    "Residences",
+    "Gardens",
+    "Heights",
+    "Court",
+    "Terraces",
+  ])} Phase ${Math.floor(Math.random() * 4) + 1}`;
 
   return {
     bio: pickRandom(payloads.bioVariants),
     company,
     description:
       "A polished sample record generated for focused local testing and QA flows.",
-    email: `${safeCompanySlug}-${suffix}@plotkeys.test`,
+    email: `${toSlugPart(firstName)}+${suffix}@${brandSlug}.test`,
     fullName,
     location,
     market: location,
     officeAddress: `${Math.floor(Math.random() * 40) + 5} Marina Road, ${location}`,
-    password: `Plotkeys-${suffix}`,
     phone: `+23480${Math.floor(Math.random() * 90000000 + 10000000)}`,
     price: `₦${(Math.floor(Math.random() * 7) + 3) * 25000000}`,
-    slug: `${safeCompanySlug}-${suffix}`,
+    projectCode: `${projectType.slice(0, 3).toUpperCase()}-${suffix.toUpperCase()}`,
+    projectName,
+    projectType,
+    signUpEmail: `hello@${brandSlug}.test`,
+    signUpPassword: `Plotkeys-${suffix}`,
+    signUpSubdomain: brandSlug,
+    slug: `${brandSlug}-${suffix}`,
     tagline: pickRandom(payloads.taglines),
     title: `${pickRandom(["Sample", "Demo", "Premium"])} Listing ${suffix.toUpperCase()}`,
     whatsapp: `+23481${Math.floor(Math.random() * 90000000 + 10000000)}`,
   };
 }
 
-export class QuickFill {
+export class QuickFill<
+  TValues extends QuickFillValues = QuickFillValues,
+  TProfile extends QuickFillProfile = QuickFillProfile,
+> {
   private readonly seed: QuickFillSeed;
 
   constructor(
-    private readonly form: HTMLFormElement,
+    private readonly form: QuickFillFormAdapter<TValues>,
     private readonly payloads: QuickFillPayloads = DEFAULT_PAYLOADS,
   ) {
     this.seed = createQuickFillSeed(payloads);
   }
 
-  async fill(profile: QuickFillProfile) {
+  fill(profile: TProfile) {
     switch (profile) {
+      case "auth-sign-up":
+        return this.authSignUp();
       case "onboarding-business-identity":
         return this.onboardingBusinessIdentity();
       case "onboarding-market-focus":
@@ -210,6 +316,8 @@ export class QuickFill {
         return this.onboardingLaunch();
       case "new-agent":
         return this.newAgent();
+      case "new-project":
+        return this.newProject();
       case "new-property":
         return this.newProperty();
       case "invite-member":
@@ -223,258 +331,191 @@ export class QuickFill {
     }
   }
 
-  async onboardingBusinessIdentity() {
-    await this.setSelect(
-      "businessType",
-      pickRandom(this.payloads.businessTypes),
-    );
-    await this.setSelect("primaryGoal", pickRandom(this.payloads.primaryGoals));
-    this.setInput("tagline", this.seed.tagline);
-  }
-
-  async onboardingMarketFocus() {
-    this.setInput(
-      "locations",
-      [this.seed.location, pickRandom(this.payloads.locations)].join(", "),
-    );
-    this.setCheckboxGroup(
-      "propertyTypes",
-      pickRandom(this.payloads.propertyTypeSets),
-      "value",
-    );
-    await this.setTagInputValues(
-      "targetAudience",
-      pickRandom(this.payloads.targetAudienceSets),
-    );
-  }
-
-  async onboardingBrandStyle() {
-    await this.setSelect("tone", pickRandom(this.payloads.tones));
-    await this.setSelect(
-      "stylePreference",
-      pickRandom(this.payloads.stylePreferences),
-    );
-    await this.setSelect(
-      "preferredColorHint",
-      pickRandom(this.payloads.colors),
-    );
-  }
-
-  async onboardingContactOperations() {
-    this.setInput("phone", this.seed.phone);
-    this.setInput("contactEmail", this.seed.email);
-    this.setInput("whatsapp", this.seed.whatsapp);
-    this.setTextarea("officeAddress", this.seed.officeAddress);
-  }
-
-  async onboardingContentReadiness() {
-    this.setCheckboxGroup(
-      null,
-      pickRandom(this.payloads.contentReadinessFlags),
-      "name",
-    );
-  }
-
-  async onboardingLaunch() {
-    this.setInput("market", this.seed.market);
-    await this.setRadioOrSelect("template", "template-1");
-  }
-
-  async newAgent() {
-    this.setInput("name", this.seed.fullName);
-    this.setInput("title", "Senior Property Advisor");
-    this.setInput("email", this.seed.email);
-    this.setInput("phone", this.seed.phone);
-    this.setInput("bio", this.seed.bio);
-    this.setInput(
-      "imageUrl",
-      `https://images.example.com/agents/${this.seed.slug}.jpg`,
-    );
-    this.setInput("displayOrder", "1");
-    this.setNativeSelect("featured", "true");
-  }
-
-  async newProperty() {
-    this.setInput("title", this.seed.title);
-    this.setInput("price", this.seed.price);
-    this.setInput("location", this.seed.location);
-    this.setInput("bedrooms", "4");
-    this.setInput("bathrooms", "3");
-    this.setInput("specs", "4 bed · 3 bath · pool · 24/7 power");
-    this.setInput(
-      "description",
-      `${this.seed.description} Contact ${this.seed.fullName} for follow-up.`,
-    );
-    this.setInput(
-      "imageUrl",
-      `https://images.example.com/properties/${this.seed.slug}.jpg`,
-    );
-    this.setNativeSelect("type", pickRandom(this.payloads.propertyTypes));
-    this.setInput("subType", pickRandom(this.payloads.propertySubTypes));
-    this.setNativeSelect("status", pickRandom(this.payloads.propertyStatuses));
-    this.setNativeSelect("featured", "true");
-  }
-
-  async inviteMember() {
-    this.setInput("email", `team-${this.seed.slug}@plotkeys.test`);
-    this.setNativeSelect("role", pickRandom(this.payloads.inviteRoles));
-  }
-
-  async inviteEmployee() {
-    this.setInput("email", `employee-${this.seed.slug}@plotkeys.test`);
-    this.setNativeSelect("workRole", pickRandom(this.payloads.employeeRoles));
-  }
-
-  async publishConfiguration() {
-    const input =
-      this.form.querySelector<HTMLInputElement>(
-        'input[placeholder*="March refresh"]',
-      ) ?? this.form.querySelector<HTMLInputElement>("input");
-
-    if (input) {
-      setNativeValue(input, `Launch ${this.seed.company}`);
-    }
-  }
-
-  async generic() {
-    const textInputs = this.form.querySelectorAll<HTMLInputElement>(
-      'input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"])',
-    );
-    const firstTextInput = Array.from(textInputs).find(
-      (input) => input.type === "text" || input.type === "email",
-    );
-
-    if (firstTextInput) {
-      setNativeValue(firstTextInput, this.seed.company);
-    }
-  }
-
-  private setInput(name: string, value: string) {
-    const input = this.form.querySelector<HTMLInputElement>(
-      `input[name="${name}"]`,
-    );
-    if (input) {
-      setNativeValue(input, value);
-    }
-  }
-
-  private setTextarea(name: string, value: string) {
-    const textarea = this.form.querySelector<HTMLTextAreaElement>(
-      `textarea[name="${name}"]`,
-    );
-    if (textarea) {
-      setNativeValue(textarea, value);
-    }
-  }
-
-  private async setSelect(name: string, value: string) {
-    const hiddenInput = this.form.querySelector<HTMLInputElement>(
-      `input[name="${name}"]`,
-    );
-    const trigger =
-      hiddenInput?.previousElementSibling instanceof HTMLElement
-        ? hiddenInput.previousElementSibling
-        : this.form.querySelector<HTMLElement>(`#${CSS.escape(name)}`);
-
-    if (!(trigger instanceof HTMLElement)) {
-      this.setNativeSelect(name, value);
-      return;
-    }
-
-    trigger.click();
-    await waitForTick();
-
-    const item = document.querySelector<HTMLElement>(
-      `[data-slot="select-item"][data-value="${value}"]`,
-    );
-    item?.click();
-    await waitForTick();
-  }
-
-  private setNativeSelect(name: string, value: string) {
-    const select = this.form.querySelector<HTMLSelectElement>(
-      `select[name="${name}"]`,
-    );
-    if (select) {
-      select.value = value;
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-  }
-
-  private async setRadioOrSelect(name: string, value: string) {
-    const radio = this.form.querySelector<HTMLInputElement>(
-      `input[type="radio"][name="${name}"][value="${value}"]`,
-    );
-
-    if (radio && !radio.checked) {
-      radio.click();
-      return;
-    }
-
-    await this.setSelect(name, value);
-  }
-
-  private setCheckboxGroup(
-    name: string | null,
-    values: string[],
-    matchBy: "name" | "value",
-  ) {
-    const selectedValues = new Set(values);
-    const selector = name
-      ? `input[type="checkbox"][name="${name}"]`
-      : 'input[type="checkbox"][name]';
-    const checkboxes = this.form.querySelectorAll<HTMLInputElement>(selector);
-
-    checkboxes.forEach((checkbox) => {
-      const key = matchBy === "name" ? checkbox.name : checkbox.value;
-      const shouldBeChecked = selectedValues.has(key);
-
-      if (checkbox.checked !== shouldBeChecked) {
-        checkbox.click();
-      }
+  onboardingBusinessIdentity() {
+    this.merge({
+      businessType: pickRandom(this.payloads.businessTypes),
+      primaryGoal: pickRandom(this.payloads.primaryGoals),
+      tagline: this.seed.tagline,
     });
   }
 
-  private async setTagInputValues(name: string, values: string[]) {
-    const selectedValues = new Set(values);
-    const selectedTags = this.form.querySelectorAll<HTMLElement>(
-      `[data-dev-tag-selected="true"][data-tag-value]`,
-    );
-
-    selectedTags.forEach((tag) => {
-      const value = tag.dataset.tagValue;
-
-      if (value && !selectedValues.has(value)) {
-        tag.click();
-      }
+  authSignUp() {
+    this.merge({
+      company: this.seed.company,
+      email: this.seed.signUpEmail,
+      name: this.seed.fullName,
+      password: this.seed.signUpPassword,
+      phoneNumber: this.seed.phone,
+      subdomain: this.seed.signUpSubdomain,
     });
+  }
 
-    await waitForTick();
+  onboardingMarketFocus() {
+    this.merge({
+      locations: [this.seed.location, pickRandom(this.payloads.locations)].join(
+        ", ",
+      ),
+      market: this.seed.market,
+      propertyTypes: pickRandom(this.payloads.propertyTypeSets),
+      targetAudience: pickRandom(this.payloads.targetAudienceSets),
+    });
+  }
 
-    for (const value of values) {
-      const hiddenInput = this.form.querySelector<HTMLInputElement>(
-        `input[type="hidden"][name="${name}"][value="${value}"]`,
-      );
+  onboardingBrandStyle() {
+    this.merge({
+      preferredColorHint: pickRandom(this.payloads.colors),
+      stylePreference: pickRandom(this.payloads.stylePreferences),
+      tone: pickRandom(this.payloads.tones),
+    });
+  }
 
-      if (hiddenInput) {
-        continue;
-      }
+  onboardingContactOperations() {
+    this.merge({
+      contactEmail: this.seed.email,
+      officeAddress: this.seed.officeAddress,
+      phone: this.seed.phone,
+      whatsapp: this.seed.whatsapp,
+    });
+  }
 
-      const suggestion = Array.from(
-        this.form.querySelectorAll<HTMLElement>(
-          `[data-dev-tag-suggestion="true"][data-tag-value]`,
-        ),
-      ).find((tag) => tag.dataset.tagValue === value);
+  onboardingContentReadiness() {
+    const selected = new Set(pickRandom(this.payloads.contentReadinessFlags));
 
-      suggestion?.click();
-      await waitForTick();
+    this.merge({
+      hasAgents: selected.has("hasAgents"),
+      hasBlogContent: selected.has("hasBlogContent"),
+      hasExistingContent: selected.has("hasExistingContent"),
+      hasListings: selected.has("hasListings"),
+      hasLogo: selected.has("hasLogo"),
+      hasProjects: selected.has("hasProjects"),
+      hasTestimonials: selected.has("hasTestimonials"),
+    });
+  }
+
+  onboardingLaunch() {
+    this.merge({
+      templateKey: "template-1",
+    });
+  }
+
+  newAgent() {
+    this.merge({
+      bio: this.seed.bio,
+      displayOrder: "1",
+      email: this.seed.email,
+      featured: "true",
+      imageUrl: `https://images.example.com/agents/${this.seed.slug}.jpg`,
+      name: this.seed.fullName,
+      phone: this.seed.phone,
+      title: "Senior Property Advisor",
+    });
+  }
+
+  newProperty() {
+    this.merge({
+      bathrooms: "3",
+      bedrooms: "4",
+      description: `${this.seed.description} Contact ${this.seed.fullName} for follow-up.`,
+      featured: "true",
+      imageUrl: `https://images.example.com/properties/${this.seed.slug}.jpg`,
+      location: this.seed.location,
+      price: this.seed.price,
+      specs: "4 bed · 3 bath · pool · 24/7 power",
+      status: pickRandom(this.payloads.propertyStatuses),
+      subType: pickRandom(this.payloads.propertySubTypes),
+      title: this.seed.title,
+      type: pickRandom(this.payloads.propertyTypes),
+    });
+  }
+
+  newProject() {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 7);
+
+    const targetCompletionDate = new Date(startDate);
+    targetCompletionDate.setMonth(targetCompletionDate.getMonth() + 14);
+
+    this.merge({
+      code: this.seed.projectCode,
+      description: `${this.seed.description} Site mobilization and planning are already underway.`,
+      location: this.seed.location,
+      name: this.seed.projectName,
+      startDate: formatDateInput(startDate),
+      targetCompletionDate: formatDateInput(targetCompletionDate),
+      type: this.seed.projectType,
+    });
+  }
+
+  inviteMember() {
+    this.merge({
+      email: `team-${this.seed.slug}@plotkeys.test`,
+      role: pickRandom(this.payloads.inviteRoles),
+    });
+  }
+
+  inviteEmployee() {
+    this.merge({
+      email: `employee-${this.seed.slug}@plotkeys.test`,
+      workRole: pickRandom(this.payloads.employeeRoles),
+    });
+  }
+
+  publishConfiguration() {
+    this.merge({
+      nextName: `Launch ${this.seed.company}`,
+    });
+  }
+
+  generic() {
+    const values = this.form.getValues();
+    const firstStringField = Object.entries(values).find(([, value]) => {
+      return typeof value === "string";
+    })?.[0];
+
+    if (!firstStringField) {
+      return;
     }
+
+    this.set(firstStringField, this.seed.company);
+  }
+
+  private merge(values: QuickFillValues) {
+    this.form.reset({
+      ...(this.form.getValues() as QuickFillValues),
+      ...values,
+    });
+  }
+
+  private set(name: string, value: unknown) {
+    this.form.setValue(name, value, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
   }
 }
 
-export function runQuickFill(
-  form: HTMLFormElement,
-  profile: QuickFillProfile = "generic",
+export function createQuickFillAdapter<
+  TValues extends QuickFillValues = QuickFillValues,
+>(form: {
+  getValues: () => TValues;
+  reset: (values: TValues | QuickFillValues) => void;
+  setValue: (name: any, value: any, options?: any) => void;
+}): QuickFillFormAdapter<TValues> {
+  return {
+    getValues: () => form.getValues(),
+    reset: (values) => form.reset(values as TValues),
+    setValue: (name, value, options) =>
+      form.setValue(name as never, value as never, options),
+  };
+}
+
+export function runQuickFill<
+  TValues extends QuickFillValues = QuickFillValues,
+  TProfile extends QuickFillProfile = QuickFillProfile,
+>(
+  form: QuickFillFormAdapter<TValues>,
+  profile: TProfile = "generic" as TProfile,
 ) {
-  return new QuickFill(form).fill(profile);
+  return new QuickFill<TValues, TProfile>(form).fill(profile);
 }

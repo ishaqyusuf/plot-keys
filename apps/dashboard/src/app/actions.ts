@@ -117,6 +117,20 @@ function getDashboardAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
 }
 
+async function getRequestOrigin() {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const protocol =
+    headerStore.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+
+  if (!host) {
+    return getDashboardAppUrl();
+  }
+
+  return `${protocol}://${host}`;
+}
+
 function getInviteRoleLabel(role: "admin" | "agent" | "staff") {
   if (role === "agent") {
     return "an agent";
@@ -286,9 +300,6 @@ export async function completeOnboardingAction(formData: FormData) {
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
   let redirectUrl: string;
 
-  const market = String(formData.get("market") ?? "").trim();
-  const templateKey = String(formData.get("template") ?? "template-1");
-
   // Load persisted onboarding record from DB (durable across devices/sessions).
   // Fall back to the cookie for users who signed up before DB persistence was added.
   const prisma = createPrismaClient().db;
@@ -303,12 +314,23 @@ export async function completeOnboardingAction(formData: FormData) {
   const subdomain = normalizeSubdomainLabel(
     savedOnboarding?.subdomain ?? pendingOnboarding?.subdomain ?? "",
   );
+  const fallbackMarket =
+    savedOnboarding?.locations?.find((value) => value.trim().length > 0) ?? "";
+  const market =
+    String(formData.get("market") ?? "").trim() ||
+    savedOnboarding?.market ||
+    fallbackMarket;
+  const submittedTemplateKey = String(formData.get("templateKey") ?? "").trim();
+  const templateKey = submittedTemplateKey || "template-1";
 
   try {
     if (!companyName || !subdomain) {
       throw new Error(
         "Your company setup details are missing. Please start again from signup.",
       );
+    }
+    if (!market) {
+      throw new Error("Primary market is required before opening the builder.");
     }
 
     // Persist the final market + template selection so the record is up-to-date
@@ -317,6 +339,13 @@ export async function completeOnboardingAction(formData: FormData) {
       await prisma.tenantOnboarding.update({
         data: {
           currentStep: "completing",
+          hasAgents: formData.get("hasAgents") === "on",
+          hasBlogContent: formData.get("hasBlogContent") === "on",
+          hasExistingContent: formData.get("hasExistingContent") === "on",
+          hasListings: formData.get("hasListings") === "on",
+          hasLogo: formData.get("hasLogo") === "on",
+          hasProjects: formData.get("hasProjects") === "on",
+          hasTestimonials: formData.get("hasTestimonials") === "on",
           market,
           templateKey,
         },
@@ -362,6 +391,17 @@ export async function createTemplateDraftAction(formData: FormData) {
   }
 
   redirect(redirectUrl);
+}
+
+export async function createTemplateDraftSilentAction(formData: FormData) {
+  const templateKey = String(formData.get("templateKey") ?? "template-1");
+  const caller = await createServerCaller();
+  const result = await caller.workspace.createTemplateDraft({
+    templateKey,
+  });
+
+  revalidatePath("/builder");
+  return result;
 }
 
 export async function updateSiteThemeFieldAction(formData: FormData) {
@@ -589,6 +629,37 @@ export async function saveOnboardingStepAction(formData: FormData) {
 }
 
 // ─── Property actions ─────────────────────────────────────────────────────
+
+export async function createProjectAction(formData: FormData) {
+  let redirectUrl: string;
+  try {
+    const caller = await createServerCaller();
+    await caller.projects.create({
+      code: String(formData.get("code") ?? "").trim() || null,
+      description: String(formData.get("description") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      name: String(formData.get("name") ?? "").trim(),
+      startDate: String(formData.get("startDate") ?? "").trim() || null,
+      targetCompletionDate:
+        String(formData.get("targetCompletionDate") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "building"
+        | "estate"
+        | "fit_out"
+        | "infrastructure"
+        | "renovation"
+        | null,
+    });
+    revalidatePath("/projects");
+    redirectUrl = "/projects";
+  } catch (error) {
+    redirectUrl = `/projects?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create project.",
+    )}`;
+  }
+
+  redirect(redirectUrl);
+}
 
 export async function createPropertyAction(formData: FormData) {
   let redirectUrl: string;
@@ -833,9 +904,11 @@ export async function initializeCheckoutAction(formData: FormData) {
   const interval = String(formData.get("interval") ?? "monthly") as
     | "monthly"
     | "annual";
+  const callbackUrl = `${await getRequestOrigin()}/billing/callback`;
 
   const caller = await createServerCaller();
   const result = await caller.workspace.initializeCheckout({
+    callbackUrl,
     interval,
     planTier,
   });
@@ -2100,8 +2173,9 @@ export async function exportBusinessSummaryCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getMonthlyBusinessSummary, businessSummaryToCsv } =
-    await import("@plotkeys/db");
+  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import(
+    "@plotkeys/db"
+  );
   const summary = await getMonthlyBusinessSummary(prisma, companyId, {
     year,
     month,
@@ -2118,8 +2192,9 @@ export async function exportAgentReportCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getAgentPerformanceReport, agentPerformanceToCsv } =
-    await import("@plotkeys/db");
+  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import(
+    "@plotkeys/db"
+  );
   const report = await getAgentPerformanceReport(prisma, companyId, {
     year,
     month,
@@ -2133,8 +2208,9 @@ export async function exportListingsReportCsvAction(): Promise<string> {
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getListingsReport, listingsReportToCsv } =
-    await import("@plotkeys/db");
+  const { getListingsReport, listingsReportToCsv } = await import(
+    "@plotkeys/db"
+  );
   const report = await getListingsReport(prisma, companyId);
   return listingsReportToCsv(report);
 }

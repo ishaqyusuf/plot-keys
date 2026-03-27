@@ -1,10 +1,4 @@
 import { createPrismaClient, findCompanyById } from "@plotkeys/db";
-import {
-  getPlanPricing,
-  planPricingByTier,
-  type BillingInterval,
-  type PlanPricing,
-} from "@plotkeys/utils";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import {
@@ -15,6 +9,12 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { Separator } from "@plotkeys/ui/separator";
+import {
+  type BillingInterval,
+  getPlanPricing,
+  planTrialDays,
+  tierLabels,
+} from "@plotkeys/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -27,25 +27,26 @@ type BillingPageProps = {
 
 const tierFeatures: Record<string, string[]> = {
   plus: [
-    "Everything in Starter",
+    "Everything in Launch",
     "Custom domain",
-    "Estate management",
+    "Up to 8 team seats",
     "WhatsApp integration",
     "Customer accounts",
-    "Website payments",
+    "Light AI allocation",
   ],
   pro: [
-    "Everything in Plus",
+    "Everything in Growth",
     "All premium templates",
-    "AI content tools",
-    "Payment integrations",
+    "Higher AI allocation",
+    "Advanced branding controls",
     "Priority support",
   ],
   starter: [
-    "1 free template",
-    "Basic site builder",
+    "1 live website",
+    "Starter templates",
     "Subdomain hosting",
     "Lead capture",
+    "Up to 2 team seats",
   ],
 };
 
@@ -85,7 +86,8 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
               Billing &amp; Plans
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage your subscription and billing history.
+              Manage your subscription and billing history. Every plan includes
+              a {planTrialDays}-day free trial.
             </p>
           </div>
         </div>
@@ -105,8 +107,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           <CardHeader>
             <CardTitle className="text-lg">Current Plan</CardTitle>
             <CardDescription>
-              You are on the{" "}
-              <strong className="capitalize">{currentTier}</strong> plan.
+              You are on the <strong>{tierLabels[currentTier]}</strong> plan.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
@@ -178,11 +179,16 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 className={isCurrent ? "border-2 border-primary" : ""}
               >
                 <CardHeader>
-                  <CardTitle className="capitalize">{tier}</CardTitle>
+                  <CardTitle>{tierLabels[tier]}</CardTitle>
                   <CardDescription>
                     <span className="text-2xl font-bold text-foreground">
                       {price.formatted}
                     </span>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {pricing.annual.minorUnits === 0
+                        ? `${planTrialDays}-day free trial`
+                        : `${planTrialDays}-day free trial · ${pricing.annual.formatted} billed annually`}
+                    </p>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -196,10 +202,6 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                     <Button disabled variant="outline" className="w-full">
                       Current plan
                     </Button>
-                  ) : tier === "starter" ? (
-                    <Button disabled variant="outline" className="w-full">
-                      Free
-                    </Button>
                   ) : isUpgrade ? (
                     <form action={initializeCheckoutAction}>
                       <input type="hidden" name="planTier" value={tier} />
@@ -209,7 +211,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                         value={selectedInterval}
                       />
                       <Button type="submit" className="w-full">
-                        Upgrade to {tier}
+                        Upgrade to {tierLabels[tier]}
                       </Button>
                     </form>
                   ) : (

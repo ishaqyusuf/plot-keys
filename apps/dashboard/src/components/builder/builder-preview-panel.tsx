@@ -19,7 +19,8 @@ import {
 } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
-import type { JSX } from "react";
+import Link from "next/link";
+import type { JSX, KeyboardEvent } from "react";
 import { useState, useTransition } from "react";
 
 type BuilderPreviewPanelProps = {
@@ -27,6 +28,8 @@ type BuilderPreviewPanelProps = {
   configId: string;
   defaultContent: TenantContentRecord;
   editableFields: EditableFieldDefinition[];
+  readOnly?: boolean;
+  readOnlyMessage?: string;
   sections: SerializableSectionData[];
   theme: Record<string, string>;
   visibleSections?: Record<string, boolean>;
@@ -74,6 +77,7 @@ type FieldEditorProps = {
   configId: string;
   content: Record<string, string>;
   field: EditableFieldDefinition;
+  readOnly?: boolean;
   onUpdate: (formData: FormData) => Promise<void>;
   onSmartFill: (formData: FormData) => Promise<void>;
 };
@@ -82,6 +86,7 @@ function FieldEditor({
   configId,
   content,
   field,
+  readOnly = false,
   onUpdate,
   onSmartFill,
 }: FieldEditorProps) {
@@ -90,6 +95,7 @@ function FieldEditor({
   const [isFilling, startFilling] = useTransition();
 
   function handleSave() {
+    if (readOnly) return;
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
@@ -100,6 +106,7 @@ function FieldEditor({
   }
 
   function handleSmartFill() {
+    if (readOnly) return;
     startFilling(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
@@ -116,7 +123,7 @@ function FieldEditor({
         {field.aiEnabled && (
           <Button
             className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-            disabled={isFilling}
+            disabled={readOnly || isFilling}
             onClick={handleSmartFill}
             size="sm"
             type="button"
@@ -130,19 +137,21 @@ function FieldEditor({
       {field.fieldType === "textarea" ? (
         <Textarea
           className="min-h-[5rem] resize-none text-sm"
+          disabled={readOnly}
           onChange={(e) => setValue(e.target.value)}
           value={value}
         />
       ) : (
         <Input
           className="text-sm"
+          disabled={readOnly}
           onChange={(e) => setValue(e.target.value)}
           value={value}
         />
       )}
       <Button
         className="mt-1.5 w-full"
-        disabled={isPending}
+        disabled={readOnly || isPending}
         onClick={handleSave}
         size="sm"
         type="button"
@@ -159,6 +168,7 @@ type PreviewSectionProps = {
   content: Record<string, string>;
   editableFields: EditableFieldDefinition[];
   focused: boolean;
+  readOnly?: boolean;
   section: SerializableSectionData;
   theme: Record<string, string>;
   onFocus: () => void;
@@ -171,6 +181,7 @@ function PreviewSection({
   content,
   editableFields,
   focused,
+  readOnly = false,
   section,
   theme,
   onFocus,
@@ -180,15 +191,28 @@ function PreviewSection({
   const SectionComponent = sectionComponents[section.type];
   const sectionFields = fieldsForSection(section.type, editableFields);
 
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (readOnly) return;
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onFocus();
+    }
+  }
+
   return (
     <section
       className={[
-        "group/section relative cursor-pointer",
+        "group/section relative",
+        readOnly ? "cursor-not-allowed" : "cursor-pointer",
         focused && "ring-2 ring-primary/40",
       ]
         .filter(Boolean)
         .join(" ")}
-      onClick={onFocus}
+      onKeyDown={readOnly ? undefined : handleKeyDown}
+      onClick={readOnly ? undefined : onFocus}
+      role={readOnly ? undefined : "button"}
+      tabIndex={readOnly ? undefined : 0}
     >
       <div className="pointer-events-none absolute inset-x-5 top-5 z-20 flex items-center justify-between gap-3 opacity-0 transition-opacity duration-200 group-hover/section:opacity-100">
         <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
@@ -196,7 +220,11 @@ function PreviewSection({
         </div>
         {sectionFields.length > 0 && (
           <div className="rounded-md border border-border/80 bg-background/95 px-3 py-1 text-xs text-foreground shadow-sm backdrop-blur">
-            {focused ? "Editing" : "Click to edit →"}
+            {readOnly
+              ? "Upgrade to edit"
+              : focused
+                ? "Editing"
+                : "Click to edit →"}
           </div>
         )}
       </div>
@@ -223,7 +251,7 @@ function PreviewSection({
       {focused && sectionFields.length > 0 && (
         <div
           className="absolute right-4 bottom-4 z-30 w-80 rounded-xl border border-border/70 bg-background/97 p-4 shadow-xl backdrop-blur"
-          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
         >
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             {sectionLabel(section.type)} fields
@@ -235,6 +263,7 @@ function PreviewSection({
                 content={content}
                 field={field}
                 key={field.contentKey}
+                readOnly={readOnly}
                 onSmartFill={onSmartFill}
                 onUpdate={onUpdate}
               />
@@ -251,6 +280,8 @@ export function BuilderPreviewPanel({
   configId,
   defaultContent,
   editableFields,
+  readOnly = false,
+  readOnlyMessage,
   sections,
   theme,
   visibleSections,
@@ -290,9 +321,18 @@ export function BuilderPreviewPanel({
         </div>
       </div>
 
+      {readOnly ? (
+        <div className="flex flex-col gap-3 border-b border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-foreground md:flex-row md:items-center md:justify-between">
+          <p>{readOnlyMessage ?? "Upgrade your plan to edit this template."}</p>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/billing">Upgrade plan</Link>
+          </Button>
+        </div>
+      ) : null}
+
       <div
         className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4"
-        onClick={() => setFocusedSectionId(null)}
+        onMouseDown={() => setFocusedSectionId(null)}
       >
         <WebsiteRuntimeProvider renderMode="draft">
           <div
@@ -309,6 +349,7 @@ export function BuilderPreviewPanel({
                 editableFields={editableFields}
                 focused={focusedSectionId === section.id}
                 key={section.id}
+                readOnly={readOnly}
                 section={section}
                 theme={theme}
                 onFocus={() => handleSectionFocus(section.id)}

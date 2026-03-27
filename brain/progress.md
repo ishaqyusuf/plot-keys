@@ -52,6 +52,35 @@
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+| Builder locked-template upgrade flow | ✅ Done |
+| Pricing strategy refresh | ✅ Done |
+
+## 2026-03-25 — Pricing Strategy Refresh
+
+### Commercial Model
+- PlotKeys no longer positions the entry tier as free forever.
+- Current commercial positioning is:
+  - Launch (`starter`) — ₦20,000/mo or ₦192,000/yr
+  - Growth (`plus`) — ₦45,000/mo or ₦432,000/yr
+  - Scale (`pro`) — ₦90,000/mo or ₦864,000/yr
+- All plans now advertise a 14-day free trial.
+- Annual billing is positioned with a 20% discount.
+
+### Implementation Notes
+- Internal entitlement keys remain `starter`, `plus`, and `pro` so template gating and existing plan logic do not break.
+- User-facing labels now present those tiers as Launch, Growth, and Scale.
+- Dashboard billing and the marketing-site pricing section now both read prices from the shared pricing config to avoid drift.
+
+## 2026-03-25 — Builder Locked Template Guard
+
+### Builder Access UX
+- Builder now detects when the active template requires a higher subscription tier than the tenant currently holds and the company does not have a separate template license.
+- In that state, the builder stays viewable but becomes read-only: publish, sidebar theme controls, inline field editing, and AI content bootstrap are disabled.
+- Upgrade CTAs now point tenants to `/billing` instead of letting them hit a `FORBIDDEN` error at publish time.
+
+### Server Enforcement
+- Added shared license-aware template access checks before publish, inline content updates, theme updates, smart fill, and AI bootstrap mutations.
+- This keeps the UI lock state and API enforcement aligned so direct mutation attempts are blocked consistently.
 
 ---
 
@@ -685,3 +714,6 @@
 - Created `/projects/[id]/budget` page showing budget summary and line items
 - Created `/projects/[id]/workforce` page showing workers and payroll runs
 - Updated `/projects/[id]` detail page header with Budget and Workforce navigation buttons
+# Progress Log
+
+- 2026-03-25: Fixed the dashboard projects page so failed project-creation attempts now surface the redirected `error` query string in a destructive alert, matching the error-handling pattern already used on properties, agents, team, and other dashboard pages. Also normalized the client-side redirecting forms for project creation, property create/edit, agent create/edit, team invites, employee invites, and final onboarding completion to await server actions directly instead of wrapping them in `startTransition(async () => ...)`, which had been causing submissions to behave like plain page refreshes instead of following the intended redirect flow.

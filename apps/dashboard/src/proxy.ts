@@ -37,6 +37,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 /** Routes that do NOT require an authenticated session. */
 const PUBLIC_PREFIXES = [
+  authRoutes.onboarding,
   authRoutes.signIn,
   authRoutes.signUp,
   authRoutes.verifyEmail,

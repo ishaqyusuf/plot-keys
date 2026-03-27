@@ -13,9 +13,10 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
-
 import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
+import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
+import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
 import { SubdomainField } from "../subdomain-field";
 import { AuthFormError } from "./auth-form-error";
 
@@ -53,6 +54,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       subdomain: "",
     },
   });
+  const quickFill = new QuickFill(createQuickFillAdapter(form));
   const signUpMutation = useMutation(
     trpc.auth.signUp.mutationOptions({
       onError(error) {
@@ -96,12 +98,17 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
   }
 
   const subdomainField = form.register("subdomain");
+  const subdomainValue = form.watch("subdomain");
 
   return (
     <form
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
+      <div className="flex justify-end">
+        <DevFormQuickFillButton onFill={() => quickFill.fill("auth-sign-up")} />
+      </div>
+
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="sign-up-name">Full name</FieldLabel>
@@ -153,6 +160,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
             onChange: subdomainField.onChange,
             ref: subdomainField.ref,
           }}
+          value={subdomainValue}
         />
       </FieldGroup>
 

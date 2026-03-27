@@ -9,20 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
-import { EMPLOYEE_WORK_ROLE_VALUES, WORK_ROLE_LABELS } from "@plotkeys/utils";
+import { WORK_ROLE_LABELS } from "@plotkeys/utils";
 import Link from "next/link";
-import { DevFormQuickFillButton } from "../../../../components/dev/dev-form-quick-fill-button";
 import { ExportCsvButton } from "../../../../components/export-csv-button";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
   deleteEmployeeAction,
   exportEmployeesCsvAction,
-  inviteEmployeeAction,
   revokeInviteAction,
   updateEmployeeAction,
 } from "../../../actions";
+import { EmployeeInviteForm } from "../employee-invite-form";
 
 type EmployeesPageProps = {
   searchParams?: Promise<{
@@ -52,11 +49,6 @@ const employmentTypeLabels: Record<string, string> = {
   intern: "Intern",
   part_time: "Part-time",
 };
-
-const employeeWorkRoleOptions = EMPLOYEE_WORK_ROLE_VALUES.map((value) => ({
-  label: WORK_ROLE_LABELS[value],
-  value,
-}));
 
 function formatDate(date: Date | null) {
   if (!date) return "—";
@@ -193,44 +185,7 @@ export default async function EmployeesPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form
-              action={inviteEmployeeAction}
-              className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_15rem_auto]"
-              data-dev-quick-fill-label="Invite employee"
-              data-dev-quick-fill-profile="invite-employee"
-            >
-              <div>
-                <Label htmlFor="employee-email">Email address</Label>
-                <Input
-                  id="employee-email"
-                  name="email"
-                  placeholder="employee@company.com"
-                  required
-                  type="email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="employee-work-role">Role</Label>
-                <select
-                  id="employee-work-role"
-                  name="workRole"
-                  defaultValue="operations"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  {employeeWorkRoleOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-end">
-                <div className="flex gap-2">
-                  <DevFormQuickFillButton profile="invite-employee" />
-                  <Button type="submit">Send invite</Button>
-                </div>
-              </div>
-            </form>
+            <EmployeeInviteForm />
           </CardContent>
         </Card>
 
