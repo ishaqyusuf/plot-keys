@@ -1,5 +1,28 @@
 import type { TenantResource } from "./types";
 
+// ---------------------------------------------------------------------------
+// Register template page imports (pure data — no React dependency)
+// ---------------------------------------------------------------------------
+import { noorStarterPages } from "./register/noor/starter/pages";
+import { noorPlusPages } from "./register/noor/plus/pages";
+import { noorProPages } from "./register/noor/pro/pages";
+import { banaStarterPages } from "./register/bana/starter/pages";
+import { banaPlusPages } from "./register/bana/plus/pages";
+import { banaProPages } from "./register/bana/pro/pages";
+import { wafiStarterPages } from "./register/wafi/starter/pages";
+import { wafiPlusPages } from "./register/wafi/plus/pages";
+import { wafiProPages } from "./register/wafi/pro/pages";
+import { farisStarterPages } from "./register/faris/starter/pages";
+import { farisPlusPages } from "./register/faris/plus/pages";
+import { farisProPages } from "./register/faris/pro/pages";
+import { thurayaStarterPages } from "./register/thuraya/starter/pages";
+import { thurayaPlusPages } from "./register/thuraya/plus/pages";
+import { thurayaProPages } from "./register/thuraya/pro/pages";
+import { sakanStarterPages } from "./register/sakan/starter/pages";
+import { sakanPlusPages } from "./register/sakan/plus/pages";
+import { sakanProPages } from "./register/sakan/pro/pages";
+import type { RegisterPageDefinition, RegisterSectionSlot } from "./register/types";
+
 /**
  * Page inventory and section-matrix definitions.
  *
@@ -683,14 +706,68 @@ const pageInventoryRegistry: Record<string, TemplatePageInventory> = {
   "template-45": template45Inventory,
 };
 
+// ---------------------------------------------------------------------------
+// Register template page map (18 variants — no UI dependencies)
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts a RegisterPageDefinition array into the canonical TemplatePageInventory
+ * shape used by buildPageSections and getEnabledSections.
+ */
+function registerPagesToInventory(
+  templateKey: string,
+  pages: RegisterPageDefinition[],
+): TemplatePageInventory {
+  return {
+    pages: pages.map((p) => ({
+      label: p.label,
+      pageKey: p.pageKey,
+      sections: p.sections.map((s: RegisterSectionSlot) => ({
+        contentKeys: s.contentKeys,
+        dataSource: s.dataSource,
+        defaultEnabled: s.defaultEnabled,
+        id: s.id,
+        label: s.label,
+        requiredResources: s.requiredResources,
+        sectionType: s.sectionType,
+        sortOrder: s.sortOrder,
+      })),
+      slug: p.slug,
+    })),
+    templateKey,
+  };
+}
+
+const registerPageInventoryMap: Record<string, TemplatePageInventory> = {
+  "noor-starter":    registerPagesToInventory("noor-starter",    noorStarterPages),
+  "noor-plus":       registerPagesToInventory("noor-plus",       noorPlusPages),
+  "noor-pro":        registerPagesToInventory("noor-pro",        noorProPages),
+  "bana-starter":    registerPagesToInventory("bana-starter",    banaStarterPages),
+  "bana-plus":       registerPagesToInventory("bana-plus",       banaPlusPages),
+  "bana-pro":        registerPagesToInventory("bana-pro",        banaProPages),
+  "wafi-starter":    registerPagesToInventory("wafi-starter",    wafiStarterPages),
+  "wafi-plus":       registerPagesToInventory("wafi-plus",       wafiPlusPages),
+  "wafi-pro":        registerPagesToInventory("wafi-pro",        wafiProPages),
+  "faris-starter":   registerPagesToInventory("faris-starter",   farisStarterPages),
+  "faris-plus":      registerPagesToInventory("faris-plus",      farisPlusPages),
+  "faris-pro":       registerPagesToInventory("faris-pro",       farisProPages),
+  "thuraya-starter": registerPagesToInventory("thuraya-starter", thurayaStarterPages),
+  "thuraya-plus":    registerPagesToInventory("thuraya-plus",    thurayaPlusPages),
+  "thuraya-pro":     registerPagesToInventory("thuraya-pro",     thurayaProPages),
+  "sakan-starter":   registerPagesToInventory("sakan-starter",   sakanStarterPages),
+  "sakan-plus":      registerPagesToInventory("sakan-plus",      sakanPlusPages),
+  "sakan-pro":       registerPagesToInventory("sakan-pro",       sakanProPages),
+};
+
 /**
  * Returns the page inventory for the given template key.
- * Falls back to template-1's inventory if the key is unknown.
+ * Checks the plan-based register first, then the legacy catalog.
+ * Falls back to template-1's inventory for unknown keys.
  */
 export function getTemplatePageInventory(
   templateKey: string,
 ): TemplatePageInventory {
-  return pageInventoryRegistry[templateKey] ?? template1Inventory;
+  return registerPageInventoryMap[templateKey] ?? pageInventoryRegistry[templateKey] ?? template1Inventory;
 }
 
 /**

@@ -131,6 +131,8 @@ export type { RenderMode, TenantResource } from "./types";
 import {
   getRegisterTemplate as _getRegisterTemplate,
   resolveFamilySectionComponents as _resolveFamilySectionComponents,
+  getFamilyPlaceholderData as _getFamilyPlaceholderData,
+  getPlaceholderContent as _getPlaceholderContent,
 } from "./register/index";
 
 export {
@@ -142,6 +144,8 @@ export {
   getAccessibleRegisterTemplates,
   getFamilyMetaForBusinessType,
   resolveFamilySectionComponents,
+  getPlaceholderContent,
+  getFamilyPlaceholderData,
 } from "./register/index";
 export type { SectionComponentOverrides } from "./register/index";
 
@@ -2047,6 +2051,130 @@ export function resolveWebsitePresentation({
   };
 }
 
+// ---------------------------------------------------------------------------
+// resolvePage — register-aware page resolver with template mode support
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal tenant context needed to render a single page.
+ * In "template" render mode all fields are optional — placeholder data
+ * is used automatically.
+ */
+export type TenantSnapshot = {
+  companyName?: string;
+  companyLogoUrl?: string | null;
+  content?: TenantContentRecord;
+  liveAgents?: LiveAgentItem[];
+  liveListings?: LiveListingItem[];
+  market?: string;
+  subdomain?: string;
+  theme?: TenantThemeRecord;
+};
+
+/**
+ * Resolved output of a single page — sections with family-branded components
+ * already applied, plus the fully merged theme.
+ */
+export type ResolvedPageConfig = {
+  pageKey: string;
+  renderMode: RenderMode;
+  sections: HomeSectionDefinition[];
+  theme: ThemeConfig;
+};
+
+/**
+ * Resolves a single page from a register template key.
+ *
+ * Differences from resolveWebsitePresentation:
+ * - In "template" render mode, uses placeholderValue content from the
+ *   family's content-schema and placeholder listings/agents from
+ *   placeholder-data.ts instead of live tenant data.
+ * - Returns a flat ResolvedPageConfig rather than a full presentation
+ *   object — no editableFields, no template metadata.
+ * - Applies family component overrides in the same way as
+ *   resolveWebsitePresentation does.
+ *
+ * @example
+ * // Template browse mode — placeholder data, no tenant required
+ * const page = resolvePage("noor-starter", "home", {}, "template");
+ *
+ * // Live rendering
+ * const page = resolvePage("noor-starter", "listings", tenant, "live");
+ */
+export function resolvePage(
+  templateKey: string,
+  pageKey: string,
+  tenant: TenantSnapshot,
+  renderMode: RenderMode = "live",
+): ResolvedPageConfig {
+  const registerVariant = _getRegisterTemplate(templateKey);
+  const template = getTemplateDefinition(templateKey);
+
+  // In template mode, substitute placeholder content and data for the family.
+  let content: TenantContentRecord;
+  let liveListings: LiveListingItem[] | undefined;
+  let liveAgents: LiveAgentItem[] | undefined;
+
+  if (renderMode === "template" && registerVariant) {
+    content = _getPlaceholderContent(registerVariant.family);
+    const phData = _getFamilyPlaceholderData(registerVariant.family);
+    liveListings = phData.listings?.map((l) => ({
+      id: l.id,
+      imageUrl: l.imageUrl ?? null,
+      location: l.location,
+      price: l.price,
+      specs: l.specs,
+      title: l.title,
+    }));
+    liveAgents = phData.agents?.map((a) => ({
+      bio: a.bio,
+      id: a.id,
+      imageUrl: a.photoUrl ?? null,
+      name: a.name,
+      title: a.role,
+    }));
+  } else {
+    content = { ...template.defaultContent, ...tenant.content };
+    liveListings = tenant.liveListings;
+    liveAgents = tenant.liveAgents;
+  }
+
+  const builtPage = buildPageSections(
+    content,
+    pageKey,
+    templateKey,
+    liveListings,
+    liveAgents,
+    tenant.subdomain,
+  );
+
+  const familyOverrides = _resolveFamilySectionComponents(registerVariant?.family);
+  const sections = builtPage.sections.map((s) => ({
+    ...s,
+    component:
+      (familyOverrides[s.type] as typeof s.component | undefined) ?? s.component,
+  })) as HomeSectionDefinition[];
+
+  const theme: ThemeConfig = {
+    ...template.defaultTheme,
+    ...tenant.theme,
+    logo:
+      tenant.companyName ??
+      (tenant.theme as ThemeConfig | undefined)?.logo ??
+      template.defaultTheme.logo,
+    logoUrl:
+      tenant.companyLogoUrl ??
+      (tenant.theme as ThemeConfig | undefined)?.logoUrl ??
+      undefined,
+    market:
+      tenant.market ??
+      (tenant.theme as ThemeConfig | undefined)?.market ??
+      template.defaultTheme.market,
+  };
+
+  return { pageKey: builtPage.pageKey, renderMode, sections, theme };
+}
+
 /**
  * Returns true when a content field value should be treated as empty/missing
  * and should show a placeholder outline in draft rendering mode.
@@ -2164,6 +2292,20 @@ export type {
   WebsiteRuntimeContextValue,
   WebsiteRuntimeProviderProps,
 } from "./runtime-context";
+
+// Runtime interaction — ClickGuard + InlineOverview
+export {
+  ClickGuardProvider,
+  useClickGuard,
+} from "./runtime/click-guard";
+export type {
+  ClickGuardItem,
+  ClickGuardItemType,
+} from "./runtime/click-guard";
+export {
+  InlineOverview,
+} from "./runtime/inline-overview";
+export type { InlineOverviewProps } from "./runtime/inline-overview";
 
 // Form action registry
 export {

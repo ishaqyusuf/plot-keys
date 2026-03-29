@@ -47,6 +47,7 @@
 | WebsiteVersion Phase 4 (writes) | ❌ Not started |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
+| **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
@@ -54,6 +55,22 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-29 — Template Registry M3 Runtime Wiring
+
+### What was built
+- **`page-inventory.ts` bridge** — `registerPagesToInventory()` converts `RegisterPageDefinition[]` to `TemplatePageInventory`. `getTemplatePageInventory()` now checks register templates first, so `buildPageSections` and `getEnabledSections` route correctly for all 18 `noor-starter` / `bana-plus` / etc. keys instead of falling back to template-1.
+- **`register/index.ts` placeholder helpers** — `getPlaceholderContent(familyKey)` returns a flat `TenantContentRecord` populated from `placeholderValue` fields in each family's content-schema. `getFamilyPlaceholderData(familyKey)` returns placeholder listings/agents/projects.
+- **`src/index.ts` — `resolvePage()`** — New public API. Takes `templateKey`, `pageKey`, `TenantSnapshot`, and `RenderMode`. In `"template"` mode, automatically substitutes family placeholder content and data. Applies family component overrides. Returns `ResolvedPageConfig` (sections + theme + renderMode).
+- **Builder wiring** — `BuilderPreviewPanel` now accepts `templateKey` prop. `resolveFamilySectionComponents()` is resolved at the panel level and merged into the section component lookup per section, so family-branded components (Noor, Bana, Wafi, Faris, Thuraya, Sakan) render correctly in the builder instead of generic fallbacks.
+- **`runtime/click-guard.tsx`** — `ClickGuardProvider` context wraps page content in non-live modes. Intercepts anchor clicks (no navigation) and form/submit clicks (no real submission). `useClickGuard()` hook exposes `openItem()` / `closeItem()` / `activeItem` for section components to trigger the overview panel.
+- **`runtime/inline-overview.tsx`** — `InlineOverview` slide-up panel. Shows placeholder item data + "Install template" CTA in `"template"` mode; shows real item data + action links in `"draft"`/`"preview"` mode. Handles listing, agent, project, and generic item types.
+
+### What's still deferred
+- Tenant-site page routing for inner pages (Phase 4 — multi-page website support)
+- ClickGuard integration into actual tenant-site page renders
+- EditableText AI icon + action bar upgrade
+- WebsiteVersion Phase 4 writes
 
 ## 2026-03-25 — Pricing Strategy Refresh
 

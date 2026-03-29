@@ -519,6 +519,7 @@ export async function BuilderWorkspace({
             sections={preview.page.sections.map(
               ({ component: _component, ...rest }) => rest,
             )}
+            templateKey={resolvedActiveDraft.templateKey}
             theme={resolvedActiveDraft.themeJson}
             visibleSections={templateConfig.visibleSections}
             onSmartFill={smartFillFieldAction}
