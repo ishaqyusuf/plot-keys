@@ -9,27 +9,24 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-### Plan-Based Template Register + Family UI Design System
-- **Branch:** `claude/plan-based-templates-fVQOQ`
-- **Status:** Register data ✅ done — Family UI design system ✅ done — wiring to builder/tenant-site pending
-- **Scope:** 18 structured templates (6 families × 3 plans) with full page inventories, content schemas, and now family-branded section UI components.
+### Template Registry M3 — Runtime Wiring
+- **Branch:** `claude/plan-template-registry-M2pDj`
+- **Status:** ✅ Complete — all M3 wiring done
+- **Scope:** Registry runtime integration: page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview.
 - **Reference:** `brain/modules/template-register-plan.md` (canonical spec)
-- **Decision:** `brain/decisions/ADR-007-template-register-standards.md`
+- **Decision:** `brain/decisions/ADR-007-template-register-standards.md`, `brain/decisions/ADR-008-template-family-ui-design-system.md`
 
-**Register data (all ✅ done):**
-- [x] Register folder structure (6 families, each with common/starter/plus/pro)
-- [x] `common/content-schema.ts`, `common/placeholder-data.ts`, `common/nav.ts`, `common/footer.ts` per family
-- [x] `starter/pages.ts`, `plus/pages.ts`, `pro/pages.ts` per family
-- [x] Family `index.ts` + master `register/index.ts`
+**M3 deliverables (all ✅ done):**
+- [x] `register/index.ts` — `getPlaceholderContent()` + `getFamilyPlaceholderData()` helpers (template mode content/data)
+- [x] `page-inventory.ts` — `registerPageInventoryMap` + `registerPagesToInventory()` bridge so all 18 register templates route correctly through `getTemplatePageInventory` + `buildPageSections`
+- [x] `src/index.ts` — `TenantSnapshot` type, `ResolvedPageConfig` type, `resolvePage()` function with template-mode placeholder support
+- [x] `builder-preview-panel.tsx` — `templateKey` prop, `resolveFamilySectionComponents()` merged into section component lookup (family-branded UI now renders in builder)
+- [x] `builder-workspace.tsx` — `templateKey` passed to `BuilderPreviewPanel`
+- [x] `runtime/click-guard.tsx` — `ClickGuardProvider` context + `useClickGuard` hook; intercepts anchors + form submits in non-live modes
+- [x] `runtime/inline-overview.tsx` — `InlineOverview` slide-up panel; listing/agent/project overview in template vs draft/preview modes
+- [x] All new components exported from `@plotkeys/section-registry`
 
-**Family UI design system (all ✅ done):**
-- [x] `register/ui-types.ts` — `SectionComponentOverrides` type
-- [x] `register/{family}/ui/{family}-sections.tsx` — family-branded section components (6 families)
-- [x] `register/{family}/ui/index.ts` — component map exports (6 families)
-- [x] `resolveFamilySectionComponents()` in `register/index.ts`
-- [x] Component swapping in `resolveWebsitePresentation()` in `src/index.ts`
-
-**Still pending:**
-- [ ] Wire `resolveFamilySectionComponents` into builder client-side renderer (`sectionComponents` map)
-- [ ] Wire into tenant-site renderer for pages beyond what `resolveWebsitePresentation` covers
-- [ ] WebsiteVersion Phase 4 (writes) — separate track
+**Still deferred (separate tracks):**
+- [ ] Wire `ClickGuard` + `InlineOverview` into actual tenant-site page renders
+- [ ] `EditableText` AI icon + action bar upgrade
+- [ ] WebsiteVersion Phase 4 (writes)

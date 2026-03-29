@@ -13,9 +13,25 @@
  *    contract. Responsiveness is a baseline, not a plan tier feature.
  */
 
-import type { TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
+import type { ContentFieldDef, PlaceholderData, TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
 import type { SectionComponentOverrides } from "./ui-types";
 import type { TemplateTier } from "../index";
+
+// Content schemas — one per family
+import { noorContentSchema } from "./noor/common/content-schema";
+import { banaContentSchema } from "./bana/common/content-schema";
+import { wafiContentSchema } from "./wafi/common/content-schema";
+import { farisContentSchema } from "./faris/common/content-schema";
+import { thurayaContentSchema } from "./thuraya/common/content-schema";
+import { sakanContentSchema } from "./sakan/common/content-schema";
+
+// Placeholder data — one per family
+import { noorPlaceholderData } from "./noor/common/placeholder-data";
+import { banaPlaceholderData } from "./bana/common/placeholder-data";
+import { wafiPlaceholderData } from "./wafi/common/placeholder-data";
+import { farisPlaceholderData } from "./faris/common/placeholder-data";
+import { thurayaPlaceholderData } from "./thuraya/common/placeholder-data";
+import { sakanPlaceholderData } from "./sakan/common/placeholder-data";
 
 // ---------------------------------------------------------------------------
 // Family imports
@@ -156,6 +172,50 @@ export function getFamilyMetaForBusinessType(
   return Object.values(templateFamilyRegistry).find(
     (f) => f.meta.businessType === businessType,
   )?.meta;
+}
+
+// ---------------------------------------------------------------------------
+// Placeholder content + data resolution (used for "template" render mode)
+// ---------------------------------------------------------------------------
+
+const familyContentSchemas: Record<TemplateFamilyKey, ContentFieldDef[]> = {
+  agency:    noorContentSchema,
+  developer: banaContentSchema,
+  manager:   wafiContentSchema,
+  solo:      farisContentSchema,
+  luxury:    thurayaContentSchema,
+  rental:    sakanContentSchema,
+};
+
+const familyPlaceholderDataMap: Record<TemplateFamilyKey, PlaceholderData> = {
+  agency:    noorPlaceholderData,
+  developer: banaPlaceholderData,
+  manager:   wafiPlaceholderData,
+  solo:      farisPlaceholderData,
+  luxury:    thurayaPlaceholderData,
+  rental:    sakanPlaceholderData,
+};
+
+/**
+ * Returns a flat content record keyed by contentKey, using each field's
+ * `placeholderValue`. Used in "template" render mode so the browse
+ * experience shows realistic-looking copy without touching tenant data.
+ */
+export function getPlaceholderContent(
+  familyKey: TemplateFamilyKey,
+): Record<string, string> {
+  const schema = familyContentSchemas[familyKey] ?? [];
+  return Object.fromEntries(schema.map((f) => [f.contentKey, f.placeholderValue]));
+}
+
+/**
+ * Returns the placeholder data (listings, agents, projects, etc.) for a
+ * family. Used in "template" render mode instead of live DB records.
+ */
+export function getFamilyPlaceholderData(
+  familyKey: TemplateFamilyKey,
+): PlaceholderData {
+  return familyPlaceholderDataMap[familyKey] ?? {};
 }
 
 // ---------------------------------------------------------------------------

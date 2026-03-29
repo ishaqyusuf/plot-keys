@@ -6,6 +6,8 @@ import type {
   TenantContentRecord,
 } from "@plotkeys/section-registry";
 import {
+  getRegisterTemplate,
+  resolveFamilySectionComponents,
   sectionComponents,
   WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
@@ -31,6 +33,7 @@ type BuilderPreviewPanelProps = {
   readOnly?: boolean;
   readOnlyMessage?: string;
   sections: SerializableSectionData[];
+  templateKey?: string;
   theme: Record<string, string>;
   visibleSections?: Record<string, boolean>;
   onUpdateField: (formData: FormData) => Promise<void>;
@@ -167,6 +170,7 @@ type PreviewSectionProps = {
   configId: string;
   content: Record<string, string>;
   editableFields: EditableFieldDefinition[];
+  familyOverrides: Record<string, (props: { config: unknown; theme: unknown }) => JSX.Element>;
   focused: boolean;
   readOnly?: boolean;
   section: SerializableSectionData;
@@ -180,6 +184,7 @@ function PreviewSection({
   configId,
   content,
   editableFields,
+  familyOverrides,
   focused,
   readOnly = false,
   section,
@@ -188,7 +193,7 @@ function PreviewSection({
   onSmartFill,
   onUpdate,
 }: PreviewSectionProps): JSX.Element {
-  const SectionComponent = sectionComponents[section.type];
+  const SectionComponent = familyOverrides[section.type] ?? sectionComponents[section.type];
   const sectionFields = fieldsForSection(section.type, editableFields);
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
@@ -283,12 +288,17 @@ export function BuilderPreviewPanel({
   readOnly = false,
   readOnlyMessage,
   sections,
+  templateKey,
   theme,
   visibleSections,
   onSmartFill,
   onUpdateField,
 }: BuilderPreviewPanelProps) {
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+
+  const familyOverrides = resolveFamilySectionComponents(
+    getRegisterTemplate(templateKey ?? "")?.family,
+  ) as Record<string, (props: { config: unknown; theme: unknown }) => JSX.Element>;
 
   const filteredSections = visibleSections
     ? sections.filter((s) => visibleSections[s.type] !== false)
@@ -347,6 +357,7 @@ export function BuilderPreviewPanel({
                 configId={configId}
                 content={content}
                 editableFields={editableFields}
+                familyOverrides={familyOverrides}
                 focused={focusedSectionId === section.id}
                 key={section.id}
                 readOnly={readOnly}
