@@ -261,6 +261,27 @@ export async function updateDraftVersion(
 }
 
 /**
+ * Finds a draft WebsiteVersion by ID, validating it belongs to the given
+ * company. Includes the parent Website for `templateKey` and `id` access.
+ *
+ * Used by Phase 4 mutation fallbacks when `configId` is a WebsiteVersion ID
+ * rather than a SiteConfiguration ID.
+ */
+export async function findDraftVersionById(
+  db: Db,
+  input: { companyId: string; versionId: string },
+) {
+  return db.websiteVersion.findFirst({
+    include: { website: { select: { id: true, templateKey: true } } },
+    where: {
+      id: input.versionId,
+      status: "draft",
+      website: { companyId: input.companyId, deletedAt: null },
+    },
+  });
+}
+
+/**
  * Publishes a draft version, archiving the previously published version.
  */
 export async function publishWebsiteVersion(

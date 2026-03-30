@@ -61,6 +61,24 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-30 — WebsiteVersion Phase 4 — Write Path
+
+### What was built
+- **`packages/db/src/queries/website.ts`** — Added `findDraftVersionById(db, { companyId, versionId })` helper. Returns a draft WebsiteVersion with its parent Website (`id`, `templateKey`), validating company ownership. Used by mutation fallbacks when `configId` is a WebsiteVersion ID.
+- **`apps/api/src/routers/workspace.route.ts`** — Five mutations upgraded with a silent WebsiteVersion fallback:
+  - **`updateSiteField`**: If SiteConfiguration not found, merges `contentKey` into `version.contentJson` and calls `updateDraftVersion`.
+  - **`updateSiteThemeField`**: If SiteConfiguration not found, merges `themeKey` into `version.themeJson` and calls `updateDraftVersion`.
+  - **`publishSiteConfiguration`**: If SiteConfiguration not found, calls `publishWebsiteVersion` directly (archives old published, promotes draft, updates `website.publishedVersionId`).
+  - **`smartFillField`**: Resolves either SiteConfiguration or WebsiteVersion; derives `templateKey` from whichever is found; AI generation logic shared; writes through `updateSiteConfigurationContentField` (legacy) or `updateDraftVersion` (Phase 4).
+  - **`ensureBuilderConfigurationExists`**: Now checks `resolveActiveDraftForCompany` first; returns `legacyConfigId ?? version.id`; falls back to SiteConfiguration for existing companies; for new companies creates Website + draft via `upsertWebsite` + `getOrCreateDraftVersion` (no SiteConfiguration created).
+- **Imports added**: `findDraftVersionById`, `getOrCreateDraftVersion`, `publishWebsiteVersion`, `upsertWebsite` added to router import block.
+
+### Design
+- No API surface changes — `configId` remains a plain string across all mutations
+- Auto-detection: try SiteConfiguration lookup first; silence NOT_FOUND and try WebsiteVersion on miss
+- Legacy dual-write path preserved for all existing companies
+- New companies get a clean WebsiteVersion-only write path
+
 ## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
 
 ### What was built
