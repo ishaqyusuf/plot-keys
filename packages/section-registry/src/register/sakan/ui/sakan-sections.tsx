@@ -19,10 +19,10 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { EditableText } from "../../../sections/editing-primitives";
 import type {
-  PropertyGridConfig,
-  WhyChooseUsConfig,
-  ServiceHighlightsConfig,
   HeroSearchConfig,
+  PropertyGridConfig,
+  ServiceHighlightsConfig,
+  WhyChooseUsConfig,
 } from "../../../sections/extended-sections";
 import type {
   CtaBandConfig,
@@ -33,6 +33,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -133,14 +134,16 @@ export function SakanHeroBannerSection({
       className="relative overflow-hidden px-6 py-16 md:px-12 md:py-24"
       style={{
         ...shell(theme),
-        background: "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%)",
+        background:
+          "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%)",
       }}
     >
       {/* Subtle dot pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
-          backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+          backgroundImage:
+            "radial-gradient(circle, white 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
         aria-hidden
@@ -148,10 +151,7 @@ export function SakanHeroBannerSection({
 
       <div className="relative mx-auto max-w-5xl text-center">
         <span className="inline-block rounded-full bg-white/15 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-white/90">
-          <EditableText
-            contentKey="hero.eyebrow"
-            value={config.eyebrow}
-          />
+          <EditableText contentKey="hero.eyebrow" value={config.eyebrow} />
         </span>
 
         <EditableText
@@ -181,10 +181,7 @@ export function SakanHeroBannerSection({
             href={config.ctaHref}
             className="shrink-0 bg-teal-600 px-6 py-4 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
           >
-            <EditableText
-              contentKey="hero.ctaText"
-              value={config.ctaText}
-            />
+            <EditableText contentKey="hero.ctaText" value={config.ctaText} />
           </a>
         </div>
 
@@ -211,6 +208,8 @@ export function SakanListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -245,6 +244,7 @@ export function SakanListingSpotlightSection({
           {config.items.map((item, i) => (
             <div
               key={i}
+              {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             >
               {/* Image */}
@@ -348,11 +348,12 @@ export function SakanStoryGridSection({
       <div className="mx-auto max-w-6xl">
         <div className="max-w-3xl">
           <FreshTag>{config.eyebrow}</FreshTag>
-          <FreshHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
-            <EditableText
-              contentKey="story.title"
-              value={config.title}
-            />
+          <FreshHeading
+            tag="h2"
+            theme={theme}
+            className="mt-2 text-4xl md:text-5xl"
+          >
+            <EditableText contentKey="story.title" value={config.title} />
           </FreshHeading>
           <EditableText
             as="p"
@@ -419,7 +420,9 @@ export function SakanCtaBandSection({
           value={config.body}
         />
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <FreshButton href={config.primaryHref}>{config.primaryText}</FreshButton>
+          <FreshButton href={config.primaryHref}>
+            {config.primaryText}
+          </FreshButton>
           <FreshButton href={config.secondaryHref} variant="ghost">
             {config.secondaryText}
           </FreshButton>
@@ -451,7 +454,11 @@ export function SakanServiceHighlightsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
           <FreshTag>{config.eyebrow}</FreshTag>
-          <FreshHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
+          <FreshHeading
+            tag="h2"
+            theme={theme}
+            className="mt-2 text-4xl md:text-5xl"
+          >
             {config.title}
           </FreshHeading>
           <EditableText
@@ -520,7 +527,11 @@ export function SakanWhyChooseUsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <FreshTag>{config.eyebrow}</FreshTag>
-          <FreshHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
+          <FreshHeading
+            tag="h2"
+            theme={theme}
+            className="mt-2 text-4xl md:text-5xl"
+          >
             {config.title}
           </FreshHeading>
         </div>
@@ -564,6 +575,8 @@ export function SakanPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -591,6 +604,7 @@ export function SakanPropertyGridSection({
           {config.items.map((item) => (
             <div
               key={item.id}
+              {...getCardProps("listing", item)}
               className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="relative h-44 overflow-hidden bg-teal-50">
@@ -711,7 +725,8 @@ export function SakanHeroSearchSection({
       className="px-6 py-16 md:px-12 md:py-24"
       style={{
         ...shell(theme),
-        background: "linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%)",
+        background:
+          "linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%)",
       }}
     >
       <div className="mx-auto max-w-4xl text-center">
@@ -755,10 +770,7 @@ export function SakanHeroSearchSection({
             href={config.ctaHref}
             className="block w-full bg-teal-600 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700 sm:w-auto"
           >
-            <EditableText
-              contentKey="hero.ctaText"
-              value={config.ctaText}
-            />
+            <EditableText contentKey="hero.ctaText" value={config.ctaText} />
           </a>
         </div>
       </div>

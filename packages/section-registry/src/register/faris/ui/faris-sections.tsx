@@ -20,8 +20,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { EditableText } from "../../../sections/editing-primitives";
 import type {
   PropertyGridConfig,
-  WhyChooseUsConfig,
   ServiceHighlightsConfig,
+  WhyChooseUsConfig,
 } from "../../../sections/extended-sections";
 import type {
   CtaBandConfig,
@@ -32,6 +32,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -174,9 +175,7 @@ export function FarisHeroBannerSection({
             />
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <WarmButton href={config.ctaHref}>
-                {config.ctaText}
-              </WarmButton>
+              <WarmButton href={config.ctaHref}>{config.ctaText}</WarmButton>
               <WarmButton href="#listings" variant="outline">
                 View my listings
               </WarmButton>
@@ -236,6 +235,8 @@ export function FarisListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -270,6 +271,7 @@ export function FarisListingSpotlightSection({
           {config.items.map((item, i) => (
             <div
               key={i}
+              {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             >
               {/* Image */}
@@ -374,11 +376,12 @@ export function FarisStoryGridSection({
         <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start">
           {/* Left: bio text */}
           <div>
-            <WarmHeading tag="h2" theme={theme} className="text-4xl md:text-5xl">
-              <EditableText
-                contentKey="story.title"
-                value={config.title}
-              />
+            <WarmHeading
+              tag="h2"
+              theme={theme}
+              className="text-4xl md:text-5xl"
+            >
+              <EditableText contentKey="story.title" value={config.title} />
             </WarmHeading>
             <EditableText
               as="p"
@@ -449,7 +452,9 @@ export function FarisCtaBandSection({
           value={config.body}
         />
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <WarmButton href={config.primaryHref}>{config.primaryText}</WarmButton>
+          <WarmButton href={config.primaryHref}>
+            {config.primaryText}
+          </WarmButton>
           <WarmButton href={config.secondaryHref} variant="ghost">
             {config.secondaryText}
           </WarmButton>
@@ -540,7 +545,11 @@ export function FarisWhyChooseUsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <WarmTag>{config.eyebrow}</WarmTag>
-          <WarmHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
+          <WarmHeading
+            tag="h2"
+            theme={theme}
+            className="mt-2 text-4xl md:text-5xl"
+          >
             {config.title}
           </WarmHeading>
         </div>
@@ -583,6 +592,8 @@ export function FarisPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -610,6 +621,7 @@ export function FarisPropertyGridSection({
           {config.items.map((item) => (
             <div
               key={item.id}
+              {...getCardProps("listing", item)}
               className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="relative h-44 overflow-hidden bg-stone-100">
@@ -682,7 +694,11 @@ export function FarisServiceHighlightsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <WarmTag>{config.eyebrow}</WarmTag>
-          <WarmHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
+          <WarmHeading
+            tag="h2"
+            theme={theme}
+            className="mt-2 text-4xl md:text-5xl"
+          >
             {config.title}
           </WarmHeading>
           <EditableText

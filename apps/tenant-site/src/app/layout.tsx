@@ -2,7 +2,6 @@ import "@plotkeys/ui/globals.css";
 
 import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
 import { NotificationsProvider } from "@plotkeys/notifications-react";
-import { WebsiteRuntimeProvider } from "@plotkeys/section-registry";
 import { ThemeProvider } from "@plotkeys/ui/theme-provider";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -12,6 +11,7 @@ import { ChatWidget } from "../components/chat-widget";
 import { IntegrationScripts } from "../components/integration-scripts";
 import { RegisterFooter } from "../components/register-footer";
 import { RegisterNav } from "../components/register-nav";
+import { TenantInteractionShell } from "../components/tenant-interaction-shell";
 import { resolveTenantShell } from "../lib/resolve-tenant";
 
 const fallbackMetadata: Metadata = {
@@ -112,7 +112,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return metadata;
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [subdomain, integrations, shell] = await Promise.all([
     resolveSubdomain(),
     resolveSubdomain().then(resolveIntegrations),
@@ -132,13 +136,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           enableSystem
         >
           <NotificationsProvider>
-            {/* Wrap all content in WebsiteRuntimeProvider to inject --pk-* CSS vars */}
-            <WebsiteRuntimeProvider
+            <TenantInteractionShell
               colorSystemKey={shell?.templateConfig.colorSystem}
-              renderMode="live"
               templateConfig={shell?.templateConfig ?? {}}
             >
-              {/* Register-template nav (only for families with a defined nav config) */}
               {hasRegisterShell && shell.familyKey && shell.tier ? (
                 <RegisterNav
                   companyName={shell.company.name}
@@ -151,14 +152,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
               <main>{children}</main>
 
-              {/* Register-template footer */}
               {hasRegisterShell && shell.familyKey ? (
                 <RegisterFooter
                   companyName={shell.company.name}
                   familyKey={shell.familyKey}
                 />
               ) : null}
-            </WebsiteRuntimeProvider>
+            </TenantInteractionShell>
           </NotificationsProvider>
 
           {subdomain && <ChatWidget subdomain={subdomain} />}

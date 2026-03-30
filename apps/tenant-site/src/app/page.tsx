@@ -6,7 +6,7 @@ import {
 } from "@plotkeys/section-registry";
 import { headers } from "next/headers";
 import type { JSX } from "react";
-
+import { parseTenantRenderMode } from "../lib/render-mode";
 import { resolveTenantContext } from "../lib/resolve-tenant";
 
 function renderSection(
@@ -26,6 +26,7 @@ function renderSection(
 type TenantWebsiteHomePageProps = {
   searchParams?: Promise<{
     hostname?: string;
+    renderMode?: string;
     subdomain?: string;
   }>;
 };
@@ -34,14 +35,17 @@ export default async function TenantWebsiteHomePage({
   searchParams,
 }: TenantWebsiteHomePageProps) {
   const sp = (await searchParams) ?? {};
+  const renderMode = parseTenantRenderMode(sp.renderMode ?? null);
 
   const tenant = await resolveTenantContext(sp);
 
   if (!tenant) {
     // No published site — show sample home in a dashed fallback card.
     const requestHeaders = await headers();
-    const tenantHostname = requestHeaders.get("x-tenant-hostname") || sp.hostname || null;
-    const tenantSubdomain = requestHeaders.get("x-tenant-subdomain") || sp.subdomain || null;
+    const tenantHostname =
+      requestHeaders.get("x-tenant-hostname") || sp.hostname || null;
+    const tenantSubdomain =
+      requestHeaders.get("x-tenant-subdomain") || sp.subdomain || null;
 
     const fallbackSections = sampleHomePage.sections.map((s) =>
       renderSection(s, sampleTheme),
@@ -83,7 +87,7 @@ export default async function TenantWebsiteHomePage({
       subdomain: tenant.company.slug,
       theme: tenant.publishedConfig.themeJson,
     },
-    "live",
+    renderMode,
   );
 
   return resolved.sections
