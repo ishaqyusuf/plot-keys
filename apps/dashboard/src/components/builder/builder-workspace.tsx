@@ -1,13 +1,12 @@
 import {
   createPrismaClient,
-  createSiteConfiguration,
   findCompanyById,
   findLicensedTemplateKeys,
   findTenantOnboardingByUserId,
   getOrCreateDraftVersion,
   listAgentsForCompany,
   listFeaturedProperties,
-  upsertWebsite,
+  upsertDraftWebsiteVersion,
 } from "@plotkeys/db";
 import {
   resolveActiveDraftForCompany,
@@ -155,17 +154,15 @@ export async function BuilderWorkspace({
         websiteId: publishedVersion.websiteId,
       });
     } else if (latestConfiguration) {
-      const website = await upsertWebsite(prisma, {
+      await upsertDraftWebsiteVersion(prisma, {
         companyId,
-        subdomain: companySlug,
-        templateKey: latestConfiguration.templateKey,
-      });
-
-      await getOrCreateDraftVersion(prisma, {
         contentJson: latestConfiguration.contentJson as Record<string, string>,
         createdById: userId,
+        name: latestConfiguration.name,
+        subdomain: companySlug,
+        templateKey: latestConfiguration.templateKey,
         themeJson: latestConfiguration.themeJson as Record<string, string>,
-        websiteId: website.id,
+        updatedById: userId,
       });
     } else {
       const starterTemplate = getTemplateDefinition("template-1");
@@ -176,13 +173,7 @@ export async function BuilderWorkspace({
         templateKey: starterTemplate.key,
       });
 
-      await upsertWebsite(prisma, {
-        companyId,
-        subdomain: companySlug,
-        templateKey: starterTemplate.key,
-      });
-
-      await createSiteConfiguration(prisma, {
+      await upsertDraftWebsiteVersion(prisma, {
         ...initialSiteConfiguration,
         companyId,
         createdById: userId,
@@ -210,22 +201,7 @@ export async function BuilderWorkspace({
     );
   }
 
-  const legacyConfigId = resolvedActiveDraft.legacyConfigId ?? null;
-  const siteConfiguration = legacyConfigId
-    ? await prisma.siteConfiguration.findFirst({
-        select: { id: true },
-        where: { id: legacyConfigId, deletedAt: null },
-      })
-    : await prisma.siteConfiguration.findFirst({
-        orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-        select: { id: true },
-        where: {
-          companyId,
-          deletedAt: null,
-        },
-      });
-
-  const configId = siteConfiguration?.id ?? resolvedActiveDraft.id;
+  const configId = resolvedActiveDraft.id;
   const changedFieldCount = (() => {
     if (!publishedVersion) return undefined;
     const draftContent = resolvedActiveDraft.contentJson;

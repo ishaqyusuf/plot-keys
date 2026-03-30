@@ -8,6 +8,7 @@ This file records completed work milestones.
 
 ## Done
 
+- Completed WebsiteVersion Phase 4 writes by switching builder/site write mutations and builder config IDs from legacy `SiteConfiguration` records to `WebsiteVersion` draft IDs, while keeping legacy SiteConfiguration only as migration fallback data.
 - Wired `ClickGuard` + `InlineOverview` into tenant-site rendering by adding a tenant interaction shell, query-param render mode parsing, and non-live listing/agent card overview triggers across shared and register-family section components.
 - Completed the deferred `EditableText` builder upgrade by adding draft-mode hover AI affordances, an explicit Save/Discard action bar, and an inline AI suggestion panel driven by shared content-field metadata lookup in `packages/section-registry`.
 - Added dev quick fill support to the `/projects` create form by migrating it onto the standard `useZodForm` pattern and wiring a dedicated `new-project` profile into the shared dashboard quick-fill helper.

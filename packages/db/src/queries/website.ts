@@ -155,6 +155,87 @@ export async function getOrCreateDraftVersion(
   });
 }
 
+export async function findDraftWebsiteVersionByIdForCompany(
+  db: Db,
+  input: {
+    companyId: string;
+    versionId: string;
+  },
+) {
+  return db.websiteVersion.findFirst({
+    include: { website: true },
+    where: {
+      id: input.versionId,
+      status: "draft",
+      website: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+    },
+  });
+}
+
+/**
+ * Ensures the company's website points at the requested template key and that
+ * a draft WebsiteVersion exists with the provided content/theme payload.
+ *
+ * If a draft already exists it is updated in place so builder routes can keep
+ * using a single active draft identifier.
+ */
+export async function upsertDraftWebsiteVersion(
+  db: Db,
+  input: {
+    companyId: string;
+    contentJson: Record<string, string>;
+    createdById: string;
+    name: string;
+    subdomain?: string | null;
+    templateKey: string;
+    themeJson: Record<string, string>;
+    updatedById: string;
+  },
+) {
+  const website = await upsertWebsite(db, {
+    companyId: input.companyId,
+    subdomain: input.subdomain,
+    templateKey: input.templateKey,
+  });
+
+  const existingDraft = await db.websiteVersion.findFirst({
+    orderBy: { versionNumber: "desc" },
+    where: { status: "draft", websiteId: website.id },
+  });
+
+  if (existingDraft) {
+    return db.websiteVersion.update({
+      data: {
+        contentJson: input.contentJson,
+        name: input.name,
+        themeJson: input.themeJson,
+        updatedById: input.updatedById,
+      },
+      where: { id: existingDraft.id },
+    });
+  }
+
+  const latest = await db.websiteVersion.findFirst({
+    orderBy: { versionNumber: "desc" },
+    where: { websiteId: website.id },
+  });
+
+  return db.websiteVersion.create({
+    data: {
+      contentJson: input.contentJson,
+      createdById: input.createdById,
+      name: input.name,
+      themeJson: input.themeJson,
+      updatedById: input.updatedById,
+      versionNumber: (latest?.versionNumber ?? 0) + 1,
+      websiteId: website.id,
+    },
+  });
+}
+
 /**
  * Updates the content and/or theme of an existing draft WebsiteVersion.
  */
@@ -162,6 +243,7 @@ export async function updateDraftVersion(
   db: Db,
   input: {
     contentJson?: Record<string, string>;
+    name?: string;
     themeJson?: Record<string, string>;
     updatedById: string;
     versionId: string;
@@ -170,6 +252,7 @@ export async function updateDraftVersion(
   return db.websiteVersion.update({
     data: {
       ...(input.contentJson ? { contentJson: input.contentJson } : {}),
+      ...(input.name ? { name: input.name } : {}),
       ...(input.themeJson ? { themeJson: input.themeJson } : {}),
       updatedById: input.updatedById,
     },
