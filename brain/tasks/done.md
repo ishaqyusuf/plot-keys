@@ -8,6 +8,7 @@ This file records completed work milestones.
 
 ## Done
 
+- Completed Customer Portal Foundation by adding a central tenant-site `/portal/*` route group with a branded shared shell for login, signup, dashboard, saved listings, offers, payments, and account pages, suppressing template-family nav/footer there and redirecting legacy `/login`, `/signup`, and `/saved` entry points into the portal.
 - Standardized public listing overview behavior while keeping pages template-based: tenant-site now applies one shared `location` / `priceRange` / `sort` / `page` query contract before rendering listing overview pages, and section-registry now derives per-template overview/detail paths from page inventories so rentals and projects no longer fall back to `/listings/*`.
 - Completed Multi-page Website Support for public template pages by wiring the main builder to select pages via `?page=...`, resolve the selected `pageKey` server-side, render the correct page inventory in draft mode, and open the corresponding live tenant-page path from the builder.
 - Clarified customer portal planning boundaries: public listing overview and marketing pages stay template-based, while customer login, signup, dashboard, saved listings, offers, payments, and account routes should live in a central tenant-site `/portal/*` shell instead of template page inventories.

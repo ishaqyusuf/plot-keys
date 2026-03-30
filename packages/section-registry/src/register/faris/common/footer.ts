@@ -17,7 +17,7 @@ export const farisFooterConfig: FooterConfig = {
       heading: "Properties",
       links: [
         { label: "Listings", href: "/listings" },
-        { label: "Saved Listings", href: "/saved" },
+        { label: "Saved Listings", href: "/portal/saved" },
       ],
     },
     {

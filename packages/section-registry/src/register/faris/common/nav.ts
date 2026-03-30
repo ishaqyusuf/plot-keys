@@ -14,7 +14,12 @@ export const farisNavConfig: NavConfig = {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
     { label: "Blog", href: "/blog", minTier: "pro" },
-    { label: "Saved Listings", href: "/saved", authRequired: true, minTier: "plus" },
+    {
+      label: "Saved Listings",
+      href: "/portal/saved",
+      authRequired: true,
+      minTier: "plus",
+    },
   ],
   mobile: [
     { label: "Home", href: "/" },
@@ -24,7 +29,12 @@ export const farisNavConfig: NavConfig = {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
     { label: "Blog", href: "/blog", minTier: "pro" },
-    { label: "Saved Listings", href: "/saved", authRequired: true, minTier: "plus" },
+    {
+      label: "Saved Listings",
+      href: "/portal/saved",
+      authRequired: true,
+      minTier: "plus",
+    },
   ],
   ctaLabel: "Book a Consultation",
   ctaHref: "/contact",

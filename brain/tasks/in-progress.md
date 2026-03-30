@@ -42,3 +42,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-again`
 - **Status:** ✅ Complete — public listing overview pages now share centralized route and query behavior while staying template-based
 - **Scope:** Shared overview/detail route contract from template inventories plus shared tenant-site query parsing for location / priceRange / sort / page before template sections render.
+
+### Customer Portal Foundation Planning
+- **Branch:** `copilot/next-high-priority-task-again`
+- **Status:** ✅ Complete — central branded `/portal/*` routes now exist in tenant-site and no longer render inside the template-family shell
+- **Scope:** Portal route group, branded shared shell, foundational login/signup/dashboard/saved/offers/payments/account pages, legacy redirect entry points, and public saved-listing links updated to `/portal/saved`.

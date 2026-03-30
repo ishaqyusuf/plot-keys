@@ -15,7 +15,12 @@ export const wafiNavConfig: NavConfig = {
     { label: "Landlords", href: "/landlords", minTier: "pro" },
     { label: "Tenants", href: "/tenants", minTier: "pro" },
     { label: "Blog", href: "/blog", minTier: "pro" },
-    { label: "Saved Listings", href: "/saved", authRequired: true, minTier: "plus" },
+    {
+      label: "Saved Listings",
+      href: "/portal/saved",
+      authRequired: true,
+      minTier: "plus",
+    },
   ],
   mobile: [
     { label: "Home", href: "/" },
@@ -27,7 +32,12 @@ export const wafiNavConfig: NavConfig = {
     { label: "Landlords", href: "/landlords", minTier: "pro" },
     { label: "Tenants", href: "/tenants", minTier: "pro" },
     { label: "Blog", href: "/blog", minTier: "pro" },
-    { label: "Saved Listings", href: "/saved", authRequired: true, minTier: "plus" },
+    {
+      label: "Saved Listings",
+      href: "/portal/saved",
+      authRequired: true,
+      minTier: "plus",
+    },
   ],
   ctaLabel: "List Your Property",
   ctaHref: "/contact",

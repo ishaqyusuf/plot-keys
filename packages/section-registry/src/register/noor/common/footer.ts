@@ -19,7 +19,7 @@ export const noorFooterConfig: FooterConfig = {
       links: [
         { label: "Listings", href: "/listings" },
         { label: "Area Guides", href: "/areas" },
-        { label: "Saved Listings", href: "/saved" },
+        { label: "Saved Listings", href: "/portal/saved" },
       ],
     },
     {

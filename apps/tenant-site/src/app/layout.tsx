@@ -24,6 +24,11 @@ async function resolveSubdomain(): Promise<string | null> {
   return requestHeaders.get("x-tenant-subdomain") || null;
 }
 
+async function resolveRequestPathname(): Promise<string | null> {
+  const requestHeaders = await headers();
+  return requestHeaders.get("x-tenant-pathname") || null;
+}
+
 async function resolveIntegrations(subdomain: string | null): Promise<{
   googleAnalyticsId?: string | null;
   facebookPixelId?: string | null;
@@ -117,14 +122,17 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const [subdomain, integrations, shell] = await Promise.all([
+  const [subdomain, integrations, shell, pathname] = await Promise.all([
     resolveSubdomain(),
     resolveSubdomain().then(resolveIntegrations),
     resolveTenantShell(),
+    resolveRequestPathname(),
   ]);
+  const isPortalRoute = pathname?.startsWith("/portal") ?? false;
 
   // Determine if this is a register template with family nav/footer
-  const hasRegisterShell = shell !== null && shell.familyKey !== undefined;
+  const hasRegisterShell =
+    shell !== null && shell.familyKey !== undefined && !isPortalRoute;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -161,7 +169,9 @@ export default async function RootLayout({
             </TenantInteractionShell>
           </NotificationsProvider>
 
-          {subdomain && <ChatWidget subdomain={subdomain} />}
+          {subdomain && !isPortalRoute ? (
+            <ChatWidget subdomain={subdomain} />
+          ) : null}
           <IntegrationScripts
             googleAnalyticsId={integrations.googleAnalyticsId}
             facebookPixelId={integrations.facebookPixelId}
