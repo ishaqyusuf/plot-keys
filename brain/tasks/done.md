@@ -8,6 +8,7 @@ This file records completed work milestones.
 
 ## Done
 
+- Completed the deferred `EditableText` builder upgrade by adding draft-mode hover AI affordances, an explicit Save/Discard action bar, and an inline AI suggestion panel driven by shared content-field metadata lookup in `packages/section-registry`.
 - Added dev quick fill support to the `/projects` create form by migrating it onto the standard `useZodForm` pattern and wiring a dedicated `new-project` profile into the shared dashboard quick-fill helper.
 - Restored dev quick fill on the sign-up page with a dedicated auth sign-up profile and updated the subdomain preview field to stay in sync when quick fill resets form values.
 - Simplified tenant onboarding by moving the primary market field into Market Focus and making Content Readiness the final step that opens `/builder` directly using the saved market and recommended/default template.

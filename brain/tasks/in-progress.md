@@ -33,5 +33,4 @@ This file tracks work currently being executed.
 
 **Still deferred (separate tracks):**
 - [ ] Wire `ClickGuard` + `InlineOverview` into actual tenant-site page renders
-- [ ] `EditableText` AI icon + action bar upgrade
 - [ ] WebsiteVersion Phase 4 (writes)

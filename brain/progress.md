@@ -70,8 +70,20 @@
 
 ### What's still deferred
 - Tenant-site ClickGuard + InlineOverview wiring into live renders
-- EditableText AI icon + action bar upgrade
 - WebsiteVersion Phase 4 writes
+
+## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
+
+### What was built
+- **`sections/editing-primitives.tsx`** — Draft-mode `EditableText` now keeps the existing amber hover affordance but upgrades into an explicit editing surface: hover can reveal a `✦ AI` trigger, click enters edit mode, and an action bar with `✓ Save` / `✕ Discard` replaces the previous implicit blur-save behavior.
+- **Inline AI suggestion panel** — When AI is enabled for the current `contentKey`, the inline editor can open an in-place suggestion panel with generated copy plus `Use this` / `Try again` actions, so the builder preview now matches the planned upgrade path instead of only exposing AI from the sidebar field editor.
+- **`register/content-field-lookup.ts`** — Added a shared content-field metadata lookup compiled from the register family content schemas plus the legacy shared builder keys. `EditableText` can now infer whether a field should expose AI affordances without requiring every section call site to pass a new prop.
+
+### Validation notes
+- Manual UI verification completed with a temporary local demo page rendering `EditableText` in draft mode. Verified hover AI affordance, edit-state action bar, and suggestion panel interaction.
+- Repository tooling required `npx bun@1.3.9 ...` because the sandbox lacked a global `bun` binary.
+- Full package typecheck remains blocked by pre-existing `packages/section-registry/src/register/index.ts` errors around unresolved `NavConfig` / `FooterConfig` types, unrelated to this task.
+- Focused Biome checks on touched files only surfaced pre-existing warnings/errors elsewhere in `editing-primitives.tsx` (`<img>`, `aria-label` on placeholder `<div>`, `autoFocus`, and array-index key), none introduced by this change.
 
 ## 2026-03-29 — Template Registry M3 Runtime Wiring
 
