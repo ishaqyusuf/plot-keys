@@ -37,3 +37,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-again`
 - **Status:** ✅ Complete — builder now supports selecting and editing template-based public pages beyond Home
 - **Scope:** URL-backed builder page selection, page-aware preview resolution, page-aware live-site links for public tenant pages.
+
+### Listing Overview Standardization
+- **Branch:** `copilot/next-high-priority-task-again`
+- **Status:** ✅ Complete — public listing overview pages now share centralized route and query behavior while staying template-based
+- **Scope:** Shared overview/detail route contract from template inventories plus shared tenant-site query parsing for location / priceRange / sort / page before template sections render.

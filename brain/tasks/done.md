@@ -8,6 +8,7 @@ This file records completed work milestones.
 
 ## Done
 
+- Standardized public listing overview behavior while keeping pages template-based: tenant-site now applies one shared `location` / `priceRange` / `sort` / `page` query contract before rendering listing overview pages, and section-registry now derives per-template overview/detail paths from page inventories so rentals and projects no longer fall back to `/listings/*`.
 - Completed Multi-page Website Support for public template pages by wiring the main builder to select pages via `?page=...`, resolve the selected `pageKey` server-side, render the correct page inventory in draft mode, and open the corresponding live tenant-page path from the builder.
 - Clarified customer portal planning boundaries: public listing overview and marketing pages stay template-based, while customer login, signup, dashboard, saved listings, offers, payments, and account routes should live in a central tenant-site `/portal/*` shell instead of template page inventories.
 - Completed WebsiteVersion Phase 4 writes by switching builder/site write mutations and builder config IDs from legacy `SiteConfiguration` records to `WebsiteVersion` draft IDs, while keeping legacy SiteConfiguration only as migration fallback data.
