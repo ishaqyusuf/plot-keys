@@ -71,29 +71,29 @@ packages/section-registry/src/register/
 
 ---
 
-## Universal Pages (All Families, All Plans)
+## Universal Template Pages (All Families, All Plans)
 
 These pages are included in every template regardless of family or plan tier:
 
 | Page | Slug | Notes |
 |------|------|-------|
 | Home | `/` | Family-specific section composition |
-| Login | `/login` | Buyer/renter account login on tenant's public site |
-| Sign Up | `/signup` | Buyer/renter account creation |
 | 404 | `/404` | Error state |
 | Privacy Policy | `/privacy` | Legal |
 | Terms of Service | `/terms` | Legal |
 
-> Login/Signup are for **public site visitors** (buyers, renters), not platform dashboard auth.
+> Customer auth and portal pages are no longer part of the template inventory direction. Routes such as `/portal/login`, `/portal/signup`, and `/portal/dashboard` should be central tenant-site pages that inherit tenant branding but do not use template-defined page composition.
 
 ---
 
-## User Account Pages (Plus and Pro, listing-heavy families)
+## Customer Portal Links (Not Template Inventory Pages)
 
 | Page | Slug | Description | Families |
 |------|------|-------------|---------|
-| Saved Listings | `/saved` | Buyer wishlist — favorited properties | Noor, Faris, Thuraya, Sakan, Wafi |
-| Inquiry Basket | `/inquire` | Cart equivalent — bundled multi-property inquiry | Noor, Thuraya, Sakan |
+| Saved Listings | `/portal/saved` | Buyer wishlist — favorited properties | Noor, Faris, Thuraya, Sakan, Wafi |
+| Inquiry Basket / Offers | `/portal/offers` | Bundled inquiry / offer tracking experience | Noor, Thuraya, Sakan |
+
+These routes may be linked from template navigation or listing detail actions, but the pages themselves should use the shared central customer portal shell rather than family-specific section layouts.
 
 ---
 
@@ -112,8 +112,6 @@ These pages are included in every template regardless of family or plan tier:
 | Agent Detail | `/agents/[slug]` | — | ✅ | ✅ |
 | Services | `/services` | — | ✅ | ✅ |
 | Area Guides | `/areas` | — | ✅ | ✅ |
-| Saved Listings | `/saved` | — | ✅ | ✅ |
-| Inquiry Basket | `/inquire` | — | ✅ | ✅ |
 | Blog | `/blog` | — | — | ✅ |
 | Blog Post | `/blog/[slug]` | — | — | ✅ |
 | Events / Open House | `/events` | — | — | ✅ |
@@ -148,7 +146,6 @@ These pages are included in every template regardless of family or plan tier:
 | Contact | `/contact` | ✅ | ✅ | ✅ |
 | Services | `/services` | — | ✅ | ✅ |
 | FAQ | `/faq` | — | ✅ | ✅ |
-| Saved Listings | `/saved` | — | ✅ | ✅ |
 | For Landlords | `/landlords` | — | — | ✅ |
 | For Tenants | `/tenants` | — | — | ✅ |
 | Blog | `/blog` | — | — | ✅ |
@@ -165,7 +162,6 @@ These pages are included in every template regardless of family or plan tier:
 | Contact | `/contact` | ✅ | ✅ | ✅ |
 | Services | `/services` | — | ✅ | ✅ |
 | Testimonials | `/testimonials` | — | ✅ | ✅ |
-| Saved Listings | `/saved` | — | ✅ | ✅ |
 | Blog | `/blog` | — | — | ✅ |
 | Blog Post | `/blog/[slug]` | — | — | ✅ |
 | Resources | `/resources` | — | — | ✅ |
@@ -182,8 +178,6 @@ These pages are included in every template regardless of family or plan tier:
 | Contact | `/contact` | ✅ | ✅ | ✅ |
 | Services | `/services` | — | ✅ | ✅ |
 | Area Guides | `/areas` | — | ✅ | ✅ |
-| Saved Listings | `/saved` | — | ✅ | ✅ |
-| Inquiry Basket | `/inquire` | — | ✅ | ✅ |
 | Private Sales | `/private-sales` | — | — | ✅ |
 | Insights / Blog | `/insights` | — | — | ✅ |
 | Press | `/press` | — | — | ✅ |
@@ -201,8 +195,6 @@ These pages are included in every template regardless of family or plan tier:
 | Services | `/services` | — | ✅ | ✅ |
 | How It Works | `/how-it-works` | — | ✅ | ✅ |
 | FAQ | `/faq` | — | ✅ | ✅ |
-| Saved Listings | `/saved` | — | ✅ | ✅ |
-| Inquiry Basket | `/inquire` | — | ✅ | ✅ |
 | For Landlords | `/landlords` | — | — | ✅ |
 | Tenant Resources | `/tenant-resources` | — | — | ✅ |
 | Blog | `/blog` | — | — | ✅ |

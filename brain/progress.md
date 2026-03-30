@@ -49,6 +49,7 @@
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
+| Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
@@ -69,6 +70,19 @@
 - **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
 
 ### What's still deferred
+
+## 2026-03-30 — Customer Portal + Listing Page Boundary Planning
+
+### Planning decisions
+- **Central customer account pages** — Customer login, signup, dashboard, saved listings, offers, payments, and account settings should live under a central tenant-site route group such as `/portal/*`. These pages should inherit tenant branding but should not be template-composed pages.
+- **Template-based public discovery pages** — Public listing overview pages (`/listings`, `/properties`, `/rentals`, `/portfolio`, `/projects`) remain template-driven because they are part of the tenant's branded marketing surface.
+- **Shared functional contract for listing pages** — Even though listing overview pages remain template-based, filtering, sorting, pagination, and auth-aware actions should be implemented through shared central code so behavior stays consistent across families.
+
+### Brain updates
+- Updated `brain/features/customer-portal.md` with explicit page-boundary decisions and a route plan for `/portal/login`, `/portal/signup`, `/portal/dashboard`, `/portal/saved`, `/portal/offers`, and `/portal/account`.
+- Updated `brain/modules/template-register-plan.md` so customer auth/account pages are no longer treated as template inventory pages.
+- Updated `brain/modules/pages-inventory.md` to separate template pages from central customer portal pages.
+- Updated `brain/system/architecture.md` and `brain/tasks/backlog.md` so future implementation follows the new central-vs-template boundary.
 
 ## 2026-03-30 — Tenant-Site ClickGuard + InlineOverview Wiring
 
