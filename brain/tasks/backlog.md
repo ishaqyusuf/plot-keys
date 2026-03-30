@@ -55,7 +55,7 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Phase 4 — Scale & Infrastructure
 
-- [ ] **Multi-page Website Support** — Extend WebsiteVersion to support multiple pages (About, Services, Blog) beyond single-page sites.
+- [x] **Multi-page Website Support** — Public tenant pages already resolve through page inventories at runtime; builder now supports URL-backed page selection so non-home template pages can be edited. ✅ Done
 - [ ] **Customer Portal Foundation Planning** — Implement central tenant-site `/portal/*` routes for customer login, signup, dashboard, saved listings, offers, and account pages. These pages should inherit tenant branding but must not be template-based.
 - [ ] **Listing Overview Standardization** — Keep public listing overview pages template-based, but move listing search/filter/sort/pagination into a shared central contract so all template families use the same functional behavior.
 - [ ] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content.

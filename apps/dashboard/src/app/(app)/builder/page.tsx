@@ -7,6 +7,7 @@ type BuilderPageProps = {
     configId?: string;
     generated?: string;
     onboarding?: string;
+    page?: string;
     published?: string;
     saved?: string;
   }>;
@@ -24,6 +25,7 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
           companyName={session.activeMembership.companyName}
           companySlug={session.activeMembership.companySlug}
           notices={params}
+          pageKey={params.page}
           userId={session.user.id}
         />
       </div>

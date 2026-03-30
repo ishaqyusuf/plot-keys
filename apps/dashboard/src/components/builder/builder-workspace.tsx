@@ -16,6 +16,7 @@ import {
   createInitialSiteConfigurationInput,
   deserializeTemplateConfig,
   getTemplateDefinition,
+  getTemplatePageInventory,
   resolveWebsitePresentation,
   templateCatalog,
 } from "@plotkeys/section-registry";
@@ -69,6 +70,7 @@ type BuilderWorkspaceProps = {
     published?: string;
     saved?: string;
   };
+  pageKey?: string;
   userId: string;
 };
 
@@ -78,6 +80,7 @@ export async function BuilderWorkspace({
   companySlug,
   mode = "page",
   notices,
+  pageKey,
   userId,
 }: BuilderWorkspaceProps) {
   const prisma = createPrismaClient().db;
@@ -234,6 +237,21 @@ export async function BuilderWorkspace({
   const liveSiteUrl = buildTenantSiteUrl(companySlug, {
     currentOrigin,
   });
+  const availablePages = getTemplatePageInventory(
+    resolvedActiveDraft.templateKey,
+  ).pages;
+  const selectedPage =
+    availablePages.find((page) => page.pageKey === pageKey) ??
+    availablePages[0];
+  const selectedPageKey = selectedPage?.pageKey ?? "home";
+  const selectedPageLabel = selectedPage?.label ?? "Home";
+  const selectedPageSlug = selectedPage?.slug ?? "/";
+  const currentPageLiveSiteUrl = selectedPageSlug.includes("[")
+    ? liveSiteUrl
+    : buildTenantSiteUrl(companySlug, {
+        currentOrigin,
+        pathname: selectedPageSlug,
+      });
 
   const preview = resolveWebsitePresentation({
     companyName,
@@ -254,6 +272,7 @@ export async function BuilderWorkspace({
       title: p.title,
     })),
     market: companyName,
+    pageKey: selectedPageKey,
     renderMode: "draft",
     subdomain: companySlug,
     templateKey: resolvedActiveDraft.templateKey,
@@ -371,6 +390,7 @@ export async function BuilderWorkspace({
                   currentTemplateKey={resolvedActiveDraft.templateKey}
                   licensedTemplateKeys={licensedTemplateKeys}
                   planTier={company.planTier as SubscriptionTier}
+                  currentPageKey={selectedPageKey}
                   readOnly={isTemplateLocked}
                   readOnlyMessage={lockedTemplateMessage}
                   requiredPlan={templateAccess.requiredTier}
@@ -432,6 +452,7 @@ export async function BuilderWorkspace({
                 editableFieldCount={preview.editableFields.length}
                 licensedTemplateKeys={licensedTemplateKeys}
                 planTier={company.planTier as SubscriptionTier}
+                currentPageKey={selectedPageKey}
                 readOnly={isTemplateLocked}
                 readOnlyMessage={lockedTemplateMessage}
                 requiredPlan={templateAccess.requiredTier}
@@ -443,7 +464,7 @@ export async function BuilderWorkspace({
                 onUpdateTheme={updateSiteThemeFieldAction}
                 onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
               />
-              <Badge variant="outline">{preview.page.pageKey}</Badge>
+              <Badge variant="outline">{selectedPageLabel}</Badge>
               {isEmbedded ? (
                 <Badge variant="outline">Website builder</Badge>
               ) : null}
@@ -478,7 +499,11 @@ export async function BuilderWorkspace({
                 </Button>
               )}
               <Button asChild>
-                <Link href={liveSiteUrl} rel="noreferrer" target="_blank">
+                <Link
+                  href={currentPageLiveSiteUrl || liveSiteUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
                   Open live site
                 </Link>
               </Button>
@@ -492,6 +517,9 @@ export async function BuilderWorkspace({
             editableFields={preview.editableFields}
             readOnly={isTemplateLocked}
             readOnlyMessage={lockedTemplateMessage}
+            pageKey={selectedPageKey}
+            pageLabel={selectedPageLabel}
+            pageSlug={selectedPageSlug}
             sections={preview.page.sections.map(
               ({ component: _component, ...rest }) => rest,
             )}
