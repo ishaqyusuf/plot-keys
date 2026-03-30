@@ -1,5 +1,23 @@
 import type { JSX } from "react";
-import type { RenderMode } from "./types";
+import { getEnabledSections, getTemplatePageInventory } from "./page-inventory";
+import {
+  type AgentShowcaseConfig,
+  AgentShowcaseSection,
+  ContactSection,
+  type ContactSectionConfig,
+  type FAQAccordionConfig,
+  FAQAccordionSection,
+  type HeroSearchConfig,
+  HeroSearchSection,
+  type NewsletterConfig,
+  NewsletterSection,
+  type PropertyGridConfig,
+  PropertyGridSection,
+  type ServiceHighlightsConfig,
+  ServiceHighlightsSection,
+  type WhyChooseUsConfig,
+  WhyChooseUsSection,
+} from "./sections/extended-sections";
 import {
   type CtaBandConfig,
   CtaBandSection,
@@ -16,25 +34,7 @@ import {
   TestimonialStripSection,
   type ThemeConfig,
 } from "./sections/home-page";
-import {
-  AgentShowcaseSection,
-  type AgentShowcaseConfig,
-  PropertyGridSection,
-  type PropertyGridConfig,
-  ContactSection,
-  type ContactSectionConfig,
-  FAQAccordionSection,
-  type FAQAccordionConfig,
-  NewsletterSection,
-  type NewsletterConfig,
-  HeroSearchSection,
-  type HeroSearchConfig,
-  WhyChooseUsSection,
-  type WhyChooseUsConfig,
-  ServiceHighlightsSection,
-  type ServiceHighlightsConfig,
-} from "./sections/extended-sections";
-import { getEnabledSections } from "./page-inventory";
+import type { RenderMode } from "./types";
 
 export type TemplateTier = "starter" | "plus" | "pro";
 
@@ -111,6 +111,7 @@ export type LiveListingItem = {
   id?: string;
   location: string;
   price?: string | null;
+  slug?: string;
   specs?: string | null;
   title: string;
 };
@@ -120,10 +121,43 @@ export type LiveAgentItem = {
   id: string;
   imageUrl?: string | null;
   name: string;
+  slug?: string;
   title?: string | null;
 };
 
-export type { RenderMode } from "./types";
+export type { RenderMode, TenantResource } from "./types";
+
+// ---------------------------------------------------------------------------
+// Plan-based template register
+// ---------------------------------------------------------------------------
+import {
+  getFamilyPlaceholderData as _getFamilyPlaceholderData,
+  getPlaceholderContent as _getPlaceholderContent,
+  getRegisterTemplate as _getRegisterTemplate,
+  resolveFamilySectionComponents as _resolveFamilySectionComponents,
+} from "./register/index";
+
+export type {
+  FooterConfig,
+  FooterLinkGroup,
+  NavConfig,
+  NavLink,
+  SectionComponentOverrides,
+} from "./register/index";
+export {
+  getAccessibleRegisterTemplates,
+  getFamilyFooterConfig,
+  getFamilyMetaForBusinessType,
+  getFamilyNavConfig,
+  getFamilyPlaceholderData,
+  getPlaceholderContent,
+  getRegisterFamily,
+  getRegisterTemplate,
+  getRegisterTemplateForBusiness,
+  registerTemplateCatalog,
+  resolveFamilySectionComponents,
+  templateFamilyRegistry,
+} from "./register/index";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];
@@ -260,9 +294,11 @@ function buildListingSpotlightItems(
 ): ListingSpotlightItem[] {
   if (liveListings && liveListings.length > 0) {
     return liveListings.slice(0, 3).map((listing) => ({
+      id: listing.id,
       imageHint: listing.imageUrl ?? "Property listing",
       location: listing.location,
       price: listing.price ?? "Price on request",
+      slug: listing.slug ?? listing.id,
       specs: listing.specs ?? "",
       title: listing.title,
     }));
@@ -270,23 +306,29 @@ function buildListingSpotlightItems(
 
   return [
     {
+      id: "sample-listing-1",
       imageHint: "Waterfront duplex preview",
       location: "Banana Island",
       price: "NGN 1.85B",
+      slug: "sample-listing-1",
       specs: "5 bed • 6 bath • cinema room • private dock access",
       title: "Sunlit waterfront duplex with private family lounge",
     },
     {
+      id: "sample-listing-2",
       imageHint: "Minimal tower penthouse preview",
       location: "Ikoyi",
       price: "NGN 980M",
+      slug: "sample-listing-2",
       specs: "4 bed • skyline terrace • concierge • smart controls",
       title: "Penthouse residence with skyline-facing entertaining suite",
     },
     {
+      id: "sample-listing-3",
       imageHint: "Garden estate preview",
       location: "Lekki Phase 1",
       price: "NGN 620M",
+      slug: "sample-listing-3",
       specs: "4 bed • pool deck • home office • gated community",
       title: "Contemporary family home tucked into a quiet garden estate",
     },
@@ -302,7 +344,74 @@ type SectionBuilder = (
   liveListings?: LiveListingItem[],
   liveAgents?: LiveAgentItem[],
   subdomain?: string,
+  pageKey?: string,
+  templateKey?: string,
 ) => HomeSectionDefinition;
+
+type ListingRouteContract = {
+  detailHrefBase: string;
+  overviewHref: string;
+};
+
+const listingOverviewPageKeys = new Set([
+  "listings",
+  "properties",
+  "rentals",
+  "portfolio",
+  "projects",
+]);
+
+const listingOverviewSlugs = new Set([
+  "/listings",
+  "/properties",
+  "/rentals",
+  "/portfolio",
+  "/projects",
+]);
+
+/**
+ * Derives the canonical public overview/detail route base for listing-style
+ * pages from the active template inventory so shared cards/CTAs follow
+ * `/rentals/*`, `/projects/*`, `/portfolio/*`, etc. instead of hardcoding
+ * `/listings/*`.
+ */
+function resolveListingRouteContract(
+  templateKey: string | undefined,
+  currentPageKey: string | undefined,
+): ListingRouteContract {
+  if (!templateKey) {
+    return {
+      detailHrefBase: "/listings",
+      overviewHref: "/properties",
+    };
+  }
+
+  const inventory = getTemplatePageInventory(templateKey);
+  const currentPage = currentPageKey
+    ? inventory.pages.find((page) => page.pageKey === currentPageKey)
+    : undefined;
+  const currentPageLooksLikeOverview =
+    currentPage &&
+    !currentPage.slug.includes("[") &&
+    (listingOverviewPageKeys.has(currentPage.pageKey) ||
+      listingOverviewSlugs.has(currentPage.slug));
+
+  const overviewPage = currentPageLooksLikeOverview
+    ? currentPage
+    : inventory.pages.find(
+        (page) =>
+          !page.slug.includes("[") &&
+          (listingOverviewPageKeys.has(page.pageKey) ||
+            listingOverviewSlugs.has(page.slug)),
+      );
+
+  const overviewHref = overviewPage?.slug ?? "/properties";
+
+  return {
+    detailHrefBase: overviewHref,
+    overviewHref,
+  };
+}
 
 const sectionBuilders: Record<string, SectionBuilder> = {
   HeroBannerSection: (content) => ({
@@ -334,20 +443,32 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     id: "market-stats",
     type: "market_stats",
   }),
-  ListingSpotlightSection: (content, liveListings) => ({
-    component: ListingSpotlightSection,
-    config: {
-      description:
-        liveListings && liveListings.length > 0
-          ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
-          : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
-      eyebrow: "Featured inventory",
-      items: buildListingSpotlightItems(liveListings),
-      title: "Featured listings feel editorial, not templated.",
-    },
-    id: "listing-spotlight",
-    type: "listing_spotlight",
-  }),
+  ListingSpotlightSection: (
+    _content,
+    liveListings,
+    _liveAgents,
+    _subdomain,
+    pageKey,
+    templateKey,
+  ) => {
+    const listingRoutes = resolveListingRouteContract(templateKey, pageKey);
+
+    return {
+      component: ListingSpotlightSection,
+      config: {
+        description:
+          liveListings && liveListings.length > 0
+            ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
+            : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
+        detailHrefBase: listingRoutes.detailHrefBase,
+        eyebrow: "Featured inventory",
+        items: buildListingSpotlightItems(liveListings),
+        title: "Featured listings feel editorial, not templated.",
+      },
+      id: "listing-spotlight",
+      type: "listing_spotlight",
+    };
+  },
   StoryGridSection: (content) => ({
     component: StoryGridSection,
     config: {
@@ -431,32 +552,45 @@ const sectionBuilders: Record<string, SectionBuilder> = {
         name: a.name,
         photoUrl: a.imageUrl ?? undefined,
         role: a.title ?? "Agent",
+        slug: a.slug ?? a.id,
       })),
       title: "The people who make it happen.",
     },
     id: "agent-showcase",
     type: "agent_showcase",
   }),
-  PropertyGridSection: (_content, liveListings) => ({
-    component: PropertyGridSection,
-    config: {
-      ctaHref: "/properties",
-      ctaText: "View all properties",
-      eyebrow: "Active listings",
-      items: (liveListings ?? []).map((p, i) => ({
-        id: p.id ?? `property-${i}`,
-        imageUrl: p.imageUrl ?? undefined,
-        location: p.location,
-        price: p.price ?? undefined,
-        slug: p.id,
-        specs: p.specs ?? undefined,
-        title: p.title,
-      })),
-      title: "Properties available now.",
-    },
-    id: "property-grid",
-    type: "property_grid",
-  }),
+  PropertyGridSection: (
+    _content,
+    liveListings,
+    _liveAgents,
+    _subdomain,
+    pageKey,
+    templateKey,
+  ) => {
+    const listingRoutes = resolveListingRouteContract(templateKey, pageKey);
+
+    return {
+      component: PropertyGridSection,
+      config: {
+        ctaHref: listingRoutes.overviewHref,
+        ctaText: "View all properties",
+        detailHrefBase: listingRoutes.detailHrefBase,
+        eyebrow: "Active listings",
+        items: (liveListings ?? []).map((p, i) => ({
+          id: p.id ?? `property-${i}`,
+          imageUrl: p.imageUrl ?? undefined,
+          location: p.location,
+          price: p.price ?? undefined,
+          slug: p.slug ?? p.id,
+          specs: p.specs ?? undefined,
+          title: p.title,
+        })),
+        title: "Properties available now.",
+      },
+      id: "property-grid",
+      type: "property_grid",
+    };
+  },
   ContactSection: (content, _listings, _agents, subdomain) => ({
     component: ContactSection,
     config: {
@@ -522,27 +656,38 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     id: "newsletter-strip",
     type: "newsletter_strip",
   }),
-  HeroSearchSection: (content) => ({
-    component: HeroSearchSection,
-    config: {
-      ctaHref: "/properties",
-      ctaText: content["hero.ctaText"] ?? "Search now",
-      locationOptions: [
-        "All locations",
-        "Lekki",
-        "Ikoyi",
-        "Victoria Island",
-        "Abuja",
-        "Port Harcourt",
-      ],
-      subtitle:
-        content["hero.subtitle"] ??
-        "Search thousands of verified listings across premium locations.",
-      title: content["hero.title"] ?? "Find Your Dream Home",
-    },
-    id: "hero-search",
-    type: "hero_search",
-  }),
+  HeroSearchSection: (
+    content,
+    _liveListings,
+    _liveAgents,
+    _subdomain,
+    pageKey,
+    templateKey,
+  ) => {
+    const listingRoutes = resolveListingRouteContract(templateKey, pageKey);
+
+    return {
+      component: HeroSearchSection,
+      config: {
+        ctaHref: listingRoutes.overviewHref,
+        ctaText: content["hero.ctaText"] ?? "Search now",
+        locationOptions: [
+          "All locations",
+          "Lekki",
+          "Ikoyi",
+          "Victoria Island",
+          "Abuja",
+          "Port Harcourt",
+        ],
+        subtitle:
+          content["hero.subtitle"] ??
+          "Search thousands of verified listings across premium locations.",
+        title: content["hero.title"] ?? "Find Your Dream Home",
+      },
+      id: "hero-search",
+      type: "hero_search",
+    };
+  },
   WhyChooseUsSection: () => ({
     component: WhyChooseUsSection,
     config: {
@@ -718,7 +863,14 @@ function buildPageSections(
     .map((slot) => {
       const builder = sectionBuilders[slot.sectionType];
       return builder
-        ? builder(content, liveListings, liveAgents, subdomain)
+        ? builder(
+            content,
+            liveListings,
+            liveAgents,
+            subdomain,
+            pageKey,
+            templateKey,
+          )
         : null;
     })
     .filter((s): s is HomeSectionDefinition => s !== null);
@@ -752,7 +904,14 @@ function buildDefaultHomePage(
     pageKey: "home",
     sections: defaultOrder
       .map((type) =>
-        sectionBuilders[type]?.(content, liveListings, liveAgents, subdomain),
+        sectionBuilders[type]?.(
+          content,
+          liveListings,
+          liveAgents,
+          subdomain,
+          "home",
+          undefined,
+        ),
       )
       .filter((s): s is HomeSectionDefinition => s !== null),
   };
@@ -1982,16 +2141,38 @@ export function resolveWebsitePresentation({
     ...content,
   };
 
+  const builtPage = buildPageSections(
+    mergedContent,
+    pageKey,
+    templateKey,
+    liveListings,
+    liveAgents,
+    subdomain,
+  );
+
+  // Apply family-specific component overrides when the templateKey maps to a
+  // register family (e.g. "noor-starter" → family "agency"). Old template keys
+  // (e.g. "template-1") return undefined family → no overrides, generic fallback.
+  const registerVariant = _getRegisterTemplate(templateKey);
+  const familyOverrides = _resolveFamilySectionComponents(
+    registerVariant?.family,
+  );
+
+  // Swap in family-branded components where the override map provides one.
+  // When familyOverrides is empty (stub or old template key) this is a no-op.
+  const page = {
+    ...builtPage,
+    sections: builtPage.sections.map((s) => ({
+      ...s,
+      component:
+        (familyOverrides[s.type] as typeof s.component | undefined) ??
+        s.component,
+    })) as HomeSectionDefinition[],
+  };
+
   return {
     editableFields: template.editableFields,
-    page: buildPageSections(
-      mergedContent,
-      pageKey,
-      templateKey,
-      liveListings,
-      liveAgents,
-      subdomain,
-    ),
+    page,
     renderMode,
     template,
     theme: {
@@ -2005,6 +2186,135 @@ export function resolveWebsitePresentation({
         `${subdomain ?? companyName?.toLowerCase().replace(/\s+/g, "") ?? "company"}.plotkeys.app`,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// resolvePage — register-aware page resolver with template mode support
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal tenant context needed to render a single page.
+ * In "template" render mode all fields are optional — placeholder data
+ * is used automatically.
+ */
+export type TenantSnapshot = {
+  companyName?: string;
+  companyLogoUrl?: string | null;
+  content?: TenantContentRecord;
+  liveAgents?: LiveAgentItem[];
+  liveListings?: LiveListingItem[];
+  market?: string;
+  subdomain?: string;
+  theme?: TenantThemeRecord;
+};
+
+/**
+ * Resolved output of a single page — sections with family-branded components
+ * already applied, plus the fully merged theme.
+ */
+export type ResolvedPageConfig = {
+  pageKey: string;
+  renderMode: RenderMode;
+  sections: HomeSectionDefinition[];
+  theme: ThemeConfig;
+};
+
+/**
+ * Resolves a single page from a register template key.
+ *
+ * Differences from resolveWebsitePresentation:
+ * - In "template" render mode, uses placeholderValue content from the
+ *   family's content-schema and placeholder listings/agents from
+ *   placeholder-data.ts instead of live tenant data.
+ * - Returns a flat ResolvedPageConfig rather than a full presentation
+ *   object — no editableFields, no template metadata.
+ * - Applies family component overrides in the same way as
+ *   resolveWebsitePresentation does.
+ *
+ * @example
+ * // Template browse mode — placeholder data, no tenant required
+ * const page = resolvePage("noor-starter", "home", {}, "template");
+ *
+ * // Live rendering
+ * const page = resolvePage("noor-starter", "listings", tenant, "live");
+ */
+export function resolvePage(
+  templateKey: string,
+  pageKey: string,
+  tenant: TenantSnapshot,
+  renderMode: RenderMode = "live",
+): ResolvedPageConfig {
+  const registerVariant = _getRegisterTemplate(templateKey);
+  const template = getTemplateDefinition(templateKey);
+
+  // In template mode, substitute placeholder content and data for the family.
+  let content: TenantContentRecord;
+  let liveListings: LiveListingItem[] | undefined;
+  let liveAgents: LiveAgentItem[] | undefined;
+
+  if (renderMode === "template" && registerVariant) {
+    content = _getPlaceholderContent(registerVariant.family);
+    const phData = _getFamilyPlaceholderData(registerVariant.family);
+    liveListings = phData.listings?.map((l) => ({
+      id: l.id,
+      imageUrl: l.imageUrl ?? null,
+      location: l.location,
+      price: l.price,
+      slug: l.slug,
+      specs: l.specs,
+      title: l.title,
+    }));
+    liveAgents = phData.agents?.map((a) => ({
+      bio: a.bio,
+      id: a.id,
+      imageUrl: a.photoUrl ?? null,
+      name: a.name,
+      slug: a.slug,
+      title: a.role,
+    }));
+  } else {
+    content = { ...template.defaultContent, ...tenant.content };
+    liveListings = tenant.liveListings;
+    liveAgents = tenant.liveAgents;
+  }
+
+  const builtPage = buildPageSections(
+    content,
+    pageKey,
+    templateKey,
+    liveListings,
+    liveAgents,
+    tenant.subdomain,
+  );
+
+  const familyOverrides = _resolveFamilySectionComponents(
+    registerVariant?.family,
+  );
+  const sections = builtPage.sections.map((s) => ({
+    ...s,
+    component:
+      (familyOverrides[s.type] as typeof s.component | undefined) ??
+      s.component,
+  })) as HomeSectionDefinition[];
+
+  const theme: ThemeConfig = {
+    ...template.defaultTheme,
+    ...tenant.theme,
+    logo:
+      tenant.companyName ??
+      (tenant.theme as ThemeConfig | undefined)?.logo ??
+      template.defaultTheme.logo,
+    logoUrl:
+      tenant.companyLogoUrl ??
+      (tenant.theme as ThemeConfig | undefined)?.logoUrl ??
+      undefined,
+    market:
+      tenant.market ??
+      (tenant.theme as ThemeConfig | undefined)?.market ??
+      template.defaultTheme.market,
+  };
+
+  return { pageKey: builtPage.pageKey, renderMode, sections, theme };
 }
 
 /**
@@ -2036,38 +2346,6 @@ export const sampleHomePage = buildPageSections(
   fallbackTemplate.key,
 );
 
-export {
-  applyAiGeneration,
-  applyHumanEdit,
-  flattenContentNodes,
-  liftFlatContent,
-} from "./content-nodes";
-export {
-  applyConfigUpdate,
-  deserializeTemplateConfig,
-  fromDerivedDesignConfig,
-  resolvePresetConfig,
-  serializeTemplateConfig,
-  stylePresets,
-} from "./template-config";
-export {
-  getFreeStockImages,
-  getStockImageById,
-  getStockImagesByCategory,
-  getStockImagesForSlot,
-  stockImageCatalog,
-} from "./stock-images";
-export type {
-  StockImage,
-  StockImageCategory,
-  StockImageLicenseTier,
-} from "./stock-images";
-export type {
-  ColorScheme,
-  StylePreset,
-  StylePresetDefinition,
-  TemplateConfig,
-} from "./template-config";
 export type {
   ContentNode,
   ContentNodeKind,
@@ -2075,22 +2353,48 @@ export type {
   ContentNodeRecord,
 } from "./content-nodes";
 export {
+  applyAiGeneration,
+  applyHumanEdit,
+  flattenContentNodes,
+  liftFlatContent,
+} from "./content-nodes";
+export type { FontFallbackMap } from "./fonts";
+export {
+  fontFallbacks,
   resolveFontStack,
   resolveHeadingFontStack,
   resolveSlotFont,
-  fontFallbacks,
 } from "./fonts";
-export type { FontFallbackMap } from "./fonts";
+export type {
+  FormAction,
+  FormActionKind,
+  SectionFormBinding,
+} from "./form-registry";
+// Form action registry
+export {
+  getFormAction,
+  getFormProcedurePath,
+  isSectionFormBound,
+  sectionFormBindings,
+} from "./form-registry";
+export type {
+  PageDefinition,
+  SectionSlot,
+  TemplatePageInventory,
+} from "./page-inventory";
 export {
   collectContentKeys,
   getEnabledSections,
   getTemplatePageInventory,
 } from "./page-inventory";
 export type {
-  PageDefinition,
-  SectionSlot,
-  TemplatePageInventory,
-} from "./page-inventory";
+  DerivedDesignConfig,
+  DerivedPageComposition,
+  DerivedProfile,
+  OnboardingSnapshot,
+  SectionVisibilityMap,
+  TemplateRecommendation,
+} from "./recommendation";
 export {
   buildBusinessSummary,
   deriveDesignConfig,
@@ -2101,17 +2405,22 @@ export {
   scoreTemplates,
 } from "./recommendation";
 export type {
-  DerivedDesignConfig,
-  DerivedPageComposition,
-  DerivedProfile,
-  OnboardingSnapshot,
-  SectionVisibilityMap,
-  TemplateRecommendation,
-} from "./recommendation";
-
+  ClickGuardItem,
+  ClickGuardItemType,
+} from "./runtime/click-guard";
+// Runtime interaction — ClickGuard + InlineOverview
+export {
+  ClickGuardProvider,
+  useClickGuard,
+} from "./runtime/click-guard";
+export type { InlineOverviewProps } from "./runtime/inline-overview";
+export { InlineOverview } from "./runtime/inline-overview";
+export type {
+  WebsiteRuntimeContextValue,
+  WebsiteRuntimeProviderProps,
+} from "./runtime-context";
 // Runtime context — WebsiteRuntimeProvider + hooks
 export {
-  WebsiteRuntimeProvider,
   useColorSystem,
   useIsDraftMode,
   useRenderMode,
@@ -2119,29 +2428,13 @@ export {
   useTemplateConfig,
   useTemplateImage,
   useTemplateStylePreset,
+  WebsiteRuntimeProvider,
 } from "./runtime-context";
 export type {
-  WebsiteRuntimeContextValue,
-  WebsiteRuntimeProviderProps,
-} from "./runtime-context";
-
-// Form action registry
-export {
-  getFormAction,
-  getFormProcedurePath,
-  isSectionFormBound,
-  sectionFormBindings,
-} from "./form-registry";
-export type {
-  FormAction,
-  FormActionKind,
-  SectionFormBinding,
-} from "./form-registry";
-
-// Color system
-export { colorSystems } from "./template-config";
-export type { ColorSystem, ColorTokenSet } from "./template-config";
-
+  EditableImageProps,
+  EditableRepeaterProps,
+  EditableTextProps,
+} from "./sections/editing-primitives";
 // Inline editing primitives
 export {
   EditableImage,
@@ -2149,11 +2442,15 @@ export {
   EditableText,
 } from "./sections/editing-primitives";
 export type {
-  EditableImageProps,
-  EditableRepeaterProps,
-  EditableTextProps,
-} from "./sections/editing-primitives";
-
+  AgentShowcaseConfig,
+  ContactSectionConfig,
+  FAQAccordionConfig,
+  HeroSearchConfig,
+  NewsletterConfig,
+  PropertyGridConfig,
+  ServiceHighlightsConfig,
+  WhyChooseUsConfig,
+} from "./sections/extended-sections";
 // Extended sections
 export {
   AgentShowcaseSection,
@@ -2166,15 +2463,35 @@ export {
   WhyChooseUsSection,
 } from "./sections/extended-sections";
 export type {
-  AgentShowcaseConfig,
-  ContactSectionConfig,
-  FAQAccordionConfig,
-  HeroSearchConfig,
-  NewsletterConfig,
-  PropertyGridConfig,
-  ServiceHighlightsConfig,
-  WhyChooseUsConfig,
-} from "./sections/extended-sections";
+  StockImage,
+  StockImageCategory,
+  StockImageLicenseTier,
+} from "./stock-images";
+export {
+  getFreeStockImages,
+  getStockImageById,
+  getStockImagesByCategory,
+  getStockImagesForSlot,
+  stockImageCatalog,
+} from "./stock-images";
+export type {
+  ColorScheme,
+  ColorSystem,
+  ColorTokenSet,
+  StylePreset,
+  StylePresetDefinition,
+  TemplateConfig,
+} from "./template-config";
+// Color system
+export {
+  applyConfigUpdate,
+  colorSystems,
+  deserializeTemplateConfig,
+  fromDerivedDesignConfig,
+  resolvePresetConfig,
+  serializeTemplateConfig,
+  stylePresets,
+} from "./template-config";
 
 export type {
   CtaBandConfig,

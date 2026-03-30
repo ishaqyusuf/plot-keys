@@ -4,8 +4,9 @@ import { buildRequestContext } from "@plotkeys/api/context";
 import { appRouter } from "@plotkeys/api/router";
 import {
   authRoutes,
-  authSessionCookieName,
   createBetterAuthSession,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
   resolvePostVerificationRoute,
   signInUser,
   signUpUser,
@@ -13,16 +14,23 @@ import {
 } from "@plotkeys/auth";
 import { createPrismaClient } from "@plotkeys/db";
 import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
-import { normalizeSubdomainLabel } from "@plotkeys/utils";
+import {
+  EMPLOYEE_WORK_ROLE_VALUES,
+  isWorkRole,
+  normalizeSubdomainLabel,
+  resolveDashboardSessionScope,
+  WORK_ROLE_LABELS,
+} from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-
+import { sendWorkspaceInvitationNotification } from "../lib/invite-notifications";
 import {
   requireAuthenticatedSession,
   requireOnboardedSession,
 } from "../lib/session";
 import {
+  clearAuthSessionCookie,
   clearPendingOnboardingCookie,
   readPendingOnboardingCookie,
 } from "../lib/session-cookie";
@@ -69,22 +77,122 @@ async function assertSubdomainAvailability(
 
 async function setSessionCookie(userId: string) {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const sessionScope =
+    resolveDashboardSessionScope(host) ?? platformSessionScope;
   const { signedSessionToken, expiresAt } =
     await createBetterAuthSession(userId);
 
-  cookieStore.set(authSessionCookieName, signedSessionToken, {
-    expires: expiresAt,
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  cookieStore.set(
+    getScopedAuthSessionCookieName(sessionScope),
+    signedSessionToken,
+    {
+      expires: expiresAt,
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  );
 }
 
 async function createServerCaller() {
   const headerStore = await headers();
+  const cookieStore = await cookies();
+  const requestHeaders = new Headers(headerStore);
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
 
-  return appRouter.createCaller(await buildRequestContext(headerStore));
+  if (cookieHeader) {
+    requestHeaders.set("cookie", cookieHeader);
+  }
+
+  return appRouter.createCaller(await buildRequestContext(requestHeaders));
+}
+
+function getDashboardAppUrl() {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
+}
+
+async function getRequestOrigin() {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const protocol =
+    headerStore.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+
+  if (!host) {
+    return getDashboardAppUrl();
+  }
+
+  return `${protocol}://${host}`;
+}
+
+function getInviteRoleLabel(role: "admin" | "agent" | "staff") {
+  if (role === "agent") {
+    return "an agent";
+  }
+
+  if (role === "staff") {
+    return "an employee";
+  }
+
+  return "a team admin";
+}
+
+async function inviteWorkspaceUser(input: {
+  email: string;
+  redirectPath: string;
+  role: "admin" | "agent" | "staff";
+  successRedirect: string;
+  workRole?: string | null;
+}) {
+  const session = await requireOnboardedSession();
+  const prisma = createPrismaClient().db;
+  let errorRedirect: string | null = null;
+
+  try {
+    const caller = await createServerCaller();
+    const result = await caller.team.inviteMember({
+      email: input.email,
+      role: input.role,
+      workRole: input.workRole,
+    });
+
+    const company = prisma
+      ? await prisma.company.findUnique({
+          select: { name: true },
+          where: { id: session.activeMembership.companyId },
+        })
+      : null;
+
+    await sendWorkspaceInvitationNotification({
+      companyName: company?.name ?? "your company",
+      inviteUrl: new URL(result.inviteUrl, getDashboardAppUrl()).toString(),
+      inviterName: session.user.name ?? session.user.email,
+      recipientEmail: input.email.trim().toLowerCase(),
+      roleLabel:
+        input.workRole && isWorkRole(input.workRole)
+          ? WORK_ROLE_LABELS[input.workRole]
+          : getInviteRoleLabel(input.role),
+    });
+
+    revalidatePath(input.redirectPath);
+    revalidatePath("/team");
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to send invite.";
+    errorRedirect = createRedirectUrl(input.redirectPath, { error: message });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+
+  redirect(input.successRedirect);
 }
 
 export async function signUpAction(formData: FormData) {
@@ -178,8 +286,10 @@ export async function verifyEmailAction(formData: FormData) {
 
 export async function signOutAction() {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
 
-  cookieStore.delete(authSessionCookieName);
+  clearAuthSessionCookie(cookieStore, host);
   clearPendingOnboardingCookie(cookieStore);
   redirect(authRoutes.signIn);
 }
@@ -189,9 +299,6 @@ export async function completeOnboardingAction(formData: FormData) {
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
   let redirectUrl: string;
-
-  const market = String(formData.get("market") ?? "").trim();
-  const templateKey = String(formData.get("template") ?? "template-1");
 
   // Load persisted onboarding record from DB (durable across devices/sessions).
   // Fall back to the cookie for users who signed up before DB persistence was added.
@@ -207,12 +314,23 @@ export async function completeOnboardingAction(formData: FormData) {
   const subdomain = normalizeSubdomainLabel(
     savedOnboarding?.subdomain ?? pendingOnboarding?.subdomain ?? "",
   );
+  const fallbackMarket =
+    savedOnboarding?.locations?.find((value) => value.trim().length > 0) ?? "";
+  const market =
+    String(formData.get("market") ?? "").trim() ||
+    savedOnboarding?.market ||
+    fallbackMarket;
+  const submittedTemplateKey = String(formData.get("templateKey") ?? "").trim();
+  const templateKey = submittedTemplateKey || "template-1";
 
   try {
     if (!companyName || !subdomain) {
       throw new Error(
         "Your company setup details are missing. Please start again from signup.",
       );
+    }
+    if (!market) {
+      throw new Error("Primary market is required before opening the builder.");
     }
 
     // Persist the final market + template selection so the record is up-to-date
@@ -221,6 +339,13 @@ export async function completeOnboardingAction(formData: FormData) {
       await prisma.tenantOnboarding.update({
         data: {
           currentStep: "completing",
+          hasAgents: formData.get("hasAgents") === "on",
+          hasBlogContent: formData.get("hasBlogContent") === "on",
+          hasExistingContent: formData.get("hasExistingContent") === "on",
+          hasListings: formData.get("hasListings") === "on",
+          hasLogo: formData.get("hasLogo") === "on",
+          hasProjects: formData.get("hasProjects") === "on",
+          hasTestimonials: formData.get("hasTestimonials") === "on",
           market,
           templateKey,
         },
@@ -237,7 +362,7 @@ export async function completeOnboardingAction(formData: FormData) {
     });
 
     clearPendingOnboardingCookie(cookieStore);
-    redirectUrl = `/builder?configId=${result.configId}`;
+    redirectUrl = `/builder?configId=${result.configId}&onboarding=1`;
   } catch (error) {
     redirectUrl = createRedirectUrl(authRoutes.onboarding, {
       error:
@@ -266,6 +391,17 @@ export async function createTemplateDraftAction(formData: FormData) {
   }
 
   redirect(redirectUrl);
+}
+
+export async function createTemplateDraftSilentAction(formData: FormData) {
+  const templateKey = String(formData.get("templateKey") ?? "template-1");
+  const caller = await createServerCaller();
+  const result = await caller.workspace.createTemplateDraft({
+    templateKey,
+  });
+
+  revalidatePath("/builder");
+  return result;
 }
 
 export async function updateSiteThemeFieldAction(formData: FormData) {
@@ -430,7 +566,6 @@ export async function saveOnboardingStepAction(formData: FormData) {
   try {
     const caller = await createServerCaller();
 
-    // biome-ignore lint/suspicious/noExplicitAny: dynamic input built per-step
     const input: Record<string, any> = {
       currentStep: nextStep || step,
     };
@@ -495,6 +630,37 @@ export async function saveOnboardingStepAction(formData: FormData) {
 
 // ─── Property actions ─────────────────────────────────────────────────────
 
+export async function createProjectAction(formData: FormData) {
+  let redirectUrl: string;
+  try {
+    const caller = await createServerCaller();
+    await caller.projects.create({
+      code: String(formData.get("code") ?? "").trim() || null,
+      description: String(formData.get("description") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      name: String(formData.get("name") ?? "").trim(),
+      startDate: String(formData.get("startDate") ?? "").trim() || null,
+      targetCompletionDate:
+        String(formData.get("targetCompletionDate") ?? "").trim() || null,
+      type: (String(formData.get("type") ?? "").trim() || null) as
+        | "building"
+        | "estate"
+        | "fit_out"
+        | "infrastructure"
+        | "renovation"
+        | null,
+    });
+    revalidatePath("/projects");
+    redirectUrl = "/projects";
+  } catch (error) {
+    redirectUrl = `/projects?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create project.",
+    )}`;
+  }
+
+  redirect(redirectUrl);
+}
+
 export async function createPropertyAction(formData: FormData) {
   let redirectUrl: string;
   try {
@@ -513,7 +679,11 @@ export async function createPropertyAction(formData: FormData) {
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
       type: (String(formData.get("type") ?? "").trim() || null) as
-        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | "residential"
+        | "commercial"
+        | "land"
+        | "industrial"
+        | "mixed_use"
         | null,
       subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
@@ -554,7 +724,11 @@ export async function updatePropertyAction(formData: FormData) {
       specs: String(formData.get("specs") ?? "").trim() || null,
       imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
       type: (String(formData.get("type") ?? "").trim() || null) as
-        | "residential" | "commercial" | "land" | "industrial" | "mixed_use"
+        | "residential"
+        | "commercial"
+        | "land"
+        | "industrial"
+        | "mixed_use"
         | null,
       subType: String(formData.get("subType") ?? "").trim() || null,
       status: String(formData.get("status") ?? "active") as
@@ -690,7 +864,7 @@ export async function toggleAgentFeaturedAction(formData: FormData) {
 }
 
 export async function syncTenantDomainsAction() {
-  let redirectUrl = "/?domains=1";
+  const redirectUrl = "/?domains=1";
   try {
     const caller = await createServerCaller();
     await caller.workspace.syncTenantDomains();
@@ -730,9 +904,11 @@ export async function initializeCheckoutAction(formData: FormData) {
   const interval = String(formData.get("interval") ?? "monthly") as
     | "monthly"
     | "annual";
+  const callbackUrl = `${await getRequestOrigin()}/billing/callback`;
 
   const caller = await createServerCaller();
   const result = await caller.workspace.initializeCheckout({
+    callbackUrl,
     interval,
     planTier,
   });
@@ -875,6 +1051,7 @@ export async function syncDomainsAction() {
 
 export async function acceptInviteAction(formData: FormData) {
   const token = String(formData.get("token") ?? "").trim();
+  const role = String(formData.get("role") ?? "").trim();
   let errorRedirect: string | null = null;
 
   try {
@@ -882,41 +1059,193 @@ export async function acceptInviteAction(formData: FormData) {
     await caller.team.acceptInvite({ token });
     revalidatePath("/");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to accept invite.";
+    const message =
+      err instanceof Error ? err.message : "Failed to accept invite.";
     errorRedirect = createRedirectUrl(`/join/${token}`, { error: message });
   }
 
   if (errorRedirect) {
     redirect(errorRedirect);
-  } else {
-    redirect("/");
   }
+
+  if (role === "agent" || role === "staff") {
+    redirect(`/join/${token}/complete`);
+  }
+
+  redirect("/");
 }
 
 export async function inviteMemberAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
-  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
-  let errorRedirect: string | null = null;
+  const role = String(formData.get("role") ?? "staff") as
+    | "admin"
+    | "agent"
+    | "staff";
 
-  try {
-    const caller = await createServerCaller();
-    await caller.team.inviteMember({ email, role });
-    revalidatePath("/team");
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to send invite.";
-    errorRedirect = createRedirectUrl("/team", { error: message });
+  await inviteWorkspaceUser({
+    email,
+    redirectPath: "/team",
+    role,
+    successRedirect: "/team?invited=1",
+  });
+}
+
+export async function inviteAgentAction(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+
+  await inviteWorkspaceUser({
+    email,
+    redirectPath: "/agents",
+    role: "agent",
+    successRedirect: "/agents?invited=1",
+  });
+}
+
+export async function inviteEmployeeAction(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const rawWorkRole = String(formData.get("workRole") ?? "").trim();
+  const workRole = EMPLOYEE_WORK_ROLE_VALUES.includes(rawWorkRole as never)
+    ? rawWorkRole
+    : "operations";
+
+  await inviteWorkspaceUser({
+    email,
+    redirectPath: "/hr/employees",
+    role: "staff",
+    successRedirect: "/hr/employees?invited=1",
+    workRole,
+  });
+}
+
+export async function completeInviteProfileAction(formData: FormData) {
+  const session = await requireAuthenticatedSession();
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("Database not configured.");
+
+  const token = String(formData.get("token") ?? "").trim();
+  const invite = await prisma.teamInvite.findUnique({
+    include: {
+      company: {
+        select: { id: true, name: true },
+      },
+    },
+    where: { token },
+  });
+
+  if (!invite) {
+    redirect(createRedirectUrl("/", { error: "Invite not found." }));
   }
 
-  if (errorRedirect) {
-    redirect(errorRedirect);
-  } else {
-    redirect("/team?invited=1");
+  if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
+    redirect(
+      createRedirectUrl(`/join/${token}`, {
+        error: "This invite belongs to a different email address.",
+      }),
+    );
   }
+
+  if (!invite.acceptedAt) {
+    redirect(
+      createRedirectUrl(`/join/${token}`, {
+        error: "Accept the invite before completing your profile.",
+      }),
+    );
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const title = String(formData.get("title") ?? "").trim() || null;
+
+  if (!name) {
+    redirect(
+      createRedirectUrl(`/join/${token}/complete`, {
+        error: "Name is required.",
+      }),
+    );
+  }
+
+  if (invite.role === "agent") {
+    const bio = String(formData.get("bio") ?? "").trim() || null;
+    const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
+    const existingAgent = await prisma.agent.findFirst({
+      where: {
+        companyId: invite.companyId,
+        deletedAt: null,
+        email: invite.email,
+      },
+    });
+
+    if (existingAgent) {
+      await prisma.agent.update({
+        data: {
+          bio,
+          imageUrl,
+          name,
+          phone,
+          title,
+        },
+        where: { id: existingAgent.id },
+      });
+    } else {
+      await prisma.agent.create({
+        data: {
+          bio,
+          companyId: invite.companyId,
+          email: invite.email,
+          imageUrl,
+          name,
+          phone,
+          title,
+        },
+      });
+    }
+
+    revalidatePath("/agents");
+  } else if (invite.role === "staff") {
+    const existingEmployee = await prisma.employee.findFirst({
+      where: {
+        companyId: invite.companyId,
+        deletedAt: null,
+        email: invite.email,
+      },
+    });
+
+    if (existingEmployee) {
+      await prisma.employee.update({
+        data: {
+          name,
+          phone,
+          title,
+          workRole: invite.workRole,
+        },
+        where: { id: existingEmployee.id },
+      });
+    } else {
+      await prisma.employee.create({
+        data: {
+          companyId: invite.companyId,
+          email: invite.email,
+          name,
+          phone,
+          title,
+          workRole: invite.workRole,
+        },
+      });
+    }
+
+    revalidatePath("/hr/employees");
+    revalidatePath("/hr/leave");
+  }
+
+  redirect("/?inviteProfileCompleted=1");
 }
 
 export async function updateMemberRoleAction(formData: FormData) {
   const membershipId = String(formData.get("membershipId") ?? "");
-  const role = String(formData.get("role") ?? "staff") as "admin" | "agent" | "staff";
+  const role = String(formData.get("role") ?? "staff") as
+    | "admin"
+    | "agent"
+    | "staff";
   let errorRedirect: string | null = null;
 
   try {
@@ -924,7 +1253,8 @@ export async function updateMemberRoleAction(formData: FormData) {
     await caller.team.updateMemberRole({ membershipId, role });
     revalidatePath("/team");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to update role.";
+    const message =
+      err instanceof Error ? err.message : "Failed to update role.";
     errorRedirect = createRedirectUrl("/team", { error: message });
   }
 
@@ -942,7 +1272,8 @@ export async function suspendMemberAction(formData: FormData) {
     await caller.team.suspendMember({ membershipId });
     revalidatePath("/team");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to suspend member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to suspend member.";
     errorRedirect = createRedirectUrl("/team", { error: message });
   }
 
@@ -960,7 +1291,8 @@ export async function reactivateMemberAction(formData: FormData) {
     await caller.team.reactivateMember({ membershipId });
     revalidatePath("/team");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to reactivate member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to reactivate member.";
     errorRedirect = createRedirectUrl("/team", { error: message });
   }
 
@@ -978,7 +1310,8 @@ export async function removeMemberAction(formData: FormData) {
     await caller.team.removeMember({ membershipId });
     revalidatePath("/team");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to remove member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to remove member.";
     errorRedirect = createRedirectUrl("/team", { error: message });
   }
 
@@ -996,7 +1329,8 @@ export async function revokeInviteAction(formData: FormData) {
     await caller.team.revokeInvite({ inviteId });
     revalidatePath("/team");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to revoke invite.";
+    const message =
+      err instanceof Error ? err.message : "Failed to revoke invite.";
     errorRedirect = createRedirectUrl("/team", { error: message });
   }
 
@@ -1027,7 +1361,7 @@ export async function updatePropertyPublishStateAction(formData: FormData) {
 export async function addPropertyMediaAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
   const url = String(formData.get("url") ?? "");
-  const kind = (String(formData.get("kind") ?? "image")) as
+  const kind = String(formData.get("kind") ?? "image") as
     | "image"
     | "floor_plan"
     | "virtual_tour";
@@ -1041,7 +1375,9 @@ export async function addPropertyMediaAction(formData: FormData) {
     revalidatePath(`/properties/${propertyId}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to add media.";
-    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, { error: message });
+    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
+      error: message,
+    });
   }
 
   if (errorRedirect) {
@@ -1096,17 +1432,29 @@ export async function createCustomerAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  const status = (String(formData.get("status") ?? "active")) as "active" | "inactive" | "vip";
-  const sourceLeadId = String(formData.get("sourceLeadId") ?? "").trim() || null;
+  const status = String(formData.get("status") ?? "active") as
+    | "active"
+    | "inactive"
+    | "vip";
+  const sourceLeadId =
+    String(formData.get("sourceLeadId") ?? "").trim() || null;
 
   let errorRedirect: string | null = null;
   try {
     const caller = await createServerCaller();
-    await caller.customers.create({ name, email, phone, notes, status, sourceLeadId });
+    await caller.customers.create({
+      name,
+      email,
+      phone,
+      notes,
+      status,
+      sourceLeadId,
+    });
     revalidatePath("/customers");
     revalidatePath("/leads");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create customer.";
+    const message =
+      err instanceof Error ? err.message : "Failed to create customer.";
     errorRedirect = createRedirectUrl("/customers", { error: message });
   }
 
@@ -1119,7 +1467,10 @@ export async function createCustomerAction(formData: FormData) {
 
 export async function updateCustomerStatusAction(formData: FormData) {
   const customerId = String(formData.get("customerId") ?? "");
-  const status = String(formData.get("status") ?? "active") as "active" | "inactive" | "vip";
+  const status = String(formData.get("status") ?? "active") as
+    | "active"
+    | "inactive"
+    | "vip";
 
   try {
     const caller = await createServerCaller();
@@ -1164,7 +1515,8 @@ export async function convertLeadToCustomerAction(formData: FormData) {
     revalidatePath("/leads");
     revalidatePath("/customers");
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to convert lead.";
+    const message =
+      err instanceof Error ? err.message : "Failed to convert lead.";
     errorRedirect = createRedirectUrl("/leads", { error: message });
   }
 
@@ -1189,17 +1541,20 @@ export async function createEmployeeAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim() || null;
-  const departmentId = String(formData.get("departmentId") ?? "").trim() || null;
-  const employmentType = (String(formData.get("employmentType") ?? "full_time")) as
-    | "full_time"
-    | "part_time"
-    | "contract"
-    | "intern";
+  const rawWorkRole = String(formData.get("workRole") ?? "").trim();
+  const departmentId =
+    String(formData.get("departmentId") ?? "").trim() || null;
+  const employmentType = String(
+    formData.get("employmentType") ?? "full_time",
+  ) as "full_time" | "part_time" | "contract" | "intern";
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
   const salaryRaw = String(formData.get("salaryAmount") ?? "").trim();
+  const workRole = isWorkRole(rawWorkRole) ? rawWorkRole : "operations";
 
   if (!name) {
-    redirect(createRedirectUrl("/hr/employees", { error: "Name is required." }));
+    redirect(
+      createRedirectUrl("/hr/employees", { error: "Name is required." }),
+    );
   }
 
   await prisma.employee.create({
@@ -1209,6 +1564,7 @@ export async function createEmployeeAction(formData: FormData) {
       email,
       phone,
       title,
+      workRole,
       departmentId,
       employmentType,
       startDate: startDateRaw ? new Date(startDateRaw) : null,
@@ -1228,24 +1584,55 @@ export async function updateEmployeeAction(formData: FormData) {
 
   const employeeId = String(formData.get("employeeId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").trim() || null;
-  const title = String(formData.get("title") ?? "").trim() || null;
-  const departmentId = String(formData.get("departmentId") ?? "").trim() || null;
-  const employmentType = (String(formData.get("employmentType") ?? "full_time")) as
-    | "full_time"
-    | "part_time"
-    | "contract"
-    | "intern";
-  const status = (String(formData.get("status") ?? "active")) as
-    | "active"
-    | "on_leave"
-    | "suspended"
-    | "terminated";
+  const rawEmail = formData.get("email");
+  const rawPhone = formData.get("phone");
+  const rawTitle = formData.get("title");
+  const rawWorkRole = formData.get("workRole");
+  const rawDepartmentId = formData.get("departmentId");
+  const rawEmploymentType = formData.get("employmentType");
+  const rawStatus = formData.get("status");
+  const email = rawEmail === null ? undefined : String(rawEmail).trim() || null;
+  const phone = rawPhone === null ? undefined : String(rawPhone).trim() || null;
+  const title = rawTitle === null ? undefined : String(rawTitle).trim() || null;
+  const departmentId =
+    rawDepartmentId === null
+      ? undefined
+      : String(rawDepartmentId).trim() || null;
+  const employmentType =
+    rawEmploymentType === null
+      ? undefined
+      : (String(rawEmploymentType).trim() as
+          | "full_time"
+          | "part_time"
+          | "contract"
+          | "intern");
+  const status =
+    rawStatus === null
+      ? undefined
+      : (String(rawStatus).trim() as
+          | "active"
+          | "on_leave"
+          | "suspended"
+          | "terminated");
+  const workRole =
+    rawWorkRole === null
+      ? undefined
+      : isWorkRole(String(rawWorkRole).trim())
+        ? String(rawWorkRole).trim()
+        : "operations";
 
   await prisma.employee.update({
     where: { id: employeeId, companyId },
-    data: { name, email, phone, title, departmentId, employmentType, status },
+    data: {
+      name,
+      email,
+      phone,
+      title,
+      workRole,
+      departmentId,
+      employmentType,
+      status,
+    },
   });
 
   revalidatePath("/hr/employees");
@@ -1281,7 +1668,9 @@ export async function createDepartmentAction(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim() || null;
 
   if (!name) {
-    redirect(createRedirectUrl("/hr/departments", { error: "Name is required." }));
+    redirect(
+      createRedirectUrl("/hr/departments", { error: "Name is required." }),
+    );
   }
 
   await prisma.department.create({
@@ -1330,7 +1719,9 @@ export async function deleteDepartmentAction(formData: FormData) {
 // CSV Export
 // ---------------------------------------------------------------------------
 
-function toCsvRow(fields: (string | number | boolean | null | undefined)[]): string {
+function toCsvRow(
+  fields: (string | number | boolean | null | undefined)[],
+): string {
   return fields
     .map((f) => {
       const str = f == null ? "" : String(f);
@@ -1354,9 +1745,25 @@ export async function exportLeadsCsvAction() {
     orderBy: { createdAt: "desc" },
   });
 
-  const header = toCsvRow(["Name", "Email", "Phone", "Source", "Status", "Message", "Created At"]);
+  const header = toCsvRow([
+    "Name",
+    "Email",
+    "Phone",
+    "Source",
+    "Status",
+    "Message",
+    "Created At",
+  ]);
   const rows = leads.map((l) =>
-    toCsvRow([l.name, l.email, l.phone, l.source, l.status, l.message, l.createdAt.toISOString()]),
+    toCsvRow([
+      l.name,
+      l.email,
+      l.phone,
+      l.source,
+      l.status,
+      l.message,
+      l.createdAt.toISOString(),
+    ]),
   );
 
   return [header, ...rows].join("\n");
@@ -1374,12 +1781,29 @@ export async function exportPropertiesCsvAction() {
   });
 
   const header = toCsvRow([
-    "Title", "Location", "Price", "Type", "Status", "Publish State", "Bedrooms", "Bathrooms", "Featured", "Created At",
+    "Title",
+    "Location",
+    "Price",
+    "Type",
+    "Status",
+    "Publish State",
+    "Bedrooms",
+    "Bathrooms",
+    "Featured",
+    "Created At",
   ]);
   const rows = properties.map((p) =>
     toCsvRow([
-      p.title, p.location, p.price, p.type, p.status, p.publishState,
-      p.bedrooms, p.bathrooms, p.featured ? "Yes" : "No", p.createdAt.toISOString(),
+      p.title,
+      p.location,
+      p.price,
+      p.type,
+      p.status,
+      p.publishState,
+      p.bedrooms,
+      p.bathrooms,
+      p.featured ? "Yes" : "No",
+      p.createdAt.toISOString(),
     ]),
   );
 
@@ -1397,9 +1821,23 @@ export async function exportCustomersCsvAction() {
     orderBy: { createdAt: "desc" },
   });
 
-  const header = toCsvRow(["Name", "Email", "Phone", "Status", "Notes", "Created At"]);
+  const header = toCsvRow([
+    "Name",
+    "Email",
+    "Phone",
+    "Status",
+    "Notes",
+    "Created At",
+  ]);
   const rows = customers.map((c) =>
-    toCsvRow([c.name, c.email, c.phone, c.status, c.notes, c.createdAt.toISOString()]),
+    toCsvRow([
+      c.name,
+      c.email,
+      c.phone,
+      c.status,
+      c.notes,
+      c.createdAt.toISOString(),
+    ]),
   );
 
   return [header, ...rows].join("\n");
@@ -1421,13 +1859,26 @@ export async function exportAppointmentsCsvAction() {
   });
 
   const header = toCsvRow([
-    "Client Name", "Client Email", "Client Phone", "Property", "Agent",
-    "Scheduled At", "Status", "Notes", "Created At",
+    "Client Name",
+    "Client Email",
+    "Client Phone",
+    "Property",
+    "Agent",
+    "Scheduled At",
+    "Status",
+    "Notes",
+    "Created At",
   ]);
   const rows = appointments.map((a) =>
     toCsvRow([
-      a.clientName, a.clientEmail, a.clientPhone, a.property?.title,
-      a.agent?.name, a.scheduledAt.toISOString(), a.status, a.notes,
+      a.clientName,
+      a.clientEmail,
+      a.clientPhone,
+      a.property?.title,
+      a.agent?.name,
+      a.scheduledAt.toISOString(),
+      a.status,
+      a.notes,
       a.createdAt.toISOString(),
     ]),
   );
@@ -1448,13 +1899,26 @@ export async function exportEmployeesCsvAction() {
   });
 
   const header = toCsvRow([
-    "Name", "Email", "Phone", "Title", "Department", "Employment Type",
-    "Status", "Start Date", "Created At",
+    "Name",
+    "Email",
+    "Phone",
+    "Title",
+    "Department",
+    "Employment Type",
+    "Status",
+    "Start Date",
+    "Created At",
   ]);
   const rows = employees.map((e) =>
     toCsvRow([
-      e.name, e.email, e.phone, e.title, e.department?.name,
-      e.employmentType, e.status, e.startDate?.toISOString(),
+      e.name,
+      e.email,
+      e.phone,
+      e.title,
+      e.department?.name,
+      e.employmentType,
+      e.status,
+      e.startDate?.toISOString(),
       e.createdAt.toISOString(),
     ]),
   );
@@ -1485,7 +1949,11 @@ export async function createLeaveRequestAction(formData: FormData) {
   const reason = String(formData.get("reason") ?? "").trim() || null;
 
   if (!employeeId || !startDateRaw || !endDateRaw) {
-    redirect(createRedirectUrl("/hr/leave", { error: "Employee, start date, and end date are required." }));
+    redirect(
+      createRedirectUrl("/hr/leave", {
+        error: "Employee, start date, and end date are required.",
+      }),
+    );
   }
 
   // Verify employee belongs to this company
@@ -1589,14 +2057,30 @@ export async function createPayrollEntryAction(formData: FormData) {
   if (!prisma) throw new Error("Database not configured.");
 
   const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const periodYear = Number.parseInt(String(formData.get("periodYear") ?? ""), 10);
-  const periodMonth = Number.parseInt(String(formData.get("periodMonth") ?? ""), 10);
-  const grossAmount = Number.parseInt(String(formData.get("grossAmount") ?? "0"), 10);
-  const netAmount = Number.parseInt(String(formData.get("netAmount") ?? "0"), 10);
+  const periodYear = Number.parseInt(
+    String(formData.get("periodYear") ?? ""),
+    10,
+  );
+  const periodMonth = Number.parseInt(
+    String(formData.get("periodMonth") ?? ""),
+    10,
+  );
+  const grossAmount = Number.parseInt(
+    String(formData.get("grossAmount") ?? "0"),
+    10,
+  );
+  const netAmount = Number.parseInt(
+    String(formData.get("netAmount") ?? "0"),
+    10,
+  );
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!employeeId || !periodYear || !periodMonth) {
-    redirect(createRedirectUrl("/hr/payroll", { error: "Employee, year, and month are required." }));
+    redirect(
+      createRedirectUrl("/hr/payroll", {
+        error: "Employee, year, and month are required.",
+      }),
+    );
   }
 
   // Verify employee belongs to this company
@@ -1604,7 +2088,9 @@ export async function createPayrollEntryAction(formData: FormData) {
     where: { id: employeeId, companyId, deletedAt: null },
   });
   if (!employee) {
-    redirect(createRedirectUrl("/hr/payroll", { error: "Employee not found." }));
+    redirect(
+      createRedirectUrl("/hr/payroll", { error: "Employee not found." }),
+    );
   }
 
   await prisma.payrollEntry.create({
@@ -1653,8 +2139,10 @@ export async function updateNotificationPreferenceAction(formData: FormData) {
   const type = String(formData.get("type") ?? "");
   const channel = String(formData.get("channel") ?? "");
   const enabled = String(formData.get("enabled") ?? "true") === "true";
-  const currentInApp = String(formData.get("currentInApp") ?? "true") === "true";
-  const currentEmail = String(formData.get("currentEmail") ?? "true") === "true";
+  const currentInApp =
+    String(formData.get("currentInApp") ?? "true") === "true";
+  const currentEmail =
+    String(formData.get("currentEmail") ?? "true") === "true";
 
   if (!type || !channel) return;
 
@@ -1685,8 +2173,13 @@ export async function exportBusinessSummaryCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import("@plotkeys/db");
-  const summary = await getMonthlyBusinessSummary(prisma, companyId, { year, month });
+  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import(
+    "@plotkeys/db"
+  );
+  const summary = await getMonthlyBusinessSummary(prisma, companyId, {
+    year,
+    month,
+  });
   return businessSummaryToCsv(summary);
 }
 
@@ -1699,8 +2192,13 @@ export async function exportAgentReportCsvAction(
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import("@plotkeys/db");
-  const report = await getAgentPerformanceReport(prisma, companyId, { year, month });
+  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import(
+    "@plotkeys/db"
+  );
+  const report = await getAgentPerformanceReport(prisma, companyId, {
+    year,
+    month,
+  });
   return agentPerformanceToCsv(report);
 }
 
@@ -1710,7 +2208,9 @@ export async function exportListingsReportCsvAction(): Promise<string> {
   const prisma = createPrismaClient().db;
   if (!prisma) throw new Error("Database not configured.");
 
-  const { getListingsReport, listingsReportToCsv } = await import("@plotkeys/db");
+  const { getListingsReport, listingsReportToCsv } = await import(
+    "@plotkeys/db"
+  );
   const report = await getListingsReport(prisma, companyId);
   return listingsReportToCsv(report);
 }
@@ -1731,8 +2231,7 @@ export async function updateIntegrationsAction(formData: FormData) {
     String(formData.get("facebookPixelId") ?? "").trim() || null;
   const whatsappPhone =
     String(formData.get("whatsappPhone") ?? "").trim() || null;
-  const calendlyUrl =
-    String(formData.get("calendlyUrl") ?? "").trim() || null;
+  const calendlyUrl = String(formData.get("calendlyUrl") ?? "").trim() || null;
 
   await prisma.companyIntegration.upsert({
     where: { companyId },

@@ -29,6 +29,7 @@ export type MembershipMinAggregateOutputType = {
   companyId: string | null
   userId: string | null
   role: $Enums.MembershipRole | null
+  workRole: $Enums.WorkRole | null
   status: $Enums.MembershipStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -40,6 +41,7 @@ export type MembershipMaxAggregateOutputType = {
   companyId: string | null
   userId: string | null
   role: $Enums.MembershipRole | null
+  workRole: $Enums.WorkRole | null
   status: $Enums.MembershipStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -51,6 +53,7 @@ export type MembershipCountAggregateOutputType = {
   companyId: number
   userId: number
   role: number
+  workRole: number
   status: number
   createdAt: number
   updatedAt: number
@@ -64,6 +67,7 @@ export type MembershipMinAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -75,6 +79,7 @@ export type MembershipMaxAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -86,6 +91,7 @@ export type MembershipCountAggregateInputType = {
   companyId?: true
   userId?: true
   role?: true
+  workRole?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -170,6 +176,7 @@ export type MembershipGroupByOutputType = {
   companyId: string
   userId: string
   role: $Enums.MembershipRole
+  workRole: $Enums.WorkRole
   status: $Enums.MembershipStatus
   createdAt: Date
   updatedAt: Date
@@ -202,12 +209,14 @@ export type MembershipWhereInput = {
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  projectAssignments?: Prisma.ProjectAssignmentListRelationFilter
 }
 
 export type MembershipOrderByWithRelationInput = {
@@ -215,12 +224,14 @@ export type MembershipOrderByWithRelationInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  projectAssignments?: Prisma.ProjectAssignmentOrderByRelationAggregateInput
 }
 
 export type MembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -231,12 +242,14 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  projectAssignments?: Prisma.ProjectAssignmentListRelationFilter
 }, "id">
 
 export type MembershipOrderByWithAggregationInput = {
@@ -244,6 +257,7 @@ export type MembershipOrderByWithAggregationInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -261,6 +275,7 @@ export type MembershipScalarWhereWithAggregatesInput = {
   companyId?: Prisma.UuidWithAggregatesFilter<"Membership"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleWithAggregatesFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleWithAggregatesFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusWithAggregatesFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
@@ -270,12 +285,14 @@ export type MembershipScalarWhereWithAggregatesInput = {
 export type MembershipCreateInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateInput = {
@@ -283,21 +300,25 @@ export type MembershipUncheckedCreateInput = {
   companyId: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateInput = {
@@ -305,10 +326,12 @@ export type MembershipUncheckedUpdateInput = {
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipCreateManyInput = {
@@ -316,6 +339,7 @@ export type MembershipCreateManyInput = {
   companyId: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -325,6 +349,7 @@ export type MembershipCreateManyInput = {
 export type MembershipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -336,6 +361,7 @@ export type MembershipUncheckedUpdateManyInput = {
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -357,6 +383,7 @@ export type MembershipCountOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -368,6 +395,7 @@ export type MembershipMaxOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -379,10 +407,16 @@ export type MembershipMinOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  workRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+}
+
+export type MembershipScalarRelationFilter = {
+  is?: Prisma.MembershipWhereInput
+  isNot?: Prisma.MembershipWhereInput
 }
 
 export type MembershipCreateNestedManyWithoutCompanyInput = {
@@ -435,6 +469,20 @@ export type EnumMembershipStatusFieldUpdateOperationsInput = {
   set?: $Enums.MembershipStatus
 }
 
+export type MembershipCreateNestedOneWithoutProjectAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProjectAssignmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutProjectAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProjectAssignmentsInput
+  upsert?: Prisma.MembershipUpsertWithoutProjectAssignmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutProjectAssignmentsInput, Prisma.MembershipUpdateWithoutProjectAssignmentsInput>, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
+}
+
 export type MembershipCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.MembershipCreateWithoutUserInput, Prisma.MembershipUncheckedCreateWithoutUserInput> | Prisma.MembershipCreateWithoutUserInput[] | Prisma.MembershipUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutUserInput | Prisma.MembershipCreateOrConnectWithoutUserInput[]
@@ -480,21 +528,25 @@ export type MembershipUncheckedUpdateManyWithoutUserNestedInput = {
 export type MembershipCreateWithoutCompanyInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutCompanyInput = {
   id?: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutCompanyInput = {
@@ -531,30 +583,99 @@ export type MembershipScalarWhereInput = {
   companyId?: Prisma.UuidFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
   role?: Prisma.EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFilter<"Membership"> | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
 }
 
-export type MembershipCreateWithoutUserInput = {
+export type MembershipCreateWithoutProjectAssignmentsInput = {
   id?: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+}
+
+export type MembershipUncheckedCreateWithoutProjectAssignmentsInput = {
+  id?: string
+  companyId: string
+  userId: string
+  role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
+  status?: $Enums.MembershipStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MembershipCreateOrConnectWithoutProjectAssignmentsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+}
+
+export type MembershipUpsertWithoutProjectAssignmentsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedCreateWithoutProjectAssignmentsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutProjectAssignmentsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutProjectAssignmentsInput, Prisma.MembershipUncheckedUpdateWithoutProjectAssignmentsInput>
+}
+
+export type MembershipUpdateWithoutProjectAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutProjectAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MembershipCreateWithoutUserInput = {
+  id?: string
+  role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
+  status?: $Enums.MembershipStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutMembershipsInput
+  projectAssignments?: Prisma.ProjectAssignmentCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutUserInput = {
   id?: string
   companyId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutUserInput = {
@@ -587,6 +708,7 @@ export type MembershipCreateManyCompanyInput = {
   id?: string
   userId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -596,27 +718,32 @@ export type MembershipCreateManyCompanyInput = {
 export type MembershipUpdateWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -627,6 +754,7 @@ export type MembershipCreateManyUserInput = {
   id?: string
   companyId: string
   role?: $Enums.MembershipRole
+  workRole?: $Enums.WorkRole
   status?: $Enums.MembershipStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -636,33 +764,67 @@ export type MembershipCreateManyUserInput = {
 export type MembershipUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutMembershipsNestedInput
+  projectAssignments?: Prisma.ProjectAssignmentUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectAssignments?: Prisma.ProjectAssignmentUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  workRole?: Prisma.EnumWorkRoleFieldUpdateOperationsInput | $Enums.WorkRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+
+/**
+ * Count Type MembershipCountOutputType
+ */
+
+export type MembershipCountOutputType = {
+  projectAssignments: number
+}
+
+export type MembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  projectAssignments?: boolean | MembershipCountOutputTypeCountProjectAssignmentsArgs
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MembershipCountOutputType
+   */
+  select?: Prisma.MembershipCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountProjectAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProjectAssignmentWhereInput
+}
 
 
 export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -670,12 +832,15 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  projectAssignments?: boolean | Prisma.Membership$projectAssignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
 export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -683,6 +848,7 @@ export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -696,6 +862,7 @@ export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -709,16 +876,19 @@ export type MembershipSelectScalar = {
   companyId?: boolean
   userId?: boolean
   role?: boolean
+  workRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "userId" | "role" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
+export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "userId" | "role" | "workRole" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  projectAssignments?: boolean | Prisma.Membership$projectAssignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
@@ -734,12 +904,14 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     company: Prisma.$CompanyPayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
+    projectAssignments: Prisma.$ProjectAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     companyId: string
     userId: string
     role: $Enums.MembershipRole
+    workRole: $Enums.WorkRole
     status: $Enums.MembershipStatus
     createdAt: Date
     updatedAt: Date
@@ -1140,6 +1312,7 @@ export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  projectAssignments<T extends Prisma.Membership$projectAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$projectAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1173,6 +1346,7 @@ export interface MembershipFieldRefs {
   readonly companyId: Prisma.FieldRef<"Membership", 'String'>
   readonly userId: Prisma.FieldRef<"Membership", 'String'>
   readonly role: Prisma.FieldRef<"Membership", 'MembershipRole'>
+  readonly workRole: Prisma.FieldRef<"Membership", 'WorkRole'>
   readonly status: Prisma.FieldRef<"Membership", 'MembershipStatus'>
   readonly createdAt: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Membership", 'DateTime'>
@@ -1575,6 +1749,30 @@ export type MembershipDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Memberships to delete.
    */
   limit?: number
+}
+
+/**
+ * Membership.projectAssignments
+ */
+export type Membership$projectAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProjectAssignment
+   */
+  select?: Prisma.ProjectAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProjectAssignment
+   */
+  omit?: Prisma.ProjectAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProjectAssignmentInclude<ExtArgs> | null
+  where?: Prisma.ProjectAssignmentWhereInput
+  orderBy?: Prisma.ProjectAssignmentOrderByWithRelationInput | Prisma.ProjectAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.ProjectAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProjectAssignmentScalarFieldEnum | Prisma.ProjectAssignmentScalarFieldEnum[]
 }
 
 /**

@@ -1,11 +1,11 @@
 "use client";
 
-import { authRoutes } from "@plotkeys/auth/shared";
 import { verifyEmailInputSchema } from "@plotkeys/api/schemas/auth";
-import { useMutation } from "@tanstack/react-query";
+import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { useZodForm } from "../../hooks/use-zod-form";
@@ -26,8 +26,12 @@ export function VerifyEmailForm({
   token: string;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const trpc = useTRPC();
-  const [formError, setFormError] = useState<string | null>(initialError ?? null);
+  const redirectTo = searchParams.get("redirect");
+  const [formError, setFormError] = useState<string | null>(
+    initialError ?? null,
+  );
   const form = useZodForm(verifyEmailInputSchema, {
     defaultValues: {
       company: onboarding?.company ?? "",
@@ -42,7 +46,7 @@ export function VerifyEmailForm({
       },
       async onSuccess(result) {
         await persistSession(result.sessionToken, onboarding);
-        router.push(result.redirectTo);
+        router.push(redirectTo || result.redirectTo);
         router.refresh();
       },
     }),
@@ -78,7 +82,15 @@ export function VerifyEmailForm({
             : "Verify and continue"}
         </Button>
         <Button asChild variant="secondary">
-          <Link href={authRoutes.signUp}>Back to sign up</Link>
+          <Link
+            href={
+              redirectTo
+                ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
+                : authRoutes.signUp
+            }
+          >
+            Back to sign up
+          </Link>
         </Button>
       </div>
     </div>

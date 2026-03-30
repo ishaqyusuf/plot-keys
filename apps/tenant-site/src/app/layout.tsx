@@ -3,22 +3,30 @@ import "@plotkeys/ui/globals.css";
 import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
 import { NotificationsProvider } from "@plotkeys/notifications-react";
 import { ThemeProvider } from "@plotkeys/ui/theme-provider";
-import { extractTenantHostname } from "@plotkeys/utils";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
 import { ChatWidget } from "../components/chat-widget";
 import { IntegrationScripts } from "../components/integration-scripts";
+import { RegisterFooter } from "../components/register-footer";
+import { RegisterNav } from "../components/register-nav";
+import { TenantInteractionShell } from "../components/tenant-interaction-shell";
+import { resolveTenantShell } from "../lib/resolve-tenant";
 
 const fallbackMetadata: Metadata = {
-  title: "PlotKeys Tenant Site",
-  description: "Structured tenant website renderer for PlotKeys",
+  title: "PlotKeys",
+  description: "Browse properties, meet agents, and schedule viewings.",
 };
 
 async function resolveSubdomain(): Promise<string | null> {
   const requestHeaders = await headers();
   return requestHeaders.get("x-tenant-subdomain") || null;
+}
+
+async function resolveRequestPathname(): Promise<string | null> {
+  const requestHeaders = await headers();
+  return requestHeaders.get("x-tenant-pathname") || null;
 }
 
 async function resolveIntegrations(subdomain: string | null): Promise<{
@@ -50,12 +58,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!prisma) return fallbackMetadata;
 
-  const tenantHostname =
-    requestHeaders.get("x-tenant-hostname") || null;
-  const tenantSubdomain =
-    requestHeaders.get("x-tenant-subdomain") || null;
+  const tenantHostname = requestHeaders.get("x-tenant-hostname") || null;
+  const tenantSubdomain = requestHeaders.get("x-tenant-subdomain") || null;
 
-  // Resolve company from hostname or subdomain
   let company: {
     name: string;
     market: string | null;
@@ -112,9 +117,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return metadata;
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const subdomain = await resolveSubdomain();
-  const integrations = await resolveIntegrations(subdomain);
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [subdomain, integrations, shell, pathname] = await Promise.all([
+    resolveSubdomain(),
+    resolveSubdomain().then(resolveIntegrations),
+    resolveTenantShell(),
+    resolveRequestPathname(),
+  ]);
+  const isPortalRoute = pathname?.startsWith("/portal") ?? false;
+
+  // Determine if this is a register template with family nav/footer
+  const hasRegisterShell =
+    shell !== null && shell.familyKey !== undefined && !isPortalRoute;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -125,8 +143,35 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           disableTransitionOnChange
           enableSystem
         >
-          <NotificationsProvider>{children}</NotificationsProvider>
-          {subdomain && <ChatWidget subdomain={subdomain} />}
+          <NotificationsProvider>
+            <TenantInteractionShell
+              colorSystemKey={shell?.templateConfig.colorSystem}
+              templateConfig={shell?.templateConfig ?? {}}
+            >
+              {hasRegisterShell && shell.familyKey && shell.tier ? (
+                <RegisterNav
+                  companyName={shell.company.name}
+                  familyKey={shell.familyKey}
+                  logoUrl={shell.company.logoUrl}
+                  templateKey={shell.templateKey}
+                  tier={shell.tier}
+                />
+              ) : null}
+
+              <main>{children}</main>
+
+              {hasRegisterShell && shell.familyKey ? (
+                <RegisterFooter
+                  companyName={shell.company.name}
+                  familyKey={shell.familyKey}
+                />
+              ) : null}
+            </TenantInteractionShell>
+          </NotificationsProvider>
+
+          {subdomain && !isPortalRoute ? (
+            <ChatWidget subdomain={subdomain} />
+          ) : null}
           <IntegrationScripts
             googleAnalyticsId={integrations.googleAnalyticsId}
             facebookPixelId={integrations.facebookPixelId}

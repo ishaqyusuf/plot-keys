@@ -1,4 +1,9 @@
-import { authSessionCookieName } from "@plotkeys/auth/shared";
+import {
+  authSessionCookieName,
+  getScopedAuthSessionCookieName,
+  platformSessionScope,
+} from "@plotkeys/auth/shared";
+import { resolveDashboardSessionScope } from "@plotkeys/utils";
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
 const pendingOnboardingCookieName = "plotkeys_pending_onboarding";
@@ -9,20 +14,35 @@ type PendingOnboardingPayload = {
 };
 
 type CookieReader = {
-  get(name: string): {
-    value: string;
-  } | undefined;
+  get(name: string):
+    | {
+        value: string;
+      }
+    | undefined;
 };
 
-export function clearAuthSessionCookie(cookieStore: ResponseCookies) {
+function resolveSessionCookieScope(host?: string | null) {
+  return resolveDashboardSessionScope(host) ?? platformSessionScope;
+}
+
+export function getScopedAuthSessionCookieNameForHost(host?: string | null) {
+  return getScopedAuthSessionCookieName(resolveSessionCookieScope(host));
+}
+
+export function clearAuthSessionCookie(
+  cookieStore: ResponseCookies,
+  host?: string | null,
+) {
+  cookieStore.delete(getScopedAuthSessionCookieNameForHost(host));
   cookieStore.delete(authSessionCookieName);
 }
 
 export function setAuthSessionCookie(
   cookieStore: ResponseCookies,
   sessionToken: string,
+  host?: string | null,
 ) {
-  cookieStore.set(authSessionCookieName, sessionToken, {
+  cookieStore.set(getScopedAuthSessionCookieNameForHost(host), sessionToken, {
     httpOnly: true,
     maxAge: 60 * 60 * 24 * 7,
     path: "/",

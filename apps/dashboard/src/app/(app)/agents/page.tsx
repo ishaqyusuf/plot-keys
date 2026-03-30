@@ -5,15 +5,23 @@ import { Button } from "@plotkeys/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
+  CardTitle,
 } from "@plotkeys/ui/card";
-import Link from "next/link";
+import { Input } from "@plotkeys/ui/input";
+import { Label } from "@plotkeys/ui/label";
 import { requireOnboardedSession } from "../../../lib/session";
-import { deleteAgentAction, toggleAgentFeaturedAction } from "../../actions";
+import {
+  deleteAgentAction,
+  inviteAgentAction,
+  revokeInviteAction,
+  toggleAgentFeaturedAction,
+} from "../../actions";
 import { AgentForm } from "./agent-form";
 
 type AgentsPageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; invited?: string }>;
 };
 
 export default async function AgentsPage({ searchParams }: AgentsPageProps) {
@@ -21,15 +29,31 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
   const params = (await searchParams) ?? {};
 
   const prisma = createPrismaClient().db;
-  const agents = prisma
-    ? await prisma.agent.findMany({
-        orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { createdAt: "asc" }],
-        where: {
-          companyId: session.activeMembership.companyId,
-          deletedAt: null,
-        },
-      })
-    : [];
+  const [agents, pendingInvites] = prisma
+    ? await Promise.all([
+        prisma.agent.findMany({
+          orderBy: [
+            { featured: "desc" },
+            { displayOrder: "asc" },
+            { createdAt: "asc" },
+          ],
+          where: {
+            companyId: session.activeMembership.companyId,
+            deletedAt: null,
+          },
+        }),
+        prisma.teamInvite.findMany({
+          orderBy: { createdAt: "desc" },
+          where: {
+            acceptedAt: null,
+            companyId: session.activeMembership.companyId,
+            expiresAt: { gt: new Date() },
+            revokedAt: null,
+            role: "agent",
+          },
+        }),
+      ])
+    : [[], []];
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
@@ -37,6 +61,15 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
         {params.error ? (
           <Alert className="mb-6" variant="destructive">
             <AlertDescription>{params.error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {params.invited ? (
+          <Alert className="mb-6">
+            <AlertDescription>
+              Agent invite sent. They&apos;ll receive an email to join and fill
+              in their profile directly.
+            </AlertDescription>
           </Alert>
         ) : null}
 
@@ -49,14 +82,69 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
               {agents.length} team member{agents.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <AgentForm mode="create" />
         </div>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Invite an agent</CardTitle>
+            <CardDescription>
+              Enter an email address and PlotKeys will invite them to join your
+              workspace and complete their agent profile on the site.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              action={inviteAgentAction}
+              className="flex flex-col gap-4 sm:flex-row"
+            >
+              <div className="flex-1">
+                <Label htmlFor="agent-email">Email address</Label>
+                <Input
+                  id="agent-email"
+                  name="email"
+                  placeholder="agent@company.com"
+                  required
+                  type="email"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button type="submit">Send invite</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {pendingInvites.length > 0 ? (
+          <div className="mb-8 grid gap-3">
+            {pendingInvites.map((invite) => (
+              <Card key={invite.id} className="border-dashed">
+                <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {invite.email}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Pending agent setup
+                    </p>
+                  </div>
+                  <form action={revokeInviteAction}>
+                    <input name="inviteId" type="hidden" value={invite.id} />
+                    <Button size="sm" type="submit" variant="ghost">
+                      Revoke
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : null}
 
         {agents.length === 0 ? (
           <Card className="py-16 text-center">
             <CardContent>
               <p className="text-muted-foreground">
-                No agents yet. Add your first team member to showcase them on your site.
+                No agents yet. Invite your first agent and they&apos;ll complete
+                their profile themselves.
               </p>
             </CardContent>
           </Card>
@@ -84,7 +172,9 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                           {agent.name}
                         </p>
                         {agent.featured && (
-                          <Badge variant="default" className="shrink-0">Featured</Badge>
+                          <Badge variant="default" className="shrink-0">
+                            Featured
+                          </Badge>
                         )}
                       </div>
                       {agent.title && (

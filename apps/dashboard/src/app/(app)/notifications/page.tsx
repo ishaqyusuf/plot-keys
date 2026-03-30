@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { createPrismaClient, listNotificationsForUser } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -32,13 +32,10 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
   const userId = session.user.id;
 
   const notifications = prisma
-    ? await prisma.notification.findMany({
-        where: {
-          companyId,
-          userId,
-          ...(onlyUnread ? { isRead: false } : {}),
-        },
-        orderBy: { createdAt: "desc" },
+    ? await listNotificationsForUser(prisma, {
+        companyId,
+        userId,
+        onlyUnread,
         take: 100,
       })
     : [];

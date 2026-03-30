@@ -2,6 +2,7 @@
 
 import {
   colorSystems,
+  getTemplatePageInventory,
   stylePresets,
   type TemplateConfig,
   templateCatalog,
@@ -24,6 +25,12 @@ import { Switch } from "@plotkeys/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Users2 } from "lucide-react";
+import {
+  describeTemplateAccess,
+  type SubscriptionTier,
+  tierLabels,
+} from "@plotkeys/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
 import { useTRPC } from "../../trpc/client";
@@ -32,11 +39,17 @@ type TemplateGroup = "starter" | "plus" | "pro";
 
 type BuilderSidebarControlsProps = {
   configId: string;
+  currentPageKey: string;
   currentTemplateKey: string;
+  licensedTemplateKeys: Set<string>;
+  planTier: SubscriptionTier;
+  readOnly?: boolean;
+  readOnlyMessage?: string;
+  requiredPlan?: SubscriptionTier;
   /** Section types present in the current template page inventory. */
   sectionTypes?: string[];
   templateConfig: TemplateConfig;
-  onCreateDraft: (formData: FormData) => Promise<void>;
+  onCreateDraft: (formData: FormData) => Promise<{ configId: string }>;
   onUpdateTheme: (formData: FormData) => Promise<void>;
   onUpdateThemeSilent?: (formData: FormData) => Promise<void>;
 };
@@ -101,11 +114,13 @@ const presetEntries = Object.values(stylePresets);
 
 function StylePresetMenu({
   configId,
+  disabled = false,
   onSave,
   onSaveSilent,
   value,
 }: {
   configId: string;
+  disabled?: boolean;
   onSave: (formData: FormData) => Promise<void>;
   onSaveSilent?: (formData: FormData) => Promise<void>;
   value: string;
@@ -114,6 +129,7 @@ function StylePresetMenu({
   const [, startTransition] = useTransition();
 
   function handleChange(preset: string) {
+    if (disabled) return;
     setOptimisticValue(preset);
     startTransition(async () => {
       const fd = new FormData();
@@ -133,7 +149,7 @@ function StylePresetMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <PickerButton label="Style preset">
+        <PickerButton disabled={disabled} label="Style preset">
           {current?.name ?? optimisticValue ?? "Default"}
         </PickerButton>
       </DropdownMenuTrigger>
@@ -176,11 +192,13 @@ const colorSystemEntries = Object.entries(colorSystems);
 
 function ColorSystemMenu({
   configId,
+  disabled = false,
   onSave,
   onSaveSilent,
   value,
 }: {
   configId: string;
+  disabled?: boolean;
   onSave: (formData: FormData) => Promise<void>;
   onSaveSilent?: (formData: FormData) => Promise<void>;
   value: string;
@@ -189,6 +207,7 @@ function ColorSystemMenu({
   const [, startTransition] = useTransition();
 
   function handleChange(system: string) {
+    if (disabled) return;
     setOptimisticValue(system);
     startTransition(async () => {
       const fd = new FormData();
@@ -208,7 +227,7 @@ function ColorSystemMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <PickerButton label="Color system">
+        <PickerButton disabled={disabled} label="Color system">
           <span className="flex items-center gap-2">
             {current && (
               <>
@@ -311,6 +330,7 @@ const fontOptions: { fonts: string[]; label: string }[] = [
 
 function FontMenu({
   configId,
+  disabled = false,
   label,
   onSave,
   onSaveSilent,
@@ -318,6 +338,7 @@ function FontMenu({
   value,
 }: {
   configId: string;
+  disabled?: boolean;
   label: string;
   onSave: (formData: FormData) => Promise<void>;
   onSaveSilent?: (formData: FormData) => Promise<void>;
@@ -328,6 +349,7 @@ function FontMenu({
   const [, startTransition] = useTransition();
 
   function handleChange(font: string) {
+    if (disabled) return;
     setOptimisticValue(font);
     startTransition(async () => {
       const fd = new FormData();
@@ -345,7 +367,7 @@ function FontMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <PickerButton label={label}>
+        <PickerButton disabled={disabled} label={label}>
           {optimisticValue || "Default"}
         </PickerButton>
       </DropdownMenuTrigger>
@@ -390,11 +412,15 @@ function FontMenu({
 function TemplatePicker({
   configId,
   currentTemplateKey,
+  licensedTemplateKeys,
   onCreateDraft,
+  planTier,
 }: {
   configId: string;
   currentTemplateKey: string;
-  onCreateDraft: (formData: FormData) => Promise<void>;
+  licensedTemplateKeys: Set<string>;
+  onCreateDraft: (formData: FormData) => Promise<{ configId: string }>;
+  planTier: SubscriptionTier;
 }) {
   const trpc = useTRPC();
   const { data: catalogWithCounts } = useQuery(
@@ -405,6 +431,8 @@ function TemplatePicker({
     (catalogWithCounts ?? []).map((t) => [t.key, t.usageCount]),
   );
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const currentTemplate = templateCatalog.find(
     (t) => t.key === currentTemplateKey,
   );
@@ -414,11 +442,20 @@ function TemplatePicker({
   const [, startTransition] = useTransition();
 
   function handleSelectTemplate(templateKey: string) {
+    if (templateKey === currentTemplateKey) {
+      return;
+    }
+
     startTransition(async () => {
       const fd = new FormData();
       fd.set("configId", configId);
       fd.set("templateKey", templateKey);
-      await onCreateDraft(fd);
+      const result = await onCreateDraft(fd);
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.set("configId", result.configId);
+      nextParams.set("page", "home");
+      router.replace(`/builder?${nextParams.toString()}`);
+      router.refresh();
     });
   }
 
@@ -467,6 +504,18 @@ function TemplatePicker({
                   return (
                     <DropdownMenuRadioItem
                       className="items-start rounded-md py-2 pr-8"
+                  const templateAccess = describeTemplateAccess(
+                    planTier,
+                    template.tier,
+                  );
+                  const isLocked =
+                    !licensedTemplateKeys.has(template.key) &&
+                    !templateAccess.allowed;
+
+                  return (
+                    <DropdownMenuRadioItem
+                      className="items-start rounded-md py-2 pr-8"
+                      disabled={isLocked}
                       key={template.key}
                       value={template.key}
                     >
@@ -494,6 +543,17 @@ function TemplatePicker({
                               ? "1 tenant"
                               : `${count} tenants`}
                           </p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Badge className="capitalize" variant="outline">
+                              {template.tier}
+                            </Badge>
+                            {isLocked ? (
+                              <span className="text-[11px] text-amber-700 dark:text-amber-300">
+                                Upgrade to{" "}
+                                {tierLabels[templateAccess.requiredTier]}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                     </DropdownMenuRadioItem>
@@ -508,17 +568,79 @@ function TemplatePicker({
   );
 }
 
+function PagePicker({
+  currentPageKey,
+  currentTemplateKey,
+}: {
+  currentPageKey: string;
+  currentTemplateKey: string;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pages = getTemplatePageInventory(currentTemplateKey).pages;
+  const currentPage =
+    pages.find((page) => page.pageKey === currentPageKey) ?? pages[0];
+
+  function handleSelectPage(pageKey: string) {
+    if (pageKey === currentPage?.pageKey) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("page", pageKey);
+    router.replace(`/builder?${nextParams.toString()}`);
+    router.refresh();
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <PickerButton label="Page">
+          {currentPage?.label ?? currentPage?.pageKey ?? "Home"}
+        </PickerButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
+        side="right"
+      >
+        <DropdownMenuRadioGroup
+          onValueChange={handleSelectPage}
+          value={currentPage?.pageKey ?? "home"}
+        >
+          <DropdownMenuGroup>
+            {pages.map((page) => (
+              <DropdownMenuRadioItem
+                className="items-start rounded-md py-2 pr-8"
+                key={page.pageKey}
+                value={page.pageKey}
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">{page.label}</p>
+                  <p className="text-xs text-muted-foreground">{page.slug}</p>
+                </div>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Image Slots
 // ---------------------------------------------------------------------------
 
 function ImageSlotsSection({
   configId,
+  disabled = false,
   namedImageSlots,
   namedImages,
   onSave,
 }: {
   configId: string;
+  disabled?: boolean;
   namedImageSlots: Record<string, string>;
   namedImages?: Record<string, string>;
   onSave: (formData: FormData) => Promise<void>;
@@ -536,6 +658,7 @@ function ImageSlotsSection({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleChange(slot: string, url: string) {
+    if (disabled) return;
     setValues((prev) => ({ ...prev, [slot]: url }));
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -563,6 +686,7 @@ function ImageSlotsSection({
           </FieldLabel>
           <Input
             className="mt-0.5 text-xs"
+            disabled={disabled}
             placeholder="Paste image URL…"
             value={values[slot] ?? ""}
             onChange={(e) => handleChange(slot, e.target.value)}
@@ -596,11 +720,13 @@ const sectionLabels: Record<string, string> = {
 
 function SectionVisibilityToggles({
   configId,
+  disabled = false,
   onSave,
   sectionTypes,
   visibleSections,
 }: {
   configId: string;
+  disabled?: boolean;
   onSave: (formData: FormData) => Promise<void>;
   sectionTypes: string[];
   visibleSections?: Record<string, boolean>;
@@ -615,6 +741,7 @@ function SectionVisibilityToggles({
   const [, startTransition] = useTransition();
 
   function handleToggle(type: string, checked: boolean) {
+    if (disabled) return;
     setVisibility((prev) => ({ ...prev, [type]: checked }));
     startTransition(async () => {
       const fd = new FormData();
@@ -639,6 +766,7 @@ function SectionVisibilityToggles({
           </span>
           <Switch
             checked={visibility[type] !== false}
+            disabled={disabled}
             size="sm"
             onCheckedChange={(checked) => handleToggle(type, checked)}
           />
@@ -654,7 +782,13 @@ function SectionVisibilityToggles({
 
 export function BuilderSidebarControls({
   configId,
+  currentPageKey,
   currentTemplateKey,
+  licensedTemplateKeys,
+  planTier,
+  readOnly = false,
+  readOnlyMessage,
+  requiredPlan,
   sectionTypes,
   templateConfig,
   onCreateDraft,
@@ -672,13 +806,30 @@ export function BuilderSidebarControls({
         <TemplatePicker
           configId={configId}
           currentTemplateKey={currentTemplateKey}
+          licensedTemplateKeys={licensedTemplateKeys}
           onCreateDraft={onCreateDraft}
+          planTier={planTier}
         />
       </Field>
 
       <Field>
+        <PagePicker
+          currentPageKey={currentPageKey}
+          currentTemplateKey={currentTemplateKey}
+        />
+      </Field>
+
+      {readOnly ? (
+        <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-foreground">
+          {readOnlyMessage ??
+            `Upgrade to the ${tierLabels[requiredPlan ?? planTier]} plan to edit this template.`}
+        </p>
+      ) : null}
+
+      <Field>
         <StylePresetMenu
           configId={configId}
+          disabled={readOnly}
           onSave={onUpdateTheme}
           onSaveSilent={onUpdateThemeSilent}
           value={templateConfig.stylePreset ?? "vega"}
@@ -688,6 +839,7 @@ export function BuilderSidebarControls({
       <Field>
         <ColorSystemMenu
           configId={configId}
+          disabled={readOnly}
           onSave={onUpdateTheme}
           onSaveSilent={onUpdateThemeSilent}
           value={templateConfig.colorSystem ?? "slate"}
@@ -697,6 +849,7 @@ export function BuilderSidebarControls({
       <Field>
         <FontMenu
           configId={configId}
+          disabled={readOnly}
           label="Body font"
           onSave={onUpdateTheme}
           onSaveSilent={onUpdateThemeSilent}
@@ -708,6 +861,7 @@ export function BuilderSidebarControls({
       <Field>
         <FontMenu
           configId={configId}
+          disabled={readOnly}
           label="Heading font"
           onSave={onUpdateTheme}
           onSaveSilent={onUpdateThemeSilent}
@@ -720,6 +874,7 @@ export function BuilderSidebarControls({
         <Field>
           <ImageSlotsSection
             configId={configId}
+            disabled={readOnly}
             namedImageSlots={namedImageSlots}
             namedImages={templateConfig.namedImages}
             onSave={onUpdateTheme}
@@ -731,6 +886,7 @@ export function BuilderSidebarControls({
         <Field>
           <SectionVisibilityToggles
             configId={configId}
+            disabled={readOnly}
             onSave={onUpdateTheme}
             sectionTypes={sectionTypes}
             visibleSections={templateConfig.visibleSections}

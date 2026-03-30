@@ -60,12 +60,36 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
+  CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
+  Customer: 'Customer',
+  Department: 'Department',
+  Employee: 'Employee',
   Lead: 'Lead',
+  LeaveRequest: 'LeaveRequest',
   Membership: 'Membership',
+  NotificationPreference: 'NotificationPreference',
+  Notification: 'Notification',
+  PayrollEntry: 'PayrollEntry',
+  ProjectAssignment: 'ProjectAssignment',
+  ProjectBudget: 'ProjectBudget',
+  ProjectBudgetLineItem: 'ProjectBudgetLineItem',
+  ProjectCustomerAccess: 'ProjectCustomerAccess',
+  ProjectCustomerNotice: 'ProjectCustomerNotice',
+  ProjectDocument: 'ProjectDocument',
+  ProjectIssue: 'ProjectIssue',
+  ProjectMilestone: 'ProjectMilestone',
+  ProjectPayrollRun: 'ProjectPayrollRun',
+  ProjectPayrollEntry: 'ProjectPayrollEntry',
+  ProjectPhase: 'ProjectPhase',
+  ProjectUpdate: 'ProjectUpdate',
+  ProjectWorker: 'ProjectWorker',
+  Project: 'Project',
+  PropertyMedia: 'PropertyMedia',
   Property: 'Property',
   SiteConfiguration: 'SiteConfiguration',
   TenantStockImageLicense: 'TenantStockImageLicense',
+  TeamInvite: 'TeamInvite',
   TenantDomain: 'TenantDomain',
   TenantOnboarding: 'TenantOnboarding',
   TenantTemplateLicense: 'TenantTemplateLicense',
@@ -239,6 +263,20 @@ export const BillingLineItemScalarFieldEnum = {
 export type BillingLineItemScalarFieldEnum = (typeof BillingLineItemScalarFieldEnum)[keyof typeof BillingLineItemScalarFieldEnum]
 
 
+export const CompanyIntegrationScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  googleAnalyticsId: 'googleAnalyticsId',
+  facebookPixelId: 'facebookPixelId',
+  whatsappPhone: 'whatsappPhone',
+  calendlyUrl: 'calendlyUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyIntegrationScalarFieldEnum = (typeof CompanyIntegrationScalarFieldEnum)[keyof typeof CompanyIntegrationScalarFieldEnum]
+
+
 export const CompanyScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -258,6 +296,60 @@ export const CompanyScalarFieldEnum = {
 export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
 
 
+export const CustomerScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  notes: 'notes',
+  status: 'status',
+  sourceLeadId: 'sourceLeadId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
+
+
+export const DepartmentScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type DepartmentScalarFieldEnum = (typeof DepartmentScalarFieldEnum)[keyof typeof DepartmentScalarFieldEnum]
+
+
+export const EmployeeScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  departmentId: 'departmentId',
+  agentId: 'agentId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  title: 'title',
+  workRole: 'workRole',
+  employmentType: 'employmentType',
+  status: 'status',
+  startDate: 'startDate',
+  probationEndDate: 'probationEndDate',
+  salaryAmount: 'salaryAmount',
+  salaryCurrency: 'salaryCurrency',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -275,11 +367,29 @@ export const LeadScalarFieldEnum = {
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
 
 
+export const LeaveRequestScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  leaveType: 'leaveType',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  reason: 'reason',
+  status: 'status',
+  approvedById: 'approvedById',
+  approvedAt: 'approvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeaveRequestScalarFieldEnum = (typeof LeaveRequestScalarFieldEnum)[keyof typeof LeaveRequestScalarFieldEnum]
+
+
 export const MembershipScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
   userId: 'userId',
   role: 'role',
+  workRole: 'workRole',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -287,6 +397,290 @@ export const MembershipScalarFieldEnum = {
 } as const
 
 export type MembershipScalarFieldEnum = (typeof MembershipScalarFieldEnum)[keyof typeof MembershipScalarFieldEnum]
+
+
+export const NotificationPreferenceScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  userId: 'userId',
+  type: 'type',
+  inApp: 'inApp',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PayrollEntryScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  employeeId: 'employeeId',
+  periodYear: 'periodYear',
+  periodMonth: 'periodMonth',
+  grossAmount: 'grossAmount',
+  netAmount: 'netAmount',
+  currency: 'currency',
+  status: 'status',
+  paidAt: 'paidAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PayrollEntryScalarFieldEnum = (typeof PayrollEntryScalarFieldEnum)[keyof typeof PayrollEntryScalarFieldEnum]
+
+
+export const ProjectAssignmentScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  membershipId: 'membershipId',
+  projectRole: 'projectRole',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectAssignmentScalarFieldEnum = (typeof ProjectAssignmentScalarFieldEnum)[keyof typeof ProjectAssignmentScalarFieldEnum]
+
+
+export const ProjectBudgetScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  currency: 'currency',
+  approvedBudgetMinor: 'approvedBudgetMinor',
+  forecastBudgetMinor: 'forecastBudgetMinor',
+  actualBudgetMinor: 'actualBudgetMinor',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectBudgetScalarFieldEnum = (typeof ProjectBudgetScalarFieldEnum)[keyof typeof ProjectBudgetScalarFieldEnum]
+
+
+export const ProjectBudgetLineItemScalarFieldEnum = {
+  id: 'id',
+  budgetId: 'budgetId',
+  category: 'category',
+  description: 'description',
+  quantity: 'quantity',
+  unitRateMinor: 'unitRateMinor',
+  estimatedMinor: 'estimatedMinor',
+  actualMinor: 'actualMinor',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectBudgetLineItemScalarFieldEnum = (typeof ProjectBudgetLineItemScalarFieldEnum)[keyof typeof ProjectBudgetLineItemScalarFieldEnum]
+
+
+export const ProjectCustomerAccessScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  customerId: 'customerId',
+  level: 'level',
+  enabledAt: 'enabledAt',
+  disabledAt: 'disabledAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectCustomerAccessScalarFieldEnum = (typeof ProjectCustomerAccessScalarFieldEnum)[keyof typeof ProjectCustomerAccessScalarFieldEnum]
+
+
+export const ProjectCustomerNoticeScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  customerId: 'customerId',
+  title: 'title',
+  body: 'body',
+  postedAt: 'postedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectCustomerNoticeScalarFieldEnum = (typeof ProjectCustomerNoticeScalarFieldEnum)[keyof typeof ProjectCustomerNoticeScalarFieldEnum]
+
+
+export const ProjectDocumentScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  kind: 'kind',
+  title: 'title',
+  fileUrl: 'fileUrl',
+  visibility: 'visibility',
+  versionLabel: 'versionLabel',
+  uploadedById: 'uploadedById',
+  approvedById: 'approvedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectDocumentScalarFieldEnum = (typeof ProjectDocumentScalarFieldEnum)[keyof typeof ProjectDocumentScalarFieldEnum]
+
+
+export const ProjectIssueScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  title: 'title',
+  description: 'description',
+  severity: 'severity',
+  status: 'status',
+  ownerId: 'ownerId',
+  openedAt: 'openedAt',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectIssueScalarFieldEnum = (typeof ProjectIssueScalarFieldEnum)[keyof typeof ProjectIssueScalarFieldEnum]
+
+
+export const ProjectMilestoneScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  phaseId: 'phaseId',
+  name: 'name',
+  status: 'status',
+  dueDate: 'dueDate',
+  completedAt: 'completedAt',
+  notes: 'notes',
+  customerVisible: 'customerVisible',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectMilestoneScalarFieldEnum = (typeof ProjectMilestoneScalarFieldEnum)[keyof typeof ProjectMilestoneScalarFieldEnum]
+
+
+export const ProjectPayrollRunScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  status: 'status',
+  totalGrossMinor: 'totalGrossMinor',
+  totalNetMinor: 'totalNetMinor',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectPayrollRunScalarFieldEnum = (typeof ProjectPayrollRunScalarFieldEnum)[keyof typeof ProjectPayrollRunScalarFieldEnum]
+
+
+export const ProjectPayrollEntryScalarFieldEnum = {
+  id: 'id',
+  payrollRunId: 'payrollRunId',
+  workerId: 'workerId',
+  attendanceUnits: 'attendanceUnits',
+  grossMinor: 'grossMinor',
+  deductionMinor: 'deductionMinor',
+  advanceMinor: 'advanceMinor',
+  netMinor: 'netMinor',
+  paymentStatus: 'paymentStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectPayrollEntryScalarFieldEnum = (typeof ProjectPayrollEntryScalarFieldEnum)[keyof typeof ProjectPayrollEntryScalarFieldEnum]
+
+
+export const ProjectPhaseScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  name: 'name',
+  order: 'order',
+  status: 'status',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectPhaseScalarFieldEnum = (typeof ProjectPhaseScalarFieldEnum)[keyof typeof ProjectPhaseScalarFieldEnum]
+
+
+export const ProjectUpdateScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  authorId: 'authorId',
+  kind: 'kind',
+  summary: 'summary',
+  details: 'details',
+  progressPercent: 'progressPercent',
+  customerVisible: 'customerVisible',
+  postedAt: 'postedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectUpdateScalarFieldEnum = (typeof ProjectUpdateScalarFieldEnum)[keyof typeof ProjectUpdateScalarFieldEnum]
+
+
+export const ProjectWorkerScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  employeeId: 'employeeId',
+  fullName: 'fullName',
+  role: 'role',
+  payBasis: 'payBasis',
+  payRateMinor: 'payRateMinor',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectWorkerScalarFieldEnum = (typeof ProjectWorkerScalarFieldEnum)[keyof typeof ProjectWorkerScalarFieldEnum]
+
+
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  code: 'code',
+  type: 'type',
+  location: 'location',
+  status: 'status',
+  startDate: 'startDate',
+  targetCompletionDate: 'targetCompletionDate',
+  completedAt: 'completedAt',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const PropertyMediaScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  kind: 'kind',
+  url: 'url',
+  isCover: 'isCover',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+} as const
+
+export type PropertyMediaScalarFieldEnum = (typeof PropertyMediaScalarFieldEnum)[keyof typeof PropertyMediaScalarFieldEnum]
 
 
 export const PropertyScalarFieldEnum = {
@@ -300,7 +694,10 @@ export const PropertyScalarFieldEnum = {
   bathrooms: 'bathrooms',
   specs: 'specs',
   imageUrl: 'imageUrl',
+  type: 'type',
+  subType: 'subType',
   status: 'status',
+  publishState: 'publishState',
   featured: 'featured',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -341,6 +738,23 @@ export const TenantStockImageLicenseScalarFieldEnum = {
 } as const
 
 export type TenantStockImageLicenseScalarFieldEnum = (typeof TenantStockImageLicenseScalarFieldEnum)[keyof typeof TenantStockImageLicenseScalarFieldEnum]
+
+
+export const TeamInviteScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  email: 'email',
+  role: 'role',
+  workRole: 'workRole',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  acceptedAt: 'acceptedAt',
+  revokedAt: 'revokedAt',
+  invitedById: 'invitedById',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamInviteScalarFieldEnum = (typeof TeamInviteScalarFieldEnum)[keyof typeof TeamInviteScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {

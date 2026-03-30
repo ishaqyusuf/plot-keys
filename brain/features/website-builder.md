@@ -146,6 +146,7 @@ Allow each company to launch and manage a professional website using predefined 
   - active-configuration selector
   - central live preview studio
   - publish action
+- `apps/dashboard/src/app/(app)/page.tsx` now embeds the same builder workspace on the tenant dashboard home so tenants can change website configuration and edit section text without leaving the main dashboard overview.
 - `apps/dashboard/src/app/live/page.tsx` now renders the current published tenant website for a selected subdomain.
 - `apps/tenant-site/src/app/page.tsx` now resolves published tenant configurations from Prisma and falls back to sample content only when no published tenant site exists.
 
@@ -180,6 +181,13 @@ Allow each company to launch and manage a professional website using predefined 
   - `preferredLength`
 - Publishing now swaps the active live site configuration in the database.
 - Server actions now enforce template access based on the tenant company's stored subscription tier rather than relying on UI state alone.
+- When a tenant lands on a draft for a template above their current plan tier and they do not hold a template license, the builder must enter a locked/read-only state instead of allowing edits and failing later on publish.
+- Locked builder state requirements:
+  - disable publish
+  - disable theme, image, and section-visibility editing
+  - disable inline field editing and AI bootstrap actions that mutate the draft
+  - show an upgrade prompt that routes the tenant to `/billing`
+  - keep the template browser visible so the tenant can switch back to an allowed template
 
 ## Current Missing UX
 - True click-to-type inline content editing is not implemented yet.

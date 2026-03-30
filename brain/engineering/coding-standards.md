@@ -35,6 +35,11 @@ This file defines implementation guardrails for the repository.
 - Route reusable form chrome through shared `packages/ui` primitives instead of recreating labels, messages, and layout per app.
 - Prefer a shared `SubmitButton` pattern for submit actions so pending, disabled, and loading-label behavior stays consistent across forms.
 - Treat simple non-validated search or filter controls as the exception; user-editable mutation forms should follow the `useZodForm` + `Controller` + shared submit-action pattern by default.
+- Every new dashboard form must support one-click dev quick fill so QA, onboarding demos, and manual regression testing do not depend on repetitive typing.
+- Form-specific quick-fill behavior must be declared explicitly rather than inferred from field names; implement the fill logic in `apps/dashboard/src/components/dev/quick-fill.ts` and bind it directly to the owning form instance.
+- Dashboard mutation forms should use `useZodForm(...)` as the standard form state layer so quick fill can update values through `form.reset(...)` and `form.setValue(...)` instead of DOM selectors or query-based field discovery.
+- Quick fill must not rely on `querySelector`, hidden DOM probing, or click automation for field population. Use the form instance as the source of truth.
+- Generic fallback quick fill is acceptable only as a temporary stopgap while a new form is being introduced; new forms should ship with their own stable profile before the work is considered complete.
 
 ## Multi-Tenant Rules
 - Scope tenant data explicitly in every app and service boundary.

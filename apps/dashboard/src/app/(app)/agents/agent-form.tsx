@@ -10,7 +10,14 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { z } from "zod";
+import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+import {
+  createQuickFillAdapter,
+  QuickFill,
+} from "../../../components/dev/quick-fill";
+import { useZodForm } from "../../../hooks/use-zod-form";
 import { createAgentAction, updateAgentAction } from "../../actions";
 
 type Agent = {
@@ -25,33 +32,71 @@ type Agent = {
   displayOrder: number | null;
 };
 
-type AgentFormProps =
-  | { mode: "create" }
-  | { mode: "edit"; agent: Agent };
+type AgentFormProps = { mode: "create" } | { mode: "edit"; agent: Agent };
+
+const agentFormSchema = z.object({
+  bio: z.string().optional(),
+  displayOrder: z.string().optional(),
+  email: z.string().email("Enter a valid email address.").or(z.literal("")),
+  featured: z.enum(["false", "true"]),
+  imageUrl: z.string().url("Enter a valid URL.").or(z.literal("")),
+  name: z.string().trim().min(1, "Name is required."),
+  phone: z.string().optional(),
+  title: z.string().optional(),
+});
+
+type AgentFormValues = z.infer<typeof agentFormSchema>;
 
 export function AgentForm(props: AgentFormProps) {
   const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
+  const [pending, setPending] = useState(false);
   const agent = props.mode === "edit" ? props.agent : null;
+  const form = useZodForm(agentFormSchema, {
+    defaultValues: {
+      bio: agent?.bio ?? "",
+      displayOrder: agent?.displayOrder?.toString() ?? "",
+      email: agent?.email ?? "",
+      featured: agent?.featured ? "true" : "false",
+      imageUrl: agent?.imageUrl ?? "",
+      name: agent?.name ?? "",
+      phone: agent?.phone ?? "",
+      title: agent?.title ?? "",
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
+  async function handleSubmit(values: AgentFormValues) {
+    setPending(true);
+    try {
+      const formData = new FormData();
+      formData.set("name", values.name.trim());
+      formData.set("title", values.title?.trim() ?? "");
+      formData.set("bio", values.bio?.trim() ?? "");
+      formData.set("email", values.email.trim());
+      formData.set("phone", values.phone?.trim() ?? "");
+      formData.set("imageUrl", values.imageUrl.trim());
+      formData.set("featured", values.featured);
+      formData.set("displayOrder", values.displayOrder?.trim() ?? "");
+
       if (props.mode === "edit") {
+        formData.set("agentId", agent!.id);
         await updateAgentAction(formData);
       } else {
         await createAgentAction(formData);
       }
-      setOpen(false);
-    });
+    } finally {
+      setPending(false);
+    }
   }
+
+  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={props.mode === "create" ? "default" : "outline"}>
+        <Button
+          size="sm"
+          variant={props.mode === "create" ? "default" : "outline"}
+        >
           {props.mode === "create" ? "Add agent" : "Edit"}
         </Button>
       </DialogTrigger>
@@ -62,66 +107,53 @@ export function AgentForm(props: AgentFormProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {agent && (
-            <input name="agentId" type="hidden" value={agent.id} />
-          )}
-
+        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <FieldGroup>
             <Field>
               <FieldLabel>Name *</FieldLabel>
               <Input
-                defaultValue={agent?.name ?? ""}
-                name="name"
                 placeholder="e.g. Amara Okafor"
                 required
+                {...form.register("name")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Job title</FieldLabel>
               <Input
-                defaultValue={agent?.title ?? ""}
-                name="title"
                 placeholder="e.g. Senior Sales Agent"
+                {...form.register("title")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Email</FieldLabel>
               <Input
-                defaultValue={agent?.email ?? ""}
-                name="email"
                 placeholder="amara@agency.com"
                 type="email"
+                {...form.register("email")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Phone</FieldLabel>
               <Input
-                defaultValue={agent?.phone ?? ""}
-                name="phone"
                 placeholder="+234 801 234 5678"
+                {...form.register("phone")}
               />
             </Field>
 
             <Field>
               <FieldLabel>Bio</FieldLabel>
-              <Input
-                defaultValue={agent?.bio ?? ""}
-                name="bio"
-                placeholder="Short bio…"
-              />
+              <Input placeholder="Short bio…" {...form.register("bio")} />
             </Field>
 
             <Field>
               <FieldLabel>Photo URL</FieldLabel>
               <Input
-                defaultValue={agent?.imageUrl ?? ""}
-                name="imageUrl"
                 placeholder="https://…"
                 type="url"
+                {...form.register("imageUrl")}
               />
             </Field>
 
@@ -129,19 +161,17 @@ export function AgentForm(props: AgentFormProps) {
               <Field>
                 <FieldLabel>Display order</FieldLabel>
                 <Input
-                  defaultValue={agent?.displayOrder ?? ""}
                   min={0}
-                  name="displayOrder"
                   placeholder="0"
                   type="number"
+                  {...form.register("displayOrder")}
                 />
               </Field>
               <Field>
                 <FieldLabel>Featured</FieldLabel>
                 <select
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  defaultValue={agent?.featured ? "true" : "false"}
-                  name="featured"
+                  {...form.register("featured")}
                 >
                   <option value="false">No</option>
                   <option value="true">Yes</option>
@@ -150,19 +180,26 @@ export function AgentForm(props: AgentFormProps) {
             </div>
           </FieldGroup>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button onClick={() => setOpen(false)} type="button" variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={pending} type="submit">
-              {pending
-                ? props.mode === "create"
-                  ? "Adding…"
-                  : "Saving…"
-                : props.mode === "create"
-                  ? "Add agent"
-                  : "Save changes"}
-            </Button>
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton onFill={() => quickFill.newAgent()} />
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setOpen(false)}
+                type="button"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending
+                  ? props.mode === "create"
+                    ? "Adding…"
+                    : "Saving…"
+                  : props.mode === "create"
+                    ? "Add agent"
+                    : "Save changes"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

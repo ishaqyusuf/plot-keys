@@ -1,28 +1,17 @@
-import {
-  createPrismaClient,
-  listAgentsForCompany,
-  listFeaturedProperties,
-  resolvePublishedForCompany,
-  resolveTenantByHostname,
-} from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
-  deserializeTemplateConfig,
-  resolveWebsitePresentation,
+  resolvePage,
   sampleHomePage,
   sampleTheme,
 } from "@plotkeys/section-registry";
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
-import Link from "next/link";
 import type { JSX } from "react";
+import { parseTenantRenderMode } from "../lib/render-mode";
+import { resolveTenantContext } from "../lib/resolve-tenant";
 
 function renderSection(
   section: HomeSectionDefinition,
-  theme: ReturnType<typeof resolveWebsitePresentation>["theme"],
+  theme: ReturnType<typeof resolvePage>["theme"],
 ) {
   const SectionComponent = section.component as (props: {
     config: HomeSectionDefinition["config"];
@@ -37,6 +26,7 @@ function renderSection(
 type TenantWebsiteHomePageProps = {
   searchParams?: Promise<{
     hostname?: string;
+    renderMode?: string;
     subdomain?: string;
   }>;
 };
@@ -44,121 +34,63 @@ type TenantWebsiteHomePageProps = {
 export default async function TenantWebsiteHomePage({
   searchParams,
 }: TenantWebsiteHomePageProps) {
-  const params = (await searchParams) ?? {};
-  const requestHeaders = await headers();
-  const prisma = createPrismaClient().db;
+  const sp = (await searchParams) ?? {};
+  const renderMode = parseTenantRenderMode(sp.renderMode ?? null);
 
-  // Prefer middleware-injected headers; fall back to query params for local dev.
-  const tenantSubdomain =
-    requestHeaders.get("x-tenant-subdomain") || params.subdomain || null;
-  const tenantHostname =
-    requestHeaders.get("x-tenant-hostname") ||
-    extractTenantHostname(params.hostname) ||
-    null;
+  const tenant = await resolveTenantContext(sp);
 
-  const requestedHostname = tenantHostname;
-  const subdomain = tenantSubdomain;
-  let matchedHostname: string | null = requestedHostname;
+  if (!tenant) {
+    // No published site — show sample home in a dashed fallback card.
+    const requestHeaders = await headers();
+    const tenantHostname =
+      requestHeaders.get("x-tenant-hostname") || sp.hostname || null;
+    const tenantSubdomain =
+      requestHeaders.get("x-tenant-subdomain") || sp.subdomain || null;
 
-  let preview = {
-    page: sampleHomePage,
-    theme: sampleTheme,
-  };
+    const fallbackSections = sampleHomePage.sections.map((s) =>
+      renderSection(s, sampleTheme),
+    );
 
-  if (prisma) {
-    // Prefer hostname-based lookup via tenant_domains (handles custom domains).
-    // Fall back to slug-based lookup for preview mode (?subdomain= query param).
-    const resolvedTenant = requestedHostname
-      ? await resolveTenantByHostname(prisma, requestedHostname)
-      : null;
-
-    const company = resolvedTenant
-      ? await prisma.company.findFirst({
-          where: { deletedAt: null, id: resolvedTenant.companyId },
-        })
-      : subdomain
-        ? await prisma.company.findFirst({
-            where: { deletedAt: null, slug: subdomain },
-          })
-        : null;
-
-    if (company) {
-      // Phase 3: Prefer WebsiteVersion, fallback to SiteConfiguration
-      const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
-
-      if (publishedConfiguration) {
-        matchedHostname = resolvedTenant?.hostname ?? matchedHostname;
-
-        const [featuredProperties, agents] = await Promise.all([
-          listFeaturedProperties(prisma, company.id),
-          listAgentsForCompany(prisma, company.id, { limit: 10 }),
-        ]);
-
-        preview = resolveWebsitePresentation({
-          companyName: company.name,
-          companyLogoUrl: company.logoUrl,
-          content: publishedConfiguration.contentJson as Record<string, string>,
-          liveAgents: agents.map((a) => ({
-            bio: a.bio,
-            id: a.id,
-            imageUrl: a.imageUrl,
-            name: a.name,
-            title: a.title,
-          })),
-          liveListings: featuredProperties.map((p) => ({
-            id: p.id,
-            imageUrl: p.imageUrl,
-            location: p.location,
-            price: p.price,
-            specs: p.specs,
-            title: p.title,
-          })),
-          market: company.market ?? company.name,
-          renderMode: "live",
-          subdomain: company.slug,
-          templateKey: publishedConfiguration.templateKey,
-          theme: publishedConfiguration.themeJson as Record<string, string>,
-        });
-      }
-    }
+    return (
+      <main className="min-h-screen bg-background px-4 py-5 md:px-6 md:py-6">
+        <div className="mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] border border-dashed border-border/80 bg-card/70 shadow-[var(--shadow-soft)] backdrop-blur">
+          <div className="flex flex-col gap-3 border-b border-border/80 bg-card px-6 py-4 text-sm text-muted-foreground md:px-10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                Preview fallback
+              </p>
+              <p className="mt-1">
+                {tenantHostname
+                  ? `No published tenant site was found for ${tenantHostname} yet.`
+                  : tenantSubdomain
+                    ? `No published tenant site was found for ${tenantSubdomain}.plotkeys.com yet.`
+                    : "Use the tenant hostname or add ?subdomain=company-slug to load a published tenant site."}
+              </p>
+            </div>
+          </div>
+          {fallbackSections}
+        </div>
+      </main>
+    );
   }
 
-  return (
-    <main className="min-h-screen px-4 py-5 md:px-6 md:py-6">
-      <div className="mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] border border-border bg-card shadow-[var(--shadow-soft)] backdrop-blur">
-        <div className="flex flex-col gap-3 border-b border-border bg-card px-6 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between md:px-10">
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-              Tenant website preview
-            </p>
-            <p className="mt-1">
-              {matchedHostname
-                ? `Published view for ${matchedHostname}`
-                : subdomain
-                  ? `Published view for ${subdomain}.plotkeys.com`
-                  : "Use the tenant hostname or add ?subdomain=company-slug to load a published tenant site."}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="default">
-              {subdomain ? "Published config" : "Sample template"}
-            </Badge>
-            {subdomain ? (
-              <Button asChild size="sm" variant="secondary">
-                <Link href={`/?subdomain=${subdomain}`}>Refresh preview</Link>
-              </Button>
-            ) : null}
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {(() => {
-          const visibleSections = deserializeTemplateConfig(preview.theme).visibleSections;
-          return preview.page.sections
-            .filter((section) => visibleSections?.[section.type] !== false)
-            .map((section) => renderSection(section, preview.theme));
-        })()}
-      </div>
-    </main>
+  const resolved = resolvePage(
+    tenant.templateKey,
+    "home",
+    {
+      companyName: tenant.company.name,
+      companyLogoUrl: tenant.company.logoUrl,
+      content: tenant.publishedConfig.contentJson,
+      liveAgents: tenant.liveAgents,
+      liveListings: tenant.liveListings,
+      market: tenant.company.market ?? tenant.company.name,
+      subdomain: tenant.company.slug,
+      theme: tenant.publishedConfig.themeJson,
+    },
+    renderMode,
   );
+
+  return resolved.sections
+    .filter((s) => tenant.templateConfig.visibleSections?.[s.type] !== false)
+    .map((s) => renderSection(s, resolved.theme));
 }

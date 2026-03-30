@@ -2,6 +2,7 @@ import { createTRPCRouter } from "../lib.trpc";
 import { authRouter } from "./auth.route";
 import { chatRouter } from "./chat.route";
 import { customersRouter } from "./customers.route";
+import { devRouter } from "./dev.route";
 import { formsRouter } from "./forms.route";
 import { healthRouter } from "./health.route";
 import { notificationsRouter } from "./notifications.route";
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   chat: chatRouter,
   customers: customersRouter,
+  dev: devRouter,
   forms: formsRouter,
   health: healthRouter,
   notifications: notificationsRouter,

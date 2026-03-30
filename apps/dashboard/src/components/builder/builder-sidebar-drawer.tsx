@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@plotkeys/ui/sheet";
+import type { SubscriptionTier } from "@plotkeys/utils";
 import { Settings2 } from "lucide-react";
 
 import { BuilderSidebarControls } from "./builder-sidebar-controls";
@@ -20,13 +21,19 @@ type BuilderSidebarDrawerProps = {
   activeTemplateLabel: string;
   configId: string;
   configStatus: string;
+  currentPageKey: string;
   currentTemplateKey: string;
   editableFieldCount: number;
+  licensedTemplateKeys: Set<string>;
+  planTier: SubscriptionTier;
+  readOnly?: boolean;
+  readOnlyMessage?: string;
+  requiredPlan?: SubscriptionTier;
   sectionCount: number;
   sectionTypes?: string[];
   templateConfig: TemplateConfig;
   totalConfigurations: number;
-  onCreateDraft: (formData: FormData) => Promise<void>;
+  onCreateDraft: (formData: FormData) => Promise<{ configId: string }>;
   onUpdateTheme: (formData: FormData) => Promise<void>;
   onUpdateThemeSilent?: (formData: FormData) => Promise<void>;
 };
@@ -35,8 +42,14 @@ export function BuilderSidebarDrawer({
   activeConfigName,
   configId,
   configStatus,
+  currentPageKey,
   currentTemplateKey,
   editableFieldCount,
+  licensedTemplateKeys,
+  planTier,
+  readOnly,
+  readOnlyMessage,
+  requiredPlan,
   sectionCount,
   sectionTypes,
   templateConfig,
@@ -90,7 +103,13 @@ export function BuilderSidebarDrawer({
 
             <BuilderSidebarControls
               configId={configId}
+              currentPageKey={currentPageKey}
               currentTemplateKey={currentTemplateKey}
+              licensedTemplateKeys={licensedTemplateKeys}
+              planTier={planTier}
+              readOnly={readOnly}
+              readOnlyMessage={readOnlyMessage}
+              requiredPlan={requiredPlan}
               sectionTypes={sectionTypes}
               templateConfig={templateConfig}
               onCreateDraft={onCreateDraft}

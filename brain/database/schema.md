@@ -55,7 +55,7 @@ This file tracks the current and planned core entities.
 ## Entity Notes
 - `Company`: tenant root entity
 - `User`: authenticated platform user aligned to Better Auth identity
-- `Membership`: joins a user to a company with role and status
+- `Membership`: joins a user to a company with access role, work role, and status
 - `TenantOnboarding`: planned persisted onboarding input and step-progress record
 - `TenantProfile`: planned derived profile used for recommendation and default generation
 - `Website`: planned tenant website root that can own active and draft version pointers
@@ -99,6 +99,7 @@ This file tracks the current and planned core entities.
 
 ## Status
 - Initial schema foundation is implemented in `packages/db` for `Company`, `User`, and `Membership`.
+- Memberships, team invites, and employees now also use a shared `WorkRole` enum for normalized employee persona and login routing.
 - Auth and website-builder schema is now partially implemented in Prisma for:
   - `users.password_hash`
   - `users.email_verified`
@@ -154,6 +155,28 @@ This file tracks the current and planned core entities.
   - Current behavior:
     - onboarding creates new companies on the `starter` tier with `active` status
     - builder template access now resolves from `Company.planTier`
+
+## Implemented Workforce Role Schema
+- `WorkRole`
+  - Purpose: normalized workplace persona used for invite intent, employee categorization, and default dashboard routing
+  - Implemented enum values:
+    - `operations`
+    - `sales_agent`
+    - `sales_manager`
+    - `hr`
+    - `finance`
+    - `marketing`
+    - `project_manager`
+    - `executive`
+- `Membership`
+  - Implemented additional field:
+    - `workRole`
+- `TeamInvite`
+  - Implemented additional field:
+    - `workRole`
+- `Employee`
+  - Implemented additional field:
+    - `workRole`
 
 ## Implemented Tenant Domain Schema
 - `TenantDomain`

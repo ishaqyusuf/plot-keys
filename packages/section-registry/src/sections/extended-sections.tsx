@@ -11,8 +11,9 @@
  * - NewsletterSection    — Simple newsletter signup strip
  */
 
-import { useState, type CSSProperties, type JSX } from "react";
+import { type CSSProperties, type JSX, useState } from "react";
 import type { ThemeConfig } from "./home-page";
+import { useItemOverviewTrigger } from "./interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -33,6 +34,7 @@ export type PropertyGridConfig = {
   /** Text for the "view all" link. Omit to hide the link. */
   ctaHref?: string;
   ctaText?: string;
+  detailHrefBase?: string;
   description?: string;
   eyebrow: string;
   items: PropertyGridItem[];
@@ -156,6 +158,7 @@ export function PropertyGridSection({
   theme: ThemeConfig;
 }): JSX.Element {
   const isEmpty = config.items.length === 0;
+  const { getLinkProps } = useItemOverviewTrigger();
 
   return (
     <section
@@ -185,10 +188,14 @@ export function PropertyGridSection({
         {/* Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isEmpty
-            ? Array.from({ length: 3 }).map((_, i) => (
+            ? [
+                "property-grid-skeleton-1",
+                "property-grid-skeleton-2",
+                "property-grid-skeleton-3",
+              ].map((skeletonKey) => (
                 // Skeleton card
                 <div
-                  key={i}
+                  key={skeletonKey}
                   className="animate-pulse overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]"
                 >
                   <div className="h-52 bg-[color:var(--muted)]" />
@@ -202,8 +209,13 @@ export function PropertyGridSection({
             : config.items.map((item) => (
                 <a
                   key={item.id}
-                  href={item.slug ? `/listings/${item.slug}` : "#"}
+                  href={
+                    item.slug
+                      ? `${config.detailHrefBase ?? "/listings"}/${item.slug}`
+                      : "#"
+                  }
                   className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-md"
+                  {...getLinkProps("listing", item)}
                 >
                   {/* Image */}
                   <div className="relative h-52 overflow-hidden bg-[color:var(--muted)]">
@@ -273,6 +285,8 @@ export function AgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }): JSX.Element {
+  const { getLinkProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
@@ -291,6 +305,7 @@ export function AgentShowcaseSection({
               key={agent.id}
               href={agent.slug ? `/agents/${agent.slug}` : "#"}
               className="group flex flex-col items-center text-center"
+              {...getLinkProps("agent", agent)}
             >
               {/* Avatar */}
               <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[color:var(--border)] bg-[color:var(--muted)]">
@@ -498,43 +513,59 @@ function ContactForm({
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+          <label
+            className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+            htmlFor="contact-name"
+          >
             Name
           </label>
           <input
             required
             className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+            id="contact-name"
             placeholder="Your name"
             type="text"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+          <label
+            className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+            htmlFor="contact-phone"
+          >
             Phone
           </label>
           <input
             className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+            id="contact-phone"
             placeholder="+234..."
             type="tel"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+        <label
+          className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+          htmlFor="contact-email"
+        >
           Email
         </label>
         <input
           className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+          id="contact-email"
           placeholder="you@example.com"
           type="email"
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+        <label
+          className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+          htmlFor="contact-message"
+        >
           Message
         </label>
         <textarea
           className="w-full resize-none rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+          id="contact-message"
           placeholder="How can we help you?"
           rows={4}
         />

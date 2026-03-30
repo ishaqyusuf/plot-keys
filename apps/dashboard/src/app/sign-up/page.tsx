@@ -1,7 +1,9 @@
 import { authRoutes } from "@plotkeys/auth/shared";
-import { FlowShell } from "../../components/flow-shell";
+import { redirect } from "next/navigation";
+
 import { SignUpForm } from "../../components/auth/sign-up-form";
-import { getCurrentAppSession } from "../../lib/session";
+import { FlowShell } from "../../components/flow-shell";
+import { getCurrentAppSession, getTenantSlugFromHost } from "../../lib/session";
 
 const signUpBenefits = [
   "Reserve your PlotKeys website and dashboard subdomains early",
@@ -16,6 +18,12 @@ type SignUpPageProps = {
 };
 
 export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const tenantSlug = await getTenantSlugFromHost();
+
+  if (tenantSlug) {
+    redirect(authRoutes.signIn);
+  }
+
   const session = await getCurrentAppSession();
 
   if (session) {

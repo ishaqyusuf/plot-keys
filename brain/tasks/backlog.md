@@ -14,7 +14,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Tenant Domain Management UI** — `/domains` dashboard page with domain listing, status filtering, summary stats, and manual re-sync button. ✅ Done
 - [ ] **Custom Domain Purchase Flow** — Registrar API integration (Namecheap/GoDaddy), domain search, DNS provisioning, SSL, renewal tracking. Large scope.
 - [x] **Property/Agent Data Binding** — Builder and live pages now fetch featured properties and agents and pass them as `liveListings`/`liveAgents` to `resolveWebsitePresentation()`. PropertyGrid and AgentShowcase sections render real DB data. ✅ Done
-- [x] **Website/WebsiteVersion Phase 4 Cleanup** — Removed SiteConfiguration fallback paths from read helpers; builder, dashboard home, live page, and actions now read from WebsiteVersion exclusively. Writes still dual-write for backward compat. ✅ Done (reads)
+- [x] **Website/WebsiteVersion Phase 4 Cleanup** — Removed SiteConfiguration fallback paths from read helpers and switched builder/site write mutations to WebsiteVersion draft IDs. Builder, dashboard home, live page, and actions now operate on WebsiteVersion as the active website state. ✅ Done
 - [x] **Logo Upload Flow** — `/settings` page with file upload (Supabase storage) + URL fallback; `setCompanyLogoAction` server action; logo rendered as image in HeroBannerSection when URL provided. ✅ Done
 - [x] **Tenant Dashboard System** — Built persistent sidebar navigation (`DashboardSidebar` + `DashboardShell`) with `(app)` route group layout. Revamped home page with stats strip, quick actions, plan upgrade prompt, and platform feature roadmap grid.
 
@@ -55,7 +55,9 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Phase 4 — Scale & Infrastructure
 
-- [ ] **Multi-page Website Support** — Extend WebsiteVersion to support multiple pages (About, Services, Blog) beyond single-page sites.
+- [x] **Multi-page Website Support** — Public tenant pages already resolve through page inventories at runtime; builder now supports URL-backed page selection so non-home template pages can be edited. ✅ Done
+- [x] **Customer Portal Foundation Planning** — Central tenant-site `/portal/*` routes now exist for login, signup, dashboard, saved listings, offers, payments, and account pages, using a branded shared shell outside the template inventory. ✅ Done
+- [x] **Listing Overview Standardization** — Public listing overview pages remain template-based, but now share centralized route resolution plus shared tenant-site query parsing for location / priceRange / sort / page. ✅ Done
 - [ ] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content.
 - [ ] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell.
 - [ ] **Preview-Safe Action Interception** — Intercept template CTAs, forms, booking, and payment actions in preview/configure mode so interactive elements feel real but do not execute live workflows.

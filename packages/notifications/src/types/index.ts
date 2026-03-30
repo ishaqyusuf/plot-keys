@@ -8,3 +8,4 @@ export * from "./site-configuration-saved";
 export * from "./site-publish-requires-review";
 export * from "./site-published";
 export * from "./subscriber-lead-created";
+export * from "./workspace-invitation-sent";

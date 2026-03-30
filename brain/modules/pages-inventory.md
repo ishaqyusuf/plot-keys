@@ -58,9 +58,17 @@ All 45 templates currently ship with a single **Home** page. The page compositio
 - `Mortgage Calculator`
 
 ### User And System Pages
-- `Saved Listings`
 - `Search Results`
 - `Compare Properties`
+
+### Central Customer Portal Pages (not part of template inventory)
+- `Portal Login` — `/portal/login`
+- `Portal Sign Up` — `/portal/signup`
+- `Portal Dashboard` — `/portal/dashboard`
+- `Saved Listings` — `/portal/saved`
+- `Offers / Inquiry Tracking` — `/portal/offers`
+- `Payments` — `/portal/payments`
+- `Account Settings` — `/portal/account/*`
 
 ### Utility Pages
 - `404`
@@ -80,3 +88,4 @@ All 45 templates currently ship with a single **Home** page. The page compositio
 - Page definitions live in `packages/section-registry/src/page-inventory.ts` via `TemplatePageInventory`.
 - The page inventory registry currently contains entries for: template-1 through template-6 and template-31 through template-45. Templates 7–30 (except 2, 4, 5) fall back to template-1's home section composition.
 - Future multi-page support will extend `PageDefinition[]` per template and add corresponding tenant-site routes.
+- Future customer portal routes should live alongside the tenant site in a central route group, but they should not be represented as template page definitions.

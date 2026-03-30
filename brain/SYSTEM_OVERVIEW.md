@@ -24,8 +24,9 @@ The platform is a multi-tenant SaaS for real-estate companies to run operations 
 
 ## Tenant Model
 - Each company is a tenant.
-- Example tenant URL: `companyname.plotkeys.app`
-- Tenants may connect custom domains such as `companyname.com`
+- Public tenant site example: `companyname.plotkeys.com`
+- Dashboard tenant example: `dashboard.companyname.plotkeys.com`
+- Tenants may connect custom domains such as `companyname.com`, with the internal dashboard living at `dashboard.companyname.com`
 
 ## Initial Core Modules
 - Company management

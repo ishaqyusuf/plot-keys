@@ -3,6 +3,7 @@ model Membership {
   companyId String           @map("company_id") @db.Uuid
   userId    String           @map("user_id")
   role      MembershipRole   @default(staff)
+  workRole  WorkRole         @default(operations) @map("work_role")
   status    MembershipStatus @default(invited)
   createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)

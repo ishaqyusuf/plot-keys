@@ -1,17 +1,21 @@
 import {
   createNotificationDispatchFromType,
   EmailService,
-  NotificationService,
-  WhatsAppService,
   makeUserRecipients,
+  type NotificationDeliveryPlan,
+  NotificationService,
   planNotificationDeliveries,
   plotKeysNotificationTypes,
-  type NotificationDeliveryPlan,
+  WhatsAppService,
 } from "@plotkeys/notifications";
 import type {
   NotificationTriggerInput,
   PlotKeysNotificationType,
 } from "@plotkeys/notifications/payload-utils";
+import {
+  buildDashboardHostnameForTenantHostname,
+  buildTenantDashboardUrl,
+} from "@plotkeys/utils";
 
 function getDashboardAppUrl() {
   return process.env.DASHBOARD_APP_URL ?? "http://localhost:3901";
@@ -28,14 +32,12 @@ async function executeNotificationTrigger(input: {
   recipientUserId: string;
   trigger: (notifications: NotificationService) => Promise<unknown>;
 }) {
-  let notification:
-    | ReturnType<
-        typeof createNotificationDispatchFromType<
-          typeof plotKeysNotificationTypes,
-          PlotKeysNotificationType
-        >
-      >
-    | null = null;
+  let notification: ReturnType<
+    typeof createNotificationDispatchFromType<
+      typeof plotKeysNotificationTypes,
+      PlotKeysNotificationType
+    >
+  > | null = null;
   let plan: NotificationDeliveryPlan | null = null;
 
   const notifications = new NotificationService(
@@ -90,13 +92,20 @@ export async function planAuthVerificationRequestedNotification(input: {
   email: string;
   fullName: string;
   phoneNumber?: string | null;
+  subdomain: string;
   token: string;
   userId: string;
 }) {
-  const verificationUrl = new URL("/verify-email", getDashboardAppUrl());
+  const verificationUrl = new URL(
+    buildTenantDashboardUrl(input.subdomain, {
+      currentOrigin: getDashboardAppUrl(),
+      pathname: "/onboarding",
+    }),
+  );
   verificationUrl.searchParams.set("token", input.token);
   verificationUrl.searchParams.set("email", input.email);
   verificationUrl.searchParams.set("company", input.companyName);
+  verificationUrl.searchParams.set("subdomain", input.subdomain);
   const result = await executeNotificationTrigger({
     email: input.email,
     fullName: input.fullName,
@@ -127,7 +136,9 @@ export async function planAuthEmailVerifiedNotification(input: {
   siteHostname: string;
   userId: string;
 }) {
-  const dashboardHostname = `dashboard.${input.siteHostname}`;
+  const dashboardHostname = buildDashboardHostnameForTenantHostname(
+    input.siteHostname,
+  );
 
   return executeNotificationTrigger({
     email: input.email,
@@ -155,7 +166,9 @@ export async function planOnboardingReminderNotification(input: {
   siteHostname: string;
   userId: string;
 }) {
-  const dashboardHostname = `dashboard.${input.siteHostname}`;
+  const dashboardHostname = buildDashboardHostnameForTenantHostname(
+    input.siteHostname,
+  );
 
   return executeNotificationTrigger({
     email: input.email,

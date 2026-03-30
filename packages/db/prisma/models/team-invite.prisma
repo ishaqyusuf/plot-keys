@@ -6,6 +6,7 @@ model TeamInvite {
   companyId  String         @map("company_id") @db.Uuid
   email      String
   role       MembershipRole
+  workRole   WorkRole       @default(operations) @map("work_role")
   token      String         @unique
   expiresAt  DateTime       @map("expires_at") @db.Timestamptz(6)
   acceptedAt DateTime?      @map("accepted_at") @db.Timestamptz(6)

@@ -1,27 +1,41 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
-import { SubmitButton } from "@plotkeys/ui/submit-button";
-import Link from "next/link";
-import { requireOnboardedSession } from "../../../../lib/session";
-import { ExportCsvButton } from "../../../../components/export-csv-button";
 import {
-  createEmployeeAction,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@plotkeys/ui/card";
+import { WORK_ROLE_LABELS } from "@plotkeys/utils";
+import Link from "next/link";
+import { ExportCsvButton } from "../../../../components/export-csv-button";
+import { requireOnboardedSession } from "../../../../lib/session";
+import {
   deleteEmployeeAction,
   exportEmployeesCsvAction,
+  revokeInviteAction,
   updateEmployeeAction,
 } from "../../../actions";
+import { EmployeeInviteForm } from "../employee-invite-form";
 
 type EmployeesPageProps = {
-  searchParams?: Promise<{ status?: string; department?: string }>;
+  searchParams?: Promise<{
+    department?: string;
+    error?: string;
+    invited?: string;
+    status?: string;
+  }>;
 };
 
 const statusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   active: { label: "Active", variant: "default" },
   on_leave: { label: "On Leave", variant: "secondary" },
@@ -45,7 +59,9 @@ function formatDate(date: Date | null) {
   }).format(date);
 }
 
-export default async function EmployeesPage({ searchParams }: EmployeesPageProps) {
+export default async function EmployeesPage({
+  searchParams,
+}: EmployeesPageProps) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
   const params = (await searchParams) ?? {};
@@ -54,7 +70,7 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
 
   const prisma = createPrismaClient().db;
 
-  const [employees, departments, counts] = await Promise.all([
+  const [employees, counts, pendingInvites] = await Promise.all([
     prisma
       ? prisma.employee.findMany({
           where: {
@@ -69,16 +85,22 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
         })
       : [],
     prisma
-      ? prisma.department.findMany({
-          where: { companyId, deletedAt: null },
-          orderBy: { name: "asc" },
-        })
-      : [],
-    prisma
       ? prisma.employee.groupBy({
           by: ["status"],
           _count: true,
           where: { companyId, deletedAt: null },
+        })
+      : [],
+    prisma
+      ? prisma.teamInvite.findMany({
+          orderBy: { createdAt: "desc" },
+          where: {
+            acceptedAt: null,
+            companyId,
+            expiresAt: { gt: new Date() },
+            revokedAt: null,
+            role: "staff",
+          },
         })
       : [],
   ]);
@@ -94,6 +116,21 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-5xl">
+        {params.error ? (
+          <Alert className="mb-6" variant="destructive">
+            <AlertDescription>{params.error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {params.invited ? (
+          <Alert className="mb-6">
+            <AlertDescription>
+              Employee invite sent. They&apos;ll receive an email to join and
+              complete their details directly.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl font-semibold text-foreground">
@@ -107,7 +144,10 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
             <Button asChild variant="outline" size="sm">
               <Link href="/hr/departments">Departments</Link>
             </Button>
-            <ExportCsvButton exportAction={exportEmployeesCsvAction} filename="employees.csv" />
+            <ExportCsvButton
+              exportAction={exportEmployeesCsvAction}
+              filename="employees.csv"
+            />
           </div>
         </div>
 
@@ -120,85 +160,60 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
           >
             <Link href="/hr/employees">All ({stats.total})</Link>
           </Button>
-          {(["active", "on_leave", "suspended", "terminated"] as const).map((s) => (
-            <Button
-              key={s}
-              asChild
-              size="sm"
-              variant={filterStatus === s ? "default" : "outline"}
-            >
-              <Link href={`/hr/employees?status=${s}`}>
-                {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
-              </Link>
-            </Button>
-          ))}
+          {(["active", "on_leave", "suspended", "terminated"] as const).map(
+            (s) => (
+              <Button
+                key={s}
+                asChild
+                size="sm"
+                variant={filterStatus === s ? "default" : "outline"}
+              >
+                <Link href={`/hr/employees?status=${s}`}>
+                  {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
+                </Link>
+              </Button>
+            ),
+          )}
         </div>
 
-        {/* Add Employee Form */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Add Employee</CardTitle>
+            <CardTitle>Invite an employee</CardTitle>
+            <CardDescription>
+              Send an invite by email and let the employee complete their
+              profile after they join the workspace.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={createEmployeeAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" name="name" required placeholder="Full name" />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="email@example.com" />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" name="phone" placeholder="+234..." />
-              </div>
-              <div>
-                <Label htmlFor="title">Job Title</Label>
-                <Input id="title" name="title" placeholder="e.g. Sales Manager" />
-              </div>
-              <div>
-                <Label htmlFor="departmentId">Department</Label>
-                <select
-                  id="departmentId"
-                  name="departmentId"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="">None</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="employmentType">Employment Type</Label>
-                <select
-                  id="employmentType"
-                  name="employmentType"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="full_time">Full-time</option>
-                  <option value="part_time">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="intern">Intern</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input id="startDate" name="startDate" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="salaryAmount">Monthly Salary (₦)</Label>
-                <Input id="salaryAmount" name="salaryAmount" type="number" placeholder="0" />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Adding…">Add Employee</SubmitButton>
-              </div>
-            </form>
+            <EmployeeInviteForm />
           </CardContent>
         </Card>
+
+        {pendingInvites.length > 0 ? (
+          <div className="mb-8 grid gap-3">
+            {pendingInvites.map((invite) => (
+              <Card key={invite.id} className="border-dashed">
+                <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {invite.email}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Pending employee setup ·{" "}
+                      {WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole}
+                    </p>
+                  </div>
+                  <form action={revokeInviteAction}>
+                    <input name="inviteId" type="hidden" value={invite.id} />
+                    <Button size="sm" type="submit" variant="ghost">
+                      Revoke
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : null}
 
         {/* Employee List */}
         {employees.length === 0 ? (
@@ -207,7 +222,7 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
               <p className="text-muted-foreground">
                 {filterStatus
                   ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} employees.`
-                  : "No employees yet. Add your first employee above."}
+                  : "No employees yet. Invite your first employee above."}
               </p>
             </CardContent>
           </Card>
@@ -221,11 +236,17 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
                       <CardTitle className="text-base font-semibold">
                         {emp.name}
                       </CardTitle>
-                      <Badge variant={statusConfig[emp.status]?.variant ?? "outline"}>
+                      <Badge
+                        variant={statusConfig[emp.status]?.variant ?? "outline"}
+                      >
                         {statusConfig[emp.status]?.label ?? emp.status}
                       </Badge>
                       <Badge variant="outline">
-                        {employmentTypeLabels[emp.employmentType] ?? emp.employmentType}
+                        {employmentTypeLabels[emp.employmentType] ??
+                          emp.employmentType}
+                      </Badge>
+                      <Badge variant="secondary">
+                        {WORK_ROLE_LABELS[emp.workRole] ?? emp.workRole}
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-sm text-muted-foreground">
@@ -244,6 +265,11 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
+                        <input
+                          type="hidden"
+                          name="workRole"
+                          value={emp.workRole}
+                        />
                         <input type="hidden" name="status" value="on_leave" />
                         <Button size="sm" type="submit" variant="outline">
                           Set On Leave
@@ -254,6 +280,11 @@ export default async function EmployeesPage({ searchParams }: EmployeesPageProps
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
+                        <input
+                          type="hidden"
+                          name="workRole"
+                          value={emp.workRole}
+                        />
                         <input type="hidden" name="status" value="active" />
                         <Button size="sm" type="submit" variant="outline">
                           Reactivate

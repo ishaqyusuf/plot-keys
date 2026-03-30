@@ -13,43 +13,78 @@ import {
 } from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useRef, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
+import { z } from "zod";
+import { useZodForm } from "../../hooks/use-zod-form";
+import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
+import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
 
 type PublishConfirmationDialogProps = {
   changedFieldCount?: number;
   configId: string;
   currentLiveName?: string;
   currentName: string;
+  disabled?: boolean;
+  disabledReason?: string;
   onPublish: (formData: FormData) => Promise<void>;
   templateLabel?: string;
 };
+
+const publishConfirmationSchema = z.object({
+  nextName: z.string().trim().min(1, "Configuration name is required."),
+});
+
+type PublishConfirmationValues = z.infer<typeof publishConfirmationSchema>;
 
 export function PublishConfirmationDialog({
   changedFieldCount,
   configId,
   currentLiveName,
   currentName,
+  disabled = false,
+  disabledReason,
   onPublish,
   templateLabel,
 }: PublishConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(currentName);
   const [pending, setPending] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const form = useZodForm(publishConfirmationSchema, {
+    defaultValues: {
+      nextName: currentName,
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(values: PublishConfirmationValues) {
     setPending(true);
 
     try {
       const formData = new FormData();
       formData.set("configId", configId);
-      formData.set("nextName", name);
+      formData.set("nextName", values.nextName);
       await onPublish(formData);
       setOpen(false);
     } finally {
       setPending(false);
     }
+  }
+
+  const quickFill = new QuickFill(createQuickFillAdapter(form));
+
+  if (disabled) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Button disabled>Publish current configuration</Button>
+        <Button asChild variant="outline">
+          <Link href="/billing">Upgrade plan</Link>
+        </Button>
+        {disabledReason ? (
+          <p className="basis-full text-xs text-muted-foreground">
+            {disabledReason}
+          </p>
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -94,33 +129,39 @@ export function PublishConfirmationDialog({
         {currentLiveName && (
           <p className="text-xs text-muted-foreground">
             Currently live:{" "}
-            <span className="font-medium text-foreground">{currentLiveName}</span>
-            {" "}— it will be archived and can be re-published from the
-            configuration list.
+            <span className="font-medium text-foreground">
+              {currentLiveName}
+            </span>{" "}
+            — it will be archived and can be re-published from the configuration
+            list.
           </p>
         )}
 
-        <form onSubmit={handleSubmit} ref={formRef}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <FieldGroup className="py-2">
             <Field>
               <FieldLabel>Configuration name</FieldLabel>
               <Input
                 autoComplete="off"
-                onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. March refresh"
-                value={name}
+                {...form.register("nextName")}
               />
             </Field>
           </FieldGroup>
-          <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="ghost">
-                Cancel
+          <DialogFooter className="mt-4 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <DevFormQuickFillButton
+              onFill={() => quickFill.publishConfiguration()}
+            />
+            <div className="flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button disabled={pending} type="submit">
+                {pending ? "Publishing…" : "Publish now"}
               </Button>
-            </DialogClose>
-            <Button disabled={pending} type="submit">
-              {pending ? "Publishing…" : "Publish now"}
-            </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

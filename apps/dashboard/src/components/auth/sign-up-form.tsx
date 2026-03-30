@@ -1,62 +1,49 @@
 "use client";
 
 import {
-  authRoutes,
-} from "@plotkeys/auth/shared";
-import {
-  signUpInputSchema,
   type SignUpInput,
+  signUpInputSchema,
 } from "@plotkeys/api/schemas/auth";
+import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { buildTenantDashboardUrl } from "@plotkeys/utils";
 import { useMutation } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-
+import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
+import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
+import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
 import { SubdomainField } from "../subdomain-field";
 import { AuthFormError } from "./auth-form-error";
 
-const DevQuickFill =
+const addAccountIfDev =
   process.env.NODE_ENV === "development"
-    ? dynamic(() =>
-        import("../dev/dev-quick-fill").then((m) => m.DevQuickFill),
-      )
+    ? async (values: SignUpInput) => {
+        const { useDevToolsStore } = await import("../../stores/dev-tools");
+        useDevToolsStore.getState().addAccount({
+          company: values.company,
+          email: values.email,
+          name: values.name,
+          password: values.password,
+          subdomain: values.subdomain,
+        });
+      }
     : null;
-
-const DEV_PRESETS = [
-  {
-    label: "user-1",
-    values: {
-      company: "Aster Grove Realty",
-      email: "amara@astergrove.com",
-      name: "Amara Okafor",
-      password: "lorem-ipsum",
-      phoneNumber: "+2348012345678",
-      subdomain: "aster-grove",
-    },
-  },
-  {
-    label: "user-2",
-    values: {
-      company: "Sunrise Properties",
-      email: "james@sunrise.com",
-      name: "James Adeyemi",
-      password: "lorem-ipsum",
-      phoneNumber: "+2348098765432",
-      subdomain: "sunrise-props",
-    },
-  },
-];
 
 export function SignUpForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const trpc = useTRPC();
-  const [formError, setFormError] = useState<string | null>(initialError ?? null);
+  const redirectTo = searchParams.get("redirect");
+  const [formError, setFormError] = useState<string | null>(
+    initialError ?? null,
+  );
+  // Capture last submitted values so we can persist to dev store on success.
+  const lastSubmittedValues = useRef<SignUpInput | null>(null);
   const form = useZodForm(signUpInputSchema, {
     defaultValues: {
       company: "",
@@ -67,20 +54,38 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       subdomain: "",
     },
   });
+  const quickFill = new QuickFill(createQuickFillAdapter(form));
   const signUpMutation = useMutation(
     trpc.auth.signUp.mutationOptions({
       onError(error) {
         setFormError(error.message);
       },
       async onSuccess(result) {
+        // Save the new account to the dev store so DevLoginFab can use it.
+        if (addAccountIfDev && lastSubmittedValues.current) {
+          await addAccountIfDev(lastSubmittedValues.current);
+        }
+
         const params = new URLSearchParams({
           company: result.onboarding.company,
           email: result.email,
+          signup: "successful",
           subdomain: result.onboarding.subdomain,
           token: result.verificationToken,
         });
+        if (redirectTo) {
+          params.set("redirect", redirectTo);
+        }
 
-        router.push(`${result.redirectTo}?${params.toString()}`);
+        const tenantOnboardingUrl = buildTenantDashboardUrl(
+          result.onboarding.subdomain,
+          {
+            currentOrigin: window.location.origin,
+            pathname: "/onboarding",
+          },
+        );
+
+        router.push(`${tenantOnboardingUrl}?${params.toString()}`);
         router.refresh();
       },
     }),
@@ -88,22 +93,21 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
 
   async function onSubmit(values: SignUpInput) {
     setFormError(null);
+    lastSubmittedValues.current = values;
     await signUpMutation.mutateAsync(values);
   }
 
   const subdomainField = form.register("subdomain");
+  const subdomainValue = form.watch("subdomain");
 
   return (
     <form
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
-      {DevQuickFill && (
-        <DevQuickFill
-          presets={DEV_PRESETS}
-          onFill={(values) => form.reset(values)}
-        />
-      )}
+      <div className="flex justify-end">
+        <DevFormQuickFillButton onFill={() => quickFill.fill("auth-sign-up")} />
+      </div>
 
       <FieldGroup>
         <Field>
@@ -156,6 +160,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
             onChange: subdomainField.onChange,
             ref: subdomainField.ref,
           }}
+          value={subdomainValue}
         />
       </FieldGroup>
 
@@ -178,7 +183,15 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
             : "Create account and continue"}
         </Button>
         <Button asChild variant="secondary">
-          <Link href={authRoutes.signIn}>Already have an account</Link>
+          <Link
+            href={
+              redirectTo
+                ? `${authRoutes.signIn}?redirect=${encodeURIComponent(redirectTo)}`
+                : authRoutes.signIn
+            }
+          >
+            Already have an account
+          </Link>
         </Button>
       </div>
     </form>

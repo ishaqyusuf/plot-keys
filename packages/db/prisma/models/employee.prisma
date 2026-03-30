@@ -7,6 +7,7 @@ model Employee {
   email            String?
   phone            String?
   title            String?
+  workRole         WorkRole       @default(operations) @map("work_role")
   employmentType   EmploymentType @default(full_time) @map("employment_type")
   status           EmployeeStatus @default(active)
   startDate        DateTime?      @map("start_date") @db.Date

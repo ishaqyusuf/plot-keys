@@ -2,13 +2,7 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@plotkeys/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +35,7 @@ type RecommendTemplatePanelProps = {
   currentPrimaryGoal?: string | null;
   currentStylePreference?: string | null;
   currentTone?: string | null;
+  disabled?: boolean;
 };
 
 export function RecommendTemplatePanel({
@@ -48,13 +43,12 @@ export function RecommendTemplatePanel({
   currentPrimaryGoal,
   currentStylePreference,
   currentTone,
+  disabled = false,
 }: RecommendTemplatePanelProps) {
   const router = useRouter();
   const trpc = useTRPC();
   const [open, setOpen] = useState(false);
-  const [businessType, setBusinessType] = useState(
-    currentBusinessType ?? "",
-  );
+  const [businessType, setBusinessType] = useState(currentBusinessType ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(currentPrimaryGoal ?? "");
   const [stylePreference, setStylePreference] = useState(
     currentStylePreference ?? "",
@@ -82,7 +76,12 @@ export function RecommendTemplatePanel({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full">
+        <Button
+          className="w-full"
+          disabled={disabled}
+          size="sm"
+          variant="outline"
+        >
           🎯 Re-recommend templates
         </Button>
       </DialogTrigger>
@@ -135,10 +134,7 @@ export function RecommendTemplatePanel({
 
           <div className="grid gap-2">
             <Label htmlFor="rtp-style">Style preference</Label>
-            <Select
-              value={stylePreference}
-              onValueChange={setStylePreference}
-            >
+            <Select value={stylePreference} onValueChange={setStylePreference}>
               <SelectTrigger id="rtp-style">
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
@@ -211,7 +207,11 @@ export function RecommendTemplatePanel({
 // AI Content Bootstrap — generates hero/intro/CTA copy from onboarding data.
 // ---------------------------------------------------------------------------
 
-export function AiContentBootstrapButton() {
+export function AiContentBootstrapButton({
+  disabled = false,
+}: {
+  disabled?: boolean;
+}) {
   const router = useRouter();
   const trpc = useTRPC();
   const [result, setResult] = useState<{
@@ -234,7 +234,7 @@ export function AiContentBootstrapButton() {
         variant="outline"
         size="sm"
         className="w-full"
-        disabled={mutation.isPending}
+        disabled={disabled || mutation.isPending}
         onClick={() => mutation.mutate()}
       >
         {mutation.isPending ? "Generating…" : "✨ AI-generate hero & CTA copy"}

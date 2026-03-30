@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import type { RenderMode } from "../types";
 import { EditableText } from "./editing-primitives";
+import { useItemOverviewTrigger } from "./interaction-utils";
 import { draftEditableClass } from "./section-utils";
 
 export type ThemeConfig = {
@@ -46,14 +47,17 @@ export type StoryGridConfig = {
 };
 
 export type ListingSpotlightItem = {
+  id?: string;
   imageHint: string;
   location: string;
   price: string;
+  slug?: string;
   specs: string;
   title: string;
 };
 
 export type ListingSpotlightConfig = {
+  detailHrefBase?: string;
   description: string;
   eyebrow: string;
   items: ListingSpotlightItem[];
@@ -198,7 +202,10 @@ export function HeroBannerSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-8 md:px-10 md:py-10" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-8 md:px-10 md:py-10"
+      style={shell(theme)}
+    >
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div>
           <Eyebrow tone="primary">{config.eyebrow}</Eyebrow>
@@ -286,7 +293,10 @@ export function MarketStatsSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 pb-4 md:px-10" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 pb-4 md:px-10"
+      style={shell(theme)}
+    >
       <div className="grid gap-4 md:grid-cols-3">
         {config.items.map((item) => (
           <Surface
@@ -379,6 +389,8 @@ export function ListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14"
@@ -393,40 +405,50 @@ export function ListingSpotlightSection({
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
-          <Surface
+          <div
             key={item.title}
-            className="overflow-hidden bg-white dark:bg-slate-900"
+            {...getCardProps("listing", item)}
+            className="rounded-[var(--radius-lg)]"
           >
-            <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)] p-5">
-              <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
-                <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
-                  {item.imageHint}
-                </p>
+            <Surface className="overflow-hidden bg-white dark:bg-slate-900">
+              <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)] p-5">
+                <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
+                  <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
+                    {item.imageHint}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="px-6 py-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                {item.location}
-              </p>
-              <h3
-                className="mt-3 text-2xl text-slate-950 dark:text-white"
-                style={{ fontFamily: theme.headingFontFamily }}
-              >
-                {item.title}
-              </h3>
-              <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
-                {item.specs}
-              </p>
-              <div className="mt-5 flex items-center justify-between gap-4">
-                <p className="text-lg font-semibold text-slate-950 dark:text-white">
-                  {item.price}
+              <div className="px-6 py-6">
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                  {item.location}
                 </p>
-                <ActionButton href="#" variant="ghost">
-                  View details
-                </ActionButton>
+                <h3
+                  className="mt-3 text-2xl text-slate-950 dark:text-white"
+                  style={{ fontFamily: theme.headingFontFamily }}
+                >
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
+                  {item.specs}
+                </p>
+                <div className="mt-5 flex items-center justify-between gap-4">
+                  <p className="text-lg font-semibold text-slate-950 dark:text-white">
+                    {item.price}
+                  </p>
+                  <ActionButton
+                    href={
+                      item.slug
+                        ? `${config.detailHrefBase ?? "/listings"}/${item.slug}`
+                        : "#"
+                    }
+                    variant="ghost"
+                  >
+                    View details
+                  </ActionButton>
+                </div>
               </div>
-            </div>
-          </Surface>
+            </Surface>
+          </div>
         ))}
       </div>
     </section>
@@ -441,7 +463,10 @@ export function TestimonialStripSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14" style={shell(theme)}>
+    <section
+      className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-10 md:px-10 md:py-14"
+      style={shell(theme)}
+    >
       <div className="grid gap-5 lg:grid-cols-3">
         {config.items.map((item) => (
           <Surface

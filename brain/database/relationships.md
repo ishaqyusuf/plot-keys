@@ -32,7 +32,10 @@ This file captures the major entity relationships as they become defined.
 - `User` may have one global platform role for support-only workflows, but tenant authorization should come from memberships
 - `Membership` belongs to `User`
 - `Membership` belongs to `Company`
-- `Membership` has one role within a company such as `owner`, `admin`, `agent`, or `staff`
+- `Membership` has one access role within a company such as `owner`, `admin`, `agent`, or `staff`
+- `Membership` also has one normalized `workRole` used for employee persona and default dashboard routing
+- `TeamInvite` carries both the invite access role and the intended `workRole`
+- `Employee` belongs to `Company` and stores the normalized `workRole` used by HR and invite completion flows
 - `SiteConfiguration` belongs to `Company`
 - `Website` belongs to `Company`
 - `Website` has one active `WebsiteVersion`

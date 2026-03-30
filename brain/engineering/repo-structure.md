@@ -62,6 +62,7 @@ brain/
 - Query modules under `packages/db/src/queries/*` should receive `db` from the caller instead of constructing their own client.
 - Prefer adding a schema under `apps/api/src/schemas/*` before defining a new API contract in an app component or shared utility package.
 - Keep routers thin; if a procedure is doing substantial data shaping or persistence work, extract that work downward into query or service modules.
+- Every frontend app under `apps/*` should maintain a local `DESIGN_SYSTEM.md` describing that app's visual-system rules, with tenant-site documenting template/theming constraints instead of a fixed brand language.
 
 ## Later Additions
 - Add new packages only when a responsibility cannot live cleanly in the current baseline packages.

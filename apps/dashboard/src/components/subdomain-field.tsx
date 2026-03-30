@@ -13,11 +13,13 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@plotkeys/ui/input-group";
+import {
+  buildDashboardHostname,
+  buildSitefrontHostname,
+  plotkeysRootDomain,
+} from "@plotkeys/utils";
 import type { ComponentProps } from "react";
-import { useId, useState } from "react";
-
-const plotkeysRootDomain = "plotkeys.com";
-const dashboardLabel = "dashboard";
+import { useEffect, useId, useState } from "react";
 
 type SubdomainFieldProps = {
   defaultValue?: string;
@@ -25,6 +27,7 @@ type SubdomainFieldProps = {
   id?: string;
   inputProps?: ComponentProps<typeof InputGroupInput>;
   name?: string;
+  value?: string;
 };
 
 function normalizePreviewValue(value: string) {
@@ -42,13 +45,19 @@ export function SubdomainField({
   id,
   inputProps,
   name = "subdomain",
+  value,
 }: SubdomainFieldProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const [subdomain, setSubdomain] = useState(defaultValue);
+  const [subdomain, setSubdomain] = useState(value ?? defaultValue);
+
+  useEffect(() => {
+    setSubdomain(value ?? defaultValue);
+  }, [defaultValue, value]);
+
   const previewValue = normalizePreviewValue(subdomain) || "your-brand";
-  const websiteHostname = `${previewValue}.${plotkeysRootDomain}`;
-  const dashboardHostname = `${dashboardLabel}.${previewValue}.${plotkeysRootDomain}`;
+  const websiteHostname = buildSitefrontHostname(previewValue);
+  const dashboardHostname = buildDashboardHostname(previewValue);
 
   return (
     <FieldGroup>
@@ -57,7 +66,6 @@ export function SubdomainField({
         <InputGroup>
           <InputGroupInput
             {...inputProps}
-            defaultValue={defaultValue}
             id={inputId}
             name={name}
             onChange={(event) => {
@@ -66,6 +74,7 @@ export function SubdomainField({
             }}
             placeholder="astergrove"
             required
+            value={value}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupText>.{plotkeysRootDomain}</InputGroupText>

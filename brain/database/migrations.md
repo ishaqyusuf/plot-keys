@@ -46,6 +46,11 @@ This file tracks migration conventions and migration milestones.
   - `companies.plan_status`
   - `companies.plan_started_at`
   - `companies.plan_ends_at`
+- Workforce-role support added in `20260325150000_add_work_roles`, including:
+  - `work_role`
+  - `memberships.work_role`
+  - `team_invites.work_role`
+  - `employees.work_role`
 
 ## TODO
 - Define migration naming convention beyond Drizzle's generated names

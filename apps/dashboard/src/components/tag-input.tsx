@@ -2,9 +2,9 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Input } from "@plotkeys/ui/input";
-import { useState, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useEffect, useState } from "react";
 
-const SYSTEM_SUGGESTIONS = [
+export const TAG_INPUT_SYSTEM_SUGGESTIONS = [
   "First-time buyers",
   "Investors",
   "Diaspora clients",
@@ -18,25 +18,46 @@ const SYSTEM_SUGGESTIONS = [
 ] as const;
 
 export function TagInput({
-  name,
   defaultValue = [],
+  name,
+  onChange,
+  value,
 }: {
-  name: string;
   defaultValue?: string[];
+  name?: string;
+  onChange?: (tags: string[]) => void;
+  value?: string[];
 }) {
-  const [tags, setTags] = useState<string[]>(defaultValue);
+  const [internalTags, setInternalTags] = useState<string[]>(defaultValue);
   const [inputValue, setInputValue] = useState("");
+  const tags = value ?? internalTags;
+
+  useEffect(() => {
+    if (value !== undefined) {
+      return;
+    }
+
+    setInternalTags(defaultValue);
+  }, [defaultValue, value]);
+
+  const updateTags = (nextTags: string[]) => {
+    if (value === undefined) {
+      setInternalTags(nextTags);
+    }
+
+    onChange?.(nextTags);
+  };
 
   const addTag = (tag: string) => {
     const trimmed = tag.trim();
     if (trimmed && !tags.includes(trimmed)) {
-      setTags((prev) => [...prev, trimmed]);
+      updateTags([...tags, trimmed]);
     }
     setInputValue("");
   };
 
   const removeTag = (tag: string) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
+    updateTags(tags.filter((currentTag) => currentTag !== tag));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -49,16 +70,18 @@ export function TagInput({
     }
   };
 
-  const availableSuggestions = SYSTEM_SUGGESTIONS.filter(
+  const availableSuggestions = TAG_INPUT_SYSTEM_SUGGESTIONS.filter(
     (s) => !tags.includes(s),
   );
 
   return (
     <div className="space-y-2">
       {/* Hidden inputs for form submission */}
-      {tags.map((tag) => (
-        <input key={tag} type="hidden" name={name} value={tag} />
-      ))}
+      {name
+        ? tags.map((tag) => (
+            <input key={tag} type="hidden" name={name} value={tag} />
+          ))
+        : null}
 
       {/* Selected tags */}
       {tags.length > 0 && (
@@ -66,6 +89,8 @@ export function TagInput({
           {tags.map((tag) => (
             <Badge
               key={tag}
+              data-dev-tag-selected="true"
+              data-tag-value={tag}
               variant="secondary"
               className="cursor-pointer gap-1 pr-1"
               onClick={() => removeTag(tag)}
@@ -93,6 +118,8 @@ export function TagInput({
           {availableSuggestions.map((suggestion) => (
             <Badge
               key={suggestion}
+              data-dev-tag-suggestion="true"
+              data-tag-value={suggestion}
               variant="outline"
               className="cursor-pointer transition-colors hover:bg-accent"
               onClick={() => addTag(suggestion)}

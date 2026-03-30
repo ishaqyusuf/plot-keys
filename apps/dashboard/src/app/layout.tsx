@@ -5,6 +5,7 @@ import { ThemeProvider } from "@plotkeys/ui/theme-provider";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { DevFormQuickFillLoader } from "../components/dev/dev-form-quick-fill-loader";
 import { TRPCReactProvider } from "../trpc/client";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           <TRPCReactProvider>
             <NotificationsProvider>{children}</NotificationsProvider>
+            <DevFormQuickFillLoader />
           </TRPCReactProvider>
         </ThemeProvider>
       </body>

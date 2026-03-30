@@ -32,12 +32,15 @@ This file tracks request and response shape conventions.
 - Current workspace mutation responses stay intentionally small and redirect-friendly:
   - `configId` for builder mutations that should route the dashboard back to a specific configuration
   - `syncedCount` for tenant-domain sync operations
+- Billing checkout contracts now allow the dashboard to pass the active host callback URL into `workspace.initializeCheckout` so provider redirects return to the correct local, preview, or production dashboard origin.
+- Team invite contracts now support an optional `workRole` alongside the required access `role` so employee invites can carry standardized workplace persona.
 
 ## Planned Enums
 - `LeadStatus`: `NEW`, `CONTACTED`, `NEGOTIATING`, `CLOSED`
 - `ClientStage`: `NEW_LEAD`, `INTERESTED`, `NEGOTIATING`, `CLOSED`
 - `PaymentMethod`: `PAYSTACK`, `FLUTTERWAVE`, `STRIPE`, `BANK_TRANSFER`, `CASH`
 - `MembershipRole`: `PLATFORM_ADMIN`, `OWNER`, `ADMIN`, `AGENT`, `STAFF`
+- `WorkRole`: `OPERATIONS`, `SALES_AGENT`, `SALES_MANAGER`, `HR`, `FINANCE`, `MARKETING`, `PROJECT_MANAGER`, `EXECUTIVE`
 
 ## Structured Builder Contract Example
 ```json

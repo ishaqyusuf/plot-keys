@@ -27,6 +27,56 @@ export const CompanyPlanStatus = {
 export type CompanyPlanStatus = (typeof CompanyPlanStatus)[keyof typeof CompanyPlanStatus]
 
 
+export const EmploymentType = {
+  full_time: 'full_time',
+  part_time: 'part_time',
+  contract: 'contract',
+  intern: 'intern'
+} as const
+
+export type EmploymentType = (typeof EmploymentType)[keyof typeof EmploymentType]
+
+
+export const EmployeeStatus = {
+  active: 'active',
+  on_leave: 'on_leave',
+  suspended: 'suspended',
+  terminated: 'terminated'
+} as const
+
+export type EmployeeStatus = (typeof EmployeeStatus)[keyof typeof EmployeeStatus]
+
+
+export const LeaveType = {
+  annual: 'annual',
+  sick: 'sick',
+  maternity: 'maternity',
+  paternity: 'paternity',
+  unpaid: 'unpaid',
+  compassionate: 'compassionate'
+} as const
+
+export type LeaveType = (typeof LeaveType)[keyof typeof LeaveType]
+
+
+export const LeaveRequestStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  cancelled: 'cancelled'
+} as const
+
+export type LeaveRequestStatus = (typeof LeaveRequestStatus)[keyof typeof LeaveRequestStatus]
+
+
+export const PayrollStatus = {
+  pending: 'pending',
+  paid: 'paid'
+} as const
+
+export type PayrollStatus = (typeof PayrollStatus)[keyof typeof PayrollStatus]
+
+
 export const LeadStatus = {
   new: 'new',
   contacted: 'contacted',
@@ -55,6 +105,203 @@ export const MembershipStatus = {
 } as const
 
 export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus]
+
+
+export const ProjectStatus = {
+  draft: 'draft',
+  active: 'active',
+  paused: 'paused',
+  delayed: 'delayed',
+  completed: 'completed',
+  archived: 'archived'
+} as const
+
+export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus]
+
+
+export const ProjectType = {
+  building: 'building',
+  estate: 'estate',
+  fit_out: 'fit_out',
+  infrastructure: 'infrastructure',
+  renovation: 'renovation'
+} as const
+
+export type ProjectType = (typeof ProjectType)[keyof typeof ProjectType]
+
+
+export const ProjectPhaseStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  on_hold: 'on_hold'
+} as const
+
+export type ProjectPhaseStatus = (typeof ProjectPhaseStatus)[keyof typeof ProjectPhaseStatus]
+
+
+export const ProjectMilestoneStatus = {
+  pending: 'pending',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  overdue: 'overdue'
+} as const
+
+export type ProjectMilestoneStatus = (typeof ProjectMilestoneStatus)[keyof typeof ProjectMilestoneStatus]
+
+
+export const ProjectDocumentKind = {
+  drawing: 'drawing',
+  contract: 'contract',
+  permit: 'permit',
+  invoice: 'invoice',
+  receipt: 'receipt',
+  site_report: 'site_report',
+  inspection: 'inspection',
+  handover: 'handover',
+  other: 'other'
+} as const
+
+export type ProjectDocumentKind = (typeof ProjectDocumentKind)[keyof typeof ProjectDocumentKind]
+
+
+export const ProjectDocumentVisibility = {
+  internal: 'internal',
+  shared: 'shared'
+} as const
+
+export type ProjectDocumentVisibility = (typeof ProjectDocumentVisibility)[keyof typeof ProjectDocumentVisibility]
+
+
+export const ProjectUpdateKind = {
+  daily: 'daily',
+  weekly: 'weekly',
+  milestone: 'milestone',
+  general: 'general'
+} as const
+
+export type ProjectUpdateKind = (typeof ProjectUpdateKind)[keyof typeof ProjectUpdateKind]
+
+
+export const ProjectIssueSeverity = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  critical: 'critical'
+} as const
+
+export type ProjectIssueSeverity = (typeof ProjectIssueSeverity)[keyof typeof ProjectIssueSeverity]
+
+
+export const ProjectIssueStatus = {
+  open: 'open',
+  in_progress: 'in_progress',
+  resolved: 'resolved',
+  closed: 'closed'
+} as const
+
+export type ProjectIssueStatus = (typeof ProjectIssueStatus)[keyof typeof ProjectIssueStatus]
+
+
+export const ProjectRole = {
+  project_owner: 'project_owner',
+  project_manager: 'project_manager',
+  qs_manager: 'qs_manager',
+  finance_reviewer: 'finance_reviewer',
+  site_supervisor: 'site_supervisor',
+  viewer: 'viewer'
+} as const
+
+export type ProjectRole = (typeof ProjectRole)[keyof typeof ProjectRole]
+
+
+export const ProjectAssignmentStatus = {
+  active: 'active',
+  removed: 'removed'
+} as const
+
+export type ProjectAssignmentStatus = (typeof ProjectAssignmentStatus)[keyof typeof ProjectAssignmentStatus]
+
+
+export const ProjectWorkerPayBasis = {
+  daily: 'daily',
+  weekly: 'weekly',
+  monthly: 'monthly',
+  fixed_contract: 'fixed_contract',
+  milestone_based: 'milestone_based'
+} as const
+
+export type ProjectWorkerPayBasis = (typeof ProjectWorkerPayBasis)[keyof typeof ProjectWorkerPayBasis]
+
+
+export const ProjectWorkerStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  terminated: 'terminated'
+} as const
+
+export type ProjectWorkerStatus = (typeof ProjectWorkerStatus)[keyof typeof ProjectWorkerStatus]
+
+
+export const ProjectPayrollRunStatus = {
+  draft: 'draft',
+  finalized: 'finalized',
+  paid: 'paid'
+} as const
+
+export type ProjectPayrollRunStatus = (typeof ProjectPayrollRunStatus)[keyof typeof ProjectPayrollRunStatus]
+
+
+export const ProjectPayrollEntryPaymentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  on_hold: 'on_hold'
+} as const
+
+export type ProjectPayrollEntryPaymentStatus = (typeof ProjectPayrollEntryPaymentStatus)[keyof typeof ProjectPayrollEntryPaymentStatus]
+
+
+export const ProjectBudgetLineCategory = {
+  preliminaries: 'preliminaries',
+  substructure: 'substructure',
+  superstructure: 'superstructure',
+  mep: 'mep',
+  finishing: 'finishing',
+  external_works: 'external_works',
+  contingency: 'contingency',
+  professional_fees: 'professional_fees',
+  other: 'other'
+} as const
+
+export type ProjectBudgetLineCategory = (typeof ProjectBudgetLineCategory)[keyof typeof ProjectBudgetLineCategory]
+
+
+export const ProjectCustomerAccessLevel = {
+  overview: 'overview',
+  detailed: 'detailed'
+} as const
+
+export type ProjectCustomerAccessLevel = (typeof ProjectCustomerAccessLevel)[keyof typeof ProjectCustomerAccessLevel]
+
+
+export const PropertyPublishState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
+} as const
+
+export type PropertyPublishState = (typeof PropertyPublishState)[keyof typeof PropertyPublishState]
+
+
+export const PropertyType = {
+  residential: 'residential',
+  commercial: 'commercial',
+  land: 'land',
+  industrial: 'industrial',
+  mixed_use: 'mixed_use'
+} as const
+
+export type PropertyType = (typeof PropertyType)[keyof typeof PropertyType]
 
 
 export const SiteConfigurationStatus = {
@@ -87,6 +334,20 @@ export const TenantDomainStatus = {
 export type TenantDomainStatus = (typeof TenantDomainStatus)[keyof typeof TenantDomainStatus]
 
 
+export const WorkRole = {
+  operations: 'operations',
+  sales_agent: 'sales_agent',
+  sales_manager: 'sales_manager',
+  hr: 'hr',
+  finance: 'finance',
+  marketing: 'marketing',
+  project_manager: 'project_manager',
+  executive: 'executive'
+} as const
+
+export type WorkRole = (typeof WorkRole)[keyof typeof WorkRole]
+
+
 export const AppointmentStatus = {
   pending: 'pending',
   confirmed: 'confirmed',
@@ -116,6 +377,24 @@ export const BillingLineItemStatus = {
 } as const
 
 export type BillingLineItemStatus = (typeof BillingLineItemStatus)[keyof typeof BillingLineItemStatus]
+
+
+export const CustomerStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  vip: 'vip'
+} as const
+
+export type CustomerStatus = (typeof CustomerStatus)[keyof typeof CustomerStatus]
+
+
+export const PropertyMediaKind = {
+  image: 'image',
+  floor_plan: 'floor_plan',
+  virtual_tour: 'virtual_tour'
+} as const
+
+export type PropertyMediaKind = (typeof PropertyMediaKind)[keyof typeof PropertyMediaKind]
 
 
 export const PropertyStatus = {

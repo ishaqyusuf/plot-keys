@@ -2,8 +2,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@source "../../apps/**/*.{ts,tsx}";
-@source "../**/*.{ts,tsx}";
+@source "../../../apps/**/*.{ts,tsx}";
+@source "../../**/*.{ts,tsx}";
 @source "../../section-registry/**/*.{ts,tsx}";
 
 :root {
@@ -26,10 +26,11 @@
   --ring: rgba(15, 118, 110, 0.22);
   --shadow-soft: 0 24px 70px rgba(16, 32, 51, 0.08);
   --shadow-card: 0 18px 42px rgba(16, 32, 51, 0.08);
-  --radius-sm: 0.875rem;
-  --radius-md: 1.25rem;
-  --radius-lg: 1.75rem;
-  --radius-xl: 2.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius: var(--radius-md);
   --content-width: 72rem;
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);

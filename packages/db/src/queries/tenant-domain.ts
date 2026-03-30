@@ -3,16 +3,23 @@ import type { Db } from "../prisma";
 /**
  * Resolves a tenant company from a fully-qualified hostname.
  *
- * Used by middleware and the public tenant-site page to map:
- *   - `{slug}.plotkeys.com` → company via `tenant_domains` table
- *   - `custom-domain.com`   → company via `tenant_domains` table
+ * Used by dashboard and tenant-site host resolution to map any registered
+ * tenant hostname, including:
+ *   - `{slug}.plotkeys.com`
+ *   - `dashboard.{slug}.plotkeys.com`
+ *   - `custom-domain.com`
+ *   - `dashboard.custom-domain.com`
  *
  * Returns null when no matching active domain is found.
  */
 export async function resolveTenantByHostname(
   db: Db,
   hostname: string,
-): Promise<{ companyId: string; companySlug: string; hostname: string } | null> {
+): Promise<{
+  companyId: string;
+  companySlug: string;
+  hostname: string;
+} | null> {
   const normalizedHostname = hostname.toLowerCase().replace(/:\d+$/, "");
 
   const tenantDomain = await db.tenantDomain.findFirst({

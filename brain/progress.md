@@ -35,6 +35,7 @@
 | Customer model + lead promotion | ✅ Done |
 | Team invite accept flow | ✅ Done |
 | HR module (Employee + Department models, pages) | ✅ Done |
+| Invite-driven agent/employee onboarding | ✅ Done |
 | CSV export actions + UI download buttons | ✅ Done |
 | Leave management (submission + approval flow) | ✅ Done |
 | Payroll page (monthly records + mark paid) | ✅ Done |
@@ -45,12 +46,160 @@
 | AI-Powered Content Generation (property descriptions) | ✅ Done |
 | Template Usage Analytics | ✅ Done |
 | Custom domain purchase | ❌ Not started |
-| WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| WebsiteVersion Phase 4 (writes) | ✅ Done |
+| **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
+| **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
+| **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
+| **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
+| Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
+| Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
+| Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
+| Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
+| Builder locked-template upgrade flow | ✅ Done |
+| Pricing strategy refresh | ✅ Done |
+
+## 2026-03-30 — Template Registry M4 — Tenant-Site Integration
+
+### What was built
+- **`register/index.ts` nav/footer helpers** — `getFamilyNavConfig(familyKey, tier)` returns `NavConfig` with links filtered by `minTier` vs active tier. `getFamilyFooterConfig(familyKey)` returns `FooterConfig`. Both backed by `familyNavConfigMap` and `familyFooterConfigMap` lookup tables across all 6 families.
+- **`lib/resolve-tenant.ts`** — Two-tier resolver. `resolveTenantContext(searchParams?)` resolves full tenant context including live listings and agents — used by page routes. `resolveTenantShell()` is lightweight (company + published theme only, no live data) — used by the root layout so the shell never waits on DB-heavy data fetches.
+- **`components/register-nav.tsx`** — `RegisterNav` server component. Desktop: inline links filtered by plan tier + CTA button. Mobile: native `<details>/<summary>` hamburger (zero JS). Uses `var(--pk-*)` CSS vars throughout for theme consistency.
+- **`components/register-footer.tsx`** — `RegisterFooter` server component. Renders link groups in a responsive grid + tagline + `© {year} {company}` copyright line.
+- **`app/[...slug]/page.tsx`** — Catch-all inner page route. `resolvePageKeyForPath(templateKey, path)` supports exact slug match then dynamic `[slug]` wildcard pattern match. Calls `resolveTenantContext()` → `resolvePage()` → renders sections with `visibleSections` filter. Empty section list → "coming soon" placeholder; unknown path → `notFound()`.
+- **`app/layout.tsx`** — `WebsiteRuntimeProvider` now wraps all body content, injecting `--pk-*` CSS custom properties for the active template's color system, font, and style preset. `resolveTenantShell()` called in parallel with subdomain + integrations. `RegisterNav` and `RegisterFooter` rendered conditionally when `familyKey` + `tier` are defined.
+- **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
+
+### What's still deferred
+
+## 2026-03-30 — Multi-page Website Support
+
+### What was built
+- **`apps/dashboard/src/app/(app)/builder/page.tsx`** — Builder now accepts a `?page=` query param and passes it into the workspace.
+- **`apps/dashboard/src/components/builder/builder-workspace.tsx`** — The workspace now validates the selected page against `getTemplatePageInventory(templateKey)`, falls back to the first available page, resolves the draft preview with `pageKey`, and builds a page-aware live-site URL.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — Added a new Page picker sourced from the active template inventory. Selection updates the main builder URL via `router.replace('/builder?page=...')`, so page state is shareable and survives refreshes.
+- **`apps/dashboard/src/components/builder/builder-sidebar-drawer.tsx`** — Mobile builder drawer now receives the current page key so page selection is available outside desktop as well.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Preview chrome now shows the selected public page path and label instead of only a generic builder-preview label.
+
+### Validation notes
+- Focused Biome checks passed on the touched builder files after adding the new page-selection wiring.
+- `apps/dashboard` workspace typecheck remains blocked in this sandbox by a pre-existing environment issue: `@plotkeys/tsconfig/nextjs.json` is not resolvable from the package.
+- Attempted live manual verification by starting the dashboard app, but the sandbox currently lacks the required `turbo`, `portless`, and `next` binaries in the runtime path, preventing a full app boot here.
+
+## 2026-03-30 — Listing Overview Standardization
+
+### What was built
+- **`apps/tenant-site/src/lib/listing-overview.ts`** — Added a shared public listing overview query contract: `location`, `priceRange`, `sort`, and `page`. The helper normalizes those search params, applies filtering/sorting/pagination to tenant listing snapshots, and identifies which page keys count as listing overview pages.
+- **`apps/tenant-site/src/app/[...slug]/page.tsx`** — Catch-all tenant pages now detect listing overview pages (`listings`, `rentals`, `projects`, etc.) and apply the shared listing query contract before passing listings into `resolvePage()`. Templates still control the section tree; the runtime now standardizes the data behavior.
+- **`packages/section-registry/src/index.ts`** — Added a shared route contract resolver that derives the canonical overview/detail base path from the active template inventory. Shared section builders now use that contract so CTA links and detail links follow `/rentals/*`, `/projects/*`, `/portfolio/*`, etc. instead of assuming `/listings/*`.
+- **`packages/section-registry/src/sections/extended-sections.tsx`** and **`packages/section-registry/src/sections/home-page.tsx`** — Shared property-grid and listing-spotlight configs now accept `detailHrefBase`, so shared listing cards can build template-correct detail URLs.
+
+### Validation notes
+- Focused Biome checks passed on the touched tenant-site and section-registry files; only pre-existing `<img>` performance warnings remain in shared section files.
+- Verified the tenant-site listing query helper with `npx -y tsx` by filtering/sorting a small in-memory listing set; confirmed the helper returns the expected ordered subset.
+- Verified template inventories with `npx -y tsx` to confirm `sakan-starter` resolves `/rentals` + `/rentals/[slug]` and `bana-starter` resolves `/projects` + `/projects/[slug]`, matching the new route contract.
+- Full `apps/tenant-site` and `packages/section-registry` typechecks remain blocked in this sandbox by pre-existing workspace environment issues (`@plotkeys/tsconfig/nextjs.json` missing in app packages, JSX/react resolution missing in section-registry standalone runs).
+- Manual UI verification used a local mock because the sandbox still cannot boot the full Next/Turbo runtime here. Screenshot: https://github.com/user-attachments/assets/de73bc0f-290f-4909-9e30-c58294103d47
+
+## 2026-03-30 — Customer Portal Foundation Planning
+
+### What was built
+- **Central `/portal/*` route group in tenant-site** — Added `apps/tenant-site/src/app/portal/` pages for `/portal/login`, `/portal/signup`, `/portal/dashboard`, `/portal/saved`, `/portal/offers`, `/portal/payments`, and `/portal/account`, plus `/portal` redirecting to `/portal/login`.
+- **Branded shared portal shell** — Added `apps/tenant-site/src/components/portal-shell.tsx` and `portal-page.tsx` so customer-facing account pages now render in a central application shell that uses tenant branding tokens from the existing `WebsiteRuntimeProvider`, rather than template section trees.
+- **Template shell suppression on portal routes** — Updated `apps/tenant-site/src/proxy.ts` to inject `x-tenant-pathname`, and updated `apps/tenant-site/src/app/layout.tsx` so register-family nav/footer and chat widget do not render on `/portal/*` routes.
+- **Legacy entry-point redirects** — Added explicit `/login`, `/signup`, and `/saved` tenant-site routes that redirect into `/portal/login`, `/portal/signup`, and `/portal/saved`, so older inventory-driven entry points land in the new central portal.
+- **Public saved-listing links repointed** — Updated register-family nav/footer configs that exposed “Saved Listings” so they now link to `/portal/saved`.
+
+### Validation notes
+- Focused Biome checks passed on all touched tenant-site and section-registry files for this task.
+- `apps/tenant-site` standalone typecheck remains blocked in this sandbox by the pre-existing workspace issue where `@plotkeys/tsconfig/nextjs.json` cannot be resolved from the package.
+- Manual UI verification used a local mock because the sandbox still cannot reliably boot the full tenant-site runtime here. Screenshot: https://github.com/user-attachments/assets/8acea668-c66c-40ef-82eb-71e55671a80b
+
+## 2026-03-30 — Customer Portal + Listing Page Boundary Planning
+
+### Planning decisions
+- **Central customer account pages** — Customer login, signup, dashboard, saved listings, offers, payments, and account settings should live under a central tenant-site route group such as `/portal/*`. These pages should inherit tenant branding but should not be template-composed pages.
+- **Template-based public discovery pages** — Public listing overview pages (`/listings`, `/properties`, `/rentals`, `/portfolio`, `/projects`) remain template-driven because they are part of the tenant's branded marketing surface.
+- **Shared functional contract for listing pages** — Even though listing overview pages remain template-based, filtering, sorting, pagination, and auth-aware actions should be implemented through shared central code so behavior stays consistent across families.
+
+### Brain updates
+- Updated `brain/features/customer-portal.md` with explicit page-boundary decisions and a route plan for `/portal/login`, `/portal/signup`, `/portal/dashboard`, `/portal/saved`, `/portal/offers`, and `/portal/account`.
+- Updated `brain/modules/template-register-plan.md` so customer auth/account pages are no longer treated as template inventory pages.
+- Updated `brain/modules/pages-inventory.md` to separate template pages from central customer portal pages.
+- Updated `brain/system/architecture.md` and `brain/tasks/backlog.md` so future implementation follows the new central-vs-template boundary.
+
+## 2026-03-30 — Tenant-Site ClickGuard + InlineOverview Wiring
+
+### What was built
+- **`apps/tenant-site/src/components/tenant-interaction-shell.tsx`** — Added a client-side interaction shell that reads `?renderMode=` from the URL, wraps tenant-site content in `WebsiteRuntimeProvider`, mounts `ClickGuardProvider`, and places a single `InlineOverview` panel around the real nav/footer/page render tree.
+- **Tenant-site render mode parsing** — Added `parseTenantRenderMode()` and updated both `app/page.tsx` and `app/[...slug]/page.tsx` to pass the selected render mode into `resolvePage()`, so `"template"` mode now resolves placeholder content/data while `"preview"` / `"draft"` keep real tenant data.
+- **Overview trigger wiring for cards** — Added `useItemOverviewTrigger()` in `packages/section-registry/src/sections/interaction-utils.tsx` and used it across shared section components plus the Noor/Bana/Wafi/Faris/Sakan/Thuraya family overrides so listing and agent cards open `InlineOverview` in non-live modes while remaining inert or navigable in live mode.
+- **Item slug propagation** — Extended live/placeholder listing + agent shapes with optional `slug` support so `InlineOverview` action links can resolve detail URLs correctly in preview/template contexts.
+
+### Validation notes
+- Manual UI verification completed with a temporary local preview-mode demo that exercised `ClickGuardProvider` + `InlineOverview` around real section components. Verified that clicking a property card opens the slide-up overview panel. Screenshot: https://github.com/user-attachments/assets/f526c025-ceed-44c4-85f4-c607d6bbbfe2
+- `apps/tenant-site` typecheck remains blocked in this sandbox because `@plotkeys/tsconfig/nextjs.json` is not resolvable from the app package here, and `packages/section-registry` standalone typecheck is also blocked by the environment not loading the expected React/JSX tsconfig setup.
+- Focused Biome checks on touched files still surface pre-existing section-registry issues in files touched for this task, especially existing `<img>` warnings and historical `noArrayIndexKey` findings in family section files. No new security findings were identified during manual review.
+
+## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
+
+### What was built
+- **`sections/editing-primitives.tsx`** — Draft-mode `EditableText` now keeps the existing amber hover affordance but upgrades into an explicit editing surface: hover can reveal a `✦ AI` trigger, click enters edit mode, and an action bar with `✓ Save` / `✕ Discard` replaces the previous implicit blur-save behavior.
+- **Inline AI suggestion panel** — When AI is enabled for the current `contentKey`, the inline editor can open an in-place suggestion panel with generated copy plus `Use this` / `Try again` actions, so the builder preview now matches the planned upgrade path instead of only exposing AI from the sidebar field editor.
+- **`register/content-field-lookup.ts`** — Added a shared content-field metadata lookup compiled from the register family content schemas plus the legacy shared builder keys. `EditableText` can now infer whether a field should expose AI affordances without requiring every section call site to pass a new prop.
+
+### Validation notes
+- Manual UI verification completed with a temporary local demo page rendering `EditableText` in draft mode. Verified hover AI affordance, edit-state action bar, and suggestion panel interaction.
+- Repository tooling required `npx bun@1.3.9 ...` because the sandbox lacked a global `bun` binary.
+- Full package typecheck remains blocked by pre-existing `packages/section-registry/src/register/index.ts` errors around unresolved `NavConfig` / `FooterConfig` types, unrelated to this task.
+- Focused Biome checks on touched files only surfaced pre-existing warnings/errors elsewhere in `editing-primitives.tsx` (`<img>`, `aria-label` on placeholder `<div>`, `autoFocus`, and array-index key), none introduced by this change.
+
+## 2026-03-29 — Template Registry M3 Runtime Wiring
+
+### What was built
+- **`page-inventory.ts` bridge** — `registerPagesToInventory()` converts `RegisterPageDefinition[]` to `TemplatePageInventory`. `getTemplatePageInventory()` now checks register templates first, so `buildPageSections` and `getEnabledSections` route correctly for all 18 `noor-starter` / `bana-plus` / etc. keys instead of falling back to template-1.
+- **`register/index.ts` placeholder helpers** — `getPlaceholderContent(familyKey)` returns a flat `TenantContentRecord` populated from `placeholderValue` fields in each family's content-schema. `getFamilyPlaceholderData(familyKey)` returns placeholder listings/agents/projects.
+- **`src/index.ts` — `resolvePage()`** — New public API. Takes `templateKey`, `pageKey`, `TenantSnapshot`, and `RenderMode`. In `"template"` mode, automatically substitutes family placeholder content and data. Applies family component overrides. Returns `ResolvedPageConfig` (sections + theme + renderMode).
+- **Builder wiring** — `BuilderPreviewPanel` now accepts `templateKey` prop. `resolveFamilySectionComponents()` is resolved at the panel level and merged into the section component lookup per section, so family-branded components (Noor, Bana, Wafi, Faris, Thuraya, Sakan) render correctly in the builder instead of generic fallbacks.
+- **`runtime/click-guard.tsx`** — `ClickGuardProvider` context wraps page content in non-live modes. Intercepts anchor clicks (no navigation) and form/submit clicks (no real submission). `useClickGuard()` hook exposes `openItem()` / `closeItem()` / `activeItem` for section components to trigger the overview panel.
+- **`runtime/inline-overview.tsx`** — `InlineOverview` slide-up panel. Shows placeholder item data + "Install template" CTA in `"template"` mode; shows real item data + action links in `"draft"`/`"preview"` mode. Handles listing, agent, project, and generic item types.
+
+### What's still deferred
+- Tenant-site page routing for inner pages (Phase 4 — multi-page website support)
+- ClickGuard integration into actual tenant-site page renders
+- EditableText AI icon + action bar upgrade
+- WebsiteVersion Phase 4 writes
+
+## 2026-03-25 — Pricing Strategy Refresh
+
+### Commercial Model
+- PlotKeys no longer positions the entry tier as free forever.
+- Current commercial positioning is:
+  - Launch (`starter`) — ₦20,000/mo or ₦192,000/yr
+  - Growth (`plus`) — ₦45,000/mo or ₦432,000/yr
+  - Scale (`pro`) — ₦90,000/mo or ₦864,000/yr
+- All plans now advertise a 14-day free trial.
+- Annual billing is positioned with a 20% discount.
+
+### Implementation Notes
+- Internal entitlement keys remain `starter`, `plus`, and `pro` so template gating and existing plan logic do not break.
+- User-facing labels now present those tiers as Launch, Growth, and Scale.
+- Dashboard billing and the marketing-site pricing section now both read prices from the shared pricing config to avoid drift.
+
+## 2026-03-25 — Builder Locked Template Guard
+
+### Builder Access UX
+- Builder now detects when the active template requires a higher subscription tier than the tenant currently holds and the company does not have a separate template license.
+- In that state, the builder stays viewable but becomes read-only: publish, sidebar theme controls, inline field editing, and AI content bootstrap are disabled.
+- Upgrade CTAs now point tenants to `/billing` instead of letting them hit a `FORBIDDEN` error at publish time.
+
+### Server Enforcement
+- Added shared license-aware template access checks before publish, inline content updates, theme updates, smart fill, and AI bootstrap mutations.
+- This keeps the UI lock state and API enforcement aligned so direct mutation attempts are blocked consistently.
 
 ---
 
@@ -93,6 +242,24 @@
 ---
 
 ## 2026-03-22 — App Store Expansion
+
+## 2026-03-24 — Invite-Driven Agent and Employee Onboarding
+
+### Admin Flows
+- Replaced direct-create agent and employee entry points with invite forms that only require an email address.
+- Agents page and Employees page now show pending role-specific invites and let admins revoke them.
+- Team/member invites now send real invitation emails through the shared notifications + email pipeline.
+
+### Invite Acceptance + Profile Completion
+- Updated `/join/[token]` so invitees can sign in or create an account with redirect preservation back to the invite link.
+- Accepting an `agent` invite now routes into a profile-completion form that creates or updates the agent record.
+- Accepting a `staff` invite now routes into a profile-completion form that creates or updates the employee record.
+- Invite acceptance now validates that the signed-in account email matches the invited email before membership is created.
+
+### Notifications + Email
+- Added `workspace_invitation_sent` notification type for invite delivery.
+- Added a dedicated workspace invitation email template and subject/default copy helpers.
+- Added dashboard-side invite notification orchestration to send invitation emails after the team invite record is created.
 
 ### Dashboard App Store Page (`/app-store`)
 - Integration cards for Google Analytics, Facebook Pixel, WhatsApp Business, Calendly
@@ -704,3 +871,19 @@
 - Created `/projects/[id]/budget` page showing budget summary and line items
 - Created `/projects/[id]/workforce` page showing workers and payroll runs
 - Updated `/projects/[id]` detail page header with Budget and Workforce navigation buttons
+# Progress Log
+
+- 2026-03-25: Fixed the dashboard projects page so failed project-creation attempts now surface the redirected `error` query string in a destructive alert, matching the error-handling pattern already used on properties, agents, team, and other dashboard pages. Also normalized the client-side redirecting forms for project creation, property create/edit, agent create/edit, team invites, employee invites, and final onboarding completion to await server actions directly instead of wrapping them in `startTransition(async () => ...)`, which had been causing submissions to behave like plain page refreshes instead of following the intended redirect flow.
+## 2026-03-30 — WebsiteVersion Phase 4 Writes
+
+### What was built
+- **WebsiteVersion-first builder writes** — Added `findDraftWebsiteVersionByIdForCompany()` and `upsertDraftWebsiteVersion()` in `packages/db/src/queries/website.ts` so the active draft can be looked up and updated directly by `WebsiteVersion.id` instead of routing writes through legacy `SiteConfiguration`.
+- **Workspace mutation cutover** — Updated `createTemplateDraft`, `ensureBuilderConfigurationExists`, `publishSiteConfiguration`, `smartFillField`, `updateSiteField`, and `updateSiteThemeField` in `apps/api/src/routers/workspace.route.ts` to use WebsiteVersion draft records as the primary write target.
+- **Builder config ID cutover** — `apps/dashboard/src/components/builder/builder-workspace.tsx` now always passes the resolved active draft WebsiteVersion ID to all builder actions. The previous fallback to `legacyConfigId` / latest `SiteConfiguration.id` was removed.
+- **Removed onboarding dual-write in active draft path** — `updateOnboardingInputs` / onboarding AI content updates now write only to the active WebsiteVersion draft instead of mirroring field-by-field back into SiteConfiguration.
+
+### Validation notes
+- Focused Biome checks passed on the touched files with only pre-existing warnings in unrelated `workspace.route.ts` mutations (`ctx` unused in lead/appointment handlers).
+- `packages/db` typecheck remains blocked in this sandbox because `@plotkeys/tsconfig/base.json` is not resolvable here.
+- `apps/api` typecheck remains blocked in this sandbox because installed package resolution for the workspace dependencies is incomplete (`drizzle-orm/node-postgres` and related modules unavailable to `tsc` here).
+- Manual code-path verification confirmed the builder now uses `resolvedActiveDraft.id` as `configId`, and the targeted website builder mutations no longer call `createSiteConfiguration`, `updateSiteConfigurationContentField`, `updateSiteConfigurationThemeField`, or `publishSiteConfiguration`.

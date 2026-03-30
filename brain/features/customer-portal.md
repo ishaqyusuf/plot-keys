@@ -3,22 +3,65 @@
 ## Purpose
 This file documents the customer-facing portal that lets end customers of tenant companies manage their properties, interact with listings, make payments, and handle property transactions through the tenant's branded site.
 
+## Current Status
+- **Phase 0 / Foundation shell complete** — Central tenant-site portal routes now exist under `/portal/*` for login, signup, dashboard, saved listings, offers, payments, and account pages.
+- These routes use a shared branded application shell inside `apps/tenant-site`, and the root tenant layout now suppresses template-family nav/footer on `/portal/*`.
+- Public saved-listing links in register-family nav/footer configs now point into `/portal/saved`.
+- Customer auth, route guards, and tenant-scoped customer data models are still deferred to the next portal phases.
+
 ## Product Direction
 - Customers are the end users served by tenant companies (buyers, renters, investors).
 - Each customer has a single global identity across the platform.
 - Each tenant company sees only their own customer relationships.
 - The portal is a gated section of the tenant site, not a separate app.
+- Customer auth and account routes should live under a central tenant-site route group such as `/portal/*`, not inside the template page inventory.
+- Public marketing and discovery pages can remain template-based, but authenticated customer account pages should use a shared central UI shell that only inherits tenant branding tokens (logo, colours, fonts).
 - This feature is gated to Plus tier and above per the pricing plan.
+
+## Page Boundary Decision
+
+### Template-Based Public Pages
+- These pages should continue to be driven by the template registry and WebsiteVersion page inventory.
+- Examples:
+  - `/`
+  - `/about`
+  - `/contact`
+  - `/listings`, `/properties`, `/rentals`, `/portfolio`, `/projects`
+  - public property / listing detail pages such as `/listings/[slug]`
+  - `/services`, `/agents`, `/blog`, `/areas`, `/faq`
+- These pages may differ by family and plan tier, and they should remain a key surface for template differentiation.
+
+### Central Customer Portal Pages
+- These pages should not be template-section pages.
+- They should use a central application shell inside `apps/tenant-site` with tenant branding applied through shared theme tokens.
+- Examples:
+  - `/portal/login`
+  - `/portal/signup`
+  - `/portal/dashboard`
+  - `/portal/saved`
+  - `/portal/offers`
+  - `/portal/payments`
+  - `/portal/account/*`
+- Templates may link to these routes, but they should not own the page composition or layout logic.
+
+### Listing Overview Direction
+- Public listing overview pages should stay template-based because they are part of the tenant's branded marketing and browsing experience.
+- However, search/filter/sort/pagination behavior should come from a central data contract so all template families use the same listing query rules.
+- In practice this means:
+  - templates control page composition, copy, and visual layout
+  - central code controls listing data retrieval, filtering, search state, and auth-aware actions such as save / inquire
 
 ## Core Capabilities
 
 ### Customer Authentication
-- Customers sign up and log in through the tenant site (not the dashboard).
-- Auth flow is separate from staff/dashboard auth.
+- Customers sign up and log in through the tenant site (not the staff dashboard).
+- The login and signup experiences should be central portal pages, not template pages.
+- Auth should share the platform auth infrastructure where practical, but customer session handling and route guards should be distinct from staff/dashboard membership flows.
 - A customer who interacts with multiple companies on the platform uses one account.
 - Social login and magic link options should be considered alongside email/password.
 
 ### Customer Dashboard (Portal Home)
+- Route direction: `/portal/dashboard`
 - Overview of owned/reserved properties.
 - Recent activity feed (payments, offers, messages).
 - Quick actions: browse listings, view saved, make payment.
@@ -31,7 +74,8 @@ This file documents the customer-facing portal that lets end customers of tenant
 - View property status (under construction, completed, handed over).
 
 ### Browse & Save Listings
-- Browse the company's available listings (already exists on tenant site, but now with auth context).
+- Browse the company's available listings through template-based public overview pages (for example `/listings`, `/properties`, `/rentals`, `/portfolio`).
+- Listing overview pages remain public/template-driven; save/favorite actions can become auth-aware when a customer signs in.
 - Save/favorite listings for later review.
 - Compare saved listings side by side.
 - Receive alerts when saved listing details change (price drop, status change).
@@ -108,6 +152,18 @@ This file documents the customer-facing portal that lets end customers of tenant
 
 ## Phased Delivery
 
+### Phase 0 — Routing & UX Boundary Planning
+- Confirm that public listing overview pages remain template-based.
+- Confirm that customer auth and dashboard routes are central `/portal/*` pages in `apps/tenant-site`.
+- Define the minimal central portal route map:
+  - `/portal/login`
+  - `/portal/signup`
+  - `/portal/dashboard`
+  - `/portal/saved`
+  - `/portal/offers`
+  - `/portal/account`
+- Define the central listing query contract used by all template-based listing overview pages.
+
 ### Phase 1 — Foundation
 - Customer and TenantCustomer schema.
 - Customer auth flow on tenant site.
@@ -131,8 +187,7 @@ This file documents the customer-facing portal that lets end customers of tenant
 - Document management.
 
 ## Open Questions
-- Should customer auth share the Better Auth instance (with a role/type flag) or use a completely separate auth system?
-- Should the portal be a route group within `apps/tenant-site` (e.g., `/portal/...`) or a separate app?
+- Should customer auth share the Better Auth instance with a separate account type / session guard, or should it use a parallel auth adapter built on the same primitives?
 - What payment providers will be supported initially? (Paystack, Flutterwave, Stripe?)
 - Should customers be able to interact with multiple properties from different companies using a single login session, or must they log in per tenant site?
 - How does KYC/identity verification fit into the customer model?
