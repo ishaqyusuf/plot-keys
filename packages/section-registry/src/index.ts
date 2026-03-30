@@ -146,8 +146,11 @@ export {
   resolveFamilySectionComponents,
   getPlaceholderContent,
   getFamilyPlaceholderData,
+  getFamilyNavConfig,
+  getFamilyFooterConfig,
 } from "./register/index";
 export type { SectionComponentOverrides } from "./register/index";
+export type { NavConfig, FooterConfig, NavLink, FooterLinkGroup } from "./register/index";
 
 export type ResolvedWebsitePresentation = {
   editableFields: EditableFieldDefinition[];

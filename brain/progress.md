@@ -48,6 +48,7 @@
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
+| **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
 | Construction Phase 4 (AI & Integrations) | ✅ Done |
@@ -55,6 +56,22 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-30 — Template Registry M4 — Tenant-Site Integration
+
+### What was built
+- **`register/index.ts` nav/footer helpers** — `getFamilyNavConfig(familyKey, tier)` returns `NavConfig` with links filtered by `minTier` vs active tier. `getFamilyFooterConfig(familyKey)` returns `FooterConfig`. Both backed by `familyNavConfigMap` and `familyFooterConfigMap` lookup tables across all 6 families.
+- **`lib/resolve-tenant.ts`** — Two-tier resolver. `resolveTenantContext(searchParams?)` resolves full tenant context including live listings and agents — used by page routes. `resolveTenantShell()` is lightweight (company + published theme only, no live data) — used by the root layout so the shell never waits on DB-heavy data fetches.
+- **`components/register-nav.tsx`** — `RegisterNav` server component. Desktop: inline links filtered by plan tier + CTA button. Mobile: native `<details>/<summary>` hamburger (zero JS). Uses `var(--pk-*)` CSS vars throughout for theme consistency.
+- **`components/register-footer.tsx`** — `RegisterFooter` server component. Renders link groups in a responsive grid + tagline + `© {year} {company}` copyright line.
+- **`app/[...slug]/page.tsx`** — Catch-all inner page route. `resolvePageKeyForPath(templateKey, path)` supports exact slug match then dynamic `[slug]` wildcard pattern match. Calls `resolveTenantContext()` → `resolvePage()` → renders sections with `visibleSections` filter. Empty section list → "coming soon" placeholder; unknown path → `notFound()`.
+- **`app/layout.tsx`** — `WebsiteRuntimeProvider` now wraps all body content, injecting `--pk-*` CSS custom properties for the active template's color system, font, and style preset. `resolveTenantShell()` called in parallel with subdomain + integrations. `RegisterNav` and `RegisterFooter` rendered conditionally when `familyKey` + `tier` are defined.
+- **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
+
+### What's still deferred
+- Tenant-site ClickGuard + InlineOverview wiring into live renders
+- EditableText AI icon + action bar upgrade
+- WebsiteVersion Phase 4 writes
 
 ## 2026-03-29 — Template Registry M3 Runtime Wiring
 

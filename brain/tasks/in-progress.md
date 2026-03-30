@@ -11,20 +11,25 @@ This file tracks work currently being executed.
 
 ### Template Registry M3 — Runtime Wiring
 - **Branch:** `claude/plan-template-registry-M2pDj`
-- **Status:** ✅ Complete — all M3 wiring done
+- **Status:** ✅ Complete — committed and pushed
 - **Scope:** Registry runtime integration: page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview.
 - **Reference:** `brain/modules/template-register-plan.md` (canonical spec)
 - **Decision:** `brain/decisions/ADR-007-template-register-standards.md`, `brain/decisions/ADR-008-template-family-ui-design-system.md`
 
-**M3 deliverables (all ✅ done):**
-- [x] `register/index.ts` — `getPlaceholderContent()` + `getFamilyPlaceholderData()` helpers (template mode content/data)
-- [x] `page-inventory.ts` — `registerPageInventoryMap` + `registerPagesToInventory()` bridge so all 18 register templates route correctly through `getTemplatePageInventory` + `buildPageSections`
-- [x] `src/index.ts` — `TenantSnapshot` type, `ResolvedPageConfig` type, `resolvePage()` function with template-mode placeholder support
-- [x] `builder-preview-panel.tsx` — `templateKey` prop, `resolveFamilySectionComponents()` merged into section component lookup (family-branded UI now renders in builder)
-- [x] `builder-workspace.tsx` — `templateKey` passed to `BuilderPreviewPanel`
-- [x] `runtime/click-guard.tsx` — `ClickGuardProvider` context + `useClickGuard` hook; intercepts anchors + form submits in non-live modes
-- [x] `runtime/inline-overview.tsx` — `InlineOverview` slide-up panel; listing/agent/project overview in template vs draft/preview modes
-- [x] All new components exported from `@plotkeys/section-registry`
+### Template Registry M4 — Tenant-Site Integration
+- **Branch:** `claude/plan-template-registry-M2pDj`
+- **Status:** ✅ Complete — all M4 wiring done
+- **Scope:** Wire register templates into the live tenant-site: nav/footer shell, CSS var injection, inner-page routing, home-page simplification.
+
+**M4 deliverables (all ✅ done):**
+- [x] `register/index.ts` — `getFamilyNavConfig()`, `getFamilyFooterConfig()` + lookup maps
+- [x] `src/index.ts` — exports `NavConfig`, `FooterConfig`, `NavLink`, `FooterLinkGroup`, `getFamilyNavConfig`, `getFamilyFooterConfig`
+- [x] `lib/resolve-tenant.ts` — `TenantContext`, `resolveTenantContext()` (full, with live data), `TenantShell`, `resolveTenantShell()` (layout-only, no live data)
+- [x] `components/register-nav.tsx` — `RegisterNav` server component; desktop inline links + CTA; mobile native `<details>/<summary>` hamburger (no JS)
+- [x] `components/register-footer.tsx` — `RegisterFooter` server component; link groups grid + tagline + copyright
+- [x] `app/[...slug]/page.tsx` — catch-all inner page route; `resolvePageKeyForPath()` with exact + dynamic pattern match; renders via `resolvePage()`
+- [x] `app/layout.tsx` — `WebsiteRuntimeProvider` wraps all content (injects `--pk-*` CSS vars); `resolveTenantShell()` used for layout; conditional `RegisterNav` + `RegisterFooter`
+- [x] `app/page.tsx` — simplified to use `resolveTenantContext()` + `resolvePage("home")`; removed ~80 lines of inline DB resolution
 
 **Still deferred (separate tracks):**
 - [ ] Wire `ClickGuard` + `InlineOverview` into actual tenant-site page renders

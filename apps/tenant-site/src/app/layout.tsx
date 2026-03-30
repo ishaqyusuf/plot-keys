@@ -2,6 +2,7 @@ import "@plotkeys/ui/globals.css";
 
 import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
 import { NotificationsProvider } from "@plotkeys/notifications-react";
+import { WebsiteRuntimeProvider } from "@plotkeys/section-registry";
 import { ThemeProvider } from "@plotkeys/ui/theme-provider";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -9,6 +10,9 @@ import type { ReactNode } from "react";
 
 import { ChatWidget } from "../components/chat-widget";
 import { IntegrationScripts } from "../components/integration-scripts";
+import { RegisterFooter } from "../components/register-footer";
+import { RegisterNav } from "../components/register-nav";
+import { resolveTenantShell } from "../lib/resolve-tenant";
 
 const fallbackMetadata: Metadata = {
   title: "PlotKeys",
@@ -52,7 +56,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const tenantHostname = requestHeaders.get("x-tenant-hostname") || null;
   const tenantSubdomain = requestHeaders.get("x-tenant-subdomain") || null;
 
-  // Resolve company from hostname or subdomain
   let company: {
     name: string;
     market: string | null;
@@ -109,13 +112,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return metadata;
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const subdomain = await resolveSubdomain();
-  const integrations = await resolveIntegrations(subdomain);
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const [subdomain, integrations, shell] = await Promise.all([
+    resolveSubdomain(),
+    resolveSubdomain().then(resolveIntegrations),
+    resolveTenantShell(),
+  ]);
+
+  // Determine if this is a register template with family nav/footer
+  const hasRegisterShell = shell !== null && shell.familyKey !== undefined;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -126,7 +131,36 @@ export default async function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          <NotificationsProvider>{children}</NotificationsProvider>
+          <NotificationsProvider>
+            {/* Wrap all content in WebsiteRuntimeProvider to inject --pk-* CSS vars */}
+            <WebsiteRuntimeProvider
+              colorSystemKey={shell?.templateConfig.colorSystem}
+              renderMode="live"
+              templateConfig={shell?.templateConfig ?? {}}
+            >
+              {/* Register-template nav (only for families with a defined nav config) */}
+              {hasRegisterShell && shell.familyKey && shell.tier ? (
+                <RegisterNav
+                  companyName={shell.company.name}
+                  familyKey={shell.familyKey}
+                  logoUrl={shell.company.logoUrl}
+                  templateKey={shell.templateKey}
+                  tier={shell.tier}
+                />
+              ) : null}
+
+              <main>{children}</main>
+
+              {/* Register-template footer */}
+              {hasRegisterShell && shell.familyKey ? (
+                <RegisterFooter
+                  companyName={shell.company.name}
+                  familyKey={shell.familyKey}
+                />
+              ) : null}
+            </WebsiteRuntimeProvider>
+          </NotificationsProvider>
+
           {subdomain && <ChatWidget subdomain={subdomain} />}
           <IntegrationScripts
             googleAnalyticsId={integrations.googleAnalyticsId}
