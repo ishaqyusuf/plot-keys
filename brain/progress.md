@@ -50,6 +50,7 @@
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
 | Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
+| Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -101,6 +102,20 @@
 - Verified template inventories with `npx -y tsx` to confirm `sakan-starter` resolves `/rentals` + `/rentals/[slug]` and `bana-starter` resolves `/projects` + `/projects/[slug]`, matching the new route contract.
 - Full `apps/tenant-site` and `packages/section-registry` typechecks remain blocked in this sandbox by pre-existing workspace environment issues (`@plotkeys/tsconfig/nextjs.json` missing in app packages, JSX/react resolution missing in section-registry standalone runs).
 - Manual UI verification used a local mock because the sandbox still cannot boot the full Next/Turbo runtime here. Screenshot: https://github.com/user-attachments/assets/de73bc0f-290f-4909-9e30-c58294103d47
+
+## 2026-03-30 — Customer Portal Foundation Planning
+
+### What was built
+- **Central `/portal/*` route group in tenant-site** — Added `apps/tenant-site/src/app/portal/` pages for `/portal/login`, `/portal/signup`, `/portal/dashboard`, `/portal/saved`, `/portal/offers`, `/portal/payments`, and `/portal/account`, plus `/portal` redirecting to `/portal/login`.
+- **Branded shared portal shell** — Added `apps/tenant-site/src/components/portal-shell.tsx` and `portal-page.tsx` so customer-facing account pages now render in a central application shell that uses tenant branding tokens from the existing `WebsiteRuntimeProvider`, rather than template section trees.
+- **Template shell suppression on portal routes** — Updated `apps/tenant-site/src/proxy.ts` to inject `x-tenant-pathname`, and updated `apps/tenant-site/src/app/layout.tsx` so register-family nav/footer and chat widget do not render on `/portal/*` routes.
+- **Legacy entry-point redirects** — Added explicit `/login`, `/signup`, and `/saved` tenant-site routes that redirect into `/portal/login`, `/portal/signup`, and `/portal/saved`, so older inventory-driven entry points land in the new central portal.
+- **Public saved-listing links repointed** — Updated register-family nav/footer configs that exposed “Saved Listings” so they now link to `/portal/saved`.
+
+### Validation notes
+- Focused Biome checks passed on all touched tenant-site and section-registry files for this task.
+- `apps/tenant-site` standalone typecheck remains blocked in this sandbox by the pre-existing workspace issue where `@plotkeys/tsconfig/nextjs.json` cannot be resolved from the package.
+- Manual UI verification used a local mock because the sandbox still cannot reliably boot the full tenant-site runtime here. Screenshot: https://github.com/user-attachments/assets/8acea668-c66c-40ef-82eb-71e55671a80b
 
 ## 2026-03-30 — Customer Portal + Listing Page Boundary Planning
 

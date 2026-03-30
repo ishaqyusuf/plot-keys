@@ -26,6 +26,7 @@ export function proxy(request: NextRequest) {
     resolveTenantSiteHostContext(host);
 
   const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-tenant-pathname", request.nextUrl.pathname);
 
   if (tenantSubdomain) {
     requestHeaders.set("x-tenant-subdomain", tenantSubdomain);

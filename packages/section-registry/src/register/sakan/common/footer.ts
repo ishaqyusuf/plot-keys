@@ -17,7 +17,7 @@ export const sakanFooter: FooterConfig = {
       heading: "Rentals",
       links: [
         { label: "All Rentals", href: "/rentals" },
-        { label: "Saved Listings", href: "/saved" },
+        { label: "Saved Listings", href: "/portal/saved" },
         { label: "How It Works", href: "/how-it-works" },
       ],
     },

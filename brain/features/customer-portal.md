@@ -3,6 +3,12 @@
 ## Purpose
 This file documents the customer-facing portal that lets end customers of tenant companies manage their properties, interact with listings, make payments, and handle property transactions through the tenant's branded site.
 
+## Current Status
+- **Phase 0 / Foundation shell complete** — Central tenant-site portal routes now exist under `/portal/*` for login, signup, dashboard, saved listings, offers, payments, and account pages.
+- These routes use a shared branded application shell inside `apps/tenant-site`, and the root tenant layout now suppresses template-family nav/footer on `/portal/*`.
+- Public saved-listing links in register-family nav/footer configs now point into `/portal/saved`.
+- Customer auth, route guards, and tenant-scoped customer data models are still deferred to the next portal phases.
+
 ## Product Direction
 - Customers are the end users served by tenant companies (buyers, renters, investors).
 - Each customer has a single global identity across the platform.
