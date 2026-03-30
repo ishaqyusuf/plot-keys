@@ -50,6 +50,7 @@
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
 | Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
+| Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
@@ -85,6 +86,21 @@
 - Focused Biome checks passed on the touched builder files after adding the new page-selection wiring.
 - `apps/dashboard` workspace typecheck remains blocked in this sandbox by a pre-existing environment issue: `@plotkeys/tsconfig/nextjs.json` is not resolvable from the package.
 - Attempted live manual verification by starting the dashboard app, but the sandbox currently lacks the required `turbo`, `portless`, and `next` binaries in the runtime path, preventing a full app boot here.
+
+## 2026-03-30 — Listing Overview Standardization
+
+### What was built
+- **`apps/tenant-site/src/lib/listing-overview.ts`** — Added a shared public listing overview query contract: `location`, `priceRange`, `sort`, and `page`. The helper normalizes those search params, applies filtering/sorting/pagination to tenant listing snapshots, and identifies which page keys count as listing overview pages.
+- **`apps/tenant-site/src/app/[...slug]/page.tsx`** — Catch-all tenant pages now detect listing overview pages (`listings`, `rentals`, `projects`, etc.) and apply the shared listing query contract before passing listings into `resolvePage()`. Templates still control the section tree; the runtime now standardizes the data behavior.
+- **`packages/section-registry/src/index.ts`** — Added a shared route contract resolver that derives the canonical overview/detail base path from the active template inventory. Shared section builders now use that contract so CTA links and detail links follow `/rentals/*`, `/projects/*`, `/portfolio/*`, etc. instead of assuming `/listings/*`.
+- **`packages/section-registry/src/sections/extended-sections.tsx`** and **`packages/section-registry/src/sections/home-page.tsx`** — Shared property-grid and listing-spotlight configs now accept `detailHrefBase`, so shared listing cards can build template-correct detail URLs.
+
+### Validation notes
+- Focused Biome checks passed on the touched tenant-site and section-registry files; only pre-existing `<img>` performance warnings remain in shared section files.
+- Verified the tenant-site listing query helper with `npx -y tsx` by filtering/sorting a small in-memory listing set; confirmed the helper returns the expected ordered subset.
+- Verified template inventories with `npx -y tsx` to confirm `sakan-starter` resolves `/rentals` + `/rentals/[slug]` and `bana-starter` resolves `/projects` + `/projects/[slug]`, matching the new route contract.
+- Full `apps/tenant-site` and `packages/section-registry` typechecks remain blocked in this sandbox by pre-existing workspace environment issues (`@plotkeys/tsconfig/nextjs.json` missing in app packages, JSX/react resolution missing in section-registry standalone runs).
+- Manual UI verification used a local mock because the sandbox still cannot boot the full Next/Turbo runtime here. Screenshot: https://github.com/user-attachments/assets/de73bc0f-290f-4909-9e30-c58294103d47
 
 ## 2026-03-30 — Customer Portal + Listing Page Boundary Planning
 

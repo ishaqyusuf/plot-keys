@@ -34,6 +34,7 @@ export type PropertyGridConfig = {
   /** Text for the "view all" link. Omit to hide the link. */
   ctaHref?: string;
   ctaText?: string;
+  detailHrefBase?: string;
   description?: string;
   eyebrow: string;
   items: PropertyGridItem[];
@@ -187,10 +188,14 @@ export function PropertyGridSection({
         {/* Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isEmpty
-            ? Array.from({ length: 3 }).map((_, i) => (
+            ? [
+                "property-grid-skeleton-1",
+                "property-grid-skeleton-2",
+                "property-grid-skeleton-3",
+              ].map((skeletonKey) => (
                 // Skeleton card
                 <div
-                  key={i}
+                  key={skeletonKey}
                   className="animate-pulse overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]"
                 >
                   <div className="h-52 bg-[color:var(--muted)]" />
@@ -204,7 +209,11 @@ export function PropertyGridSection({
             : config.items.map((item) => (
                 <a
                   key={item.id}
-                  href={item.slug ? `/listings/${item.slug}` : "#"}
+                  href={
+                    item.slug
+                      ? `${config.detailHrefBase ?? "/listings"}/${item.slug}`
+                      : "#"
+                  }
                   className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-md"
                   {...getLinkProps("listing", item)}
                 >
@@ -504,43 +513,59 @@ function ContactForm({
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+          <label
+            className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+            htmlFor="contact-name"
+          >
             Name
           </label>
           <input
             required
             className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+            id="contact-name"
             placeholder="Your name"
             type="text"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+          <label
+            className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+            htmlFor="contact-phone"
+          >
             Phone
           </label>
           <input
             className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+            id="contact-phone"
             placeholder="+234..."
             type="tel"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+        <label
+          className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+          htmlFor="contact-email"
+        >
           Email
         </label>
         <input
           className="w-full rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+          id="contact-email"
           placeholder="you@example.com"
           type="email"
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]">
+        <label
+          className="mb-1.5 block text-xs font-medium text-[color:var(--foreground)]"
+          htmlFor="contact-message"
+        >
           Message
         </label>
         <textarea
           className="w-full resize-none rounded-lg border border-[color:var(--input)] bg-[color:var(--background)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
+          id="contact-message"
           placeholder="How can we help you?"
           rows={4}
         />

@@ -57,6 +57,7 @@ export type ListingSpotlightItem = {
 };
 
 export type ListingSpotlightConfig = {
+  detailHrefBase?: string;
   description: string;
   eyebrow: string;
   items: ListingSpotlightItem[];
@@ -435,7 +436,11 @@ export function ListingSpotlightSection({
                     {item.price}
                   </p>
                   <ActionButton
-                    href={item.slug ? `/listings/${item.slug}` : "#"}
+                    href={
+                      item.slug
+                        ? `${config.detailHrefBase ?? "/listings"}/${item.slug}`
+                        : "#"
+                    }
                     variant="ghost"
                   >
                     View details

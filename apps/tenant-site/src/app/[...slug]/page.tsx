@@ -29,6 +29,11 @@ import {
 } from "@plotkeys/section-registry";
 import { notFound } from "next/navigation";
 import type { JSX } from "react";
+import {
+  applyListingOverviewQuery,
+  isListingOverviewPage,
+  parseListingOverviewQuery,
+} from "../../lib/listing-overview";
 import { parseTenantRenderMode } from "../../lib/render-mode";
 import { resolveTenantContext } from "../../lib/resolve-tenant";
 
@@ -93,7 +98,11 @@ type InnerPageProps = {
   params: Promise<{ slug: string[] }>;
   searchParams?: Promise<{
     hostname?: string;
+    location?: string;
+    page?: string;
+    priceRange?: string;
     renderMode?: string;
+    sort?: string;
     subdomain?: string;
   }>;
 };
@@ -125,6 +134,13 @@ export default async function InnerPage({
     notFound();
   }
 
+  const resolvedListings = isListingOverviewPage(pageKey)
+    ? applyListingOverviewQuery(
+        tenant.liveListings,
+        parseListingOverviewQuery(sp),
+      ).items
+    : tenant.liveListings;
+
   const resolved = resolvePage(
     tenant.templateKey,
     pageKey,
@@ -133,7 +149,7 @@ export default async function InnerPage({
       companyLogoUrl: tenant.company.logoUrl,
       content: tenant.publishedConfig.contentJson,
       liveAgents: tenant.liveAgents,
-      liveListings: tenant.liveListings,
+      liveListings: resolvedListings,
       market: tenant.company.market ?? tenant.company.name,
       subdomain: tenant.company.slug,
       theme: tenant.publishedConfig.themeJson,
