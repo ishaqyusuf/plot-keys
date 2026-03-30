@@ -2430,6 +2430,11 @@ export {
   useTemplateStylePreset,
   WebsiteRuntimeProvider,
 } from "./runtime-context";
+export {
+  SmartFillProvider,
+  useSmartFill,
+} from "./runtime/smart-fill-context";
+export type { SmartFillFn } from "./runtime/smart-fill-context";
 export type {
   EditableImageProps,
   EditableRepeaterProps,

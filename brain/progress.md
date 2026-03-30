@@ -61,6 +61,17 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
+
+### What was built
+- **`packages/section-registry/src/runtime/smart-fill-context.tsx`** (new) — `SmartFillContext` following the same pattern as ClickGuardContext. `SmartFillProvider` accepts an `onSmartFill(contentKey)` async function and injects it via context. `useSmartFill()` hook returns the function or null when no provider is present.
+- **`packages/section-registry/src/sections/editing-primitives.tsx`** — `EditableText` upgraded with hover action bar. In draft mode, hovering text reveals a small floating pill (`absolute -top-7 right-0`) with ✏ Edit and ✦ AI buttons. The AI button only renders when `useSmartFill()` is non-null. Clicking AI calls `triggerSmartFill(contentKey)` and shows a `animate-pulse ring-primary/40` loading state while the mutation runs. Clicking Edit enters contentEditable as before.
+- **`packages/section-registry/src/index.ts`** — Exports `SmartFillProvider`, `useSmartFill`, `SmartFillFn`.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Added `handleInlineSmartFill` adapter (derives `shortDetail` from `contentKey` dot-notation). Wraps sections with `SmartFillProvider` when `readOnly={false}`; locked-template preview skips the provider so the AI button is not shown.
+
+### What's still deferred
+- WebsiteVersion Phase 4 writes
+
 ## 2026-03-30 — ClickGuard + InlineOverview Wiring (M3 Deferred)
 
 ### What was built
