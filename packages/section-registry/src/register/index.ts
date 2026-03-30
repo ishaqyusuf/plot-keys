@@ -17,6 +17,22 @@ import type { ContentFieldDef, PlaceholderData, TemplateFamilyKey, TemplateFamil
 import type { SectionComponentOverrides } from "./ui-types";
 import type { TemplateTier } from "../index";
 
+// Nav configs — one per family
+import { noorNavConfig } from "./noor/common/nav";
+import { banaNavConfig } from "./bana/common/nav";
+import { wafiNavConfig } from "./wafi/common/nav";
+import { farisNavConfig } from "./faris/common/nav";
+import { thurayaNav } from "./thuraya/common/nav";
+import { sakanNav } from "./sakan/common/nav";
+
+// Footer configs — one per family
+import { noorFooterConfig } from "./noor/common/footer";
+import { banaFooterConfig } from "./bana/common/footer";
+import { wafiFooterConfig } from "./wafi/common/footer";
+import { farisFooterConfig } from "./faris/common/footer";
+import { thurayaFooter } from "./thuraya/common/footer";
+import { sakanFooter } from "./sakan/common/footer";
+
 // Content schemas — one per family
 import { noorContentSchema } from "./noor/common/content-schema";
 import { banaContentSchema } from "./bana/common/content-schema";
@@ -46,7 +62,7 @@ export { sakanFamilyMeta, sakanStarter, sakanPlus, sakanPro, sakanVariants } fro
 
 // Re-export types for consumers
 export type { TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
-export type { ContentFieldDef, PlaceholderData, NavConfig, FooterConfig, RegisterPageDefinition, RegisterSectionSlot } from "./types";
+export type { ContentFieldDef, PlaceholderData, NavConfig, NavLink, FooterConfig, FooterLinkGroup, RegisterPageDefinition, RegisterSectionSlot } from "./types";
 export type { SectionComponentOverrides } from "./ui-types";
 
 // ---------------------------------------------------------------------------
@@ -216,6 +232,60 @@ export function getFamilyPlaceholderData(
   familyKey: TemplateFamilyKey,
 ): PlaceholderData {
   return familyPlaceholderDataMap[familyKey] ?? {};
+}
+
+// ---------------------------------------------------------------------------
+// Nav + footer config resolution
+// ---------------------------------------------------------------------------
+
+const familyNavConfigMap: Record<TemplateFamilyKey, NavConfig> = {
+  agency:    noorNavConfig,
+  developer: banaNavConfig,
+  manager:   wafiNavConfig,
+  solo:      farisNavConfig,
+  luxury:    thurayaNav,
+  rental:    sakanNav,
+};
+
+const familyFooterConfigMap: Record<TemplateFamilyKey, FooterConfig> = {
+  agency:    noorFooterConfig,
+  developer: banaFooterConfig,
+  manager:   wafiFooterConfig,
+  solo:      farisFooterConfig,
+  luxury:    thurayaFooter,
+  rental:    sakanFooter,
+};
+
+const tierOrder: Record<TemplateTier, number> = { starter: 0, plus: 1, pro: 2 };
+
+/**
+ * Returns the nav configuration for a family, filtered to the links that
+ * are accessible on the given plan tier. Links with `minTier` above the
+ * current tier are excluded from both primary and mobile menus.
+ */
+export function getFamilyNavConfig(
+  familyKey: TemplateFamilyKey,
+  tier: TemplateTier,
+): NavConfig {
+  const config = familyNavConfigMap[familyKey];
+  if (!config) return { primary: [], mobile: [], ctaLabel: "Contact", ctaHref: "/contact" };
+  const maxOrder = tierOrder[tier];
+  const filterLinks = (links: NavConfig["primary"]) =>
+    links.filter((l) => !l.minTier || tierOrder[l.minTier] <= maxOrder);
+  return {
+    ...config,
+    primary: filterLinks(config.primary),
+    mobile: filterLinks(config.mobile),
+  };
+}
+
+/**
+ * Returns the footer configuration for a family.
+ */
+export function getFamilyFooterConfig(
+  familyKey: TemplateFamilyKey,
+): FooterConfig {
+  return familyFooterConfigMap[familyKey] ?? { groups: [], tagline: "" };
 }
 
 // ---------------------------------------------------------------------------
