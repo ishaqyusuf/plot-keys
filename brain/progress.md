@@ -44,7 +44,7 @@
 | Chat-bot | ✅ Done (LLM + Widget) |
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
-| WebsiteVersion Phase 4 (writes) | ❌ Not started |
+| WebsiteVersion Phase 4 (writes) | ✅ Done |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
@@ -69,7 +69,6 @@
 - **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
 
 ### What's still deferred
-- WebsiteVersion Phase 4 writes
 
 ## 2026-03-30 — Tenant-Site ClickGuard + InlineOverview Wiring
 
@@ -775,3 +774,16 @@
 # Progress Log
 
 - 2026-03-25: Fixed the dashboard projects page so failed project-creation attempts now surface the redirected `error` query string in a destructive alert, matching the error-handling pattern already used on properties, agents, team, and other dashboard pages. Also normalized the client-side redirecting forms for project creation, property create/edit, agent create/edit, team invites, employee invites, and final onboarding completion to await server actions directly instead of wrapping them in `startTransition(async () => ...)`, which had been causing submissions to behave like plain page refreshes instead of following the intended redirect flow.
+## 2026-03-30 — WebsiteVersion Phase 4 Writes
+
+### What was built
+- **WebsiteVersion-first builder writes** — Added `findDraftWebsiteVersionByIdForCompany()` and `upsertDraftWebsiteVersion()` in `packages/db/src/queries/website.ts` so the active draft can be looked up and updated directly by `WebsiteVersion.id` instead of routing writes through legacy `SiteConfiguration`.
+- **Workspace mutation cutover** — Updated `createTemplateDraft`, `ensureBuilderConfigurationExists`, `publishSiteConfiguration`, `smartFillField`, `updateSiteField`, and `updateSiteThemeField` in `apps/api/src/routers/workspace.route.ts` to use WebsiteVersion draft records as the primary write target.
+- **Builder config ID cutover** — `apps/dashboard/src/components/builder/builder-workspace.tsx` now always passes the resolved active draft WebsiteVersion ID to all builder actions. The previous fallback to `legacyConfigId` / latest `SiteConfiguration.id` was removed.
+- **Removed onboarding dual-write in active draft path** — `updateOnboardingInputs` / onboarding AI content updates now write only to the active WebsiteVersion draft instead of mirroring field-by-field back into SiteConfiguration.
+
+### Validation notes
+- Focused Biome checks passed on the touched files with only pre-existing warnings in unrelated `workspace.route.ts` mutations (`ctx` unused in lead/appointment handlers).
+- `packages/db` typecheck remains blocked in this sandbox because `@plotkeys/tsconfig/base.json` is not resolvable here.
+- `apps/api` typecheck remains blocked in this sandbox because installed package resolution for the workspace dependencies is incomplete (`drizzle-orm/node-postgres` and related modules unavailable to `tsc` here).
+- Manual code-path verification confirmed the builder now uses `resolvedActiveDraft.id` as `configId`, and the targeted website builder mutations no longer call `createSiteConfiguration`, `updateSiteConfigurationContentField`, `updateSiteConfigurationThemeField`, or `publishSiteConfiguration`.

@@ -32,4 +32,3 @@ This file tracks work currently being executed.
 - [x] `app/page.tsx` — simplified to use `resolveTenantContext()` + `resolvePage("home")`; removed ~80 lines of inline DB resolution
 
 **Still deferred (separate tracks):**
-- [ ] WebsiteVersion Phase 4 (writes)
