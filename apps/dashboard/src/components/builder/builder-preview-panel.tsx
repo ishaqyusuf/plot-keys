@@ -6,7 +6,9 @@ import type {
   TenantContentRecord,
 } from "@plotkeys/section-registry";
 import {
+  ClickGuardProvider,
   getRegisterTemplate,
+  InlineOverview,
   resolveFamilySectionComponents,
   sectionComponents,
   WebsiteRuntimeProvider,
@@ -365,30 +367,33 @@ export function BuilderPreviewPanel({
         role="presentation"
       >
         <WebsiteRuntimeProvider renderMode="draft">
-          <div
-            className="overflow-hidden rounded-lg border border-border/70"
-            style={{
-              backgroundColor: "#f8fafc",
-              fontFamily: "Satoshi, sans-serif",
-            }}
-          >
-            {filteredSections.map((section) => (
-              <PreviewSection
-                configId={configId}
-                content={content}
-                editableFields={editableFields}
-                familyOverrides={familyOverrides}
-                focused={focusedSectionId === section.id}
-                key={section.id}
-                readOnly={readOnly}
-                section={section}
-                theme={theme}
-                onFocus={() => handleSectionFocus(section.id)}
-                onSmartFill={onSmartFill}
-                onUpdate={onUpdateField}
-              />
-            ))}
-          </div>
+          <ClickGuardProvider>
+            <div
+              className="overflow-hidden rounded-lg border border-border/70"
+              style={{
+                backgroundColor: "#f8fafc",
+                fontFamily: "Satoshi, sans-serif",
+              }}
+            >
+              {filteredSections.map((section) => (
+                <PreviewSection
+                  configId={configId}
+                  content={content}
+                  editableFields={editableFields}
+                  familyOverrides={familyOverrides}
+                  focused={focusedSectionId === section.id}
+                  key={section.id}
+                  readOnly={readOnly}
+                  section={section}
+                  theme={theme}
+                  onFocus={() => handleSectionFocus(section.id)}
+                  onSmartFill={onSmartFill}
+                  onUpdate={onUpdateField}
+                />
+              ))}
+            </div>
+            <InlineOverview />
+          </ClickGuardProvider>
         </WebsiteRuntimeProvider>
       </div>
     </div>
