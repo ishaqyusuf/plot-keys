@@ -21,6 +21,7 @@ type BuilderSidebarDrawerProps = {
   activeTemplateLabel: string;
   configId: string;
   configStatus: string;
+  currentPageKey: string;
   currentTemplateKey: string;
   editableFieldCount: number;
   licensedTemplateKeys: Set<string>;
@@ -41,6 +42,7 @@ export function BuilderSidebarDrawer({
   activeConfigName,
   configId,
   configStatus,
+  currentPageKey,
   currentTemplateKey,
   editableFieldCount,
   licensedTemplateKeys,
@@ -101,6 +103,7 @@ export function BuilderSidebarDrawer({
 
             <BuilderSidebarControls
               configId={configId}
+              currentPageKey={currentPageKey}
               currentTemplateKey={currentTemplateKey}
               licensedTemplateKeys={licensedTemplateKeys}
               planTier={planTier}

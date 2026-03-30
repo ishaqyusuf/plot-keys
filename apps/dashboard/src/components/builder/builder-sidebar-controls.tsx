@@ -2,6 +2,7 @@
 
 import {
   colorSystems,
+  getTemplatePageInventory,
   stylePresets,
   type TemplateConfig,
   templateCatalog,
@@ -27,13 +28,14 @@ import {
   type SubscriptionTier,
   tierLabels,
 } from "@plotkeys/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
 type TemplateGroup = "starter" | "plus" | "pro";
 
 type BuilderSidebarControlsProps = {
   configId: string;
+  currentPageKey: string;
   currentTemplateKey: string;
   licensedTemplateKeys: Set<string>;
   planTier: SubscriptionTier;
@@ -417,6 +419,7 @@ function TemplatePicker({
   planTier: SubscriptionTier;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const currentTemplate = templateCatalog.find(
     (t) => t.key === currentTemplateKey,
   );
@@ -435,7 +438,10 @@ function TemplatePicker({
       fd.set("configId", configId);
       fd.set("templateKey", templateKey);
       const result = await onCreateDraft(fd);
-      router.replace(`/builder?configId=${result.configId}`);
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.set("configId", result.configId);
+      nextParams.set("page", "home");
+      router.replace(`/builder?${nextParams.toString()}`);
       router.refresh();
     });
   }
@@ -534,6 +540,66 @@ function TemplatePicker({
             </DropdownMenuRadioGroup>
           </TabsContent>
         </Tabs>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function PagePicker({
+  currentPageKey,
+  currentTemplateKey,
+}: {
+  currentPageKey: string;
+  currentTemplateKey: string;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pages = getTemplatePageInventory(currentTemplateKey).pages;
+  const currentPage =
+    pages.find((page) => page.pageKey === currentPageKey) ?? pages[0];
+
+  function handleSelectPage(pageKey: string) {
+    if (pageKey === currentPage?.pageKey) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("page", pageKey);
+    router.replace(`/builder?${nextParams.toString()}`);
+    router.refresh();
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <PickerButton label="Page">
+          {currentPage?.label ?? currentPage?.pageKey ?? "Home"}
+        </PickerButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
+        side="right"
+      >
+        <DropdownMenuRadioGroup
+          onValueChange={handleSelectPage}
+          value={currentPage?.pageKey ?? "home"}
+        >
+          <DropdownMenuGroup>
+            {pages.map((page) => (
+              <DropdownMenuRadioItem
+                className="items-start rounded-md py-2 pr-8"
+                key={page.pageKey}
+                value={page.pageKey}
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">{page.label}</p>
+                  <p className="text-xs text-muted-foreground">{page.slug}</p>
+                </div>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -693,6 +759,7 @@ function SectionVisibilityToggles({
 
 export function BuilderSidebarControls({
   configId,
+  currentPageKey,
   currentTemplateKey,
   licensedTemplateKeys,
   planTier,
@@ -719,6 +786,13 @@ export function BuilderSidebarControls({
           licensedTemplateKeys={licensedTemplateKeys}
           onCreateDraft={onCreateDraft}
           planTier={planTier}
+        />
+      </Field>
+
+      <Field>
+        <PagePicker
+          currentPageKey={currentPageKey}
+          currentTemplateKey={currentTemplateKey}
         />
       </Field>
 

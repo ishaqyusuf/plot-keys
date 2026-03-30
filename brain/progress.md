@@ -49,6 +49,7 @@
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
+| Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
 | Construction Phase 3 (Customer Visibility) | ✅ Done |
@@ -70,6 +71,20 @@
 - **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
 
 ### What's still deferred
+
+## 2026-03-30 — Multi-page Website Support
+
+### What was built
+- **`apps/dashboard/src/app/(app)/builder/page.tsx`** — Builder now accepts a `?page=` query param and passes it into the workspace.
+- **`apps/dashboard/src/components/builder/builder-workspace.tsx`** — The workspace now validates the selected page against `getTemplatePageInventory(templateKey)`, falls back to the first available page, resolves the draft preview with `pageKey`, and builds a page-aware live-site URL.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — Added a new Page picker sourced from the active template inventory. Selection updates the main builder URL via `router.replace('/builder?page=...')`, so page state is shareable and survives refreshes.
+- **`apps/dashboard/src/components/builder/builder-sidebar-drawer.tsx`** — Mobile builder drawer now receives the current page key so page selection is available outside desktop as well.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Preview chrome now shows the selected public page path and label instead of only a generic builder-preview label.
+
+### Validation notes
+- Focused Biome checks passed on the touched builder files after adding the new page-selection wiring.
+- `apps/dashboard` workspace typecheck remains blocked in this sandbox by a pre-existing environment issue: `@plotkeys/tsconfig/nextjs.json` is not resolvable from the package.
+- Attempted live manual verification by starting the dashboard app, but the sandbox currently lacks the required `turbo`, `portless`, and `next` binaries in the runtime path, preventing a full app boot here.
 
 ## 2026-03-30 — Customer Portal + Listing Page Boundary Planning
 

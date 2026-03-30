@@ -32,3 +32,8 @@ This file tracks work currently being executed.
 - [x] `app/page.tsx` — simplified to use `resolveTenantContext()` + `resolvePage("home")`; removed ~80 lines of inline DB resolution
 
 **Still deferred (separate tracks):**
+
+### Multi-page Website Support
+- **Branch:** `copilot/next-high-priority-task-again`
+- **Status:** ✅ Complete — builder now supports selecting and editing template-based public pages beyond Home
+- **Scope:** URL-backed builder page selection, page-aware preview resolution, page-aware live-site links for public tenant pages.
