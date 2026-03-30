@@ -11,6 +11,7 @@ import {
   InlineOverview,
   resolveFamilySectionComponents,
   sectionComponents,
+  SmartFillProvider,
   WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
@@ -25,7 +26,7 @@ import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
 import Link from "next/link";
 import type { JSX, KeyboardEvent } from "react";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 
 type BuilderPreviewPanelProps = {
   companySlug: string;
@@ -332,6 +333,25 @@ export function BuilderPreviewPanel({
     setFocusedSectionId((prev) => (prev === sectionId ? null : sectionId));
   }
 
+  // Bridges the inline AI button in EditableText to the smartFillField mutation.
+  // Derives shortDetail from the contentKey (e.g. "hero.title" → "hero title").
+  const handleInlineSmartFill = useCallback(
+    async (contentKey: string) => {
+      const fd = new FormData();
+      fd.set("configId", configId);
+      fd.set("contentKey", contentKey);
+      fd.set(
+        "shortDetail",
+        contentKey
+          .replace(/\./g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .toLowerCase(),
+      );
+      await onSmartFill(fd);
+    },
+    [configId, onSmartFill],
+  );
+
   return (
     <div className="mx-auto overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
@@ -367,34 +387,66 @@ export function BuilderPreviewPanel({
         role="presentation"
       >
         <WebsiteRuntimeProvider renderMode="draft">
-          <ClickGuardProvider>
-            <div
-              className="overflow-hidden rounded-lg border border-border/70"
-              style={{
-                backgroundColor: "#f8fafc",
-                fontFamily: "Satoshi, sans-serif",
-              }}
-            >
-              {filteredSections.map((section) => (
-                <PreviewSection
-                  configId={configId}
-                  content={content}
-                  editableFields={editableFields}
-                  familyOverrides={familyOverrides}
-                  focused={focusedSectionId === section.id}
-                  key={section.id}
-                  readOnly={readOnly}
-                  section={section}
-                  theme={theme}
-                  onFocus={() => handleSectionFocus(section.id)}
-                  onSmartFill={onSmartFill}
-                  onUpdate={onUpdateField}
-                />
-              ))}
-            </div>
-            <InlineOverview />
-          </ClickGuardProvider>
-        </WebsiteRuntimeProvider>
+          {/* SmartFillProvider only in editable mode — suppressed for locked templates */}
+          {readOnly ? (
+            <ClickGuardProvider>
+              <div
+                className="overflow-hidden rounded-lg border border-border/70"
+                style={{
+                  backgroundColor: "#f8fafc",
+                  fontFamily: "Satoshi, sans-serif",
+                }}
+              >
+                {filteredSections.map((section) => (
+                  <PreviewSection
+                    configId={configId}
+                    content={content}
+                    editableFields={editableFields}
+                    familyOverrides={familyOverrides}
+                    focused={focusedSectionId === section.id}
+                    key={section.id}
+                    readOnly={readOnly}
+                    section={section}
+                    theme={theme}
+                    onFocus={() => handleSectionFocus(section.id)}
+                    onSmartFill={onSmartFill}
+                    onUpdate={onUpdateField}
+                  />
+                ))}
+              </div>
+              <InlineOverview />
+            </ClickGuardProvider>
+          ) : (
+            <SmartFillProvider onSmartFill={handleInlineSmartFill}>
+              <ClickGuardProvider>
+                <div
+                  className="overflow-hidden rounded-lg border border-border/70"
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    fontFamily: "Satoshi, sans-serif",
+                  }}
+                >
+                  {filteredSections.map((section) => (
+                    <PreviewSection
+                      configId={configId}
+                      content={content}
+                      editableFields={editableFields}
+                      familyOverrides={familyOverrides}
+                      focused={focusedSectionId === section.id}
+                      key={section.id}
+                      readOnly={readOnly}
+                      section={section}
+                      theme={theme}
+                      onFocus={() => handleSectionFocus(section.id)}
+                      onSmartFill={onSmartFill}
+                      onUpdate={onUpdateField}
+                    />
+                  ))}
+                </div>
+                <InlineOverview />
+              </ClickGuardProvider>
+            </SmartFillProvider>
+          )}
       </div>
     </div>
   );

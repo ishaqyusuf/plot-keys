@@ -11,9 +11,10 @@
  *   <EditableImage slot="heroImage" src={imageUrl} alt="Hero" />
  */
 
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { isContentKeyAiEnabled } from "../register/content-field-lookup";
 import { useIsDraftMode } from "../runtime-context";
+import { useSmartFill } from "../runtime/smart-fill-context";
 
 // ---------------------------------------------------------------------------
 // EditableText
@@ -55,68 +56,11 @@ function focusEditableElement(element: HTMLElement | null) {
   selection.addRange(range);
 }
 
-function buildAiSuggestions(
-  contentKey: string,
-  currentValue: string,
-): string[] {
-  const normalizedValue = currentValue.trim();
-  const lowerKey = contentKey.toLowerCase();
-
-  if (
-    lowerKey.includes("description") ||
-    lowerKey.includes("subtitle") ||
-    lowerKey.includes("subheading") ||
-    lowerKey.includes("body")
-  ) {
-    return [
-      "Bring clarity, local expertise, and a smoother path to every property decision with a team clients can trust.",
-      "Deliver a polished property experience backed by thoughtful advice, responsive service, and market knowledge that moves with confidence.",
-      "Guide buyers, sellers, and investors with sharper insight, stronger communication, and a more refined path from first enquiry to final handover.",
-    ];
-  }
-
-  if (
-    lowerKey.includes("cta") ||
-    lowerKey.includes("label") ||
-    lowerKey.includes("button")
-  ) {
-    return [
-      "Book a consultation",
-      "Explore available listings",
-      "Request a callback",
-    ];
-  }
-
-  if (
-    lowerKey.includes("title") ||
-    lowerKey.includes("heading") ||
-    lowerKey.includes("eyebrow")
-  ) {
-    return [
-      "Find your next move with confidence",
-      "Trusted property guidance for every step",
-      "Spaces selected for the way you live",
-    ];
-  }
-
-  if (normalizedValue) {
-    return [
-      normalizedValue,
-      `${normalizedValue} — thoughtfully tailored for your next client conversation.`,
-      `A refined take on ${normalizedValue.toLowerCase()}.`,
-    ];
-  }
-
-  return [
-    "Trusted local expertise",
-    "Clear guidance for every move",
-    "A polished property story starts here",
-  ];
-}
-
 /**
  * Renders a text node in live mode. In draft mode, the element becomes
- * contentEditable with a visible amber outline and a "Save" button overlay.
+ * contentEditable with a visible amber outline. When a SmartFillProvider is
+ * present in the tree, a hover action bar appears with Edit (✏) and AI (✦)
+ * buttons so users can trigger AI generation directly on the text.
  */
 export function EditableText({
   as,
@@ -132,21 +76,13 @@ export function EditableText({
   const isDraft = useIsDraftMode();
   const aiAvailable =
     canUseAi && (aiEnabled ?? isContentKeyAiEnabled(contentKey));
-  const Tag = (as ?? (display === "block" ? "div" : "span")) as "div" | "span";
-  const WrapperTag = display === "block" || Tag !== "span" ? "div" : "span";
+  const triggerSmartFill = useSmartFill();
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [localValue, setLocalValue] = useState(value);
-  const [aiOpen, setAiOpen] = useState(false);
-  const [suggestionIndex, setSuggestionIndex] = useState(0);
   const ref = useRef<HTMLElement>(null);
-  const aiSuggestions = useMemo(
-    () => buildAiSuggestions(contentKey, localValue),
-    [contentKey, localValue],
-  );
-  const activeSuggestion =
-    aiSuggestions[suggestionIndex % Math.max(aiSuggestions.length, 1)] ??
-    localValue;
+  const Tag = (as ?? (display === "block" ? "div" : "span")) as "div" | "span";
 
   useEffect(() => {
     setLocalValue(value);
@@ -166,7 +102,7 @@ export function EditableText({
   }
 
   function handleClick() {
-    if (editing) return;
+    if (editing || isPending) return;
     setEditing(true);
     requestAnimationFrame(() => focusEditableElement(ref.current));
   }
@@ -175,164 +111,98 @@ export function EditableText({
     setLocalValue((e.target as HTMLElement).innerText);
   }
 
-  function handleDiscard() {
-    setAiOpen(false);
-    setEditing(false);
-    setLocalValue(value);
-  }
-
-  function handleSave() {
-    setAiOpen(false);
+  function handleBlur() {
+    if (!editing) return;
     setEditing(false);
     if (localValue !== value) {
       void onCommit?.(contentKey, localValue);
     }
   }
 
-  function handleAiToggle(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    setEditing(true);
-    setAiOpen((current) => !current);
+  async function handleAiGenerate(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!aiAvailable || !triggerSmartFill || isPending) return;
+    setIsPending(true);
+    try {
+      await triggerSmartFill(contentKey);
+    } finally {
+      setIsPending(false);
+    }
   }
 
-  function handleTryAgain(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    setSuggestionIndex((current) => current + 1);
-  }
-
-  function handleUseSuggestion(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
+  function handleEditClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     setEditing(true);
-    setLocalValue(activeSuggestion);
     requestAnimationFrame(() => focusEditableElement(ref.current));
   }
 
+  const showActionBar = isHovered && !editing && !isPending;
+
   return (
-    <WrapperTag
-      className={
-        display === "block"
-          ? "group/editable relative block"
-          : "group/editable relative inline-block max-w-full"
-      }
+    <Tag
+      ref={ref as React.RefObject<HTMLDivElement & HTMLSpanElement>}
+      style={style}
+      className={[
+        className,
+        "relative cursor-text outline-none",
+        isPending
+          ? "animate-pulse rounded ring-2 ring-primary/40"
+          : editing
+            ? "rounded ring-2 ring-primary/60"
+            : "rounded ring-1 ring-amber-400/60 hover:ring-amber-500/80",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      contentEditable={editing}
+      suppressContentEditableWarning
+      onBlur={handleBlur}
+      onClick={handleClick}
+      onInput={handleInput}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        setEditing(false);
+        setLocalValue(value);
+        requestAnimationFrame(() => {
+          if (ref.current) {
+            ref.current.innerText = value;
+          }
+        });
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {aiAvailable && !editing && isHovered ? (
-        <button
-          aria-label={`Generate AI copy for ${contentKey}`}
-          className="absolute -right-2 -top-2 z-20 rounded-full border border-amber-400/60 bg-background/95 px-2 py-1 text-[11px] font-semibold text-amber-700 shadow-sm backdrop-blur hover:border-amber-500 hover:text-amber-800"
-          type="button"
-          onClick={handleAiToggle}
-          onMouseDown={(event) => event.stopPropagation()}
+      {/* Floating action bar — Edit + optional AI button */}
+      {showActionBar && (
+        <span
+          className="absolute -top-7 right-0 z-20 flex items-center gap-0.5 rounded border border-border/60 bg-background/95 px-1 py-0.5 shadow-sm"
+          contentEditable={false}
+          onMouseEnter={() => setIsHovered(true)}
         >
-          ✦ AI
-        </button>
-      ) : null}
-
-      {editing ? (
-        <div className="absolute left-0 top-full z-30 mt-2 flex flex-wrap items-center gap-2 rounded-md border border-border/70 bg-background/95 px-2 py-2 text-xs shadow-lg backdrop-blur">
           <button
-            className="rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 font-medium text-primary hover:bg-primary/15"
             type="button"
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={handleSave}
+            title="Edit text"
+            className="flex size-5 items-center justify-center rounded text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+            onMouseDown={handleEditClick}
           >
-            ✓ Save
+            ✏
           </button>
-          <button
-            className="rounded-md border border-border/70 bg-background px-2.5 py-1 font-medium text-muted-foreground hover:text-foreground"
-            type="button"
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={handleDiscard}
-          >
-            ✕ Discard
-          </button>
-          {aiAvailable ? (
+          {triggerSmartFill ? (
             <button
-              className="rounded-md border border-amber-400/40 bg-amber-50 px-2.5 py-1 font-medium text-amber-700 hover:bg-amber-100"
               type="button"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={handleAiToggle}
-            >
-              ✦ AI
+            title="Generate with AI"
+            className="flex size-5 items-center justify-center rounded text-[11px] text-primary hover:bg-primary/10"
+            onMouseDown={handleAiGenerate}
+          >
+            ✦
             </button>
           ) : null}
-        </div>
-      ) : null}
-
-      {aiAvailable && aiOpen ? (
-        <div className="absolute left-0 top-full z-30 mt-14 w-[min(28rem,90vw)] rounded-xl border border-border/70 bg-background/98 p-3 shadow-xl backdrop-blur">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700">
-              AI suggestion
-            </p>
-            <button
-              aria-label="Close AI suggestion panel"
-              className="rounded-md px-1.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-              type="button"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                setAiOpen(false);
-              }}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="rounded-lg border border-border/70 bg-muted/30 p-3 text-sm leading-6 text-foreground">
-            {activeSuggestion}
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              className="rounded-md border border-primary/20 bg-primary px-2.5 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-95"
-              type="button"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={handleUseSuggestion}
-            >
-              Use this
-            </button>
-            <button
-              className="rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-              type="button"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={handleTryAgain}
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      <Tag
-        ref={ref as React.RefObject<HTMLDivElement & HTMLSpanElement>}
-        style={style}
-        className={[
-          className,
-          "cursor-text outline-none transition-shadow",
-          editing
-            ? "rounded ring-2 ring-primary/60"
-            : "rounded ring-1 ring-amber-400/60 hover:ring-amber-500/80",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        contentEditable={editing}
-        suppressContentEditableWarning
-        onClick={handleClick}
-        onInput={handleInput}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault();
-            handleDiscard();
-          }
-        }}
-      >
-        {localValue}
-      </Tag>
-    </WrapperTag>
+        </span>
+      )}
+      {localValue}
+    </Tag>
   );
 }
 
