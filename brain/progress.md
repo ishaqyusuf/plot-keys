@@ -61,6 +61,19 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-30 — ClickGuard + InlineOverview Wiring (M3 Deferred)
+
+### What was built
+- **`runtime/click-guard.tsx`** — Enhanced `handleClick` to auto-detect item data from `data-click-guard-type` + `data-click-guard-data` attributes on intercepted anchors. Parses JSON payload and calls `openItem()` automatically, so section components need no direct dependency on `useClickGuard`.
+- **`sections/extended-sections.tsx`** — Added `data-click-guard-type` and `data-click-guard-data` attributes to `PropertyGridSection` listing card anchors (type: `"listing"`, data: id/title/location/price/specs/slug) and `AgentShowcaseSection` agent card anchors (type: `"agent"`, data: id/name/role/bio/slug).
+- **`apps/tenant-site/src/components/website-shell.tsx`** — New `"use client"` wrapper component. Provides `ClickGuardProvider` + `InlineOverview` boundary inside `WebsiteRuntimeProvider`'s client tree. In `renderMode="live"`, ClickGuard is transparent and InlineOverview returns null — zero behaviour change for live visitors.
+- **`apps/tenant-site/src/app/layout.tsx`** — `<main>{children}</main>` wrapped with `<WebsiteShell>` to enable ClickGuard + InlineOverview for all tenant-site pages.
+- **`apps/dashboard/.../builder-preview-panel.tsx`** — `ClickGuardProvider` + `InlineOverview` nested inside `WebsiteRuntimeProvider renderMode="draft"`. Clicking a listing/agent card in the builder preview now slides up the InlineOverview panel instead of triggering broken navigation.
+
+### What's still deferred
+- EditableText AI icon + action bar upgrade
+- WebsiteVersion Phase 4 writes
+
 ## 2026-03-30 — Template Registry M4 — Tenant-Site Integration
 
 ### What was built

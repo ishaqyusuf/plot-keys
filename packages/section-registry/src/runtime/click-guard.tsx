@@ -91,6 +91,16 @@ export function ClickGuardProvider({ children }: { children: ReactNode }) {
     if (anchor) {
       e.preventDefault();
       e.stopPropagation();
+      // Auto-open InlineOverview if the anchor carries item data attributes.
+      const itemType = (anchor as HTMLElement).dataset.clickGuardType as ClickGuardItemType | undefined;
+      const itemData = (anchor as HTMLElement).dataset.clickGuardData;
+      if (itemType && itemData) {
+        try {
+          openItem({ type: itemType, data: JSON.parse(itemData) });
+        } catch {
+          // ignore malformed JSON
+        }
+      }
       return;
     }
 

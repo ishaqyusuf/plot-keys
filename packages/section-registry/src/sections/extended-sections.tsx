@@ -304,6 +304,14 @@ export function AgentShowcaseSection({
             <a
               key={agent.id}
               href={agent.slug ? `/agents/${agent.slug}` : "#"}
+              data-click-guard-type="agent"
+              data-click-guard-data={JSON.stringify({
+                id: agent.id,
+                name: agent.name,
+                role: agent.role,
+                bio: agent.bio ?? undefined,
+                slug: agent.slug,
+              })}
               className="group flex flex-col items-center text-center"
               {...getLinkProps("agent", agent)}
             >
