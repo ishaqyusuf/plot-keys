@@ -35,6 +35,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -51,7 +52,10 @@ function shell(theme: ThemeConfig) {
 function OperationsTag({ children }: { children: string }) {
   return (
     <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.36em] text-teal-600 dark:text-teal-400">
-      <span className="inline-block h-1.5 w-1.5 rounded-full bg-teal-600 dark:bg-teal-400" aria-hidden />
+      <span
+        className="inline-block h-1.5 w-1.5 rounded-full bg-teal-600 dark:bg-teal-400"
+        aria-hidden
+      />
       {children}
     </p>
   );
@@ -147,7 +151,9 @@ export function WafiHeroBannerSection({
       {/* Subtle teal wash top-right */}
       <div
         className="pointer-events-none absolute -right-40 -top-40 h-[480px] w-[480px] rounded-full opacity-[0.07]"
-        style={{ background: "radial-gradient(circle, #0d9488 0%, transparent 70%)" }}
+        style={{
+          background: "radial-gradient(circle, #0d9488 0%, transparent 70%)",
+        }}
         aria-hidden
       />
 
@@ -175,7 +181,9 @@ export function WafiHeroBannerSection({
             />
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <ManagerButton href={config.ctaHref}>{config.ctaText}</ManagerButton>
+              <ManagerButton href={config.ctaHref}>
+                {config.ctaText}
+              </ManagerButton>
               <ManagerButton href="#services" variant="outline">
                 Our services
               </ManagerButton>
@@ -237,12 +245,16 @@ export function WafiHeroBannerSection({
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal-500 text-[9px] font-bold text-white">
                     ✓
                   </span>
-                  <span className="text-sm text-slate-600 dark:text-slate-400">{item}</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                    {item}
+                  </span>
                 </li>
               ))}
             </ul>
 
-            <p className="mt-5 text-xs leading-5 text-slate-400">{theme.supportLine}</p>
+            <p className="mt-5 text-xs leading-5 text-slate-400">
+              {theme.supportLine}
+            </p>
           </div>
         </div>
       </div>
@@ -264,6 +276,8 @@ export function WafiListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -274,7 +288,11 @@ export function WafiListingSpotlightSection({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <OperationsTag>{config.eyebrow}</OperationsTag>
-            <ManagerHeading tag="h2" theme={theme} className="mt-2 text-4xl md:text-5xl">
+            <ManagerHeading
+              tag="h2"
+              theme={theme}
+              className="mt-2 text-4xl md:text-5xl"
+            >
               {config.title}
             </ManagerHeading>
           </div>
@@ -297,6 +315,7 @@ export function WafiListingSpotlightSection({
             return (
               <div
                 key={i}
+                {...getCardProps("listing", item)}
                 className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900"
               >
                 {/* Image */}
@@ -376,7 +395,9 @@ export function WafiMarketStatsSection({
               >
                 {stat.value}
               </p>
-              <p className="text-sm text-[color:var(--muted-foreground)]">{stat.label}</p>
+              <p className="text-sm text-[color:var(--muted-foreground)]">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
@@ -407,7 +428,11 @@ export function WafiStoryGridSection({
         {/* Header */}
         <div className="max-w-2xl">
           <OperationsTag>{config.eyebrow}</OperationsTag>
-          <ManagerHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <ManagerHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </ManagerHeading>
           <EditableText
@@ -518,7 +543,11 @@ export function WafiServiceHighlightsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-10">
           <OperationsTag>{config.eyebrow}</OperationsTag>
-          <ManagerHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <ManagerHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </ManagerHeading>
           <p className="mt-3 max-w-2xl text-base text-[color:var(--muted-foreground)]">
@@ -574,7 +603,11 @@ export function WafiWhyChooseUsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 text-center">
           <OperationsTag>{config.eyebrow}</OperationsTag>
-          <ManagerHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <ManagerHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </ManagerHeading>
         </div>
@@ -624,6 +657,8 @@ export function WafiPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -633,7 +668,11 @@ export function WafiPropertyGridSection({
         <div className="mb-8 flex items-end justify-between">
           <div>
             <OperationsTag>{config.eyebrow}</OperationsTag>
-            <ManagerHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+            <ManagerHeading
+              tag="h2"
+              theme={theme}
+              className="mt-3 text-4xl md:text-5xl"
+            >
               {config.title}
             </ManagerHeading>
           </div>
@@ -651,6 +690,7 @@ export function WafiPropertyGridSection({
           {config.items.map((item) => (
             <div
               key={item.id}
+              {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900"
             >
               <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
@@ -746,7 +786,9 @@ export function WafiTestimonialStripSection({
                 >
                   {t.speaker}
                 </p>
-                <p className="text-xs text-[color:var(--muted-foreground)]">{t.role}</p>
+                <p className="text-xs text-[color:var(--muted-foreground)]">
+                  {t.role}
+                </p>
               </div>
             </div>
           ))}
@@ -770,6 +812,8 @@ export function WafiAgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -778,7 +822,11 @@ export function WafiAgentShowcaseSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <OperationsTag>{config.eyebrow}</OperationsTag>
-          <ManagerHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <ManagerHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </ManagerHeading>
           {config.description && (
@@ -792,6 +840,7 @@ export function WafiAgentShowcaseSection({
           {config.items.map((agent) => (
             <div
               key={agent.id}
+              {...getCardProps("agent", agent)}
               className="overflow-hidden rounded-xl border border-[color:var(--border)] bg-white dark:bg-slate-900"
             >
               {/* Photo */}
@@ -816,7 +865,9 @@ export function WafiAgentShowcaseSection({
                 >
                   {agent.name}
                 </p>
-                <p className="text-xs text-[color:var(--muted-foreground)]">{agent.role}</p>
+                <p className="text-xs text-[color:var(--muted-foreground)]">
+                  {agent.role}
+                </p>
                 {agent.listings !== undefined && (
                   <p className="mt-2 text-xs font-semibold text-teal-600 dark:text-teal-400">
                     {agent.listings} properties managed

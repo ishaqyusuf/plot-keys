@@ -15,11 +15,14 @@ import {
   resolvePublishedForCompany,
   resolveTenantByHostname,
 } from "@plotkeys/db";
+import type {
+  TemplateFamilyKey,
+  TemplateTier,
+} from "@plotkeys/section-registry";
 import {
   deserializeTemplateConfig,
   getRegisterTemplate,
 } from "@plotkeys/section-registry";
-import type { TemplateFamilyKey, TemplateTier } from "@plotkeys/section-registry";
 import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
 
@@ -80,9 +83,7 @@ export async function resolveTenantContext(searchParams?: {
 
   const requestHeaders = await headers();
   const tenantSubdomain =
-    requestHeaders.get("x-tenant-subdomain") ||
-    searchParams?.subdomain ||
-    null;
+    requestHeaders.get("x-tenant-subdomain") || searchParams?.subdomain || null;
   const tenantHostname =
     requestHeaders.get("x-tenant-hostname") ||
     extractTenantHostname(searchParams?.hostname) ||
@@ -96,12 +97,24 @@ export async function resolveTenantContext(searchParams?: {
   const company = resolvedTenant
     ? await prisma.company.findFirst({
         where: { deletedAt: null, id: resolvedTenant.companyId },
-        select: { id: true, name: true, slug: true, logoUrl: true, market: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logoUrl: true,
+          market: true,
+        },
       })
     : tenantSubdomain
       ? await prisma.company.findFirst({
           where: { deletedAt: null, slug: tenantSubdomain },
-          select: { id: true, name: true, slug: true, logoUrl: true, market: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+            market: true,
+          },
         })
       : null;
 
@@ -137,6 +150,7 @@ export async function resolveTenantContext(searchParams?: {
       imageUrl: p.imageUrl,
       location: p.location,
       price: p.price,
+      slug: p.id,
       specs: p.specs,
       title: p.title,
     })),
@@ -144,6 +158,7 @@ export async function resolveTenantContext(searchParams?: {
       id: a.id,
       imageUrl: a.imageUrl,
       name: a.name,
+      slug: a.id,
       title: a.title,
       bio: a.bio,
     })),

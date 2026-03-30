@@ -17,11 +17,11 @@
 import type { CSSProperties } from "react";
 
 import { EditableText } from "../../../sections/editing-primitives";
-import type { AgentShowcaseConfig } from "../../../sections/extended-sections";
 import type {
+  AgentShowcaseConfig,
+  HeroSearchConfig,
   PropertyGridConfig,
   WhyChooseUsConfig,
-  HeroSearchConfig,
 } from "../../../sections/extended-sections";
 import type {
   CtaBandConfig,
@@ -32,6 +32,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -91,8 +92,7 @@ function AgencyButton({
       "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] shadow-[0_6px_24px_rgba(0,0,0,0.18)] hover:opacity-90",
     outline:
       "border-2 border-[color:var(--foreground)]/20 bg-transparent text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]",
-    ghost:
-      "bg-transparent text-white/90 underline-offset-4 hover:underline",
+    ghost: "bg-transparent text-white/90 underline-offset-4 hover:underline",
   };
 
   return (
@@ -139,10 +139,7 @@ export function NoorHeroBannerSection({
           {/* Left: main content */}
           <div>
             <span className="inline-block rounded-sm bg-[color:var(--primary)]/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.32em] text-[color:var(--primary)]">
-              <EditableText
-                contentKey="hero.eyebrow"
-                value={config.eyebrow}
-              />
+              <EditableText contentKey="hero.eyebrow" value={config.eyebrow} />
             </span>
 
             <EditableText
@@ -196,7 +193,9 @@ export function NoorHeroBannerSection({
               ].map((stat) => (
                 <div key={stat.label} className="rounded-lg bg-white/8 p-3">
                   <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">{stat.label}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -224,6 +223,8 @@ export function NoorListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -255,6 +256,7 @@ export function NoorListingSpotlightSection({
           {config.items.map((item, i) => (
             <div
               key={i}
+              {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900"
             >
               {/* Image placeholder */}
@@ -426,7 +428,9 @@ export function NoorCtaBandSection({
           value={config.body}
         />
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <AgencyButton href={config.primaryHref}>{config.primaryText}</AgencyButton>
+          <AgencyButton href={config.primaryHref}>
+            {config.primaryText}
+          </AgencyButton>
           <AgencyButton href={config.secondaryHref} variant="ghost">
             {config.secondaryText}
           </AgencyButton>
@@ -450,6 +454,8 @@ export function NoorAgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -472,6 +478,7 @@ export function NoorAgentShowcaseSection({
           {config.items.map((agent) => (
             <div
               key={agent.id}
+              {...getCardProps("agent", agent)}
               className="overflow-hidden rounded-xl border border-[color:var(--border)] bg-white dark:bg-slate-900"
             >
               {/* Agent photo */}
@@ -624,6 +631,8 @@ export function NoorPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -651,6 +660,7 @@ export function NoorPropertyGridSection({
           {config.items.map((item) => (
             <div
               key={item.id}
+              {...getCardProps("listing", item)}
               className="overflow-hidden rounded-xl border border-[color:var(--border)] bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900"
             >
               <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">

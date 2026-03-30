@@ -69,8 +69,20 @@
 - **`app/page.tsx` simplification** — Removed ~80 lines of inline tenant resolution. Now calls `resolveTenantContext(sp)` and `resolvePage(templateKey, "home", tenant, "live")`. Fallback (no published site) still shows sample home in dashed border card.
 
 ### What's still deferred
-- Tenant-site ClickGuard + InlineOverview wiring into live renders
 - WebsiteVersion Phase 4 writes
+
+## 2026-03-30 — Tenant-Site ClickGuard + InlineOverview Wiring
+
+### What was built
+- **`apps/tenant-site/src/components/tenant-interaction-shell.tsx`** — Added a client-side interaction shell that reads `?renderMode=` from the URL, wraps tenant-site content in `WebsiteRuntimeProvider`, mounts `ClickGuardProvider`, and places a single `InlineOverview` panel around the real nav/footer/page render tree.
+- **Tenant-site render mode parsing** — Added `parseTenantRenderMode()` and updated both `app/page.tsx` and `app/[...slug]/page.tsx` to pass the selected render mode into `resolvePage()`, so `"template"` mode now resolves placeholder content/data while `"preview"` / `"draft"` keep real tenant data.
+- **Overview trigger wiring for cards** — Added `useItemOverviewTrigger()` in `packages/section-registry/src/sections/interaction-utils.tsx` and used it across shared section components plus the Noor/Bana/Wafi/Faris/Sakan/Thuraya family overrides so listing and agent cards open `InlineOverview` in non-live modes while remaining inert or navigable in live mode.
+- **Item slug propagation** — Extended live/placeholder listing + agent shapes with optional `slug` support so `InlineOverview` action links can resolve detail URLs correctly in preview/template contexts.
+
+### Validation notes
+- Manual UI verification completed with a temporary local preview-mode demo that exercised `ClickGuardProvider` + `InlineOverview` around real section components. Verified that clicking a property card opens the slide-up overview panel. Screenshot: https://github.com/user-attachments/assets/f526c025-ceed-44c4-85f4-c607d6bbbfe2
+- `apps/tenant-site` typecheck remains blocked in this sandbox because `@plotkeys/tsconfig/nextjs.json` is not resolvable from the app package here, and `packages/section-registry` standalone typecheck is also blocked by the environment not loading the expected React/JSX tsconfig setup.
+- Focused Biome checks on touched files still surface pre-existing section-registry issues in files touched for this task, especially existing `<img>` warnings and historical `noArrayIndexKey` findings in family section files. No new security findings were identified during manual review.
 
 ## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
 

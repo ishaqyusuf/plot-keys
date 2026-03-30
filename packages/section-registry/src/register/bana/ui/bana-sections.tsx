@@ -34,6 +34,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -50,10 +51,7 @@ function shell(theme: ThemeConfig) {
 function IndustrialTag({ children }: { children: ReactNode }) {
   return (
     <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.32em] text-amber-500">
-      <span
-        className="inline-block h-0.5 w-5 bg-amber-500"
-        aria-hidden
-      />
+      <span className="inline-block h-0.5 w-5 bg-amber-500" aria-hidden />
       {children}
     </p>
   );
@@ -83,14 +81,16 @@ function IndustrialHeading({
 }
 
 /** Status badge — "Under Construction" (amber) or "Ready" (green) */
-function ProjectBadge({ label }: { label: "Under Construction" | "Ready" | string }) {
+function ProjectBadge({
+  label,
+}: {
+  label: "Under Construction" | "Ready" | string;
+}) {
   const isReady = label === "Ready";
   return (
     <span
       className={`inline-block rounded-sm px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-        isReady
-          ? "bg-emerald-600 text-white"
-          : "bg-amber-500 text-zinc-950"
+        isReady ? "bg-emerald-600 text-white" : "bg-amber-500 text-zinc-950"
       }`}
     >
       {label}
@@ -158,7 +158,9 @@ export function BanaHeroBannerSection({
       {/* Amber glow top-left */}
       <div
         className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full opacity-10"
-        style={{ background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)" }}
+        style={{
+          background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)",
+        }}
         aria-hidden
       />
 
@@ -186,7 +188,9 @@ export function BanaHeroBannerSection({
             />
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <BuilderButton href={config.ctaHref}>{config.ctaText}</BuilderButton>
+              <BuilderButton href={config.ctaHref}>
+                {config.ctaText}
+              </BuilderButton>
               <BuilderButton href="#projects" variant="outline">
                 View projects
               </BuilderButton>
@@ -225,13 +229,19 @@ export function BanaHeroBannerSection({
                 { label: "Client satisfaction", value: "98%" },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-sm bg-white/6 p-3">
-                  <p className="text-2xl font-extrabold text-amber-400">{stat.value}</p>
-                  <p className="mt-0.5 text-[11px] text-zinc-500">{stat.label}</p>
+                  <p className="text-2xl font-extrabold text-amber-400">
+                    {stat.value}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-zinc-500">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
 
-            <p className="mt-5 text-xs leading-5 text-zinc-600">{theme.supportLine}</p>
+            <p className="mt-5 text-xs leading-5 text-zinc-600">
+              {theme.supportLine}
+            </p>
           </div>
         </div>
       </div>
@@ -253,6 +263,8 @@ export function BanaListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -263,7 +275,11 @@ export function BanaListingSpotlightSection({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <IndustrialTag>{config.eyebrow}</IndustrialTag>
-            <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+            <IndustrialHeading
+              tag="h2"
+              theme={theme}
+              className="mt-3 text-4xl md:text-5xl"
+            >
               {config.title}
             </IndustrialHeading>
           </div>
@@ -287,6 +303,7 @@ export function BanaListingSpotlightSection({
             return (
               <div
                 key={i}
+                {...getCardProps("listing", item)}
                 className="group overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-lg"
               >
                 {/* Image placeholder */}
@@ -298,7 +315,9 @@ export function BanaListingSpotlightSection({
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-700/50">
                     <div
                       className="h-full bg-amber-500"
-                      style={{ width: badge === "Ready" ? "100%" : `${45 + i * 18}%` }}
+                      style={{
+                        width: badge === "Ready" ? "100%" : `${45 + i * 18}%`,
+                      }}
                     />
                   </div>
                   <div className="absolute left-3 top-3">
@@ -317,9 +336,13 @@ export function BanaListingSpotlightSection({
                     {item.location}
                   </p>
                   <div className="mt-3 flex items-center justify-between">
-                    <p className="text-xl font-extrabold text-amber-500">{item.price}</p>
+                    <p className="text-xl font-extrabold text-amber-500">
+                      {item.price}
+                    </p>
                     {item.specs && (
-                      <p className="text-xs text-[color:var(--muted-foreground)]">{item.specs}</p>
+                      <p className="text-xs text-[color:var(--muted-foreground)]">
+                        {item.specs}
+                      </p>
                     )}
                   </div>
                   <a
@@ -352,10 +375,7 @@ export function BanaMarketStatsSection({
   theme: ThemeConfig;
 }) {
   return (
-    <section
-      className="bg-zinc-900 px-6 py-12 md:px-12"
-      style={shell(theme)}
-    >
+    <section className="bg-zinc-900 px-6 py-12 md:px-12" style={shell(theme)}>
       <div className="mx-auto max-w-6xl">
         <div className="grid divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {config.items.map((stat, i) => (
@@ -404,7 +424,11 @@ export function BanaStoryGridSection({
           {/* Left: headline + description */}
           <div>
             <IndustrialTag>{config.eyebrow}</IndustrialTag>
-            <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+            <IndustrialHeading
+              tag="h2"
+              theme={theme}
+              className="mt-3 text-4xl md:text-5xl"
+            >
               {config.title}
             </IndustrialHeading>
             <EditableText
@@ -509,7 +533,9 @@ export function BanaCtaBandSection({
           value={config.body}
         />
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <BuilderButton href={config.primaryHref}>{config.primaryText}</BuilderButton>
+          <BuilderButton href={config.primaryHref}>
+            {config.primaryText}
+          </BuilderButton>
           <BuilderButton href={config.secondaryHref} variant="ghost">
             {config.secondaryText}
           </BuilderButton>
@@ -533,6 +559,8 @@ export function BanaAgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -541,7 +569,11 @@ export function BanaAgentShowcaseSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <IndustrialTag>{config.eyebrow}</IndustrialTag>
-          <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <IndustrialHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </IndustrialHeading>
           {config.description && (
@@ -555,6 +587,7 @@ export function BanaAgentShowcaseSection({
           {config.items.map((agent) => (
             <div
               key={agent.id}
+              {...getCardProps("agent", agent)}
               className="overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--card)]"
             >
               {/* Photo */}
@@ -581,7 +614,9 @@ export function BanaAgentShowcaseSection({
                 >
                   {agent.name}
                 </p>
-                <p className="text-xs text-[color:var(--muted-foreground)]">{agent.role}</p>
+                <p className="text-xs text-[color:var(--muted-foreground)]">
+                  {agent.role}
+                </p>
                 {agent.listings !== undefined && (
                   <p className="mt-2 text-xs font-bold text-amber-500">
                     {agent.listings} projects managed
@@ -617,7 +652,11 @@ export function BanaWhyChooseUsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <IndustrialTag>{config.eyebrow}</IndustrialTag>
-          <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <IndustrialHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </IndustrialHeading>
         </div>
@@ -665,6 +704,8 @@ export function BanaPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-6 py-14 md:px-12 md:py-20"
@@ -674,7 +715,11 @@ export function BanaPropertyGridSection({
         <div className="mb-8 flex items-end justify-between">
           <div>
             <IndustrialTag>{config.eyebrow}</IndustrialTag>
-            <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+            <IndustrialHeading
+              tag="h2"
+              theme={theme}
+              className="mt-3 text-4xl md:text-5xl"
+            >
               {config.title}
             </IndustrialHeading>
           </div>
@@ -692,6 +737,7 @@ export function BanaPropertyGridSection({
           {config.items.map((item) => (
             <div
               key={item.id}
+              {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="relative h-44 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
@@ -712,7 +758,9 @@ export function BanaPropertyGridSection({
               </div>
               <div className="p-4">
                 {item.price && (
-                  <p className="text-xl font-extrabold text-amber-500">{item.price}</p>
+                  <p className="text-xl font-extrabold text-amber-500">
+                    {item.price}
+                  </p>
                 )}
                 <p
                   className="mt-1 text-sm font-bold text-[color:var(--foreground)]"
@@ -813,7 +861,11 @@ export function BanaServiceHighlightsSection({
       <div className="mx-auto max-w-6xl">
         <div className="mb-10">
           <IndustrialTag>{config.eyebrow}</IndustrialTag>
-          <IndustrialHeading tag="h2" theme={theme} className="mt-3 text-4xl md:text-5xl">
+          <IndustrialHeading
+            tag="h2"
+            theme={theme}
+            className="mt-3 text-4xl md:text-5xl"
+          >
             {config.title}
           </IndustrialHeading>
           <p className="mt-3 max-w-2xl text-base text-[color:var(--muted-foreground)]">

@@ -22,11 +22,14 @@
  * minimal placeholder so they are reachable but visually minimal.
  */
 
-import { getTemplatePageInventory, resolvePage } from "@plotkeys/section-registry";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
+import {
+  getTemplatePageInventory,
+  resolvePage,
+} from "@plotkeys/section-registry";
 import { notFound } from "next/navigation";
 import type { JSX } from "react";
-
+import { parseTenantRenderMode } from "../../lib/render-mode";
 import { resolveTenantContext } from "../../lib/resolve-tenant";
 
 // ---------------------------------------------------------------------------
@@ -77,7 +80,9 @@ function renderSection(
     theme: typeof theme;
   }) => JSX.Element;
 
-  return <SectionComponent key={section.id} config={section.config} theme={theme} />;
+  return (
+    <SectionComponent key={section.id} config={section.config} theme={theme} />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -86,15 +91,23 @@ function renderSection(
 
 type InnerPageProps = {
   params: Promise<{ slug: string[] }>;
-  searchParams?: Promise<{ hostname?: string; subdomain?: string }>;
+  searchParams?: Promise<{
+    hostname?: string;
+    renderMode?: string;
+    subdomain?: string;
+  }>;
 };
 
-export default async function InnerPage({ params, searchParams }: InnerPageProps) {
+export default async function InnerPage({
+  params,
+  searchParams,
+}: InnerPageProps) {
   const { slug: segments } = await params;
   const sp = (await searchParams) ?? {};
+  const renderMode = parseTenantRenderMode(sp.renderMode ?? null);
 
   // Reconstruct path: ["listings"] → "/listings", ["blog", "my-post"] → "/blog/my-post"
-  const path = "/" + segments.join("/");
+  const path = `/${segments.join("/")}`;
 
   const tenant = await resolveTenantContext(sp);
   if (!tenant) {
@@ -125,7 +138,7 @@ export default async function InnerPage({ params, searchParams }: InnerPageProps
       subdomain: tenant.company.slug,
       theme: tenant.publishedConfig.themeJson,
     },
-    "live",
+    renderMode,
   );
 
   // Pages with no sections (login, signup, privacy, terms, etc.) show a

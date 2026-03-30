@@ -11,8 +11,9 @@
  * - NewsletterSection    — Simple newsletter signup strip
  */
 
-import { useState, type CSSProperties, type JSX } from "react";
+import { type CSSProperties, type JSX, useState } from "react";
 import type { ThemeConfig } from "./home-page";
+import { useItemOverviewTrigger } from "./interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -156,6 +157,7 @@ export function PropertyGridSection({
   theme: ThemeConfig;
 }): JSX.Element {
   const isEmpty = config.items.length === 0;
+  const { getLinkProps } = useItemOverviewTrigger();
 
   return (
     <section
@@ -204,6 +206,7 @@ export function PropertyGridSection({
                   key={item.id}
                   href={item.slug ? `/listings/${item.slug}` : "#"}
                   className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-md"
+                  {...getLinkProps("listing", item)}
                 >
                   {/* Image */}
                   <div className="relative h-52 overflow-hidden bg-[color:var(--muted)]">
@@ -273,6 +276,8 @@ export function AgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }): JSX.Element {
+  const { getLinkProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] dark:bg-[var(--background)] px-6 py-16 md:px-10 md:py-20"
@@ -291,6 +296,7 @@ export function AgentShowcaseSection({
               key={agent.id}
               href={agent.slug ? `/agents/${agent.slug}` : "#"}
               className="group flex flex-col items-center text-center"
+              {...getLinkProps("agent", agent)}
             >
               {/* Avatar */}
               <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[color:var(--border)] bg-[color:var(--muted)]">

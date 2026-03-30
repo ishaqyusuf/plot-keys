@@ -19,9 +19,9 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { EditableText } from "../../../sections/editing-primitives";
 import type {
+  AgentShowcaseConfig,
   PropertyGridConfig,
   WhyChooseUsConfig,
-  AgentShowcaseConfig,
 } from "../../../sections/extended-sections";
 import type {
   CtaBandConfig,
@@ -32,6 +32,7 @@ import type {
   TestimonialStripConfig,
   ThemeConfig,
 } from "../../../sections/home-page";
+import { useItemOverviewTrigger } from "../../../sections/interaction-utils";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -79,10 +80,7 @@ function SerifHeading({
 /** Thin gold rule */
 function GoldRule({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={`h-px w-12 bg-amber-400/70 ${className}`}
-      aria-hidden
-    />
+    <div className={`h-px w-12 bg-amber-400/70 ${className}`} aria-hidden />
   );
 }
 
@@ -129,10 +127,7 @@ export function ThurayaHeroBannerSection({
           theme={theme}
           className="mt-8 text-5xl md:text-7xl lg:text-8xl"
         >
-          <EditableText
-            contentKey="hero.title"
-            value={config.title}
-          />
+          <EditableText contentKey="hero.title" value={config.title} />
         </SerifHeading>
 
         {/* Subtitle + CTA */}
@@ -179,6 +174,8 @@ export function ThurayaListingSpotlightSection({
   config: ListingSpotlightConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-8 py-20 md:px-16 md:py-28"
@@ -189,7 +186,11 @@ export function ThurayaListingSpotlightSection({
         <div className="mb-12 flex items-start justify-between">
           <div>
             <EditorialTag>{config.eyebrow}</EditorialTag>
-            <SerifHeading tag="h2" theme={theme} className="mt-4 text-4xl md:text-5xl">
+            <SerifHeading
+              tag="h2"
+              theme={theme}
+              className="mt-4 text-4xl md:text-5xl"
+            >
               {config.title}
             </SerifHeading>
           </div>
@@ -204,7 +205,7 @@ export function ThurayaListingSpotlightSection({
         {/* 2-column listing cards */}
         <div className="grid gap-8 sm:grid-cols-2">
           {config.items.slice(0, 4).map((item, i) => (
-            <div key={i} className="group">
+            <div key={i} {...getCardProps("listing", item)} className="group">
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-900">
                 <div className="flex h-full w-full items-center justify-center text-xs text-stone-400 transition-transform duration-500 group-hover:scale-105">
@@ -263,7 +264,10 @@ export function ThurayaMarketStatsSection({
       <div className="mx-auto max-w-5xl">
         <div className="grid grid-cols-1 gap-8 divide-y divide-[color:var(--border)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {config.items.map((stat, i) => (
-            <div key={i} className="pt-8 sm:px-8 sm:pt-0 sm:first:pl-0 sm:last:pr-0">
+            <div
+              key={i}
+              className="pt-8 sm:px-8 sm:pt-0 sm:first:pl-0 sm:last:pr-0"
+            >
               <GoldRule className="mb-4" />
               <p
                 className="text-4xl font-light text-[color:var(--foreground)] md:text-5xl"
@@ -310,11 +314,12 @@ export function ThurayaStoryGridSection({
         <div className="mt-10 grid gap-14 lg:grid-cols-[1fr_360px] lg:items-start">
           {/* Left: headline + body */}
           <div>
-            <SerifHeading tag="h2" theme={theme} className="text-4xl md:text-5xl">
-              <EditableText
-                contentKey="story.title"
-                value={config.title}
-              />
+            <SerifHeading
+              tag="h2"
+              theme={theme}
+              className="text-4xl md:text-5xl"
+            >
+              <EditableText contentKey="story.title" value={config.title} />
             </SerifHeading>
 
             <EditableText
@@ -393,7 +398,10 @@ export function ThurayaCtaBandSection({
             </span>
           </a>
 
-          <span className="hidden text-[color:var(--border)] sm:block" aria-hidden>
+          <span
+            className="hidden text-[color:var(--border)] sm:block"
+            aria-hidden
+          >
             ·
           </span>
 
@@ -462,6 +470,8 @@ export function ThurayaPropertyGridSection({
   config: PropertyGridConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-8 py-20 md:px-16 md:py-28"
@@ -470,14 +480,22 @@ export function ThurayaPropertyGridSection({
       <div className="mx-auto max-w-5xl">
         <div className="mb-12">
           <EditorialTag>{config.eyebrow}</EditorialTag>
-          <SerifHeading tag="h2" theme={theme} className="mt-4 text-4xl md:text-5xl">
+          <SerifHeading
+            tag="h2"
+            theme={theme}
+            className="mt-4 text-4xl md:text-5xl"
+          >
             {config.title}
           </SerifHeading>
         </div>
 
         <div className="grid gap-10 sm:grid-cols-2">
           {config.items.map((item) => (
-            <div key={item.id} className="group">
+            <div
+              key={item.id}
+              {...getCardProps("listing", item)}
+              className="group"
+            >
               <div className="aspect-[3/2] overflow-hidden bg-stone-100 dark:bg-stone-900">
                 {item.imageUrl ? (
                   <img
@@ -532,6 +550,8 @@ export function ThurayaAgentShowcaseSection({
   config: AgentShowcaseConfig;
   theme: ThemeConfig;
 }) {
+  const { getCardProps } = useItemOverviewTrigger();
+
   return (
     <section
       className="bg-[var(--section-bg)] px-8 py-20 md:px-16 md:py-28"
@@ -540,14 +560,18 @@ export function ThurayaAgentShowcaseSection({
       <div className="mx-auto max-w-5xl">
         <div className="mb-12">
           <EditorialTag>{config.eyebrow}</EditorialTag>
-          <SerifHeading tag="h2" theme={theme} className="mt-4 text-4xl md:text-5xl">
+          <SerifHeading
+            tag="h2"
+            theme={theme}
+            className="mt-4 text-4xl md:text-5xl"
+          >
             {config.title}
           </SerifHeading>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {config.items.map((agent) => (
-            <div key={agent.id}>
+            <div key={agent.id} {...getCardProps("agent", agent)}>
               <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-900">
                 {agent.photoUrl ? (
                   <img
@@ -602,7 +626,11 @@ export function ThurayaWhyChooseUsSection({
       <div className="mx-auto max-w-5xl">
         <div className="mb-12">
           <EditorialTag>{config.eyebrow}</EditorialTag>
-          <SerifHeading tag="h2" theme={theme} className="mt-4 text-4xl md:text-5xl">
+          <SerifHeading
+            tag="h2"
+            theme={theme}
+            className="mt-4 text-4xl md:text-5xl"
+          >
             {config.title}
           </SerifHeading>
         </div>
