@@ -69,6 +69,10 @@ This file records the intended high-level architecture and boundaries between ap
   - initial draft installation
 - Tenant website requests should resolve tenant context first using custom domain, subdomain, preview token, or editor preview route.
 - Runtime context should provide tenant identity, website identity, mode, branding, and feature availability to sections and data hooks.
+- Public tenant-site marketing and discovery pages should remain template-driven through the section registry and WebsiteVersion page inventory.
+- Customer auth, dashboard, payments, saved listings, offers, and account pages should live in a central `apps/tenant-site` route group (for example `/portal/*`) rather than inside the template page inventory.
+- Template pages may link into the customer portal, but portal page composition should come from shared application UI, not family-specific section trees.
+- Listing overview pages should remain template-based, but listing search/filter/pagination/data-loading behavior should come from a shared central contract so templates vary visually without diverging functionally.
 - The preferred runtime stack is:
   - tenant website runtime
   - pages
@@ -119,6 +123,7 @@ This file records the intended high-level architecture and boundaries between ap
 - Locale should continue to follow the Midday-style path segment pattern inside each app.
 - Vercel domain attachment can now be triggered from the dashboard through a server action that syncs pending or failed tenant domains against the configured Vercel projects.
 - Public website rendering can now resolve the tenant by hostname when a matching `TenantDomain` record exists, with slug/query fallback still present for previews and local development.
+- Customer portal direction: use the same tenant-site app and hostname resolution as public tenant pages, but protect `/portal/*` with central customer-session guards instead of template page resolution.
 - Dashboard tenant auth and session scoping now resolve against dashboard-prefixed hosts only; the legacy `{subdomain}.plotkeys.com` dashboard alias is no longer accepted.
 - Tenant domain provisioning is now modeled as explicit paired hostnames, so first-party and custom registrations attach both the public hostname and the dashboard hostname separately.
 - Notifications now use a split-package pattern: framework-agnostic models in `packages/notifications` and React hooks/provider rendering in `packages/notifications-react`.
