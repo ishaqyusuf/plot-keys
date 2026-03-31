@@ -59,3 +59,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-another-one`
 - **Status:** ✅ Complete — register families now have clearer home-page conversion spines across Starter / Plus / Pro tiers
 - **Scope:** differentiated family home compositions in `packages/section-registry/src/register/*/*/pages.ts`, aligning agency / developer / manager / solo-agent / luxury / rental families with their existing nav/CTA patterns.
+
+### Preview-Safe Action Interception
+- **Branch:** `copilot/next-high-priority-task-another-one`
+- **Status:** ✅ Complete — template CTAs, forms, and buttons are now safely intercepted in non-live modes
+- **Scope:** ContactSection render-mode guard (skip real fetch in preview/template/draft), ClickGuard expanded to intercept all `<button>` clicks, PreviewBanner sticky mode label, PreviewToast on swallowed actions.
