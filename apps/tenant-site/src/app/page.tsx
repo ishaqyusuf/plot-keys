@@ -5,9 +5,10 @@ import {
   sampleTheme,
 } from "@plotkeys/section-registry";
 import { headers } from "next/headers";
+import type { Metadata } from "next";
 import type { JSX } from "react";
 import { parseTenantRenderMode } from "../lib/render-mode";
-import { resolveTenantContext } from "../lib/resolve-tenant";
+import { resolveTenantContext, resolveTenantShell } from "../lib/resolve-tenant";
 
 function renderSection(
   section: HomeSectionDefinition,
@@ -30,6 +31,38 @@ type TenantWebsiteHomePageProps = {
     subdomain?: string;
   }>;
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const shell = await resolveTenantShell();
+  if (!shell) return {};
+
+  const seo = shell.templateConfig.seo?.home;
+  const title = seo?.title || shell.company.name;
+  const description =
+    seo?.description ||
+    (shell.company.market
+      ? `${shell.company.name} — Real estate in ${shell.company.market}. Browse properties, meet agents, and schedule viewings.`
+      : `${shell.company.name} — Browse properties, meet agents, and schedule viewings.`);
+  const ogImage = seo?.ogImage || shell.company.logoUrl;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: shell.company.name,
+      ...(ogImage ? { images: [{ url: ogImage, alt: title }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
+  };
+}
 
 export default async function TenantWebsiteHomePage({
   searchParams,
