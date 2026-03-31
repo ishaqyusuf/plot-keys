@@ -63,6 +63,21 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-31 — Multi-page Template Depth
+
+### What was built
+- **`packages/section-registry/src/register/inner-page-defaults.ts`** (new) — Shared per-page hero defaults for 16 inner page types (about, listings, projects, portfolio, rentals, contact, agents, services, how-it-works, landlords, tenants, areas, private-sales, faq, insights, blog, resources). Each entry stores page-prefixed keys (e.g. `about.hero.title = "About Our Agency"`) so they don't collide with home-page keys.
+- **`packages/section-registry/src/index.ts`** — Three changes:
+  1. `resolvePageContent()` helper: aliases `{pageKey}.hero.*` to base `hero.*` keys before handing content to section builders. Builders remain unchanged; they always read `hero.title`, but on the about page they receive the about-specific value.
+  2. `buildPageSections()`: calls `resolvePageContent` for non-home pages.
+  3. `resolveWebsitePresentation()` and `resolvePage()`: both now merge `innerPageDefaults[pageKey]` between `template.defaultContent` and tenant-saved content, so per-page defaults are overridable by tenant customisation.
+
+### Design
+- Storage: per-page content is stored as `about.hero.title` etc. in `contentJson`/`themeJson` — no key collision with home page
+- Builder builders and section components remain unchanged (zero regression risk)
+- Tenant overrides: if a tenant saves `about.hero.title` to their contentJson (currently only possible via direct API; future builder UI TBD), it takes priority over the shared defaults
+- Known limitation: inline EditableText contentKey is still hardcoded to `hero.title` in section components — inline editing on inner pages writes to the home page key. Full page-scoped editing is a Phase 2 improvement requiring section component changes.
+
 ## 2026-03-31 — Path-Aware Builder Preview
 
 ### What was built
