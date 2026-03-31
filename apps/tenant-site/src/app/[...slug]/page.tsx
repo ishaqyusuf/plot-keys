@@ -22,6 +22,7 @@
  * minimal placeholder so they are reachable but visually minimal.
  */
 
+import { createPrismaClient, getPublishedBlogPostBySlug } from "@plotkeys/db";
 import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import {
   getTemplatePageInventory,
@@ -112,15 +113,53 @@ type InnerPageProps = {
   }>;
 };
 
-export async function generateMetadata({ params }: InnerPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: InnerPageProps): Promise<Metadata> {
   const { slug: segments } = await params;
-  const path = "/" + segments.join("/");
+  const path = `/${segments.join("/")}`;
 
   const shell = await resolveTenantShell();
   if (!shell) return {};
 
   const pageKey = resolvePageKeyForPath(shell.templateKey, path);
   if (!pageKey) return {};
+
+  if (pageKey === "blog-post" && segments.length > 1) {
+    const prisma = createPrismaClient().db;
+    if (prisma) {
+      const post = await getPublishedBlogPostBySlug(
+        prisma,
+        shell.company.id,
+        segments[segments.length - 1] ?? "",
+      );
+
+      if (post) {
+        const title = post.title;
+        const description =
+          post.excerpt ?? `${shell.company.name} blog article`;
+        const ogImage = post.featuredImage || shell.company.logoUrl;
+
+        return {
+          title,
+          description,
+          openGraph: {
+            title,
+            description,
+            type: "article",
+            siteName: shell.company.name,
+            ...(ogImage ? { images: [{ url: ogImage, alt: title }] } : {}),
+          },
+          twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            ...(ogImage ? { images: [ogImage] } : {}),
+          },
+        };
+      }
+    }
+  }
 
   const seo = shell.templateConfig.seo?.[pageKey];
   const title = seo?.title || shell.company.name;
@@ -150,7 +189,10 @@ export async function generateMetadata({ params }: InnerPageProps): Promise<Meta
   };
 }
 
-export default async function InnerPage({ params, searchParams }: InnerPageProps) {
+export default async function InnerPage({
+  params,
+  searchParams,
+}: InnerPageProps) {
   const { slug: segments } = await params;
   const sp = (await searchParams) ?? {};
   const renderMode = parseTenantRenderMode(sp.renderMode ?? null);
@@ -174,6 +216,23 @@ export default async function InnerPage({ params, searchParams }: InnerPageProps
     notFound();
   }
 
+  const currentBlogPost =
+    pageKey === "blog-post" && segments.length > 1
+      ? await (() => {
+          const prisma = createPrismaClient().db;
+          if (!prisma) return null;
+          return getPublishedBlogPostBySlug(
+            prisma,
+            tenant.company.id,
+            segments[segments.length - 1] ?? "",
+          );
+        })()
+      : null;
+
+  if (pageKey === "blog-post" && !currentBlogPost) {
+    notFound();
+  }
+
   const resolvedListings = isListingOverviewPage(pageKey)
     ? applyListingOverviewQuery(
         tenant.liveListings,
@@ -188,7 +247,19 @@ export default async function InnerPage({ params, searchParams }: InnerPageProps
       companyName: tenant.company.name,
       companyLogoUrl: tenant.company.logoUrl,
       content: tenant.publishedConfig.contentJson,
+      currentBlogPost: currentBlogPost
+        ? {
+            content: currentBlogPost.content,
+            excerpt: currentBlogPost.excerpt,
+            featuredImageUrl: currentBlogPost.featuredImage,
+            id: currentBlogPost.id,
+            publishedAt: currentBlogPost.publishedAt?.toISOString() ?? null,
+            slug: currentBlogPost.slug,
+            title: currentBlogPost.title,
+          }
+        : null,
       liveAgents: tenant.liveAgents,
+      liveBlogPosts: tenant.liveBlogPosts,
       liveListings: resolvedListings,
       market: tenant.company.market ?? tenant.company.name,
       subdomain: tenant.company.slug,

@@ -29,6 +29,7 @@ model Company {
   teamInvites        TeamInvite[]
   notifications      Notification[]
   customers          Customer[]
+  blogPosts          BlogPost[]
   departments        Department[]
   employees          Employee[]
   payrollEntries     PayrollEntry[]
@@ -42,4 +43,3 @@ model Company {
   @@index([deletedAt], map: "companies_deleted_at_idx")
   @@map("companies")
 }
-

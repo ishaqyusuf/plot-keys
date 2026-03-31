@@ -12,6 +12,7 @@ import {
   createPrismaClient,
   listAgentsForCompany,
   listFeaturedProperties,
+  listPublishedBlogPostsForCompany,
   resolvePublishedForCompany,
   resolveTenantByHostname,
 } from "@plotkeys/db";
@@ -61,6 +62,15 @@ export type TenantContext = {
     name: string;
     title?: string | null;
     bio?: string | null;
+  }[];
+  liveBlogPosts: {
+    content?: string | null;
+    excerpt?: string | null;
+    featuredImageUrl?: string | null;
+    id: string;
+    publishedAt?: string | null;
+    slug: string;
+    title: string;
   }[];
 };
 
@@ -133,9 +143,10 @@ export async function resolveTenantContext(searchParams?: {
   const registerVariant = getRegisterTemplate(publishedConfig.templateKey);
   const templateConfig = deserializeTemplateConfig(publishedConfig.themeJson);
 
-  const [featuredProperties, agents] = await Promise.all([
+  const [featuredProperties, agents, blogPosts] = await Promise.all([
     listFeaturedProperties(prisma, company.id),
     listAgentsForCompany(prisma, company.id, { limit: 10 }),
+    listPublishedBlogPostsForCompany(prisma, company.id, { limit: 24 }),
   ]);
 
   return {
@@ -161,6 +172,15 @@ export async function resolveTenantContext(searchParams?: {
       slug: a.id,
       title: a.title,
       bio: a.bio,
+    })),
+    liveBlogPosts: blogPosts.map((post) => ({
+      content: post.content,
+      excerpt: post.excerpt,
+      featuredImageUrl: post.featuredImage,
+      id: post.id,
+      publishedAt: post.publishedAt?.toISOString() ?? null,
+      slug: post.slug,
+      title: post.title,
     })),
   };
 }
@@ -203,12 +223,24 @@ export async function resolveTenantShell(): Promise<TenantShell | null> {
   const company = resolvedTenant
     ? await prisma.company.findFirst({
         where: { deletedAt: null, id: resolvedTenant.companyId },
-        select: { id: true, name: true, slug: true, logoUrl: true, market: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logoUrl: true,
+          market: true,
+        },
       })
     : tenantSubdomain
       ? await prisma.company.findFirst({
           where: { deletedAt: null, slug: tenantSubdomain },
-          select: { id: true, name: true, slug: true, logoUrl: true, market: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+            market: true,
+          },
         })
       : null;
 

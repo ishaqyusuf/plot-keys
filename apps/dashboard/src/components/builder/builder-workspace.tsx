@@ -5,6 +5,7 @@ import {
   findTenantOnboardingByUserId,
   getOrCreateDraftVersion,
   listAgentsForCompany,
+  listBlogPostsForCompany,
   listFeaturedProperties,
   upsertDraftWebsiteVersion,
 } from "@plotkeys/db";
@@ -119,6 +120,7 @@ export async function BuilderWorkspace({
     publishedVersion,
     featuredProperties,
     agents,
+    blogPosts,
     licensedTemplateKeys,
     onboarding,
   ] = await Promise.all([
@@ -127,6 +129,10 @@ export async function BuilderWorkspace({
     resolvePublishedForCompany(prisma, companyId),
     listFeaturedProperties(prisma, companyId),
     listAgentsForCompany(prisma, companyId, { limit: 10 }),
+    listBlogPostsForCompany(prisma, companyId, {
+      limit: 24,
+      status: "published",
+    }),
     findLicensedTemplateKeys(prisma, companyId),
     findTenantOnboardingByUserId(prisma, userId),
   ]);
@@ -247,7 +253,9 @@ export async function BuilderWorkspace({
   const liveSiteUrl = buildTenantSiteUrl(companySlug, {
     currentOrigin,
   });
-  const pageInventory = getTemplatePageInventory(resolvedActiveDraft.templateKey);
+  const pageInventory = getTemplatePageInventory(
+    resolvedActiveDraft.templateKey,
+  );
   const availablePages: PageNavItem[] = pageInventory.pages.map((page) => ({
     label: page.label,
     pageKey: page.pageKey,
@@ -257,7 +265,9 @@ export async function BuilderWorkspace({
     pageKey ??
     (() => {
       if (!previewPath || previewPath === "/") return "home";
-      const matched = pageInventory.pages.find((page) => page.slug === previewPath);
+      const matched = pageInventory.pages.find(
+        (page) => page.slug === previewPath,
+      );
       return matched?.pageKey ?? "home";
     })();
   const selectedPage =
@@ -282,6 +292,15 @@ export async function BuilderWorkspace({
       imageUrl: a.imageUrl,
       name: a.name,
       title: a.title,
+    })),
+    liveBlogPosts: blogPosts.map((post) => ({
+      content: post.content,
+      excerpt: post.excerpt,
+      featuredImageUrl: post.featuredImage,
+      id: post.id,
+      publishedAt: post.publishedAt?.toISOString() ?? null,
+      slug: post.slug,
+      title: post.title,
     })),
     liveListings: featuredProperties.map((p) => ({
       id: p.id,

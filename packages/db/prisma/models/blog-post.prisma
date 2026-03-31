@@ -1,0 +1,31 @@
+model BlogPost {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId     String         @map("company_id") @db.Uuid
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  authorId      String?        @map("author_id")
+  author        User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  title         String
+  slug          String
+  excerpt       String?
+  content       String
+  featuredImage String?        @map("featured_image")
+  status        BlogPostStatus @default(draft)
+  publishedAt   DateTime?      @map("published_at") @db.Timestamptz(6)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz(6)
+
+  @@unique([companyId, slug], map: "blog_posts_company_slug_key")
+  @@index([companyId, status], map: "blog_posts_company_status_idx")
+  @@index([publishedAt], map: "blog_posts_published_at_idx")
+  @@index([deletedAt], map: "blog_posts_deleted_at_idx")
+  @@map("blog_posts")
+}
+
+enum BlogPostStatus {
+  draft
+  published
+  archived
+
+  @@map("blog_post_status")
+}

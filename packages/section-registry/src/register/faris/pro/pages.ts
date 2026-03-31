@@ -110,14 +110,14 @@ export const farisProPages: RegisterPageDefinition[] = [
     pageKey: "blog",
     slug: "/blog",
     minTier: "pro",
-    sections: [],
+    sections: [{ ...slot.blogList, id: "blog-list", sortOrder: 10 }],
   },
   {
     label: "Blog Post",
     pageKey: "blog-post",
     slug: "/blog/[slug]",
     minTier: "pro",
-    sections: [],
+    sections: [{ ...slot.blogPost, id: "blog-post", sortOrder: 10 }],
   },
   {
     label: "Resources",

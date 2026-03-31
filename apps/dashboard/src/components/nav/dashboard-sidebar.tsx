@@ -70,6 +70,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/properties", icon: Building2, label: "Properties" },
       { href: "/agents", icon: UsersRound, label: "Agents" },
+      { href: "/blog", icon: FileText, label: "Blog", badge: "Pro" },
       { href: "/leads", icon: Mail, label: "Leads" },
       { href: "/appointments", icon: Calendar, label: "Appointments" },
       { href: "/customers", icon: Users, label: "Customers", badge: "Plus" },
@@ -146,7 +147,9 @@ export function DashboardSidebar() {
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
                   const startsWith =
-                    item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href);
+                    item.href !== "/" &&
+                    item.href !== "#" &&
+                    pathname.startsWith(item.href);
                   const isDisabled = item.href === "#";
 
                   return (
@@ -155,7 +158,11 @@ export function DashboardSidebar() {
                         asChild={!isDisabled}
                         isActive={isActive || startsWith}
                         tooltip={item.label}
-                        className={isDisabled ? "cursor-not-allowed opacity-60" : undefined}
+                        className={
+                          isDisabled
+                            ? "cursor-not-allowed opacity-60"
+                            : undefined
+                        }
                       >
                         {isDisabled ? (
                           <span className="flex items-center gap-2">
@@ -169,7 +176,9 @@ export function DashboardSidebar() {
                           </Link>
                         )}
                       </SidebarMenuButton>
-                      {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
+                      {item.badge ? (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      ) : null}
                     </SidebarMenuItem>
                   );
                 })}
