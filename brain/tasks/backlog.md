@@ -61,7 +61,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content. ✅ Done (per-page hero defaults + content aliasing; inline editing scope deferred)
 - [x] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell. ✅ Done
 - [x] **Preview-Safe Action Interception** — ClickGuard now intercepts all button clicks (not just `type="submit"`), ContactSection skips real `fetch()` in non-live modes, PreviewBanner shows mode label at page top, and PreviewToast flashes on swallowed button clicks. ✅ Done
-- [ ] **Builder UI Shadcn Standardization** — Refactor builder/configure-mode controls toward shadcn/ui primitives and composition patterns as the default editor UI system.
+- [x] **Builder UI Shadcn Standardization** — Refactored builder-sidebar-controls.tsx: PickerButton now uses shadcn Button variant="outline", ChevronIcon uses lucide-react ChevronRight, raw textarea replaced with Textarea component, read-only banner uses Alert+AlertDescription. ✅ Done
 - [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
 - [x] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head. ✅ Done
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
