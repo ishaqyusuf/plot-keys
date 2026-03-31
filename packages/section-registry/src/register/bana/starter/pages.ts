@@ -3,8 +3,8 @@
  * Developer project-first layout — Home, Projects, About, Contact.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import { slot, universalPages } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const banaStarterPages: RegisterPageDefinition[] = [
   {
@@ -13,9 +13,15 @@ export const banaStarterPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroBanner, id: "hero", sortOrder: 10 },
-      { ...slot.story, id: "story", sortOrder: 20 },
-      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 30 },
-      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 40 },
+      {
+        ...slot.propertyGrid,
+        id: "project-grid",
+        label: "Project Grid",
+        sectionType: "PropertyGridSection",
+        sortOrder: 20,
+      },
+      { ...slot.story, id: "story", sortOrder: 30 },
+      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 40 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],
   },

@@ -1,16 +1,16 @@
 /**
  * Page definitions for the Sakan Plus plan.
  * Extends Starter with Services, How It Works, and FAQ pages.
- * Home gains ServiceHighlights, FAQ, and Contact sections.
+ * Home shifts toward a renter-conversion flow with FAQ and Contact sections.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const sakanPlusPages: RegisterPageDefinition[] = [
   // Home — adds ServiceHighlights(25), FAQ(50), Contact(55)
@@ -20,10 +20,14 @@ export const sakanPlusPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
-      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 25 },
-      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
-      { ...slot.faq, id: "faq", sortOrder: 50 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
+      { ...slot.faq, id: "faq", sortOrder: 30 },
+      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 40 },
       { ...slot.contact, id: "contact", sortOrder: 55 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],

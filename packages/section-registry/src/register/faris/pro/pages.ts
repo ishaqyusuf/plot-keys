@@ -4,8 +4,8 @@
  * and a Newsletter section on the Home page.
  */
 
+import { savedListingsPage, slot, universalPages } from "../../shared-slots";
 import type { RegisterPageDefinition } from "../../types";
-import { slot, universalPages, savedListingsPage } from "../../shared-slots";
 
 export const farisProPages: RegisterPageDefinition[] = [
   {
@@ -14,16 +14,22 @@ export const farisProPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroBanner, id: "hero", sortOrder: 10 },
-      { ...slot.story, id: "story", sortOrder: 20 },
-      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 25 },
+      {
+        ...slot.agentShowcase,
+        id: "agent-showcase",
+        defaultEnabled: true,
+        requiredResources: ["agents"],
+        sortOrder: 20,
+      },
+      { ...slot.story, id: "story", sortOrder: 30 },
       {
         ...slot.testimonials,
         id: "testimonials",
         defaultEnabled: true,
         requiredResources: ["testimonials"],
-        sortOrder: 30,
+        sortOrder: 40,
       },
-      { ...slot.featuredListings, id: "featured-listings", sortOrder: 35 },
+      { ...slot.featuredListings, id: "featured-listings", sortOrder: 50 },
       { ...slot.newsletter, id: "newsletter", sortOrder: 57 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],

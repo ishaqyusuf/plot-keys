@@ -54,3 +54,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-another-one`
 - **Status:** ✅ Complete — builder now has per-page AI content generation beyond field-level smart-fill
 - **Scope:** `generatePageContent()` AI function, `generatePageContent` tRPC mutation (10 credits), `GeneratePageContentButton` in builder sidebar, page-prefixed content key support for non-home pages.
+
+### Template Family Differentiation
+- **Branch:** `copilot/next-high-priority-task-another-one`
+- **Status:** ✅ Complete — register families now have clearer home-page conversion spines across Starter / Plus / Pro tiers
+- **Scope:** differentiated family home compositions in `packages/section-registry/src/register/*/*/pages.ts`, aligning agency / developer / manager / solo-agent / luxury / rental families with their existing nav/CTA patterns.

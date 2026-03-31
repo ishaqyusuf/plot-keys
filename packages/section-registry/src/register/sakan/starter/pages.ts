@@ -3,13 +3,13 @@
  * Rental-first layout — Home, Rentals, About, Contact.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const sakanStarterPages: RegisterPageDefinition[] = [
   // Home
@@ -19,7 +19,12 @@ export const sakanStarterPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
       { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],

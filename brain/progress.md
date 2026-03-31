@@ -54,6 +54,7 @@
 | Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
 | Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
 | AI-Powered Page Content Generation | ✅ Done — per-page AI content generation in builder sidebar (10 credits) |
+| Template Family Differentiation | ✅ Done — register family homes now vary by business model and conversion spine |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -79,6 +80,24 @@
 - Non-home pages use page-prefixed content keys (e.g. `about.hero.title`) matching the inner-page-defaults convention
 - Credit cost: 10 credits per page generation (between smart-fill's 2/field and onboarding bootstrap's 15)
 - Follows existing patterns: same draft resolution as `bootstrapAiContent`, same credit check/deduct/log flow
+
+## 2026-03-31 — Template Family Differentiation
+
+### What was built
+- Updated the home-page inventories for the 6 register families (`Noor`, `Bana`, `Wafi`, `Faris`, `Thuraya`, `Sakan`) across Starter / Plus / Pro tiers in `packages/section-registry/src/register/*/*/pages.ts`.
+- The changes are data-only and limited to page inventory composition: reordering section slots, swapping a few home sections, and introducing family-specific proof/conversion sections where those slot types already existed.
+- Resulting family identities:
+  - **Noor** — listings-first agency with market proof first, then agents/testimonials, then brand story
+  - **Bana** — project-first developer with project grid and market proof early
+  - **Wafi** — property-management/owner-acquisition home flow with services + contact before listings depth
+  - **Faris** — solo-agent identity with agent showcase moved onto home for Plus / Pro
+  - **Thuraya** — luxury/editorial portfolio flow with listings and testimonials ahead of story
+  - **Sakan** — search-first renter conversion flow with FAQ/contact emphasis on Plus / Pro
+
+### Validation
+- Ran targeted Biome checks on the changed register page files — clean after formatting.
+- Ran the package typecheck and confirmed it still fails only on the same pre-existing unrelated errors in `src/register/index.ts` and `src/template-config.ts`; none of the changed family page files introduced type errors.
+- Manually verified the resulting family/tier home section orders by generating a visual summary table from the register files.
 
 ## 2026-03-31 — Multi-page Template Depth
 

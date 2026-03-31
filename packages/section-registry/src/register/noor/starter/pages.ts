@@ -3,13 +3,13 @@
  * Agency listings-first layout — Home, Listings, About, Contact.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const noorStarterPages: RegisterPageDefinition[] = [
   {

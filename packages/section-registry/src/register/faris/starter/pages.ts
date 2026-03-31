@@ -3,8 +3,8 @@
  * Personal agent — story-first with testimonials on home and about pages.
  */
 
+import { savedListingsPage, slot, universalPages } from "../../shared-slots";
 import type { RegisterPageDefinition } from "../../types";
-import { slot, universalPages, savedListingsPage } from "../../shared-slots";
 
 export const farisStarterPages: RegisterPageDefinition[] = [
   {

@@ -185,10 +185,9 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 - The imported reference docs describe the target direction and should be treated as design guidance until corresponding code and schema land.
 
 ## Current Template Gap
-- Most live templates are currently differentiated more by theme, copy defaults, and marketing positioning than by truly distinct page systems or information architecture.
-- All 45 live templates currently ship with only a single implemented `Home` page.
-- Several templates reuse the same home-page section composition or fall back to a shared base composition.
-- This means the current template library has breadth in branding presets, but not yet enough structural uniqueness for users who want a site that feels materially different from other tenants.
+- The older template catalog was historically differentiated more by theme, copy defaults, and marketing positioning than by truly distinct page systems or information architecture.
+- That gap has narrowed now that the register families ship with multi-page inventories and differentiated home-page compositions by business model.
+- Remaining work is less about raw page count and more about deepening each family's unique section system, richer conversion journeys, and more family-specific content defaults.
 - The working evidence for this gap is documented in:
   - [brain/modules/templates-catalog.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/templates-catalog.md)
   - [brain/modules/pages-inventory.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/pages-inventory.md)
@@ -212,6 +211,16 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   - rental/property-management templates
   - corporate real-estate templates
 - Each family should have a defined page inventory, section system, and conversion strategy before variants are multiplied.
+
+### 2026-03-31 progress
+- Register-family home pages are now materially differentiated at the inventory level:
+  - `Noor` = listings / market proof / team
+  - `Bana` = project showcase / developer proof
+  - `Wafi` = services / owner acquisition
+  - `Faris` = personal agent / trust
+  - `Thuraya` = editorial portfolio / luxury proof
+  - `Sakan` = rental search / renter conversion
+- Existing family nav models and CTA labels already aligned with these business models, so this phase focused on home-page composition rather than introducing new nav primitives.
 
 ## Template Register (2026-03-23)
 
