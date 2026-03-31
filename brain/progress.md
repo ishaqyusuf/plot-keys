@@ -53,6 +53,7 @@
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
 | Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
 | Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
+| AI-Powered Page Content Generation | ✅ Done — per-page AI content generation in builder sidebar (10 credits) |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -62,6 +63,22 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — AI-Powered Page Content Generation
+
+### What was built
+- **`apps/api/src/lib.ai.ts`** — New `generatePageContent()` function and `PageContentContext` type. Takes a page key, company context, and list of editable fields; generates all field values in a single Claude Haiku 4.5 call. Returns a `Record<string, string>` mapping content keys to generated copy. Handles page-prefixed keys for non-home pages.
+- **`packages/db/src/queries/ai-credits.ts`** — Added `page_content: 10` to `AI_CREDIT_COSTS` map.
+- **`apps/api/src/schemas/workspace.schema.ts`** — New `generatePageContentInputSchema` with `pageKey` field.
+- **`apps/api/src/routers/workspace.route.ts`** — New `generatePageContent` tRPC mutation. Resolves active draft via `resolveActiveDraftForCompany()`, gets AI-enabled editable fields from template definition, prefixes content keys for non-home pages, calls `generatePageContent()`, merges results into draft, deducts 10 credits.
+- **`apps/dashboard/src/components/builder/onboarding-tools.tsx`** — New `GeneratePageContentButton` component. Shows page-specific label (e.g. "Generate About page content"), credit cost hint (10 credits), loading/error/success states with field count.
+- **`apps/dashboard/src/components/builder/builder-workspace.tsx`** — Wired `GeneratePageContentButton` into builder sidebar as new "AI content" section between "Editable fields" and "Onboarding tools". Button receives `pageKey` from builder's resolved page state.
+
+### Design
+- Single LLM call generates all AI-enabled fields for a page (more efficient than field-by-field smart-fill)
+- Non-home pages use page-prefixed content keys (e.g. `about.hero.title`) matching the inner-page-defaults convention
+- Credit cost: 10 credits per page generation (between smart-fill's 2/field and onboarding bootstrap's 15)
+- Follows existing patterns: same draft resolution as `bootstrapAiContent`, same credit check/deduct/log flow
 
 ## 2026-03-31 — Multi-page Template Depth
 
