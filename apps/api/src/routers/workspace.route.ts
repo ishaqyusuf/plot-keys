@@ -85,7 +85,7 @@ import {
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { generateFieldContent, generateOnboardingContent } from "../lib.ai";
+import { generateFieldContent, generateOnboardingContent, generatePageContent } from "../lib.ai";
 import {
   assertMinRole,
   authenticatedProcedure,
@@ -98,6 +98,7 @@ import {
   completeOnboardingInputSchema,
   createAppointmentInputSchema,
   createTemplateDraftInputSchema,
+  generatePageContentInputSchema,
   initializeCheckoutInputSchema,
   publishSiteConfigurationInputSchema,
   saveOnboardingProgressInputSchema,
@@ -783,6 +784,129 @@ export const workspaceRouter = createTRPCRouter({
       success: true,
     };
   }),
+
+  generatePageContent: membershipProcedure
+    .input(generatePageContentInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const company = await findCompanyById(db, companyId);
+      if (!company) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Company not found.",
+        });
+      }
+
+      // Check credits
+      const enough = await hasEnoughCredits(db, companyId, "page_content");
+      if (!enough) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Insufficient AI credits. Page content generation costs 10 credits.",
+        });
+      }
+
+      // Resolve active draft
+      const draft = await resolveActiveDraftForCompany(db, companyId);
+      if (!draft) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No active draft found. Create a template draft first.",
+        });
+      }
+
+      await assertTemplateAccessWithLicense(
+        db,
+        company.id,
+        company.planTier,
+        draft.templateKey,
+      );
+
+      // Resolve editable fields for the requested page
+      const template = getTemplateDefinition(draft.templateKey);
+      const aiFields = template.editableFields.filter((f) => f.aiEnabled);
+
+      // For non-home pages, prefix content keys with the page key
+      const targetFields = aiFields.map((f) => {
+        const contentKey =
+          input.pageKey !== "home"
+            ? `${input.pageKey}.${f.contentKey}`
+            : f.contentKey;
+        return {
+          contentKey,
+          longDetail: f.longDetail,
+          preferredLength: f.preferredLength,
+          shortDetail: f.label,
+        };
+      });
+
+      if (targetFields.length === 0) {
+        return { fieldsUpdated: [] as string[], success: true };
+      }
+
+      // Fetch onboarding for business context (optional)
+      const onboarding = await findTenantOnboardingByUserId(
+        db,
+        ctx.auth.session.user.id,
+      );
+
+      const generated = await generatePageContent({
+        businessSummary: onboarding?.businessSummary,
+        businessType: onboarding?.businessType,
+        companyName: company.name,
+        fields: targetFields,
+        market: onboarding?.market ?? company.market,
+        pageKey: input.pageKey,
+        templateKey: draft.templateKey,
+        tone: onboarding?.tone,
+      });
+
+      if (!generated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "AI content generation failed. Ensure ANTHROPIC_API_KEY is configured.",
+        });
+      }
+
+      // Merge generated content into existing draft content
+      const mergedContent = {
+        ...draft.contentJson,
+        ...generated,
+      };
+
+      // Update the WebsiteVersion draft
+      await updateDraftVersion(db, {
+        contentJson: mergedContent,
+        updatedById: ctx.auth.session.user.id,
+        versionId: draft.id,
+      });
+
+      // Deduct credits and log usage
+      await deductAiCredits(db, {
+        companyId,
+        feature: "page_content",
+      });
+
+      await logAiUsage(db, {
+        companyId,
+        creditsUsed: 10,
+        feature: "page_content",
+        meta: {
+          fieldsGenerated: Object.keys(generated),
+          pageKey: input.pageKey,
+        },
+        userId: ctx.auth.session.user.id,
+      }).catch(() => null);
+
+      return {
+        fieldsUpdated: Object.keys(generated),
+        success: true,
+      };
+    }),
 
   getTemplateCatalog: authenticatedProcedure.query(async () => {
     const db = getDb();

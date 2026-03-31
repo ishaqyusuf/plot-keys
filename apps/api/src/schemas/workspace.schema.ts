@@ -93,6 +93,10 @@ export const smartFillFieldInputSchema = z.object({
   shortDetail: z.string().trim().min(1, "Field detail is required."),
 });
 
+export const generatePageContentInputSchema = z.object({
+  pageKey: z.string().trim().min(1, "Page key is required."),
+});
+
 export const updateLeadStatusInputSchema = z.object({
   leadId: z.string().trim().min(1, "Lead id is required."),
   notes: z.string().trim().optional(),
@@ -111,6 +115,9 @@ export type PublishSiteConfigurationInput = z.infer<
   typeof publishSiteConfigurationInputSchema
 >;
 export type SmartFillFieldInput = z.infer<typeof smartFillFieldInputSchema>;
+export type GeneratePageContentInput = z.infer<
+  typeof generatePageContentInputSchema
+>;
 export type SaveOnboardingProgressInput = z.infer<
   typeof saveOnboardingProgressInputSchema
 >;

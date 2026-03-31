@@ -173,6 +173,111 @@ export async function generateOnboardingContent(
 }
 
 // ---------------------------------------------------------------------------
+// Page Content AI — generate all editable fields for a specific page
+// ---------------------------------------------------------------------------
+
+export type PageContentContext = {
+  businessSummary?: string | null;
+  businessType?: string | null;
+  companyName: string;
+  fields: Array<{
+    contentKey: string;
+    longDetail: string;
+    preferredLength?: string;
+    shortDetail: string;
+  }>;
+  market?: string | null;
+  pageKey: string;
+  templateKey?: string | null;
+  tone?: string | null;
+};
+
+/**
+ * Generates content for all editable fields on a specific page in a single
+ * LLM call. Returns a map of contentKey → generated text, or null if the
+ * API key is not configured.
+ */
+export async function generatePageContent(
+  ctx: PageContentContext,
+): Promise<Record<string, string> | null> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return null;
+  }
+
+  if (ctx.fields.length === 0) return {};
+
+  const client = getAnthropicClient();
+
+  const contextBlock = [
+    `Company: ${ctx.companyName}`,
+    ctx.businessType ? `Business type: ${ctx.businessType}` : null,
+    ctx.market ? `Market: ${ctx.market}` : null,
+    ctx.tone ? `Tone: ${ctx.tone}` : null,
+    ctx.businessSummary ? `Business profile: ${ctx.businessSummary}` : null,
+    `Page: ${ctx.pageKey}`,
+    ctx.templateKey ? `Template: ${ctx.templateKey}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const fieldDescriptions = ctx.fields
+    .map((f, i) => {
+      const lines = [
+        `  ${i + 1}. Key: "${f.contentKey}"`,
+        `     Label: ${f.shortDetail}`,
+        `     Instruction: ${f.longDetail}`,
+      ];
+      if (f.preferredLength) {
+        lines.push(`     Preferred length: ${f.preferredLength}`);
+      }
+      return lines.join("\n");
+    })
+    .join("\n\n");
+
+  const userMessage = [
+    contextBlock,
+    "",
+    `Generate website copy for the "${ctx.pageKey}" page of this real-estate business.`,
+    `Return ONLY a JSON object where each key is the field "Key" and the value is the generated copy.`,
+    "",
+    "Fields to generate:",
+    "",
+    fieldDescriptions,
+    "",
+    "Guidelines:",
+    "- Write in a confident, professional tone appropriate for the business segment.",
+    "- Reference the company name and market where natural.",
+    "- Match the specified tone if provided.",
+    "- Respect the preferred length for each field.",
+    "- Do NOT use generic filler or placeholder text.",
+    "- Make the content specific to the page context.",
+    "",
+    "Return ONLY valid JSON — no markdown, no explanation, no wrapping.",
+  ].join("\n");
+
+  const response = await client.messages.create({
+    max_tokens: 1024,
+    messages: [{ role: "user", content: userMessage }],
+    model: "claude-haiku-4-5",
+    system:
+      "You are a real-estate website copywriter specializing in brand-first websites. " +
+      "Generate polished, segment-appropriate copy for all requested fields. Return only a JSON object with the requested keys.",
+  });
+
+  const textBlock = response.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") return null;
+
+  try {
+    const parsed = JSON.parse(textBlock.text.trim());
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+      return null;
+    return parsed as Record<string, string>;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Project AI — Summary, Risk Flags, Customer Draft
 // ---------------------------------------------------------------------------
 

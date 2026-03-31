@@ -54,6 +54,7 @@ import { BuilderSidebarControls } from "./builder-sidebar-controls";
 import { BuilderSidebarDrawer } from "./builder-sidebar-drawer";
 import {
   AiContentBootstrapButton,
+  GeneratePageContentButton,
   RecommendTemplatePanel,
 } from "./onboarding-tools";
 import { PublishConfirmationDialog } from "./publish-confirmation-dialog";
@@ -440,6 +441,18 @@ export async function BuilderWorkspace({
                     {preview.page.sections.length} sections
                   </Badge>
                 </div>
+              </section>
+
+              <Separator />
+
+              <section className="flex flex-col gap-2">
+                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                  AI content
+                </p>
+                <GeneratePageContentButton
+                  disabled={isTemplateLocked}
+                  pageKey={selectedPageKey}
+                />
               </section>
 
               <Separator />
