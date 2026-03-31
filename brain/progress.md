@@ -56,6 +56,7 @@
 | AI-Powered Page Content Generation | ✅ Done — per-page AI content generation in builder sidebar (10 credits) |
 | Template Family Differentiation | ✅ Done — register family homes now vary by business model and conversion spine |
 | Preview-Safe Action Interception | ✅ Done — forms, buttons, and links safely intercepted in non-live modes |
+| Builder UI Shadcn Standardization | ✅ Done — PickerButton, ChevronIcon, textarea, alert all use shadcn/ui primitives |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |

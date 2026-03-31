@@ -64,3 +64,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-another-one`
 - **Status:** ✅ Complete — template CTAs, forms, and buttons are now safely intercepted in non-live modes
 - **Scope:** ContactSection render-mode guard (skip real fetch in preview/template/draft), ClickGuard expanded to intercept all `<button>` clicks, PreviewBanner sticky mode label, PreviewToast on swallowed actions.
+
+### Builder UI Shadcn Standardization
+- **Branch:** `copilot/next-high-priority-task-another-one`
+- **Status:** ✅ Complete — builder sidebar controls now use shadcn/ui primitives
+- **Scope:** PickerButton → shadcn Button variant="outline", ChevronIcon → lucide-react ChevronRight, raw textarea → Textarea component, read-only warning → Alert + AlertDescription.
