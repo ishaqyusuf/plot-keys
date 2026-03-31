@@ -28,8 +28,11 @@ import {
   type SubscriptionTier,
   tierLabels,
 } from "@plotkeys/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
+
+import { useTRPC } from "../../trpc/client";
 
 type TemplateGroup = "starter" | "plus" | "pro";
 
@@ -420,6 +423,13 @@ function TemplatePicker({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const trpc = useTRPC();
+  const { data: catalogData } = useQuery(
+    trpc.workspace.getTemplateCatalog.queryOptions(),
+  );
+  const usageMap = new Map(
+    catalogData?.map((t) => [t.key, t.usageCount]) ?? [],
+  );
   const currentTemplate = templateCatalog.find(
     (t) => t.key === currentTemplateKey,
   );
@@ -520,6 +530,14 @@ function TemplatePicker({
                               {template.marketingTagline}
                             </p>
                           )}
+                          {(() => {
+                            const count = usageMap.get(template.key) ?? 0;
+                            return count > 0 ? (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                {count} using
+                              </p>
+                            ) : null;
+                          })()}
                           <div className="mt-1 flex items-center gap-2">
                             <Badge className="capitalize" variant="outline">
                               {template.tier}
