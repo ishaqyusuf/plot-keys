@@ -12,7 +12,7 @@ This file holds actionable work that is identified but not currently in progress
 ## Phase 1 — Core Product Gaps (High Impact)
 
 - [x] **Tenant Domain Management UI** — `/domains` dashboard page with domain listing, status filtering, summary stats, and manual re-sync button. ✅ Done
-- [ ] **Custom Domain Purchase Flow** — Registrar API integration (Namecheap/GoDaddy), domain search, DNS provisioning, SSL, renewal tracking. Large scope.
+- [ ] **Custom Domain Purchase Flow** — Highest-priority remaining non-mobile phase. Must support Vercel domain attachment/verification plus registrar search/purchase/renewal flows, including `.com.ng` availability via a provider that supports Nigerian ccTLD commerce. Includes domain search, DNS provisioning, SSL, and renewal tracking. Large scope.
 - [x] **Property/Agent Data Binding** — Builder and live pages now fetch featured properties and agents and pass them as `liveListings`/`liveAgents` to `resolveWebsitePresentation()`. PropertyGrid and AgentShowcase sections render real DB data. ✅ Done
 - [x] **Website/WebsiteVersion Phase 4 Cleanup** — Removed SiteConfiguration fallback paths from read helpers and switched builder/site write mutations to WebsiteVersion draft IDs. Builder, dashboard home, live page, and actions now operate on WebsiteVersion as the active website state. ✅ Done
 - [x] **Logo Upload Flow** — `/settings` page with file upload (Supabase storage) + URL fallback; `setCompanyLogoAction` server action; logo rendered as image in HeroBannerSection when URL provided. ✅ Done
