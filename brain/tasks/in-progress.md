@@ -69,3 +69,8 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-another-one`
 - **Status:** ✅ Complete — builder sidebar controls now use shadcn/ui primitives
 - **Scope:** PickerButton → shadcn Button variant="outline", ChevronIcon → lucide-react ChevronRight, raw textarea → Textarea component, read-only warning → Alert + AlertDescription.
+
+### Blog/CMS Module
+- **Branch:** `copilot/next-high-priority-task-another-one`
+- **Status:** ✅ Complete — full blog authoring and public rendering pipeline
+- **Scope:** BlogPost Prisma model + migration, DB query module, dashboard `/blog` list + `/blog/[id]` editor with markdown toolbar, server actions (CRUD + publish/archive), BlogListSection + BlogPostSection in section-registry with lightweight markdown renderer, blog page slots in all 6 Pro-tier families, tenant-site live data resolution and blog-post detail rendering via slug.
