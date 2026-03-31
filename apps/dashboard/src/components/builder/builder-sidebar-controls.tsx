@@ -7,8 +7,10 @@ import {
   type TemplateConfig,
   templateCatalog,
 } from "@plotkeys/section-registry";
+import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Avatar, AvatarFallback } from "@plotkeys/ui/avatar";
 import { Badge } from "@plotkeys/ui/badge";
+import { Button } from "@plotkeys/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +25,14 @@ import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Switch } from "@plotkeys/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
+import { Textarea } from "@plotkeys/ui/textarea";
 import {
   describeTemplateAccess,
   type SubscriptionTier,
   tierLabels,
 } from "@plotkeys/utils";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
@@ -61,24 +65,16 @@ type BuilderSidebarControlsProps = {
 
 function ChevronIcon() {
   return (
-    <svg
+    <ChevronRight
       aria-hidden="true"
       className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
+    />
   );
 }
 
 const PickerButton = forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<"button"> & {
+  React.ComponentProps<typeof Button> & {
     children: React.ReactNode;
     label: string;
   }
@@ -87,23 +83,28 @@ const PickerButton = forwardRef<
   ref,
 ) {
   return (
-    <button
+    <Button
       className={[
-        "relative w-full rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+        "relative h-auto w-full justify-start px-2.5 py-1.5 text-left",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
       ref={ref}
       type={type}
+      variant="outline"
       {...props}
     >
-      <span className="block text-xs text-muted-foreground">{label}</span>
-      <span className="mt-0.5 block pr-7 text-sm font-medium text-foreground">
-        {children}
+      <span className="flex flex-col items-start pr-7">
+        <span className="text-xs font-normal text-muted-foreground">
+          {label}
+        </span>
+        <span className="mt-0.5 text-sm font-medium text-foreground">
+          {children}
+        </span>
       </span>
       <ChevronIcon />
-    </button>
+    </Button>
   );
 });
 
@@ -837,8 +838,8 @@ function SeoSection({
         <FieldLabel className="text-xs text-muted-foreground">
           Meta description
         </FieldLabel>
-        <textarea
-          className="mt-0.5 w-full resize-none rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        <Textarea
+          className="mt-0.5 min-h-0 resize-none text-xs"
           disabled={disabled}
           placeholder="Describe this page for search engines…"
           rows={3}
@@ -907,10 +908,12 @@ export function BuilderSidebarControls({
       </Field>
 
       {readOnly ? (
-        <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-foreground">
-          {readOnlyMessage ??
-            `Upgrade to the ${tierLabels[requiredPlan ?? planTier]} plan to edit this template.`}
-        </p>
+        <Alert className="border-amber-500/30 bg-amber-500/10">
+          <AlertDescription className="text-xs leading-5 text-foreground">
+            {readOnlyMessage ??
+              `Upgrade to the ${tierLabels[requiredPlan ?? planTier]} plan to edit this template.`}
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       <Field>
