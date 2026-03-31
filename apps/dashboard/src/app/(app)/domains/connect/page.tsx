@@ -9,8 +9,10 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
-import { isVercelDomainProvisioningConfigured } from "@plotkeys/utils";
-import { SUPPORTED_TLDS } from "@plotkeys/utils";
+import {
+  isVercelDomainProvisioningConfigured,
+  SUPPORTED_TLDS,
+} from "@plotkeys/utils";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { connectCustomDomainAction } from "../../../actions";
@@ -92,9 +94,7 @@ export default async function ConnectDomainPage({
         {/* DNS instructions guide */}
         <Card className="bg-card">
           <CardHeader className="px-6 pt-6 pb-4">
-            <CardTitle className="text-base">
-              How custom domains work
-            </CardTitle>
+            <CardTitle className="text-base">How custom domains work</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 px-6 pb-6 text-sm text-muted-foreground">
             <div className="space-y-2">
@@ -143,14 +143,12 @@ export default async function ConnectDomainPage({
             </div>
 
             <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-3">
-              <p className="font-medium text-foreground">
-                🇳🇬 .com.ng domains
-              </p>
+              <p className="font-medium text-foreground">🇳🇬 .com.ng domains</p>
               <p className="mt-1">
                 Nigerian domains (.com.ng, .ng, .org.ng, .net.ng) work the same
                 way. Configure DNS records at your Nigerian domain registrar
-                (e.g. NiRA-accredited registrar, QServers, Whogohost, Web4Africa)
-                following the instructions above.
+                (e.g. NiRA-accredited registrar, QServers, Whogohost,
+                Web4Africa) following the instructions above.
               </p>
             </div>
           </CardContent>

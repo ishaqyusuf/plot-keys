@@ -6,6 +6,7 @@ import {
   createAgent,
   createAppointment,
   createCompanyOnboardingBundle,
+  createCustomDomainPair,
   createPrismaClient,
   createProperty,
   type Db,
@@ -17,14 +18,15 @@ import {
   findCompanyBySlug,
   findDraftVersionById,
   findLatestSiteConfigurationForCompany,
-  findSiteConfigurationByIdForCompany,
   findLicensedTemplateKeys,
+  findSiteConfigurationByIdForCompany,
   findTemplateLicensesForCompany,
+  findTenantDomainByHostname,
   findTenantOnboardingByUserId,
   getAiCreditBalance,
   getAiUsageStats,
-  getOrCreateDraftVersion,
   getAnalyticsSummary,
+  getOrCreateDraftVersion,
   getPageViewsByDay,
   grantAiCredits,
   grantStockImageLicense,
@@ -34,19 +36,17 @@ import {
   hasTemplateLicense,
   listAgentsForCompany,
   listAppointmentsForCompany,
+  listCustomDomainsWithVerification,
   listFeaturedProperties,
   listLeadsForCompany,
   listPropertiesForCompany,
   listStockImageLicensesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
-  listCustomDomainsWithVerification,
-  createCustomDomainPair,
-  findTenantDomainByHostname,
-  removeCustomDomain,
   logAiUsage,
   publishSiteConfiguration,
   publishWebsiteVersion,
+  removeCustomDomain,
   resolveActiveDraftForCompany,
   resolvePublishedForCompany,
   saveOnboardingStepProgress,
@@ -62,9 +62,9 @@ import {
   updateLeadStatus,
   updateOnboardingProfile,
   updateProperty,
-  upsertDraftWebsiteVersion,
   updateSiteConfigurationContentField,
   updateSiteConfigurationThemeField,
+  upsertDraftWebsiteVersion,
   upsertWebsite,
 } from "@plotkeys/db";
 import { domainSyncHandler, triggerJob } from "@plotkeys/jobs";
@@ -88,12 +88,16 @@ import {
   isValidDomainName,
   isVercelDomainProvisioningConfigured,
   plotkeysRootDomain,
-  searchDomainAvailability,
   type SubscriptionTier,
+  searchDomainAvailability,
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { generateFieldContent, generateOnboardingContent, generatePageContent } from "../lib.ai";
+import {
+  generateFieldContent,
+  generateOnboardingContent,
+  generatePageContent,
+} from "../lib.ai";
 import {
   assertMinRole,
   authenticatedProcedure,
@@ -1247,7 +1251,11 @@ export const workspaceRouter = createTRPCRouter({
       });
 
       if (configuration) {
-        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await assertCompanyCanUseTemplate(
+          db,
+          companyId,
+          configuration.templateKey,
+        );
         await publishSiteConfiguration(db, {
           companyId,
           configId: configuration.id,
@@ -1269,7 +1277,11 @@ export const workspaceRouter = createTRPCRouter({
           message: "Configuration not found.",
         });
       }
-      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      await assertCompanyCanUseTemplate(
+        db,
+        companyId,
+        version.website.templateKey,
+      );
       await publishWebsiteVersion(db, {
         companyId,
         name: input.nextName,
@@ -1292,7 +1304,10 @@ export const workspaceRouter = createTRPCRouter({
 
       const version = configuration
         ? null
-        : await findDraftVersionById(db, { companyId, versionId: input.configId });
+        : await findDraftVersionById(db, {
+            companyId,
+            versionId: input.configId,
+          });
 
       if (!configuration && !version) {
         throw new TRPCError({
@@ -1301,12 +1316,16 @@ export const workspaceRouter = createTRPCRouter({
         });
       }
 
-      const templateKey = configuration?.templateKey ?? version!.website.templateKey;
+      const templateKey =
+        configuration?.templateKey ?? version!.website.templateKey;
       await assertCompanyCanUseTemplate(db, companyId, templateKey);
 
       const company = await findCompanyById(db, companyId);
       if (!company) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Company not found.",
+        });
       }
 
       // Fetch the onboarding record for business context (optional — enriches the prompt)
@@ -1439,12 +1458,17 @@ export const workspaceRouter = createTRPCRouter({
       const companyId = ctx.auth.activeMembership.companyId;
 
       // Normalize and validate the hostname
-      const hostname = input.hostname.toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "").replace(/:\d+$/, "");
+      const hostname = input.hostname
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/.*$/, "")
+        .replace(/:\d+$/, "");
 
       if (!isValidDomainName(hostname)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid domain name. Enter a valid domain like example.com or example.com.ng.",
+          message:
+            "Invalid domain name. Enter a valid domain like example.com or example.com.ng.",
         });
       }
 
@@ -1452,7 +1476,8 @@ export const workspaceRouter = createTRPCRouter({
       if (hostname.endsWith(`.${plotkeysRootDomain}`)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "PlotKeys subdomains are created automatically during onboarding.",
+          message:
+            "PlotKeys subdomains are created automatically during onboarding.",
         });
       }
 
@@ -1461,14 +1486,18 @@ export const workspaceRouter = createTRPCRouter({
       if (existingSitefront) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: existingSitefront.companyId === companyId
-            ? "This domain is already connected to your workspace."
-            : "This domain is already in use by another workspace.",
+          message:
+            existingSitefront.companyId === companyId
+              ? "This domain is already connected to your workspace."
+              : "This domain is already in use by another workspace.",
         });
       }
 
       const dashboardHostname = `dashboard.${hostname}`;
-      const existingDashboard = await findTenantDomainByHostname(db, dashboardHostname);
+      const existingDashboard = await findTenantDomainByHostname(
+        db,
+        dashboardHostname,
+      );
       if (existingDashboard) {
         throw new TRPCError({
           code: "CONFLICT",
@@ -1531,13 +1560,20 @@ export const workspaceRouter = createTRPCRouter({
     const db = getDb();
     const companyId = ctx.auth.activeMembership.companyId;
 
-    const customDomains = await listCustomDomainsWithVerification(db, companyId);
+    const customDomains = await listCustomDomainsWithVerification(
+      db,
+      companyId,
+    );
 
     return customDomains
       .filter((d) => d.kind === "sitefront_custom_domain")
       .map((d) => {
         const verificationChallenges = Array.isArray(d.verificationJson)
-          ? (d.verificationJson as Array<{ type: string; domain: string; value: string }>)
+          ? (d.verificationJson as Array<{
+              type: string;
+              domain: string;
+              value: string;
+            }>)
           : undefined;
 
         return {
@@ -1546,7 +1582,10 @@ export const workspaceRouter = createTRPCRouter({
           status: d.status,
           lastError: d.lastError,
           provisionedAt: d.provisionedAt,
-          instructions: buildDnsInstructions(d.hostname, verificationChallenges),
+          instructions: buildDnsInstructions(
+            d.hostname,
+            verificationChallenges,
+          ),
         };
       });
   }),
@@ -1562,7 +1601,11 @@ export const workspaceRouter = createTRPCRouter({
       });
 
       if (configuration) {
-        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await assertCompanyCanUseTemplate(
+          db,
+          companyId,
+          configuration.templateKey,
+        );
         await updateSiteConfigurationContentField(db, {
           configId: configuration.id,
           contentKey: input.contentKey,
@@ -1584,7 +1627,11 @@ export const workspaceRouter = createTRPCRouter({
           message: "Configuration not found.",
         });
       }
-      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      await assertCompanyCanUseTemplate(
+        db,
+        companyId,
+        version.website.templateKey,
+      );
       const newContent = {
         ...(version.contentJson as Record<string, string>),
         [input.contentKey]: input.value,
@@ -1614,7 +1661,11 @@ export const workspaceRouter = createTRPCRouter({
       });
 
       if (configuration) {
-        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await assertCompanyCanUseTemplate(
+          db,
+          companyId,
+          configuration.templateKey,
+        );
         await updateSiteConfigurationThemeField(db, {
           configId: configuration.id,
           currentTheme: configuration.themeJson as Record<string, string>,
@@ -1636,7 +1687,11 @@ export const workspaceRouter = createTRPCRouter({
           message: "Configuration not found.",
         });
       }
-      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      await assertCompanyCanUseTemplate(
+        db,
+        companyId,
+        version.website.templateKey,
+      );
       const newTheme = {
         ...(version.themeJson as Record<string, string>),
         [input.themeKey]: input.value,

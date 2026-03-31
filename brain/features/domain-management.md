@@ -49,8 +49,22 @@ Allow companies to search, buy, connect, renew, and manage domains directly from
 - Enforce HTTPS
 - Auto-renew or warn before expiration where supported
 
+## Implementation Status
+
+### Phase 1 — ✅ Done
+- Domain service abstraction (`packages/utils/src/domain-service.ts`) with validation, apex extraction, DNS instruction builder, and availability search
+- Supports all TLDs including `.com.ng`, `.ng`, `.org.ng`, `.net.ng`
+- Custom domain connection flow (tRPC + dashboard UI + server actions)
+- DNS instruction rendering for Vercel verification
+- Domain removal (soft-delete with paired dashboard domain)
+- 16 unit tests for domain service functions
+
+### Phase 2 — Not Started
+- Registrar purchase API integration
+- Domain renewal tracking
+- WHOIS privacy management
+- Domain transfer support
+
 ## Open Items
 - TODO: Confirm exact registrar(s) that cover `.com.ng` purchase and renewal APIs
-- TODO: DNS automation model
 - TODO: Decide whether Vercel DNS, registrar DNS, or nameserver delegation is the default for purchased domains
-- TODO: Hosting/runtime assumptions for custom-domain routing

@@ -43,7 +43,7 @@
 | Agent performance analytics | ✅ Done |
 | Chat-bot | ✅ Done (LLM + Widget) |
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
-| Custom domain purchase | ❌ Not started |
+| Custom domain purchase | ✅ Phase 1 Done — connection + search + DNS instructions |
 | WebsiteVersion Phase 4 (writes) | ✅ Done |
 | Template usage analytics (TemplatePicker) | ✅ Done |
 | SEO & Meta Tags (per-page title/description/OG) | ✅ Done |
@@ -82,6 +82,52 @@
   - **Vercel** for deployment-facing domain attach/sync
   - **Registrar adapter(s)** for commercial domain search, purchase, renewal, and DNS/nameserver workflows
 - If the main registrar does not support `.com.ng`, the abstraction should allow a second provider dedicated to Nigerian-domain commerce.
+
+## 2026-03-31 — Custom Domain Purchase Flow (Phase 1)
+
+### What was built
+- **`packages/utils/src/domain-service.ts`** (new) — Domain service abstraction with:
+  - `isValidDomainName()` — syntactic domain validation
+  - `extractApexDomain()` — apex extraction with two-part ccTLD support (`.com.ng`, `.co.uk`, etc.)
+  - `buildDnsInstructions()` — generates DNS records (A for apex, CNAME for subdomains) + Vercel TXT verification records
+  - `checkDomainAvailability()` — DNS-over-HTTPS availability check via Cloudflare (works for all TLDs including `.com.ng`)
+  - `searchDomainAvailability()` — parallel availability check across all supported TLD variants
+  - `SUPPORTED_TLDS` / `ALL_SUPPORTED_TLDS` constants covering global (`.com`, `.net`, `.org`, `.info`, `.biz`) and Nigerian (`.com.ng`, `.ng`, `.org.ng`, `.net.ng`) TLDs
+- **`packages/utils/src/domain-service.test.ts`** (new) — 16 tests covering validation, apex extraction (including `.com.ng`), DNS instruction building, and TLD constants
+- **`packages/db/src/queries/tenant-domain.ts`** — 4 new query functions:
+  - `createCustomDomainPair()` — creates sitefront + dashboard domain pair in a transaction
+  - `findTenantDomainByHostname()` — hostname conflict check
+  - `listCustomDomainsWithVerification()` — custom domains with verificationJson for DNS instruction rendering
+  - `removeCustomDomain()` — soft-delete a custom domain pair
+- **`apps/api/src/routers/workspace.route.ts`** — 4 new tRPC procedures:
+  - `searchDomains` — parallel domain availability search across all supported TLDs
+  - `connectCustomDomain` — validates hostname, checks conflicts, creates domain pair, triggers Vercel sync, returns DNS instructions
+  - `removeCustomDomain` — soft-deletes custom domain pair
+  - `getCustomDomainDnsInstructions` — returns DNS instruction cards for all pending custom domains
+- **`apps/api/src/schemas/workspace.schema.ts`** — 3 new Zod schemas: `searchDomainInputSchema`, `connectCustomDomainInputSchema`, `removeCustomDomainInputSchema`
+- **`apps/dashboard/src/app/(app)/domains/connect/page.tsx`** (new) — Connect Custom Domain page with:
+  - Hostname input form
+  - Vercel readiness gate
+  - Step-by-step DNS configuration guide
+  - Explicit `.com.ng` registrar instructions (NiRA, QServers, Whogohost, Web4Africa)
+- **`apps/dashboard/src/app/(app)/domains/page.tsx`** — Updated with:
+  - "Connect Custom Domain" button
+  - DNS instruction cards for pending/provisioning custom domains (table with Type/Name/Value)
+  - "Remove" button for custom domains
+  - Success alerts for connected/removed domains
+- **`apps/dashboard/src/app/actions.ts`** — 2 new server actions: `connectCustomDomainAction`, `removeCustomDomainAction`
+
+### Design
+- **Split-provider architecture:** Vercel handles deployment-facing domain attachment/verification; the registrar layer (DNS-based availability check for now, upgradeable to WHOIS/RDAP/registrar API) handles search. Both layers support `.com.ng` and all Nigerian ccTLDs.
+- **DNS instructions are generated server-side** using `buildDnsInstructions()` which correctly handles two-part ccTLDs like `.com.ng` (apex detection, A vs CNAME record selection).
+- **Vercel TXT verification records** are persisted in `verificationJson` and rendered in the DNS instruction table when present.
+- **Zero regression risk:** All existing domain sync, onboarding domain creation, and hostname resolution paths are untouched.
+
+### Phase 2 (deferred)
+- Registrar purchase API integration (Namecheap, GoDaddy, or `.com.ng`-specific provider)
+- Domain renewal tracking and auto-renewal
+- WHOIS privacy management
+- Domain transfer support
 
 ## 2026-03-31 — Preview-Safe Action Interception
 
