@@ -175,6 +175,7 @@ export type TenantShell = {
     name: string;
     slug: string;
     logoUrl: string | null;
+    market: string | null;
   };
   templateKey: string;
   familyKey: TemplateFamilyKey | undefined;
@@ -202,12 +203,12 @@ export async function resolveTenantShell(): Promise<TenantShell | null> {
   const company = resolvedTenant
     ? await prisma.company.findFirst({
         where: { deletedAt: null, id: resolvedTenant.companyId },
-        select: { id: true, name: true, slug: true, logoUrl: true },
+        select: { id: true, name: true, slug: true, logoUrl: true, market: true },
       })
     : tenantSubdomain
       ? await prisma.company.findFirst({
           where: { deletedAt: null, slug: tenantSubdomain },
-          select: { id: true, name: true, slug: true, logoUrl: true },
+          select: { id: true, name: true, slug: true, logoUrl: true, market: true },
         })
       : null;
 

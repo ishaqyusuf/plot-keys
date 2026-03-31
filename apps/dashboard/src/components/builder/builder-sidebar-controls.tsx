@@ -772,6 +772,95 @@ function SectionVisibilityToggles({
 }
 
 // ---------------------------------------------------------------------------
+// SEO Section
+// ---------------------------------------------------------------------------
+
+function SeoSection({
+  configId,
+  disabled = false,
+  onSave,
+  pageKey,
+  seoValues,
+}: {
+  configId: string;
+  disabled?: boolean;
+  onSave: (formData: FormData) => Promise<void>;
+  pageKey: string;
+  seoValues?: { title?: string; description?: string; ogImage?: string };
+}) {
+  const [values, setValues] = useState({
+    title: seoValues?.title ?? "",
+    description: seoValues?.description ?? "",
+    ogImage: seoValues?.ogImage ?? "",
+  });
+  const [, startTransition] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleChange(
+    field: "title" | "description" | "ogImage",
+    value: string,
+  ) {
+    if (disabled) return;
+    setValues((prev) => ({ ...prev, [field]: value }));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      startTransition(async () => {
+        const fd = new FormData();
+        fd.set("configId", configId);
+        fd.set("themeKey", `seo.${pageKey}.${field}`);
+        fd.set("value", value.trim());
+        await onSave(fd);
+      });
+    }, 600);
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+        SEO
+      </p>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          Page title
+        </FieldLabel>
+        <Input
+          className="mt-0.5 text-xs"
+          disabled={disabled}
+          placeholder="Override page title…"
+          value={values.title}
+          onChange={(e) => handleChange("title", e.target.value)}
+        />
+      </div>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          Meta description
+        </FieldLabel>
+        <textarea
+          className="mt-0.5 w-full resize-none rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled}
+          placeholder="Describe this page for search engines…"
+          rows={3}
+          value={values.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+        />
+      </div>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          OG image URL
+        </FieldLabel>
+        <Input
+          className="mt-0.5 text-xs"
+          disabled={disabled}
+          placeholder="Paste image URL for social sharing…"
+          value={values.ogImage}
+          onChange={(e) => handleChange("ogImage", e.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
 
@@ -888,6 +977,16 @@ export function BuilderSidebarControls({
           />
         </Field>
       )}
+
+      <Field>
+        <SeoSection
+          configId={configId}
+          disabled={readOnly}
+          onSave={onUpdateTheme}
+          pageKey="home"
+          seoValues={templateConfig.seo?.home}
+        />
+      </Field>
     </FieldGroup>
   );
 }

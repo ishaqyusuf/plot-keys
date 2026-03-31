@@ -27,15 +27,20 @@ import {
   getTemplatePageInventory,
   resolvePage,
 } from "@plotkeys/section-registry";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { JSX } from "react";
+
 import {
   applyListingOverviewQuery,
   isListingOverviewPage,
   parseListingOverviewQuery,
 } from "../../lib/listing-overview";
 import { parseTenantRenderMode } from "../../lib/render-mode";
-import { resolveTenantContext } from "../../lib/resolve-tenant";
+import {
+  resolveTenantContext,
+  resolveTenantShell,
+} from "../../lib/resolve-tenant";
 
 // ---------------------------------------------------------------------------
 // Path → pageKey matching
@@ -107,10 +112,45 @@ type InnerPageProps = {
   }>;
 };
 
-export default async function InnerPage({
-  params,
-  searchParams,
-}: InnerPageProps) {
+export async function generateMetadata({ params }: InnerPageProps): Promise<Metadata> {
+  const { slug: segments } = await params;
+  const path = "/" + segments.join("/");
+
+  const shell = await resolveTenantShell();
+  if (!shell) return {};
+
+  const pageKey = resolvePageKeyForPath(shell.templateKey, path);
+  if (!pageKey) return {};
+
+  const seo = shell.templateConfig.seo?.[pageKey];
+  const title = seo?.title || shell.company.name;
+  const description =
+    seo?.description ||
+    (shell.company.market
+      ? `${shell.company.name} — Real estate in ${shell.company.market}.`
+      : `${shell.company.name} — Browse properties, meet agents, and schedule viewings.`);
+  const ogImage = seo?.ogImage || shell.company.logoUrl;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: shell.company.name,
+      ...(ogImage ? { images: [{ url: ogImage, alt: title }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
+  };
+}
+
+export default async function InnerPage({ params, searchParams }: InnerPageProps) {
   const { slug: segments } = await params;
   const sp = (await searchParams) ?? {};
   const renderMode = parseTenantRenderMode(sp.renderMode ?? null);
