@@ -50,7 +50,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Chat-bot LLM Integration** — Expanded `@plotkeys/chat-bot` with Anthropic Claude Haiku 4.5 chat completion, context-aware system prompt (company, properties, agents, business summary). Added `chat` tRPC router with `sendMessage` mutation. Created `/api/chat` route in tenant-site. Built floating `ChatWidget` component with message thread, typing indicator. Widget injected into tenant-site layout via server-resolved subdomain. ✅ Done
 - [x] **App Store Expansion** — Created `/app-store` dashboard page with integration cards (GA, Facebook Pixel, WhatsApp, Calendly) showing connect/disconnect status. Created `IntegrationScripts` component that injects GA4 and Facebook Pixel `<Script>` tags into tenant sites. Sidebar App Store link now functional. ✅ Done
 - [ ] **AI-Powered Content Generation** — Expand beyond smart-fill: generate full page copy, property descriptions, blog posts from onboarding context.
-- [ ] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting.
+- [x] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting. ✅ Done
 - [ ] **Template Family Differentiation** — Reduce shared/fallback template structures; define stronger template families with distinct home-page composition, navigation patterns, and conversion strategy instead of mostly theme-level variation.
 
 ## Phase 4 — Scale & Infrastructure
@@ -63,7 +63,7 @@ This file holds actionable work that is identified but not currently in progress
 - [ ] **Preview-Safe Action Interception** — Intercept template CTAs, forms, booking, and payment actions in preview/configure mode so interactive elements feel real but do not execute live workflows.
 - [ ] **Builder UI Shadcn Standardization** — Refactor builder/configure-mode controls toward shadcn/ui primitives and composition patterns as the default editor UI system.
 - [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
-- [ ] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head.
+- [x] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head. ✅ Done
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
 - [ ] **Database Adapter Abstraction** — Add first non-Postgres adapter only when concrete deployment need arises.
 - [ ] **Supabase Package Rename** — Decide whether `packages/supabase` should become a general platform-integrations package.

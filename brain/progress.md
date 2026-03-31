@@ -46,6 +46,7 @@
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ✅ Done |
 | Template usage analytics (TemplatePicker) | ✅ Done |
+| SEO & Meta Tags (per-page title/description/OG) | ✅ Done |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
@@ -61,6 +62,20 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — SEO & Meta Tags
+
+### What was built
+- **`packages/section-registry/src/template-config.ts`** — Added `seo?: Record<string, { title?, description?, ogImage? }>` to `TemplateConfig`. Updated `deserializeTemplateConfig` to parse `seo.{pageKey}.{field}` dot-notation keys from `themeJson` into the nested structure.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — New `SeoSection` component with title input, description textarea (3 rows, debounced), and OG image URL input. Saves via `onUpdateTheme` with key `seo.home.{field}`. Wired into `BuilderSidebarControls` below section visibility toggles.
+- **`apps/tenant-site/src/lib/resolve-tenant.ts`** — Added `market` to `TenantShell` company select so the description fallback can reference the market.
+- **`apps/tenant-site/src/app/page.tsx`** — Exported `generateMetadata()` that calls `resolveTenantShell()` (lightweight), reads `templateConfig.seo?.home`, and returns `title` + `description` + `openGraph` + `twitter` metadata. Falls back to company name and market when no SEO override is set.
+- **`apps/tenant-site/src/app/[...slug]/page.tsx`** — Exported `generateMetadata({ params })` that resolves `pageKey` from path segments via the existing `resolvePageKeyForPath()` helper, then reads `templateConfig.seo?.[pageKey]` for overrides. Same fallback pattern.
+
+### Design
+- Storage: `themeJson` dot-notation keys (`seo.home.title`, `seo.listings.description`, etc.) — follows the existing `sectionVisible.*` and `namedImage.*` patterns; no schema changes
+- Per-page `generateMetadata()` in route files takes priority over the root layout's company-level metadata in Next.js
+- Builder scoped to `pageKey="home"` for now; inner pages can be added later via path-aware builder preview
 
 ## 2026-03-31 — Template Usage Analytics
 
