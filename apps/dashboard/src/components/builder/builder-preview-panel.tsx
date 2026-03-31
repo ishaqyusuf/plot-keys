@@ -25,10 +25,19 @@ import {
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { JSX, KeyboardEvent } from "react";
 import { useCallback, useState, useTransition } from "react";
 
+type PageNavItem = {
+  label: string;
+  pageKey: string;
+  slug: string;
+};
+
 type BuilderPreviewPanelProps = {
+  activePageKey?: string;
+  availablePages?: PageNavItem[];
   companySlug: string;
   configId: string;
   defaultContent: TenantContentRecord;
@@ -293,6 +302,8 @@ function PreviewSection({
 }
 
 export function BuilderPreviewPanel({
+  activePageKey = "home",
+  availablePages,
   companySlug,
   configId,
   defaultContent,
@@ -309,7 +320,20 @@ export function BuilderPreviewPanel({
   onSmartFill,
   onUpdateField,
 }: BuilderPreviewPanelProps) {
+  const router = useRouter();
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+
+  function handlePageNav(page: PageNavItem) {
+    const params = new URLSearchParams(window.location.search);
+    if (page.slug === "/" || page.pageKey === "home") {
+      params.delete("page");
+      params.delete("path");
+    } else {
+      params.set("page", page.pageKey);
+      params.set("path", page.slug);
+    }
+    router.push(`?${params.toString()}`);
+  }
 
   const familyOverrides = resolveFamilySectionComponents(
     getRegisterTemplate(templateKey ?? "")?.family,
@@ -360,14 +384,39 @@ export function BuilderPreviewPanel({
           <span className="size-2.5 rounded-full bg-foreground/20" />
           <span className="size-2.5 rounded-full bg-foreground/20" />
         </div>
-        <div className="min-w-0 text-center">
-          <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
-            {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
-          </p>
-          <p className="truncate text-[11px] text-muted-foreground/80">
-            {pageLabel} · {pageKey}
-          </p>
-        </div>
+        {availablePages && availablePages.length > 1 ? (
+          <div className="min-w-0 flex-1 text-center">
+            <nav className="flex min-w-0 items-center justify-center gap-0.5 overflow-x-auto">
+              {availablePages.map((page) => (
+                <button
+                  className={[
+                    "shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors",
+                    activePageKey === page.pageKey
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  ].join(" ")}
+                  key={page.pageKey}
+                  type="button"
+                  onClick={() => handlePageNav(page)}
+                >
+                  {page.label}
+                </button>
+              ))}
+            </nav>
+            <p className="mt-1 truncate text-[11px] text-muted-foreground/80">
+              {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
+            </p>
+          </div>
+        ) : (
+          <div className="min-w-0 text-center">
+            <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
+              {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
+            </p>
+            <p className="truncate text-[11px] text-muted-foreground/80">
+              {pageLabel} · {pageKey}
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <Badge variant="outline">{filteredSections.length} sections</Badge>
         </div>

@@ -58,6 +58,12 @@ import {
 } from "./onboarding-tools";
 import { PublishConfirmationDialog } from "./publish-confirmation-dialog";
 
+type PageNavItem = {
+  label: string;
+  pageKey: string;
+  slug: string;
+};
+
 type BuilderWorkspaceProps = {
   companyId: string;
   companyName: string;
@@ -71,6 +77,8 @@ type BuilderWorkspaceProps = {
     saved?: string;
   };
   pageKey?: string;
+  /** Active page path from ?path= query param (e.g. "/about", "/listings"). */
+  previewPath?: string;
   userId: string;
 };
 
@@ -81,6 +89,7 @@ export async function BuilderWorkspace({
   mode = "page",
   notices,
   pageKey,
+  previewPath,
   userId,
 }: BuilderWorkspaceProps) {
   const prisma = createPrismaClient().db;
@@ -237,11 +246,21 @@ export async function BuilderWorkspace({
   const liveSiteUrl = buildTenantSiteUrl(companySlug, {
     currentOrigin,
   });
-  const availablePages = getTemplatePageInventory(
-    resolvedActiveDraft.templateKey,
-  ).pages;
+  const pageInventory = getTemplatePageInventory(resolvedActiveDraft.templateKey);
+  const availablePages: PageNavItem[] = pageInventory.pages.map((page) => ({
+    label: page.label,
+    pageKey: page.pageKey,
+    slug: page.slug,
+  }));
+  const resolvedPageKey =
+    pageKey ??
+    (() => {
+      if (!previewPath || previewPath === "/") return "home";
+      const matched = pageInventory.pages.find((page) => page.slug === previewPath);
+      return matched?.pageKey ?? "home";
+    })();
   const selectedPage =
-    availablePages.find((page) => page.pageKey === pageKey) ??
+    availablePages.find((page) => page.pageKey === resolvedPageKey) ??
     availablePages[0];
   const selectedPageKey = selectedPage?.pageKey ?? "home";
   const selectedPageLabel = selectedPage?.label ?? "Home";
@@ -386,6 +405,7 @@ export async function BuilderWorkspace({
                 </div>
 
                 <BuilderSidebarControls
+                  activePageKey={activePageKey}
                   configId={configId}
                   currentTemplateKey={resolvedActiveDraft.templateKey}
                   licensedTemplateKeys={licensedTemplateKeys}
@@ -445,6 +465,7 @@ export async function BuilderWorkspace({
             <div className="flex flex-wrap items-center gap-2">
               <BuilderSidebarDrawer
                 activeConfigName={resolvedActiveDraft.name}
+                activePageKey={activePageKey}
                 activeTemplateLabel={activeTemplateLabel}
                 configId={configId}
                 configStatus={resolvedActiveDraft.status}
@@ -511,6 +532,8 @@ export async function BuilderWorkspace({
           </div>
 
           <BuilderPreviewPanel
+            activePageKey={activePageKey}
+            availablePages={availablePages}
             companySlug={companySlug}
             configId={configId}
             defaultContent={preview.template.defaultContent}

@@ -37,6 +37,8 @@ import { useTRPC } from "../../trpc/client";
 type TemplateGroup = "starter" | "plus" | "pro";
 
 type BuilderSidebarControlsProps = {
+  /** The currently previewed page key (e.g. "home", "about"). */
+  activePageKey?: string;
   configId: string;
   currentPageKey: string;
   currentTemplateKey: string;
@@ -865,6 +867,7 @@ function SeoSection({
 // ---------------------------------------------------------------------------
 
 export function BuilderSidebarControls({
+  activePageKey = "home",
   configId,
   currentPageKey,
   currentTemplateKey,
@@ -983,8 +986,8 @@ export function BuilderSidebarControls({
           configId={configId}
           disabled={readOnly}
           onSave={onUpdateTheme}
-          pageKey="home"
-          seoValues={templateConfig.seo?.home}
+          pageKey={activePageKey}
+          seoValues={templateConfig.seo?.[activePageKey]}
         />
       </Field>
     </FieldGroup>
