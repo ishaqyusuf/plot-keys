@@ -6,9 +6,12 @@ import type {
   TenantContentRecord,
 } from "@plotkeys/section-registry";
 import {
+  ClickGuardProvider,
   getRegisterTemplate,
+  InlineOverview,
   resolveFamilySectionComponents,
   sectionComponents,
+  SmartFillProvider,
   WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
@@ -22,10 +25,19 @@ import {
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { JSX, KeyboardEvent } from "react";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
+
+type PageNavItem = {
+  label: string;
+  pageKey: string;
+  slug: string;
+};
 
 type BuilderPreviewPanelProps = {
+  activePageKey?: string;
+  availablePages?: PageNavItem[];
   companySlug: string;
   configId: string;
   defaultContent: TenantContentRecord;
@@ -290,6 +302,8 @@ function PreviewSection({
 }
 
 export function BuilderPreviewPanel({
+  activePageKey = "home",
+  availablePages,
   companySlug,
   configId,
   defaultContent,
@@ -306,7 +320,20 @@ export function BuilderPreviewPanel({
   onSmartFill,
   onUpdateField,
 }: BuilderPreviewPanelProps) {
+  const router = useRouter();
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+
+  function handlePageNav(page: PageNavItem) {
+    const params = new URLSearchParams(window.location.search);
+    if (page.slug === "/" || page.pageKey === "home") {
+      params.delete("page");
+      params.delete("path");
+    } else {
+      params.set("page", page.pageKey);
+      params.set("path", page.slug);
+    }
+    router.push(`?${params.toString()}`);
+  }
 
   const familyOverrides = resolveFamilySectionComponents(
     getRegisterTemplate(templateKey ?? "")?.family,
@@ -330,6 +357,25 @@ export function BuilderPreviewPanel({
     setFocusedSectionId((prev) => (prev === sectionId ? null : sectionId));
   }
 
+  // Bridges the inline AI button in EditableText to the smartFillField mutation.
+  // Derives shortDetail from the contentKey (e.g. "hero.title" → "hero title").
+  const handleInlineSmartFill = useCallback(
+    async (contentKey: string) => {
+      const fd = new FormData();
+      fd.set("configId", configId);
+      fd.set("contentKey", contentKey);
+      fd.set(
+        "shortDetail",
+        contentKey
+          .replace(/\./g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .toLowerCase(),
+      );
+      await onSmartFill(fd);
+    },
+    [configId, onSmartFill],
+  );
+
   return (
     <div className="mx-auto overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
@@ -338,14 +384,39 @@ export function BuilderPreviewPanel({
           <span className="size-2.5 rounded-full bg-foreground/20" />
           <span className="size-2.5 rounded-full bg-foreground/20" />
         </div>
-        <div className="min-w-0 text-center">
-          <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
-            {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
-          </p>
-          <p className="truncate text-[11px] text-muted-foreground/80">
-            {pageLabel} · {pageKey}
-          </p>
-        </div>
+        {availablePages && availablePages.length > 1 ? (
+          <div className="min-w-0 flex-1 text-center">
+            <nav className="flex min-w-0 items-center justify-center gap-0.5 overflow-x-auto">
+              {availablePages.map((page) => (
+                <button
+                  className={[
+                    "shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors",
+                    activePageKey === page.pageKey
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  ].join(" ")}
+                  key={page.pageKey}
+                  type="button"
+                  onClick={() => handlePageNav(page)}
+                >
+                  {page.label}
+                </button>
+              ))}
+            </nav>
+            <p className="mt-1 truncate text-[11px] text-muted-foreground/80">
+              {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
+            </p>
+          </div>
+        ) : (
+          <div className="min-w-0 text-center">
+            <p className="truncate text-xs uppercase tracking-[0.24em] text-muted-foreground">
+              {companySlug}.plotkeys.app{pageSlug === "/" ? "" : pageSlug}
+            </p>
+            <p className="truncate text-[11px] text-muted-foreground/80">
+              {pageLabel} · {pageKey}
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <Badge variant="outline">{filteredSections.length} sections</Badge>
         </div>
@@ -365,31 +436,66 @@ export function BuilderPreviewPanel({
         role="presentation"
       >
         <WebsiteRuntimeProvider renderMode="draft">
-          <div
-            className="overflow-hidden rounded-lg border border-border/70"
-            style={{
-              backgroundColor: "#f8fafc",
-              fontFamily: "Satoshi, sans-serif",
-            }}
-          >
-            {filteredSections.map((section) => (
-              <PreviewSection
-                configId={configId}
-                content={content}
-                editableFields={editableFields}
-                familyOverrides={familyOverrides}
-                focused={focusedSectionId === section.id}
-                key={section.id}
-                readOnly={readOnly}
-                section={section}
-                theme={theme}
-                onFocus={() => handleSectionFocus(section.id)}
-                onSmartFill={onSmartFill}
-                onUpdate={onUpdateField}
-              />
-            ))}
-          </div>
-        </WebsiteRuntimeProvider>
+          {/* SmartFillProvider only in editable mode — suppressed for locked templates */}
+          {readOnly ? (
+            <ClickGuardProvider>
+              <div
+                className="overflow-hidden rounded-lg border border-border/70"
+                style={{
+                  backgroundColor: "#f8fafc",
+                  fontFamily: "Satoshi, sans-serif",
+                }}
+              >
+                {filteredSections.map((section) => (
+                  <PreviewSection
+                    configId={configId}
+                    content={content}
+                    editableFields={editableFields}
+                    familyOverrides={familyOverrides}
+                    focused={focusedSectionId === section.id}
+                    key={section.id}
+                    readOnly={readOnly}
+                    section={section}
+                    theme={theme}
+                    onFocus={() => handleSectionFocus(section.id)}
+                    onSmartFill={onSmartFill}
+                    onUpdate={onUpdateField}
+                  />
+                ))}
+              </div>
+              <InlineOverview />
+            </ClickGuardProvider>
+          ) : (
+            <SmartFillProvider onSmartFill={handleInlineSmartFill}>
+              <ClickGuardProvider>
+                <div
+                  className="overflow-hidden rounded-lg border border-border/70"
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    fontFamily: "Satoshi, sans-serif",
+                  }}
+                >
+                  {filteredSections.map((section) => (
+                    <PreviewSection
+                      configId={configId}
+                      content={content}
+                      editableFields={editableFields}
+                      familyOverrides={familyOverrides}
+                      focused={focusedSectionId === section.id}
+                      key={section.id}
+                      readOnly={readOnly}
+                      section={section}
+                      theme={theme}
+                      onFocus={() => handleSectionFocus(section.id)}
+                      onSmartFill={onSmartFill}
+                      onUpdate={onUpdateField}
+                    />
+                  ))}
+                </div>
+                <InlineOverview />
+              </ClickGuardProvider>
+            </SmartFillProvider>
+          )}
       </div>
     </div>
   );

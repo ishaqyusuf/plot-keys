@@ -15,13 +15,15 @@ import {
   deleteProperty,
   findCompanyById,
   findCompanyBySlug,
-  findDraftWebsiteVersionByIdForCompany,
+  findDraftVersionById,
   findLatestSiteConfigurationForCompany,
+  findSiteConfigurationByIdForCompany,
   findLicensedTemplateKeys,
   findTemplateLicensesForCompany,
   findTenantOnboardingByUserId,
   getAiCreditBalance,
   getAiUsageStats,
+  getOrCreateDraftVersion,
   getAnalyticsSummary,
   getPageViewsByDay,
   grantAiCredits,
@@ -39,6 +41,7 @@ import {
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
   logAiUsage,
+  publishSiteConfiguration,
   publishWebsiteVersion,
   resolveActiveDraftForCompany,
   resolvePublishedForCompany,
@@ -56,6 +59,9 @@ import {
   updateOnboardingProfile,
   updateProperty,
   upsertDraftWebsiteVersion,
+  updateSiteConfigurationContentField,
+  updateSiteConfigurationThemeField,
+  upsertWebsite,
 } from "@plotkeys/db";
 import { domainSyncHandler, triggerJob } from "@plotkeys/jobs";
 import { domainSyncTask } from "@plotkeys/jobs/tasks";
@@ -1007,22 +1013,23 @@ export const workspaceRouter = createTRPCRouter({
   ensureBuilderConfigurationExists: membershipProcedure.mutation(
     async ({ ctx }) => {
       const db = getDb();
-      const draft = await resolveActiveDraftForCompany(
-        db,
-        ctx.auth.activeMembership.companyId,
-      );
+      const companyId = ctx.auth.activeMembership.companyId;
 
-      if (draft) {
-        return {
-          configId: draft.id,
-        };
+      const existingDraft = await resolveActiveDraftForCompany(db, companyId);
+      if (existingDraft) {
+        return { configId: existingDraft.id };
       }
 
-      const company = await findCompanyById(
+      const configuration = await findLatestSiteConfigurationForCompany(
         db,
-        ctx.auth.activeMembership.companyId,
+        companyId,
       );
+      if (configuration) {
+        return { configId: configuration.id };
+      }
 
+      // New company with no Website/SiteConfiguration yet: create Website + draft only
+      const company = await findCompanyById(db, companyId);
       if (!company) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -1070,91 +1077,102 @@ export const workspaceRouter = createTRPCRouter({
         };
       }
 
-      const initialSiteConfiguration = createInitialSiteConfigurationInput({
+      const starterTemplate = getTemplateDefinition("template-1");
+      const initialInput = createInitialSiteConfigurationInput({
         companyName: company.name,
         market: company.market ?? company.name,
         subdomain: company.slug,
-        templateKey: getTemplateDefinition("template-1").key,
+        templateKey: starterTemplate.key,
       });
 
-      const draftVersion = await upsertDraftWebsiteVersion(db, {
-        ...initialSiteConfiguration,
-        companyId: company.id,
+      const website = await upsertWebsite(db, {
+        companyId,
+        subdomain: company.slug,
+        templateKey: starterTemplate.key,
+      });
+
+      const version = await getOrCreateDraftVersion(db, {
+        contentJson: initialInput.contentJson,
         createdById: ctx.auth.session.user.id,
-        updatedById: ctx.auth.session.user.id,
+        themeJson: initialInput.themeJson,
+        websiteId: website.id,
       });
 
-      return {
-        configId: draftVersion.id,
-      };
+      return { configId: version.id };
     },
   ),
   publishSiteConfiguration: membershipProcedure
     .input(publishSiteConfigurationInputSchema)
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      const draft = await findDraftWebsiteVersionByIdForCompany(db, {
-        companyId: ctx.auth.activeMembership.companyId,
-        versionId: input.configId,
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const configuration = await findSiteConfigurationByIdForCompany(db, {
+        companyId,
+        configId: input.configId,
       });
 
-      if (!draft) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Draft website version not found.",
+      if (configuration) {
+        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await publishSiteConfiguration(db, {
+          companyId,
+          configId: configuration.id,
+          currentName: configuration.name,
+          nextName: input.nextName,
+          updatedById: ctx.auth.session.user.id,
+          version: configuration.version,
         });
+        return { configId: configuration.id };
       }
 
-      await assertCompanyCanUseTemplate(
-        db,
-        ctx.auth.activeMembership.companyId,
-        draft.website.templateKey,
-      );
-
-      await publishWebsiteVersion(db, {
-        companyId: ctx.auth.activeMembership.companyId,
-        name: input.nextName || draft.name || "Published",
-        updatedById: ctx.auth.session.user.id,
-        versionId: draft.id,
-        websiteId: draft.websiteId,
+      const version = await findDraftVersionById(db, {
+        companyId,
+        versionId: input.configId,
       });
-
-      return {
-        configId: draft.id,
-      };
+      if (!version) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Configuration not found.",
+        });
+      }
+      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      await publishWebsiteVersion(db, {
+        companyId,
+        name: input.nextName,
+        updatedById: ctx.auth.session.user.id,
+        versionId: version.id,
+        websiteId: version.website.id,
+      });
+      return { configId: version.id };
     }),
   smartFillField: membershipProcedure
     .input(smartFillFieldInputSchema)
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      const draft = await findDraftWebsiteVersionByIdForCompany(db, {
-        companyId: ctx.auth.activeMembership.companyId,
-        versionId: input.configId,
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const configuration = await findSiteConfigurationByIdForCompany(db, {
+        companyId,
+        configId: input.configId,
       });
 
-      if (!draft) {
+      const version = configuration
+        ? null
+        : await findDraftVersionById(db, { companyId, versionId: input.configId });
+
+      if (!configuration && !version) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Draft website version not found.",
+          message: "Configuration not found.",
         });
       }
 
-      await assertCompanyCanUseTemplate(
-        db,
-        ctx.auth.activeMembership.companyId,
-        draft.website.templateKey,
-      );
+      const templateKey = configuration?.templateKey ?? version!.website.templateKey;
+      await assertCompanyCanUseTemplate(db, companyId, templateKey);
 
-      const company = await findCompanyById(
-        db,
-        ctx.auth.activeMembership.companyId,
-      );
-
+      const company = await findCompanyById(db, companyId);
       if (!company) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Company not found.",
-        });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
       }
 
       // Fetch the onboarding record for business context (optional — enriches the prompt)
@@ -1171,18 +1189,18 @@ export const workspaceRouter = createTRPCRouter({
         market: onboarding?.market ?? company.market,
         preferredLength: input.preferredLength,
         shortDetail: input.shortDetail,
-        templateKey: draft.website.templateKey,
+        templateKey,
       });
 
       // Deduct credits if AI was actually used
       if (aiSuggestion) {
         const deducted = await deductAiCredits(db, {
-          companyId: ctx.auth.activeMembership.companyId,
+          companyId,
           feature: "smart_fill",
         });
 
         await logAiUsage(db, {
-          companyId: ctx.auth.activeMembership.companyId,
+          companyId,
           creditsUsed: deducted ? 2 : 0,
           feature: "smart_fill",
           meta: { contentKey: input.contentKey },
@@ -1197,18 +1215,28 @@ export const workspaceRouter = createTRPCRouter({
           ? `${company.name} unlocks better moves.`
           : `${input.shortDetail} for ${company.name}.`);
 
-      await updateDraftVersion(db, {
-        contentJson: {
-          ...(draft.contentJson as Record<string, string>),
-          [input.contentKey]: suggestion,
-        },
-        updatedById: ctx.auth.session.user.id,
-        versionId: draft.id,
-      });
+      if (configuration) {
+        await updateSiteConfigurationContentField(db, {
+          configId: configuration.id,
+          contentKey: input.contentKey,
+          currentContent: configuration.contentJson as Record<string, string>,
+          updatedById: ctx.auth.session.user.id,
+          value: suggestion,
+          version: configuration.version,
+        });
+        return { configId: configuration.id };
+      }
 
-      return {
-        configId: draft.id,
+      const newContent = {
+        ...(version!.contentJson as Record<string, string>),
+        [input.contentKey]: suggestion,
       };
+      await updateDraftVersion(db, {
+        contentJson: newContent,
+        updatedById: ctx.auth.session.user.id,
+        versionId: version!.id,
+      });
+      return { configId: version!.id };
     }),
   syncTenantDomains: membershipProcedure.mutation(async ({ ctx }) => {
     const db = getDb();
@@ -1269,36 +1297,47 @@ export const workspaceRouter = createTRPCRouter({
     .input(updateSiteFieldInputSchema)
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      const draft = await findDraftWebsiteVersionByIdForCompany(db, {
-        companyId: ctx.auth.activeMembership.companyId,
-        versionId: input.configId,
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const configuration = await findSiteConfigurationByIdForCompany(db, {
+        companyId,
+        configId: input.configId,
       });
 
-      if (!draft) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Draft website version not found.",
+      if (configuration) {
+        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await updateSiteConfigurationContentField(db, {
+          configId: configuration.id,
+          contentKey: input.contentKey,
+          currentContent: configuration.contentJson as Record<string, string>,
+          updatedById: ctx.auth.session.user.id,
+          value: input.value,
+          version: configuration.version,
         });
+        return { configId: configuration.id };
       }
 
-      await assertCompanyCanUseTemplate(
-        db,
-        ctx.auth.activeMembership.companyId,
-        draft.website.templateKey,
-      );
-
-      await updateDraftVersion(db, {
-        contentJson: {
-          ...(draft.contentJson as Record<string, string>),
-          [input.contentKey]: input.value,
-        },
-        updatedById: ctx.auth.session.user.id,
-        versionId: draft.id,
+      const version = await findDraftVersionById(db, {
+        companyId,
+        versionId: input.configId,
       });
-
-      return {
-        configId: draft.id,
+      if (!version) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Configuration not found.",
+        });
+      }
+      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      const newContent = {
+        ...(version.contentJson as Record<string, string>),
+        [input.contentKey]: input.value,
       };
+      await updateDraftVersion(db, {
+        contentJson: newContent,
+        updatedById: ctx.auth.session.user.id,
+        versionId: version.id,
+      });
+      return { configId: version.id };
     }),
   updateSiteThemeField: membershipProcedure
     .input(
@@ -1310,34 +1349,47 @@ export const workspaceRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      const draft = await findDraftWebsiteVersionByIdForCompany(db, {
-        companyId: ctx.auth.activeMembership.companyId,
-        versionId: input.configId,
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const configuration = await findSiteConfigurationByIdForCompany(db, {
+        companyId,
+        configId: input.configId,
       });
 
-      if (!draft) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Draft website version not found.",
+      if (configuration) {
+        await assertCompanyCanUseTemplate(db, companyId, configuration.templateKey);
+        await updateSiteConfigurationThemeField(db, {
+          configId: configuration.id,
+          currentTheme: configuration.themeJson as Record<string, string>,
+          themeKey: input.themeKey,
+          updatedById: ctx.auth.session.user.id,
+          value: input.value,
+          version: configuration.version,
         });
+        return { configId: configuration.id };
       }
 
-      await assertCompanyCanUseTemplate(
-        db,
-        ctx.auth.activeMembership.companyId,
-        draft.website.templateKey,
-      );
-
-      await updateDraftVersion(db, {
-        themeJson: {
-          ...(draft.themeJson as Record<string, string>),
-          [input.themeKey]: input.value,
-        },
-        updatedById: ctx.auth.session.user.id,
-        versionId: draft.id,
+      const version = await findDraftVersionById(db, {
+        companyId,
+        versionId: input.configId,
       });
-
-      return { configId: draft.id };
+      if (!version) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Configuration not found.",
+        });
+      }
+      await assertCompanyCanUseTemplate(db, companyId, version.website.templateKey);
+      const newTheme = {
+        ...(version.themeJson as Record<string, string>),
+        [input.themeKey]: input.value,
+      };
+      await updateDraftVersion(db, {
+        themeJson: newTheme,
+        updatedById: ctx.auth.session.user.id,
+        versionId: version.id,
+      });
+      return { configId: version.id };
     }),
   getSiteRenderData: publicProcedure
     .input(

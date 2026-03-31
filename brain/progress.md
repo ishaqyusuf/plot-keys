@@ -47,6 +47,8 @@
 | Template Usage Analytics | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ✅ Done |
+| Template usage analytics (TemplatePicker) | ✅ Done |
+| SEO & Meta Tags (per-page title/description/OG) | ✅ Done |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
@@ -62,6 +64,100 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — Multi-page Template Depth
+
+### What was built
+- **`packages/section-registry/src/register/inner-page-defaults.ts`** (new) — Shared per-page hero defaults for 16 inner page types (about, listings, projects, portfolio, rentals, contact, agents, services, how-it-works, landlords, tenants, areas, private-sales, faq, insights, blog, resources). Each entry stores page-prefixed keys (e.g. `about.hero.title = "About Our Agency"`) so they don't collide with home-page keys.
+- **`packages/section-registry/src/index.ts`** — Three changes:
+  1. `resolvePageContent()` helper: aliases `{pageKey}.hero.*` to base `hero.*` keys before handing content to section builders. Builders remain unchanged; they always read `hero.title`, but on the about page they receive the about-specific value.
+  2. `buildPageSections()`: calls `resolvePageContent` for non-home pages.
+  3. `resolveWebsitePresentation()` and `resolvePage()`: both now merge `innerPageDefaults[pageKey]` between `template.defaultContent` and tenant-saved content, so per-page defaults are overridable by tenant customisation.
+
+### Design
+- Storage: per-page content is stored as `about.hero.title` etc. in `contentJson`/`themeJson` — no key collision with home page
+- Builder builders and section components remain unchanged (zero regression risk)
+- Tenant overrides: if a tenant saves `about.hero.title` to their contentJson (currently only possible via direct API; future builder UI TBD), it takes priority over the shared defaults
+- Known limitation: inline EditableText contentKey is still hardcoded to `hero.title` in section components — inline editing on inner pages writes to the home page key. Full page-scoped editing is a Phase 2 improvement requiring section component changes.
+
+## 2026-03-31 — Path-Aware Builder Preview
+
+### What was built
+- **`apps/dashboard/src/app/(app)/builder/page.tsx`** — Added `path` to `searchParams`; passed as `previewPath` to `BuilderWorkspace`.
+- **`apps/dashboard/src/components/builder/builder-workspace.tsx`** — Imports `getTemplatePageInventory`. Resolves `activePageKey` from `previewPath` by matching against the template's page inventory slugs (defaults to `"home"`). Builds `availablePages: PageNavItem[]` list. Passes `pageKey` to `resolveWebsitePresentation` so the correct page's sections are fetched. Threads `availablePages` + `activePageKey` into `BuilderPreviewPanel`, `BuilderSidebarControls`, and `BuilderSidebarDrawer`.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Accepts `availablePages` and `activePageKey`. When the template has more than one page, renders a tab strip in the preview chrome bar replacing the URL label. Clicking a tab calls `router.push('?path=...')` preserving all other query params (configId, etc.). Home tab clears the `path` param.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — Accepts `activePageKey` (default `"home"`). `SeoSection` now uses `activePageKey` instead of the hardcoded `"home"` — SEO fields update per-page as you navigate.
+- **`apps/dashboard/src/components/builder/builder-sidebar-drawer.tsx`** — Accepts and threads `activePageKey` to `BuilderSidebarControls`.
+
+### Design
+- URL-based navigation: `?path=/about` triggers server re-render of `BuilderWorkspace` with the correct page. Full re-render is acceptable since the builder already re-renders on template/theme changes.
+- No new DB queries: `getTemplatePageInventory` is a pure in-memory lookup against the registry.
+- SEO section is now page-aware: switching to `/about` and entering a title writes `seo.about.title` to themeJson.
+
+## 2026-03-31 — SEO & Meta Tags
+
+### What was built
+- **`packages/section-registry/src/template-config.ts`** — Added `seo?: Record<string, { title?, description?, ogImage? }>` to `TemplateConfig`. Updated `deserializeTemplateConfig` to parse `seo.{pageKey}.{field}` dot-notation keys from `themeJson` into the nested structure.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — New `SeoSection` component with title input, description textarea (3 rows, debounced), and OG image URL input. Saves via `onUpdateTheme` with key `seo.home.{field}`. Wired into `BuilderSidebarControls` below section visibility toggles.
+- **`apps/tenant-site/src/lib/resolve-tenant.ts`** — Added `market` to `TenantShell` company select so the description fallback can reference the market.
+- **`apps/tenant-site/src/app/page.tsx`** — Exported `generateMetadata()` that calls `resolveTenantShell()` (lightweight), reads `templateConfig.seo?.home`, and returns `title` + `description` + `openGraph` + `twitter` metadata. Falls back to company name and market when no SEO override is set.
+- **`apps/tenant-site/src/app/[...slug]/page.tsx`** — Exported `generateMetadata({ params })` that resolves `pageKey` from path segments via the existing `resolvePageKeyForPath()` helper, then reads `templateConfig.seo?.[pageKey]` for overrides. Same fallback pattern.
+
+### Design
+- Storage: `themeJson` dot-notation keys (`seo.home.title`, `seo.listings.description`, etc.) — follows the existing `sectionVisible.*` and `namedImage.*` patterns; no schema changes
+- Per-page `generateMetadata()` in route files takes priority over the root layout's company-level metadata in Next.js
+- Builder scoped to `pageKey="home"` for now; inner pages can be added later via path-aware builder preview
+
+## 2026-03-31 — Template Usage Analytics
+
+### What was built
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — `TemplatePicker` now fetches `getTemplateCatalog` via tRPC (`useQuery`). Builds a `usageMap` (key → usageCount) from the API response. Each template card shows `"{N} using"` in muted text below the tagline when count > 0. Falls back to 0 silently while the query loads.
+
+### Design
+- Read-only analytics display only — no new mutations or schema changes
+- `getTemplateCatalog` already returned `usageCount` per template (backed by `countCompaniesByTemplateKey`); this surfaces it in the picker UI
+
+## 2026-03-30 — WebsiteVersion Phase 4 — Write Path
+
+### What was built
+- **`packages/db/src/queries/website.ts`** — Added `findDraftVersionById(db, { companyId, versionId })` helper. Returns a draft WebsiteVersion with its parent Website (`id`, `templateKey`), validating company ownership. Used by mutation fallbacks when `configId` is a WebsiteVersion ID.
+- **`apps/api/src/routers/workspace.route.ts`** — Five mutations upgraded with a silent WebsiteVersion fallback:
+  - **`updateSiteField`**: If SiteConfiguration not found, merges `contentKey` into `version.contentJson` and calls `updateDraftVersion`.
+  - **`updateSiteThemeField`**: If SiteConfiguration not found, merges `themeKey` into `version.themeJson` and calls `updateDraftVersion`.
+  - **`publishSiteConfiguration`**: If SiteConfiguration not found, calls `publishWebsiteVersion` directly (archives old published, promotes draft, updates `website.publishedVersionId`).
+  - **`smartFillField`**: Resolves either SiteConfiguration or WebsiteVersion; derives `templateKey` from whichever is found; AI generation logic shared; writes through `updateSiteConfigurationContentField` (legacy) or `updateDraftVersion` (Phase 4).
+  - **`ensureBuilderConfigurationExists`**: Now checks `resolveActiveDraftForCompany` first; returns `legacyConfigId ?? version.id`; falls back to SiteConfiguration for existing companies; for new companies creates Website + draft via `upsertWebsite` + `getOrCreateDraftVersion` (no SiteConfiguration created).
+- **Imports added**: `findDraftVersionById`, `getOrCreateDraftVersion`, `publishWebsiteVersion`, `upsertWebsite` added to router import block.
+
+### Design
+- No API surface changes — `configId` remains a plain string across all mutations
+- Auto-detection: try SiteConfiguration lookup first; silence NOT_FOUND and try WebsiteVersion on miss
+- Legacy dual-write path preserved for all existing companies
+- New companies get a clean WebsiteVersion-only write path
+
+## 2026-03-30 — EditableText AI Icon + Action Bar Upgrade
+
+### What was built
+- **`packages/section-registry/src/runtime/smart-fill-context.tsx`** (new) — `SmartFillContext` following the same pattern as ClickGuardContext. `SmartFillProvider` accepts an `onSmartFill(contentKey)` async function and injects it via context. `useSmartFill()` hook returns the function or null when no provider is present.
+- **`packages/section-registry/src/sections/editing-primitives.tsx`** — `EditableText` upgraded with hover action bar. In draft mode, hovering text reveals a small floating pill (`absolute -top-7 right-0`) with ✏ Edit and ✦ AI buttons. The AI button only renders when `useSmartFill()` is non-null. Clicking AI calls `triggerSmartFill(contentKey)` and shows a `animate-pulse ring-primary/40` loading state while the mutation runs. Clicking Edit enters contentEditable as before.
+- **`packages/section-registry/src/index.ts`** — Exports `SmartFillProvider`, `useSmartFill`, `SmartFillFn`.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Added `handleInlineSmartFill` adapter (derives `shortDetail` from `contentKey` dot-notation). Wraps sections with `SmartFillProvider` when `readOnly={false}`; locked-template preview skips the provider so the AI button is not shown.
+
+### What's still deferred
+- WebsiteVersion Phase 4 writes
+
+## 2026-03-30 — ClickGuard + InlineOverview Wiring (M3 Deferred)
+
+### What was built
+- **`runtime/click-guard.tsx`** — Enhanced `handleClick` to auto-detect item data from `data-click-guard-type` + `data-click-guard-data` attributes on intercepted anchors. Parses JSON payload and calls `openItem()` automatically, so section components need no direct dependency on `useClickGuard`.
+- **`sections/extended-sections.tsx`** — Added `data-click-guard-type` and `data-click-guard-data` attributes to `PropertyGridSection` listing card anchors (type: `"listing"`, data: id/title/location/price/specs/slug) and `AgentShowcaseSection` agent card anchors (type: `"agent"`, data: id/name/role/bio/slug).
+- **`apps/tenant-site/src/components/website-shell.tsx`** — New `"use client"` wrapper component. Provides `ClickGuardProvider` + `InlineOverview` boundary inside `WebsiteRuntimeProvider`'s client tree. In `renderMode="live"`, ClickGuard is transparent and InlineOverview returns null — zero behaviour change for live visitors.
+- **`apps/tenant-site/src/app/layout.tsx`** — `<main>{children}</main>` wrapped with `<WebsiteShell>` to enable ClickGuard + InlineOverview for all tenant-site pages.
+- **`apps/dashboard/.../builder-preview-panel.tsx`** — `ClickGuardProvider` + `InlineOverview` nested inside `WebsiteRuntimeProvider renderMode="draft"`. Clicking a listing/agent card in the builder preview now slides up the InlineOverview panel instead of triggering broken navigation.
+
+### What's still deferred
+- EditableText AI icon + action bar upgrade
+- WebsiteVersion Phase 4 writes
 
 ## 2026-03-30 — Template Registry M4 — Tenant-Site Integration
 

@@ -58,12 +58,12 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Multi-page Website Support** — Public tenant pages already resolve through page inventories at runtime; builder now supports URL-backed page selection so non-home template pages can be edited. ✅ Done
 - [x] **Customer Portal Foundation Planning** — Central tenant-site `/portal/*` routes now exist for login, signup, dashboard, saved listings, offers, payments, and account pages, using a branded shared shell outside the template inventory. ✅ Done
 - [x] **Listing Overview Standardization** — Public listing overview pages remain template-based, but now share centralized route resolution plus shared tenant-site query parsing for location / priceRange / sort / page. ✅ Done
-- [ ] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content.
-- [ ] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell.
+- [x] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content. ✅ Done (per-page hero defaults + content aliasing; inline editing scope deferred)
+- [x] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell. ✅ Done
 - [ ] **Preview-Safe Action Interception** — Intercept template CTAs, forms, booking, and payment actions in preview/configure mode so interactive elements feel real but do not execute live workflows.
 - [ ] **Builder UI Shadcn Standardization** — Refactor builder/configure-mode controls toward shadcn/ui primitives and composition patterns as the default editor UI system.
 - [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
-- [ ] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head.
+- [x] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head. ✅ Done
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
 - [ ] **Database Adapter Abstraction** — Add first non-Postgres adapter only when concrete deployment need arises.
 - [ ] **Supabase Package Rename** — Decide whether `packages/supabase` should become a general platform-integrations package.

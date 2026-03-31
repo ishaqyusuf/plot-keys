@@ -30,6 +30,7 @@ import {
   type SubscriptionTier,
   tierLabels,
 } from "@plotkeys/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
@@ -38,6 +39,8 @@ import { useTRPC } from "../../trpc/client";
 type TemplateGroup = "starter" | "plus" | "pro";
 
 type BuilderSidebarControlsProps = {
+  /** The currently previewed page key (e.g. "home", "about"). */
+  activePageKey?: string;
   configId: string;
   currentPageKey: string;
   currentTemplateKey: string;
@@ -433,6 +436,13 @@ function TemplatePicker({
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const trpc = useTRPC();
+  const { data: catalogData } = useQuery(
+    trpc.workspace.getTemplateCatalog.queryOptions(),
+  );
+  const usageMap = new Map(
+    catalogData?.map((t) => [t.key, t.usageCount]) ?? [],
+  );
   const currentTemplate = templateCatalog.find(
     (t) => t.key === currentTemplateKey,
   );
@@ -537,12 +547,14 @@ function TemplatePicker({
                               {template.marketingTagline}
                             </p>
                           )}
-                          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground/70">
-                            <Users2 className="size-3" />
-                            {count === 1
-                              ? "1 tenant"
-                              : `${count} tenants`}
-                          </p>
+                          {(() => {
+                            const count = usageMap.get(template.key) ?? 0;
+                            return count > 0 ? (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                {count} using
+                              </p>
+                            ) : null;
+                          })()}
                           <div className="mt-1 flex items-center gap-2">
                             <Badge className="capitalize" variant="outline">
                               {template.tier}
@@ -777,10 +789,100 @@ function SectionVisibilityToggles({
 }
 
 // ---------------------------------------------------------------------------
+// SEO Section
+// ---------------------------------------------------------------------------
+
+function SeoSection({
+  configId,
+  disabled = false,
+  onSave,
+  pageKey,
+  seoValues,
+}: {
+  configId: string;
+  disabled?: boolean;
+  onSave: (formData: FormData) => Promise<void>;
+  pageKey: string;
+  seoValues?: { title?: string; description?: string; ogImage?: string };
+}) {
+  const [values, setValues] = useState({
+    title: seoValues?.title ?? "",
+    description: seoValues?.description ?? "",
+    ogImage: seoValues?.ogImage ?? "",
+  });
+  const [, startTransition] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleChange(
+    field: "title" | "description" | "ogImage",
+    value: string,
+  ) {
+    if (disabled) return;
+    setValues((prev) => ({ ...prev, [field]: value }));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      startTransition(async () => {
+        const fd = new FormData();
+        fd.set("configId", configId);
+        fd.set("themeKey", `seo.${pageKey}.${field}`);
+        fd.set("value", value.trim());
+        await onSave(fd);
+      });
+    }, 600);
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+        SEO
+      </p>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          Page title
+        </FieldLabel>
+        <Input
+          className="mt-0.5 text-xs"
+          disabled={disabled}
+          placeholder="Override page title…"
+          value={values.title}
+          onChange={(e) => handleChange("title", e.target.value)}
+        />
+      </div>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          Meta description
+        </FieldLabel>
+        <textarea
+          className="mt-0.5 w-full resize-none rounded-md border border-border/70 bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled}
+          placeholder="Describe this page for search engines…"
+          rows={3}
+          value={values.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+        />
+      </div>
+      <div>
+        <FieldLabel className="text-xs text-muted-foreground">
+          OG image URL
+        </FieldLabel>
+        <Input
+          className="mt-0.5 text-xs"
+          disabled={disabled}
+          placeholder="Paste image URL for social sharing…"
+          value={values.ogImage}
+          onChange={(e) => handleChange("ogImage", e.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
 
 export function BuilderSidebarControls({
+  activePageKey = "home",
   configId,
   currentPageKey,
   currentTemplateKey,
@@ -893,6 +995,16 @@ export function BuilderSidebarControls({
           />
         </Field>
       )}
+
+      <Field>
+        <SeoSection
+          configId={configId}
+          disabled={readOnly}
+          onSave={onUpdateTheme}
+          pageKey={activePageKey}
+          seoValues={templateConfig.seo?.[activePageKey]}
+        />
+      </Field>
     </FieldGroup>
   );
 }

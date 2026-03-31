@@ -342,6 +342,13 @@ export type TemplateConfig = {
   /** Support tagline or contact line shown in the footer/header. */
   supportLine?: string;
   /**
+   * Per-page SEO metadata overrides. Keys are page keys (e.g. "home",
+   * "listings", "about"); values contain optional title, description, and
+   * OG image URL. When absent the tenant-site falls back to company-level
+   * metadata.
+   */
+  seo?: Record<string, { title?: string; description?: string; ogImage?: string }>;
+  /**
    * Section visibility overrides. Keys are section type strings;
    * values are booleans indicating whether the section is visible.
    * Sections not present default to visible (true).
@@ -389,6 +396,7 @@ export function deserializeTemplateConfig(
 ): TemplateConfig {
   const namedImages: Record<string, string> = {};
   const visibleSections: Record<string, boolean> = {};
+  const seo: Record<string, { title?: string; description?: string; ogImage?: string }> = {};
 
   for (const [key, value] of Object.entries(raw)) {
     if (key.startsWith("namedImage.")) {
@@ -397,6 +405,16 @@ export function deserializeTemplateConfig(
     } else if (key.startsWith("sectionVisible.")) {
       const section = key.slice("sectionVisible.".length);
       visibleSections[section] = value !== "false";
+    } else if (key.startsWith("seo.")) {
+      const parts = key.split(".");
+      if (parts.length === 3) {
+        const pageKey = parts[1];
+        const field = parts[2];
+        if (!seo[pageKey]) seo[pageKey] = {};
+        if (field === "title" || field === "description" || field === "ogImage") {
+          if (value) seo[pageKey][field] = value;
+        }
+      }
     }
   }
 
@@ -409,6 +427,7 @@ export function deserializeTemplateConfig(
     logo: raw.logo,
     market: raw.market,
     namedImages: Object.keys(namedImages).length > 0 ? namedImages : undefined,
+    seo: Object.keys(seo).length > 0 ? seo : undefined,
     stylePreset: raw.stylePreset as StylePreset | undefined,
     supportLine: raw.supportLine,
     visibleSections:

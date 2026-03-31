@@ -9,12 +9,14 @@ This file tracks work currently being executed.
 
 ## In Progress
 
-### Template Registry M3 — Runtime Wiring
-- **Branch:** `claude/plan-template-registry-M2pDj`
-- **Status:** ✅ Complete — committed and pushed
-- **Scope:** Registry runtime integration: page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview.
-- **Reference:** `brain/modules/template-register-plan.md` (canonical spec)
-- **Decision:** `brain/decisions/ADR-007-template-register-standards.md`, `brain/decisions/ADR-008-template-family-ui-design-system.md`
+### High Priority Batch — branch `claude/plan-high-priority-ghs3J`
+- **Status:** ✅ All items complete — committed and pushed
+
+**Completed deliverables:**
+- [x] Wire `ClickGuard` + `InlineOverview` into tenant-site and builder preview
+- [x] `EditableText` AI icon + action bar upgrade (SmartFillContext)
+- [x] WebsiteVersion Phase 4 write-path fallback in mutations
+- [x] Template usage analytics — `TemplatePicker` shows live `usageCount` per template card
 
 ### Template Registry M4 — Tenant-Site Integration
 - **Branch:** `claude/plan-template-registry-M2pDj`

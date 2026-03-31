@@ -18,6 +18,7 @@ import { BuilderSidebarControls } from "./builder-sidebar-controls";
 
 type BuilderSidebarDrawerProps = {
   activeConfigName: string;
+  activePageKey?: string;
   activeTemplateLabel: string;
   configId: string;
   configStatus: string;
@@ -40,6 +41,7 @@ type BuilderSidebarDrawerProps = {
 
 export function BuilderSidebarDrawer({
   activeConfigName,
+  activePageKey,
   configId,
   configStatus,
   currentPageKey,
@@ -102,6 +104,7 @@ export function BuilderSidebarDrawer({
             </div>
 
             <BuilderSidebarControls
+              activePageKey={activePageKey}
               configId={configId}
               currentPageKey={currentPageKey}
               currentTemplateKey={currentTemplateKey}
