@@ -63,6 +63,20 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-31 — Path-Aware Builder Preview
+
+### What was built
+- **`apps/dashboard/src/app/(app)/builder/page.tsx`** — Added `path` to `searchParams`; passed as `previewPath` to `BuilderWorkspace`.
+- **`apps/dashboard/src/components/builder/builder-workspace.tsx`** — Imports `getTemplatePageInventory`. Resolves `activePageKey` from `previewPath` by matching against the template's page inventory slugs (defaults to `"home"`). Builds `availablePages: PageNavItem[]` list. Passes `pageKey` to `resolveWebsitePresentation` so the correct page's sections are fetched. Threads `availablePages` + `activePageKey` into `BuilderPreviewPanel`, `BuilderSidebarControls`, and `BuilderSidebarDrawer`.
+- **`apps/dashboard/src/components/builder/builder-preview-panel.tsx`** — Accepts `availablePages` and `activePageKey`. When the template has more than one page, renders a tab strip in the preview chrome bar replacing the URL label. Clicking a tab calls `router.push('?path=...')` preserving all other query params (configId, etc.). Home tab clears the `path` param.
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — Accepts `activePageKey` (default `"home"`). `SeoSection` now uses `activePageKey` instead of the hardcoded `"home"` — SEO fields update per-page as you navigate.
+- **`apps/dashboard/src/components/builder/builder-sidebar-drawer.tsx`** — Accepts and threads `activePageKey` to `BuilderSidebarControls`.
+
+### Design
+- URL-based navigation: `?path=/about` triggers server re-render of `BuilderWorkspace` with the correct page. Full re-render is acceptable since the builder already re-renders on template/theme changes.
+- No new DB queries: `getTemplatePageInventory` is a pure in-memory lookup against the registry.
+- SEO section is now page-aware: switching to `/about` and entering a title writes `seo.about.title` to themeJson.
+
 ## 2026-03-31 — SEO & Meta Tags
 
 ### What was built
