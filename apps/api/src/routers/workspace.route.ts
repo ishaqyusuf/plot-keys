@@ -1507,12 +1507,30 @@ export const workspaceRouter = createTRPCRouter({
 
       const apexDomain = extractApexDomain(hostname);
 
-      // Create the domain pair
-      const domain = await createCustomDomainPair(db, {
-        companyId,
-        hostname,
-        apexDomain,
-      });
+      // Create the domain pair — catch unique constraint violations from
+      // concurrent requests (TOCTOU between the check above and this create).
+      let domain: Awaited<ReturnType<typeof createCustomDomainPair>>;
+      try {
+        domain = await createCustomDomainPair(db, {
+          companyId,
+          hostname,
+          apexDomain,
+        });
+      } catch (err) {
+        // Prisma P2002 = unique constraint violation
+        if (
+          err &&
+          typeof err === "object" &&
+          "code" in err &&
+          err.code === "P2002"
+        ) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This domain was just claimed by another request. Please try again.",
+          });
+        }
+        throw err;
+      }
 
       // Trigger Vercel provisioning if configured
       if (isVercelDomainProvisioningConfigured()) {

@@ -54,6 +54,11 @@ const DOMAIN_REGEX = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
  */
 export function isValidDomainName(value: string): boolean {
   if (!value || value.length > 253) return false;
+
+  // Check each label is ≤ 63 characters (DNS spec limit)
+  const labels = value.split(".");
+  if (labels.some((label) => !label || label.length > 63)) return false;
+
   return DOMAIN_REGEX.test(value);
 }
 

@@ -30,6 +30,12 @@ describe("isValidDomainName", () => {
     expect(isValidDomainName("http://example.com")).toBe(false);
     expect(isValidDomainName("-invalid.com")).toBe(false);
   });
+
+  it("rejects labels longer than 63 characters", () => {
+    const longLabel = "a".repeat(64);
+    expect(isValidDomainName(`${longLabel}.com`)).toBe(false);
+    expect(isValidDomainName(`${"a".repeat(63)}.com`)).toBe(true);
+  });
 });
 
 describe("extractApexDomain", () => {
