@@ -1,4 +1,8 @@
-import { createPrismaClient, listTenantDomainsForCompany, listCustomDomainsWithVerification } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listCustomDomainsWithVerification,
+  listTenantDomainsForCompany,
+} from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -9,13 +13,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { buildDnsInstructions, isVercelDomainProvisioningConfigured } from "@plotkeys/utils";
+import {
+  buildDnsInstructions,
+  isVercelDomainProvisioningConfigured,
+} from "@plotkeys/utils";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
 import { removeCustomDomainAction, syncDomainsAction } from "../../actions";
 
 type DomainsPageProps = {
-  searchParams?: Promise<{ error?: string; synced?: string; connected?: string; removed?: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    synced?: string;
+    connected?: string;
+    removed?: string;
+  }>;
 };
 
 const statusVariant: Record<
@@ -89,8 +101,8 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
 
   const domainProvisioningConfigured = isVercelDomainProvisioningConfigured();
   const hasFailure = domains.some((d) => d.status === "failed");
-  const allActive = domains.length > 0 && domains.every((d) => d.status === "active");
-  const hasCustomDomains = customDomains.length > 0;
+  const allActive =
+    domains.length > 0 && domains.every((d) => d.status === "active");
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
@@ -135,8 +147,12 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant={domainProvisioningConfigured ? "default" : "outline"}>
-              {domainProvisioningConfigured ? "Vercel ready" : "Vercel env needed"}
+            <Badge
+              variant={domainProvisioningConfigured ? "default" : "outline"}
+            >
+              {domainProvisioningConfigured
+                ? "Vercel ready"
+                : "Vercel env needed"}
             </Badge>
             <Button asChild variant="secondary" size="sm">
               <Link href="/">← Dashboard</Link>
@@ -190,7 +206,10 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
               DNS Configuration Required
             </h2>
             {pendingCustomDomains.map((d) => (
-              <Card key={d.id} className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
+              <Card
+                key={d.id}
+                className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20"
+              >
                 <CardHeader className="px-6 pt-5 pb-3">
                   <CardTitle className="text-sm font-semibold">
                     {d.hostname}
@@ -210,8 +229,11 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
                         </tr>
                       </thead>
                       <tbody>
-                        {d.instructions.records.map((record, i) => (
-                          <tr key={`${record.type}-${record.name}-${i}`} className="border-b last:border-0">
+                        {d.instructions.records.map((record) => (
+                          <tr
+                            key={`${record.type}-${record.name}-${record.value}`}
+                            className="border-b last:border-0"
+                          >
                             <td className="py-2 pr-4">
                               <Badge variant="outline" className="text-xs">
                                 {record.type}
@@ -250,7 +272,9 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
         ) : (
           <div className="grid gap-4">
             {domains.map((domain) => {
-              const isCustom = domain.kind === "sitefront_custom_domain" || domain.kind === "dashboard_custom_domain";
+              const isCustom =
+                domain.kind === "sitefront_custom_domain" ||
+                domain.kind === "dashboard_custom_domain";
               return (
                 <Card key={domain.id} className="bg-card">
                   <CardHeader className="grid grid-cols-[1fr_auto] items-start gap-4 px-6 pt-6 pb-3">
@@ -263,22 +287,29 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={statusVariant[domain.status] ?? "outline"}>
+                      <Badge
+                        variant={statusVariant[domain.status] ?? "outline"}
+                      >
                         {domain.status}
                       </Badge>
-                      {isCustom && domain.kind === "sitefront_custom_domain" && (
-                        <form action={removeCustomDomainAction}>
-                          <input type="hidden" name="domainId" value={domain.id} />
-                          <Button
-                            type="submit"
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto px-2 py-1 text-xs text-destructive hover:text-destructive"
-                          >
-                            Remove
-                          </Button>
-                        </form>
-                      )}
+                      {isCustom &&
+                        domain.kind === "sitefront_custom_domain" && (
+                          <form action={removeCustomDomainAction}>
+                            <input
+                              type="hidden"
+                              name="domainId"
+                              value={domain.id}
+                            />
+                            <Button
+                              type="submit"
+                              variant="ghost"
+                              size="sm"
+                              className="h-auto px-2 py-1 text-xs text-destructive hover:text-destructive"
+                            >
+                              Remove
+                            </Button>
+                          </form>
+                        )}
                     </div>
                   </CardHeader>
                   <CardContent className="grid gap-2 px-6 pb-6 text-sm">

@@ -130,7 +130,8 @@ export function buildDnsInstructions(
     });
   } else {
     // Subdomain — CNAME to Vercel
-    const label = hostname.slice(0, hostname.length - apex.length - 1) || hostname;
+    const label =
+      hostname.slice(0, hostname.length - apex.length - 1) || hostname;
     records.push({
       type: "CNAME",
       name: label,
@@ -146,7 +147,7 @@ export function buildDnsInstructions(
         records.push({
           type: "TXT",
           name: challenge.domain.startsWith("_vercel")
-            ? challenge.domain.split(".")[0] ?? challenge.domain
+            ? (challenge.domain.split(".")[0] ?? challenge.domain)
             : challenge.domain,
           value: challenge.value,
         });
@@ -210,7 +211,11 @@ export async function checkDomainAvailability(
     }
 
     // NOERROR with no answers could mean parked with no records
-    return { domain, available: true, note: "No DNS records found — verify with registrar" };
+    return {
+      domain,
+      available: true,
+      note: "No DNS records found — verify with registrar",
+    };
   } catch {
     return { domain, available: false, note: "DNS lookup timed out" };
   }

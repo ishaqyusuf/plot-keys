@@ -185,10 +185,7 @@ export async function createCustomDomainPair(
  * Finds a non-deleted TenantDomain by hostname, regardless of status.
  * Used to check for hostname conflicts before creating custom domains.
  */
-export async function findTenantDomainByHostname(
-  db: Db,
-  hostname: string,
-) {
+export async function findTenantDomainByHostname(db: Db, hostname: string) {
   return db.tenantDomain.findFirst({
     where: {
       hostname: hostname.toLowerCase(),
