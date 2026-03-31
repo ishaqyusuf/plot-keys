@@ -256,7 +256,7 @@ export async function generatePageContent(
   ].join("\n");
 
   const response = await client.messages.create({
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [{ role: "user", content: userMessage }],
     model: "claude-haiku-4-5",
     system:

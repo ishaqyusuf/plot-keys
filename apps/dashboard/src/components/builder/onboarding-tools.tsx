@@ -283,7 +283,10 @@ export function GeneratePageContentButton({
     }),
   );
 
-  const pageLabel = pageKey === "home" ? "Home" : pageKey.charAt(0).toUpperCase() + pageKey.slice(1);
+  const pageLabel = pageKey
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   return (
     <div className="flex flex-col gap-2">
@@ -310,8 +313,7 @@ export function GeneratePageContentButton({
 
       {result && (
         <p className="text-xs text-muted-foreground">
-          ✅ Updated {result.fieldsUpdated.length} fields:{" "}
-          {result.fieldsUpdated.join(", ")}
+          ✅ Updated {result.fieldsUpdated.length} fields
         </p>
       )}
     </div>
