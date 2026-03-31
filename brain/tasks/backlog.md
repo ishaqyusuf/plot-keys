@@ -62,7 +62,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell. ✅ Done
 - [x] **Preview-Safe Action Interception** — ClickGuard now intercepts all button clicks (not just `type="submit"`), ContactSection skips real `fetch()` in non-live modes, PreviewBanner shows mode label at page top, and PreviewToast flashes on swallowed button clicks. ✅ Done
 - [x] **Builder UI Shadcn Standardization** — Refactored builder-sidebar-controls.tsx: PickerButton now uses shadcn Button variant="outline", ChevronIcon uses lucide-react ChevronRight, raw textarea replaced with Textarea component, read-only banner uses Alert+AlertDescription. ✅ Done
-- [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
+- [x] **Blog/CMS Module** — BlogPost Prisma model, dashboard `/blog` list + `/blog/[id]` editor with markdown toolbar, server actions (CRUD + publish/archive), BlogListSection + BlogPostSection in section-registry, blog page slots in all Pro-tier families, tenant-site rendering. ✅ Done
 - [x] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head. ✅ Done
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
 - [ ] **Database Adapter Abstraction** — Add first non-Postgres adapter only when concrete deployment need arises.

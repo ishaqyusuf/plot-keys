@@ -47,6 +47,7 @@
 | WebsiteVersion Phase 4 (writes) | ✅ Done |
 | Template usage analytics (TemplatePicker) | ✅ Done |
 | SEO & Meta Tags (per-page title/description/OG) | ✅ Done |
+| Blog/CMS Module | ✅ Done — model, editor, sections, rendering |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
