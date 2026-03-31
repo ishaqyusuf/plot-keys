@@ -379,6 +379,15 @@ export const BillingLineItemStatus = {
 export type BillingLineItemStatus = (typeof BillingLineItemStatus)[keyof typeof BillingLineItemStatus]
 
 
+export const BlogPostStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
+} as const
+
+export type BlogPostStatus = (typeof BlogPostStatus)[keyof typeof BlogPostStatus]
+
+
 export const CustomerStatus = {
   active: 'active',
   inactive: 'inactive',

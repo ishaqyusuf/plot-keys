@@ -12,7 +12,14 @@ import {
   signUpUser,
   verifyUserEmail,
 } from "@plotkeys/auth";
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  createBlogPost,
+  createPrismaClient,
+  deleteBlogPost,
+  getBlogPostForCompany,
+  setBlogPostStatus,
+  updateBlogPost,
+} from "@plotkeys/db";
 import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
 import {
   EMPLOYEE_WORK_ROLE_VALUES,
@@ -49,6 +56,43 @@ function createRedirectUrl(path: string, params: Record<string, string>) {
   const searchParams = new URLSearchParams(params);
 
   return `${path}?${searchParams.toString()}`;
+}
+
+function normalizeBlogSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+async function ensureUniqueBlogSlug(
+  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
+  companyId: string,
+  requestedSlug: string,
+  excludeId?: string,
+) {
+  const baseSlug = normalizeBlogSlug(requestedSlug) || "untitled-post";
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await prisma.blogPost.findFirst({
+      select: { id: true },
+      where: {
+        companyId,
+        deletedAt: null,
+        slug: candidate,
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+    });
+
+    if (!existing) return candidate;
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
 }
 
 async function assertSubdomainAvailability(
@@ -774,6 +818,147 @@ export async function togglePropertyFeaturedAction(formData: FormData) {
     revalidatePath("/properties");
   } catch {
     // non-fatal — page will show current state on next load
+  }
+}
+
+// ─── Blog actions ─────────────────────────────────────────────────────────
+
+export async function createBlogPostAction() {
+  const session = await requireOnboardedSession();
+  const prisma = createPrismaClient().db;
+
+  if (!prisma) {
+    redirect("/blog?error=Database%20unavailable.");
+  }
+
+  const companyId = session.activeMembership.companyId;
+
+  try {
+    const slug = await ensureUniqueBlogSlug(prisma, companyId, "untitled-post");
+    const post = await createBlogPost(prisma, {
+      authorId: session.user.id,
+      companyId,
+      content: "# Untitled post\n\nStart writing here.",
+      excerpt: "Add a short summary for this article.",
+      slug,
+      title: "Untitled post",
+    });
+
+    revalidatePath("/blog");
+    redirect(`/blog/${post.id}?created=1`);
+  } catch (error) {
+    redirect(
+      `/blog?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to create blog post.",
+      )}`,
+    );
+  }
+}
+
+export async function updateBlogPostAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const prisma = createPrismaClient().db;
+  const blogPostId = String(formData.get("blogPostId") ?? "");
+
+  if (!prisma) {
+    redirect(`/blog/${blogPostId}?error=Database%20unavailable.`);
+  }
+
+  const companyId = session.activeMembership.companyId;
+
+  try {
+    const existing = await getBlogPostForCompany(prisma, blogPostId, companyId);
+    if (!existing) {
+      throw new Error("Blog post not found.");
+    }
+
+    const title = String(formData.get("title") ?? "").trim() || existing.title;
+    const slugInput =
+      String(formData.get("slug") ?? "").trim() || title || existing.slug;
+    const slug = await ensureUniqueBlogSlug(
+      prisma,
+      companyId,
+      slugInput,
+      blogPostId,
+    );
+
+    await updateBlogPost(prisma, blogPostId, companyId, {
+      content: String(formData.get("content") ?? "").trim(),
+      excerpt: String(formData.get("excerpt") ?? "").trim() || null,
+      featuredImage: String(formData.get("featuredImage") ?? "").trim() || null,
+      slug,
+      title,
+    });
+
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${blogPostId}`);
+    redirect(`/blog/${blogPostId}?saved=1`);
+  } catch (error) {
+    redirect(
+      `/blog/${blogPostId}?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to save blog post.",
+      )}`,
+    );
+  }
+}
+
+export async function updateBlogPostStatusAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const prisma = createPrismaClient().db;
+  const blogPostId = String(formData.get("blogPostId") ?? "");
+  const status = String(formData.get("status") ?? "").trim() as
+    | "draft"
+    | "published"
+    | "archived";
+
+  if (!prisma) {
+    redirect(`/blog/${blogPostId}?error=Database%20unavailable.`);
+  }
+
+  try {
+    await setBlogPostStatus(
+      prisma,
+      blogPostId,
+      session.activeMembership.companyId,
+      status,
+    );
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${blogPostId}`);
+    redirect(`/blog/${blogPostId}?saved=1`);
+  } catch (error) {
+    redirect(
+      `/blog/${blogPostId}?error=${encodeURIComponent(
+        error instanceof Error
+          ? error.message
+          : "Unable to update blog status.",
+      )}`,
+    );
+  }
+}
+
+export async function deleteBlogPostAction(formData: FormData) {
+  const session = await requireOnboardedSession();
+  const prisma = createPrismaClient().db;
+  const blogPostId = String(formData.get("blogPostId") ?? "");
+
+  if (!prisma) {
+    redirect("/blog?error=Database%20unavailable.");
+  }
+
+  try {
+    await deleteBlogPost(
+      prisma,
+      blogPostId,
+      session.activeMembership.companyId,
+    );
+    revalidatePath("/blog");
+    redirect("/blog");
+  } catch (error) {
+    redirect(
+      `/blog/${blogPostId}?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Unable to delete blog post.",
+      )}`,
+    );
   }
 }
 

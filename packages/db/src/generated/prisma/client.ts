@@ -92,6 +92,11 @@ export type Verification = Prisma.VerificationModel
  */
 export type BillingLineItem = Prisma.BillingLineItemModel
 /**
+ * Model BlogPost
+ * 
+ */
+export type BlogPost = Prisma.BlogPostModel
+/**
  * Model CompanyIntegration
  * 
  */

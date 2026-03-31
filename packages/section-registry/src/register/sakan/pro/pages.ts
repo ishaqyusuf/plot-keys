@@ -158,7 +158,7 @@ export const sakanProPages: RegisterPageDefinition[] = [
     pageKey: "blog",
     slug: "/blog",
     minTier: "pro",
-    sections: [],
+    sections: [{ ...slot.blogList, id: "blog-list", sortOrder: 10 }],
   },
 
   // Blog Post (Pro)
@@ -167,7 +167,7 @@ export const sakanProPages: RegisterPageDefinition[] = [
     pageKey: "blog-post",
     slug: "/blog/[slug]",
     minTier: "pro",
-    sections: [],
+    sections: [{ ...slot.blogPost, id: "blog-post", sortOrder: 10 }],
   },
 
   // Universal + account pages

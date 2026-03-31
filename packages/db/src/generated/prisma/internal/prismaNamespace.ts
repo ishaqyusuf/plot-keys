@@ -393,6 +393,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
+  BlogPost: 'BlogPost',
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
@@ -444,7 +445,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "companyIntegration" | "company" | "customer" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "website" | "websiteVersion"
+    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "website" | "websiteVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1111,6 +1112,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BillingLineItemCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BillingLineItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    BlogPost: {
+      payload: Prisma.$BlogPostPayload<ExtArgs>
+      fields: Prisma.BlogPostFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BlogPostFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BlogPostFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        findFirst: {
+          args: Prisma.BlogPostFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BlogPostFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        findMany: {
+          args: Prisma.BlogPostFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>[]
+        }
+        create: {
+          args: Prisma.BlogPostCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        createMany: {
+          args: Prisma.BlogPostCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BlogPostCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>[]
+        }
+        delete: {
+          args: Prisma.BlogPostDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        update: {
+          args: Prisma.BlogPostUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        deleteMany: {
+          args: Prisma.BlogPostDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BlogPostUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BlogPostUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>[]
+        }
+        upsert: {
+          args: Prisma.BlogPostUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPostPayload>
+        }
+        aggregate: {
+          args: Prisma.BlogPostAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBlogPost>
+        }
+        groupBy: {
+          args: Prisma.BlogPostGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogPostGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BlogPostCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogPostCountAggregateOutputType> | number
         }
       }
     }
@@ -3966,6 +4041,25 @@ export const BillingLineItemScalarFieldEnum = {
 export type BillingLineItemScalarFieldEnum = (typeof BillingLineItemScalarFieldEnum)[keyof typeof BillingLineItemScalarFieldEnum]
 
 
+export const BlogPostScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  authorId: 'authorId',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  featuredImage: 'featuredImage',
+  status: 'status',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
+
+
 export const CompanyIntegrationScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -4747,6 +4841,20 @@ export type ListEnumBillingLineItemStatusFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'BlogPostStatus'
+ */
+export type EnumBlogPostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BlogPostStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BlogPostStatus[]'
+ */
+export type ListEnumBlogPostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BlogPostStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'CompanyPlanTier'
  */
 export type EnumCompanyPlanTierFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CompanyPlanTier'>
@@ -5409,6 +5517,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   billingLineItem?: Prisma.BillingLineItemOmit
+  blogPost?: Prisma.BlogPostOmit
   companyIntegration?: Prisma.CompanyIntegrationOmit
   company?: Prisma.CompanyOmit
   customer?: Prisma.CustomerOmit

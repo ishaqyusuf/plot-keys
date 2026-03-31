@@ -10,7 +10,12 @@ import type { RegisterSectionSlot } from "./types";
 
 export const slot = {
   heroBanner: {
-    contentKeys: ["hero.eyebrow", "hero.title", "hero.subtitle", "hero.ctaText"],
+    contentKeys: [
+      "hero.eyebrow",
+      "hero.title",
+      "hero.subtitle",
+      "hero.ctaText",
+    ],
     dataSource: undefined,
     defaultEnabled: true,
     id: "hero",
@@ -31,9 +36,12 @@ export const slot = {
 
   marketStats: {
     contentKeys: [
-      "marketStats.stat1Label", "marketStats.stat1Value",
-      "marketStats.stat2Label", "marketStats.stat2Value",
-      "marketStats.stat3Label", "marketStats.stat3Value",
+      "marketStats.stat1Label",
+      "marketStats.stat1Value",
+      "marketStats.stat2Label",
+      "marketStats.stat2Value",
+      "marketStats.stat3Label",
+      "marketStats.stat3Value",
     ],
     dataSource: undefined,
     defaultEnabled: true,
@@ -44,7 +52,11 @@ export const slot = {
   } satisfies RegisterSectionSlot,
 
   featuredListings: {
-    contentKeys: ["listings.heading", "listings.subheading", "listings.ctaLabel"],
+    contentKeys: [
+      "listings.heading",
+      "listings.subheading",
+      "listings.ctaLabel",
+    ],
     dataSource: "listings" as const,
     defaultEnabled: true,
     id: "featured-listings",
@@ -64,7 +76,12 @@ export const slot = {
   } satisfies RegisterSectionSlot,
 
   story: {
-    contentKeys: ["story.eyebrow", "story.heading", "story.body", "story.ctaLabel"],
+    contentKeys: [
+      "story.eyebrow",
+      "story.heading",
+      "story.body",
+      "story.ctaLabel",
+    ],
     dataSource: undefined,
     defaultEnabled: true,
     id: "story",
@@ -136,13 +153,38 @@ export const slot = {
   } satisfies RegisterSectionSlot,
 
   contact: {
-    contentKeys: ["contact.email", "contact.phone", "contact.address", "contact.whatsapp"],
+    contentKeys: [
+      "contact.email",
+      "contact.phone",
+      "contact.address",
+      "contact.whatsapp",
+    ],
     dataSource: "contact" as const,
     defaultEnabled: true,
     id: "contact",
     label: "Contact",
     sectionType: "ContactSection",
     sortOrder: 58,
+  } satisfies RegisterSectionSlot,
+
+  blogList: {
+    contentKeys: [],
+    dataSource: "blog_posts" as const,
+    defaultEnabled: true,
+    id: "blog-list",
+    label: "Blog List",
+    sectionType: "BlogListSection",
+    sortOrder: 35,
+  } satisfies RegisterSectionSlot,
+
+  blogPost: {
+    contentKeys: [],
+    dataSource: "blog_posts" as const,
+    defaultEnabled: true,
+    id: "blog-post",
+    label: "Blog Post",
+    sectionType: "BlogPostSection",
+    sortOrder: 10,
   } satisfies RegisterSectionSlot,
 
   cta: {
@@ -166,7 +208,12 @@ export const universalPages: RegisterPageDefinition[] = [
   { label: "Login", pageKey: "login", slug: "/login", sections: [] },
   { label: "Sign Up", pageKey: "signup", slug: "/signup", sections: [] },
   { label: "404", pageKey: "not-found", slug: "/404", sections: [] },
-  { label: "Privacy Policy", pageKey: "privacy", slug: "/privacy", sections: [] },
+  {
+    label: "Privacy Policy",
+    pageKey: "privacy",
+    slug: "/privacy",
+    sections: [],
+  },
   { label: "Terms of Service", pageKey: "terms", slug: "/terms", sections: [] },
 ];
 

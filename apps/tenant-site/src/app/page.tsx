@@ -4,11 +4,14 @@ import {
   sampleHomePage,
   sampleTheme,
 } from "@plotkeys/section-registry";
-import { headers } from "next/headers";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import type { JSX } from "react";
 import { parseTenantRenderMode } from "../lib/render-mode";
-import { resolveTenantContext, resolveTenantShell } from "../lib/resolve-tenant";
+import {
+  resolveTenantContext,
+  resolveTenantShell,
+} from "../lib/resolve-tenant";
 
 function renderSection(
   section: HomeSectionDefinition,
@@ -115,6 +118,7 @@ export default async function TenantWebsiteHomePage({
       companyLogoUrl: tenant.company.logoUrl,
       content: tenant.publishedConfig.contentJson,
       liveAgents: tenant.liveAgents,
+      liveBlogPosts: tenant.liveBlogPosts,
       liveListings: tenant.liveListings,
       market: tenant.company.market ?? tenant.company.name,
       subdomain: tenant.company.slug,

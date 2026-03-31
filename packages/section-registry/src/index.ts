@@ -1,6 +1,16 @@
 import type { JSX } from "react";
 import { getEnabledSections, getTemplatePageInventory } from "./page-inventory";
 import {
+  innerPageDefaults,
+  pageAliasFields,
+} from "./register/inner-page-defaults";
+import {
+  type BlogListConfig,
+  BlogListSection,
+  type BlogPostConfig,
+  BlogPostSection,
+} from "./sections/blog-sections";
+import {
   type AgentShowcaseConfig,
   AgentShowcaseSection,
   ContactSection,
@@ -35,10 +45,6 @@ import {
   type ThemeConfig,
 } from "./sections/home-page";
 import type { RenderMode } from "./types";
-import {
-  innerPageDefaults,
-  pageAliasFields,
-} from "./register/inner-page-defaults";
 
 export type TemplateTier = "starter" | "plus" | "pro";
 
@@ -63,7 +69,9 @@ export type HomeSectionDefinition =
   | SectionDefinition<NewsletterConfig>
   | SectionDefinition<HeroSearchConfig>
   | SectionDefinition<WhyChooseUsConfig>
-  | SectionDefinition<ServiceHighlightsConfig>;
+  | SectionDefinition<ServiceHighlightsConfig>
+  | SectionDefinition<BlogListConfig>
+  | SectionDefinition<BlogPostConfig>;
 
 export type EditableFieldDefinition = {
   aiEnabled?: boolean;
@@ -129,6 +137,16 @@ export type LiveAgentItem = {
   title?: string | null;
 };
 
+export type LiveBlogPostItem = {
+  content?: string | null;
+  excerpt?: string | null;
+  featuredImageUrl?: string | null;
+  id: string;
+  publishedAt?: string | null;
+  slug: string;
+  title: string;
+};
+
 export type { RenderMode, TenantResource } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -180,8 +198,10 @@ type ResolveTemplateOptions = {
   companyLogoUrl?: string | null;
   content?: TenantContentRecord;
   liveAgents?: LiveAgentItem[];
+  liveBlogPosts?: LiveBlogPostItem[];
   liveListings?: LiveListingItem[];
   market?: string;
+  currentBlogPost?: LiveBlogPostItem | null;
   /** Which page to render. Defaults to "home" when omitted. */
   pageKey?: string;
   /** Defaults to "live" when omitted. */
@@ -350,6 +370,8 @@ type SectionBuilder = (
   subdomain?: string,
   pageKey?: string,
   templateKey?: string,
+  liveBlogPosts?: LiveBlogPostItem[],
+  currentBlogPost?: LiveBlogPostItem | null,
 ) => HomeSectionDefinition;
 
 type ListingRouteContract = {
@@ -762,6 +784,75 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     id: "service-highlights",
     type: "service_highlights",
   }),
+  BlogListSection: (
+    _content,
+    _liveListings,
+    _liveAgents,
+    _subdomain,
+    _pageKey,
+    _templateKey,
+    liveBlogPosts,
+  ) => ({
+    component: BlogListSection,
+    config: {
+      description:
+        liveBlogPosts && liveBlogPosts.length > 0
+          ? "Expert advice, market updates, and practical guidance from our team."
+          : "Fresh property insights and market commentary will appear here as new articles are published.",
+      eyebrow: "Latest articles",
+      items:
+        liveBlogPosts && liveBlogPosts.length > 0
+          ? liveBlogPosts.map((post) => ({
+              excerpt: post.excerpt ?? undefined,
+              featuredImageUrl: post.featuredImageUrl ?? undefined,
+              id: post.id,
+              publishedAt: post.publishedAt ?? undefined,
+              slug: post.slug,
+              title: post.title,
+            }))
+          : [
+              {
+                excerpt:
+                  "Follow our latest updates for buying tips, market movement, and neighborhood guides.",
+                id: "sample-blog-post",
+                publishedAt: new Date().toISOString(),
+                slug: "coming-soon",
+                title: "The blog will be live soon.",
+              },
+            ],
+      title: "Insights for smarter property decisions.",
+    },
+    id: "blog-list",
+    type: "blog_list",
+  }),
+  BlogPostSection: (
+    _content,
+    _liveListings,
+    _liveAgents,
+    _subdomain,
+    _pageKey,
+    _templateKey,
+    liveBlogPosts,
+    currentBlogPost,
+  ) => {
+    const post = currentBlogPost ?? liveBlogPosts?.[0] ?? null;
+
+    return {
+      component: BlogPostSection,
+      config: {
+        backHref: "/blog",
+        content:
+          post?.content ??
+          "# Blog post preview\n\nYour published article will appear here once a post is available.",
+        excerpt: post?.excerpt ?? undefined,
+        featuredImageUrl: post?.featuredImageUrl ?? undefined,
+        publishedAt: post?.publishedAt ?? undefined,
+        title: post?.title ?? "Blog post preview",
+      },
+      id: "blog-post",
+      type: "blog_post",
+    };
+  },
 };
 
 /**
@@ -830,6 +921,14 @@ export const sectionComponents: Record<
     config: unknown;
     theme: ThemeConfig;
   }) => JSX.Element,
+  blog_list: BlogListSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
+  blog_post: BlogPostSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
 };
 
 /**
@@ -883,6 +982,8 @@ function buildPageSections(
   liveListings?: LiveListingItem[],
   liveAgents?: LiveAgentItem[],
   subdomain?: string,
+  liveBlogPosts?: LiveBlogPostItem[],
+  currentBlogPost?: LiveBlogPostItem | null,
 ): {
   pageKey: string;
   sections: HomeSectionDefinition[];
@@ -903,6 +1004,8 @@ function buildPageSections(
             subdomain,
             pageKey,
             templateKey,
+            liveBlogPosts,
+            currentBlogPost,
           )
         : null;
     })
@@ -943,6 +1046,8 @@ function buildDefaultHomePage(
           liveAgents,
           subdomain,
           "home",
+          undefined,
+          undefined,
           undefined,
         ),
       )
@@ -2160,8 +2265,10 @@ export function resolveWebsitePresentation({
   companyLogoUrl,
   content,
   liveAgents,
+  liveBlogPosts,
   liveListings,
   market,
+  currentBlogPost,
   pageKey = "home",
   renderMode = "live",
   subdomain,
@@ -2171,7 +2278,8 @@ export function resolveWebsitePresentation({
   const template = getTemplateDefinition(templateKey);
   // For non-home pages, inject per-page default content (e.g. "about.hero.title")
   // between template defaults and tenant-saved content so tenants can override.
-  const pageDefaults = pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
+  const pageDefaults =
+    pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
   const mergedContent = {
     ...template.defaultContent,
     ...pageDefaults,
@@ -2185,6 +2293,8 @@ export function resolveWebsitePresentation({
     liveListings,
     liveAgents,
     subdomain,
+    liveBlogPosts,
+    currentBlogPost,
   );
 
   // Apply family-specific component overrides when the templateKey maps to a
@@ -2239,8 +2349,10 @@ export type TenantSnapshot = {
   companyLogoUrl?: string | null;
   content?: TenantContentRecord;
   liveAgents?: LiveAgentItem[];
+  liveBlogPosts?: LiveBlogPostItem[];
   liveListings?: LiveListingItem[];
   market?: string;
+  currentBlogPost?: LiveBlogPostItem | null;
   subdomain?: string;
   theme?: TenantThemeRecord;
 };
@@ -2288,6 +2400,7 @@ export function resolvePage(
   let content: TenantContentRecord;
   let liveListings: LiveListingItem[] | undefined;
   let liveAgents: LiveAgentItem[] | undefined;
+  let liveBlogPosts: LiveBlogPostItem[] | undefined;
 
   if (renderMode === "template" && registerVariant) {
     content = _getPlaceholderContent(registerVariant.family);
@@ -2309,11 +2422,29 @@ export function resolvePage(
       slug: a.slug,
       title: a.role,
     }));
+    liveBlogPosts = [
+      {
+        content:
+          "# Market update\n\nBrowse placeholder insight content while previewing this template.",
+        excerpt:
+          "Browse placeholder insight content while previewing this template.",
+        id: "placeholder-blog-post",
+        publishedAt: new Date().toISOString(),
+        slug: "market-update",
+        title: "A sample market update",
+      },
+    ];
   } else {
-    const pageDefaults = pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
-    content = { ...template.defaultContent, ...pageDefaults, ...tenant.content };
+    const pageDefaults =
+      pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
+    content = {
+      ...template.defaultContent,
+      ...pageDefaults,
+      ...tenant.content,
+    };
     liveListings = tenant.liveListings;
     liveAgents = tenant.liveAgents;
+    liveBlogPosts = tenant.liveBlogPosts;
   }
 
   const builtPage = buildPageSections(
@@ -2323,6 +2454,8 @@ export function resolvePage(
     liveListings,
     liveAgents,
     tenant.subdomain,
+    liveBlogPosts,
+    tenant.currentBlogPost,
   );
 
   const familyOverrides = _resolveFamilySectionComponents(
@@ -2454,6 +2587,11 @@ export {
 export type { InlineOverviewProps } from "./runtime/inline-overview";
 export { InlineOverview } from "./runtime/inline-overview";
 export { PreviewBanner } from "./runtime/preview-banner";
+export type { SmartFillFn } from "./runtime/smart-fill-context";
+export {
+  SmartFillProvider,
+  useSmartFill,
+} from "./runtime/smart-fill-context";
 export type {
   WebsiteRuntimeContextValue,
   WebsiteRuntimeProviderProps,
@@ -2469,11 +2607,6 @@ export {
   useTemplateStylePreset,
   WebsiteRuntimeProvider,
 } from "./runtime-context";
-export {
-  SmartFillProvider,
-  useSmartFill,
-} from "./runtime/smart-fill-context";
-export type { SmartFillFn } from "./runtime/smart-fill-context";
 export type {
   EditableImageProps,
   EditableRepeaterProps,

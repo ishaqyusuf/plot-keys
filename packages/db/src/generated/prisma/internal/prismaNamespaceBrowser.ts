@@ -60,6 +60,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
+  BlogPost: 'BlogPost',
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
@@ -261,6 +262,25 @@ export const BillingLineItemScalarFieldEnum = {
 } as const
 
 export type BillingLineItemScalarFieldEnum = (typeof BillingLineItemScalarFieldEnum)[keyof typeof BillingLineItemScalarFieldEnum]
+
+
+export const BlogPostScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  authorId: 'authorId',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  featuredImage: 'featuredImage',
+  status: 'status',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
 
 
 export const CompanyIntegrationScalarFieldEnum = {
