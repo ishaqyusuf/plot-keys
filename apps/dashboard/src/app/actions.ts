@@ -1232,6 +1232,38 @@ export async function syncDomainsAction() {
   redirect(redirectUrl);
 }
 
+export async function connectCustomDomainAction(formData: FormData) {
+  const hostname = String(formData.get("hostname") ?? "").trim();
+  let redirectUrl = "/domains?connected=1";
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.connectCustomDomain({ hostname });
+    revalidatePath("/domains");
+    revalidatePath("/");
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to connect domain.";
+    redirectUrl = createRedirectUrl("/domains/connect", { error: message });
+  }
+  redirect(redirectUrl);
+}
+
+export async function removeCustomDomainAction(formData: FormData) {
+  const domainId = String(formData.get("domainId") ?? "").trim();
+  let redirectUrl = "/domains?removed=1";
+  try {
+    const caller = await createServerCaller();
+    await caller.workspace.removeCustomDomain({ domainId });
+    revalidatePath("/domains");
+    revalidatePath("/");
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to remove domain.";
+    redirectUrl = createRedirectUrl("/domains", { error: message });
+  }
+  redirect(redirectUrl);
+}
+
 // ─── Team management ──────────────────────────────────────────────────────
 
 export async function acceptInviteAction(formData: FormData) {

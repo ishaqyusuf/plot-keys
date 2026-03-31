@@ -1,6 +1,7 @@
 import { buildTenantDashboardUrl } from "./tenant-domains";
 
 export * from "./cn";
+export * from "./domain-service";
 export * from "./paystack";
 export * from "./phone";
 export * from "./pricing";

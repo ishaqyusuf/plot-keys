@@ -40,6 +40,10 @@ import {
   listStockImageLicensesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
+  listCustomDomainsWithVerification,
+  createCustomDomainPair,
+  findTenantDomainByHostname,
+  removeCustomDomain,
   logAiUsage,
   publishSiteConfiguration,
   publishWebsiteVersion,
@@ -77,10 +81,14 @@ import {
 } from "@plotkeys/section-registry";
 import {
   buildDashboardHostname,
+  buildDnsInstructions,
   buildSitefrontHostname,
   describeTemplateAccess,
+  extractApexDomain,
+  isValidDomainName,
   isVercelDomainProvisioningConfigured,
   plotkeysRootDomain,
+  searchDomainAvailability,
   type SubscriptionTier,
 } from "@plotkeys/utils";
 import { TRPCError } from "@trpc/server";
@@ -96,12 +104,15 @@ import {
 import {
   changePlanInputSchema,
   completeOnboardingInputSchema,
+  connectCustomDomainInputSchema,
   createAppointmentInputSchema,
   createTemplateDraftInputSchema,
   generatePageContentInputSchema,
   initializeCheckoutInputSchema,
   publishSiteConfigurationInputSchema,
+  removeCustomDomainInputSchema,
   saveOnboardingProgressInputSchema,
+  searchDomainInputSchema,
   smartFillFieldInputSchema,
   updateAppointmentStatusInputSchema,
   updateLeadStatusInputSchema,
@@ -1415,6 +1426,129 @@ export const workspaceRouter = createTRPCRouter({
       hasFailure,
       allProvisioned,
     };
+  }),
+  searchDomains: membershipProcedure
+    .input(searchDomainInputSchema)
+    .query(async ({ input }) => {
+      return searchDomainAvailability(input.label, input.tlds);
+    }),
+  connectCustomDomain: membershipProcedure
+    .input(connectCustomDomainInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      // Normalize and validate the hostname
+      const hostname = input.hostname.toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "").replace(/:\d+$/, "");
+
+      if (!isValidDomainName(hostname)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid domain name. Enter a valid domain like example.com or example.com.ng.",
+        });
+      }
+
+      // Reject plotkeys subdomains — those are created automatically
+      if (hostname.endsWith(`.${plotkeysRootDomain}`)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "PlotKeys subdomains are created automatically during onboarding.",
+        });
+      }
+
+      // Check for conflicts
+      const existingSitefront = await findTenantDomainByHostname(db, hostname);
+      if (existingSitefront) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: existingSitefront.companyId === companyId
+            ? "This domain is already connected to your workspace."
+            : "This domain is already in use by another workspace.",
+        });
+      }
+
+      const dashboardHostname = `dashboard.${hostname}`;
+      const existingDashboard = await findTenantDomainByHostname(db, dashboardHostname);
+      if (existingDashboard) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "This domain is already in use.",
+        });
+      }
+
+      const apexDomain = extractApexDomain(hostname);
+
+      // Create the domain pair
+      const domain = await createCustomDomainPair(db, {
+        companyId,
+        hostname,
+        apexDomain,
+      });
+
+      // Trigger Vercel provisioning if configured
+      if (isVercelDomainProvisioningConfigured()) {
+        await triggerJob(
+          domainSyncTask,
+          domainSyncHandler,
+          { companyId },
+          { baseDelayMs: 2000, maxAttempts: 4 },
+        );
+      }
+
+      // Build DNS instructions for the user
+      const instructions = buildDnsInstructions(hostname);
+
+      return {
+        domain: {
+          id: domain.id,
+          hostname: domain.hostname,
+          status: domain.status,
+        },
+        dnsInstructions: instructions,
+      };
+    }),
+  removeCustomDomain: membershipProcedure
+    .input(removeCustomDomainInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+
+      const removed = await removeCustomDomain(db, {
+        companyId,
+        domainId: input.domainId,
+      });
+
+      if (!removed) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Custom domain not found or already removed.",
+        });
+      }
+
+      return { removed: true, hostname: removed.hostname };
+    }),
+  getCustomDomainDnsInstructions: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+
+    const customDomains = await listCustomDomainsWithVerification(db, companyId);
+
+    return customDomains
+      .filter((d) => d.kind === "sitefront_custom_domain")
+      .map((d) => {
+        const verificationChallenges = Array.isArray(d.verificationJson)
+          ? (d.verificationJson as Array<{ type: string; domain: string; value: string }>)
+          : undefined;
+
+        return {
+          id: d.id,
+          hostname: d.hostname,
+          status: d.status,
+          lastError: d.lastError,
+          provisionedAt: d.provisionedAt,
+          instructions: buildDnsInstructions(d.hostname, verificationChallenges),
+        };
+      });
   }),
   updateSiteField: membershipProcedure
     .input(updateSiteFieldInputSchema)

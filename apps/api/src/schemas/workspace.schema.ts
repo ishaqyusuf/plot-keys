@@ -121,3 +121,24 @@ export type GeneratePageContentInput = z.infer<
 export type SaveOnboardingProgressInput = z.infer<
   typeof saveOnboardingProgressInputSchema
 >;
+
+export const searchDomainInputSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(1, "Domain label is required.")
+    .max(63, "Domain label is too long."),
+  tlds: z.array(z.string().trim()).optional(),
+});
+
+export const connectCustomDomainInputSchema = z.object({
+  hostname: z
+    .string()
+    .trim()
+    .min(1, "Hostname is required.")
+    .max(253, "Hostname is too long."),
+});
+
+export const removeCustomDomainInputSchema = z.object({
+  domainId: z.string().uuid("Invalid domain id."),
+});
