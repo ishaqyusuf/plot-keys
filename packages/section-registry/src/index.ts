@@ -35,6 +35,10 @@ import {
   type ThemeConfig,
 } from "./sections/home-page";
 import type { RenderMode } from "./types";
+import {
+  innerPageDefaults,
+  pageAliasFields,
+} from "./register/inner-page-defaults";
 
 export type TemplateTier = "starter" | "plus" | "pro";
 
@@ -840,6 +844,32 @@ export type SerializableSectionData = {
 };
 
 /**
+ * Applies per-page content aliasing for non-home pages.
+ *
+ * When rendering the "about" page, if the tenant (or the inner-page defaults)
+ * has set "about.hero.title", that value is copied into "hero.title" so the
+ * existing section builders — which always read the base keys — pick up the
+ * page-specific content without any builder changes.
+ *
+ * The priority chain for a given base key on a non-home page is:
+ *   page-prefixed tenant content  >  page-prefixed inner-page defaults  >  base key value
+ */
+function resolvePageContent(
+  content: TenantContentRecord,
+  pageKey: string,
+): TenantContentRecord {
+  if (pageKey === "home") return content;
+  const resolved: TenantContentRecord = { ...content };
+  for (const field of pageAliasFields) {
+    const prefixed = `${pageKey}.${field}`;
+    if (content[prefixed] !== undefined) {
+      resolved[field] = content[prefixed];
+    }
+  }
+  return resolved;
+}
+
+/**
  * Builds the section list for the given page, driven by the page-inventory for
  * the given template. Per-template overrides (e.g. Meridian leads with listings)
  * are respected automatically. Falls back to the default home section set when
@@ -859,12 +889,15 @@ function buildPageSections(
 } {
   const slots = getEnabledSections(templateKey, pageKey);
 
+  // Alias page-prefixed content keys to base keys so builders remain unchanged.
+  const resolvedContent = resolvePageContent(content, pageKey);
+
   const sections: HomeSectionDefinition[] = slots
     .map((slot) => {
       const builder = sectionBuilders[slot.sectionType];
       return builder
         ? builder(
-            content,
+            resolvedContent,
             liveListings,
             liveAgents,
             subdomain,
@@ -2136,8 +2169,12 @@ export function resolveWebsitePresentation({
   theme,
 }: ResolveTemplateOptions): ResolvedWebsitePresentation {
   const template = getTemplateDefinition(templateKey);
+  // For non-home pages, inject per-page default content (e.g. "about.hero.title")
+  // between template defaults and tenant-saved content so tenants can override.
+  const pageDefaults = pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
   const mergedContent = {
     ...template.defaultContent,
+    ...pageDefaults,
     ...content,
   };
 
@@ -2273,7 +2310,8 @@ export function resolvePage(
       title: a.role,
     }));
   } else {
-    content = { ...template.defaultContent, ...tenant.content };
+    const pageDefaults = pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
+    content = { ...template.defaultContent, ...pageDefaults, ...tenant.content };
     liveListings = tenant.liveListings;
     liveAgents = tenant.liveAgents;
   }
