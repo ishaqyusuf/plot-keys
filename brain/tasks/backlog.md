@@ -60,7 +60,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **Listing Overview Standardization** — Public listing overview pages remain template-based, but now share centralized route resolution plus shared tenant-site query parsing for location / priceRange / sort / page. ✅ Done
 - [x] **Multi-page Template Depth** — Add meaningful per-template page inventories (for example About, Contact, Listings, Projects, Services) so templates differ structurally, not only by styling and seed content. ✅ Done (per-page hero defaults + content aliasing; inline editing scope deferred)
 - [x] **Path-Aware Builder Preview** — Make internal template links work in preview/configure mode via query state such as `?path=/about` so users can navigate multi-page templates without leaving the builder shell. ✅ Done
-- [ ] **Preview-Safe Action Interception** — Intercept template CTAs, forms, booking, and payment actions in preview/configure mode so interactive elements feel real but do not execute live workflows.
+- [x] **Preview-Safe Action Interception** — ClickGuard now intercepts all button clicks (not just `type="submit"`), ContactSection skips real `fetch()` in non-live modes, PreviewBanner shows mode label at page top, and PreviewToast flashes on swallowed button clicks. ✅ Done
 - [ ] **Builder UI Shadcn Standardization** — Refactor builder/configure-mode controls toward shadcn/ui primitives and composition patterns as the default editor UI system.
 - [ ] **Blog/CMS Module** — Add blog post model, rich text editor, and blog section rendering for tenant sites.
 - [x] **SEO & Meta Tags** — Add per-page SEO metadata (title, description, OG image) management in builder; render in tenant-site head. ✅ Done

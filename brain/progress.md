@@ -55,6 +55,7 @@
 | Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
 | AI-Powered Page Content Generation | ✅ Done — per-page AI content generation in builder sidebar (10 credits) |
 | Template Family Differentiation | ✅ Done — register family homes now vary by business model and conversion spine |
+| Preview-Safe Action Interception | ✅ Done — forms, buttons, and links safely intercepted in non-live modes |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
@@ -64,6 +65,20 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — Preview-Safe Action Interception
+
+### What was built
+- **`packages/section-registry/src/runtime/click-guard.tsx`** — ClickGuard now intercepts **all** `<button>` clicks in non-live modes (previously only `button[type='submit']`). Added `PreviewToast` component that briefly shows "Action disabled in preview" when a button is swallowed. Uses `useEffect` auto-hide timer (1500ms).
+- **`packages/section-registry/src/sections/extended-sections.tsx`** — `ContactForm` now checks `useRenderMode()` before executing the `fetch()` call. In non-live modes (`draft`, `preview`, `template`), the form shows immediate "Message received" success without making any real API calls.
+- **`packages/section-registry/src/runtime/preview-banner.tsx`** (new) — Slim sticky banner at the top of the page in non-live modes. Shows render mode label ("Draft preview", "Preview mode", "Template preview") and the message "links, forms and actions are disabled".
+- **`packages/section-registry/src/index.ts`** — Exported `PreviewBanner` from the main barrel.
+- **`apps/tenant-site/src/components/tenant-interaction-shell.tsx`** — Wired `PreviewBanner` inside `ClickGuardProvider`, above `{children}`.
+
+### Design
+- **Three-layer interception:** (1) ClickGuard DOM-level click capture for links, buttons, and forms; (2) React-level render-mode guard in ContactSection's `handleSubmit` to prevent `fetch()` even if ClickGuard is bypassed; (3) Visual feedback via PreviewBanner (persistent) and PreviewToast (ephemeral).
+- **Zero regression risk in live mode:** All guards check `renderMode === "live"` and pass through transparently. No changes to live-mode behavior.
+- **NewsletterSection already safe:** Only calls local `setSubmitted(true)` — no API endpoint, no fetch.
 
 ## 2026-03-31 — AI-Powered Page Content Generation
 
