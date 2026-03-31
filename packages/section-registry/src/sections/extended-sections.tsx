@@ -12,6 +12,7 @@
  */
 
 import { type CSSProperties, type JSX, useState } from "react";
+import { useRenderMode } from "../runtime-context";
 import type { ThemeConfig } from "./home-page";
 import { useItemOverviewTrigger } from "./interaction-utils";
 
@@ -451,6 +452,7 @@ function ContactForm({
   config: ContactSectionConfig;
   theme: ThemeConfig;
 }) {
+  const renderMode = useRenderMode();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -474,6 +476,13 @@ function ContactForm({
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // In non-live modes, show immediate success without making real API calls.
+    if (renderMode !== "live") {
+      setSubmitted(true);
+      return;
+    }
+
     const form = e.currentTarget;
     const data = new FormData(form);
 

@@ -3,6 +3,7 @@
 import {
   ClickGuardProvider,
   InlineOverview,
+  PreviewBanner,
   type TemplateConfig,
   WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
@@ -32,6 +33,7 @@ export function TenantInteractionShell({
       templateConfig={templateConfig}
     >
       <ClickGuardProvider>
+        <PreviewBanner />
         {children}
         <InlineOverview />
       </ClickGuardProvider>
