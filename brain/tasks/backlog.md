@@ -51,7 +51,7 @@ This file holds actionable work that is identified but not currently in progress
 - [x] **App Store Expansion** — Created `/app-store` dashboard page with integration cards (GA, Facebook Pixel, WhatsApp, Calendly) showing connect/disconnect status. Created `IntegrationScripts` component that injects GA4 and Facebook Pixel `<Script>` tags into tenant sites. Sidebar App Store link now functional. ✅ Done
 - [x] **AI-Powered Content Generation** — Expanded beyond smart-fill with `generatePageContent()` AI function that generates all editable fields for a specific page in a single LLM call. Added `generatePageContent` tRPC mutation (10 credits), `GeneratePageContentButton` in builder sidebar "AI content" section with per-page label and credit cost display. Property descriptions and blog posts deferred to dedicated modules. ✅ Done
 - [x] **Template Usage Analytics** — Add usage-count aggregation so tenants can assess template uniqueness before selecting. ✅ Done
-- [ ] **Template Family Differentiation** — Reduce shared/fallback template structures; define stronger template families with distinct home-page composition, navigation patterns, and conversion strategy instead of mostly theme-level variation.
+- [x] **Template Family Differentiation** — Register-family home pages now follow clearer structural identities by business model: Noor stays listings-first with proof/team before story, Bana becomes project-first, Wafi shifts to service/owner-acquisition, Faris emphasizes the solo agent, Thuraya becomes editorial/portfolio-led, and Sakan stays search/renter-conversion-first. Existing family-specific nav models and CTAs now line up with these stronger home-page compositions across Starter / Plus / Pro tiers. ✅ Done
 
 ## Phase 4 — Scale & Infrastructure
 

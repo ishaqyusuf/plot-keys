@@ -4,13 +4,13 @@
  * Home gains a Newsletter section.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const noorProPages: RegisterPageDefinition[] = [
   {
@@ -21,21 +21,21 @@ export const noorProPages: RegisterPageDefinition[] = [
       { ...slot.heroBanner, id: "hero", sortOrder: 10 },
       { ...slot.featuredListings, id: "featured-listings", sortOrder: 20 },
       { ...slot.marketStats, id: "market-stats", sortOrder: 30 },
-      { ...slot.story, id: "story", sortOrder: 40 },
       {
         ...slot.agentShowcase,
         id: "agent-showcase",
         defaultEnabled: true,
-        sortOrder: 50,
+        sortOrder: 40,
         requiredResources: ["agents"],
       },
       {
         ...slot.testimonials,
         id: "testimonials",
         defaultEnabled: true,
-        sortOrder: 55,
+        sortOrder: 50,
         requiredResources: ["testimonials"],
       },
+      { ...slot.story, id: "story", sortOrder: 55 },
       { ...slot.newsletter, id: "newsletter", sortOrder: 57 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],

@@ -3,8 +3,8 @@
  * Extends Starter with Services, FAQ pages, and an enriched Home page.
  */
 
+import { savedListingsPage, slot, universalPages } from "../../shared-slots";
 import type { RegisterPageDefinition } from "../../types";
-import { slot, universalPages, savedListingsPage } from "../../shared-slots";
 
 export const wafiPlusPages: RegisterPageDefinition[] = [
   {
@@ -12,17 +12,17 @@ export const wafiPlusPages: RegisterPageDefinition[] = [
     pageKey: "home",
     slug: "/",
     sections: [
-      { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
+      { ...slot.heroBanner, id: "hero", sortOrder: 10 },
       { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 20 },
+      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
       {
         ...slot.propertyGrid,
         id: "property-grid",
         dataSource: "listings",
         defaultEnabled: true,
-        sortOrder: 25,
+        sortOrder: 40,
       },
-      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
-      { ...slot.faq, id: "faq", sortOrder: 40 },
+      { ...slot.faq, id: "faq", sortOrder: 50 },
       { ...slot.contact, id: "contact", sortOrder: 55 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],
@@ -33,7 +33,12 @@ export const wafiPlusPages: RegisterPageDefinition[] = [
     slug: "/properties",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
       { ...slot.cta, id: "cta", sortOrder: 30 },
     ],
   },

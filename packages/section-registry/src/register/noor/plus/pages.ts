@@ -4,13 +4,13 @@
  * Home gains AgentShowcase and Testimonials sections.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const noorPlusPages: RegisterPageDefinition[] = [
   {
@@ -21,21 +21,21 @@ export const noorPlusPages: RegisterPageDefinition[] = [
       { ...slot.heroBanner, id: "hero", sortOrder: 10 },
       { ...slot.featuredListings, id: "featured-listings", sortOrder: 20 },
       { ...slot.marketStats, id: "market-stats", sortOrder: 30 },
-      { ...slot.story, id: "story", sortOrder: 40 },
       {
         ...slot.agentShowcase,
         id: "agent-showcase",
         defaultEnabled: true,
-        sortOrder: 50,
+        sortOrder: 40,
         requiredResources: ["agents"],
       },
       {
         ...slot.testimonials,
         id: "testimonials",
         defaultEnabled: true,
-        sortOrder: 55,
+        sortOrder: 50,
         requiredResources: ["testimonials"],
       },
+      { ...slot.story, id: "story", sortOrder: 55 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],
   },

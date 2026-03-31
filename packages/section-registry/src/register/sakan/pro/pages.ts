@@ -4,13 +4,13 @@
  * Home gains Testimonials and Newsletter sections.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const sakanProPages: RegisterPageDefinition[] = [
   // Home — adds Testimonials(45) and Newsletter(57)
@@ -20,16 +20,20 @@ export const sakanProPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
-      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 25 },
-      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
       {
         ...slot.testimonials,
         id: "testimonials",
-        sortOrder: 45,
+        sortOrder: 30,
         defaultEnabled: true,
         requiredResources: ["testimonials"],
       },
+      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 40 },
       { ...slot.faq, id: "faq", sortOrder: 50 },
       { ...slot.contact, id: "contact", sortOrder: 55 },
       { ...slot.newsletter, id: "newsletter", sortOrder: 57 },

@@ -2,8 +2,8 @@
  * Page definitions for the Wafi Starter plan.
  */
 
+import { savedListingsPage, slot, universalPages } from "../../shared-slots";
 import type { RegisterPageDefinition } from "../../types";
-import { slot, universalPages, savedListingsPage } from "../../shared-slots";
 
 export const wafiStarterPages: RegisterPageDefinition[] = [
   {
@@ -11,10 +11,10 @@ export const wafiStarterPages: RegisterPageDefinition[] = [
     pageKey: "home",
     slug: "/",
     sections: [
-      { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
+      { ...slot.heroBanner, id: "hero", sortOrder: 10 },
       { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 20 },
       { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
-      { ...slot.faq, id: "faq", sortOrder: 40 },
+      { ...slot.contact, id: "contact", sortOrder: 50 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
     ],
   },
@@ -24,7 +24,12 @@ export const wafiStarterPages: RegisterPageDefinition[] = [
     slug: "/properties",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
       { ...slot.cta, id: "cta", sortOrder: 30 },
     ],
   },

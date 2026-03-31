@@ -1,10 +1,10 @@
-import type { RegisterPageDefinition } from "../../types";
 import {
+  inquiryBasketPage,
+  savedListingsPage,
   slot,
   universalPages,
-  savedListingsPage,
-  inquiryBasketPage,
 } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const thurayaStarterPages: RegisterPageDefinition[] = [
   // Home
@@ -14,8 +14,14 @@ export const thurayaStarterPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroBanner, sortOrder: 10 },
-      { ...slot.story, sortOrder: 20 },
-      { ...slot.featuredListings, sortOrder: 30 },
+      { ...slot.featuredListings, sortOrder: 20 },
+      {
+        ...slot.testimonials,
+        sortOrder: 30,
+        defaultEnabled: true,
+        requiredResources: ["testimonials"],
+      },
+      { ...slot.story, sortOrder: 40 },
       { ...slot.cta, sortOrder: 60 },
     ],
   },

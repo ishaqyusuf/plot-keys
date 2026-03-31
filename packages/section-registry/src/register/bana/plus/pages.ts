@@ -4,8 +4,8 @@
  * Home gains a PropertyGrid and Testimonials section.
  */
 
-import type { RegisterPageDefinition } from "../../types";
 import { slot, universalPages } from "../../shared-slots";
+import type { RegisterPageDefinition } from "../../types";
 
 export const banaPlusPages: RegisterPageDefinition[] = [
   {
@@ -14,17 +14,16 @@ export const banaPlusPages: RegisterPageDefinition[] = [
     slug: "/",
     sections: [
       { ...slot.heroBanner, id: "hero", sortOrder: 10 },
-      { ...slot.story, id: "story", sortOrder: 20 },
-      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 30 },
-      { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 40 },
       {
         ...slot.propertyGrid,
         id: "project-grid",
         label: "Project Grid",
         sectionType: "PropertyGridSection",
         defaultEnabled: true,
-        sortOrder: 25,
+        sortOrder: 20,
       },
+      { ...slot.marketStats, id: "market-stats", sortOrder: 30 },
+      { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 40 },
       {
         ...slot.testimonials,
         id: "testimonials",

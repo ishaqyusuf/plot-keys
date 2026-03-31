@@ -4,8 +4,8 @@
  * and an enriched Home page with Testimonials and Newsletter.
  */
 
+import { savedListingsPage, slot, universalPages } from "../../shared-slots";
 import type { RegisterPageDefinition } from "../../types";
-import { slot, universalPages, savedListingsPage } from "../../shared-slots";
 
 export const wafiProPages: RegisterPageDefinition[] = [
   {
@@ -13,24 +13,24 @@ export const wafiProPages: RegisterPageDefinition[] = [
     pageKey: "home",
     slug: "/",
     sections: [
-      { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
+      { ...slot.heroBanner, id: "hero", sortOrder: 10 },
       { ...slot.serviceHighlights, id: "service-highlights", sortOrder: 20 },
-      {
-        ...slot.propertyGrid,
-        id: "property-grid",
-        dataSource: "listings",
-        defaultEnabled: true,
-        sortOrder: 25,
-      },
       { ...slot.whyChooseUs, id: "why-choose-us", sortOrder: 30 },
-      { ...slot.faq, id: "faq", sortOrder: 40 },
       {
         ...slot.testimonials,
         id: "testimonials",
         defaultEnabled: true,
         requiredResources: ["testimonials"],
-        sortOrder: 50,
+        sortOrder: 40,
       },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        defaultEnabled: true,
+        sortOrder: 45,
+      },
+      { ...slot.faq, id: "faq", sortOrder: 50 },
       { ...slot.contact, id: "contact", sortOrder: 55 },
       { ...slot.newsletter, id: "newsletter", sortOrder: 57 },
       { ...slot.cta, id: "cta", sortOrder: 60 },
@@ -42,7 +42,12 @@ export const wafiProPages: RegisterPageDefinition[] = [
     slug: "/properties",
     sections: [
       { ...slot.heroSearch, id: "hero-search", sortOrder: 10 },
-      { ...slot.propertyGrid, id: "property-grid", dataSource: "listings", sortOrder: 20 },
+      {
+        ...slot.propertyGrid,
+        id: "property-grid",
+        dataSource: "listings",
+        sortOrder: 20,
+      },
       { ...slot.cta, id: "cta", sortOrder: 30 },
     ],
   },
