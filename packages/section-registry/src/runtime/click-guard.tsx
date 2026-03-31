@@ -7,6 +7,7 @@
  * so that:
  *  - Anchor/Link clicks → preventDefault (no navigation)
  *  - Form submit clicks → preventDefault (no real submission)
+ *  - All button clicks → swallowed (no side effects)
  *  - CTA button clicks → swallowed with a brief visual flash
  *
  * In "live" mode the ClickGuard is a transparent passthrough.
@@ -23,11 +24,12 @@
 
 import {
   createContext,
-  useCallback,
-  useContext,
-  useState,
   type MouseEvent,
   type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { useRenderMode } from "../runtime-context";
 
@@ -59,12 +61,29 @@ const ClickGuardContext = createContext<ClickGuardContextValue>({
 });
 
 // ---------------------------------------------------------------------------
+// Preview toast — brief "Action disabled in preview" indicator
+// ---------------------------------------------------------------------------
+
+function PreviewToast({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <div
+      aria-live="polite"
+      className="pointer-events-none fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2 rounded-full border border-amber-300/40 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-800 shadow-lg transition-opacity duration-300 dark:border-amber-700/40 dark:bg-amber-950/80 dark:text-amber-200"
+    >
+      Action disabled in preview
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
 export function ClickGuardProvider({ children }: { children: ReactNode }) {
   const renderMode = useRenderMode();
   const [activeItem, setActiveItem] = useState<ClickGuardItem | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   const openItem = useCallback((item: ClickGuardItem) => {
     setActiveItem(item);
@@ -73,6 +92,13 @@ export function ClickGuardProvider({ children }: { children: ReactNode }) {
   const closeItem = useCallback(() => {
     setActiveItem(null);
   }, []);
+
+  // Auto-hide toast after a short delay.
+  useEffect(() => {
+    if (!showToast) return;
+    const timer = setTimeout(() => setShowToast(false), 1500);
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   // In live mode, render children with no interception.
   if (renderMode === "live") {
@@ -92,7 +118,9 @@ export function ClickGuardProvider({ children }: { children: ReactNode }) {
       e.preventDefault();
       e.stopPropagation();
       // Auto-open InlineOverview if the anchor carries item data attributes.
-      const itemType = (anchor as HTMLElement).dataset.clickGuardType as ClickGuardItemType | undefined;
+      const itemType = (anchor as HTMLElement).dataset.clickGuardType as
+        | ClickGuardItemType
+        | undefined;
       const itemData = (anchor as HTMLElement).dataset.clickGuardData;
       if (itemType && itemData) {
         try {
@@ -104,8 +132,17 @@ export function ClickGuardProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Intercept form submit buttons and form elements.
-    const formEl = target.closest("button[type='submit'], form");
+    // Intercept all button clicks — covers submit, button, and untyped buttons.
+    const button = target.closest("button");
+    if (button) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowToast(true);
+      return;
+    }
+
+    // Intercept form element clicks as a fallback.
+    const formEl = target.closest("form");
     if (formEl) {
       e.preventDefault();
       e.stopPropagation();
@@ -115,9 +152,11 @@ export function ClickGuardProvider({ children }: { children: ReactNode }) {
 
   return (
     <ClickGuardContext.Provider value={{ activeItem, closeItem, openItem }}>
-      {/* Capture phase listener to intercept before Next.js router handles the click */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: ClickGuard is a transparent interception layer, not an interactive control */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: Wrapper div intercepts events; not a semantic interactive element */}
       <div className="relative" onClick={handleClick}>
         {children}
+        <PreviewToast visible={showToast} />
       </div>
     </ClickGuardContext.Provider>
   );
