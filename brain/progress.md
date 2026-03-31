@@ -45,6 +45,7 @@
 | App Store (GA, FB Pixel, WhatsApp, Calendly) | ✅ Done |
 | Custom domain purchase | ❌ Not started |
 | WebsiteVersion Phase 4 (writes) | ✅ Done |
+| Template usage analytics (TemplatePicker) | ✅ Done |
 | **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
 | **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
@@ -60,6 +61,15 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — Template Usage Analytics
+
+### What was built
+- **`apps/dashboard/src/components/builder/builder-sidebar-controls.tsx`** — `TemplatePicker` now fetches `getTemplateCatalog` via tRPC (`useQuery`). Builds a `usageMap` (key → usageCount) from the API response. Each template card shows `"{N} using"` in muted text below the tagline when count > 0. Falls back to 0 silently while the query loads.
+
+### Design
+- Read-only analytics display only — no new mutations or schema changes
+- `getTemplateCatalog` already returned `usageCount` per template (backed by `countCompaniesByTemplateKey`); this surfaces it in the picker UI
 
 ## 2026-03-30 — WebsiteVersion Phase 4 — Write Path
 
