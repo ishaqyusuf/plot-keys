@@ -68,6 +68,21 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-03-31 — Custom Domain Purchase Phase Clarification
+
+### What changed
+- Confirmed that **Custom Domain Purchase Flow** is the highest-priority remaining non-mobile backlog item.
+- Clarified the domain-planning docs so the future implementation must support:
+  - **Vercel domain attachment and verification** for deployment/runtime routing
+  - **Registrar-based search/purchase/renewal**
+  - **`.com.ng` coverage** through a registrar/provider that supports Nigerian ccTLDs
+
+### Planning direction
+- Treat domain management as a split-provider system rather than assuming one vendor handles everything:
+  - **Vercel** for deployment-facing domain attach/sync
+  - **Registrar adapter(s)** for commercial domain search, purchase, renewal, and DNS/nameserver workflows
+- If the main registrar does not support `.com.ng`, the abstraction should allow a second provider dedicated to Nigerian-domain commerce.
+
 ## 2026-03-31 — Preview-Safe Action Interception
 
 ### What was built
