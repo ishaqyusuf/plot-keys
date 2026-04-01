@@ -20,6 +20,7 @@ model Property {
   deletedAt    DateTime?            @map("deleted_at") @db.Timestamptz(6)
   appointments Appointment[]
   media        PropertyMedia[]
+  savedListings SavedListing[]
 
   @@index([companyId], map: "properties_company_id_idx")
   @@index([status], map: "properties_status_idx")

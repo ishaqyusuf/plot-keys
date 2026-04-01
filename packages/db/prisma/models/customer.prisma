@@ -20,11 +20,30 @@ model Customer {
   updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz(6)
   company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  projectAccess  ProjectCustomerAccess[]
-  projectNotices ProjectCustomerNotice[]
+  savedListings   SavedListing[]
+  projectAccess   ProjectCustomerAccess[]
+  projectNotices  ProjectCustomerNotice[]
 
   @@index([companyId], map: "customers_company_id_idx")
   @@index([companyId, status], map: "customers_company_status_idx")
   @@index([deletedAt], map: "customers_deleted_at_idx")
   @@map("customers")
+}
+
+model SavedListing {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  customerId String   @map("customer_id") @db.Uuid
+  propertyId String   @map("property_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, propertyId], map: "customer_saved_listings_customer_property_key")
+  @@index([companyId], map: "customer_saved_listings_company_id_idx")
+  @@index([customerId], map: "customer_saved_listings_customer_id_idx")
+  @@index([propertyId], map: "customer_saved_listings_property_id_idx")
+  @@map("customer_saved_listings")
 }

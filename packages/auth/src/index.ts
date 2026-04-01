@@ -221,7 +221,7 @@ export async function signUpUser(input: {
   emailVerified?: boolean;
   name: string;
   password: string;
-  phoneNumber: string;
+  phoneNumber?: string | null;
 }) {
   const db = input.db ?? requireDb();
   const email = input.email.trim().toLowerCase();
@@ -250,7 +250,7 @@ export async function signUpUser(input: {
     data: {
       emailVerified: input.emailVerified ?? false,
       passwordHash: await hashPassword(input.password),
-      phoneNumber: input.phoneNumber,
+      phoneNumber: input.phoneNumber?.trim() || null,
     },
     where: { id: result.user.id },
   });

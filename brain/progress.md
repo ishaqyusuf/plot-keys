@@ -32,7 +32,7 @@
 | Jobs (custom queue, 4 handlers) | ✅ Done (Trigger.dev) |
 | Listing categories & types | ✅ Done |
 | Settings expansion | ✅ Done |
-| Customer model + lead promotion | ✅ Done |
+| Customer model + lead promotion | ✅ Done — current company-scoped customer records |
 | Team invite accept flow | ✅ Done |
 | HR module (Employee + Department models, pages) | ✅ Done |
 | Invite-driven agent/employee onboarding | ✅ Done |
@@ -60,13 +60,71 @@
 | Builder UI Shadcn Standardization | ✅ Done — PickerButton, ChevronIcon, textarea, alert all use shadcn/ui primitives |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
 | Customer portal page-boundary planning | ✅ Done |
+| Customer Portal Phase 1A (Auth + Route Guards) | ✅ Done — tenant-site portal signup/login, session cookies, and protected routes |
+| Customer Portal Phase 1B (Saved Listings + Live Portal Data) | ✅ Done — public property save flow plus live `/portal/dashboard` and `/portal/saved` data |
 | Construction Phase 2 (Budget, Workers, Payroll) | ✅ Done |
-| Construction Phase 3 (Customer Visibility) | ✅ Done |
-| Construction Phase 4 (AI & Integrations) | ✅ Done |
+| Construction Phase 3 (Customer Visibility) | 🟡 Partial — staff-side controls and query layer exist; customer portal project routes still pending |
+| Construction Phase 4 (AI & Integrations) | 🟡 Partial — AI summary/risk/customer draft live; BOQ/QS/design integrations pending |
 | Tenant Onboarding Improvements | ✅ Done |
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-03-31 — Customer and Construction Status Correction
+
+### What changed
+- Corrected the Brain to match the real implementation state for customer-tenant and construction-adjacent features.
+- Confirmed that the current customer portal is a route-and-UI foundation, not a completed customer account system.
+- Confirmed that the current construction module is strong on internal project operations, but still incomplete for customer-facing project routes, document workflows, and advanced QS/design intelligence.
+
+### Code-backed status
+- **Customer portal:** `/portal/login`, `/portal/signup`, `/portal/dashboard`, `/portal/saved`, `/portal/offers`, `/portal/payments`, and `/portal/account` exist, but they are placeholder shells and not wired to real customer auth or live customer data.
+- **Customer browse:** public listing browsing and inquiry are live on the tenant site.
+- **Customer transactions:** saved listings, offers, payments, owned-property management, transfer, sell-back, and customer 2FA are still pending.
+- **Customer model:** the current schema uses company-scoped `Customer` records for staff workflows. The planned global-customer identity plus tenant-customer bridge is not implemented yet.
+- **Construction operations:** internal project CRUD, phases, milestones, updates, issues, team assignment, budgets, workers, payroll, and AI summary/risk/customer-draft tools are live.
+- **Construction customer visibility:** staff can grant customer access and mark milestones/updates customer-visible, but there is no live tenant-site `/portal/projects/*` customer experience yet.
+- **Construction AI/QS/design:** AI summary/risk/draft exists; smart BOQ generation, historical price suggestions, document extraction, and architectural design evaluation are still pending.
+
+## 2026-03-31 — Customer Portal Auth Foundation
+
+### What was built
+- Tenant-site portal signup and login now use real Better Auth-backed sessions instead of placeholder buttons.
+- Non-auth portal routes are now guarded and redirect unauthenticated visitors to `/portal/login`.
+- Portal signup creates a Better Auth user and creates a company-scoped `Customer` record when one does not already exist for the current tenant/email.
+- Portal sign-in only succeeds when the authenticated user also matches a customer record for the current tenant.
+- Portal dashboard and account pages now read the signed-in customer session and show real customer identity details.
+- Portal shell navigation now adapts between signed-out auth routes and signed-in customer routes, and includes sign-out.
+
+### Design
+- Reused the existing Better Auth user/session stack rather than introducing a second auth provider for the first customer-portal slice.
+- Customer access is tenant-scoped by matching authenticated user email to the current tenant's `Customer` record.
+- Tenant-site uses a tenant-scoped Better Auth session cookie keyed by tenant slug so the existing auth resolver can read public-site customer sessions cleanly.
+- Temporary assumption: customer signup auto-verifies email in this first slice until a dedicated customer verification flow is added.
+
+### What remains next
+- Saved listings and auth-aware save actions
+- Offer submission and tracking
+- Payments, receipts, and ownership records
+- Transfer, sell-back, and stronger account security
+
+## 2026-03-31 — Customer Portal Saved Listings
+
+### What was built
+- Added a `SavedListing` company/customer/property relation plus Prisma migration for portal saved listings.
+- Public property detail pages now show auth-aware save/remove actions and redirect signed-out customers into portal login with return-path preservation.
+- `/portal/dashboard` now shows live saved-listing counts and recent saved properties.
+- `/portal/saved` now renders the customer’s real saved inventory with remove actions.
+
+### Design
+- Saved listings stay tenant-scoped by attaching each record to `companyId`, `customerId`, and `propertyId`.
+- Save/remove behavior is centralized in one portal server action so property pages and portal pages share the same guard and revalidation rules.
+- The current customer identity assumption did not change: portal access still resolves through Better Auth plus company-scoped customer email matching.
+
+### What remains next
+- Offer submission and staff review flow
+- Payments, receipts, and ownership/reservation records
+- Transfer, sell-back, verification, and 2FA
 
 ## 2026-03-31 — Custom Domain Purchase Phase Clarification
 

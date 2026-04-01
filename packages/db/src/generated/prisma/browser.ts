@@ -88,6 +88,11 @@ export type Company = Prisma.CompanyModel
  */
 export type Customer = Prisma.CustomerModel
 /**
+ * Model SavedListing
+ * 
+ */
+export type SavedListing = Prisma.SavedListingModel
+/**
  * Model Department
  * 
  */

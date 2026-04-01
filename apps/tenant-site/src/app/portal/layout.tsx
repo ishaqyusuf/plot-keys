@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 
 import { PortalShell } from "../../components/portal-shell";
+import { getPortalCustomerSession } from "../../lib/customer-session";
 import { resolveTenantShell } from "../../lib/resolve-tenant";
 
 export default async function PortalLayout({
@@ -9,10 +11,14 @@ export default async function PortalLayout({
 }: {
   children: ReactNode;
 }) {
-  const [requestHeaders, shell] = await Promise.all([
+  const [requestHeaders, shell, session] = await Promise.all([
     headers(),
     resolveTenantShell(),
+    getPortalCustomerSession(),
   ]);
+  const currentPath = requestHeaders.get("x-tenant-pathname") ?? "/portal";
+  const isAuthRoute =
+    currentPath === "/portal/login" || currentPath === "/portal/signup";
 
   if (!shell) {
     return (
@@ -33,10 +39,20 @@ export default async function PortalLayout({
     );
   }
 
+  if (!session && !isAuthRoute) {
+    redirect(`/portal/login?redirect=${encodeURIComponent(currentPath)}`);
+  }
+
+  if (session && isAuthRoute) {
+    redirect("/portal/dashboard");
+  }
+
   return (
     <PortalShell
+      authenticated={!!session}
       companyName={shell.company.name}
-      currentPath={requestHeaders.get("x-tenant-pathname") ?? "/portal"}
+      currentPath={currentPath}
+      customerName={session?.customer.name}
       logoUrl={shell.company.logoUrl}
     >
       {children}

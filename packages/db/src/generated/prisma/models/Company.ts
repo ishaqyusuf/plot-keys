@@ -263,6 +263,7 @@ export type CompanyWhereInput = {
   teamInvites?: Prisma.TeamInviteListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
+  savedListings?: Prisma.SavedListingListRelationFilter
   blogPosts?: Prisma.BlogPostListRelationFilter
   departments?: Prisma.DepartmentListRelationFilter
   employees?: Prisma.EmployeeListRelationFilter
@@ -303,6 +304,7 @@ export type CompanyOrderByWithRelationInput = {
   teamInvites?: Prisma.TeamInviteOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   customers?: Prisma.CustomerOrderByRelationAggregateInput
+  savedListings?: Prisma.SavedListingOrderByRelationAggregateInput
   blogPosts?: Prisma.BlogPostOrderByRelationAggregateInput
   departments?: Prisma.DepartmentOrderByRelationAggregateInput
   employees?: Prisma.EmployeeOrderByRelationAggregateInput
@@ -346,6 +348,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   teamInvites?: Prisma.TeamInviteListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
+  savedListings?: Prisma.SavedListingListRelationFilter
   blogPosts?: Prisma.BlogPostListRelationFilter
   departments?: Prisma.DepartmentListRelationFilter
   employees?: Prisma.EmployeeListRelationFilter
@@ -424,6 +427,7 @@ export type CompanyCreateInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -464,6 +468,7 @@ export type CompanyUncheckedCreateInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -504,6 +509,7 @@ export type CompanyUpdateInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -544,6 +550,7 @@ export type CompanyUncheckedUpdateInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -788,6 +795,20 @@ export type CompanyUpdateOneRequiredWithoutCustomersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutCustomersInput, Prisma.CompanyUpdateWithoutCustomersInput>, Prisma.CompanyUncheckedUpdateWithoutCustomersInput>
 }
 
+export type CompanyCreateNestedOneWithoutSavedListingsInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutSavedListingsInput, Prisma.CompanyUncheckedCreateWithoutSavedListingsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutSavedListingsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+}
+
+export type CompanyUpdateOneRequiredWithoutSavedListingsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutSavedListingsInput, Prisma.CompanyUncheckedCreateWithoutSavedListingsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutSavedListingsInput
+  upsert?: Prisma.CompanyUpsertWithoutSavedListingsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutSavedListingsInput, Prisma.CompanyUpdateWithoutSavedListingsInput>, Prisma.CompanyUncheckedUpdateWithoutSavedListingsInput>
+}
+
 export type CompanyCreateNestedOneWithoutDepartmentsInput = {
   create?: Prisma.XOR<Prisma.CompanyCreateWithoutDepartmentsInput, Prisma.CompanyUncheckedCreateWithoutDepartmentsInput>
   connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutDepartmentsInput
@@ -1028,6 +1049,7 @@ export type CompanyCreateWithoutAgentsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1067,6 +1089,7 @@ export type CompanyUncheckedCreateWithoutAgentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1122,6 +1145,7 @@ export type CompanyUpdateWithoutAgentsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -1161,6 +1185,7 @@ export type CompanyUncheckedUpdateWithoutAgentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1200,6 +1225,7 @@ export type CompanyCreateWithoutAiUsageLogsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1239,6 +1265,7 @@ export type CompanyUncheckedCreateWithoutAiUsageLogsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1294,6 +1321,7 @@ export type CompanyUpdateWithoutAiUsageLogsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -1333,6 +1361,7 @@ export type CompanyUncheckedUpdateWithoutAiUsageLogsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1372,6 +1401,7 @@ export type CompanyCreateWithoutAiCreditLedgerInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1411,6 +1441,7 @@ export type CompanyUncheckedCreateWithoutAiCreditLedgerInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1466,6 +1497,7 @@ export type CompanyUpdateWithoutAiCreditLedgerInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -1505,6 +1537,7 @@ export type CompanyUncheckedUpdateWithoutAiCreditLedgerInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1544,6 +1577,7 @@ export type CompanyCreateWithoutAnalyticsEventsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1583,6 +1617,7 @@ export type CompanyUncheckedCreateWithoutAnalyticsEventsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1638,6 +1673,7 @@ export type CompanyUpdateWithoutAnalyticsEventsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -1677,6 +1713,7 @@ export type CompanyUncheckedUpdateWithoutAnalyticsEventsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1716,6 +1753,7 @@ export type CompanyCreateWithoutAppointmentsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1755,6 +1793,7 @@ export type CompanyUncheckedCreateWithoutAppointmentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1810,6 +1849,7 @@ export type CompanyUpdateWithoutAppointmentsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -1849,6 +1889,7 @@ export type CompanyUncheckedUpdateWithoutAppointmentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1888,6 +1929,7 @@ export type CompanyCreateWithoutBillingLineItemsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -1927,6 +1969,7 @@ export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -1982,6 +2025,7 @@ export type CompanyUpdateWithoutBillingLineItemsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -2021,6 +2065,7 @@ export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2061,6 +2106,7 @@ export type CompanyCreateWithoutBlogPostsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
@@ -2100,6 +2146,7 @@ export type CompanyUncheckedCreateWithoutBlogPostsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
@@ -2155,6 +2202,7 @@ export type CompanyUpdateWithoutBlogPostsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
@@ -2194,6 +2242,7 @@ export type CompanyUncheckedUpdateWithoutBlogPostsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2233,6 +2282,7 @@ export type CompanyCreateWithoutIntegrationInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -2272,6 +2322,7 @@ export type CompanyUncheckedCreateWithoutIntegrationInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -2327,6 +2378,7 @@ export type CompanyUpdateWithoutIntegrationInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -2366,6 +2418,7 @@ export type CompanyUncheckedUpdateWithoutIntegrationInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2404,6 +2457,7 @@ export type CompanyCreateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -2443,6 +2497,7 @@ export type CompanyUncheckedCreateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -2498,6 +2553,7 @@ export type CompanyUpdateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -2537,6 +2593,183 @@ export type CompanyUncheckedUpdateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUncheckedUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyCreateWithoutSavedListingsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyUncheckedCreateWithoutSavedListingsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationUncheckedCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyCreateOrConnectWithoutSavedListingsInput = {
+  where: Prisma.CompanyWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutSavedListingsInput, Prisma.CompanyUncheckedCreateWithoutSavedListingsInput>
+}
+
+export type CompanyUpsertWithoutSavedListingsInput = {
+  update: Prisma.XOR<Prisma.CompanyUpdateWithoutSavedListingsInput, Prisma.CompanyUncheckedUpdateWithoutSavedListingsInput>
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutSavedListingsInput, Prisma.CompanyUncheckedCreateWithoutSavedListingsInput>
+  where?: Prisma.CompanyWhereInput
+}
+
+export type CompanyUpdateToOneWithWhereWithoutSavedListingsInput = {
+  where?: Prisma.CompanyWhereInput
+  data: Prisma.XOR<Prisma.CompanyUpdateWithoutSavedListingsInput, Prisma.CompanyUncheckedUpdateWithoutSavedListingsInput>
+}
+
+export type CompanyUpdateWithoutSavedListingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyUncheckedUpdateWithoutSavedListingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2577,6 +2810,7 @@ export type CompanyCreateWithoutDepartmentsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
@@ -2616,6 +2850,7 @@ export type CompanyUncheckedCreateWithoutDepartmentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
@@ -2671,6 +2906,7 @@ export type CompanyUpdateWithoutDepartmentsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
@@ -2710,6 +2946,7 @@ export type CompanyUncheckedUpdateWithoutDepartmentsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2749,6 +2986,7 @@ export type CompanyCreateWithoutEmployeesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
@@ -2788,6 +3026,7 @@ export type CompanyUncheckedCreateWithoutEmployeesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
@@ -2843,6 +3082,7 @@ export type CompanyUpdateWithoutEmployeesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
@@ -2882,6 +3122,7 @@ export type CompanyUncheckedUpdateWithoutEmployeesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2920,6 +3161,7 @@ export type CompanyCreateWithoutLeadsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -2959,6 +3201,7 @@ export type CompanyUncheckedCreateWithoutLeadsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3014,6 +3257,7 @@ export type CompanyUpdateWithoutLeadsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3053,6 +3297,7 @@ export type CompanyUncheckedUpdateWithoutLeadsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3092,6 +3337,7 @@ export type CompanyCreateWithoutMembershipsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3131,6 +3377,7 @@ export type CompanyUncheckedCreateWithoutMembershipsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3186,6 +3433,7 @@ export type CompanyUpdateWithoutMembershipsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3225,6 +3473,7 @@ export type CompanyUncheckedUpdateWithoutMembershipsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3265,6 +3514,7 @@ export type CompanyCreateWithoutNotificationPreferencesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3304,6 +3554,7 @@ export type CompanyUncheckedCreateWithoutNotificationPreferencesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3359,6 +3610,7 @@ export type CompanyUpdateWithoutNotificationPreferencesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3398,6 +3650,7 @@ export type CompanyUncheckedUpdateWithoutNotificationPreferencesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3436,6 +3689,7 @@ export type CompanyCreateWithoutNotificationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3475,6 +3729,7 @@ export type CompanyUncheckedCreateWithoutNotificationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3530,6 +3785,7 @@ export type CompanyUpdateWithoutNotificationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3569,6 +3825,7 @@ export type CompanyUncheckedUpdateWithoutNotificationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3609,6 +3866,7 @@ export type CompanyCreateWithoutPayrollEntriesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3648,6 +3906,7 @@ export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3703,6 +3962,7 @@ export type CompanyUpdateWithoutPayrollEntriesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3742,6 +4002,7 @@ export type CompanyUncheckedUpdateWithoutPayrollEntriesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3781,6 +4042,7 @@ export type CompanyCreateWithoutProjectsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3820,6 +4082,7 @@ export type CompanyUncheckedCreateWithoutProjectsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -3875,6 +4138,7 @@ export type CompanyUpdateWithoutProjectsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -3914,6 +4178,7 @@ export type CompanyUncheckedUpdateWithoutProjectsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3952,6 +4217,7 @@ export type CompanyCreateWithoutPropertiesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -3991,6 +4257,7 @@ export type CompanyUncheckedCreateWithoutPropertiesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4046,6 +4313,7 @@ export type CompanyUpdateWithoutPropertiesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4085,6 +4353,7 @@ export type CompanyUncheckedUpdateWithoutPropertiesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4124,6 +4393,7 @@ export type CompanyCreateWithoutSiteConfigurationsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -4163,6 +4433,7 @@ export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4218,6 +4489,7 @@ export type CompanyUpdateWithoutSiteConfigurationsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4257,6 +4529,7 @@ export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4296,6 +4569,7 @@ export type CompanyCreateWithoutStockImageLicensesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -4335,6 +4609,7 @@ export type CompanyUncheckedCreateWithoutStockImageLicensesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4390,6 +4665,7 @@ export type CompanyUpdateWithoutStockImageLicensesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4429,6 +4705,7 @@ export type CompanyUncheckedUpdateWithoutStockImageLicensesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4468,6 +4745,7 @@ export type CompanyCreateWithoutTeamInvitesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -4507,6 +4785,7 @@ export type CompanyUncheckedCreateWithoutTeamInvitesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4562,6 +4841,7 @@ export type CompanyUpdateWithoutTeamInvitesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4601,6 +4881,7 @@ export type CompanyUncheckedUpdateWithoutTeamInvitesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4640,6 +4921,7 @@ export type CompanyCreateWithoutTenantDomainsInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -4679,6 +4961,7 @@ export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4734,6 +5017,7 @@ export type CompanyUpdateWithoutTenantDomainsInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4773,6 +5057,7 @@ export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4812,6 +5097,7 @@ export type CompanyCreateWithoutTemplateLicensesInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -4851,6 +5137,7 @@ export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -4906,6 +5193,7 @@ export type CompanyUpdateWithoutTemplateLicensesInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -4945,6 +5233,7 @@ export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4984,6 +5273,7 @@ export type CompanyCreateWithoutWebsiteInput = {
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
@@ -5023,6 +5313,7 @@ export type CompanyUncheckedCreateWithoutWebsiteInput = {
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
@@ -5078,6 +5369,7 @@ export type CompanyUpdateWithoutWebsiteInput = {
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
@@ -5117,6 +5409,7 @@ export type CompanyUncheckedUpdateWithoutWebsiteInput = {
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
   departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5148,6 +5441,7 @@ export type CompanyCountOutputType = {
   teamInvites: number
   notifications: number
   customers: number
+  savedListings: number
   blogPosts: number
   departments: number
   employees: number
@@ -5173,6 +5467,7 @@ export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   teamInvites?: boolean | CompanyCountOutputTypeCountTeamInvitesArgs
   notifications?: boolean | CompanyCountOutputTypeCountNotificationsArgs
   customers?: boolean | CompanyCountOutputTypeCountCustomersArgs
+  savedListings?: boolean | CompanyCountOutputTypeCountSavedListingsArgs
   blogPosts?: boolean | CompanyCountOutputTypeCountBlogPostsArgs
   departments?: boolean | CompanyCountOutputTypeCountDepartmentsArgs
   employees?: boolean | CompanyCountOutputTypeCountEmployeesArgs
@@ -5306,6 +5601,13 @@ export type CompanyCountOutputTypeCountCustomersArgs<ExtArgs extends runtime.Typ
 /**
  * CompanyCountOutputType without action
  */
+export type CompanyCountOutputTypeCountSavedListingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedListingWhereInput
+}
+
+/**
+ * CompanyCountOutputType without action
+ */
 export type CompanyCountOutputTypeCountBlogPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BlogPostWhereInput
 }
@@ -5377,6 +5679,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   teamInvites?: boolean | Prisma.Company$teamInvitesArgs<ExtArgs>
   notifications?: boolean | Prisma.Company$notificationsArgs<ExtArgs>
   customers?: boolean | Prisma.Company$customersArgs<ExtArgs>
+  savedListings?: boolean | Prisma.Company$savedListingsArgs<ExtArgs>
   blogPosts?: boolean | Prisma.Company$blogPostsArgs<ExtArgs>
   departments?: boolean | Prisma.Company$departmentsArgs<ExtArgs>
   employees?: boolean | Prisma.Company$employeesArgs<ExtArgs>
@@ -5454,6 +5757,7 @@ export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   teamInvites?: boolean | Prisma.Company$teamInvitesArgs<ExtArgs>
   notifications?: boolean | Prisma.Company$notificationsArgs<ExtArgs>
   customers?: boolean | Prisma.Company$customersArgs<ExtArgs>
+  savedListings?: boolean | Prisma.Company$savedListingsArgs<ExtArgs>
   blogPosts?: boolean | Prisma.Company$blogPostsArgs<ExtArgs>
   departments?: boolean | Prisma.Company$departmentsArgs<ExtArgs>
   employees?: boolean | Prisma.Company$employeesArgs<ExtArgs>
@@ -5486,6 +5790,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     teamInvites: Prisma.$TeamInvitePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     customers: Prisma.$CustomerPayload<ExtArgs>[]
+    savedListings: Prisma.$SavedListingPayload<ExtArgs>[]
     blogPosts: Prisma.$BlogPostPayload<ExtArgs>[]
     departments: Prisma.$DepartmentPayload<ExtArgs>[]
     employees: Prisma.$EmployeePayload<ExtArgs>[]
@@ -5919,6 +6224,7 @@ export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends runtime.
   teamInvites<T extends Prisma.Company$teamInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$teamInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Company$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customers<T extends Prisma.Company$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$customersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedListings<T extends Prisma.Company$savedListingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$savedListingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   blogPosts<T extends Prisma.Company$blogPostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$blogPostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlogPostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   departments<T extends Prisma.Company$departmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$departmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepartmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   employees<T extends Prisma.Company$employeesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$employeesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6761,6 +7067,30 @@ export type Company$customersArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.CustomerScalarFieldEnum | Prisma.CustomerScalarFieldEnum[]
+}
+
+/**
+ * Company.savedListings
+ */
+export type Company$savedListingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedListing
+   */
+  select?: Prisma.SavedListingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedListing
+   */
+  omit?: Prisma.SavedListingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedListingInclude<ExtArgs> | null
+  where?: Prisma.SavedListingWhereInput
+  orderBy?: Prisma.SavedListingOrderByWithRelationInput | Prisma.SavedListingOrderByWithRelationInput[]
+  cursor?: Prisma.SavedListingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedListingScalarFieldEnum | Prisma.SavedListingScalarFieldEnum[]
 }
 
 /**

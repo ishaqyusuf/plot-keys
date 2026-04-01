@@ -1,12 +1,23 @@
-import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  isListingSavedForCustomer,
+  resolveTenantByHostname,
+} from "@plotkeys/db";
 import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { toggleSavedListingAction } from "../../portal/actions";
+import { getPortalCustomerSession } from "../../../lib/customer-session";
+
 type PropertyDetailPageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ hostname?: string; subdomain?: string }>;
+  searchParams?: Promise<{
+    hostname?: string;
+    savedStatus?: string;
+    subdomain?: string;
+  }>;
 };
 
 export default async function PropertyDetailPage({
@@ -55,6 +66,18 @@ export default async function PropertyDetailPage({
   if (!property) {
     notFound();
   }
+
+  const session = await getPortalCustomerSession();
+  const isSignedInCustomer =
+    session?.company.id === company.id && Boolean(session.customer.id);
+  const isSaved = isSignedInCustomer
+    ? await isListingSavedForCustomer(prisma, {
+        companyId: company.id,
+        customerId: session.customer.id,
+        propertyId: property.id,
+      })
+    : false;
+  const savedStatus = sp.savedStatus;
 
   return (
     <main className="min-h-screen px-4 py-8 md:px-8 md:py-12">
@@ -112,8 +135,55 @@ export default async function PropertyDetailPage({
             </p>
           )}
 
-          <div className="mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
-            Enquire about this property
+          {savedStatus === "saved" ? (
+            <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              This property is now saved in your portal.
+            </p>
+          ) : null}
+          {savedStatus === "already-saved" ? (
+            <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              This property is already in your saved listings.
+            </p>
+          ) : null}
+          {savedStatus === "removed" ? (
+            <p className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              This property was removed from your saved listings.
+            </p>
+          ) : null}
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {isSignedInCustomer ? (
+              <form action={toggleSavedListingAction}>
+                <input
+                  name="mode"
+                  type="hidden"
+                  value={isSaved ? "remove" : "save"}
+                />
+                <input name="propertyId" type="hidden" value={property.id} />
+                <input
+                  name="redirectTo"
+                  type="hidden"
+                  value={`/property/${property.id}`}
+                />
+                <button
+                  className="inline-flex items-center justify-center rounded-full border border-[color:var(--pk-border,#e2e8f0)] px-6 py-3 text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:border-[color:var(--pk-primary,#0f766e)]/40 hover:text-[color:var(--pk-primary,#0f766e)]"
+                  type="submit"
+                >
+                  {isSaved ? "Remove from saved" : "Save to portal"}
+                </button>
+              </form>
+            ) : (
+              <Link
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--pk-border,#e2e8f0)] px-6 py-3 text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:border-[color:var(--pk-primary,#0f766e)]/40 hover:text-[color:var(--pk-primary,#0f766e)]"
+                href={`/portal/login?redirect=${encodeURIComponent(`/property/${property.id}`)}`}
+              >
+                Sign in to save
+              </Link>
+            )}
+
+            <div className="inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
+              Enquire about this property
+            </div>
           </div>
         </div>
       </div>

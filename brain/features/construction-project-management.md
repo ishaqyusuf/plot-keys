@@ -1,7 +1,7 @@
 # Construction Project Management
 
 ## Purpose
-This file documents the future internal construction project management system for tenant companies that build, supervise, or deliver real-estate projects from planning through handover.
+This file documents the internal construction project management system for tenant companies that build, supervise, or deliver real-estate projects from planning through handover.
 
 ## Goal
 Give a company one operational system to manage a building or estate project end-to-end, including structure, phases, documents, QS/budget workflows, workforce coordination, project-scoped permissions, reporting, and AI assistance.
@@ -58,12 +58,14 @@ Give a company one operational system to manage a building or estate project end
 - Upload and organize drawings, contracts, permits, invoices, receipts, site reports, inspection records, and handover files.
 - Support document categories, version notes, approval state, and restricted visibility.
 - Keep project documents distinct from public listing media.
+- Current code status: document models/query support exist, but a finished document-management UI and upload workflow are not yet established.
 
 ### QS, Budget, and Cost Tracking
 - Track project budget at summary and line-item level.
 - Support BOQ-aligned cost structures and quantity/cost notes.
 - Record projected cost, approved cost, actual cost, and variance commentary.
 - Allow finance or QS users to review and update construction cost positions without turning the feature into full accounting software.
+- Current code status: basic budget and line-item tracking exist; native smart BOQ generation, historical price suggestions, and advanced QS workflows do not.
 
 ### Site Workforce and Payroll
 - Track project workers, crews, contractors, and internal staff assigned to the project.
@@ -87,6 +89,7 @@ Give a company one operational system to manage a building or estate project end
 - Flag delayed milestones or budget variance patterns.
 - Draft customer-safe progress updates from internal logs.
 - Future: assist with BOQ/QS interpretation and architectural quick-view reasoning.
+- Current code status: AI summary, risk flags, and customer-update draft are implemented; document extraction, BOQ/QS interpretation, and architectural design evaluation are still future work.
 
 ## Validation Rules
 - This feature should only be activated for construction/development workflows, not generic company operations.
@@ -176,7 +179,7 @@ Give a company one operational system to manage a building or estate project end
 
 ## Phased Delivery
 
-### Phase 1 — Internal Project Core
+### Phase 1 — Internal Project Core ✅
 - Project CRUD
 - Phases and milestones
 - Documents
@@ -189,16 +192,19 @@ Give a company one operational system to manage a building or estate project end
 - Project payroll runs and entries
 - Financial reporting basics
 
-### Phase 3 — Customer Visibility ✅
+### Phase 3 — Customer Visibility (Partial)
 - Controlled project sharing to linked customers
 - Customer-safe updates and milestone progress
 - Shared documents and notices
+- Current code status: staff-side controls and customer-safe data helpers exist, but tenant-site customer-facing project routes are still pending.
 
-### Phase 4 — AI and Integrations ✅
-- AI summaries, extraction, and risk support
+### Phase 4 — AI and Integrations (Partial)
+- AI summaries and risk support
+- Customer-safe update drafting
 - QS/BOQ assistance
 - Architectural quick-view analysis
 - External QS software integrations
+- Current code status: AI summaries, risk flags, and customer-draft generation are live; QS/BOQ assistance, design analysis, and external integrations are still pending.
 
 ## Edge Cases
 - A company may manage many projects with overlapping staff but different project roles.
@@ -221,3 +227,20 @@ Give a company one operational system to manage a building or estate project end
 - Delay forecasting and cost overrun prediction
 - Drawing interpretation and AI-assisted quantity extraction
 - External QS software sync
+
+## Next Phase Breakdown
+
+### Next Phase A — Project Documents
+- Ship the project document upload/list/review UI in the dashboard.
+- Support drawing, contract, permit, invoice, receipt, site-report, inspection, and handover categories.
+- Make document visibility explicit so shared documents are ready for customer-facing routes later.
+
+### Next Phase B — Customer-Facing Project Routes
+- Build `/portal/projects` and `/portal/projects/[id]` in tenant-site.
+- Reuse the existing customer-visibility controls and customer-safe overview queries.
+- Keep the first release read-only.
+
+### Next Phase C — Advanced QS and Design Intelligence
+- Add pre-generated BOQ templates and AI-assisted BOQ drafting from project description.
+- Add recent-project price suggestion logic from historical budget line items.
+- Add drawing/design ingestion and AI-assisted extraction/evaluation.

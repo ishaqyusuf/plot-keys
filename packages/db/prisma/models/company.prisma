@@ -29,6 +29,7 @@ model Company {
   teamInvites        TeamInvite[]
   notifications      Notification[]
   customers          Customer[]
+  savedListings      SavedListing[]
   blogPosts          BlogPost[]
   departments        Department[]
   employees          Employee[]

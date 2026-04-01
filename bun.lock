@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "plotkeys",
@@ -71,6 +70,7 @@
     "apps/tenant-site": {
       "name": "@plotkeys/tenant-site",
       "dependencies": {
+        "@plotkeys/auth": "workspace:*",
         "@plotkeys/chat-bot": "workspace:*",
         "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications-react": "workspace:*",

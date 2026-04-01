@@ -12,6 +12,11 @@ Give customers transparent, controlled visibility into their own ongoing project
 - It should read from approved project data rather than exposing raw internal project records.
 - This feature is intended for Pro tier tenants after the internal project management foundation exists.
 
+## Current Status
+- Staff-side groundwork exists in the dashboard: project customer access can be granted/revoked, project notices can be created, and milestones/updates can be marked customer-visible.
+- A customer-safe read helper exists in the data layer for project overview, milestones, updates, documents, notices, and phases.
+- The tenant-site customer experience is not implemented yet: there is no live `/portal/projects/[id]` route, no customer portal auth, and no end-to-end customer project viewer.
+
 ## Scope
 - Customer project overview
 - Milestone and phase visibility
@@ -37,6 +42,7 @@ Give customers transparent, controlled visibility into their own ongoing project
 ## APIs
 - Customer-safe read procedures for project overview, milestones, updates, and documents.
 - Notification endpoints for project notices.
+- Current code status: read helpers exist in the DB/query layer, but tenant-site customer-facing route wiring is still pending.
 - TODO: Decide whether customer replies should live in the existing customer portal messaging model or a project-specific thread model.
 
 ## UI
@@ -47,6 +53,7 @@ Give customers transparent, controlled visibility into their own ongoing project
   - approved updates timeline
   - shared documents list
   - notices and next steps
+- Current code status: planned only.
 
 ## Edge Cases
 - A customer may be linked to more than one project.
@@ -64,3 +71,9 @@ Give customers transparent, controlled visibility into their own ongoing project
 - Progress photo galleries
 - Payment-linked milestone progress
 - AI-generated customer-friendly weekly reports
+
+## Next Phase Breakdown
+- Add tenant-site route(s) for customer project listing and project detail inside `/portal/projects/*`.
+- Reuse the existing customer-safe query layer rather than exposing raw internal project procedures.
+- Gate project views behind customer auth and explicit project-customer access.
+- Start with read-only project visibility before adding replies, acknowledgements, or payment-linked milestones.

@@ -67,3 +67,18 @@ This file holds actionable work that is identified but not currently in progress
 - [ ] **Mobile App Request Flow** — Define packaging and fulfillment for Pro customers' mobile app requests.
 - [ ] **Database Adapter Abstraction** — Add first non-Postgres adapter only when concrete deployment need arises.
 - [ ] **Supabase Package Rename** — Decide whether `packages/supabase` should become a general platform-integrations package.
+
+## Next Phase — Customer Tenant Features
+
+- [ ] **Customer Portal Phase 1A Follow-up — Identity Hardening** — Finalize whether customer identity stays company-scoped or becomes global-plus-tenant-bridge, replace temporary email-linking with an explicit relation, and add customer verification/2FA follow-up.
+- [ ] **Customer Portal Phase 1C — Offers Workflow** — Add customer offer submission, offer status tracking, and basic staff review workflow.
+- [ ] **Customer Portal Phase 2 — Payments + Ownership Records** — Add customer payment records, receipts, due dates, and owned/reserved property visibility.
+- [ ] **Customer Portal Phase 3 — Transfer and Sell-Back** — Add transfer and sell-back workflows after payments and ownership records exist.
+
+## Next Phase — Construction Tenant Features
+
+- [ ] **Construction Phase 3A — Project Documents UI** — Ship dashboard UI for project document upload, listing, approval metadata, and customer-share visibility.
+- [ ] **Construction Phase 3B — Tenant-Site Customer Project Viewer** — Build read-only `/portal/projects` and `/portal/projects/[id]` using existing project-customer access and customer-safe query helpers.
+- [ ] **Construction Phase 4A — Native BOQ Workflow** — Add project-description-to-BOQ drafting and reusable BOQ templates.
+- [ ] **Construction Phase 4B — Historical Price Suggestions** — Use past project budget line items to suggest quantities/rates for new BOQ entries.
+- [ ] **Construction Phase 4C — Design Ingestion and Evaluation** — Add architectural drawing upload, extraction, and AI-assisted evaluation hooks.

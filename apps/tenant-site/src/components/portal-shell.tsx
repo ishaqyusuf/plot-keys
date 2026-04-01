@@ -2,32 +2,39 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type PortalShellProps = {
+  authenticated?: boolean;
   children: ReactNode;
   companyName: string;
   currentPath: string;
+  customerName?: string | null;
   logoUrl?: string | null;
 };
-
-const portalNavLinks = [
-  { href: "/portal/login", label: "Login" },
-  { href: "/portal/signup", label: "Sign Up" },
-  { href: "/portal/dashboard", label: "Dashboard" },
-  { href: "/portal/saved", label: "Saved" },
-  { href: "/portal/offers", label: "Offers" },
-  { href: "/portal/payments", label: "Payments" },
-  { href: "/portal/account", label: "Account" },
-];
 
 function isActiveLink(currentPath: string, href: string) {
   return currentPath === href || currentPath.startsWith(`${href}/`);
 }
 
 export function PortalShell({
+  authenticated = false,
   children,
   companyName,
   currentPath,
+  customerName,
   logoUrl,
 }: PortalShellProps) {
+  const portalNavLinks = authenticated
+    ? [
+        { href: "/portal/dashboard", label: "Dashboard" },
+        { href: "/portal/saved", label: "Saved" },
+        { href: "/portal/offers", label: "Offers" },
+        { href: "/portal/payments", label: "Payments" },
+        { href: "/portal/account", label: "Account" },
+      ]
+    : [
+        { href: "/portal/login", label: "Login" },
+        { href: "/portal/signup", label: "Sign Up" },
+      ];
+
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,var(--pk-background,#f8fafc)_0%,rgba(255,255,255,0.98)_100%)] px-4 py-5 md:px-6 md:py-6">
       <div className="mx-auto max-w-[84rem] overflow-hidden rounded-[2rem] border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-card,#ffffff)]/80 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur">
@@ -53,11 +60,12 @@ export function PortalShell({
 
             <div className="mt-6 rounded-[1.25rem] border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#f8fafc)]/90 p-4">
               <p className="text-sm font-medium text-[color:var(--pk-foreground,#0f172a)]">
-                Central portal foundation
+                {authenticated ? "Portal access active" : "Portal access"}
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--pk-muted-foreground,#64748b)]">
-                These routes are shared application pages that inherit tenant
-                branding, rather than template-composed marketing pages.
+                {authenticated
+                  ? `Signed in${customerName ? ` as ${customerName}` : ""}.`
+                  : "These routes are shared application pages that inherit tenant branding, rather than template-composed marketing pages."}
               </p>
             </div>
 
@@ -84,6 +92,17 @@ export function PortalShell({
                 );
               })}
             </nav>
+
+            {authenticated ? (
+              <form action="/portal/sign-out" className="mt-8" method="post">
+                <button
+                  className="w-full rounded-2xl border border-[color:var(--pk-border,#e2e8f0)] px-4 py-3 text-left text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:border-[color:var(--pk-primary,#0f766e)]/40 hover:text-[color:var(--pk-primary,#0f766e)]"
+                  type="submit"
+                >
+                  Sign out
+                </button>
+              </form>
+            ) : null}
           </aside>
 
           <div className="p-6 md:p-8 lg:p-10">{children}</div>

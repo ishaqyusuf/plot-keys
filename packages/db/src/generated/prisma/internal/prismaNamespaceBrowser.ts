@@ -64,6 +64,7 @@ export const ModelName = {
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
+  SavedListing: 'SavedListing',
   Department: 'Department',
   Employee: 'Employee',
   Lead: 'Lead',
@@ -331,6 +332,18 @@ export const CustomerScalarFieldEnum = {
 } as const
 
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
+
+
+export const SavedListingScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  propertyId: 'propertyId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedListingScalarFieldEnum = (typeof SavedListingScalarFieldEnum)[keyof typeof SavedListingScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {

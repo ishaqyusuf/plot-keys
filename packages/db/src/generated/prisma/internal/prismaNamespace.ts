@@ -397,6 +397,7 @@ export const ModelName = {
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
+  SavedListing: 'SavedListing',
   Department: 'Department',
   Employee: 'Employee',
   Lead: 'Lead',
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "website" | "websiteVersion"
+    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "savedListing" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "website" | "websiteVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1408,6 +1409,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CustomerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CustomerCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedListing: {
+      payload: Prisma.$SavedListingPayload<ExtArgs>
+      fields: Prisma.SavedListingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedListingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedListingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedListingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedListingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        findMany: {
+          args: Prisma.SavedListingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>[]
+        }
+        create: {
+          args: Prisma.SavedListingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        createMany: {
+          args: Prisma.SavedListingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedListingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedListingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        update: {
+          args: Prisma.SavedListingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedListingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedListingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedListingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedListingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedListingPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedListingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedListing>
+        }
+        groupBy: {
+          args: Prisma.SavedListingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedListingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedListingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedListingCountAggregateOutputType> | number
         }
       }
     }
@@ -4110,6 +4185,18 @@ export const CustomerScalarFieldEnum = {
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
 
 
+export const SavedListingScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  propertyId: 'propertyId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedListingScalarFieldEnum = (typeof SavedListingScalarFieldEnum)[keyof typeof SavedListingScalarFieldEnum]
+
+
 export const DepartmentScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -5521,6 +5608,7 @@ export type GlobalOmitConfig = {
   companyIntegration?: Prisma.CompanyIntegrationOmit
   company?: Prisma.CompanyOmit
   customer?: Prisma.CustomerOmit
+  savedListing?: Prisma.SavedListingOmit
   department?: Prisma.DepartmentOmit
   employee?: Prisma.EmployeeOmit
   lead?: Prisma.LeadOmit

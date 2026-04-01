@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@plotkeys/auth": "workspace:*",
     "@plotkeys/chat-bot": "workspace:*",
     "@plotkeys/db": "workspace:*",
     "@plotkeys/notifications-react": "workspace:*",
