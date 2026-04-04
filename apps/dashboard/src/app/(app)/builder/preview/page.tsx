@@ -24,7 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { Separator } from "@plotkeys/ui/separator";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -312,7 +312,7 @@ export default function BuilderPreviewPage() {
               <ButtonGroup>
                 <Button asChild size="icon" variant="outline">
                   <Link href="/builder" aria-label="Back to builder">
-                    <ChevronLeft className="size-4" />
+                    <Icon.ChevronLeft className="size-4" />
                   </Link>
                 </Button>
               </ButtonGroup>
@@ -400,7 +400,7 @@ export default function BuilderPreviewPage() {
                   aria-label="Previous template"
                   onClick={() => goToTemplate(currentIndex - 1)}
                 >
-                  <ChevronLeft className="size-4" />
+                  <Icon.ChevronLeft className="size-4" />
                 </Button>
                 <Button
                   size="icon"
@@ -408,7 +408,7 @@ export default function BuilderPreviewPage() {
                   aria-label="Next template"
                   onClick={() => goToTemplate(currentIndex + 1)}
                 >
-                  <ChevronRight className="size-4" />
+                  <Icon.ChevronRight className="size-4" />
                 </Button>
               </ButtonGroup>
             </div>

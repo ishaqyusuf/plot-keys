@@ -8,14 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import {
-  BarChart3,
-  Calendar,
-  ExternalLink,
-  MessageCircle,
-  Settings,
-  Target,
-} from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
 
@@ -35,7 +28,7 @@ const integrations: Integration[] = [
     name: "Google Analytics",
     description:
       "Track website traffic, visitor behaviour, and conversion events with Google Analytics 4.",
-    icon: BarChart3,
+    icon: Icon.Analytics,
     category: "Analytics",
     configField: "googleAnalyticsId",
     docsUrl: "https://support.google.com/analytics/answer/9304153",
@@ -45,7 +38,7 @@ const integrations: Integration[] = [
     name: "Facebook Pixel",
     description:
       "Measure ad conversions, build audiences, and retarget visitors who interact with your site.",
-    icon: Target,
+    icon: Icon.Target,
     category: "Marketing",
     configField: "facebookPixelId",
     docsUrl: "https://www.facebook.com/business/help/952192354843755",
@@ -65,7 +58,7 @@ const integrations: Integration[] = [
     name: "Calendly",
     description:
       "Sync appointment scheduling with your Calendly page so visitors can book viewings.",
-    icon: Calendar,
+    icon: Icon.Calendar,
     category: "Scheduling",
     configField: "calendlyUrl",
     docsUrl: "https://calendly.com/",
@@ -102,7 +95,7 @@ export default async function AppStorePage() {
             </Badge>
             <Button asChild variant="outline" size="sm">
               <Link href="/settings/integrations">
-                <Settings className="mr-1.5 size-3.5" />
+                <Icon.Settings className="mr-1.5 size-3.5" />
                 Configure credentials
               </Link>
             </Button>
@@ -151,7 +144,7 @@ export default async function AppStorePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <ExternalLink className="mr-1 size-3" />
+                        <Icon.ExternalLink className="mr-1 size-3" />
                         Docs
                       </a>
                     </Button>

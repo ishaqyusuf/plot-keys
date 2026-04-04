@@ -74,3 +74,22 @@ This file tracks work currently being executed.
 - **Branch:** `copilot/next-high-priority-task-another-one`
 - **Status:** ✅ Complete — full blog authoring and public rendering pipeline
 - **Scope:** BlogPost Prisma model + migration, DB query module, dashboard `/blog` list + `/blog/[id]` editor with markdown toolbar, server actions (CRUD + publish/archive), BlogListSection + BlogPostSection in section-registry with lightweight markdown renderer, blog page slots in all 6 Pro-tier families, tenant-site live data resolution and blog-post detail rendering via slug.
+
+### shadcn Upgrade + HugeIcons Migration + Minimal Page Redesign
+- **Branch:** `claude/upgrade-shadcn-redesign-8wncn`
+- **Status:** ✅ Complete — committed and pushed
+- **ADR:** `brain/decisions/ADR-011-shadcn-upgrade-hugeicons-minimal-redesign.md`
+
+**Completed deliverables:**
+- [x] `components.json` updated: `iconLibrary: "hugeicons"`, `baseColor: "slate"`
+- [x] `@hugeicons/react@0.6.2` installed, `lucide-react` removed from all packages
+- [x] `packages/ui/src/components/icons.tsx` created — centralized `Icon` namespace (40+ icons)
+- [x] `"./icons"` export added to `packages/ui/package.json`
+- [x] All 23 `packages/ui` component icon imports migrated to `Icon.X`
+- [x] All 13 dashboard component/page icon imports migrated to `Icon.X`
+- [x] `globals.css` redesigned — standard HSL slate tokens, no body gradients, clean neutral palette
+- [x] `apps/website/src/app/page.tsx` fully redesigned — clean nav/hero/features/workflow/pricing/CTA, no heavy gradients
+- [x] `apps/dashboard/src/app/sign-in/page.tsx` redesigned — clean two-column, no radial gradient bg
+- [x] `apps/dashboard/src/components/flow-shell.tsx` redesigned — `bg-muted/40` side panel replaces dark gradient card
+- [x] `apps/dashboard/src/app/onboarding/page.tsx` side panel token cleanup — `primary-foreground` → `foreground`/`muted-foreground`
+- [x] `apps/dashboard/src/app/(app)/page.tsx` cleaned — removed `font-serif`, normalized stat card icons

@@ -8,12 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import {
-  BarChart3,
-  ImageIcon,
-  StarIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { Icon } from "/ui/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -206,7 +201,7 @@ export default async function PropertyDetailPage({
         {/* Analytics Card */}
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center gap-2">
-            <BarChart3 className="size-4 text-muted-foreground" />
+            <Icon.Analytics className="size-4 text-muted-foreground" />
             <CardTitle className="text-base">Listing Analytics</CardTitle>
           </CardHeader>
           <CardContent>
@@ -287,7 +282,7 @@ export default async function PropertyDetailPage({
             {media.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-10 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                  <Icon.Image className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">
                   No media yet. Add photos, floor plans, or virtual tour links.
@@ -343,7 +338,7 @@ export default async function PropertyDetailPage({
                                 title="Set as cover"
                                 className="rounded p-1 text-muted-foreground hover:text-foreground"
                               >
-                                <StarIcon className="h-3.5 w-3.5" />
+                                <Icon.Star className="h-3.5 w-3.5" />
                               </button>
                             </form>
                           ) : null}
@@ -355,7 +350,7 @@ export default async function PropertyDetailPage({
                               title="Remove"
                               className="rounded p-1 text-muted-foreground hover:text-destructive"
                             >
-                              <Trash2Icon className="h-3.5 w-3.5" />
+                              <Icon.Delete className="h-3.5 w-3.5" />
                             </button>
                           </form>
                         </div>

@@ -14,31 +14,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@plotkeys/ui/sidebar";
-import {
-  BarChart3,
-  Bell,
-  Bot,
-  Briefcase,
-  Building2,
-  Calendar,
-  CalendarOff,
-  CreditCard,
-  FileText,
-  Globe,
-  HardHat,
-  Home,
-  LayoutDashboard,
-  Mail,
-  Network,
-  Paintbrush,
-  Receipt,
-  Settings,
-  Sparkles,
-  Store,
-  UserRoundCog,
-  Users,
-  UsersRound,
-} from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -60,55 +36,55 @@ const navGroups: NavGroup[] = [
   {
     label: "Overview",
     items: [
-      { href: "/", icon: Home, label: "Dashboard" },
-      { href: "/builder", icon: Paintbrush, label: "Builder" },
-      { href: "/live", icon: Globe, label: "Live Preview" },
+      { href: "/", icon: Icon.Home, label: "Dashboard" },
+      { href: "/builder", icon: Icon.Builder, label: "Builder" },
+      { href: "/live", icon: Icon.Globe, label: "Live Preview" },
     ],
   },
   {
     label: "Manage",
     items: [
-      { href: "/properties", icon: Building2, label: "Properties" },
-      { href: "/agents", icon: UsersRound, label: "Agents" },
-      { href: "/blog", icon: FileText, label: "Blog", badge: "Pro" },
-      { href: "/leads", icon: Mail, label: "Leads" },
-      { href: "/appointments", icon: Calendar, label: "Appointments" },
-      { href: "/customers", icon: Users, label: "Customers", badge: "Plus" },
+      { href: "/properties", icon: Icon.Building, label: "Properties" },
+      { href: "/agents", icon: Icon.UsersGroup, label: "Agents" },
+      { href: "/blog", icon: Icon.File, label: "Blog", badge: "Pro" },
+      { href: "/leads", icon: Icon.Mail, label: "Leads" },
+      { href: "/appointments", icon: Icon.Calendar, label: "Appointments" },
+      { href: "/customers", icon: Icon.Users, label: "Customers", badge: "Plus" },
     ],
   },
   {
     label: "Construction",
     items: [
-      { href: "/projects", icon: HardHat, label: "Projects", badge: "Plus" },
+      { href: "/projects", icon: Icon.HardHat, label: "Projects", badge: "Plus" },
     ],
   },
   {
     label: "HR & Team",
     items: [
-      { href: "/hr/employees", icon: Briefcase, label: "Employees" },
-      { href: "/hr/departments", icon: Network, label: "Departments" },
-      { href: "/hr/leave", icon: CalendarOff, label: "Leave", badge: "Plus" },
-      { href: "/hr/payroll", icon: Receipt, label: "Payroll", badge: "Plus" },
-      { href: "/team", icon: UserRoundCog, label: "Team" },
+      { href: "/hr/employees", icon: Icon.Briefcase, label: "Employees" },
+      { href: "/hr/departments", icon: Icon.Network, label: "Departments" },
+      { href: "/hr/leave", icon: Icon.CalendarOff, label: "Leave", badge: "Plus" },
+      { href: "/hr/payroll", icon: Icon.Receipt, label: "Payroll", badge: "Plus" },
+      { href: "/team", icon: Icon.UserSettings, label: "Team" },
     ],
   },
   {
     label: "Insights",
     items: [
-      { href: "/analytics", icon: BarChart3, label: "Analytics" },
-      { href: "/reports", icon: FileText, label: "Reports", badge: "Plus" },
-      { href: "/ai-credits", icon: Sparkles, label: "AI Credits", badge: "AI" },
-      { href: "#", icon: Bot, label: "Chat-bot", badge: "Pro" },
+      { href: "/analytics", icon: Icon.Analytics, label: "Analytics" },
+      { href: "/reports", icon: Icon.File, label: "Reports", badge: "Plus" },
+      { href: "/ai-credits", icon: Icon.Sparkles, label: "AI Credits", badge: "AI" },
+      { href: "#", icon: Icon.Bot, label: "Chat-bot", badge: "Pro" },
     ],
   },
   {
     label: "Platform",
     items: [
-      { href: "/billing", icon: CreditCard, label: "Billing" },
-      { href: "/domains", icon: Globe, label: "Domains" },
-      { href: "/notifications", icon: Bell, label: "Notifications" },
-      { href: "/settings", icon: Settings, label: "Settings" },
-      { href: "/app-store", icon: Store, label: "App store" },
+      { href: "/billing", icon: Icon.CreditCard, label: "Billing" },
+      { href: "/domains", icon: Icon.Globe, label: "Domains" },
+      { href: "/notifications", icon: Icon.Bell, label: "Notifications" },
+      { href: "/settings", icon: Icon.Settings, label: "Settings" },
+      { href: "/app-store", icon: Icon.Store, label: "App store" },
     ],
   },
 ];
@@ -124,7 +100,7 @@ export function DashboardSidebar() {
             <SidebarMenuButton asChild size="lg">
               <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <LayoutDashboard className="size-4" />
+                  <Icon.Dashboard className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">PlotKeys</span>
