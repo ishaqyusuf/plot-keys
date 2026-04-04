@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader } from "@plotkeys/ui/card";
-import { UsersIcon } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import {
   createCustomerAction,
@@ -187,7 +187,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
           <Card className="py-20 text-center">
             <CardContent className="flex flex-col items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <UsersIcon className="h-6 w-6 text-muted-foreground" />
+                <Icon.Users className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">
                 {statusFilter ? `No ${statusFilter} customers.` : "No customers yet."}

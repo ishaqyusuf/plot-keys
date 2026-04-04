@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -27,47 +28,43 @@ export function FlowShell({
   title,
 }: FlowShellProps) {
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
+    <main className="min-h-screen bg-background px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-7xl">
         <Link
           aria-label="Go to homepage"
-          className="mb-6 inline-flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition hover:border-primary hover:text-primary"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
           href="/"
         >
-          <span className="flex size-8 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--primary)_0%,color-mix(in_srgb,var(--primary)_70%,white)_100%)] text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground">
+          <div className="flex size-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-semibold">
             PK
-          </span>
-          <span className="font-medium tracking-[0.18em] uppercase">
-            PlotKeys
-          </span>
+          </div>
+          PlotKeys
         </Link>
 
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <Card className="bg-card">
-          <CardHeader className="px-8 pt-8 md:px-10 md:pt-10">
-            <p className="text-sm uppercase tracking-[0.32em] text-muted-foreground">
-              {eyebrow}
-            </p>
-            <Badge className="mt-5" variant="default">
-              {badge}
-            </Badge>
-            <CardTitle className="mt-5 max-w-3xl font-serif text-5xl text-foreground md:text-6xl">
-              {title}
-            </CardTitle>
-            <CardDescription className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              {description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-8 pb-8 md:px-10 md:pb-10">
-            {children}
-          </CardContent>
-        </Card>
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <Card className="border-border">
+            <CardHeader className="px-8 pt-8 md:px-10 md:pt-10">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {eyebrow}
+              </p>
+              <Badge className="mt-4 w-fit" variant="secondary">
+                {badge}
+              </Badge>
+              <CardTitle className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+                {title}
+              </CardTitle>
+              <CardDescription className="mt-3 text-base leading-7">
+                {description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-8 pb-8 md:px-10 md:pb-10">
+              {children}
+            </CardContent>
+          </Card>
 
-        <Card className="border-transparent bg-[linear-gradient(145deg,color-mix(in_srgb,var(--foreground)_94%,black)_0%,var(--primary)_100%)] text-primary-foreground">
-          <CardContent className="px-8 py-8 md:px-10 md:py-10">
+          <div className="rounded-xl border border-border bg-muted/40 p-8 md:p-10">
             {sidePanel}
-          </CardContent>
-        </Card>
+          </div>
         </div>
       </div>
     </main>

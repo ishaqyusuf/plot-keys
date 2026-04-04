@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent } from "@plotkeys/ui/card";
-import { BellIcon } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { markAllNotificationsReadAction } from "../../actions";
 import { requireOnboardedSession } from "../../../lib/session";
@@ -92,7 +92,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
           <Card className="py-20 text-center">
             <CardContent className="flex flex-col items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <BellIcon className="h-6 w-6 text-muted-foreground" />
+                <Icon.Bell className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">
                 {onlyUnread ? "No unread notifications." : "No notifications yet."}
@@ -108,7 +108,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
               >
                 <CardContent className="flex items-start gap-4 px-5 py-4">
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                    <BellIcon className="h-4 w-4 text-muted-foreground" />
+                    <Icon.Bell className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">

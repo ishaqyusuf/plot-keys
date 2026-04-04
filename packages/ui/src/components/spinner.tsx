@@ -1,4 +1,4 @@
-import { Loader2Icon } from "lucide-react";
+import { Icon } from "./icons";
 
 import { cn } from "../lib/utils";
 

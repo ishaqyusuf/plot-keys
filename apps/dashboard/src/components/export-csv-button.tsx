@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
-import { Download } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import { useState, useTransition } from "react";
 
 type ExportCsvButtonProps = {
@@ -39,7 +39,7 @@ export function ExportCsvButton({
       onClick={handleExport}
       disabled={isPending}
     >
-      <Download className="mr-1.5 size-3.5" />
+      <Icon.Download className="mr-1.5 size-3.5" />
       {isPending ? "Exporting…" : label}
     </Button>
   );

@@ -15,15 +15,7 @@ import {
   buildTenantSiteUrl,
   isVercelDomainProvisioningConfigured,
 } from "@plotkeys/utils";
-import {
-  BarChart3,
-  Building2,
-  Calendar,
-  Globe,
-  Mail,
-  Paintbrush,
-  Users,
-} from "lucide-react";
+import { Icon } from "/ui/icons";
 import Link from "next/link";
 import { BuilderWorkspace } from "../../components/builder/builder-workspace";
 import { DevTenantFabLoader } from "../../components/dev/dev-tenant-fab-loader";
@@ -93,15 +85,15 @@ export default async function DashboardHomePage({
       label: "Properties",
       value: propertyCount ?? 0,
       href: "/properties",
-      icon: Building2,
+      icon: Icon.Building,
     },
-    { label: "Agents", value: agentCount ?? 0, href: "/agents", icon: Users },
-    { label: "Leads", value: leadCount ?? 0, href: "/leads", icon: Mail },
+    { label: "Agents", value: agentCount ?? 0, href: "/agents", icon: Icon.Users },
+    { label: "Leads", value: leadCount ?? 0, href: "/leads", icon: Icon.Mail },
     {
       label: "Appointments",
       value: appointmentCount ?? 0,
       href: "/appointments",
-      icon: Calendar,
+      icon: Icon.Calendar,
     },
   ];
 
@@ -117,7 +109,7 @@ export default async function DashboardHomePage({
           ) : null}
 
           {params.domains ? (
-            <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
+            <Alert className="mb-6 border-border bg-muted/30">
               <AlertDescription>Tenant domain sync completed.</AlertDescription>
             </Alert>
           ) : null}
@@ -151,7 +143,7 @@ export default async function DashboardHomePage({
                   </Alert>
                 ) : null}
                 {pendingDomains.length > 0 ? (
-                  <Alert className="border-amber-500/20 bg-amber-500/10 text-foreground">
+                  <Alert className="border-warning/20 bg-warning/10">
                     <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                       <span>
                         {pendingDomains.length} domain
@@ -172,7 +164,7 @@ export default async function DashboardHomePage({
           })()}
 
           <div className="mb-8">
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Welcome back, {session.activeMembership.companyName}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -185,11 +177,11 @@ export default async function DashboardHomePage({
               <Link key={stat.label} href={stat.href}>
                 <Card className="h-full cursor-pointer bg-card transition-shadow hover:shadow-md">
                   <CardContent className="flex items-center gap-4 px-5 py-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
                       <stat.icon className="size-5" />
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {stat.label}
                       </p>
                       <p className="mt-0.5 text-2xl font-semibold text-foreground">
@@ -241,25 +233,25 @@ export default async function DashboardHomePage({
                     title: "Open builder",
                     description: "Edit your website template and content",
                     href: "/builder",
-                    icon: Paintbrush,
+                    icon: Icon.Builder,
                   },
                   {
                     title: "View live site",
                     description: "Preview your published website",
                     href: liveSiteUrl,
-                    icon: Globe,
+                    icon: Icon.Globe,
                   },
                   {
                     title: "Manage properties",
                     description: "Add or update your property listings",
                     href: "/properties",
-                    icon: Building2,
+                    icon: Icon.Building,
                   },
                   {
                     title: "View analytics",
                     description: "See website traffic and visitor activity",
                     href: "/analytics",
-                    icon: BarChart3,
+                    icon: Icon.Analytics,
                   },
                 ].map((action) => (
                   <Link

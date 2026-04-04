@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { FileText, PlusCircle } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { requireOnboardedSession } from "../../../lib/session";
 import { createBlogPostAction } from "../../actions";
@@ -79,7 +79,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
           <form action={createBlogPostAction}>
             <Button type="submit">
-              <PlusCircle className="size-4" />
+              <Icon.PlusCircle className="size-4" />
               New post
             </Button>
           </form>
@@ -104,7 +104,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <Card className="py-20 text-center">
             <CardContent className="flex flex-col items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <FileText className="size-6 text-muted-foreground" />
+                <Icon.File className="size-6 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">No blog posts yet.</p>
               <p className="text-xs text-muted-foreground">

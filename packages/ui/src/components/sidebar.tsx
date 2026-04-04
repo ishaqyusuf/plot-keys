@@ -2,7 +2,7 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { Icon } from "./icons";
 import { Slot } from "radix-ui";
 import * as React from "react";
 
@@ -274,7 +274,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <Icon.PanelLeft />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from "@plotkeys/ui/sheet";
 import type { SubscriptionTier } from "@plotkeys/utils";
-import { Settings2 } from "lucide-react";
+import { Icon } from "@plotkeys/ui/icons";
 
 import { BuilderSidebarControls } from "./builder-sidebar-controls";
 
@@ -69,7 +69,7 @@ export function BuilderSidebarDrawer({
           variant="outline"
           aria-label="Open builder settings"
         >
-          <Settings2 className="size-4" />
+          <Icon.Icon.Settings2 className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 overflow-y-auto p-0 sm:w-80">

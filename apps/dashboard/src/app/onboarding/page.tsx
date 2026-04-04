@@ -105,7 +105,7 @@ export default async function OnboardingPage({
           description="Email verification now continues on the tenant workspace host so onboarding stays scoped to the right company from the first click."
           sidePanel={
             <>
-              <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
+              <p className="text-sm uppercase tracking-wide text-muted-foreground">
                 Handoff contract
               </p>
               <div className="mt-6 grid gap-3">
@@ -116,7 +116,7 @@ export default async function OnboardingPage({
                 ].map((item) => (
                   <div
                     key={item}
-                    className="rounded-[calc(var(--radius-md)-0.1rem)] border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-4 text-sm leading-7 text-primary-foreground/85"
+                    className="rounded-lg border border-border bg-muted/50 px-4 py-4 text-sm leading-7 text-foreground"
                   >
                     {item}
                   </div>
@@ -366,7 +366,7 @@ function StepSidePanel({
 }: StepSidePanelProps) {
   return (
     <>
-      <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
+      <p className="text-sm uppercase tracking-wide text-muted-foreground">
         Onboarding checklist
       </p>
       <div className="mt-6 grid gap-3">
@@ -379,15 +379,15 @@ function StepSidePanel({
           return (
             <div
               key={step.id}
-              className={`rounded-[calc(var(--radius-md)-0.1rem)] border px-4 py-3 text-sm leading-7 ${
+              className={`rounded-lg border px-4 py-3 text-sm leading-7 ${
                 isCurrent
-                  ? "border-primary-foreground/30 bg-primary-foreground/20 text-primary-foreground"
+                  ? "border-border bg-muted text-foreground"
                   : isDone
-                    ? "border-primary-foreground/10 bg-primary-foreground/5 text-primary-foreground/50 line-through"
-                    : "border-primary-foreground/10 bg-primary-foreground/5 text-primary-foreground/40"
+                    ? "border-border bg-muted/30 text-muted-foreground line-through line-through"
+                    : "border-border bg-muted/30 text-muted-foreground/60"
               }`}
             >
-              <span className="mr-2 text-primary-foreground/60">
+              <span className="mr-2 text-muted-foreground">
                 0{STEPS.findIndex((s) => s.id === step.id) + 1}
               </span>
               {step.label}
@@ -396,8 +396,8 @@ function StepSidePanel({
         })}
       </div>
       {companyName && subdomain ? (
-        <div className="mt-8 rounded-lg border border-primary-foreground/10 bg-primary-foreground/5 px-4 py-4 text-sm text-primary-foreground/70">
-          <p className="font-medium text-primary-foreground/90">
+        <div className="mt-8 rounded-lg border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">
             {companyName}
           </p>
           <p className="mt-1">{subdomain}.plotkeys.com</p>
