@@ -18,79 +18,17 @@ import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { DEFAULT_APP_KEYS, getActiveApps } from "../../lib/app-registry";
 import { SignOutButton } from "../auth/sign-out-button";
 
-type NavItem = {
-  badge?: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
+type Props = {
+  installedAppKeys?: string[];
 };
 
-type NavGroup = {
-  items: NavItem[];
-  label: string;
-};
-
-const navGroups: NavGroup[] = [
-  {
-    label: "Overview",
-    items: [
-      { href: "/", icon: Icon.Home, label: "Dashboard" },
-      { href: "/builder", icon: Icon.Builder, label: "Builder" },
-      { href: "/live", icon: Icon.Globe, label: "Live Preview" },
-    ],
-  },
-  {
-    label: "Manage",
-    items: [
-      { href: "/properties", icon: Icon.Building, label: "Properties" },
-      { href: "/agents", icon: Icon.UsersGroup, label: "Agents" },
-      { href: "/blog", icon: Icon.File, label: "Blog", badge: "Pro" },
-      { href: "/leads", icon: Icon.Mail, label: "Leads" },
-      { href: "/appointments", icon: Icon.Calendar, label: "Appointments" },
-      { href: "/customers", icon: Icon.Users, label: "Customers", badge: "Plus" },
-    ],
-  },
-  {
-    label: "Construction",
-    items: [
-      { href: "/projects", icon: Icon.HardHat, label: "Projects", badge: "Plus" },
-    ],
-  },
-  {
-    label: "HR & Team",
-    items: [
-      { href: "/hr/employees", icon: Icon.Briefcase, label: "Employees" },
-      { href: "/hr/departments", icon: Icon.Network, label: "Departments" },
-      { href: "/hr/leave", icon: Icon.CalendarOff, label: "Leave", badge: "Plus" },
-      { href: "/hr/payroll", icon: Icon.Receipt, label: "Payroll", badge: "Plus" },
-      { href: "/team", icon: Icon.UserSettings, label: "Team" },
-    ],
-  },
-  {
-    label: "Insights",
-    items: [
-      { href: "/analytics", icon: Icon.Analytics, label: "Analytics" },
-      { href: "/reports", icon: Icon.File, label: "Reports", badge: "Plus" },
-      { href: "/ai-credits", icon: Icon.Sparkles, label: "AI Credits", badge: "AI" },
-      { href: "#", icon: Icon.Bot, label: "Chat-bot", badge: "Pro" },
-    ],
-  },
-  {
-    label: "Platform",
-    items: [
-      { href: "/billing", icon: Icon.CreditCard, label: "Billing" },
-      { href: "/domains", icon: Icon.Globe, label: "Domains" },
-      { href: "/notifications", icon: Icon.Bell, label: "Notifications" },
-      { href: "/settings", icon: Icon.Settings, label: "Settings" },
-      { href: "/app-store", icon: Icon.Store, label: "App store" },
-    ],
-  },
-];
-
-export function DashboardSidebar() {
+export function DashboardSidebar({ installedAppKeys }: Props) {
   const pathname = usePathname();
+  const keys = installedAppKeys ?? DEFAULT_APP_KEYS;
+  const navGroups = getActiveApps(keys).map((app) => app.navGroup);
 
   return (
     <Sidebar collapsible="icon" variant="inset">

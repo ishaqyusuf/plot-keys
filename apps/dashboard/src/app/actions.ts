@@ -20,6 +20,10 @@ import {
   setBlogPostStatus,
   updateBlogPost,
 } from "@plotkeys/db";
+import {
+  installApp,
+  uninstallApp,
+} from "@plotkeys/db/queries/company-apps";
 import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
 import {
   EMPLOYEE_WORK_ROLE_VALUES,
@@ -2469,4 +2473,26 @@ export async function updateIntegrationsAction(formData: FormData) {
 
   revalidatePath("/settings/integrations");
   redirect("/settings/integrations?saved=1");
+}
+
+// ---------------------------------------------------------------------------
+// Workspace app store — install / uninstall apps
+// ---------------------------------------------------------------------------
+
+export async function installAppAction(appKey: string) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("DATABASE_URL is not configured.");
+  await installApp(prisma, companyId, appKey);
+  revalidatePath("/app-store");
+}
+
+export async function uninstallAppAction(appKey: string) {
+  const session = await requireOnboardedSession();
+  const companyId = session.activeMembership.companyId;
+  const prisma = createPrismaClient().db;
+  if (!prisma) throw new Error("DATABASE_URL is not configured.");
+  await uninstallApp(prisma, companyId, appKey);
+  revalidatePath("/app-store");
 }

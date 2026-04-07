@@ -1,0 +1,11 @@
+model CompanyApp {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  appKey      String   @map("app_key")
+  installedAt DateTime @default(now()) @map("installed_at") @db.Timestamptz(6)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, appKey], map: "company_apps_company_id_app_key_uniq")
+  @@index([companyId], map: "company_apps_company_id_idx")
+  @@map("company_apps")
+}
