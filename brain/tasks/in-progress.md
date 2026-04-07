@@ -9,6 +9,24 @@ This file tracks work currently being executed.
 
 ## In Progress
 
+### Modular Dashboard Sidebar — branch `claude/modular-dashboard-sidebar-KqqHz`
+- **Status:** ✅ Complete — committed and pushed
+
+**Deliverables:**
+- [x] `CompanyApp` Prisma model (`packages/db/prisma/models/company-app.prisma`)
+- [x] `Company` relation extended (`installedApps CompanyApp[]`)
+- [x] DB query module: `getInstalledAppKeys`, `installApp`, `uninstallApp` (`packages/db/src/queries/company-apps.ts`)
+- [x] `APP_REGISTRY` with 5 installable apps + 2 core groups (`apps/dashboard/src/lib/app-registry.ts`)
+- [x] `DashboardSidebar` now accepts `installedAppKeys` prop, renders only active modules
+- [x] `layout.tsx` fetches installed keys server-side with fallback to `DEFAULT_APP_KEYS`
+- [x] App Store redesigned: "Workspace Apps" install/uninstall section + "Integrations" section
+- [x] `installAppAction` / `uninstallAppAction` added to `actions.ts`
+- [x] `InstallButton` client component for optimistic install/uninstall
+
+**Note:** DB migration (`db:generate` + `db:migrate`) is pending — sidebar falls back to DEFAULT_APP_KEYS until migrated.
+
+---
+
 ### High Priority Batch — branch `claude/plan-high-priority-ghs3J`
 - **Status:** ✅ All items complete — committed and pushed
 
