@@ -1,0 +1,10 @@
+model WaitlistEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String
+  name      String?
+  type      String   @default("early_access")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([email, type])
+  @@map("waitlist_entries")
+}

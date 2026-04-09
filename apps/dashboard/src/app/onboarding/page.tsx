@@ -102,6 +102,8 @@ export default async function OnboardingPage({
       return (
         <FlowShell
           badge="Flow 02"
+          brandLogoUrl={null}
+          brandName={params.company ?? "PlotKeys"}
           description="Email verification now continues on the tenant workspace host so onboarding stays scoped to the right company from the first click."
           sidePanel={
             <>
@@ -258,6 +260,9 @@ export default async function OnboardingPage({
       />
       <FlowShell
         badge={`Step ${currentStepIdx + 1} of ${STEPS.length}`}
+        brandEditable
+        brandLogoUrl={pendingOnboarding?.logoUrl ?? null}
+        brandName={companyName || "PlotKeys"}
         description={stepDescription(currentStepId)}
         sidePanel={
           <StepSidePanel

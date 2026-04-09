@@ -496,6 +496,7 @@ export function BuilderPreviewPanel({
               </ClickGuardProvider>
             </SmartFillProvider>
           )}
+        </WebsiteRuntimeProvider>
       </div>
     </div>
   );

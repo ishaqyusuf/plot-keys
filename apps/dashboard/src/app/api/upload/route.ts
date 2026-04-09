@@ -5,7 +5,7 @@ import {
   storageBuckets,
 } from "@plotkeys/platform-integrations";
 import { NextResponse } from "next/server";
-import { requireOnboardedSession } from "../../../lib/session";
+import { requireAuthenticatedSession } from "../../../lib/session";
 
 /**
  * POST /api/upload
@@ -14,12 +14,15 @@ import { requireOnboardedSession } from "../../../lib/session";
  * Uploads the file to Supabase storage (logos bucket) and returns the
  * public URL so the caller can persist it via `setCompanyLogo`.
  *
- * Auth: requires an active onboarded session.
+ * Auth: requires an authenticated session. During onboarding, uploads are
+ * stored under a temporary user-scoped path and persisted into the company
+ * once onboarding completes.
  */
 export async function POST(request: Request) {
   try {
-    const session = await requireOnboardedSession();
-    const companyId = session.activeMembership.companyId;
+    const session = await requireAuthenticatedSession();
+    const storageOwnerId =
+      session.activeMembership?.companyId ?? `onboarding-${session.user.id}`;
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -31,7 +34,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml",
+    ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: "Only JPEG, PNG, WebP, and SVG images are accepted." },
@@ -51,7 +59,7 @@ export async function POST(request: Request) {
     const ext = file.name.split(".").pop() ?? "png";
     const fileName = `logo.${ext}`;
     const path = buildTenantStoragePath({
-      companyId,
+      companyId: storageOwnerId,
       fileName,
       folder: "logo",
     });

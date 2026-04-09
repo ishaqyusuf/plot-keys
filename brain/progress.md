@@ -70,6 +70,26 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-04-06 — Customer Portal Phase 1C — Offers Workflow
+
+**What was built:**
+- `CustomerOffer` Prisma model with `OfferStatus` enum (pending/accepted/rejected/withdrawn); migration SQL written, awaiting apply
+- Five new query functions: `hasPendingOfferForCustomer`, `submitOfferForCustomer`, `withdrawOfferForCustomer`, `countOffersForCustomer`, `listOffersForCustomer`
+- Two server actions: `submitOfferAction` (submit with optional amount + message), `withdrawOfferAction` (pending offers only)
+- `portal-offer-card.tsx` — card component with status badge and inline withdraw form
+- `/portal/offers` page — live offer grid, four status banners, empty state
+- `/portal/dashboard` — "Coming online next" placeholder replaced with "Active offers" widget showing count + recent 3
+- Property detail page — "Enquire" div replaced with auth-aware offer form; unauthenticated visitors get "Sign in to make an offer" link
+
+**Design decisions:**
+- Multiple offers allowed per customer+property (history preserved); one-PENDING-at-a-time enforced at the app layer in `submitOfferForCustomer`
+- `offerAmount` stored as `String?` matching `Property.price` (no currency parsing at DB layer)
+- Staff review workflow (accepting/rejecting offers from dashboard) deferred — status can only move to `withdrawn` by the customer in this phase; staff-side transitions are next
+
+**Deferred:**
+- Staff dashboard surfaces for reviewing and actioning offers
+- Counter-offer flow
+
 ## 2026-03-31 — Customer and Construction Status Correction
 
 ### What changed

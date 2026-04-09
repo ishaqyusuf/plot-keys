@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const completeOnboardingInputSchema = z.object({
   companyName: z.string().trim().min(1),
+  logoUrl: z.string().trim().url().nullable().optional(),
   market: z.string().trim().min(1, "Primary market is required."),
   subdomain: z.string().trim().min(1),
   templateKey: z.string().trim().min(1),

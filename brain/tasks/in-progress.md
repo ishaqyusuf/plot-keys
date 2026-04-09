@@ -27,6 +27,21 @@ This file tracks work currently being executed.
 
 ---
 
+### Customer Portal Phase 1C — Offers Workflow
+- **Status:** ✅ Complete — awaiting migration to be applied
+
+**Completed deliverables:**
+- [x] `OfferStatus` enum + `CustomerOffer` model in `packages/db/prisma/models/customer.prisma`
+- [x] Migration SQL: `packages/db/prisma/migrations/20260406120000_customer_offers/migration.sql`
+- [x] Query functions: `hasPendingOfferForCustomer`, `submitOfferForCustomer`, `withdrawOfferForCustomer`, `countOffersForCustomer`, `listOffersForCustomer` in `packages/db/src/queries/customer.ts`
+- [x] Server actions: `submitOfferAction`, `withdrawOfferAction` in `apps/tenant-site/src/app/portal/actions.ts`
+- [x] New component: `apps/tenant-site/src/components/portal-offer-card.tsx`
+- [x] `/portal/offers` page wired with live data, status banners, and withdraw support
+- [x] `/portal/dashboard` — "Coming online next" replaced with "Active offers" widget
+- [x] Property detail page — "Enquire" placeholder replaced with offer form (auth-aware)
+
+**Pending (manual):** Run `prisma generate` and apply migration
+
 ### High Priority Batch — branch `claude/plan-high-priority-ghs3J`
 - **Status:** ✅ All items complete — committed and pushed
 

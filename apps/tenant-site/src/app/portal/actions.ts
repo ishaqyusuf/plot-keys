@@ -12,6 +12,8 @@ import {
   isListingSavedForCustomer,
   removeSavedListingForCustomer,
   saveListingForCustomer,
+  submitOfferForCustomer,
+  withdrawOfferForCustomer,
 } from "@plotkeys/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -327,4 +329,119 @@ export async function toggleSavedListingAction(formData: FormData) {
   revalidatePath("/portal/saved");
   revalidatePath(`/property/${propertyId}`);
   redirect(buildRedirectWithStatus(redirectTo, "saved"));
+}
+
+function buildRedirectWithOfferStatus(
+  pathname: string,
+  status:
+    | "already-pending"
+    | "sign-in-required"
+    | "submitted"
+    | "withdraw-failed"
+    | "withdrawn",
+) {
+  const url = new URL(pathname, "https://portal.plotkeys.local");
+  url.searchParams.set("offerStatus", status);
+  return `${url.pathname}${url.search}`;
+}
+
+export async function submitOfferAction(formData: FormData) {
+  const propertyId = assertRequired(
+    normalizeString(formData.get("propertyId")),
+    "Property",
+  );
+  const redirectTo = normalizeRedirectTarget(
+    normalizeString(formData.get("redirectTo")),
+    `/property/${propertyId}`,
+  );
+  const offerAmount = normalizeString(formData.get("offerAmount")) || null;
+  const message = normalizeString(formData.get("message")) || null;
+
+  const [shell, session] = await Promise.all([
+    resolveTenantShell(),
+    getPortalCustomerSession(),
+  ]);
+  const prisma = createPrismaClient().db;
+
+  if (!shell || !prisma) {
+    redirect(
+      buildErrorRedirect(
+        "/portal/login",
+        "Customer portal is not available for this tenant.",
+      ),
+    );
+  }
+
+  if (!session) {
+    redirect(
+      `/portal/login?redirect=${encodeURIComponent(redirectTo)}&offerStatus=sign-in-required`,
+    );
+  }
+
+  try {
+    await submitOfferForCustomer(prisma, {
+      companyId: shell.company.id,
+      customerId: session.customer.id,
+      propertyId,
+      offerAmount,
+      message,
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("already have a pending offer")
+    ) {
+      redirect(buildRedirectWithOfferStatus(redirectTo, "already-pending"));
+    }
+    throw error;
+  }
+
+  revalidatePath("/portal/dashboard");
+  revalidatePath("/portal/offers");
+  revalidatePath(`/property/${propertyId}`);
+  redirect(buildRedirectWithOfferStatus(redirectTo, "submitted"));
+}
+
+export async function withdrawOfferAction(formData: FormData) {
+  const offerId = assertRequired(
+    normalizeString(formData.get("offerId")),
+    "Offer",
+  );
+  const redirectTo = normalizeRedirectTarget(
+    normalizeString(formData.get("redirectTo")),
+    "/portal/offers",
+  );
+
+  const [shell, session] = await Promise.all([
+    resolveTenantShell(),
+    getPortalCustomerSession(),
+  ]);
+  const prisma = createPrismaClient().db;
+
+  if (!shell || !prisma) {
+    redirect(
+      buildErrorRedirect(
+        "/portal/login",
+        "Customer portal is not available for this tenant.",
+      ),
+    );
+  }
+
+  if (!session) {
+    redirect(`/portal/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const withdrawn = await withdrawOfferForCustomer(prisma, {
+    companyId: shell.company.id,
+    customerId: session.customer.id,
+    offerId,
+  });
+
+  if (!withdrawn) {
+    redirect(buildRedirectWithOfferStatus(redirectTo, "withdraw-failed"));
+  }
+
+  revalidatePath("/portal/dashboard");
+  revalidatePath("/portal/offers");
+  redirect(buildRedirectWithOfferStatus(redirectTo, "withdrawn"));
 }

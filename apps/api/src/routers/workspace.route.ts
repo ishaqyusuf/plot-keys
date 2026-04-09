@@ -275,6 +275,7 @@ export const workspaceRouter = createTRPCRouter({
       );
 
       const companyName = savedOnboarding?.companyName ?? input.companyName;
+      const logoUrl = input.logoUrl ?? null;
       const subdomain = savedOnboarding?.subdomain ?? input.subdomain;
       const market = input.market;
       const templateKey = input.templateKey;
@@ -334,6 +335,7 @@ export const workspaceRouter = createTRPCRouter({
                 fontFamily: designConfig.fontFamily,
                 headingFontFamily: designConfig.headingFontFamily,
                 logo: companyName,
+                ...(logoUrl ? { logoUrl } : {}),
                 market,
               },
             }
@@ -344,12 +346,20 @@ export const workspaceRouter = createTRPCRouter({
               templateKey,
             });
 
+      if (logoUrl) {
+        initialSiteConfiguration.themeJson = {
+          ...initialSiteConfiguration.themeJson,
+          logoUrl,
+        };
+      }
+
       const siteConfiguration = await createCompanyOnboardingBundle(db, {
         apexDomain: plotkeysRootDomain,
         companyName,
         createdById: ctx.auth.session.user.id,
         dashboardHostname: buildDashboardHostname(subdomain),
         initialSiteConfiguration,
+        logoUrl,
         market,
         sitefrontHostname: buildSitefrontHostname(subdomain),
         subdomain,

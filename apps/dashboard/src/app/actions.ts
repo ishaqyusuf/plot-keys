@@ -44,6 +44,7 @@ import {
   clearAuthSessionCookie,
   clearPendingOnboardingCookie,
   readPendingOnboardingCookie,
+  setPendingOnboardingCookie,
 } from "../lib/session-cookie";
 
 const reservedSubdomains = new Set([
@@ -404,6 +405,7 @@ export async function completeOnboardingAction(formData: FormData) {
     const caller = await createServerCaller();
     const result = await caller.workspace.completeOnboarding({
       companyName,
+      logoUrl: pendingOnboarding?.logoUrl ?? null,
       market,
       subdomain,
       templateKey,
@@ -419,6 +421,37 @@ export async function completeOnboardingAction(formData: FormData) {
   }
 
   redirect(redirectUrl);
+}
+
+export async function setPendingOnboardingLogoAction(logoUrl: string | null) {
+  "use server";
+
+  const session = await requireAuthenticatedSession();
+  const cookieStore = await cookies();
+  const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
+  const prisma = createPrismaClient().db;
+
+  const savedOnboarding = prisma
+    ? await prisma.tenantOnboarding.findUnique({
+        where: { userId: session.user.id },
+      })
+    : null;
+
+  const company =
+    pendingOnboarding?.company ?? savedOnboarding?.companyName ?? null;
+  const subdomain =
+    pendingOnboarding?.subdomain ?? savedOnboarding?.subdomain ?? null;
+
+  if (!company || !subdomain) {
+    return;
+  }
+
+  setPendingOnboardingCookie(cookieStore, {
+    company,
+    logoUrl,
+    subdomain,
+  });
+  revalidatePath("/onboarding");
 }
 
 export async function createTemplateDraftAction(formData: FormData) {

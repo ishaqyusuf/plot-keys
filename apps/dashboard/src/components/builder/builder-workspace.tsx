@@ -417,7 +417,7 @@ export async function BuilderWorkspace({
                   </div>
 
                   <BuilderSidebarControls
-                    activePageKey={activePageKey}
+                    activePageKey={selectedPageKey}
                     configId={configId}
                     currentTemplateKey={resolvedActiveDraft.templateKey}
                     licensedTemplateKeys={licensedTemplateKeys}
@@ -510,7 +510,7 @@ export async function BuilderWorkspace({
               </div>
 
               <BuilderSidebarControls
-                activePageKey={activePageKey}
+                activePageKey={selectedPageKey}
                 configId={configId}
                 currentTemplateKey={resolvedActiveDraft.templateKey}
                 licensedTemplateKeys={licensedTemplateKeys}
@@ -581,7 +581,7 @@ export async function BuilderWorkspace({
             <div className="flex flex-wrap items-center gap-2">
               <BuilderSidebarDrawer
                 activeConfigName={resolvedActiveDraft.name}
-                activePageKey={activePageKey}
+                activePageKey={selectedPageKey}
                 activeTemplateLabel={activeTemplateLabel}
                 configId={configId}
                 configStatus={resolvedActiveDraft.status}
@@ -648,7 +648,7 @@ export async function BuilderWorkspace({
           </div>
 
           <BuilderPreviewPanel
-            activePageKey={activePageKey}
+            activePageKey={selectedPageKey}
             availablePages={availablePages}
             companySlug={companySlug}
             configId={configId}

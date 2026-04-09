@@ -53,7 +53,7 @@ describe("tenant domain helpers", () => {
         currentOrigin: "http://plotkeys.localhost:1355",
         pathname: "/onboarding",
       }),
-    ).toBe("http://dashboard.acme.app.plotkeys.localhost:1355/onboarding");
+    ).toBe("http://app.plotkeys.localhost:1355/onboarding");
     expect(
       buildTenantDashboardUrl("acme", {
         currentOrigin: "https://acme.plotkeys.com",

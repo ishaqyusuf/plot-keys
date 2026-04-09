@@ -205,6 +205,7 @@ export async function createCompanyOnboardingBundle(
       templateKey: string;
       themeJson: Record<string, string>;
     };
+    logoUrl?: string | null;
     market: string;
     sitefrontHostname: string;
     subdomain: string;
@@ -213,6 +214,7 @@ export async function createCompanyOnboardingBundle(
   return db.$transaction(async (tx) => {
     const company = await tx.company.create({
       data: {
+        ...(input.logoUrl ? { logoUrl: input.logoUrl } : {}),
         market: input.market,
         name: input.companyName,
         planStartedAt: new Date(),

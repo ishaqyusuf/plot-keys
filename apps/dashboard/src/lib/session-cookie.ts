@@ -10,6 +10,7 @@ const pendingOnboardingCookieName = "plotkeys_pending_onboarding";
 
 type PendingOnboardingPayload = {
   company: string;
+  logoUrl?: string | null;
   subdomain: string;
 };
 
@@ -59,6 +60,7 @@ export function setPendingOnboardingCookie(
     pendingOnboardingCookieName,
     JSON.stringify({
       company: payload.company.trim(),
+      ...(payload.logoUrl ? { logoUrl: payload.logoUrl.trim() } : {}),
       subdomain: payload.subdomain.trim().toLowerCase(),
     }),
     {
@@ -96,6 +98,10 @@ export function readPendingOnboardingCookie(cookieStore: CookieReader) {
 
     return {
       company: parsed.company.trim(),
+      logoUrl:
+        typeof parsed.logoUrl === "string" && parsed.logoUrl.trim().length > 0
+          ? parsed.logoUrl.trim()
+          : null,
       subdomain: parsed.subdomain.trim().toLowerCase(),
     };
   } catch {

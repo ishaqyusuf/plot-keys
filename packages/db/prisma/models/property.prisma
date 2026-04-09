@@ -21,6 +21,7 @@ model Property {
   appointments Appointment[]
   media        PropertyMedia[]
   savedListings SavedListing[]
+  offers        CustomerOffer[]
 
   @@index([companyId], map: "properties_company_id_idx")
   @@index([status], map: "properties_status_idx")

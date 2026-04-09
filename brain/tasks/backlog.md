@@ -71,7 +71,7 @@ This file holds actionable work that is identified but not currently in progress
 ## Next Phase — Customer Tenant Features
 
 - [ ] **Customer Portal Phase 1A Follow-up — Identity Hardening** — Finalize whether customer identity stays company-scoped or becomes global-plus-tenant-bridge, replace temporary email-linking with an explicit relation, and add customer verification/2FA follow-up.
-- [ ] **Customer Portal Phase 1C — Offers Workflow** — Add customer offer submission, offer status tracking, and basic staff review workflow.
+- ✅ **Customer Portal Phase 1C — Offers Workflow** — Offer submission + status tracking live. Staff review workflow deferred.
 - [ ] **Customer Portal Phase 2 — Payments + Ownership Records** — Add customer payment records, receipts, due dates, and owned/reserved property visibility.
 - [ ] **Customer Portal Phase 3 — Transfer and Sell-Back** — Add transfer and sell-back workflows after payments and ownership records exist.
 

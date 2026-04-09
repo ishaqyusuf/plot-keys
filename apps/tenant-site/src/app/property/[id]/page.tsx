@@ -8,13 +8,14 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { toggleSavedListingAction } from "../../portal/actions";
+import { submitOfferAction, toggleSavedListingAction } from "../../portal/actions";
 import { getPortalCustomerSession } from "../../../lib/customer-session";
 
 type PropertyDetailPageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{
     hostname?: string;
+    offerStatus?: string;
     savedStatus?: string;
     subdomain?: string;
   }>;
@@ -78,6 +79,7 @@ export default async function PropertyDetailPage({
       })
     : false;
   const savedStatus = sp.savedStatus;
+  const offerStatus = sp.offerStatus;
 
   return (
     <main className="min-h-screen px-4 py-8 md:px-8 md:py-12">
@@ -151,6 +153,23 @@ export default async function PropertyDetailPage({
             </p>
           ) : null}
 
+          {offerStatus === "submitted" ? (
+            <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              Your offer has been submitted.{" "}
+              <Link className="font-medium underline underline-offset-4" href="/portal/offers">
+                Track it in your portal.
+              </Link>
+            </p>
+          ) : null}
+          {offerStatus === "already-pending" ? (
+            <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              You already have a pending offer on this property.{" "}
+              <Link className="font-medium underline underline-offset-4" href="/portal/offers">
+                View it in your portal.
+              </Link>
+            </p>
+          ) : null}
+
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {isSignedInCustomer ? (
               <form action={toggleSavedListingAction}>
@@ -181,9 +200,59 @@ export default async function PropertyDetailPage({
               </Link>
             )}
 
-            <div className="inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
-              Enquire about this property
-            </div>
+            {isSignedInCustomer ? (
+              <form action={submitOfferAction} className="flex flex-wrap items-end gap-3">
+                <input name="propertyId" type="hidden" value={property.id} />
+                <input
+                  name="redirectTo"
+                  type="hidden"
+                  value={`/property/${property.id}`}
+                />
+                <div className="flex flex-col gap-1">
+                  <label
+                    className="text-xs font-medium text-muted-foreground"
+                    htmlFor="offerAmount"
+                  >
+                    Offer amount (optional)
+                  </label>
+                  <input
+                    className="rounded-2xl border border-[color:var(--pk-border,#e2e8f0)] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--pk-primary,#0f766e)]/30"
+                    id="offerAmount"
+                    name="offerAmount"
+                    placeholder="e.g. ₦45,000,000"
+                    type="text"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label
+                    className="text-xs font-medium text-muted-foreground"
+                    htmlFor="offerMessage"
+                  >
+                    Message (optional)
+                  </label>
+                  <input
+                    className="rounded-2xl border border-[color:var(--pk-border,#e2e8f0)] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--pk-primary,#0f766e)]/30"
+                    id="offerMessage"
+                    name="message"
+                    placeholder="Add a note to your offer"
+                    type="text"
+                  />
+                </div>
+                <button
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+                  type="submit"
+                >
+                  Submit offer
+                </button>
+              </form>
+            ) : (
+              <Link
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--pk-border,#e2e8f0)] px-6 py-3 text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:border-[color:var(--pk-primary,#0f766e)]/40 hover:text-[color:var(--pk-primary,#0f766e)]"
+                href={`/portal/login?redirect=${encodeURIComponent(`/property/${property.id}`)}`}
+              >
+                Sign in to make an offer
+              </Link>
+            )}
           </div>
         </div>
       </div>

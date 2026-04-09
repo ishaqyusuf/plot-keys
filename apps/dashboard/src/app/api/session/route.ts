@@ -14,6 +14,7 @@ const sessionPayloadSchema = sessionBridgeInputSchema.extend({
   onboarding: z
     .object({
       company: z.string().trim().min(1),
+      logoUrl: z.string().trim().url().nullable().optional(),
       subdomain: z.string().trim().min(1),
     })
     .optional(),

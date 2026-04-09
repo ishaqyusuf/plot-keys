@@ -6,12 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { OnboardingBrandAvatar } from "./onboarding/onboarding-brand-avatar";
 
 type FlowShellProps = {
   badge: string;
+  brandEditable?: boolean;
+  brandLogoUrl?: string | null;
+  brandName?: string;
   children: ReactNode;
   description: string;
   eyebrow?: string;
@@ -21,6 +24,9 @@ type FlowShellProps = {
 
 export function FlowShell({
   badge,
+  brandEditable = false,
+  brandLogoUrl = null,
+  brandName = "PlotKeys",
   children,
   description,
   eyebrow = "Tenant setup",
@@ -30,16 +36,20 @@ export function FlowShell({
   return (
     <main className="min-h-screen bg-background px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-7xl">
-        <Link
-          aria-label="Go to homepage"
-          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
-          href="/"
-        >
-          <div className="flex size-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-semibold">
-            PK
-          </div>
-          PlotKeys
-        </Link>
+        <div className="mb-6 inline-flex items-start gap-3 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground">
+          <OnboardingBrandAvatar
+            brandName={brandName}
+            editable={brandEditable}
+            logoUrl={brandLogoUrl}
+          />
+          <Link
+            aria-label="Go to homepage"
+            className="self-center pr-1 font-medium uppercase tracking-[0.18em] transition hover:text-primary"
+            href="/"
+          >
+            {brandName}
+          </Link>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <Card className="border-border">

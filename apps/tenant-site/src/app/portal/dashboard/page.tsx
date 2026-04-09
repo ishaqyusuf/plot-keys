@@ -1,6 +1,8 @@
 import {
+  countOffersForCustomer,
   countSavedListingsForCustomer,
   createPrismaClient,
+  listOffersForCustomer,
   listSavedListingsForCustomer,
 } from "@plotkeys/db";
 import Link from "next/link";
@@ -10,7 +12,11 @@ import { PortalCard, PortalPage } from "../../../components/portal-page";
 import { getPortalCustomerSession } from "../../../lib/customer-session";
 
 type PortalDashboardPageProps = {
-  searchParams?: Promise<{ savedStatus?: string; signup?: string }>;
+  searchParams?: Promise<{
+    offerStatus?: string;
+    savedStatus?: string;
+    signup?: string;
+  }>;
 };
 
 export default async function PortalDashboardPage({
@@ -18,7 +24,11 @@ export default async function PortalDashboardPage({
 }: PortalDashboardPageProps) {
   const [rawParams, session] = await Promise.all([
     searchParams?.then((value) => value ?? {}) ??
-      Promise.resolve<{ savedStatus?: string; signup?: string }>({}),
+      Promise.resolve<{
+        offerStatus?: string;
+        savedStatus?: string;
+        signup?: string;
+      }>({}),
     getPortalCustomerSession(),
   ]);
   const params = rawParams ?? {};
@@ -29,13 +39,15 @@ export default async function PortalDashboardPage({
         customerId: session.customer.id,
       }
     : null;
-  const [savedCount, recentSavedListings] =
+  const [savedCount, recentSavedListings, offerCount, recentOffers] =
     prisma && savedScope
       ? await Promise.all([
           countSavedListingsForCustomer(prisma, savedScope),
           listSavedListingsForCustomer(prisma, { ...savedScope, take: 3 }),
+          countOffersForCustomer(prisma, savedScope),
+          listOffersForCustomer(prisma, { ...savedScope, take: 3 }),
         ])
-      : [0, []];
+      : [0, [], 0, []];
 
   return (
     <PortalPage
@@ -133,12 +145,62 @@ export default async function PortalDashboardPage({
           </div>
         </PortalCard>
 
-        <PortalCard title="Coming online next">
-          <ul className="space-y-3 text-sm leading-7 text-[color:var(--pk-muted-foreground,#64748b)]">
-            <li>Offer status tracking and customer activity history</li>
-            <li>Customer-scoped payments, receipts, and account settings</li>
-            <li>Owned and reserved property visibility from one workspace</li>
-          </ul>
+        <PortalCard title="Active offers">
+          <div className="space-y-4 text-sm text-[color:var(--pk-muted-foreground,#64748b)]">
+            <p>
+              <span className="font-medium text-[color:var(--pk-foreground,#0f172a)]">
+                Total offers:
+              </span>{" "}
+              {offerCount}
+            </p>
+            {recentOffers.length ? (
+              <div className="space-y-3">
+                {recentOffers.map((offer) => (
+                  <div
+                    key={offer.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--pk-border,#e2e8f0)] px-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        className="block truncate font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:text-[color:var(--pk-primary,#0f766e)]"
+                        href={`/property/${offer.property.id}`}
+                      >
+                        {offer.property.title}
+                      </Link>
+                      {offer.offerAmount ? (
+                        <p className="mt-0.5 text-sm">{offer.offerAmount}</p>
+                      ) : null}
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+                        offer.status === "pending"
+                          ? "border-amber-200 bg-amber-50 text-amber-700"
+                          : offer.status === "accepted"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : offer.status === "rejected"
+                              ? "border-red-200 bg-red-50 text-red-700"
+                              : "border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-surface,#f8fafc)] text-[color:var(--pk-muted-foreground,#64748b)]"
+                      }`}
+                    >
+                      {offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>
+                Submit an offer from a property page and it will appear here.
+              </p>
+            )}
+            {offerCount > 0 ? (
+              <Link
+                className="font-medium text-[color:var(--pk-primary,#0f766e)] underline-offset-4 hover:underline"
+                href="/portal/offers"
+              >
+                View all offers →
+              </Link>
+            ) : null}
+          </div>
         </PortalCard>
 
         {recentSavedListings.length ? (

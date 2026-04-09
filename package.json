@@ -15,7 +15,7 @@
     "db:migrate:deploy": "node ./scripts/with-workspace-env.mjs bun run --cwd packages/db db:migrate:deploy",
     "db:studio": "node ./scripts/with-workspace-env.mjs bun run --cwd packages/db db:studio",
     "db:drizzle:studio": "node ./scripts/with-workspace-env.mjs bun run --cwd packages/db db:drizzle:studio",
-    "db:up": "docker compose up -d postgres",
+    "db:up": "docker desktop start && until docker info >/dev/null 2>&1; do sleep 2; done && docker compose up -d postgres",
     "dev": "turbo dev --parallel",
     "dev:api": "turbo dev --filter=@plotkeys/api",
     "dev:api:portless": "turbo dev:portless --filter=@plotkeys/api",

@@ -311,3 +311,200 @@ export async function listSavedListingsForCustomer(
     property: savedListing.property,
   }));
 }
+
+export type CustomerOfferOverview = {
+  id: string;
+  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  offerAmount: string | null;
+  message: string | null;
+  submittedAt: Date;
+  property: {
+    id: string;
+    title: string;
+    location: string;
+    price: string | null;
+    imageUrl: string | null;
+  };
+};
+
+export async function hasPendingOfferForCustomer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    propertyId: string;
+  },
+) {
+  const offer = await db.customerOffer.findFirst({
+    where: {
+      companyId: input.companyId,
+      customerId: input.customerId,
+      propertyId: input.propertyId,
+      status: "pending",
+    },
+    select: { id: true },
+  });
+
+  return Boolean(offer);
+}
+
+export async function submitOfferForCustomer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    propertyId: string;
+    offerAmount?: string | null;
+    message?: string | null;
+  },
+) {
+  const property = await db.property.findFirst({
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.propertyId,
+    },
+    select: { id: true },
+  });
+
+  if (!property) {
+    throw new Error("Property could not be found for this tenant.");
+  }
+
+  const customer = await db.customer.findFirst({
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.customerId,
+    },
+    select: { id: true },
+  });
+
+  if (!customer) {
+    throw new Error("Customer account is not available for this tenant.");
+  }
+
+  const alreadyPending = await hasPendingOfferForCustomer(db, {
+    companyId: input.companyId,
+    customerId: input.customerId,
+    propertyId: input.propertyId,
+  });
+
+  if (alreadyPending) {
+    throw new Error("You already have a pending offer on this property.");
+  }
+
+  return db.customerOffer.create({
+    data: {
+      companyId: input.companyId,
+      customerId: input.customerId,
+      propertyId: input.propertyId,
+      offerAmount: input.offerAmount ?? null,
+      message: input.message ?? null,
+    },
+  });
+}
+
+export async function withdrawOfferForCustomer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    offerId: string;
+  },
+) {
+  const offer = await db.customerOffer.findFirst({
+    where: {
+      id: input.offerId,
+      companyId: input.companyId,
+      customerId: input.customerId,
+      status: "pending",
+    },
+    select: { id: true },
+  });
+
+  if (!offer) {
+    return false;
+  }
+
+  await db.customerOffer.update({
+    where: { id: offer.id },
+    data: { status: "withdrawn" },
+  });
+
+  return true;
+}
+
+export async function countOffersForCustomer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+  },
+) {
+  return db.customerOffer.count({
+    where: {
+      companyId: input.companyId,
+      customerId: input.customerId,
+      customer: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+      property: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+    },
+  });
+}
+
+export async function listOffersForCustomer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    take?: number;
+  },
+): Promise<CustomerOfferOverview[]> {
+  const offers = await db.customerOffer.findMany({
+    where: {
+      companyId: input.companyId,
+      customerId: input.customerId,
+      customer: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+      property: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: input.take,
+    select: {
+      id: true,
+      status: true,
+      offerAmount: true,
+      message: true,
+      createdAt: true,
+      property: {
+        select: {
+          id: true,
+          title: true,
+          location: true,
+          price: true,
+          imageUrl: true,
+        },
+      },
+    },
+  });
+
+  return offers.map((offer) => ({
+    id: offer.id,
+    status: offer.status as CustomerOfferOverview["status"],
+    offerAmount: offer.offerAmount,
+    message: offer.message,
+    submittedAt: offer.createdAt,
+    property: offer.property,
+  }));
+}
