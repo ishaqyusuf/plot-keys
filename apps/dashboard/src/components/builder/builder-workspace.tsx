@@ -53,6 +53,7 @@ import { getBaseUrl } from "../../lib/get-base-url";
 import { BuilderPreviewPanel } from "./builder-preview-panel";
 import { BuilderSidebarControls } from "./builder-sidebar-controls";
 import { BuilderSidebarDrawer } from "./builder-sidebar-drawer";
+import { FloatingConfigPanel } from "./floating-config-panel";
 import {
   AiContentBootstrapButton,
   GeneratePageContentButton,
@@ -372,125 +373,208 @@ export async function BuilderWorkspace({
       )}
 
       <div
-        className={[
-          "grid gap-3",
+        className={
           isEmbedded
-            ? "xl:grid-cols-[15rem_minmax(0,1fr)]"
-            : "max-w-464 xl:grid-cols-[14rem_minmax(0,1fr)]",
-        ]
-          .filter(Boolean)
-          .join(" ")}
+            ? "grid gap-3 xl:grid-cols-[15rem_minmax(0,1fr)]"
+            : "relative min-h-screen"
+        }
       >
-        <aside
-          className={[
-            "hidden xl:block",
-            isEmbedded ? "" : "xl:sticky xl:top-3 xl:h-[calc(100svh-1.5rem)]",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
-            <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
-                  Website config
-                </p>
-                <Badge variant="outline">Studio</Badge>
+        {isEmbedded ? (
+          <aside className="hidden xl:block">
+            <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-soft)]">
+              <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
+                    Website config
+                  </p>
+                  <Badge variant="outline">Studio</Badge>
+                </div>
+              </div>
+
+              <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+                <section className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                        Active configuration
+                      </p>
+                      <p className="mt-1.5 text-sm font-semibold text-foreground">
+                        {resolvedActiveDraft.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Version {resolvedActiveDraft.versionNumber ?? 1}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        resolvedActiveDraft.status === "published"
+                          ? "default"
+                          : "outline"
+                      }
+                    >
+                      {resolvedActiveDraft.status}
+                    </Badge>
+                  </div>
+
+                  <BuilderSidebarControls
+                    activePageKey={activePageKey}
+                    configId={configId}
+                    currentTemplateKey={resolvedActiveDraft.templateKey}
+                    licensedTemplateKeys={licensedTemplateKeys}
+                    planTier={company.planTier as SubscriptionTier}
+                    currentPageKey={selectedPageKey}
+                    readOnly={isTemplateLocked}
+                    readOnlyMessage={lockedTemplateMessage}
+                    requiredPlan={templateAccess.requiredTier}
+                    sectionTypes={sectionTypes}
+                    templateConfig={templateConfig}
+                    onCreateDraft={createTemplateDraftSilentAction}
+                    onUpdateTheme={updateSiteThemeFieldAction}
+                    onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
+                  />
+                </section>
+
+                <Separator />
+
+                <section className="flex flex-col gap-1.5">
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    Editable fields
+                  </p>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Click any section in the preview to reveal its inline field
+                    editor. Changes are saved per field.
+                  </p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <Badge variant="outline">
+                      {preview.editableFields.length} fields
+                    </Badge>
+                    <Badge variant="outline">
+                      {preview.page.sections.length} sections
+                    </Badge>
+                  </div>
+                </section>
+
+                <Separator />
+
+                <section className="flex flex-col gap-2">
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    AI content
+                  </p>
+                  <GeneratePageContentButton
+                    disabled={isTemplateLocked}
+                    pageKey={selectedPageKey}
+                  />
+                </section>
+
+                <Separator />
+
+                <section className="flex flex-col gap-2">
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    Onboarding tools
+                  </p>
+                  <AiContentBootstrapButton disabled={isTemplateLocked} />
+                  <RecommendTemplatePanel
+                    currentBusinessType={onboarding?.businessType}
+                    currentPrimaryGoal={onboarding?.primaryGoal}
+                    currentStylePreference={onboarding?.stylePreference}
+                    currentTone={onboarding?.tone}
+                  />
+                </section>
               </div>
             </div>
-
-            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-              <section className="flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                      Active configuration
-                    </p>
-                    <p className="mt-1.5 text-sm font-semibold text-foreground">
-                      {resolvedActiveDraft.name}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Version {resolvedActiveDraft.versionNumber ?? 1}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={
-                      resolvedActiveDraft.status === "published"
-                        ? "default"
-                        : "outline"
-                    }
-                  >
-                    {resolvedActiveDraft.status}
-                  </Badge>
+          </aside>
+        ) : (
+          <FloatingConfigPanel>
+            <section className="flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    Active configuration
+                  </p>
+                  <p className="mt-1.5 text-sm font-semibold text-foreground">
+                    {resolvedActiveDraft.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Version {resolvedActiveDraft.versionNumber ?? 1}
+                  </p>
                 </div>
+                <Badge
+                  variant={
+                    resolvedActiveDraft.status === "published"
+                      ? "default"
+                      : "outline"
+                  }
+                >
+                  {resolvedActiveDraft.status}
+                </Badge>
+              </div>
 
-                <BuilderSidebarControls
-                  activePageKey={activePageKey}
-                  configId={configId}
-                  currentTemplateKey={resolvedActiveDraft.templateKey}
-                  licensedTemplateKeys={licensedTemplateKeys}
-                  planTier={company.planTier as SubscriptionTier}
-                  currentPageKey={selectedPageKey}
-                  readOnly={isTemplateLocked}
-                  readOnlyMessage={lockedTemplateMessage}
-                  requiredPlan={templateAccess.requiredTier}
-                  sectionTypes={sectionTypes}
-                  templateConfig={templateConfig}
-                  onCreateDraft={createTemplateDraftSilentAction}
-                  onUpdateTheme={updateSiteThemeFieldAction}
-                  onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
-                />
-              </section>
+              <BuilderSidebarControls
+                activePageKey={activePageKey}
+                configId={configId}
+                currentTemplateKey={resolvedActiveDraft.templateKey}
+                licensedTemplateKeys={licensedTemplateKeys}
+                planTier={company.planTier as SubscriptionTier}
+                currentPageKey={selectedPageKey}
+                readOnly={isTemplateLocked}
+                readOnlyMessage={lockedTemplateMessage}
+                requiredPlan={templateAccess.requiredTier}
+                sectionTypes={sectionTypes}
+                templateConfig={templateConfig}
+                onCreateDraft={createTemplateDraftSilentAction}
+                onUpdateTheme={updateSiteThemeFieldAction}
+                onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
+              />
+            </section>
 
-              <Separator />
+            <Separator />
 
-              <section className="flex flex-col gap-1.5">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Editable fields
-                </p>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Click any section in the preview to reveal its inline field
-                  editor. Changes are saved per field.
-                </p>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <Badge variant="outline">
-                    {preview.editableFields.length} fields
-                  </Badge>
-                  <Badge variant="outline">
-                    {preview.page.sections.length} sections
-                  </Badge>
-                </div>
-              </section>
+            <section className="flex flex-col gap-1.5">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                Editable fields
+              </p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Click any section in the preview to reveal its inline field
+                editor. Changes are saved per field.
+              </p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <Badge variant="outline">
+                  {preview.editableFields.length} fields
+                </Badge>
+                <Badge variant="outline">
+                  {preview.page.sections.length} sections
+                </Badge>
+              </div>
+            </section>
 
-              <Separator />
+            <Separator />
 
-              <section className="flex flex-col gap-2">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  AI content
-                </p>
-                <GeneratePageContentButton
-                  disabled={isTemplateLocked}
-                  pageKey={selectedPageKey}
-                />
-              </section>
+            <section className="flex flex-col gap-2">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                AI content
+              </p>
+              <GeneratePageContentButton
+                disabled={isTemplateLocked}
+                pageKey={selectedPageKey}
+              />
+            </section>
 
-              <Separator />
+            <Separator />
 
-              <section className="flex flex-col gap-2">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Onboarding tools
-                </p>
-                <AiContentBootstrapButton disabled={isTemplateLocked} />
-                <RecommendTemplatePanel
-                  currentBusinessType={onboarding?.businessType}
-                  currentPrimaryGoal={onboarding?.primaryGoal}
-                  currentStylePreference={onboarding?.stylePreference}
-                  currentTone={onboarding?.tone}
-                />
-              </section>
-            </div>
-          </div>
-        </aside>
+            <section className="flex flex-col gap-2">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                Onboarding tools
+              </p>
+              <AiContentBootstrapButton disabled={isTemplateLocked} />
+              <RecommendTemplatePanel
+                currentBusinessType={onboarding?.businessType}
+                currentPrimaryGoal={onboarding?.primaryGoal}
+                currentStylePreference={onboarding?.stylePreference}
+                currentTone={onboarding?.tone}
+              />
+            </section>
+          </FloatingConfigPanel>
+        )}
 
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">

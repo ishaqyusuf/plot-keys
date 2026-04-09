@@ -19,19 +19,16 @@ export default async function BuilderPage({ searchParams }: BuilderPageProps) {
   const params = (await searchParams) ?? {};
 
   return (
-    <main className="min-h-screen bg-background px-2 py-2 md:px-3 md:py-3">
-      <div className="mx-auto">
-        <BuilderWorkspace
-          companyId={session.activeMembership.companyId}
-          companyName={session.activeMembership.companyName}
-          companySlug={session.activeMembership.companySlug}
-          notices={params}
-          pageKey={params.page}
-          previewPath={params.path}
-          pageKey={params.page}
-          userId={session.user.id}
-        />
-      </div>
+    <main className="min-h-screen bg-background">
+      <BuilderWorkspace
+        companyId={session.activeMembership.companyId}
+        companyName={session.activeMembership.companyName}
+        companySlug={session.activeMembership.companySlug}
+        notices={params}
+        pageKey={params.page}
+        previewPath={params.path}
+        userId={session.user.id}
+      />
     </main>
   );
 }
