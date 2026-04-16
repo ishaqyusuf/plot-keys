@@ -5,9 +5,12 @@ import {
   findAppById,
   isAppAvailable,
 } from "@plotkeys/app-store/registry";
-import { createPrismaClient } from "@plotkeys/db";
 import { revalidatePath } from "next/cache";
 
+import {
+  getCompanyAppsState,
+  setCompanyEnabledAppIds,
+} from "../../../lib/company-apps";
 import { requireOnboardedSession } from "../../../lib/session";
 
 export type SetAppEnabledResult = { ok: true } | { error: string; ok: false };
@@ -31,15 +34,7 @@ export async function setAppEnabled(
     return { ok: false, error: "Unknown app." };
   }
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) {
-    return { ok: false, error: "Database unavailable." };
-  }
-
-  const company = await prisma.company.findUnique({
-    where: { id: session.activeMembership.companyId },
-    select: { enabledApps: true, planTier: true },
-  });
+  const company = await getCompanyAppsState(session.activeMembership.companyId);
 
   if (!company) {
     return { ok: false, error: "Company not found." };
@@ -54,17 +49,17 @@ export async function setAppEnabled(
     };
   }
 
-  const current = new Set(company.enabledApps ?? []);
+  const current = new Set(company.enabledIds);
   if (enabled) {
     current.add(app.id);
   } else {
     current.delete(app.id);
   }
 
-  await prisma.company.update({
-    where: { id: session.activeMembership.companyId },
-    data: { enabledApps: Array.from(current) },
-  });
+  await setCompanyEnabledAppIds(
+    session.activeMembership.companyId,
+    Array.from(current),
+  );
 
   revalidatePath("/app-store");
   revalidatePath("/", "layout");

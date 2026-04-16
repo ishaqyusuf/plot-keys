@@ -3,7 +3,10 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { buildTenantDashboardUrl } from "@plotkeys/utils";
+import {
+  buildTenantDashboardUrl,
+  resolveDashboardLandingRoute,
+} from "@plotkeys/utils";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -19,6 +22,7 @@ import {
 import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
 import { getCurrentAppSession, getTenantSlugFromHost } from "../../lib/session";
 import { readPendingOnboardingCookie } from "../../lib/session-cookie";
+import { getTenantSignInUrlForSubdomain } from "../../lib/tenant-dashboard-url";
 
 // ---------------------------------------------------------------------------
 // Step definitions
@@ -80,9 +84,9 @@ export default async function OnboardingPage({
   const currentOrigin = host ? `${protocol}://${host}` : null;
 
   if (!session) {
-    if (tenantSlug && params.token) {
+    if (params.token && (tenantSlug || params.subdomain)) {
       const verificationLink = new URL(
-        buildTenantDashboardUrl(params.subdomain ?? tenantSlug, {
+        buildTenantDashboardUrl(params.subdomain ?? tenantSlug!, {
           currentOrigin,
           pathname: "/onboarding",
         }),
@@ -179,12 +183,17 @@ export default async function OnboardingPage({
       redirect(authRoutes.signIn);
     }
 
-    redirect(authRoutes.signIn);
+    redirect(authRoutes.signUp);
   }
 
   if (session.activeMembership) {
-    return (
-      <meta content={`0;url=${authRoutes.dashboardHome}`} httpEquiv="refresh" />
+    redirect(
+      tenantSlug
+        ? resolveDashboardLandingRoute(session.activeMembership.workRole)
+        : await getTenantSignInUrlForSubdomain(
+            session.activeMembership.companySlug,
+            resolveDashboardLandingRoute(session.activeMembership.workRole),
+          ),
     );
   }
 

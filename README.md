@@ -38,11 +38,12 @@ PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for 
 
 Default routes:
 - `http://plotkeys.localhost:1355` for the marketing site
-- `http://app.plotkeys.localhost:1355` for the dashboard
+- `http://app.plotkeys.localhost:1355` for shared signup and onboarding
 - `http://api.plotkeys.localhost:1355` for the API
 - `http://tenant.plotkeys.localhost:1355` for the tenant site
 
 Tenant subdomains also work through the tenant-site route, so a host like `http://acme.tenant.plotkeys.localhost:1355` maps to the tenant-site app.
+Tenant dashboard hosts use `http://dashboard.<tenant>.app.plotkeys.localhost:1355`, for example `http://dashboard.acme.app.plotkeys.localhost:1355`.
 
 If you use Portless locally, update app env vars that still point at hardcoded `localhost:<port>` URLs to the matching named host above.
 

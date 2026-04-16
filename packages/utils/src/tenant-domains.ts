@@ -209,9 +209,7 @@ export function buildTenantDashboardUrl(
       return `${protocol}://${localTenantDashboardHostname}${port}${normalizedPathname}`;
     }
 
-    // Portless reliably serves the shared dashboard app host locally, but
-    // nested tenant dashboard hosts can fall through to a host-level 404.
-    return `${protocol}://${localDashboardRootDomain}${port}${normalizedPathname}`;
+    return `${protocol}://${buildLocalDashboardHostname(normalizedSubdomain)}${port}${normalizedPathname}`;
   }
 
   const tenantDashboardHostname = options?.tenantHostname

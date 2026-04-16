@@ -85,11 +85,11 @@ export function VerifyEmailForm({
           <Link
             href={
               redirectTo
-                ? `${authRoutes.signIn}?redirect=${encodeURIComponent(redirectTo)}`
-                : authRoutes.signIn
+                ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
+                : authRoutes.signUp
             }
           >
-            Back to sign in
+            Back to sign up
           </Link>
         </Button>
       </div>

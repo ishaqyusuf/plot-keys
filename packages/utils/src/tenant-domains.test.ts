@@ -64,7 +64,7 @@ describe("tenant domain helpers", () => {
         currentOrigin: "http://plotkeys.localhost:1355",
         pathname: "/onboarding",
       }),
-    ).toBe("http://app.plotkeys.localhost:1355/onboarding");
+    ).toBe("http://dashboard.acme.app.plotkeys.localhost:1355/onboarding");
     expect(
       buildTenantDashboardUrl("acme", {
         currentOrigin: "https://acme.plotkeys.com",
@@ -115,6 +115,13 @@ describe("tenant domain helpers", () => {
         tenantHostname: "summitpoint.plotkeys.com",
       }),
     ).toBe("http://dashboard.summitpoint.app.plotkeys.localhost:1355");
+    expect(
+      buildTenantDashboardUrl("summitpoint", {
+        currentOrigin: "http://app.plotkeys.localhost:1355",
+        tenantHostname: "summitpoint.tenant.plotkeys.localhost",
+        pathname: "/onboarding",
+      }),
+    ).toBe("http://dashboard.summitpoint.app.plotkeys.localhost:1355/onboarding");
   });
 
   it("parses dashboard hosts without accepting the legacy public alias", () => {

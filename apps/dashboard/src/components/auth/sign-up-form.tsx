@@ -8,7 +8,7 @@ import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { buildTenantDashboardUrl } from "@plotkeys/utils";
+import { buildLocalSitefrontHostname, buildTenantDashboardUrl } from "@plotkeys/utils";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -77,15 +77,20 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           params.set("redirect", redirectTo);
         }
 
-        const tenantOnboardingUrl = buildTenantDashboardUrl(
+        const onboardingUrl = `${buildTenantDashboardUrl(
           result.onboarding.subdomain,
           {
             currentOrigin: window.location.origin,
             pathname: "/onboarding",
+            tenantHostname: window.location.hostname.endsWith(
+              ".plotkeys.localhost",
+            )
+              ? buildLocalSitefrontHostname(result.onboarding.subdomain)
+              : undefined,
           },
-        );
+        )}?${params.toString()}`;
 
-        router.push(`${tenantOnboardingUrl}?${params.toString()}`);
+        router.push(onboardingUrl);
         router.refresh();
       },
     }),

@@ -46,6 +46,7 @@ import {
   readPendingOnboardingCookie,
   setPendingOnboardingCookie,
 } from "../lib/session-cookie";
+import { getTenantSignInUrlForSubdomain } from "../lib/tenant-dashboard-url";
 
 const reservedSubdomains = new Set([
   "admin",
@@ -412,7 +413,10 @@ export async function completeOnboardingAction(formData: FormData) {
     });
 
     clearPendingOnboardingCookie(cookieStore);
-    redirectUrl = `/builder?configId=${result.configId}&onboarding=1`;
+    redirectUrl = await getTenantSignInUrlForSubdomain(
+      subdomain,
+      `/builder?configId=${result.configId}&onboarding=1`,
+    );
   } catch (error) {
     redirectUrl = createRedirectUrl(authRoutes.onboarding, {
       error:

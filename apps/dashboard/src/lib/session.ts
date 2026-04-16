@@ -7,9 +7,13 @@ import {
   platformSessionScope,
 } from "@plotkeys/auth";
 import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
-import { resolveDashboardSessionScope } from "@plotkeys/utils";
+import {
+  resolveDashboardLandingRoute,
+  resolveDashboardSessionScope,
+} from "@plotkeys/utils";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getTenantSignInUrlForSubdomain } from "./tenant-dashboard-url";
 
 function resolveSessionCookieScope(host?: string | null) {
   return resolveDashboardSessionScope(host) ?? platformSessionScope;
@@ -94,6 +98,20 @@ export async function requireOnboardedSession() {
     }
 
     redirect(authRoutes.onboarding);
+  }
+
+  if (!tenantSlug) {
+    const requestHeaders = await headers();
+    const requestedPath =
+      requestHeaders.get("x-pathname") ??
+      resolveDashboardLandingRoute(session.activeMembership.workRole);
+
+    redirect(
+      await getTenantSignInUrlForSubdomain(
+        session.activeMembership.companySlug,
+        requestedPath,
+      ),
+    );
   }
 
   return session as AppSession & {
