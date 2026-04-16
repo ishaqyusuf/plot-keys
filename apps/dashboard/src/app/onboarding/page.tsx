@@ -179,7 +179,7 @@ export default async function OnboardingPage({
       redirect(authRoutes.signIn);
     }
 
-    redirect(authRoutes.signUp);
+    redirect(authRoutes.signIn);
   }
 
   if (session.activeMembership) {

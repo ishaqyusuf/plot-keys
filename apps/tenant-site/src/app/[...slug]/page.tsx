@@ -29,7 +29,7 @@ import {
   resolvePage,
 } from "@plotkeys/section-registry";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { JSX } from "react";
 
 import {
@@ -76,6 +76,25 @@ function resolvePageKeyForPath(
   }
 
   return null;
+}
+
+const listingOverviewAliasSlugs = new Set([
+  "/listings",
+  "/properties",
+  "/rentals",
+  "/portfolio",
+  "/projects",
+]);
+
+function resolveCanonicalListingOverviewPath(
+  templateKey: string,
+): string | null {
+  const inventory = getTemplatePageInventory(templateKey);
+  const overviewPage = inventory.pages.find(
+    (page) => !page.slug.includes("[") && isListingOverviewPage(page.pageKey),
+  );
+
+  return overviewPage?.slug ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -213,6 +232,27 @@ export default async function InnerPage({
 
   const pageKey = resolvePageKeyForPath(tenant.templateKey, path);
   if (!pageKey) {
+    if (listingOverviewAliasSlugs.has(path)) {
+      const canonicalOverviewPath = resolveCanonicalListingOverviewPath(
+        tenant.templateKey,
+      );
+
+      if (canonicalOverviewPath && canonicalOverviewPath !== path) {
+        const search = new URLSearchParams();
+        if (sp.location) search.set("location", sp.location);
+        if (sp.page) search.set("page", sp.page);
+        if (sp.priceRange) search.set("priceRange", sp.priceRange);
+        if (sp.sort) search.set("sort", sp.sort);
+        if (sp.renderMode) search.set("renderMode", sp.renderMode);
+
+        redirect(
+          search.size > 0
+            ? `${canonicalOverviewPath}?${search.toString()}`
+            : canonicalOverviewPath,
+        );
+      }
+    }
+
     notFound();
   }
 

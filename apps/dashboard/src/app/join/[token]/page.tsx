@@ -79,7 +79,6 @@ export default async function JoinPage({
   const role = invite.role;
   const redirectTo = `/join/${token}`;
   const signInHref = `/sign-in?redirect=${encodeURIComponent(redirectTo)}`;
-  const signUpHref = `/sign-up?redirect=${encodeURIComponent(redirectTo)}`;
   const profileCompletionHref =
     role === "agent" || role === "staff" ? `/join/${token}/complete` : "/";
 
@@ -107,15 +106,12 @@ export default async function JoinPage({
         {!session ? (
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Sign in to an existing PlotKeys account or create one with{" "}
-              <strong>{invite.email}</strong> to accept this invitation.
+              Sign in with <strong>{invite.email}</strong> to accept this
+              invitation.
             </p>
             <div className="flex flex-col gap-3">
               <Button asChild>
                 <Link href={signInHref}>Sign in to continue</Link>
-              </Button>
-              <Button asChild variant="secondary">
-                <Link href={signUpHref}>Create account</Link>
               </Button>
             </div>
           </CardContent>

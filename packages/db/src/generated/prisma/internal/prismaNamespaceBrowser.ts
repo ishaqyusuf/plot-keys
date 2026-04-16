@@ -65,6 +65,7 @@ export const ModelName = {
   Company: 'Company',
   Customer: 'Customer',
   SavedListing: 'SavedListing',
+  CustomerOffer: 'CustomerOffer',
   Department: 'Department',
   Employee: 'Employee',
   Lead: 'Lead',
@@ -96,6 +97,7 @@ export const ModelName = {
   TenantOnboarding: 'TenantOnboarding',
   TenantTemplateLicense: 'TenantTemplateLicense',
   User: 'User',
+  WaitlistEntry: 'WaitlistEntry',
   Website: 'Website',
   WebsiteVersion: 'WebsiteVersion'
 } as const
@@ -308,6 +310,7 @@ export const CompanyScalarFieldEnum = {
   planStatus: 'planStatus',
   planStartedAt: 'planStartedAt',
   planEndsAt: 'planEndsAt',
+  enabledApps: 'enabledApps',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -344,6 +347,21 @@ export const SavedListingScalarFieldEnum = {
 } as const
 
 export type SavedListingScalarFieldEnum = (typeof SavedListingScalarFieldEnum)[keyof typeof SavedListingScalarFieldEnum]
+
+
+export const CustomerOfferScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  propertyId: 'propertyId',
+  status: 'status',
+  offerAmount: 'offerAmount',
+  message: 'message',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerOfferScalarFieldEnum = (typeof CustomerOfferScalarFieldEnum)[keyof typeof CustomerOfferScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {
@@ -881,6 +899,17 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const WaitlistEntryScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type WaitlistEntryScalarFieldEnum = (typeof WaitlistEntryScalarFieldEnum)[keyof typeof WaitlistEntryScalarFieldEnum]
 
 
 export const WebsiteScalarFieldEnum = {

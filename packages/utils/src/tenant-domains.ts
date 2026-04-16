@@ -62,6 +62,18 @@ export function buildDashboardCustomHostname(hostname: string) {
     : `${dashboardSubdomainLabel}.${normalizedHostname}`;
 }
 
+export function buildLocalDashboardCustomHostname(hostname: string) {
+  const normalizedHostname = extractTenantHostname(hostname);
+
+  if (!normalizedHostname) {
+    return "";
+  }
+
+  const dashboardHostname = buildDashboardCustomHostname(normalizedHostname);
+
+  return dashboardHostname ? `${dashboardHostname}.localhost` : "";
+}
+
 function parseOriginLike(value: string) {
   try {
     return new URL(value);
@@ -144,10 +156,27 @@ export function buildDashboardHostnameForTenantHostname(hostname: string) {
   return buildDashboardCustomHostname(normalizedHostname);
 }
 
+export function buildLocalDashboardHostnameForTenantHostname(hostname: string) {
+  const normalizedHostname = extractTenantHostname(hostname);
+
+  if (!normalizedHostname) {
+    return "";
+  }
+
+  const sitefrontSubdomain = extractSitefrontSubdomain(normalizedHostname);
+
+  if (sitefrontSubdomain) {
+    return buildLocalDashboardHostname(sitefrontSubdomain);
+  }
+
+  return buildLocalDashboardCustomHostname(normalizedHostname);
+}
+
 export function buildTenantDashboardUrl(
   subdomain: string,
   options?: {
     currentOrigin?: string | null;
+    tenantHostname?: string | null;
     pathname?: string;
     protocol?: "http" | "https";
   },
@@ -172,9 +201,25 @@ export function buildTenantDashboardUrl(
   const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
 
   if (isAnyLocalPlotkeysHostname(parsedOrigin?.hostname)) {
+    const localTenantDashboardHostname = options?.tenantHostname
+      ? buildLocalDashboardHostnameForTenantHostname(options.tenantHostname)
+      : "";
+
+    if (localTenantDashboardHostname) {
+      return `${protocol}://${localTenantDashboardHostname}${port}${normalizedPathname}`;
+    }
+
     // Portless reliably serves the shared dashboard app host locally, but
     // nested tenant dashboard hosts can fall through to a host-level 404.
     return `${protocol}://${localDashboardRootDomain}${port}${normalizedPathname}`;
+  }
+
+  const tenantDashboardHostname = options?.tenantHostname
+    ? buildDashboardHostnameForTenantHostname(options.tenantHostname)
+    : "";
+
+  if (tenantDashboardHostname) {
+    return `${protocol}://${tenantDashboardHostname}${normalizedPathname}`;
   }
 
   return `${protocol}://${buildDashboardHostname(normalizedSubdomain)}${normalizedPathname}`;
@@ -184,6 +229,7 @@ export function buildTenantSiteUrl(
   subdomain: string,
   options?: {
     currentOrigin?: string | null;
+    tenantHostname?: string | null;
     pathname?: string;
     protocol?: "http" | "https";
   },
@@ -209,6 +255,12 @@ export function buildTenantSiteUrl(
 
   if (isAnyLocalPlotkeysHostname(parsedOrigin?.hostname)) {
     return `${protocol}://${buildLocalSitefrontHostname(normalizedSubdomain)}${port}${normalizedPathname}`;
+  }
+
+  const tenantHostname = extractTenantHostname(options?.tenantHostname);
+
+  if (tenantHostname) {
+    return `${protocol}://${tenantHostname}${normalizedPathname}`;
   }
 
   return `${protocol}://${buildSitefrontHostname(normalizedSubdomain)}${normalizedPathname}`;

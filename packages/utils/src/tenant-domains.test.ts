@@ -4,7 +4,9 @@ import {
   buildDashboardCustomHostname,
   buildDashboardHostname,
   buildDashboardHostnameForTenantHostname,
+  buildLocalDashboardCustomHostname,
   buildLocalDashboardHostname,
+  buildLocalDashboardHostnameForTenantHostname,
   buildLocalSitefrontHostname,
   buildSitefrontHostname,
   buildTenantDashboardUrl,
@@ -39,11 +41,20 @@ describe("tenant domain helpers", () => {
     expect(
       buildDashboardHostnameForTenantHostname("acme.tenant.plotkeys.localhost"),
     ).toBe("dashboard.acme.app.plotkeys.localhost");
+    expect(
+      buildLocalDashboardHostnameForTenantHostname("summitpoint.app"),
+    ).toBe("dashboard.summitpoint.app.localhost");
+    expect(
+      buildLocalDashboardHostnameForTenantHostname("summitpoint.plotkeys.com"),
+    ).toBe("dashboard.summitpoint.app.plotkeys.localhost");
     expect(buildDashboardHostnameForTenantHostname("acmehomes.com")).toBe(
       "dashboard.acmehomes.com",
     );
     expect(buildDashboardCustomHostname("dashboard.acmehomes.com")).toBe(
       "dashboard.acmehomes.com",
+    );
+    expect(buildLocalDashboardCustomHostname("summitpoint.app")).toBe(
+      "dashboard.summitpoint.app.localhost",
     );
   });
 
@@ -72,6 +83,38 @@ describe("tenant domain helpers", () => {
         pathname: "/",
       }),
     ).toBe("https://acme.plotkeys.com/");
+  });
+
+  it("prefers provided tenant hostnames for production site and dashboard URLs", () => {
+    expect(
+      buildTenantDashboardUrl("acme", {
+        currentOrigin: "https://plotkeys.com",
+        tenantHostname: "summitpoint.app",
+        pathname: "/onboarding",
+      }),
+    ).toBe("https://dashboard.summitpoint.app/onboarding");
+    expect(
+      buildTenantSiteUrl("acme", {
+        currentOrigin: "https://plotkeys.com",
+        tenantHostname: "summitpoint.app",
+        pathname: "/",
+      }),
+    ).toBe("https://summitpoint.app/");
+  });
+
+  it("prefers provided tenant dashboard hostname even from a local origin", () => {
+    expect(
+      buildTenantDashboardUrl("summitpoint", {
+        currentOrigin: "http://plotkeys.localhost:1355",
+        tenantHostname: "summitpoint.app",
+      }),
+    ).toBe("http://dashboard.summitpoint.app.localhost:1355");
+    expect(
+      buildTenantDashboardUrl("summitpoint", {
+        currentOrigin: "http://plotkeys.localhost:1355",
+        tenantHostname: "summitpoint.plotkeys.com",
+      }),
+    ).toBe("http://dashboard.summitpoint.app.plotkeys.localhost:1355");
   });
 
   it("parses dashboard hosts without accepting the legacy public alias", () => {

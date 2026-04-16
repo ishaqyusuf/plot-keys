@@ -426,6 +426,23 @@ export type EnumCustomerStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumCustomerStatusFilter<$PrismaModel>
 }
 
+export type EnumOfferStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OfferStatus | Prisma.EnumOfferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel> | $Enums.OfferStatus
+}
+
+export type EnumOfferStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OfferStatus | Prisma.EnumOfferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOfferStatusWithAggregatesFilter<$PrismaModel> | $Enums.OfferStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel>
+}
+
 export type EnumWorkRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.WorkRole | Prisma.EnumWorkRoleFieldRefInput<$PrismaModel>
   in?: $Enums.WorkRole[] | Prisma.ListEnumWorkRoleFieldRefInput<$PrismaModel>
@@ -1508,6 +1525,23 @@ export type NestedEnumCustomerStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCustomerStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCustomerStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumOfferStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OfferStatus | Prisma.EnumOfferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel> | $Enums.OfferStatus
+}
+
+export type NestedEnumOfferStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OfferStatus | Prisma.EnumOfferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OfferStatus[] | Prisma.ListEnumOfferStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOfferStatusWithAggregatesFilter<$PrismaModel> | $Enums.OfferStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOfferStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumWorkRoleFilter<$PrismaModel = never> = {

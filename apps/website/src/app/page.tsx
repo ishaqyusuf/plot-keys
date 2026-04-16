@@ -142,7 +142,20 @@ export default async function MarketingHomePage() {
   const prisma = createPrismaClient().db!;
   const tenants = await prisma.company.findMany({
     orderBy: { createdAt: "asc" },
-    select: { id: true, name: true, planTier: true, slug: true },
+    select: {
+      id: true,
+      name: true,
+      planTier: true,
+      slug: true,
+      tenantDomains: {
+        orderBy: { createdAt: "asc" },
+        select: { hostname: true, kind: true, status: true },
+        where: {
+          deletedAt: null,
+          kind: { in: ["sitefront_custom_domain", "sitefront_subdomain"] },
+        },
+      },
+    },
     where: { deletedAt: null, isActive: true },
   });
   const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
@@ -159,6 +172,19 @@ export default async function MarketingHomePage() {
     <>
       <DevTenantFab
         tenants={tenants.map((t) => ({
+          hostname:
+            t.tenantDomains.find(
+              (domain) => domain.kind === "sitefront_custom_domain",
+            )?.hostname ??
+            t.tenantDomains.find(
+              (domain) =>
+                domain.kind === "sitefront_subdomain" &&
+                domain.status === "active",
+            )?.hostname ??
+            t.tenantDomains.find(
+              (domain) => domain.kind === "sitefront_subdomain",
+            )?.hostname ??
+            null,
           id: t.id,
           name: t.name,
           planTier: t.planTier,

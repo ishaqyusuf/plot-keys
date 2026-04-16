@@ -397,6 +397,16 @@ export const CustomerStatus = {
 export type CustomerStatus = (typeof CustomerStatus)[keyof typeof CustomerStatus]
 
 
+export const OfferStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  withdrawn: 'withdrawn'
+} as const
+
+export type OfferStatus = (typeof OfferStatus)[keyof typeof OfferStatus]
+
+
 export const PropertyMediaKind = {
   image: 'image',
   floor_plan: 'floor_plan',

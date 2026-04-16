@@ -4,6 +4,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./registry": "./src/registry/index.ts",
+    "./registry/icon-map": "./src/registry/icon-map.tsx",
     "./whatsapp-client": "./src/whatsapp-client.ts"
   },
   "scripts": {
@@ -11,8 +13,13 @@
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "lucide-react": "^0.577.0",
+    "react": "^19.0.0"
+  },
   "devDependencies": {
     "@plotkeys/tsconfig": "workspace:*",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0"
   }
 }

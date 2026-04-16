@@ -37,6 +37,7 @@
       "dependencies": {
         "@hookform/resolvers": "^5.2.2",
         "@plotkeys/api": "workspace:*",
+        "@plotkeys/app-store": "workspace:*",
         "@plotkeys/auth": "workspace:*",
         "@plotkeys/db": "workspace:*",
         "@plotkeys/notifications": "workspace:*",
@@ -113,9 +114,14 @@
     },
     "packages/app-store": {
       "name": "@plotkeys/app-store",
+      "dependencies": {
+        "lucide-react": "^0.577.0",
+        "react": "^19.0.0",
+      },
       "devDependencies": {
         "@plotkeys/tsconfig": "workspace:*",
         "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
       },
     },
     "packages/auth": {

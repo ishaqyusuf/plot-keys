@@ -4,13 +4,11 @@ import {
   type SignInInput,
   signInInputSchema,
 } from "@plotkeys/api/schemas/auth";
-import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -24,13 +22,7 @@ const DevLoginFab =
     ? dynamic(() => import("../dev/dev-login-fab").then((m) => m.DevLoginFab))
     : null;
 
-export function SignInForm({
-  initialError,
-  showCreateAccount = true,
-}: {
-  initialError?: string;
-  showCreateAccount?: boolean;
-}) {
+export function SignInForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const trpc = useTRPC();
@@ -112,19 +104,6 @@ export function SignInForm({
         >
           {signInMutation.isPending ? "Signing in..." : "Sign in"}
         </Button>
-        {showCreateAccount ? (
-          <Button asChild className="w-full" variant="secondary">
-            <Link
-              href={
-                redirectTo
-                  ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
-                  : authRoutes.signUp
-              }
-            >
-              Create account
-            </Link>
-          </Button>
-        ) : null}
       </div>
     </form>
   );

@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { DevFabShell } from "./dev-fab-shell";
 
 type Tenant = {
+  hostname?: string | null;
   id: string;
   name: string;
   planTier: string;
@@ -25,10 +26,12 @@ export function DevTenantFab({ tenants }: { tenants: Tenant[] }) {
       tenants.map((tenant) => ({
         dashboardUrl: buildTenantDashboardUrl(tenant.subdomain, {
           currentOrigin,
+          tenantHostname: tenant.hostname,
         }),
         ...tenant,
         siteUrl: buildTenantSiteUrl(tenant.subdomain, {
           currentOrigin,
+          tenantHostname: tenant.hostname,
         }),
       })),
     [currentOrigin, tenants],

@@ -117,6 +117,11 @@ export type Customer = Prisma.CustomerModel
  */
 export type SavedListing = Prisma.SavedListingModel
 /**
+ * Model CustomerOffer
+ * 
+ */
+export type CustomerOffer = Prisma.CustomerOfferModel
+/**
  * Model Department
  * 
  */
@@ -275,6 +280,11 @@ export type TenantTemplateLicense = Prisma.TenantTemplateLicenseModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model WaitlistEntry
+ * 
+ */
+export type WaitlistEntry = Prisma.WaitlistEntryModel
 /**
  * Model Website
  * *

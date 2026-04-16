@@ -398,6 +398,7 @@ export const ModelName = {
   Company: 'Company',
   Customer: 'Customer',
   SavedListing: 'SavedListing',
+  CustomerOffer: 'CustomerOffer',
   Department: 'Department',
   Employee: 'Employee',
   Lead: 'Lead',
@@ -429,6 +430,7 @@ export const ModelName = {
   TenantOnboarding: 'TenantOnboarding',
   TenantTemplateLicense: 'TenantTemplateLicense',
   User: 'User',
+  WaitlistEntry: 'WaitlistEntry',
   Website: 'Website',
   WebsiteVersion: 'WebsiteVersion'
 } as const
@@ -446,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "savedListing" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "website" | "websiteVersion"
+    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "savedListing" | "customerOffer" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "waitlistEntry" | "website" | "websiteVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1483,6 +1485,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SavedListingCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SavedListingCountAggregateOutputType> | number
+        }
+      }
+    }
+    CustomerOffer: {
+      payload: Prisma.$CustomerOfferPayload<ExtArgs>
+      fields: Prisma.CustomerOfferFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CustomerOfferFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CustomerOfferFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        findFirst: {
+          args: Prisma.CustomerOfferFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CustomerOfferFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        findMany: {
+          args: Prisma.CustomerOfferFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>[]
+        }
+        create: {
+          args: Prisma.CustomerOfferCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        createMany: {
+          args: Prisma.CustomerOfferCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CustomerOfferCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>[]
+        }
+        delete: {
+          args: Prisma.CustomerOfferDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        update: {
+          args: Prisma.CustomerOfferUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        deleteMany: {
+          args: Prisma.CustomerOfferDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CustomerOfferUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CustomerOfferUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>[]
+        }
+        upsert: {
+          args: Prisma.CustomerOfferUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerOfferPayload>
+        }
+        aggregate: {
+          args: Prisma.CustomerOfferAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCustomerOffer>
+        }
+        groupBy: {
+          args: Prisma.CustomerOfferGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomerOfferGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CustomerOfferCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomerOfferCountAggregateOutputType> | number
         }
       }
     }
@@ -3780,6 +3856,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    WaitlistEntry: {
+      payload: Prisma.$WaitlistEntryPayload<ExtArgs>
+      fields: Prisma.WaitlistEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WaitlistEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WaitlistEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.WaitlistEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WaitlistEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        findMany: {
+          args: Prisma.WaitlistEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>[]
+        }
+        create: {
+          args: Prisma.WaitlistEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        createMany: {
+          args: Prisma.WaitlistEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WaitlistEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.WaitlistEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        update: {
+          args: Prisma.WaitlistEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.WaitlistEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WaitlistEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WaitlistEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.WaitlistEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WaitlistEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.WaitlistEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWaitlistEntry>
+        }
+        groupBy: {
+          args: Prisma.WaitlistEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WaitlistEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WaitlistEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WaitlistEntryCountAggregateOutputType> | number
+        }
+      }
+    }
     Website: {
       payload: Prisma.$WebsitePayload<ExtArgs>
       fields: Prisma.WebsiteFieldRefs
@@ -4159,6 +4309,7 @@ export const CompanyScalarFieldEnum = {
   planStatus: 'planStatus',
   planStartedAt: 'planStartedAt',
   planEndsAt: 'planEndsAt',
+  enabledApps: 'enabledApps',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -4195,6 +4346,21 @@ export const SavedListingScalarFieldEnum = {
 } as const
 
 export type SavedListingScalarFieldEnum = (typeof SavedListingScalarFieldEnum)[keyof typeof SavedListingScalarFieldEnum]
+
+
+export const CustomerOfferScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  propertyId: 'propertyId',
+  status: 'status',
+  offerAmount: 'offerAmount',
+  message: 'message',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerOfferScalarFieldEnum = (typeof CustomerOfferScalarFieldEnum)[keyof typeof CustomerOfferScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {
@@ -4734,6 +4900,17 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const WaitlistEntryScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type WaitlistEntryScalarFieldEnum = (typeof WaitlistEntryScalarFieldEnum)[keyof typeof WaitlistEntryScalarFieldEnum]
+
+
 export const WebsiteScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -4980,6 +5157,20 @@ export type EnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'CustomerStatus[]'
  */
 export type ListEnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CustomerStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OfferStatus'
+ */
+export type EnumOfferStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OfferStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OfferStatus[]'
+ */
+export type ListEnumOfferStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OfferStatus[]'>
     
 
 
@@ -5609,6 +5800,7 @@ export type GlobalOmitConfig = {
   company?: Prisma.CompanyOmit
   customer?: Prisma.CustomerOmit
   savedListing?: Prisma.SavedListingOmit
+  customerOffer?: Prisma.CustomerOfferOmit
   department?: Prisma.DepartmentOmit
   employee?: Prisma.EmployeeOmit
   lead?: Prisma.LeadOmit
@@ -5640,6 +5832,7 @@ export type GlobalOmitConfig = {
   tenantOnboarding?: Prisma.TenantOnboardingOmit
   tenantTemplateLicense?: Prisma.TenantTemplateLicenseOmit
   user?: Prisma.UserOmit
+  waitlistEntry?: Prisma.WaitlistEntryOmit
   website?: Prisma.WebsiteOmit
   websiteVersion?: Prisma.WebsiteVersionOmit
 }
