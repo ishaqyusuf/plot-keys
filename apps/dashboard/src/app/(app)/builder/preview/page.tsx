@@ -2,10 +2,9 @@
 
 import {
   colorSystems,
-  stylePresets,
-  type TemplateConfig,
   resolveWebsitePresentation,
   sectionComponents,
+  stylePresets,
   type ThemeConfig,
   templateCatalog,
 } from "@plotkeys/section-registry";
@@ -21,8 +20,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@plotkeys/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { Separator } from "@plotkeys/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
@@ -51,11 +50,6 @@ export default function BuilderPreviewPage() {
     template?.tier ?? "starter",
   );
   const groups = useMemo(groupedTemplates, []);
-
-  const templatePages = useMemo(
-    () => (template ? getTemplatePageInventory(template.key).pages : []),
-    [template],
-  );
 
   const preview = useMemo(
     () =>
@@ -105,9 +99,6 @@ export default function BuilderPreviewPage() {
     });
   }
 
-  const currentPageSlug =
-    templatePages.find((p) => p.pageKey === currentPageKey)?.slug ?? "/";
-
   if (!template || !preview) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
@@ -117,8 +108,8 @@ export default function BuilderPreviewPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-2 py-2 md:px-3 md:py-3">
-      <div className="mx-auto grid max-w-464 gap-3 xl:grid-cols-[14rem_minmax(0,1fr)]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.08),transparent_40%),hsl(var(--background))] px-2 py-2 md:px-3 md:py-3">
+      <div className="mx-auto grid max-w-464 gap-3 rounded-[calc(var(--radius-xl)+0.125rem)] border border-border/70 bg-background/70 p-3 shadow-[var(--shadow-card)] backdrop-blur xl:grid-cols-[14rem_minmax(0,1fr)]">
         {/* ── Builder Config Sidebar (hidden on mobile) ── */}
         <aside className="hidden xl:sticky xl:top-3 xl:block xl:h-[calc(100svh-1.5rem)]">
           <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card">
@@ -237,10 +228,10 @@ export default function BuilderPreviewPage() {
                       key={key}
                       className="flex h-14 items-center justify-center rounded-lg border border-border/70 transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
                       type="button"
-                      title={preset.displayName}
+                      title={preset.name}
                     >
                       <span className="text-xs font-medium text-muted-foreground truncate px-2">
-                        {preset.displayName}
+                        {preset.name}
                       </span>
                     </button>
                   ))}
@@ -263,11 +254,15 @@ export default function BuilderPreviewPage() {
                       <div className="flex gap-1">
                         <div
                           className="size-3 rounded-full border border-border/50"
-                          style={{ backgroundColor: `hsl(${system.light.primary})` }}
+                          style={{
+                            backgroundColor: `hsl(${system.light.primary})`,
+                          }}
                         />
                         <div
                           className="size-3 rounded-full border border-border/50"
-                          style={{ backgroundColor: `hsl(${system.light.secondary})` }}
+                          style={{
+                            backgroundColor: `hsl(${system.light.secondary})`,
+                          }}
                         />
                       </div>
                       <span className="truncate font-medium text-muted-foreground">
@@ -295,7 +290,7 @@ export default function BuilderPreviewPage() {
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <span className="text-muted-foreground">Theme</span>
                     <span className="font-medium text-foreground">
-                      {template.defaultTheme.displayName}
+                      {template.defaultTheme.logo}
                     </span>
                   </div>
                 </div>
@@ -388,7 +383,7 @@ export default function BuilderPreviewPage() {
                 </DropdownMenu>
               </div>
 
-              <Badge variant="outline">{preview.page.page}</Badge>
+              <Badge variant="outline">{currentPageKey}</Badge>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">

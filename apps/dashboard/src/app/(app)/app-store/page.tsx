@@ -1,5 +1,10 @@
-import { createPrismaClient } from "@plotkeys/db";
-import { getInstalledAppKeys } from "@plotkeys/db/queries/company-apps";
+import {
+  APP_REGISTRY,
+  type AppDefinition,
+  type CompanyPlanTier,
+  isAppAvailable,
+} from "@plotkeys/app-store/registry";
+import { RegistryIcon } from "@plotkeys/app-store/registry/icon-map";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import {
@@ -9,228 +14,174 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Icon } from "@plotkeys/ui/icons";
+import { Lock } from "lucide-react";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../../lib/session";
-import { DEFAULT_APP_KEYS, getInstallableApps } from "../../../lib/app-registry";
-import { InstallButton } from "./install-button";
 
-type Integration = {
-  key: string;
-  name: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  category: string;
-  configField: "googleAnalyticsId" | "facebookPixelId" | "whatsappPhone" | "calendlyUrl";
-  docsUrl: string;
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
+import { getCompanyAppsContext } from "../../../lib/company-apps";
+import { AppToggle } from "./_components/app-toggle";
+
+type AppStatus = "enabled" | "available" | "locked";
+
+function getStatus(
+  app: AppDefinition,
+  planTier: CompanyPlanTier,
+  enabledIds: Set<string>,
+): AppStatus {
+  if (!isAppAvailable(app, planTier)) return "locked";
+  if (enabledIds.has(app.id)) return "enabled";
+  return "available";
+}
+
+const planLabels: Record<CompanyPlanTier, string> = {
+  starter: "Starter",
+  plus: "Plus",
+  pro: "Pro",
 };
 
-const integrations: Integration[] = [
-  {
-    key: "google-analytics",
-    name: "Google Analytics",
-    description:
-      "Track website traffic, visitor behaviour, and conversion events with Google Analytics 4.",
-    icon: Icon.Analytics,
-    category: "Analytics",
-    configField: "googleAnalyticsId",
-    docsUrl: "https://support.google.com/analytics/answer/9304153",
-  },
-  {
-    key: "facebook-pixel",
-    name: "Facebook Pixel",
-    description:
-      "Measure ad conversions, build audiences, and retarget visitors who interact with your site.",
-    icon: Icon.Target,
-    category: "Marketing",
-    configField: "facebookPixelId",
-    docsUrl: "https://www.facebook.com/business/help/952192354843755",
-  },
-  {
-    key: "whatsapp",
-    name: "WhatsApp Business",
-    description:
-      "Let website visitors message you directly on WhatsApp with a single click.",
-    icon: Icon.MessageCircle,
-    category: "Communication",
-    configField: "whatsappPhone",
-    docsUrl: "https://business.whatsapp.com/",
-  },
-  {
-    key: "calendly",
-    name: "Calendly",
-    description:
-      "Sync appointment scheduling with your Calendly page so visitors can book viewings.",
-    icon: Icon.Calendar,
-    category: "Scheduling",
-    configField: "calendlyUrl",
-    docsUrl: "https://calendly.com/",
-  },
-];
+export default async function AppStorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ locked?: string }>;
+}) {
+  const { locked } = await searchParams;
+  const { availableApps, enabledApps, planTier } =
+    await getCompanyAppsContext();
+  const enabledIds = new Set(enabledApps.map((app) => app.id));
 
-export default async function AppStorePage() {
-  const session = await requireOnboardedSession();
-  const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-
-  // Resolve installed workspace app keys with fallback
-  let installedAppKeys: string[] = DEFAULT_APP_KEYS;
-  if (prisma) {
-    try {
-      const keys = await getInstalledAppKeys(prisma, companyId);
-      if (keys.length > 0) installedAppKeys = keys;
-    } catch {
-      // Table may not exist yet (pending migration) — fall back to defaults
-    }
+  const byCategory = new Map<string, AppDefinition[]>();
+  for (const app of APP_REGISTRY) {
+    const list = byCategory.get(app.category) ?? [];
+    list.push(app);
+    byCategory.set(app.category, list);
   }
 
-  // Resolve third-party integration connection states
-  const integration = prisma
-    ? await prisma.companyIntegration.findUnique({ where: { companyId } })
-    : null;
-
-  const connectedCount = integrations.filter(
-    (i) => integration?.[i.configField],
-  ).length;
-
-  const installableApps = getInstallableApps();
+  const lockedApp = locked
+    ? APP_REGISTRY.find((a) => a.id === locked)
+    : undefined;
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-4xl space-y-12">
-
-        {/* Workspace Apps */}
-        <section>
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground">App Store</h1>
-            <p className="mt-2 text-muted-foreground">
-              Install workspace apps to customise your sidebar and keep your
-              team focused on what matters.
-            </p>
-            <div className="mt-3">
-              <Badge variant="secondary">
-                {installedAppKeys.length} of {installableApps.length} apps
-                installed
-              </Badge>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {installableApps.map((app) => {
-              const isInstalled = installedAppKeys.includes(app.key);
-
-              return (
-                <Card key={app.key} className="bg-card">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <app.icon className="size-5" />
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Platform workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>App Store</DashboardPageTitle>
+            <DashboardPageDescription>
+              Enable the feature modules your team needs. Your current plan is{" "}
+              <strong>{planLabels[planTier]}</strong> with {enabledApps.length}{" "}
+              of {availableApps.length} available apps enabled.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Badge variant="secondary">{planLabels[planTier]} plan</Badge>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {enabledApps.length} enabled of {availableApps.length} available
+            apps
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
+      {lockedApp ? (
+        <div className="mt-4 rounded-md border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+          <strong>{lockedApp.label}</strong> isn&rsquo;t enabled for your
+          workspace. Enable it below
+          {isAppAvailable(lockedApp, planTier)
+            ? "."
+            : ` or upgrade to ${planLabels[lockedApp.planGate]} to unlock it.`}
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-10">
+        {Array.from(byCategory.entries()).map(([category, apps]) => (
+          <DashboardSection key={category}>
+            <DashboardSectionHeader>
+              <div>
+                <DashboardSectionTitle>{category}</DashboardSectionTitle>
+                <DashboardSectionDescription>
+                  Turn on the modules that match this operational area.
+                </DashboardSectionDescription>
+              </div>
+            </DashboardSectionHeader>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {apps.map((app) => {
+                const status = getStatus(app, planTier, enabledIds);
+                return (
+                  <Card key={app.id} className="border-border/70 bg-card/82">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <RegistryIcon name={app.icon} className="size-5" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">
+                              {app.label}
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground">
+                              {app.category}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <CardTitle className="text-base">{app.name}</CardTitle>
-                          {app.requiredPlan ? (
-                            <Badge variant="outline" className="mt-0.5 text-xs capitalize">
-                              {app.requiredPlan}
-                            </Badge>
-                          ) : null}
-                        </div>
+                        <StatusBadge status={status} />
                       </div>
-                      <Badge variant={isInstalled ? "default" : "outline"}>
-                        {isInstalled ? "Installed" : "Not installed"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="mb-4">
-                      {app.description}
-                    </CardDescription>
-                    <InstallButton appKey={app.key} installed={isInstalled} />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Third-party Integrations */}
-        <section>
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-foreground">
-              Integrations
-            </h2>
-            <p className="mt-1 text-muted-foreground">
-              Connect third-party services to your website and dashboard.
-            </p>
-            <div className="mt-3 flex items-center gap-3">
-              <Badge variant="secondary">
-                {connectedCount} of {integrations.length} connected
-              </Badge>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/settings/integrations">
-                  <Icon.Settings className="mr-1.5 size-3.5" />
-                  Configure credentials
-                </Link>
-              </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription className="mb-4 min-h-[3rem]">
+                        {app.description}
+                      </CardDescription>
+                      {status === "locked" ? (
+                        <Button asChild size="sm" variant="outline">
+                          <Link href="/billing">
+                            <Lock className="mr-1.5 size-3.5" />
+                            Upgrade to {planLabels[app.planGate]}
+                          </Link>
+                        </Button>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            {status === "enabled" ? "Enabled" : "Disabled"}
+                          </span>
+                          <AppToggle
+                            appId={app.id}
+                            enabled={status === "enabled"}
+                          />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {integrations.map((app) => {
-              const isConnected = Boolean(integration?.[app.configField]);
-
-              return (
-                <Card key={app.key} className="bg-card">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <app.icon className="size-5" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-base">{app.name}</CardTitle>
-                          <p className="text-xs text-muted-foreground">
-                            {app.category}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant={isConnected ? "default" : "outline"}>
-                        {isConnected ? "Connected" : "Not connected"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="mb-4">
-                      {app.description}
-                    </CardDescription>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        asChild
-                        size="sm"
-                        variant={isConnected ? "outline" : "default"}
-                      >
-                        <Link href="/settings/integrations">
-                          {isConnected ? "Configure" : "Connect"}
-                        </Link>
-                      </Button>
-                      <Button asChild size="sm" variant="ghost">
-                        <a
-                          href={app.docsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Icon.ExternalLink className="mr-1 size-3" />
-                          Docs
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
+          </DashboardSection>
+        ))}
       </div>
-    </main>
+    </DashboardPage>
   );
+}
+
+function StatusBadge({ status }: { status: AppStatus }) {
+  if (status === "enabled") {
+    return <Badge variant="default">Enabled</Badge>;
+  }
+  if (status === "locked") {
+    return <Badge variant="outline">Locked</Badge>;
+  }
+  return <Badge variant="secondary">Available</Badge>;
 }

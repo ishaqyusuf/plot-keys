@@ -1,4 +1,6 @@
 import { createPrismaClient } from "@plotkeys/db";
+import { Alert, AlertDescription } from "@plotkeys/ui/alert";
+import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import {
   Card,
@@ -7,15 +9,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
+import { BellRing, Inbox, Mail, Sparkles } from "lucide-react";
 import Link from "next/link";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardStatGrid,
+} from "../../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { updateNotificationPreferenceAction } from "../../../actions";
 
-/**
- * All notification types the user can configure, with human-readable labels
- * and descriptions.
- */
 const notificationTypes = [
   {
     type: "new_lead_captured",
@@ -62,77 +75,130 @@ export default async function NotificationPreferencesPage({
   const params = (await searchParams) ?? {};
 
   const prisma = createPrismaClient().db;
-
   const preferences = prisma
     ? await prisma.notificationPreference.findMany({
         where: { companyId, userId },
       })
     : [];
 
-  // Build a map of type → { inApp, email }
   const prefMap = new Map(
     preferences.map((p) => [p.type, { inApp: p.inApp, email: p.email }]),
   );
 
+  const enabledInApp = preferences.filter((p) => p.inApp).length;
+  const enabledEmail = preferences.filter((p) => p.email).length;
+
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-3xl">
+    <DashboardPage className="max-w-none">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {params.saved ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
+          <Alert className="border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>Notification preferences saved.</AlertDescription>
           </Alert>
         ) : null}
 
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Notification Preferences
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Choose how you want to be notified for each event.
-            </p>
-          </div>
-          <Button asChild variant="secondary" size="sm">
-            <Link href="/settings">← Settings</Link>
-          </Button>
-        </div>
+        <DashboardPageHeader>
+          <DashboardPageHeaderRow>
+            <DashboardPageIntro>
+              <DashboardPageEyebrow>Settings module</DashboardPageEyebrow>
+              <DashboardPageTitle>Notification Preferences</DashboardPageTitle>
+              <DashboardPageDescription>
+                Keep alerts calm and intentional across the dashboard by
+                choosing which events deserve in-app or email delivery.
+              </DashboardPageDescription>
+            </DashboardPageIntro>
+            <DashboardPageActions>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/settings">Back to settings</Link>
+              </Button>
+            </DashboardPageActions>
+          </DashboardPageHeaderRow>
+        </DashboardPageHeader>
 
-        <Card className="bg-card">
-          <CardHeader className="px-6 pt-6 pb-4">
-            <CardTitle>Event Notifications</CardTitle>
-            <CardDescription>
-              Toggle in-app and email notifications for each event type.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="space-y-0 divide-y">
+        <DashboardStatGrid className="xl:grid-cols-3">
+          {[
+            {
+              icon: BellRing,
+              label: "Tracked events",
+              value: notificationTypes.length,
+            },
+            {
+              icon: Inbox,
+              label: "In-app enabled",
+              value: enabledInApp,
+            },
+            {
+              icon: Mail,
+              label: "Email enabled",
+              value: enabledEmail,
+            },
+          ].map((stat) => (
+            <Card key={stat.label} className="border-border/65 bg-card/78">
+              <CardContent className="flex items-center gap-4 px-5 py-5">
+                <div className="rounded-full border border-border/60 bg-background/70 p-3">
+                  <stat.icon className="size-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    {stat.label}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-foreground">
+                    {stat.value}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </DashboardStatGrid>
+
+        <DashboardSection>
+          <DashboardSectionHeader>
+            <div>
+              <DashboardSectionTitle>Event routing</DashboardSectionTitle>
+              <DashboardSectionDescription>
+                Toggle delivery by channel for each important system event.
+              </DashboardSectionDescription>
+            </div>
+          </DashboardSectionHeader>
+
+          <Card className="border-border/65 bg-card/78">
+            <CardHeader className="px-5 py-4">
+              <CardTitle>Event notifications</CardTitle>
+              <CardDescription>
+                Each toggle updates immediately and follows the shared Midday
+                control styling for calmer settings management.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2.5 px-5 pb-5 pt-0">
               {notificationTypes.map((nt) => {
                 const pref = prefMap.get(nt.type) ?? {
                   inApp: true,
                   email: true,
                 };
+
                 return (
                   <div
                     key={nt.type}
-                    className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                    className="flex flex-col gap-4 rounded-[calc(var(--radius-lg)+0.125rem)] border border-border/60 bg-background/55 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {nt.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">
+                          {nt.label}
+                        </p>
+                        <Badge variant="outline" className="text-[11px]">
+                          {nt.type.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
                         {nt.description}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      {/* In-app toggle */}
+
+                    <div className="flex flex-wrap items-center gap-2">
                       <form action={updateNotificationPreferenceAction}>
                         <input type="hidden" name="type" value={nt.type} />
-                        <input
-                          type="hidden"
-                          name="channel"
-                          value="inApp"
-                        />
+                        <input type="hidden" name="channel" value="inApp" />
                         <input
                           type="hidden"
                           name="enabled"
@@ -150,32 +216,20 @@ export default async function NotificationPreferencesPage({
                         />
                         <button
                           type="submit"
-                          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                             pref.inApp
-                              ? "bg-primary/10 text-primary hover:bg-primary/20"
-                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                              ? "border-primary/20 bg-primary/10 text-primary"
+                              : "border-border/60 bg-background/80 text-muted-foreground hover:bg-muted/50"
                           }`}
-                          title={
-                            pref.inApp
-                              ? "In-app notifications enabled – click to disable"
-                              : "In-app notifications disabled – click to enable"
-                          }
                         >
-                          <span
-                            className={`size-1.5 rounded-full ${pref.inApp ? "bg-primary" : "bg-muted-foreground/40"}`}
-                          />
+                          <Inbox className="size-3.5" />
                           In-app
                         </button>
                       </form>
 
-                      {/* Email toggle */}
                       <form action={updateNotificationPreferenceAction}>
                         <input type="hidden" name="type" value={nt.type} />
-                        <input
-                          type="hidden"
-                          name="channel"
-                          value="email"
-                        />
+                        <input type="hidden" name="channel" value="email" />
                         <input
                           type="hidden"
                           name="enabled"
@@ -193,20 +247,13 @@ export default async function NotificationPreferencesPage({
                         />
                         <button
                           type="submit"
-                          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                             pref.email
-                              ? "bg-primary/10 text-primary hover:bg-primary/20"
-                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                              ? "border-primary/20 bg-primary/10 text-primary"
+                              : "border-border/60 bg-background/80 text-muted-foreground hover:bg-muted/50"
                           }`}
-                          title={
-                            pref.email
-                              ? "Email notifications enabled – click to disable"
-                              : "Email notifications disabled – click to enable"
-                          }
                         >
-                          <span
-                            className={`size-1.5 rounded-full ${pref.email ? "bg-primary" : "bg-muted-foreground/40"}`}
-                          />
+                          <Mail className="size-3.5" />
                           Email
                         </button>
                       </form>
@@ -214,10 +261,26 @@ export default async function NotificationPreferencesPage({
                   </div>
                 );
               })}
+            </CardContent>
+          </Card>
+        </DashboardSection>
+
+        <Card className="border-border/70 bg-card/82">
+          <CardContent className="flex items-start gap-3 px-5 py-5">
+            <div className="rounded-full border border-border/70 bg-background/80 p-2.5">
+              <Sparkles className="size-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Midday direction</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Notification controls now live in the same quieter surface,
+                spacing, and token system as the rest of the redesigned
+                dashboard.
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
-    </main>
+    </DashboardPage>
   );
 }

@@ -13,76 +13,125 @@
  *    contract. Responsiveness is a baseline, not a plan tier feature.
  */
 
-import type { ContentFieldDef, PlaceholderData, TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
-import type { SectionComponentOverrides } from "./ui-types";
 import type { TemplateTier } from "../index";
-
-// Nav configs — one per family
-import { noorNavConfig } from "./noor/common/nav";
-import { banaNavConfig } from "./bana/common/nav";
-import { wafiNavConfig } from "./wafi/common/nav";
-import { farisNavConfig } from "./faris/common/nav";
-import { thurayaNav } from "./thuraya/common/nav";
-import { sakanNav } from "./sakan/common/nav";
-
-// Footer configs — one per family
-import { noorFooterConfig } from "./noor/common/footer";
+import { banaContentSchema } from "./bana/common/content-schema";
 import { banaFooterConfig } from "./bana/common/footer";
-import { wafiFooterConfig } from "./wafi/common/footer";
+import { banaNavConfig } from "./bana/common/nav";
+import { banaPlaceholderData } from "./bana/common/placeholder-data";
+import { farisContentSchema } from "./faris/common/content-schema";
 import { farisFooterConfig } from "./faris/common/footer";
-import { thurayaFooter } from "./thuraya/common/footer";
-import { sakanFooter } from "./sakan/common/footer";
-
+import { farisNavConfig } from "./faris/common/nav";
+import { farisPlaceholderData } from "./faris/common/placeholder-data";
 // Content schemas — one per family
 import { noorContentSchema } from "./noor/common/content-schema";
-import { banaContentSchema } from "./bana/common/content-schema";
-import { wafiContentSchema } from "./wafi/common/content-schema";
-import { farisContentSchema } from "./faris/common/content-schema";
-import { thurayaContentSchema } from "./thuraya/common/content-schema";
-import { sakanContentSchema } from "./sakan/common/content-schema";
-
+// Footer configs — one per family
+import { noorFooterConfig } from "./noor/common/footer";
+// Nav configs — one per family
+import { noorNavConfig } from "./noor/common/nav";
 // Placeholder data — one per family
 import { noorPlaceholderData } from "./noor/common/placeholder-data";
-import { banaPlaceholderData } from "./bana/common/placeholder-data";
-import { wafiPlaceholderData } from "./wafi/common/placeholder-data";
-import { farisPlaceholderData } from "./faris/common/placeholder-data";
-import { thurayaPlaceholderData } from "./thuraya/common/placeholder-data";
+import { sakanContentSchema } from "./sakan/common/content-schema";
+import { sakanFooter } from "./sakan/common/footer";
+import { sakanNav } from "./sakan/common/nav";
 import { sakanPlaceholderData } from "./sakan/common/placeholder-data";
+import { thurayaContentSchema } from "./thuraya/common/content-schema";
+import { thurayaFooter } from "./thuraya/common/footer";
+import { thurayaNav } from "./thuraya/common/nav";
+import { thurayaPlaceholderData } from "./thuraya/common/placeholder-data";
+import type {
+  ContentFieldDef,
+  FooterConfig,
+  NavConfig,
+  PlaceholderData,
+  TemplateFamilyKey,
+  TemplateFamilyMeta,
+  TemplatePlanVariant,
+} from "./types";
+import type { SectionComponentOverrides } from "./ui-types";
+import { wafiContentSchema } from "./wafi/common/content-schema";
+import { wafiFooterConfig } from "./wafi/common/footer";
+import { wafiNavConfig } from "./wafi/common/nav";
+import { wafiPlaceholderData } from "./wafi/common/placeholder-data";
 
 // ---------------------------------------------------------------------------
 // Family imports
 // ---------------------------------------------------------------------------
 
-export { noorFamilyMeta, noorStarter, noorPlus, noorPro, noorVariants } from "./noor/index";
-export { banaFamilyMeta, banaStarter, banaPlus, banaPro, banaVariants } from "./bana/index";
-export { wafiFamilyMeta, wafiStarter, wafiPlus, wafiPro, wafiVariants } from "./wafi/index";
-export { farisFamilyMeta, farisStarter, farisPlus, farisPro, farisVariants } from "./faris/index";
-export { thurayaFamilyMeta, thurayaStarter, thurayaPlus, thurayaPro, thurayaVariants } from "./thuraya/index";
-export { sakanFamilyMeta, sakanStarter, sakanPlus, sakanPro, sakanVariants } from "./sakan/index";
-
+export {
+  banaFamilyMeta,
+  banaPlus,
+  banaPro,
+  banaStarter,
+  banaVariants,
+} from "./bana/index";
+export {
+  farisFamilyMeta,
+  farisPlus,
+  farisPro,
+  farisStarter,
+  farisVariants,
+} from "./faris/index";
+export {
+  noorFamilyMeta,
+  noorPlus,
+  noorPro,
+  noorStarter,
+  noorVariants,
+} from "./noor/index";
+export {
+  sakanFamilyMeta,
+  sakanPlus,
+  sakanPro,
+  sakanStarter,
+  sakanVariants,
+} from "./sakan/index";
+export {
+  thurayaFamilyMeta,
+  thurayaPlus,
+  thurayaPro,
+  thurayaStarter,
+  thurayaVariants,
+} from "./thuraya/index";
 // Re-export types for consumers
-export type { TemplateFamilyKey, TemplateFamilyMeta, TemplatePlanVariant } from "./types";
-export type { ContentFieldDef, PlaceholderData, NavConfig, NavLink, FooterConfig, FooterLinkGroup, RegisterPageDefinition, RegisterSectionSlot } from "./types";
+export type {
+  ContentFieldDef,
+  FooterConfig,
+  FooterLinkGroup,
+  NavConfig,
+  NavLink,
+  PlaceholderData,
+  RegisterPageDefinition,
+  RegisterSectionSlot,
+  TemplateFamilyKey,
+  TemplateFamilyMeta,
+  TemplatePlanVariant,
+} from "./types";
 export type { SectionComponentOverrides } from "./ui-types";
+export {
+  wafiFamilyMeta,
+  wafiPlus,
+  wafiPro,
+  wafiStarter,
+  wafiVariants,
+} from "./wafi/index";
 
 // ---------------------------------------------------------------------------
 // Internal imports for registry construction
 // ---------------------------------------------------------------------------
 
-import { noorFamilyMeta, noorVariants } from "./noor/index";
 import { banaFamilyMeta, banaVariants } from "./bana/index";
-import { wafiFamilyMeta, wafiVariants } from "./wafi/index";
+import { banaSectionComponents } from "./bana/ui/index";
 import { farisFamilyMeta, farisVariants } from "./faris/index";
-import { thurayaFamilyMeta, thurayaVariants } from "./thuraya/index";
-import { sakanFamilyMeta, sakanVariants } from "./sakan/index";
-
+import { farisSectionComponents } from "./faris/ui/index";
+import { noorFamilyMeta, noorVariants } from "./noor/index";
 // UI component override maps — one per family
 import { noorSectionComponents } from "./noor/ui/index";
-import { banaSectionComponents } from "./bana/ui/index";
-import { wafiSectionComponents } from "./wafi/ui/index";
-import { farisSectionComponents } from "./faris/ui/index";
-import { thurayaSectionComponents } from "./thuraya/ui/index";
+import { sakanFamilyMeta, sakanVariants } from "./sakan/index";
 import { sakanSectionComponents } from "./sakan/ui/index";
+import { thurayaFamilyMeta, thurayaVariants } from "./thuraya/index";
+import { thurayaSectionComponents } from "./thuraya/ui/index";
+import { wafiFamilyMeta, wafiVariants } from "./wafi/index";
+import { wafiSectionComponents } from "./wafi/ui/index";
 
 // ---------------------------------------------------------------------------
 // Family registry — grouped by genre/family key
@@ -104,12 +153,12 @@ export const templateFamilyRegistry: Record<
   TemplateFamilyKey,
   { meta: TemplateFamilyMeta; variants: TemplatePlanVariant[] }
 > = {
-  agency:    { meta: noorFamilyMeta,    variants: noorVariants },
-  developer: { meta: banaFamilyMeta,    variants: banaVariants },
-  manager:   { meta: wafiFamilyMeta,    variants: wafiVariants },
-  solo:      { meta: farisFamilyMeta,   variants: farisVariants },
-  luxury:    { meta: thurayaFamilyMeta, variants: thurayaVariants },
-  rental:    { meta: sakanFamilyMeta,   variants: sakanVariants },
+  agency: { meta: noorFamilyMeta, variants: noorVariants },
+  developer: { meta: banaFamilyMeta, variants: banaVariants },
+  manager: { meta: wafiFamilyMeta, variants: wafiVariants },
+  solo: { meta: farisFamilyMeta, variants: farisVariants },
+  luxury: { meta: thurayaFamilyMeta, variants: thurayaVariants },
+  rental: { meta: sakanFamilyMeta, variants: sakanVariants },
 };
 
 // ---------------------------------------------------------------------------
@@ -133,7 +182,9 @@ export const registerTemplateCatalog: TemplatePlanVariant[] = Object.values(
  * Returns a template variant by its unique key (e.g. "noor-starter").
  * Returns undefined when the key is not found.
  */
-export function getRegisterTemplate(key: string): TemplatePlanVariant | undefined {
+export function getRegisterTemplate(
+  key: string,
+): TemplatePlanVariant | undefined {
   return registerTemplateCatalog.find((t) => t.key === key);
 }
 
@@ -171,11 +222,13 @@ export function getRegisterTemplateForBusiness(
 export function getAccessibleRegisterTemplates(
   tier: TemplateTier,
 ): TemplatePlanVariant[] {
-  const tierOrder: Record<TemplateTier, number> = { starter: 0, plus: 1, pro: 2 };
+  const tierOrder: Record<TemplateTier, number> = {
+    starter: 0,
+    plus: 1,
+    pro: 2,
+  };
   const maxOrder = tierOrder[tier];
-  return registerTemplateCatalog.filter(
-    (t) => tierOrder[t.tier] <= maxOrder,
-  );
+  return registerTemplateCatalog.filter((t) => tierOrder[t.tier] <= maxOrder);
 }
 
 /**
@@ -195,21 +248,21 @@ export function getFamilyMetaForBusinessType(
 // ---------------------------------------------------------------------------
 
 const familyContentSchemas: Record<TemplateFamilyKey, ContentFieldDef[]> = {
-  agency:    noorContentSchema,
+  agency: noorContentSchema,
   developer: banaContentSchema,
-  manager:   wafiContentSchema,
-  solo:      farisContentSchema,
-  luxury:    thurayaContentSchema,
-  rental:    sakanContentSchema,
+  manager: wafiContentSchema,
+  solo: farisContentSchema,
+  luxury: thurayaContentSchema,
+  rental: sakanContentSchema,
 };
 
 const familyPlaceholderDataMap: Record<TemplateFamilyKey, PlaceholderData> = {
-  agency:    noorPlaceholderData,
+  agency: noorPlaceholderData,
   developer: banaPlaceholderData,
-  manager:   wafiPlaceholderData,
-  solo:      farisPlaceholderData,
-  luxury:    thurayaPlaceholderData,
-  rental:    sakanPlaceholderData,
+  manager: wafiPlaceholderData,
+  solo: farisPlaceholderData,
+  luxury: thurayaPlaceholderData,
+  rental: sakanPlaceholderData,
 };
 
 /**
@@ -221,7 +274,9 @@ export function getPlaceholderContent(
   familyKey: TemplateFamilyKey,
 ): Record<string, string> {
   const schema = familyContentSchemas[familyKey] ?? [];
-  return Object.fromEntries(schema.map((f) => [f.contentKey, f.placeholderValue]));
+  return Object.fromEntries(
+    schema.map((f) => [f.contentKey, f.placeholderValue]),
+  );
 }
 
 /**
@@ -239,21 +294,21 @@ export function getFamilyPlaceholderData(
 // ---------------------------------------------------------------------------
 
 const familyNavConfigMap: Record<TemplateFamilyKey, NavConfig> = {
-  agency:    noorNavConfig,
+  agency: noorNavConfig,
   developer: banaNavConfig,
-  manager:   wafiNavConfig,
-  solo:      farisNavConfig,
-  luxury:    thurayaNav,
-  rental:    sakanNav,
+  manager: wafiNavConfig,
+  solo: farisNavConfig,
+  luxury: thurayaNav,
+  rental: sakanNav,
 };
 
 const familyFooterConfigMap: Record<TemplateFamilyKey, FooterConfig> = {
-  agency:    noorFooterConfig,
+  agency: noorFooterConfig,
   developer: banaFooterConfig,
-  manager:   wafiFooterConfig,
-  solo:      farisFooterConfig,
-  luxury:    thurayaFooter,
-  rental:    sakanFooter,
+  manager: wafiFooterConfig,
+  solo: farisFooterConfig,
+  luxury: thurayaFooter,
+  rental: sakanFooter,
 };
 
 const tierOrder: Record<TemplateTier, number> = { starter: 0, plus: 1, pro: 2 };
@@ -268,7 +323,13 @@ export function getFamilyNavConfig(
   tier: TemplateTier,
 ): NavConfig {
   const config = familyNavConfigMap[familyKey];
-  if (!config) return { primary: [], mobile: [], ctaLabel: "Contact", ctaHref: "/contact" };
+  if (!config)
+    return {
+      primary: [],
+      mobile: [],
+      ctaLabel: "Contact",
+      ctaHref: "/contact",
+    };
   const maxOrder = tierOrder[tier];
   const filterLinks = (links: NavConfig["primary"]) =>
     links.filter((l) => !l.minTier || tierOrder[l.minTier] <= maxOrder);
@@ -292,13 +353,16 @@ export function getFamilyFooterConfig(
 // Family UI component resolution
 // ---------------------------------------------------------------------------
 
-const familySectionComponentMap: Record<TemplateFamilyKey, SectionComponentOverrides> = {
-  agency:    noorSectionComponents,
+const familySectionComponentMap: Record<
+  TemplateFamilyKey,
+  SectionComponentOverrides
+> = {
+  agency: noorSectionComponents,
   developer: banaSectionComponents,
-  manager:   wafiSectionComponents,
-  solo:      farisSectionComponents,
-  luxury:    thurayaSectionComponents,
-  rental:    sakanSectionComponents,
+  manager: wafiSectionComponents,
+  solo: farisSectionComponents,
+  luxury: thurayaSectionComponents,
+  rental: sakanSectionComponents,
 };
 
 /**

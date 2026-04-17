@@ -3,13 +3,33 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import { FolderKanban } from "lucide-react";
 import Link from "next/link";
-import { requireOnboardedSession } from "../../../lib/session";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { CreateProjectForm } from "../../../components/projects/create-project-form";
 import {
   DeleteProjectButton,
   UpdateProjectStatusButton,
 } from "../../../components/projects/project-actions";
+import { requireOnboardedSession } from "../../../lib/session";
 
 type ProjectsPageProps = {
   searchParams?: Promise<{ error?: string; status?: string }>;
@@ -17,7 +37,10 @@ type ProjectsPageProps = {
 
 const statusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   active: { label: "Active", variant: "default" },
   archived: { label: "Archived", variant: "outline" },
@@ -44,7 +67,9 @@ function formatDate(date: Date | null) {
   }).format(date);
 }
 
-export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+export default async function ProjectsPage({
+  searchParams,
+}: ProjectsPageProps) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
   const params = (await searchParams) ?? {};
@@ -95,77 +120,110 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   };
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {params.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{params.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {params.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{params.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Projects
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {stats.total} project{stats.total !== 1 ? "s" : ""}
-              {stats.active > 0 ? ` · ${stats.active} active` : ""}
-            </p>
-          </div>
-        </div>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Delivery workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Projects</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage delivery pipelines, staffing, issues, and milestones from a
+              single operational view.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Button asChild variant="outline">
+              <Link href="/reports">View reports</Link>
+            </Button>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
 
-        {/* Status filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Button
-            asChild
-            size="sm"
-            variant={!filterStatus ? "default" : "outline"}
-          >
-            <Link href="/projects">All ({stats.total})</Link>
-          </Button>
-          {(["draft", "active", "paused", "delayed", "completed", "archived"] as const).map(
-            (s) => (
-              <Button
-                key={s}
-                asChild
-                size="sm"
-                variant={filterStatus === s ? "default" : "outline"}
-              >
-                <Link href={`/projects?status=${s}`}>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {stats.total} project{stats.total !== 1 ? "s" : ""}
+            {(stats.active ?? 0) > 0 ? ` · ${stats.active ?? 0} active` : ""}
+          </DashboardToolbarGroup>
+          <DashboardToolbarGroup>
+            <DashboardFilterTabs>
+              <DashboardFilterTab active={!filterStatus} href="/projects">
+                All ({stats.total})
+              </DashboardFilterTab>
+              {(
+                [
+                  "draft",
+                  "active",
+                  "paused",
+                  "delayed",
+                  "completed",
+                  "archived",
+                ] as const
+              ).map((s) => (
+                <DashboardFilterTab
+                  key={s}
+                  active={filterStatus === s}
+                  href={`/projects?status=${s}`}
+                >
                   {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
-                </Link>
-              </Button>
-            ),
-          )}
-        </div>
+                </DashboardFilterTab>
+              ))}
+            </DashboardFilterTabs>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
-        {/* Create Project Form */}
-        <Card className="mb-8">
-          <CardHeader>
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Create project</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Start a new delivery workflow with the same structure used across
+              the dashboard.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
+        <Card className="border-border/65 bg-card/78">
+          <CardHeader className="px-5 py-4">
             <CardTitle>Create Project</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 pt-0">
             <CreateProjectForm />
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Project List */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Project pipeline</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review current work, move draft projects forward, and remove stale
+              records.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
         {projects.length === 0 ? (
-          <Card className="py-16 text-center">
-            <CardContent>
-              <p className="text-muted-foreground">
-                {filterStatus
-                  ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} projects.`
-                  : "No projects yet. Create your first project above."}
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            description={
+              filterStatus
+                ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} projects yet.`
+                : "No projects yet. Create your first project to start tracking delivery."
+            }
+            icon={<FolderKanban className="size-5" />}
+            title="Nothing in the pipeline"
+          />
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-2.5">
             {projects.map((project) => (
-              <Card key={project.id} className="bg-card">
-                <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pt-5 pb-2">
+              <Card key={project.id} className="border-border/65 bg-card/78">
+                <CardHeader className="flex flex-row items-start justify-between gap-4 px-5 py-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-base font-semibold">
@@ -189,11 +247,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         </Badge>
                       )}
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {project.code ? `${project.code} · ` : ""}
                       {project.location ?? "No location"}
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {project._count.phases} phase
                       {project._count.phases !== 1 ? "s" : ""} ·{" "}
                       {project._count.milestones} milestone
@@ -204,7 +262,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       {project._count.assignments !== 1 ? "s" : ""}
                     </p>
                     {(project.startDate || project.targetCompletionDate) && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {project.startDate
                           ? `Start: ${formatDate(project.startDate)}`
                           : ""}
@@ -217,7 +275,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       </p>
                     )}
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2 self-center">
                     {project.status === "draft" && (
                       <UpdateProjectStatusButton
                         projectId={project.id}
@@ -235,7 +293,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

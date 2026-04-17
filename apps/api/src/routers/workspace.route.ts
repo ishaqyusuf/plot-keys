@@ -1536,7 +1536,8 @@ export const workspaceRouter = createTRPCRouter({
         ) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "This domain was just claimed by another request. Please try again.",
+            message:
+              "This domain was just claimed by another request. Please try again.",
           });
         }
         throw err;
@@ -2044,7 +2045,7 @@ export const workspaceRouter = createTRPCRouter({
   }),
   updateLeadStatus: membershipProcedure
     .input(updateLeadStatusInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       const lead = await updateLeadStatus(db, {
         leadId: input.leadId,
@@ -2207,7 +2208,7 @@ export const workspaceRouter = createTRPCRouter({
 
   updateAppointmentStatus: membershipProcedure
     .input(updateAppointmentStatusInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       return updateAppointmentStatus(db, {
         appointmentId: input.appointmentId,
@@ -2218,7 +2219,7 @@ export const workspaceRouter = createTRPCRouter({
 
   deleteAppointment: membershipProcedure
     .input(z.object({ appointmentId: z.string().uuid() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       return deleteAppointment(db, input.appointmentId);
     }),
@@ -2268,7 +2269,7 @@ export const workspaceRouter = createTRPCRouter({
           companyId,
           currency: "NGN",
           kind: "stock_image",
-          meta: { imageId: input.imageId, imageTitle: image.title },
+          meta: { imageId: input.imageId, imageTitle: image.label },
           paidAt: new Date(),
           status: "active",
         },

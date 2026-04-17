@@ -31,6 +31,7 @@ import {
   normalizeSubdomainLabel,
   resolveDashboardSessionScope,
   WORK_ROLE_LABELS,
+  type WorkRole,
 } from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
@@ -198,7 +199,7 @@ async function inviteWorkspaceUser(input: {
   redirectPath: string;
   role: "admin" | "agent" | "staff";
   successRedirect: string;
-  workRole?: string | null;
+  workRole?: WorkRole | null;
 }) {
   const session = await requireOnboardedSession();
   const prisma = createPrismaClient().db;
@@ -1362,8 +1363,10 @@ export async function inviteAgentAction(formData: FormData) {
 export async function inviteEmployeeAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const rawWorkRole = String(formData.get("workRole") ?? "").trim();
-  const workRole = EMPLOYEE_WORK_ROLE_VALUES.includes(rawWorkRole as never)
-    ? rawWorkRole
+  const workRole: WorkRole = EMPLOYEE_WORK_ROLE_VALUES.includes(
+    rawWorkRole as never,
+  )
+    ? (rawWorkRole as WorkRole)
     : "operations";
 
   await inviteWorkspaceUser({
@@ -1872,11 +1875,11 @@ export async function updateEmployeeAction(formData: FormData) {
           | "on_leave"
           | "suspended"
           | "terminated");
-  const workRole =
+  const workRole: WorkRole | undefined =
     rawWorkRole === null
       ? undefined
       : isWorkRole(String(rawWorkRole).trim())
-        ? String(rawWorkRole).trim()
+        ? (String(rawWorkRole).trim() as WorkRole)
         : "operations";
 
   await prisma.employee.update({
@@ -2129,9 +2132,9 @@ export async function exportAppointmentsCsvAction() {
   ]);
   const rows = appointments.map((a) =>
     toCsvRow([
-      a.clientName,
-      a.clientEmail,
-      a.clientPhone,
+      a.name,
+      a.email,
+      a.phone,
       a.property?.title,
       a.agent?.name,
       a.scheduledAt.toISOString(),

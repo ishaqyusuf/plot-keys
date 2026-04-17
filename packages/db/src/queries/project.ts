@@ -10,7 +10,13 @@ export async function createProject(
     companyId: string;
     name: string;
     code?: string | null;
-    type?: "building" | "estate" | "fit_out" | "infrastructure" | "renovation" | null;
+    type?:
+      | "building"
+      | "estate"
+      | "fit_out"
+      | "infrastructure"
+      | "renovation"
+      | null;
     location?: string | null;
     description?: string | null;
     startDate?: Date | null;
@@ -35,7 +41,13 @@ export async function listProjectsForCompany(
   db: Db,
   companyId: string,
   options: {
-    status?: "draft" | "active" | "paused" | "delayed" | "completed" | "archived";
+    status?:
+      | "draft"
+      | "active"
+      | "paused"
+      | "delayed"
+      | "completed"
+      | "archived";
     take?: number;
   } = {},
 ) {
@@ -114,10 +126,22 @@ export async function updateProject(
   data: {
     name?: string;
     code?: string | null;
-    type?: "building" | "estate" | "fit_out" | "infrastructure" | "renovation" | null;
+    type?:
+      | "building"
+      | "estate"
+      | "fit_out"
+      | "infrastructure"
+      | "renovation"
+      | null;
     location?: string | null;
     description?: string | null;
-    status?: "draft" | "active" | "paused" | "delayed" | "completed" | "archived";
+    status?:
+      | "draft"
+      | "active"
+      | "paused"
+      | "delayed"
+      | "completed"
+      | "archived";
     startDate?: Date | null;
     targetCompletionDate?: Date | null;
     completedAt?: Date | null;
@@ -140,10 +164,7 @@ export async function deleteProject(
   });
 }
 
-export async function countProjectsByStatus(
-  db: Db,
-  companyId: string,
-) {
+export async function countProjectsByStatus(db: Db, companyId: string) {
   const rows = await db.project.groupBy({
     by: ["status"],
     _count: { id: true },
@@ -335,7 +356,13 @@ export async function assignMemberToProject(
   input: {
     projectId: string;
     membershipId: string;
-    projectRole?: "project_owner" | "project_manager" | "qs_manager" | "finance_reviewer" | "site_supervisor" | "viewer";
+    projectRole?:
+      | "project_owner"
+      | "project_manager"
+      | "qs_manager"
+      | "finance_reviewer"
+      | "site_supervisor"
+      | "viewer";
   },
 ) {
   return db.projectAssignment.upsert({
@@ -371,10 +398,7 @@ export async function removeAssignmentFromProject(
 // Documents
 // ---------------------------------------------------------------------------
 
-export async function listProjectDocuments(
-  db: Db,
-  projectId: string,
-) {
+export async function listProjectDocuments(db: Db, projectId: string) {
   return db.projectDocument.findMany({
     where: { projectId },
     orderBy: { createdAt: "desc" },
@@ -385,7 +409,16 @@ export async function createProjectDocument(
   db: Db,
   input: {
     projectId: string;
-    kind?: "drawing" | "contract" | "permit" | "invoice" | "receipt" | "site_report" | "inspection" | "handover" | "other";
+    kind?:
+      | "drawing"
+      | "contract"
+      | "permit"
+      | "invoice"
+      | "receipt"
+      | "site_report"
+      | "inspection"
+      | "handover"
+      | "other";
     title: string;
     fileUrl: string;
     visibility?: "internal" | "shared";
@@ -410,10 +443,7 @@ export async function createProjectDocument(
 // Budget
 // ---------------------------------------------------------------------------
 
-export async function getOrCreateProjectBudget(
-  db: Db,
-  projectId: string,
-) {
+export async function getOrCreateProjectBudget(db: Db, projectId: string) {
   const existing = await db.projectBudget.findUnique({ where: { projectId } });
   if (existing) return existing;
   return db.projectBudget.create({
@@ -435,10 +465,7 @@ export async function updateProjectBudget(
   return db.projectBudget.update({ where: { id: budgetId }, data });
 }
 
-export async function getProjectBudgetWithLineItems(
-  db: Db,
-  projectId: string,
-) {
+export async function getProjectBudgetWithLineItems(db: Db, projectId: string) {
   return db.projectBudget.findUnique({
     where: { projectId },
     include: {
@@ -452,7 +479,16 @@ export async function createProjectBudgetLineItem(
   input: {
     projectId: string;
     budgetId: string;
-    category: string;
+    category:
+      | "preliminaries"
+      | "substructure"
+      | "superstructure"
+      | "mep"
+      | "finishing"
+      | "external_works"
+      | "contingency"
+      | "professional_fees"
+      | "other";
     description: string;
     quantity?: number | null;
     unitRateMinor?: number | null;
@@ -463,7 +499,6 @@ export async function createProjectBudgetLineItem(
 ) {
   return db.projectBudgetLineItem.create({
     data: {
-      projectId: input.projectId,
       budgetId: input.budgetId,
       category: input.category,
       description: input.description,
@@ -480,7 +515,16 @@ export async function updateProjectBudgetLineItem(
   db: Db,
   lineItemId: string,
   data: {
-    category?: string;
+    category?:
+      | "preliminaries"
+      | "substructure"
+      | "superstructure"
+      | "mep"
+      | "finishing"
+      | "external_works"
+      | "contingency"
+      | "professional_fees"
+      | "other";
     description?: string;
     quantity?: number | null;
     unitRateMinor?: number | null;
@@ -492,194 +536,6 @@ export async function updateProjectBudgetLineItem(
   return db.projectBudgetLineItem.update({ where: { id: lineItemId }, data });
 }
 
-export async function deleteProjectBudgetLineItem(
-  db: Db,
-  lineItemId: string,
-) {
+export async function deleteProjectBudgetLineItem(db: Db, lineItemId: string) {
   return db.projectBudgetLineItem.delete({ where: { id: lineItemId } });
-}
-
-// ---------------------------------------------------------------------------
-// Workers
-// ---------------------------------------------------------------------------
-
-export async function listProjectWorkers(
-  db: Db,
-  projectId: string,
-  options: {
-    status?: "active" | "off_project" | "completed";
-  } = {},
-) {
-  return db.projectWorker.findMany({
-    where: {
-      projectId,
-      ...(options.status ? { status: options.status } : {}),
-    },
-    orderBy: { createdAt: "asc" },
-  });
-}
-
-export async function createProjectWorker(
-  db: Db,
-  input: {
-    projectId: string;
-    employeeId?: string | null;
-    contractorName?: string | null;
-    fullName: string;
-    role: string;
-    payBasis?: "daily" | "weekly" | "fixed_contract" | "milestone_based";
-    payRateMinor?: number;
-    currency?: string;
-    notes?: string | null;
-  },
-) {
-  return db.projectWorker.create({
-    data: {
-      projectId: input.projectId,
-      employeeId: input.employeeId ?? null,
-      contractorName: input.contractorName ?? null,
-      fullName: input.fullName,
-      role: input.role,
-      payBasis: input.payBasis ?? "daily",
-      payRateMinor: input.payRateMinor ?? 0,
-      currency: input.currency ?? "NGN",
-      notes: input.notes ?? null,
-    },
-  });
-}
-
-export async function updateProjectWorker(
-  db: Db,
-  workerId: string,
-  data: {
-    fullName?: string;
-    role?: string;
-    payBasis?: "daily" | "weekly" | "fixed_contract" | "milestone_based";
-    payRateMinor?: number;
-    status?: "active" | "off_project" | "completed";
-    notes?: string | null;
-  },
-) {
-  return db.projectWorker.update({ where: { id: workerId }, data });
-}
-
-export async function deleteProjectWorker(db: Db, workerId: string) {
-  return db.projectWorker.delete({ where: { id: workerId } });
-}
-
-// ---------------------------------------------------------------------------
-// Payroll Runs
-// ---------------------------------------------------------------------------
-
-export async function listProjectPayrollRuns(db: Db, projectId: string) {
-  return db.projectPayrollRun.findMany({
-    where: { projectId },
-    include: {
-      _count: { select: { entries: true } },
-    },
-    orderBy: { periodStart: "desc" },
-  });
-}
-
-export async function getProjectPayrollRunWithEntries(
-  db: Db,
-  runId: string,
-) {
-  return db.projectPayrollRun.findUnique({
-    where: { id: runId },
-    include: {
-      entries: {
-        include: { worker: true },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
-}
-
-export async function createProjectPayrollRun(
-  db: Db,
-  input: {
-    projectId: string;
-    periodStart: Date;
-    periodEnd: Date;
-    currency?: string;
-    notes?: string | null;
-  },
-) {
-  return db.projectPayrollRun.create({
-    data: {
-      projectId: input.projectId,
-      periodStart: input.periodStart,
-      periodEnd: input.periodEnd,
-      currency: input.currency ?? "NGN",
-      notes: input.notes ?? null,
-    },
-  });
-}
-
-export async function updateProjectPayrollRun(
-  db: Db,
-  runId: string,
-  data: {
-    status?: "draft" | "confirmed" | "paid";
-    totalGrossMinor?: number;
-    totalNetMinor?: number;
-    notes?: string | null;
-  },
-) {
-  return db.projectPayrollRun.update({ where: { id: runId }, data });
-}
-
-export async function deleteProjectPayrollRun(db: Db, runId: string) {
-  return db.projectPayrollRun.delete({ where: { id: runId } });
-}
-
-// ---------------------------------------------------------------------------
-// Payroll Entries
-// ---------------------------------------------------------------------------
-
-export async function upsertProjectPayrollEntry(
-  db: Db,
-  input: {
-    payrollRunId: string;
-    workerId: string;
-    attendanceUnits?: number;
-    grossMinor?: number;
-    deductionMinor?: number;
-    advanceMinor?: number;
-    netMinor?: number;
-    paymentStatus?: "pending" | "paid" | "partial";
-    notes?: string | null;
-  },
-) {
-  const data = {
-    attendanceUnits: input.attendanceUnits ?? 0,
-    grossMinor: input.grossMinor ?? 0,
-    deductionMinor: input.deductionMinor ?? 0,
-    advanceMinor: input.advanceMinor ?? 0,
-    netMinor: input.netMinor ?? 0,
-    paymentStatus: input.paymentStatus ?? "pending",
-    notes: input.notes ?? null,
-  };
-  return db.projectPayrollEntry.upsert({
-    where: {
-      payrollRunId_workerId: {
-        payrollRunId: input.payrollRunId,
-        workerId: input.workerId,
-      },
-    },
-    update: data,
-    create: {
-      payrollRunId: input.payrollRunId,
-      workerId: input.workerId,
-      ...data,
-    },
-  });
-}
-
-export async function deleteProjectPayrollEntry(
-  db: Db,
-  entryId: string,
-) {
-  return db.projectPayrollEntry.delete({ where: { id: entryId } });
 }

@@ -2,13 +2,13 @@ import {
   type AuthSessionContext,
   getAppSessionFromBetterAuth,
 } from "@plotkeys/auth";
-import { createDatabaseClient } from "@plotkeys/db";
+import { createPrismaClient } from "@plotkeys/db";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 
 export type TRPCContext = {
   auth: AuthSessionContext;
-  db: ReturnType<typeof createDatabaseClient>;
-  databaseProvider: ReturnType<typeof createDatabaseClient>["provider"];
+  db: ReturnType<typeof createPrismaClient>;
+  databaseProvider: ReturnType<typeof createPrismaClient>["provider"];
   headers: Headers;
 };
 
@@ -47,7 +47,7 @@ async function resolveAuthContext(
 export async function buildRequestContext(
   headers: Headers,
 ): Promise<TRPCContext> {
-  const db = createDatabaseClient();
+  const db = createPrismaClient();
 
   return {
     auth: await resolveAuthContext(headers),

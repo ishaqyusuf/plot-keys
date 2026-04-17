@@ -10,8 +10,8 @@ import {
   getRegisterTemplate,
   InlineOverview,
   resolveFamilySectionComponents,
-  sectionComponents,
   SmartFillProvider,
+  sectionComponents,
   WebsiteRuntimeProvider,
 } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
@@ -275,7 +275,7 @@ function PreviewSection({
         </div>
         {focused && sectionFields.length > 0 && (
           <div
-            className="absolute right-4 bottom-4 z-30 w-80 rounded-xl border border-border/70 bg-background/97 p-4 shadow-xl backdrop-blur"
+            className="absolute right-4 bottom-4 z-30 w-80 rounded-[1.1rem] border border-border/70 bg-card/96 p-4 shadow-[var(--shadow-card)] backdrop-blur"
             role="presentation"
           >
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
@@ -377,23 +377,23 @@ export function BuilderPreviewPanel({
   );
 
   return (
-    <div className="mx-auto overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
-      <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
+    <div className="mx-auto overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/86 shadow-[var(--shadow-card)] backdrop-blur-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-background/72 px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="size-2.5 rounded-full bg-foreground/20" />
-          <span className="size-2.5 rounded-full bg-foreground/20" />
-          <span className="size-2.5 rounded-full bg-foreground/20" />
+          <span className="size-2.5 rounded-full bg-foreground/18" />
+          <span className="size-2.5 rounded-full bg-foreground/18" />
+          <span className="size-2.5 rounded-full bg-foreground/18" />
         </div>
         {availablePages && availablePages.length > 1 ? (
           <div className="min-w-0 flex-1 text-center">
-            <nav className="flex min-w-0 items-center justify-center gap-0.5 overflow-x-auto">
+            <nav className="flex min-w-0 items-center justify-center gap-1 overflow-x-auto">
               {availablePages.map((page) => (
                 <button
                   className={[
-                    "shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors",
+                    "shrink-0 rounded-full border px-3 py-1 text-xs transition-colors",
                     activePageKey === page.pageKey
-                      ? "bg-primary/10 font-medium text-primary"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                      ? "border-primary/20 bg-primary/10 font-medium text-primary"
+                      : "border-transparent text-muted-foreground hover:border-border/70 hover:bg-background/80 hover:text-foreground",
                   ].join(" ")}
                   key={page.pageKey}
                   type="button"
@@ -432,7 +432,7 @@ export function BuilderPreviewPanel({
       ) : null}
 
       <div
-        className="max-h-[78vh] overflow-auto bg-muted/20 p-3 md:p-4"
+        className="max-h-[78vh] overflow-auto bg-muted/12 p-3 md:p-4"
         role="presentation"
       >
         <WebsiteRuntimeProvider renderMode="draft">
@@ -440,9 +440,9 @@ export function BuilderPreviewPanel({
           {readOnly ? (
             <ClickGuardProvider>
               <div
-                className="overflow-hidden rounded-lg border border-border/70"
+                className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
                 style={{
-                  backgroundColor: "#f8fafc",
+                  backgroundColor: "hsl(var(--background))",
                   fontFamily: "Satoshi, sans-serif",
                 }}
               >
@@ -469,9 +469,9 @@ export function BuilderPreviewPanel({
             <SmartFillProvider onSmartFill={handleInlineSmartFill}>
               <ClickGuardProvider>
                 <div
-                  className="overflow-hidden rounded-lg border border-border/70"
+                  className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
                   style={{
-                    backgroundColor: "#f8fafc",
+                    backgroundColor: "hsl(var(--background))",
                     fontFamily: "Satoshi, sans-serif",
                   }}
                 >

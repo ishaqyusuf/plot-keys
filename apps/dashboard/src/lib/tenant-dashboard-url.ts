@@ -20,7 +20,7 @@ export async function getTenantDashboardUrlForSubdomain(
   pathname: string,
 ) {
   const currentOrigin = await getCurrentOrigin();
-  const isLocalPlotkeysHost = currentOrigin?.includes("plotkeys.localhost");
+  const isLocalPlotkeysHost = currentOrigin?.includes("localhost");
 
   return buildTenantDashboardUrl(subdomain, {
     currentOrigin,

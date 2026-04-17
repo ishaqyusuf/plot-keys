@@ -3,8 +3,26 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import { Icon } from "@plotkeys/ui/icons";
+import { FileText, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardStatGrid,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 import { createBlogPostAction } from "../../actions";
 
@@ -51,77 +69,90 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     : [[], []];
 
   const counts = { archived: 0, draft: 0, published: 0 };
-  for (const item of grouped) {
-    counts[item.status] = item._count.id;
-  }
+  for (const item of grouped) counts[item.status] = item._count.id;
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {sp.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{sp.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {sp.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{sp.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/">← Dashboard</Link>
-            </Button>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
-              Blog
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Create articles for your public site at <code>/blog</code>.
-            </p>
-          </div>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Content workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Blog</DashboardPageTitle>
+            <DashboardPageDescription>
+              Publish calmer, editorial updates to your public site using the
+              same systemized dashboard structure as the rest of the product.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <form action={createBlogPostAction}>
+              <Button type="submit">
+                <PlusCircle className="size-4" />
+                New post
+              </Button>
+            </form>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {posts.length} post{posts.length === 1 ? "" : "s"} across your
+            content workspace
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
-          <form action={createBlogPostAction}>
-            <Button type="submit">
-              <Icon.PlusCircle className="size-4" />
-              New post
-            </Button>
-          </form>
-        </div>
-
-        <div className="mb-6 grid gap-3 sm:grid-cols-3">
-          {(["draft", "published", "archived"] as const).map((status) => (
-            <Card key={status}>
-              <CardContent className="flex items-center justify-between px-4 py-3">
-                <p className="text-xs capitalize text-muted-foreground">
-                  {status}
-                </p>
-                <p className="text-lg font-semibold text-foreground">
-                  {counts[status]}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {posts.length === 0 ? (
-          <Card className="py-20 text-center">
-            <CardContent className="flex flex-col items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <Icon.File className="size-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">No blog posts yet.</p>
-              <p className="text-xs text-muted-foreground">
-                Start with a draft and publish it when your article is ready.
+      <DashboardStatGrid className="xl:grid-cols-3">
+        {(["draft", "published", "archived"] as const).map((status) => (
+          <Card key={status} className="border-border/70 bg-card/82">
+            <CardContent className="px-5 py-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                {status}
+              </p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">
+                {counts[status]}
               </p>
             </CardContent>
           </Card>
+        ))}
+      </DashboardStatGrid>
+
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Editorial queue</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Drafts, published stories, and archived articles all follow one
+              quieter list presentation.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
+        {posts.length === 0 ? (
+          <DashboardEmptyState
+            title="No blog posts yet"
+            description="Start with a draft and publish it when your article is ready."
+            icon={<FileText className="size-5" />}
+            actions={
+              <form action={createBlogPostAction}>
+                <Button type="submit">Create first post</Button>
+              </form>
+            }
+          />
         ) : (
-          <div className="grid gap-3">
+          <div className="grid gap-4">
             {posts.map((post) => (
-              <Card key={post.id}>
-                <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <Card key={post.id} className="border-border/70 bg-card/82">
+                <CardHeader className="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-lg">
                         <Link
-                          className="hover:underline"
+                          className="transition-colors hover:text-primary"
                           href={`/blog/${post.id}`}
                         >
                           {post.title}
@@ -138,13 +169,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       /blog/{post.slug}
                     </p>
                     {post.excerpt ? (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
                         {post.excerpt}
                       </p>
                     ) : null}
                   </div>
-                  <div className="text-right text-xs text-muted-foreground">
-                    <p>{formatDate(post.publishedAt)}</p>
+
+                  <div className="text-sm text-muted-foreground lg:text-right">
+                    <p>Published {formatDate(post.publishedAt)}</p>
                     <p>Updated {formatDate(post.updatedAt)}</p>
                   </div>
                 </CardHeader>
@@ -152,7 +184,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

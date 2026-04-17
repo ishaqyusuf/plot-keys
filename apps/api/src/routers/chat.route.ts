@@ -6,12 +6,12 @@
  * The tenant is identified by subdomain.
  */
 
+import { type ChatBotMessage, getChatCompletion } from "@plotkeys/chat-bot";
 import {
   createPrismaClient,
   listAgentsForCompany,
   listFeaturedProperties,
 } from "@plotkeys/db";
-import { getChatCompletion, type ChatBotMessage } from "@plotkeys/chat-bot";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -21,7 +21,11 @@ let _client: ReturnType<typeof createPrismaClient> | null = null;
 function getDb() {
   if (!_client) _client = createPrismaClient();
   const { db } = _client;
-  if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DATABASE_URL is not configured." });
+  if (!db)
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "DATABASE_URL is not configured.",
+    });
   return db;
 }
 
@@ -71,21 +75,25 @@ export const chatRouter = createTRPCRouter({
       ]);
 
       // Fetch onboarding business summary if available
-      const onboarding = await db.tenantOnboarding.findFirst({
-        select: { businessSummary: true },
-        where: {
-          user: {
-            memberships: {
-              some: { companyId: company.id },
+      const onboarding = await db.tenantOnboarding
+        .findFirst({
+          select: { businessSummary: true },
+          where: {
+            user: {
+              memberships: {
+                some: { companyId: company.id },
+              },
             },
           },
-        },
-      }).catch(() => null);
+        })
+        .catch(() => null);
 
-      const conversationMessages: ChatBotMessage[] = input.messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      const conversationMessages: ChatBotMessage[] = input.messages.map(
+        (m) => ({
+          role: m.role,
+          content: m.content,
+        }),
+      );
 
       const result = await getChatCompletion(
         {
@@ -95,7 +103,7 @@ export const chatRouter = createTRPCRouter({
           properties: properties.map((p) => ({
             title: p.title,
             location: p.location,
-            price: p.price,
+            price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
             specs: p.specs,
           })),
           agents: agents.map((a) => ({

@@ -2,8 +2,9 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -96,21 +97,19 @@ export function BudgetSummary({
       forecastBudgetMinor: Math.round(
         Number(fd.get("forecastBudget") ?? 0) * 100,
       ),
-      actualBudgetMinor: Math.round(
-        Number(fd.get("actualBudget") ?? 0) * 100,
-      ),
+      actualBudgetMinor: Math.round(Number(fd.get("actualBudget") ?? 0) * 100),
     });
   }
 
   if (!budget) {
     return (
-      <form onSubmit={onSubmit} className="space-y-3">
+      <form onSubmit={onSubmit} className="space-y-4">
         <p className="text-sm text-muted-foreground">
           No budget set for this project.
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div>
-            <Label htmlFor="approvedBudget">Approved Budget</Label>
+        <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field>
+            <FieldLabel htmlFor="approvedBudget">Approved Budget</FieldLabel>
             <Input
               id="approvedBudget"
               name="approvedBudget"
@@ -119,9 +118,9 @@ export function BudgetSummary({
               min="0"
               placeholder="0.00"
             />
-          </div>
-          <div>
-            <Label htmlFor="forecastBudget">Forecast</Label>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="forecastBudget">Forecast</FieldLabel>
             <Input
               id="forecastBudget"
               name="forecastBudget"
@@ -130,17 +129,17 @@ export function BudgetSummary({
               min="0"
               placeholder="0.00"
             />
-          </div>
-          <div>
-            <Label htmlFor="currency">Currency</Label>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="currency">Currency</FieldLabel>
             <Input
               id="currency"
               name="currency"
               defaultValue="NGN"
               placeholder="NGN"
             />
-          </div>
-        </div>
+          </Field>
+        </FieldGroup>
         <input type="hidden" name="actualBudget" value="0" />
         <Button disabled={upsertMutation.isPending} type="submit">
           {upsertMutation.isPending ? "Creating…" : "Create Budget"}
@@ -161,26 +160,26 @@ export function BudgetSummary({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
           <p className="text-xs text-muted-foreground">Approved</p>
           <p className="text-lg font-bold">
             {formatCurrency(budget.approvedBudgetMinor, budget.currency)}
           </p>
         </div>
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
           <p className="text-xs text-muted-foreground">Forecast</p>
           <p className="text-lg font-bold">
             {formatCurrency(budget.forecastBudgetMinor, budget.currency)}
           </p>
         </div>
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
           <p className="text-xs text-muted-foreground">Actual</p>
           <p className="text-lg font-bold">
             {formatCurrency(budget.actualBudgetMinor, budget.currency)}
           </p>
         </div>
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
           <p className="text-xs text-muted-foreground">Variance</p>
           <p
             className={`text-lg font-bold ${variance >= 0 ? "text-green-600" : "text-red-600"}`}
@@ -230,7 +229,7 @@ export function BudgetLineItemList({
       {lineItems.map((item) => (
         <div
           key={item.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between rounded-xl border border-border/65 bg-card/74 p-3.5"
         >
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -242,9 +241,7 @@ export function BudgetLineItemList({
             <p className="mt-0.5 text-xs text-muted-foreground">
               Est: {formatCurrency(item.estimatedMinor, currency)} · Act:{" "}
               {formatCurrency(item.actualMinor, currency)}
-              {item.quantity != null
-                ? ` · Qty: ${item.quantity}`
-                : ""}
+              {item.quantity != null ? ` · Qty: ${item.quantity}` : ""}
               {item.unitRateMinor != null
                 ? ` · Rate: ${formatCurrency(item.unitRateMinor, currency)}`
                 : ""}
@@ -317,13 +314,9 @@ export function CreateBudgetLineForm({
           | "contingency"
           | "professional_fees"
           | "other") || "other",
-      estimatedMinor: Math.round(
-        Number(fd.get("estimatedAmount") ?? 0) * 100,
-      ),
+      estimatedMinor: Math.round(Number(fd.get("estimatedAmount") ?? 0) * 100),
       actualMinor: Math.round(Number(fd.get("actualAmount") ?? 0) * 100),
-      quantity: fd.get("quantity")
-        ? Number(fd.get("quantity"))
-        : null,
+      quantity: fd.get("quantity") ? Number(fd.get("quantity")) : null,
       unitRateMinor: fd.get("unitRate")
         ? Math.round(Number(fd.get("unitRate")) * 100)
         : null,
@@ -334,56 +327,51 @@ export function CreateBudgetLineForm({
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-    >
+    <form onSubmit={onSubmit} className="space-y-4">
+      <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field>
+          <FieldLabel htmlFor="lineDesc">Description *</FieldLabel>
+          <Input
+            id="lineDesc"
+            name="description"
+            required
+            placeholder="Line item description"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="lineCategory">Category</FieldLabel>
+          <NativeSelect id="lineCategory" name="category">
+            {Object.entries(categoryLabels).map(([value, label]) => (
+              <NativeSelectOption key={value} value={value}>
+                {label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="lineEstimated">Estimated Amount</FieldLabel>
+          <Input
+            id="lineEstimated"
+            name="estimatedAmount"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="lineActual">Actual Amount</FieldLabel>
+          <Input
+            id="lineActual"
+            name="actualAmount"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+          />
+        </Field>
+      </FieldGroup>
       <div>
-        <Label htmlFor="lineDesc">Description *</Label>
-        <Input
-          id="lineDesc"
-          name="description"
-          required
-          placeholder="Line item description"
-        />
-      </div>
-      <div>
-        <Label htmlFor="lineCategory">Category</Label>
-        <select
-          id="lineCategory"
-          name="category"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          {Object.entries(categoryLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <Label htmlFor="lineEstimated">Estimated Amount</Label>
-        <Input
-          id="lineEstimated"
-          name="estimatedAmount"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-        />
-      </div>
-      <div>
-        <Label htmlFor="lineActual">Actual Amount</Label>
-        <Input
-          id="lineActual"
-          name="actualAmount"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-        />
-      </div>
-      <div className="sm:col-span-2">
         <Button disabled={createMutation.isPending} type="submit">
           {createMutation.isPending ? "Adding…" : "Add Line Item"}
         </Button>

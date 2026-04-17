@@ -2,13 +2,34 @@ import { createPrismaClient, listAppointmentsForCompany } from "@plotkeys/db";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
-import Link from "next/link";
-
-import { requireOnboardedSession } from "../../../lib/session";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Input } from "@plotkeys/ui/input";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import { Textarea } from "@plotkeys/ui/textarea";
+import { CalendarRange } from "lucide-react";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { ExportCsvButton } from "../../../components/export-csv-button";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   createAppointmentAction,
-  deleteAppointmentAction,
   exportAppointmentsCsvAction,
   updateAppointmentStatusAction,
 } from "../../actions";
@@ -41,6 +62,10 @@ function formatDateTime(date: Date) {
     timeStyle: "short",
   }).format(date);
 }
+
+type AppointmentItem = Awaited<
+  ReturnType<typeof listAppointmentsForCompany>
+>[number];
 
 export default async function AppointmentsPage({
   searchParams,
@@ -88,129 +113,159 @@ export default async function AppointmentsPage({
     : [];
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Appointments
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {stats.total ?? 0} appointment
-              {(stats.total ?? 0) !== 1 ? "s" : ""} total
-            </p>
-          </div>
-          <ExportCsvButton exportAction={exportAppointmentsCsvAction} filename="appointments.csv" />
-        </div>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Scheduling workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Appointments</DashboardPageTitle>
+            <DashboardPageDescription>
+              Run viewings and customer meetings with a clearer schedule board
+              and standardized follow-up controls.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <ExportCsvButton
+              exportAction={exportAppointmentsCsvAction}
+              filename="appointments.csv"
+            />
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
 
-        {/* Stats / filters */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Button
-            asChild
-            size="sm"
-            variant={!filterStatus && !showUpcoming ? "default" : "outline"}
-          >
-            <Link href="/appointments">All ({stats.total ?? 0})</Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            variant={showUpcoming ? "default" : "outline"}
-          >
-            <Link href="/appointments?view=upcoming">Upcoming</Link>
-          </Button>
-          {(["pending", "confirmed", "completed", "cancelled"] as const).map(
-            (s) => (
-              <Button
-                key={s}
-                asChild
-                size="sm"
-                variant={filterStatus === s ? "default" : "outline"}
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {stats.total ?? 0} appointment
+            {(stats.total ?? 0) !== 1 ? "s" : ""} total
+          </DashboardToolbarGroup>
+          <DashboardToolbarGroup>
+            <DashboardFilterTabs>
+              <DashboardFilterTab
+                active={!filterStatus && !showUpcoming}
+                href="/appointments"
               >
-                <Link href={`/appointments?status=${s}`}>
+                All ({stats.total ?? 0})
+              </DashboardFilterTab>
+              <DashboardFilterTab
+                active={showUpcoming}
+                href="/appointments?view=upcoming"
+              >
+                Upcoming
+              </DashboardFilterTab>
+              {(
+                ["pending", "confirmed", "completed", "cancelled"] as const
+              ).map((s) => (
+                <DashboardFilterTab
+                  key={s}
+                  active={filterStatus === s}
+                  href={`/appointments?status=${s}`}
+                >
                   {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
-                </Link>
-              </Button>
-            ),
-          )}
-        </div>
+                </DashboardFilterTab>
+              ))}
+            </DashboardFilterTabs>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
-        {/* Quick-create form */}
-        <Card className="mb-8">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Schedule appointment</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Add upcoming viewings and assign them to the right team member
+              without leaving the schedule view.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
+        <Card className="border-border/65 bg-card/78">
           <CardHeader>
             <CardTitle className="text-base">Schedule Appointment</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              action={createAppointmentAction}
-              className="grid gap-3 sm:grid-cols-2 md:grid-cols-3"
-            >
-              <input
-                name="name"
-                placeholder="Visitor name"
-                required
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <input
-                name="email"
-                type="email"
-                placeholder="Email"
-                required
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <input
-                name="phone"
-                placeholder="Phone (optional)"
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <input
-                name="scheduledAt"
-                type="datetime-local"
-                required
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <input
-                name="location"
-                placeholder="Location (optional)"
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              {agents.length > 0 && (
-                <select
-                  name="agentId"
-                  className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">Assign agent (optional)</option>
-                  {agents.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <textarea
-                name="notes"
-                placeholder="Notes (optional)"
-                rows={1}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm sm:col-span-2"
-              />
-              <Button type="submit" size="sm">
-                Schedule
-              </Button>
+            <form action={createAppointmentAction} className="space-y-4">
+              <FieldGroup className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <Field>
+                  <FieldLabel>Visitor name</FieldLabel>
+                  <Input name="name" placeholder="Visitor name" required />
+                </Field>
+                <Field>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Phone</FieldLabel>
+                  <Input name="phone" placeholder="Phone (optional)" />
+                </Field>
+                <Field>
+                  <FieldLabel>Scheduled time</FieldLabel>
+                  <Input name="scheduledAt" type="datetime-local" required />
+                </Field>
+                <Field>
+                  <FieldLabel>Location</FieldLabel>
+                  <Input name="location" placeholder="Location (optional)" />
+                </Field>
+                {agents.length > 0 && (
+                  <Field>
+                    <FieldLabel>Assign agent</FieldLabel>
+                    <NativeSelect name="agentId">
+                      <NativeSelectOption value="">
+                        Assign agent (optional)
+                      </NativeSelectOption>
+                      {agents.map((a) => (
+                        <NativeSelectOption key={a.id} value={a.id}>
+                          {a.name}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                )}
+                <Field className="sm:col-span-2 xl:col-span-3">
+                  <FieldLabel>Notes</FieldLabel>
+                  <Textarea
+                    name="notes"
+                    placeholder="Notes (optional)"
+                    rows={3}
+                  />
+                </Field>
+              </FieldGroup>
+              <div className="flex justify-end">
+                <Button type="submit" size="sm">
+                  Schedule
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Appointment list */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Appointment queue</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Stay on top of upcoming, confirmed, completed, and cancelled
+              appointments in one timeline.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
         {appointments.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground">
-            No appointments found.
-          </p>
+          <DashboardEmptyState
+            description="No appointments found for this view yet."
+            icon={<CalendarRange className="size-5" />}
+            title="Nothing on the schedule"
+          />
         ) : (
-          <div className="space-y-3">
-            {appointments.map((appt) => {
+          <div className="space-y-2.5">
+            {appointments.map((appt: AppointmentItem) => {
               const flow = statusFlow[appt.status];
               return (
-                <Card key={appt.id}>
+                <Card key={appt.id} className="border-border/65 bg-card/78">
                   <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -290,7 +345,7 @@ export default async function AppointmentsPage({
             })}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

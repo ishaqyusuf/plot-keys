@@ -1,4 +1,4 @@
-import type { Db } from "../client";
+import type { Db } from "../prisma";
 
 export async function grantStockImageLicense(
   db: Db,

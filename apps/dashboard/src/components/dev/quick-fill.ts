@@ -192,7 +192,19 @@ const DEFAULT_PAYLOADS: QuickFillPayloads = {
 };
 
 function pickRandom<T>(items: readonly T[]) {
-  return items[Math.floor(Math.random() * items.length)] ?? items[0];
+  const item = items[Math.floor(Math.random() * items.length)];
+  if (item !== undefined) {
+    return item;
+  }
+
+  const [firstItem] = items;
+  if (firstItem === undefined) {
+    throw new Error(
+      "Expected at least one item when generating quick-fill data.",
+    );
+  }
+
+  return firstItem;
 }
 
 function randomId() {

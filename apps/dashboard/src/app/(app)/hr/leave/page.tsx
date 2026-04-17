@@ -2,16 +2,37 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { CalendarClock } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "../../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
-  createLeaveRequestAction,
   approveLeaveRequestAction,
-  rejectLeaveRequestAction,
   cancelLeaveRequestAction,
+  createLeaveRequestAction,
+  rejectLeaveRequestAction,
 } from "../../../actions";
 
 type LeavePageProps = {
@@ -20,7 +41,10 @@ type LeavePageProps = {
 
 const statusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   approved: { label: "Approved", variant: "default" },
   cancelled: { label: "Cancelled", variant: "outline" },
@@ -53,7 +77,6 @@ export default async function LeavePage({ searchParams }: LeavePageProps) {
   const filterStatus = params.status || undefined;
 
   const prisma = createPrismaClient().db;
-
   const [requests, employees, counts] = await Promise.all([
     prisma
       ? prisma.leaveRequest.findMany({
@@ -93,175 +116,213 @@ export default async function LeavePage({ searchParams }: LeavePageProps) {
   };
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Leave Requests
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {stats.total} request{stats.total !== 1 ? "s" : ""}
-              {stats.pending > 0 ? ` · ${stats.pending} pending` : ""}
-            </p>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/hr/employees">← Employees</Link>
-          </Button>
-        </div>
-
-        {/* Status filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Button
-            asChild
-            size="sm"
-            variant={!filterStatus ? "default" : "outline"}
-          >
-            <Link href="/hr/leave">All ({stats.total})</Link>
-          </Button>
-          {(["pending", "approved", "rejected", "cancelled"] as const).map((s) => (
-            <Button
-              key={s}
-              asChild
-              size="sm"
-              variant={filterStatus === s ? "default" : "outline"}
-            >
-              <Link href={`/hr/leave?status=${s}`}>
-                {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
-              </Link>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>People workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Leave Requests</DashboardPageTitle>
+            <DashboardPageDescription>
+              Track time away, review pending approvals, and keep leave
+              operations inside the unified dashboard contract.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/hr/employees">Back to employees</Link>
             </Button>
-          ))}
-        </div>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup>
+            <DashboardFilterTabs>
+              <DashboardFilterTab active={!filterStatus} href="/hr/leave">
+                All ({stats.total})
+              </DashboardFilterTab>
+              {(["pending", "approved", "rejected", "cancelled"] as const).map(
+                (status) => (
+                  <DashboardFilterTab
+                    key={status}
+                    active={filterStatus === status}
+                    href={`/hr/leave?status=${status}`}
+                  >
+                    {statusConfig[status]?.label ?? status} (
+                    {stats[status] ?? 0})
+                  </DashboardFilterTab>
+                ),
+              )}
+            </DashboardFilterTabs>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
-        {/* Submit Leave Request Form */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Submit Leave Request</CardTitle>
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Submit request</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Capture new leave requests with the same input styling and spacing
+              used elsewhere in the redesign.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
+        <Card className="border-border/65 bg-card/78">
+          <CardHeader className="px-5 py-4">
+            <CardTitle>New leave request</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form action={createLeaveRequestAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="employeeId">Employee *</Label>
-                <select
-                  id="employeeId"
-                  name="employeeId"
-                  required
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="">Select employee</option>
-                  {employees.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="leaveType">Leave Type *</Label>
-                <select
-                  id="leaveType"
-                  name="leaveType"
-                  required
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="annual">Annual</option>
-                  <option value="sick">Sick</option>
-                  <option value="maternity">Maternity</option>
-                  <option value="paternity">Paternity</option>
-                  <option value="unpaid">Unpaid</option>
-                  <option value="compassionate">Compassionate</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="startDate">Start Date *</Label>
-                <Input id="startDate" name="startDate" type="date" required />
-              </div>
-              <div>
-                <Label htmlFor="endDate">End Date *</Label>
-                <Input id="endDate" name="endDate" type="date" required />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="reason">Reason</Label>
-                <Input id="reason" name="reason" placeholder="Optional reason for leave" />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Submitting…">Submit Request</SubmitButton>
+          <CardContent className="px-5 pb-5 pt-0">
+            <form action={createLeaveRequestAction} className="space-y-4">
+              <FieldGroup className="sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="employeeId">Employee</FieldLabel>
+                  <NativeSelect id="employeeId" name="employeeId" required>
+                    <NativeSelectOption value="">
+                      Select employee
+                    </NativeSelectOption>
+                    {employees.map((employee) => (
+                      <NativeSelectOption key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="leaveType">Leave type</FieldLabel>
+                  <NativeSelect id="leaveType" name="leaveType" required>
+                    {Object.entries(leaveTypeLabels).map(([value, label]) => (
+                      <NativeSelectOption key={value} value={value}>
+                        {label}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="startDate">Start date</FieldLabel>
+                  <Input id="startDate" name="startDate" type="date" required />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="endDate">End date</FieldLabel>
+                  <Input id="endDate" name="endDate" type="date" required />
+                </Field>
+                <Field className="sm:col-span-2">
+                  <FieldLabel htmlFor="reason">Reason</FieldLabel>
+                  <Input
+                    id="reason"
+                    name="reason"
+                    placeholder="Optional reason for leave"
+                  />
+                </Field>
+              </FieldGroup>
+              <div className="flex justify-end">
+                <SubmitButton loadingLabel="Submitting…">
+                  Submit request
+                </SubmitButton>
               </div>
             </form>
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Leave Request List */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Request queue</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review the current leave pipeline and action requests without
+              leaving the roster flow.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
         {requests.length === 0 ? (
-          <Card className="py-16 text-center">
-            <CardContent>
-              <p className="text-muted-foreground">
-                {filterStatus
-                  ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} leave requests.`
-                  : "No leave requests yet. Submit one above."}
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            title="No leave requests"
+            description={
+              filterStatus
+                ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} leave requests found.`
+                : "No leave requests yet. Submit one above to start the workflow."
+            }
+            icon={<CalendarClock className="size-5" />}
+          />
         ) : (
           <div className="grid gap-4">
-            {requests.map((req) => (
-              <Card key={req.id} className="bg-card">
-                <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pt-5 pb-2">
+            {requests.map((request) => (
+              <Card key={request.id} className="border-border/70 bg-card/82">
+                <CardHeader className="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-base font-semibold">
-                        {req.employee.name}
+                        {request.employee.name}
                       </CardTitle>
-                      <Badge variant={statusConfig[req.status]?.variant ?? "outline"}>
-                        {statusConfig[req.status]?.label ?? req.status}
+                      <Badge
+                        variant={
+                          statusConfig[request.status]?.variant ?? "outline"
+                        }
+                      >
+                        {statusConfig[request.status]?.label ?? request.status}
                       </Badge>
                       <Badge variant="outline">
-                        {leaveTypeLabels[req.leaveType] ?? req.leaveType}
+                        {leaveTypeLabels[request.leaveType] ??
+                          request.leaveType}
                       </Badge>
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      {req.employee.title ?? ""}
-                      {" · "}
-                      {formatDate(req.startDate)} → {formatDate(req.endDate)}
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {request.employee.title ?? "No title"} ·{" "}
+                      {formatDate(request.startDate)} to{" "}
+                      {formatDate(request.endDate)}
                     </p>
-                    {req.reason && (
+                    {request.reason ? (
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {req.reason}
+                        {request.reason}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    {req.status === "pending" && (
+                    {request.status === "pending" ? (
                       <>
                         <form action={approveLeaveRequestAction}>
-                          <input type="hidden" name="leaveRequestId" value={req.id} />
-                          <Button size="sm" type="submit" variant="default">
+                          <input
+                            type="hidden"
+                            name="leaveRequestId"
+                            value={request.id}
+                          />
+                          <Button size="sm" type="submit">
                             Approve
                           </Button>
                         </form>
                         <form action={rejectLeaveRequestAction}>
-                          <input type="hidden" name="leaveRequestId" value={req.id} />
+                          <input
+                            type="hidden"
+                            name="leaveRequestId"
+                            value={request.id}
+                          />
                           <Button size="sm" type="submit" variant="destructive">
                             Reject
                           </Button>
                         </form>
                       </>
-                    )}
-                    {(req.status === "pending" || req.status === "approved") && (
+                    ) : null}
+                    {request.status === "pending" ||
+                    request.status === "approved" ? (
                       <form action={cancelLeaveRequestAction}>
-                        <input type="hidden" name="leaveRequestId" value={req.id} />
+                        <input
+                          type="hidden"
+                          name="leaveRequestId"
+                          value={request.id}
+                        />
                         <Button size="sm" type="submit" variant="outline">
                           Cancel
                         </Button>
                       </form>
-                    )}
+                    ) : null}
                   </div>
                 </CardHeader>
               </Card>
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

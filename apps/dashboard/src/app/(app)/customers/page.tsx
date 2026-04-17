@@ -2,20 +2,54 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Card, CardContent, CardHeader } from "@plotkeys/ui/card";
-import { Icon } from "@plotkeys/ui/icons";
-import Link from "next/link";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Input } from "@plotkeys/ui/input";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@plotkeys/ui/table";
+import { UsersIcon } from "lucide-react";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardTablePage,
+  DashboardTablePageBody,
+  DashboardTablePageDescription,
+  DashboardTablePageHeader,
+  DashboardTablePageTitle,
+  DashboardTableToolbar,
+  DashboardTableToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
+import { ExportCsvButton } from "../../../components/export-csv-button";
+import { requireOnboardedSession } from "../../../lib/session";
 import {
   createCustomerAction,
   deleteCustomerAction,
   exportCustomersCsvAction,
   updateCustomerStatusAction,
 } from "../../actions";
-import { requireOnboardedSession } from "../../../lib/session";
-import { ExportCsvButton } from "../../../components/export-csv-button";
 
 type CustomersPageProps = {
-  searchParams?: Promise<{ error?: string; created?: string; filter?: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    created?: string;
+    filter?: string;
+    q?: string;
+  }>;
 };
 
 const statusVariant: Record<string, "default" | "secondary" | "outline"> = {
@@ -32,9 +66,12 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default async function CustomersPage({ searchParams }: CustomersPageProps) {
+export default async function CustomersPage({
+  searchParams,
+}: CustomersPageProps) {
   const session = await requireOnboardedSession();
   const sp = (await searchParams) ?? {};
+  const query = sp.q?.trim() ?? "";
   const statusFilter = sp.filter && sp.filter !== "all" ? sp.filter : undefined;
 
   const prisma = createPrismaClient().db;
@@ -46,7 +83,18 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
           where: {
             companyId,
             deletedAt: null,
-            ...(statusFilter ? { status: statusFilter as "active" | "inactive" | "vip" } : {}),
+            ...(statusFilter
+              ? { status: statusFilter as "active" | "inactive" | "vip" }
+              : {}),
+            ...(query
+              ? {
+                  OR: [
+                    { name: { contains: query, mode: "insensitive" } },
+                    { email: { contains: query, mode: "insensitive" } },
+                    { phone: { contains: query, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
           },
           orderBy: { createdAt: "desc" },
           take: 100,
@@ -67,205 +115,292 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   }
   const total = Object.values(statMap).reduce((a, b) => a + b, 0);
 
+  function buildFilterHref(filter: string) {
+    const next = new URLSearchParams();
+
+    if (query) {
+      next.set("q", query);
+    }
+
+    if (filter !== "all") {
+      next.set("filter", filter);
+    }
+
+    const qs = next.toString();
+    return qs ? `/customers?${qs}` : "/customers";
+  }
+
   const canManage =
     session.activeMembership.role === "owner" ||
     session.activeMembership.role === "admin" ||
     session.activeMembership.role === "agent";
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {sp.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{sp.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {sp.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{sp.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {sp.created ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
-            <AlertDescription>Customer added successfully.</AlertDescription>
-          </Alert>
-        ) : null}
+      {sp.created ? (
+        <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <AlertDescription>Customer added successfully.</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/">← Dashboard</Link>
-            </Button>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground">
-              Customers
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {total} customer{total !== 1 ? "s" : ""} total
-            </p>
-            <div className="mt-2">
-              <ExportCsvButton exportAction={exportCustomersCsvAction} filename="customers.csv" />
-            </div>
-          </div>
-
-          {/* Add customer form */}
-          {canManage ? (
-            <details className="group relative">
-              <summary className="cursor-pointer list-none">
-                <Button size="sm" type="button">
-                  Add customer
-                </Button>
-              </summary>
-              <div className="absolute right-0 top-full z-10 mt-2 w-80 rounded-xl border border-border bg-card p-4 shadow-lg">
-                <p className="mb-3 text-sm font-medium text-foreground">New customer</p>
-                <form action={createCustomerAction} className="space-y-3">
-                  <input
-                    name="name"
-                    required
-                    placeholder="Full name *"
-                    className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <input
-                    name="phone"
-                    placeholder="Phone"
-                    className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <select
-                    name="status"
-                    defaultValue="active"
-                    className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-                  >
-                    <option value="active">Active</option>
-                    <option value="vip">VIP</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <Button size="sm" type="submit" className="w-full">
-                    Save customer
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Customers</DashboardPageEyebrow>
+            <DashboardPageTitle>Customers</DashboardPageTitle>
+            <DashboardPageDescription>
+              All customer records in one place. Filter, scan, and update
+              relationship status from a single table.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <ExportCsvButton
+              exportAction={exportCustomersCsvAction}
+              filename="customers.csv"
+            />
+            {canManage ? (
+              <details className="group relative">
+                <summary className="list-none">
+                  <Button size="sm" type="button">
+                    Add customer
                   </Button>
-                </form>
-              </div>
-            </details>
-          ) : null}
-        </div>
-
-        {/* Stats strip */}
-        <div className="mb-6 grid grid-cols-3 gap-3">
-          {(["active", "vip", "inactive"] as const).map((s) => (
-            <Card key={s} className="bg-card">
-              <CardContent className="flex items-center justify-between px-4 py-3">
-                <p className="text-xs capitalize text-muted-foreground">{s}</p>
-                <p className="text-lg font-semibold text-foreground">{statMap[s] ?? 0}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Filter tabs */}
-        <div className="mb-5 flex flex-wrap gap-2">
-          {["all", "active", "vip", "inactive"].map((f) => {
-            const isActive = (f === "all" && !statusFilter) || f === statusFilter;
-            return (
-              <Link
-                key={f}
-                href={f === "all" ? "/customers" : `/customers?filter=${f}`}
-                className={`rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-input text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f === "all" ? "All" : f}
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Customer list */}
-        {customers.length === 0 ? (
-          <Card className="py-20 text-center">
-            <CardContent className="flex flex-col items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <Icon.Users className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">
-                {statusFilter ? `No ${statusFilter} customers.` : "No customers yet."}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Add customers directly or convert qualified leads.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-3">
-            {customers.map((c) => (
-              <Card key={c.id} className="bg-card">
-                <CardHeader className="flex flex-row items-center justify-between gap-4 px-5 py-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-                      {c.name.charAt(0).toUpperCase()}
+                </summary>
+                <div className="absolute right-0 top-full z-10 mt-2 w-80 rounded-[1.25rem] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+                  <p className="mb-3 text-sm font-medium text-foreground">
+                    New customer
+                  </p>
+                  <form action={createCustomerAction} className="space-y-4">
+                    <FieldGroup>
+                      <Field>
+                        <FieldLabel>Name</FieldLabel>
+                        <Input name="name" required placeholder="Full name" />
+                      </Field>
+                    </FieldGroup>
+                    <FieldGroup className="sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel>Email</FieldLabel>
+                        <Input
+                          name="email"
+                          type="email"
+                          placeholder="name@company.com"
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel>Phone</FieldLabel>
+                        <Input name="phone" placeholder="+234..." />
+                      </Field>
+                    </FieldGroup>
+                    <FieldGroup>
+                      <Field>
+                        <FieldLabel>Status</FieldLabel>
+                        <NativeSelect name="status" defaultValue="active">
+                          <NativeSelectOption value="active">
+                            Active
+                          </NativeSelectOption>
+                          <NativeSelectOption value="vip">
+                            VIP
+                          </NativeSelectOption>
+                          <NativeSelectOption value="inactive">
+                            Inactive
+                          </NativeSelectOption>
+                        </NativeSelect>
+                      </Field>
+                    </FieldGroup>
+                    <div className="flex justify-end">
+                      <Button size="sm" type="submit" className="min-w-32">
+                        Save customer
+                      </Button>
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-foreground truncate">{c.name}</p>
-                        <Badge variant={statusVariant[c.status] ?? "outline"} className="capitalize">
-                          {c.status}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {[c.email, c.phone].filter(Boolean).join(" · ") || "No contact info"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Added {formatDate(c.createdAt)}
-                      </p>
-                    </div>
-                  </div>
+                  </form>
+                </div>
+              </details>
+            ) : null}
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+      </DashboardPageHeader>
 
-                  {canManage ? (
-                    <div className="flex shrink-0 items-center gap-2">
-                      {/* Status selector */}
-                      <form action={updateCustomerStatusAction} className="flex items-center gap-2">
-                        <input type="hidden" name="customerId" value={c.id} />
-                        <select
-                          name="status"
-                          defaultValue={c.status}
-                          className="rounded-md border border-input bg-background px-2 py-1 text-xs"
-                        >
-                          <option value="active">Active</option>
-                          <option value="vip">VIP</option>
-                          <option value="inactive">Inactive</option>
-                        </select>
-                        <Button size="sm" type="submit" variant="outline">
-                          Save
-                        </Button>
-                      </form>
-
-                      {/* Delete */}
-                      <form action={deleteCustomerAction}>
-                        <input type="hidden" name="customerId" value={c.id} />
-                        <Button
-                          size="sm"
-                          type="submit"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          Remove
-                        </Button>
-                      </form>
-                    </div>
+      {customers.length === 0 ? (
+        <DashboardEmptyState
+          description={
+            statusFilter
+              ? `No ${statusFilter} customers yet.`
+              : "Add customers directly or convert qualified leads to start building the pipeline."
+          }
+          icon={<UsersIcon className="size-5" />}
+          title="No customers here yet"
+        />
+      ) : (
+        <DashboardTablePage>
+          <DashboardTablePageHeader>
+            <div className="space-y-1">
+              <DashboardTablePageTitle>All customers</DashboardTablePageTitle>
+              <DashboardTablePageDescription>
+                {total} customer{total !== 1 ? "s" : ""}
+                {query ? ` matching “${query}”` : ""}.
+              </DashboardTablePageDescription>
+            </div>
+            <DashboardTableToolbar>
+              <form action="/customers" className="w-full max-w-sm">
+                <div className="flex items-center gap-2">
+                  <Input
+                    defaultValue={query}
+                    name="q"
+                    placeholder="Search name, email, or phone"
+                  />
+                  {statusFilter ? (
+                    <input name="filter" type="hidden" value={statusFilter} />
                   ) : null}
-                </CardHeader>
-                {c.notes ? (
-                  <CardContent className="px-5 pb-4 pt-0">
-                    <p className="text-xs text-muted-foreground">{c.notes}</p>
-                  </CardContent>
-                ) : null}
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+                  <Button size="sm" type="submit" variant="outline">
+                    Search
+                  </Button>
+                </div>
+              </form>
+              <DashboardTableToolbarGroup>
+                <DashboardFilterTabs className="bg-background/70">
+                  {["all", "active", "vip", "inactive"].map((f) => {
+                    const isActive =
+                      (f === "all" && !statusFilter) || f === statusFilter;
+                    return (
+                      <DashboardFilterTab
+                        key={f}
+                        active={isActive}
+                        href={buildFilterHref(f)}
+                      >
+                        {f === "all" ? "All" : f}
+                        {f === "all" ? ` (${total})` : ` (${statMap[f] ?? 0})`}
+                      </DashboardFilterTab>
+                    );
+                  })}
+                </DashboardFilterTabs>
+              </DashboardTableToolbarGroup>
+            </DashboardTableToolbar>
+          </DashboardTablePageHeader>
+          <DashboardTablePageBody>
+            <Table>
+              <TableHeader className="[&_tr]:border-border/55">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="px-5 text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Customer
+                  </TableHead>
+                  <TableHead className="text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Contact
+                  </TableHead>
+                  <TableHead className="text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Added
+                  </TableHead>
+                  <TableHead className="text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Notes
+                  </TableHead>
+                  <TableHead className="px-5 text-right text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((c) => (
+                  <TableRow
+                    key={c.id}
+                    className="border-border/50 hover:bg-background/40"
+                  >
+                    <TableCell className="px-5 py-4 align-top">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 space-y-1">
+                          <p className="truncate font-medium text-foreground">
+                            {c.name}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 align-top">
+                      <p className="text-sm text-muted-foreground">
+                        {[c.email, c.phone].filter(Boolean).join(" · ") ||
+                          "No contact info"}
+                      </p>
+                    </TableCell>
+                    <TableCell className="py-4 align-top">
+                      <Badge
+                        variant={statusVariant[c.status] ?? "outline"}
+                        className="capitalize"
+                      >
+                        {c.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4 align-top text-sm text-muted-foreground">
+                      {formatDate(c.createdAt)}
+                    </TableCell>
+                    <TableCell className="py-4 align-top">
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        {c.notes || "—"}
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-5 py-4 align-top">
+                      {canManage ? (
+                        <div className="flex justify-end gap-2">
+                          <form
+                            action={updateCustomerStatusAction}
+                            className="flex items-center gap-2"
+                          >
+                            <input
+                              type="hidden"
+                              name="customerId"
+                              value={c.id}
+                            />
+                            <NativeSelect
+                              name="status"
+                              defaultValue={c.status}
+                              className="h-8 min-w-28 text-xs"
+                            >
+                              <NativeSelectOption value="active">
+                                Active
+                              </NativeSelectOption>
+                              <NativeSelectOption value="vip">
+                                VIP
+                              </NativeSelectOption>
+                              <NativeSelectOption value="inactive">
+                                Inactive
+                              </NativeSelectOption>
+                            </NativeSelect>
+                            <Button size="sm" type="submit" variant="outline">
+                              Save
+                            </Button>
+                          </form>
+                          <form action={deleteCustomerAction}>
+                            <input
+                              type="hidden"
+                              name="customerId"
+                              value={c.id}
+                            />
+                            <Button
+                              size="sm"
+                              type="submit"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              Remove
+                            </Button>
+                          </form>
+                        </div>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DashboardTablePageBody>
+        </DashboardTablePage>
+      )}
+    </DashboardPage>
   );
 }

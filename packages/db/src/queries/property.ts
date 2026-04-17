@@ -1,6 +1,12 @@
+import type { Prisma } from "../generated/prisma/client";
 import type { Db } from "../prisma";
 
-export type PropertyTypeValue = "residential" | "commercial" | "land" | "industrial" | "mixed_use";
+export type PropertyTypeValue =
+  | "residential"
+  | "commercial"
+  | "land"
+  | "industrial"
+  | "mixed_use";
 
 export async function createProperty(
   db: Db,
@@ -26,7 +32,7 @@ export async function createProperty(
       title: data.title,
       description: data.description ?? null,
       price: data.price ?? null,
-      location: data.location ?? null,
+      location: data.location ?? "",
       bedrooms: data.bedrooms ?? null,
       bathrooms: data.bathrooms ?? null,
       specs: data.specs ?? null,
@@ -58,8 +64,23 @@ export async function updateProperty(
     featured?: boolean;
   },
 ) {
+  const updateData: Prisma.PropertyUpdateInput = {};
+
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.price !== undefined) updateData.price = data.price;
+  if (data.location !== undefined) updateData.location = data.location ?? "";
+  if (data.bedrooms !== undefined) updateData.bedrooms = data.bedrooms;
+  if (data.bathrooms !== undefined) updateData.bathrooms = data.bathrooms;
+  if (data.specs !== undefined) updateData.specs = data.specs;
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+  if (data.type !== undefined) updateData.type = data.type;
+  if (data.subType !== undefined) updateData.subType = data.subType;
+  if (data.status !== undefined) updateData.status = data.status;
+  if (data.featured !== undefined) updateData.featured = data.featured;
+
   return db.property.update({
-    data,
+    data: updateData,
     where: { id: propertyId, companyId, deletedAt: null },
   });
 }

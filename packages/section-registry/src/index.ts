@@ -47,6 +47,7 @@ import {
 import type { RenderMode } from "./types";
 
 export type TemplateTier = "starter" | "plus" | "pro";
+export type { TemplateFamilyKey } from "./register";
 
 export type SectionDefinition<TConfig> = {
   component: (props: { config: TConfig; theme: ThemeConfig }) => JSX.Element;

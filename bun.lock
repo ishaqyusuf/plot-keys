@@ -44,6 +44,7 @@
         "@plotkeys/notifications-react": "workspace:*",
         "@plotkeys/platform-integrations": "workspace:*",
         "@plotkeys/section-registry": "workspace:*",
+        "@plotkeys/site-nav": "workspace:*",
         "@plotkeys/ui": "workspace:*",
         "@plotkeys/utils": "workspace:*",
         "@tanstack/react-query": "^5.90.2",
@@ -151,6 +152,8 @@
     "packages/db": {
       "name": "@plotkeys/db",
       "dependencies": {
+        "@plotkeys/section-registry": "workspace:*",
+        "@plotkeys/utils": "workspace:*",
         "@prisma/adapter-pg": "^7.3.0",
         "@prisma/client": "^7.3.0",
         "drizzle-orm": "^0.44.5",
@@ -236,6 +239,18 @@
         "@types/react": "^19.0.0",
       },
     },
+    "packages/site-nav": {
+      "name": "@plotkeys/site-nav",
+      "dependencies": {
+        "@plotkeys/utils": "workspace:*",
+        "react": "^19.0.0",
+      },
+      "devDependencies": {
+        "@plotkeys/tsconfig": "workspace:*",
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
+      },
+    },
     "packages/supabase": {
       "name": "@plotkeys/platform-integrations",
       "dependencies": {
@@ -264,6 +279,7 @@
         "radix-ui": "^1.4.3",
         "react": "^19.0.0",
         "react-day-picker": "^9.14.0",
+        "react-dom": "^19.0.0",
         "react-hook-form": "^7.71.2",
         "react-resizable-panels": "^4",
         "recharts": "2.15.4",
@@ -276,6 +292,7 @@
         "@plotkeys/tsconfig": "workspace:*",
         "@tailwindcss/postcss": "^4.1.0",
         "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
         "postcss": "^8.4.0",
         "tailwindcss": "^4.1.0",
       },
@@ -614,6 +631,8 @@
     "@plotkeys/platform-integrations": ["@plotkeys/platform-integrations@workspace:packages/supabase"],
 
     "@plotkeys/section-registry": ["@plotkeys/section-registry@workspace:packages/section-registry"],
+
+    "@plotkeys/site-nav": ["@plotkeys/site-nav@workspace:packages/site-nav"],
 
     "@plotkeys/tenant-site": ["@plotkeys/tenant-site@workspace:apps/tenant-site"],
 

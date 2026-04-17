@@ -1,4 +1,7 @@
 {
   "extends": "@plotkeys/tsconfig/base.json",
-  "include": ["src/**/*.ts", "drizzle/**/*.ts"]
+  "compilerOptions": {
+    "jsx": "preserve"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "drizzle/**/*.ts"]
 }

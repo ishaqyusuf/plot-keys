@@ -10,7 +10,27 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { WORK_ROLE_LABELS } from "@plotkeys/utils";
+import { UsersRound } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "../../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../../components/dashboard/dashboard-page";
 import { ExportCsvButton } from "../../../../components/export-csv-button";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
@@ -69,7 +89,6 @@ export default async function EmployeesPage({
   const filterDepartment = params.department || undefined;
 
   const prisma = createPrismaClient().db;
-
   const [employees, counts, pendingInvites] = await Promise.all([
     prisma
       ? prisma.employee.findMany({
@@ -114,33 +133,33 @@ export default async function EmployeesPage({
   };
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {params.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{params.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {params.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{params.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {params.invited ? (
-          <Alert className="mb-6">
-            <AlertDescription>
-              Employee invite sent. They&apos;ll receive an email to join and
-              complete their details directly.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+      {params.invited ? (
+        <Alert>
+          <AlertDescription>
+            Employee invite sent. They&apos;ll receive an email to join and
+            complete their details directly.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Employees
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {stats.total} employee{stats.total !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>People workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Employees</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage employee lifecycle, invite flows, and workforce structure
+              from a unified Midday-style dashboard layout.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
             <Button asChild variant="outline" size="sm">
               <Link href="/hr/departments">Departments</Link>
             </Button>
@@ -148,51 +167,73 @@ export default async function EmployeesPage({
               exportAction={exportEmployeesCsvAction}
               filename="employees.csv"
             />
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup>
+            <DashboardFilterTabs>
+              <DashboardFilterTab active={!filterStatus} href="/hr/employees">
+                All ({stats.total})
+              </DashboardFilterTab>
+              {(["active", "on_leave", "suspended", "terminated"] as const).map(
+                (status) => (
+                  <DashboardFilterTab
+                    key={status}
+                    active={filterStatus === status}
+                    href={`/hr/employees?status=${status}`}
+                  >
+                    {statusConfig[status]?.label ?? status} (
+                    {stats[status] ?? 0})
+                  </DashboardFilterTab>
+                ),
+              )}
+            </DashboardFilterTabs>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
+
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Invite employee</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Send a self-serve onboarding link so new staff can complete their
+              profile inside the workspace.
+            </DashboardSectionDescription>
           </div>
-        </div>
-
-        {/* Status filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Button
-            asChild
-            size="sm"
-            variant={!filterStatus ? "default" : "outline"}
-          >
-            <Link href="/hr/employees">All ({stats.total})</Link>
-          </Button>
-          {(["active", "on_leave", "suspended", "terminated"] as const).map(
-            (s) => (
-              <Button
-                key={s}
-                asChild
-                size="sm"
-                variant={filterStatus === s ? "default" : "outline"}
-              >
-                <Link href={`/hr/employees?status=${s}`}>
-                  {statusConfig[s]?.label ?? s} ({stats[s] ?? 0})
-                </Link>
-              </Button>
-            ),
-          )}
-        </div>
-
-        <Card className="mb-8">
-          <CardHeader>
+        </DashboardSectionHeader>
+        <Card className="border-border/65 bg-card/78">
+          <CardHeader className="px-5 py-4">
             <CardTitle>Invite an employee</CardTitle>
             <CardDescription>
-              Send an invite by email and let the employee complete their
-              profile after they join the workspace.
+              Employees will receive a secure invite link and finish their own
+              setup after joining.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 pt-0">
             <EmployeeInviteForm />
           </CardContent>
         </Card>
+      </DashboardSection>
+
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Pending invites</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review staff invitations that still need attention.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
 
         {pendingInvites.length > 0 ? (
-          <div className="mb-8 grid gap-3">
+          <div className="grid gap-2.5">
             {pendingInvites.map((invite) => (
-              <Card key={invite.id} className="border-dashed">
+              <Card
+                key={invite.id}
+                className="border-border/65 border-dashed bg-card/78"
+              >
                 <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
                   <div>
                     <p className="font-medium text-foreground">
@@ -213,26 +254,43 @@ export default async function EmployeesPage({
               </Card>
             ))}
           </div>
-        ) : null}
+        ) : (
+          <DashboardEmptyState
+            title="No pending employee invites"
+            description="Invitations that have not yet been accepted will appear here."
+            icon={<UsersRound className="size-5" />}
+          />
+        )}
+      </DashboardSection>
 
-        {/* Employee List */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Employee roster</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review status, role, department, and quick actions from one calmer
+              roster view.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
         {employees.length === 0 ? (
-          <Card className="py-16 text-center">
-            <CardContent>
-              <p className="text-muted-foreground">
-                {filterStatus
-                  ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} employees.`
-                  : "No employees yet. Invite your first employee above."}
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            title="No employees yet"
+            description={
+              filterStatus
+                ? `No ${statusConfig[filterStatus]?.label ?? filterStatus} employees found.`
+                : "Invite your first employee above to start building the roster."
+            }
+            icon={<UsersRound className="size-5" />}
+          />
         ) : (
           <div className="grid gap-4">
             {employees.map((emp) => (
-              <Card key={emp.id} className="bg-card">
-                <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pt-5 pb-2">
+              <Card key={emp.id} className="border-border/70 bg-card/82">
+                <CardHeader className="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-base font-semibold">
                         {emp.name}
                       </CardTitle>
@@ -249,19 +307,20 @@ export default async function EmployeesPage({
                         {WORK_ROLE_LABELS[emp.workRole] ?? emp.workRole}
                       </Badge>
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {emp.title ?? "No title"}
                       {emp.department ? ` · ${emp.department.name}` : ""}
                       {emp.email ? ` · ${emp.email}` : ""}
                     </p>
-                    {emp.startDate && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        Started: {formatDate(emp.startDate)}
+                    {emp.startDate ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Started {formatDate(emp.startDate)}
                       </p>
-                    )}
+                    ) : null}
                   </div>
+
                   <div className="flex shrink-0 items-center gap-2">
-                    {emp.status === "active" && (
+                    {emp.status === "active" ? (
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
@@ -272,11 +331,12 @@ export default async function EmployeesPage({
                         />
                         <input type="hidden" name="status" value="on_leave" />
                         <Button size="sm" type="submit" variant="outline">
-                          Set On Leave
+                          Set on leave
                         </Button>
                       </form>
-                    )}
-                    {emp.status === "on_leave" && (
+                    ) : null}
+
+                    {emp.status === "on_leave" ? (
                       <form action={updateEmployeeAction}>
                         <input type="hidden" name="employeeId" value={emp.id} />
                         <input type="hidden" name="name" value={emp.name} />
@@ -290,7 +350,8 @@ export default async function EmployeesPage({
                           Reactivate
                         </Button>
                       </form>
-                    )}
+                    ) : null}
+
                     <form action={deleteEmployeeAction}>
                       <input type="hidden" name="employeeId" value={emp.id} />
                       <Button size="sm" type="submit" variant="destructive">
@@ -303,7 +364,7 @@ export default async function EmployeesPage({
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

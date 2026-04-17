@@ -9,7 +9,7 @@
  *
  * Host patterns handled:
  *   {slug}.plotkeys.com                 → subdomain = {slug}, hostname = {slug}.plotkeys.com
- *   {slug}.tenant.plotkeys.localhost    → subdomain = {slug}, hostname = {slug}.tenant.plotkeys.localhost
+ *   {slug}.tenant-plotkeys.localhost    → subdomain = {slug}, hostname = {slug}.tenant-plotkeys.localhost
  *   custom-domain.com                   → subdomain = null,   hostname = custom-domain.com
  *   localhost             → no injection (dev fallback via query params)
  *

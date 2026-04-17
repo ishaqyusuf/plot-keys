@@ -1,4 +1,5 @@
-import type { Db } from "../client";
+import type { Prisma } from "../generated/prisma/client";
+import type { Db } from "../prisma";
 
 // ---------------------------------------------------------------------------
 // Credit cost definitions
@@ -126,7 +127,7 @@ export async function logAiUsage(
       companyId: data.companyId,
       creditsUsed: data.creditsUsed,
       feature: data.feature,
-      meta: data.meta ?? {},
+      meta: (data.meta ?? {}) as Prisma.InputJsonValue,
       success: data.success ?? true,
       tokensUsed: data.tokensUsed,
       userId: data.userId,
@@ -154,7 +155,7 @@ export async function getAiUsageStats(db: Db, companyId: string) {
   ]);
 
   return {
-    byFeature: byFeature.map((f) => ({
+    byFeature: byFeature.map((f: (typeof byFeature)[number]) => ({
       count: f._count,
       creditsUsed: f._sum.creditsUsed ?? 0,
       feature: f.feature,

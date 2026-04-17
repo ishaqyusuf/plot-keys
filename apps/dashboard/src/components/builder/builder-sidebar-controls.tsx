@@ -157,7 +157,7 @@ function StylePresetMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-64 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
+        className="w-64 rounded-[1rem] border border-border/70 bg-popover/96 p-1.5 shadow-[var(--shadow-card)] backdrop-blur"
         side="right"
       >
         <DropdownMenuRadioGroup
@@ -253,7 +253,7 @@ function ColorSystemMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-72 rounded-lg border-border/70 bg-popover/95 p-1.5 shadow-xl backdrop-blur"
+        className="w-72 rounded-[1rem] border border-border/70 bg-popover/96 p-1.5 shadow-[var(--shadow-card)] backdrop-blur"
         side="right"
       >
         <DropdownMenuRadioGroup

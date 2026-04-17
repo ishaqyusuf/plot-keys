@@ -5,9 +5,24 @@ import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BlogRichTextEditor } from "../../../../components/blog/blog-rich-text-editor";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+} from "../../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
   deleteBlogPostAction,
@@ -60,8 +75,8 @@ export default async function BlogDetailPage({
   if (!post) return notFound();
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <DashboardPage className="max-w-none">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         {sp.error ? (
           <Alert variant="destructive">
             <AlertDescription>{sp.error}</AlertDescription>
@@ -78,138 +93,151 @@ export default async function BlogDetailPage({
           </Alert>
         ) : null}
 
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <Button asChild size="sm" variant="ghost">
-              <a href="/blog">← Blog</a>
-            </Button>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <h1 className="font-serif text-3xl font-semibold text-foreground">
-                {post.title}
-              </h1>
-              <Badge
-                className="capitalize"
-                variant={statusVariant[post.status] ?? "outline"}
-              >
-                {post.status}
-              </Badge>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Public URL: /blog/{post.slug}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Published: {formatDate(post.publishedAt)}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {post.status !== "published" ? (
-              <form action={updateBlogPostStatusAction}>
-                <input type="hidden" name="blogPostId" value={post.id} />
-                <input type="hidden" name="status" value="published" />
-                <Button size="sm" type="submit">
-                  Publish
-                </Button>
-              </form>
-            ) : (
-              <form action={updateBlogPostStatusAction}>
-                <input type="hidden" name="blogPostId" value={post.id} />
-                <input type="hidden" name="status" value="draft" />
-                <Button size="sm" type="submit" variant="outline">
-                  Move to draft
-                </Button>
-              </form>
-            )}
-            {post.status !== "archived" ? (
-              <form action={updateBlogPostStatusAction}>
-                <input type="hidden" name="blogPostId" value={post.id} />
-                <input type="hidden" name="status" value="archived" />
-                <Button size="sm" type="submit" variant="outline">
-                  Archive
-                </Button>
-              </form>
-            ) : null}
-            <form action={deleteBlogPostAction}>
-              <input type="hidden" name="blogPostId" value={post.id} />
-              <Button
-                className="text-destructive hover:text-destructive"
-                size="sm"
-                type="submit"
-                variant="ghost"
-              >
-                Delete
+        <DashboardPageHeader>
+          <DashboardPageHeaderRow>
+            <DashboardPageIntro>
+              <DashboardPageEyebrow>Content workspace</DashboardPageEyebrow>
+              <DashboardPageTitle>{post.title}</DashboardPageTitle>
+              <DashboardPageDescription>
+                Public URL: <code>/blog/{post.slug}</code> · Published{" "}
+                {formatDate(post.publishedAt)}
+              </DashboardPageDescription>
+            </DashboardPageIntro>
+            <DashboardPageActions>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/blog">Back to blog</Link>
               </Button>
-            </form>
+              {post.status !== "published" ? (
+                <form action={updateBlogPostStatusAction}>
+                  <input type="hidden" name="blogPostId" value={post.id} />
+                  <input type="hidden" name="status" value="published" />
+                  <Button size="sm" type="submit">
+                    Publish
+                  </Button>
+                </form>
+              ) : (
+                <form action={updateBlogPostStatusAction}>
+                  <input type="hidden" name="blogPostId" value={post.id} />
+                  <input type="hidden" name="status" value="draft" />
+                  <Button size="sm" type="submit" variant="outline">
+                    Move to draft
+                  </Button>
+                </form>
+              )}
+              {post.status !== "archived" ? (
+                <form action={updateBlogPostStatusAction}>
+                  <input type="hidden" name="blogPostId" value={post.id} />
+                  <input type="hidden" name="status" value="archived" />
+                  <Button size="sm" type="submit" variant="outline">
+                    Archive
+                  </Button>
+                </form>
+              ) : null}
+              <form action={deleteBlogPostAction}>
+                <input type="hidden" name="blogPostId" value={post.id} />
+                <Button
+                  size="sm"
+                  type="submit"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                >
+                  Delete
+                </Button>
+              </form>
+            </DashboardPageActions>
+          </DashboardPageHeaderRow>
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-4">
+            <Badge
+              className="capitalize"
+              variant={statusVariant[post.status] ?? "outline"}
+            >
+              {post.status}
+            </Badge>
+            <Badge variant="outline">
+              Updated {formatDate(post.updatedAt)}
+            </Badge>
           </div>
-        </div>
+        </DashboardPageHeader>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit article</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={updateBlogPostAction} className="space-y-5">
-              <input type="hidden" name="blogPostId" value={post.id} />
+        <DashboardSection>
+          <DashboardSectionHeader>
+            <div>
+              <DashboardSectionTitle>Edit article</DashboardSectionTitle>
+              <DashboardSectionDescription>
+                Refine metadata, featured visuals, and rich content in one
+                focused editorial surface.
+              </DashboardSectionDescription>
+            </div>
+          </DashboardSectionHeader>
 
-              <div className="grid gap-5 md:grid-cols-2">
+          <Card className="border-border/70 bg-card/82">
+            <CardHeader>
+              <CardTitle>Article details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={updateBlogPostAction} className="space-y-5">
+                <input type="hidden" name="blogPostId" value={post.id} />
+
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      defaultValue={post.title}
+                      id="title"
+                      name="title"
+                      placeholder="Article title"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                      defaultValue={post.slug}
+                      id="slug"
+                      name="slug"
+                      placeholder="market-update"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="featuredImage">Featured image URL</Label>
                   <Input
-                    defaultValue={post.title}
-                    id="title"
-                    name="title"
-                    placeholder="Article title"
-                    required
+                    defaultValue={post.featuredImage ?? ""}
+                    id="featuredImage"
+                    name="featuredImage"
+                    placeholder="https://..."
+                    type="url"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug</Label>
+                  <Label htmlFor="excerpt">Excerpt</Label>
                   <Input
-                    defaultValue={post.slug}
-                    id="slug"
-                    name="slug"
-                    placeholder="market-update"
-                    required
+                    defaultValue={post.excerpt ?? ""}
+                    id="excerpt"
+                    name="excerpt"
+                    placeholder="Short summary shown on the blog listing page"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="featuredImage">Featured image URL</Label>
-                <Input
-                  defaultValue={post.featuredImage ?? ""}
-                  id="featuredImage"
-                  name="featuredImage"
-                  placeholder="https://..."
-                  type="url"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label>Content</Label>
+                  <BlogRichTextEditor
+                    defaultValue={post.content}
+                    name="content"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt</Label>
-                <Input
-                  defaultValue={post.excerpt ?? ""}
-                  id="excerpt"
-                  name="excerpt"
-                  placeholder="Short summary shown on the blog listing page"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Content</Label>
-                <BlogRichTextEditor
-                  defaultValue={post.content}
-                  name="content"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button type="submit">Save changes</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="flex justify-end">
+                  <Button type="submit">Save changes</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </DashboardSection>
       </div>
-    </main>
+    </DashboardPage>
   );
 }

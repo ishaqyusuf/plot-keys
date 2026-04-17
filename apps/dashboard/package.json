@@ -4,8 +4,8 @@
   "scripts": {
     "build": "node ../../scripts/with-workspace-env.mjs next build --turbopack",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev": "node ../../scripts/with-workspace-env.mjs PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-3901} TZ=UTC portless app.plotkeys next dev --turbopack",
-    "dev:portless": "node ../../scripts/with-workspace-env.mjs portless app.plotkeys next dev --turbopack",
+    "dev": "node ../../scripts/with-workspace-env.mjs PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-3901} TZ=UTC portless app-plotkeys next dev --turbopack",
+    "dev:portless": "node ../../scripts/with-workspace-env.mjs portless app-plotkeys next dev --turbopack",
     "lint": "biome check .",
     "start": "node ../../scripts/with-workspace-env.mjs next start",
     "typecheck": "tsc --noEmit"
@@ -19,6 +19,7 @@
     "@plotkeys/notifications": "workspace:*",
     "@plotkeys/notifications-react": "workspace:*",
     "@plotkeys/platform-integrations": "workspace:*",
+    "@plotkeys/site-nav": "workspace:*",
     "@plotkeys/section-registry": "workspace:*",
     "@plotkeys/ui": "workspace:*",
     "@plotkeys/utils": "workspace:*",

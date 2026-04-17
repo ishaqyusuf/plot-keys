@@ -47,8 +47,10 @@ function parsePriceValue(price: string | null | undefined): number | null {
     .replace(priceCleanupPattern, "");
   const match = normalized.match(/(\d+(?:\.\d+)?)([kmb])?/);
   if (!match) return null;
+  const [rawBase] = match.slice(1);
+  if (!rawBase) return null;
 
-  const base = Number.parseFloat(match[1]);
+  const base = Number.parseFloat(rawBase);
   if (!Number.isFinite(base)) return null;
 
   switch (match[2]) {

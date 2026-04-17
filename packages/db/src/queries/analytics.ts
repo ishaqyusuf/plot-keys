@@ -1,4 +1,5 @@
-import type { Db } from "../client";
+import type { Prisma } from "../generated/prisma/client";
+import type { Db } from "../prisma";
 
 // ---------------------------------------------------------------------------
 // Event recording
@@ -21,7 +22,7 @@ export async function recordAnalyticsEvent(
     data: {
       companyId: data.companyId,
       eventType: data.eventType,
-      meta: data.meta ?? {},
+      meta: (data.meta ?? {}) as Prisma.InputJsonValue,
       path: data.path,
       propertyId: data.propertyId,
       referrer: data.referrer,
@@ -78,7 +79,7 @@ export async function getAnalyticsSummary(
   );
 
   return {
-    byType: byType.map((t) => ({
+    byType: byType.map((t: (typeof byType)[number]) => ({
       count: t._count,
       eventType: t.eventType,
     })),
@@ -143,7 +144,10 @@ export async function getTopPages(
     take: limit,
   });
 
-  return rows.map((r) => ({ path: r.path!, views: r._count }));
+  return rows.map((r: (typeof rows)[number]) => ({
+    path: r.path!,
+    views: r._count,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -163,7 +167,8 @@ function bucketReferrer(referrer: string | null): string {
   } catch {
     hostname = referrer.toLowerCase();
   }
-  if (isDomain(hostname, "google.com") || isDomain(hostname, "google.co")) return "Google";
+  if (isDomain(hostname, "google.com") || isDomain(hostname, "google.co"))
+    return "Google";
   if (
     isDomain(hostname, "facebook.com") ||
     isDomain(hostname, "twitter.com") ||
@@ -230,7 +235,10 @@ export async function getPropertyAnalytics(
     take: limit,
   });
 
-  return rows.map((r) => ({ propertyId: r.propertyId!, views: r._count }));
+  return rows.map((r: (typeof rows)[number]) => ({
+    propertyId: r.propertyId!,
+    views: r._count,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -255,8 +263,16 @@ export async function getLeadSourceBreakdown(
   });
 
   return rows
-    .map((r) => ({ source: r.source ?? "unknown", count: r._count.id }))
-    .sort((a, b) => b.count - a.count);
+    .map((r: (typeof rows)[number]) => ({
+      source: r.source ?? "unknown",
+      count: r._count.id,
+    }))
+    .sort(
+      (
+        a: { count: number; source: string },
+        b: { count: number; source: string },
+      ) => b.count - a.count,
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -314,48 +330,54 @@ export async function getPropertyDetailAnalytics(
 // Agent performance analytics
 // ---------------------------------------------------------------------------
 
-export async function getAgentPerformanceStats(
-  db: Db,
-  companyId: string,
-) {
+export async function getAgentPerformanceStats(db: Db, companyId: string) {
   const agents = await db.agent.findMany({
     where: { companyId, deletedAt: null },
     select: { id: true, name: true, title: true },
     orderBy: { name: "asc" },
   });
 
-  const agentIds = agents.map((a) => a.id);
+  const agentIds = agents.map((a: (typeof agents)[number]) => a.id);
 
   if (agentIds.length === 0) return [];
 
-  const [allAppointmentsByAgent, completedAppointmentsByAgent] = await Promise.all([
-    db.appointment.groupBy({
-      by: ["agentId"],
-      _count: { id: true },
-      where: {
-        companyId,
-        agentId: { in: agentIds },
-      },
-    }),
-    db.appointment.groupBy({
-      by: ["agentId"],
-      _count: { id: true },
-      where: {
-        companyId,
-        agentId: { in: agentIds },
-        status: "completed",
-      },
-    }),
-  ]);
+  const [allAppointmentsByAgent, completedAppointmentsByAgent] =
+    await Promise.all([
+      db.appointment.groupBy({
+        by: ["agentId"],
+        _count: { id: true },
+        where: {
+          companyId,
+          agentId: { in: agentIds },
+        },
+      }),
+      db.appointment.groupBy({
+        by: ["agentId"],
+        _count: { id: true },
+        where: {
+          companyId,
+          agentId: { in: agentIds },
+          status: "completed",
+        },
+      }),
+    ]);
 
   const appointmentMap = new Map(
-    allAppointmentsByAgent.map((r) => [r.agentId, r._count.id]),
+    allAppointmentsByAgent.map((r: (typeof allAppointmentsByAgent)[number]) => [
+      r.agentId,
+      r._count.id,
+    ]),
   );
   const completedMap = new Map(
-    completedAppointmentsByAgent.map((r) => [r.agentId, r._count.id]),
+    completedAppointmentsByAgent.map(
+      (r: (typeof completedAppointmentsByAgent)[number]) => [
+        r.agentId,
+        r._count.id,
+      ],
+    ),
   );
 
-  return agents.map((agent) => ({
+  return agents.map((agent: (typeof agents)[number]) => ({
     id: agent.id,
     name: agent.name,
     title: agent.title,

@@ -17,6 +17,22 @@ import {
   Target,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 
 type Integration = {
@@ -93,32 +109,53 @@ export default async function IntegrationsPage() {
   ).length;
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Integrations</h1>
-          <p className="mt-2 text-muted-foreground">
-            Connect third-party services to your website and dashboard.
-          </p>
-          <div className="mt-4 flex items-center gap-3">
-            <Badge variant="secondary">
-              {connectedCount} of {integrations.length} connected
-            </Badge>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Connection workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Integrations</DashboardPageTitle>
+            <DashboardPageDescription>
+              Connect analytics, communication, and scheduling tools to your
+              website and operational stack.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
             <Button asChild variant="outline" size="sm">
               <Link href="/settings/integrations">
                 <Settings className="mr-1.5 size-3.5" />
                 Configure credentials
               </Link>
             </Button>
-          </div>
-        </div>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup>
+            <Badge variant="secondary">
+              {connectedCount} of {integrations.length} connected
+            </Badge>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>
+              Available integrations
+            </DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Turn on the services that matter to your growth workflow and
+              configure credentials in settings.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
         <div className="grid gap-6 sm:grid-cols-2">
           {integrations.map((app) => {
             const isConnected = Boolean(integration?.[app.configField]);
 
             return (
-              <Card key={app.key} className="bg-card">
+              <Card key={app.key} className="border-border/70 bg-card/82">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -167,7 +204,7 @@ export default async function IntegrationsPage() {
             );
           })}
         </div>
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

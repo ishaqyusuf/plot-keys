@@ -27,10 +27,10 @@ describe("tenant domain helpers", () => {
       "dashboard.acme-homes.plotkeys.com",
     );
     expect(buildLocalSitefrontHostname("Acme Homes")).toBe(
-      "acme-homes.tenant.plotkeys.localhost",
+      "acme-homes.tenant-plotkeys.localhost",
     );
     expect(buildLocalDashboardHostname("Acme Homes")).toBe(
-      "dashboard.acme-homes.app.plotkeys.localhost",
+      "dashboard.acme-homes.app-plotkeys.localhost",
     );
   });
 
@@ -39,14 +39,14 @@ describe("tenant domain helpers", () => {
       "dashboard.acme.plotkeys.com",
     );
     expect(
-      buildDashboardHostnameForTenantHostname("acme.tenant.plotkeys.localhost"),
-    ).toBe("dashboard.acme.app.plotkeys.localhost");
+      buildDashboardHostnameForTenantHostname("acme.tenant-plotkeys.localhost"),
+    ).toBe("dashboard.acme.app-plotkeys.localhost");
     expect(
       buildLocalDashboardHostnameForTenantHostname("summitpoint.app"),
     ).toBe("dashboard.summitpoint.app.localhost");
     expect(
       buildLocalDashboardHostnameForTenantHostname("summitpoint.plotkeys.com"),
-    ).toBe("dashboard.summitpoint.app.plotkeys.localhost");
+    ).toBe("dashboard.summitpoint.app-plotkeys.localhost");
     expect(buildDashboardHostnameForTenantHostname("acmehomes.com")).toBe(
       "dashboard.acmehomes.com",
     );
@@ -64,7 +64,7 @@ describe("tenant domain helpers", () => {
         currentOrigin: "http://plotkeys.localhost:1355",
         pathname: "/onboarding",
       }),
-    ).toBe("http://dashboard.acme.app.plotkeys.localhost:1355/onboarding");
+    ).toBe("http://dashboard.acme.app-plotkeys.localhost:1355/onboarding");
     expect(
       buildTenantDashboardUrl("acme", {
         currentOrigin: "https://acme.plotkeys.com",
@@ -76,7 +76,7 @@ describe("tenant domain helpers", () => {
         currentOrigin: "http://plotkeys.localhost:1355",
         pathname: "/",
       }),
-    ).toBe("http://acme.tenant.plotkeys.localhost:1355/");
+    ).toBe("http://acme.tenant-plotkeys.localhost:1355/");
     expect(
       buildTenantSiteUrl("acme", {
         currentOrigin: "https://plotkeys.com",
@@ -114,14 +114,14 @@ describe("tenant domain helpers", () => {
         currentOrigin: "http://plotkeys.localhost:1355",
         tenantHostname: "summitpoint.plotkeys.com",
       }),
-    ).toBe("http://dashboard.summitpoint.app.plotkeys.localhost:1355");
+    ).toBe("http://dashboard.summitpoint.app-plotkeys.localhost:1355");
     expect(
       buildTenantDashboardUrl("summitpoint", {
-        currentOrigin: "http://app.plotkeys.localhost:1355",
-        tenantHostname: "summitpoint.tenant.plotkeys.localhost",
+        currentOrigin: "http://app-plotkeys.localhost:1355",
+        tenantHostname: "summitpoint.tenant-plotkeys.localhost",
         pathname: "/onboarding",
       }),
-    ).toBe("http://dashboard.summitpoint.app.plotkeys.localhost:1355/onboarding");
+    ).toBe("http://dashboard.summitpoint.app-plotkeys.localhost:1355/onboarding");
   });
 
   it("parses dashboard hosts without accepting the legacy public alias", () => {
@@ -129,7 +129,7 @@ describe("tenant domain helpers", () => {
       "acme",
     );
     expect(
-      extractDashboardTenantSlug("dashboard.acme.app.plotkeys.localhost:1355"),
+      extractDashboardTenantSlug("dashboard.acme.app-plotkeys.localhost:1355"),
     ).toBe("acme");
     expect(extractDashboardTenantSlug("acme.plotkeys.com")).toBeNull();
     expect(isTenantDashboardHost("dashboard.acmehomes.com")).toBe(true);
@@ -140,12 +140,12 @@ describe("tenant domain helpers", () => {
 
   it("parses public tenant hosts and rejects dashboard hosts", () => {
     expect(extractSitefrontSubdomain("acme.plotkeys.com")).toBe("acme");
-    expect(extractSitefrontSubdomain("acme.tenant.plotkeys.localhost")).toBe(
+    expect(extractSitefrontSubdomain("acme.tenant-plotkeys.localhost")).toBe(
       "acme",
     );
     expect(extractSitefrontSubdomain("dashboard.acme.plotkeys.com")).toBeNull();
     expect(
-      resolveTenantSiteHostContext("dashboard.acme.app.plotkeys.localhost"),
+      resolveTenantSiteHostContext("dashboard.acme.app-plotkeys.localhost"),
     ).toEqual({
       tenantHostname: null,
       tenantSubdomain: null,

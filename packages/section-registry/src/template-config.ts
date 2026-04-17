@@ -347,7 +347,10 @@ export type TemplateConfig = {
    * OG image URL. When absent the tenant-site falls back to company-level
    * metadata.
    */
-  seo?: Record<string, { title?: string; description?: string; ogImage?: string }>;
+  seo?: Record<
+    string,
+    { title?: string; description?: string; ogImage?: string }
+  >;
   /**
    * Section visibility overrides. Keys are section type strings;
    * values are booleans indicating whether the section is visible.
@@ -396,7 +399,10 @@ export function deserializeTemplateConfig(
 ): TemplateConfig {
   const namedImages: Record<string, string> = {};
   const visibleSections: Record<string, boolean> = {};
-  const seo: Record<string, { title?: string; description?: string; ogImage?: string }> = {};
+  const seo: Record<
+    string,
+    { title?: string; description?: string; ogImage?: string }
+  > = {};
 
   for (const [key, value] of Object.entries(raw)) {
     if (key.startsWith("namedImage.")) {
@@ -410,8 +416,13 @@ export function deserializeTemplateConfig(
       if (parts.length === 3) {
         const pageKey = parts[1];
         const field = parts[2];
+        if (!pageKey) continue;
         if (!seo[pageKey]) seo[pageKey] = {};
-        if (field === "title" || field === "description" || field === "ogImage") {
+        if (
+          field === "title" ||
+          field === "description" ||
+          field === "ogImage"
+        ) {
           if (value) seo[pageKey][field] = value;
         }
       }

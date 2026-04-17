@@ -8,17 +8,23 @@ import type { HomeSectionDefinition } from "@plotkeys/section-registry";
 import { resolveWebsitePresentation } from "@plotkeys/section-registry";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { Card, CardContent } from "@plotkeys/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@plotkeys/ui/empty";
 import { extractTenantHostname } from "@plotkeys/utils";
+import { Globe2 } from "lucide-react";
 import Link from "next/link";
 import type { JSX } from "react";
 
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 
 function renderLiveSection(
@@ -49,20 +55,13 @@ export default async function LivePage({ searchParams }: LivePageProps) {
 
   if (!prisma) {
     return (
-      <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl">
-          <CardContent className="p-8">
-            <Empty className="border">
-              <EmptyHeader>
-                <EmptyTitle>Live preview is unavailable</EmptyTitle>
-                <EmptyDescription>
-                  `DATABASE_URL` is not configured for live-site previews.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </CardContent>
-        </Card>
-      </main>
+      <DashboardPage>
+        <DashboardEmptyState
+          description="`DATABASE_URL` is not configured for live-site previews."
+          icon={<Globe2 className="size-5" />}
+          title="Live preview is unavailable"
+        />
+      </DashboardPage>
     );
   }
 
@@ -89,41 +88,30 @@ export default async function LivePage({ searchParams }: LivePageProps) {
 
   if (!company) {
     return (
-      <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl">
-          <CardContent className="p-8">
-            <Empty className="border">
-              <EmptyHeader>
-                <EmptyTitle>Company not found</EmptyTitle>
-                <EmptyDescription>
-                  No company found for that slug.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </CardContent>
-        </Card>
-      </main>
+      <DashboardPage>
+        <DashboardEmptyState
+          description="No company found for that slug."
+          icon={<Globe2 className="size-5" />}
+          title="Company not found"
+        />
+      </DashboardPage>
     );
   }
 
-  const publishedConfiguration = await resolvePublishedForCompany(prisma, company.id);
+  const publishedConfiguration = await resolvePublishedForCompany(
+    prisma,
+    company.id,
+  );
 
   if (!publishedConfiguration) {
     return (
-      <main className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl">
-          <CardContent className="p-8">
-            <Empty className="border">
-              <EmptyHeader>
-                <EmptyTitle>No published site configuration</EmptyTitle>
-                <EmptyDescription>
-                  No published site configuration exists for this tenant yet.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </CardContent>
-        </Card>
-      </main>
+      <DashboardPage>
+        <DashboardEmptyState
+          description="No published site configuration exists for this tenant yet."
+          icon={<Globe2 className="size-5" />}
+          title="No published site configuration"
+        />
+      </DashboardPage>
     );
   }
 
@@ -158,35 +146,38 @@ export default async function LivePage({ searchParams }: LivePageProps) {
   });
 
   return (
-    <main className="min-h-screen px-4 py-5 md:px-6 md:py-6">
-      <div className="mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] border border-border bg-card shadow-[var(--shadow-soft)] backdrop-blur">
-        <div className="flex flex-col gap-3 border-b border-border bg-card px-6 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between md:px-10">
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-              Published live site
-            </p>
-            <p className="mt-1">
-              {company.name} is currently serving{" "}
+    <DashboardPage className="px-4 py-5 md:px-6 md:py-6">
+      <DashboardPageHeader className="mx-auto max-w-[82rem]">
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Published live site</DashboardPageEyebrow>
+            <DashboardPageTitle>{company.name}</DashboardPageTitle>
+            <DashboardPageDescription>
+              This workspace is currently serving{" "}
               <strong>{publishedConfiguration.name}</strong>.
-            </p>
+            </DashboardPageDescription>
             {tenantDomain ? (
-              <p className="mt-1 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
                 Hostname: {tenantDomain.hostname}
               </p>
             ) : null}
-          </div>
-          <div className="flex items-center gap-3">
+          </DashboardPageIntro>
+          <DashboardPageActions>
             <Badge variant="default">Published</Badge>
             <Button asChild size="sm" variant="secondary">
               <Link href="/builder">Back to builder</Link>
             </Button>
-          </div>
-        </div>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+      </DashboardPageHeader>
 
-        {presentation.page.sections.map((section) =>
-          renderLiveSection(section, presentation.theme),
-        )}
-      </div>
-    </main>
+      <DashboardSection className="mx-auto max-w-[82rem]">
+        <div className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-[var(--shadow-soft)] backdrop-blur">
+          {presentation.page.sections.map((section) =>
+            renderLiveSection(section, presentation.theme),
+          )}
+        </div>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

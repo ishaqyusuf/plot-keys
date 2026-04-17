@@ -11,6 +11,25 @@ import {
 } from "@plotkeys/ui/card";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { UsersRound } from "lucide-react";
+import Image from "next/image";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 import {
   deleteAgentAction,
@@ -56,35 +75,56 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
     : [[], []];
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {params.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{params.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {params.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{params.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {params.invited ? (
-          <Alert className="mb-6">
-            <AlertDescription>
-              Agent invite sent. They&apos;ll receive an email to join and fill
-              in their profile directly.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+      {params.invited ? (
+        <Alert>
+          <AlertDescription>
+            Agent invite sent. They&apos;ll receive an email to join and fill in
+            their profile directly.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="mb-8 flex items-center justify-between gap-4">
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>People workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Agents</DashboardPageTitle>
+            <DashboardPageDescription>
+              Invite agents, curate their public profiles, and keep the team
+              roster presentation aligned with the rest of the dashboard.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <AgentForm mode="create" />
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {agents.length} team member{agents.length !== 1 ? "s" : ""}
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
+
+      <DashboardSection>
+        <DashboardSectionHeader>
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Agents
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {agents.length} team member{agents.length !== 1 ? "s" : ""}
-            </p>
+            <DashboardSectionTitle>Invite an agent</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              PlotKeys will send a self-serve onboarding link so the agent can
+              complete their own profile.
+            </DashboardSectionDescription>
           </div>
-        </div>
+        </DashboardSectionHeader>
 
-        <Card className="mb-8">
+        <Card className="border-border/70 bg-card/82">
           <CardHeader>
             <CardTitle>Invite an agent</CardTitle>
             <CardDescription>
@@ -113,11 +153,24 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
             </form>
           </CardContent>
         </Card>
+      </DashboardSection>
 
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Pending invites</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review outstanding invitations before they expire.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
         {pendingInvites.length > 0 ? (
-          <div className="mb-8 grid gap-3">
+          <div className="grid gap-3">
             {pendingInvites.map((invite) => (
-              <Card key={invite.id} className="border-dashed">
+              <Card
+                key={invite.id}
+                className="border-border/70 border-dashed bg-card/82"
+              >
                 <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
                   <div>
                     <p className="font-medium text-foreground">
@@ -137,29 +190,44 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
               </Card>
             ))}
           </div>
-        ) : null}
+        ) : (
+          <DashboardEmptyState
+            description="No pending invites right now."
+            icon={<UsersRound className="size-5" />}
+            title="No pending invitations"
+          />
+        )}
+      </DashboardSection>
 
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Agent roster</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Feature priority agents, maintain public bios, and keep ordering
+              tidy.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
         {agents.length === 0 ? (
-          <Card className="py-16 text-center">
-            <CardContent>
-              <p className="text-muted-foreground">
-                No agents yet. Invite your first agent and they&apos;ll complete
-                their profile themselves.
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            description="Invite your first agent and they&apos;ll complete their profile themselves."
+            icon={<UsersRound className="size-5" />}
+            title="No agents yet"
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {agents.map((agent) => (
-              <Card key={agent.id} className="bg-card">
+              <Card key={agent.id} className="border-border/70 bg-card/82">
                 <CardHeader className="px-5 pt-5 pb-3">
                   <div className="flex items-start gap-3">
                     {agent.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         alt={agent.name}
                         className="h-12 w-12 rounded-full object-cover shrink-0"
+                        height={48}
                         src={agent.imageUrl}
+                        width={48}
                       />
                     ) : (
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-semibold text-muted-foreground">
@@ -216,7 +284,7 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

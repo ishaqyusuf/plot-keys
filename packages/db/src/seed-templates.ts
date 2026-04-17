@@ -12,20 +12,24 @@
  */
 
 import { templateCatalog } from "@plotkeys/section-registry";
-import { canAccessTemplateTier } from "@plotkeys/utils";
 
 import { createPrismaClient } from "./prisma";
 import { grantTemplateLicense } from "./queries/template-license";
 
 const STARTER_KEYS = templateCatalog
-  .filter((t) => t.tier === "starter")
-  .map((t) => t.key);
+  .filter((t: (typeof templateCatalog)[number]) => t.tier === "starter")
+  .map((t: (typeof templateCatalog)[number]) => t.key);
 
 const PLUS_KEYS = templateCatalog
-  .filter((t) => t.tier === "plus" || t.tier === "starter")
-  .map((t) => t.key);
+  .filter(
+    (t: (typeof templateCatalog)[number]) =>
+      t.tier === "plus" || t.tier === "starter",
+  )
+  .map((t: (typeof templateCatalog)[number]) => t.key);
 
-const PRO_KEYS = templateCatalog.map((t) => t.key);
+const PRO_KEYS = templateCatalog.map(
+  (t: (typeof templateCatalog)[number]) => t.key,
+);
 
 function allowedKeysForTier(tier: string): string[] {
   switch (tier) {
@@ -39,9 +43,12 @@ function allowedKeysForTier(tier: string): string[] {
 }
 
 async function main() {
-  const db = createPrismaClient();
+  const prisma = createPrismaClient().db;
+  if (!prisma) {
+    throw new Error("Database not configured.");
+  }
 
-  const companies = await db.company.findMany({
+  const companies = await prisma.company.findMany({
     select: { id: true, name: true, planTier: true },
     where: { deletedAt: null },
   });
@@ -55,7 +62,7 @@ async function main() {
     const keys = allowedKeysForTier(company.planTier);
 
     for (const templateKey of keys) {
-      const existing = await db.tenantTemplateLicense.findFirst({
+      const existing = await prisma.tenantTemplateLicense.findFirst({
         where: { companyId: company.id, revokedAt: null, templateKey },
       });
 
@@ -64,19 +71,21 @@ async function main() {
         continue;
       }
 
-      await grantTemplateLicense(db, {
+      await grantTemplateLicense(prisma, {
         companyId: company.id,
         source: "plan_included",
         templateKey,
       });
       granted++;
-      console.log(`  + Granted ${templateKey} (plan_included) → ${company.name}`);
+      console.log(
+        `  + Granted ${templateKey} (plan_included) → ${company.name}`,
+      );
     }
 
     // Every company gets at least one free starter pick
     const freeStarterKey = STARTER_KEYS[0];
     if (freeStarterKey) {
-      const existingFree = await db.tenantTemplateLicense.findFirst({
+      const existingFree = await prisma.tenantTemplateLicense.findFirst({
         where: {
           companyId: company.id,
           revokedAt: null,
@@ -86,7 +95,7 @@ async function main() {
       });
 
       if (!existingFree) {
-        await grantTemplateLicense(db, {
+        await grantTemplateLicense(prisma, {
           companyId: company.id,
           source: "free",
           templateKey: freeStarterKey,
@@ -97,8 +106,10 @@ async function main() {
     }
   }
 
-  console.log(`\nDone. ${granted} licenses granted, ${skipped} already existed.`);
-  await db.$disconnect();
+  console.log(
+    `\nDone. ${granted} licenses granted, ${skipped} already existed.`,
+  );
+  await prisma.$disconnect();
 }
 
 main().catch((err) => {

@@ -1,3 +1,4 @@
+import type { Prisma } from "../generated/prisma/client";
 import type { Db } from "../prisma";
 
 export async function createAgent(
@@ -24,7 +25,7 @@ export async function createAgent(
       phone: data.phone ?? null,
       imageUrl: data.imageUrl ?? null,
       featured: data.featured ?? false,
-      displayOrder: data.displayOrder ?? null,
+      displayOrder: data.displayOrder ?? 0,
     },
   });
 }
@@ -44,17 +45,26 @@ export async function updateAgent(
     displayOrder?: number | null;
   },
 ) {
+  const updateData: Prisma.AgentUpdateInput = {};
+
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.bio !== undefined) updateData.bio = data.bio;
+  if (data.email !== undefined) updateData.email = data.email;
+  if (data.phone !== undefined) updateData.phone = data.phone;
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+  if (data.featured !== undefined) updateData.featured = data.featured;
+  if (data.displayOrder !== undefined) {
+    updateData.displayOrder = data.displayOrder ?? 0;
+  }
+
   return db.agent.update({
-    data,
+    data: updateData,
     where: { id: agentId, companyId, deletedAt: null },
   });
 }
 
-export async function deleteAgent(
-  db: Db,
-  agentId: string,
-  companyId: string,
-) {
+export async function deleteAgent(db: Db, agentId: string, companyId: string) {
   return db.agent.update({
     data: { deletedAt: new Date() },
     where: { id: agentId, companyId, deletedAt: null },
@@ -85,7 +95,11 @@ export async function listAgentsForCompany(
   options: { limit?: number; featured?: boolean } = {},
 ) {
   return db.agent.findMany({
-    orderBy: [{ featured: "desc" }, { displayOrder: "asc" }, { createdAt: "asc" }],
+    orderBy: [
+      { featured: "desc" },
+      { displayOrder: "asc" },
+      { createdAt: "asc" },
+    ],
     take: options.limit ?? 20,
     where: {
       companyId,

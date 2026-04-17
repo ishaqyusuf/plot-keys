@@ -8,16 +8,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Separator } from "@plotkeys/ui/separator";
 import {
   type BillingInterval,
   getPlanPricing,
   planTrialDays,
   tierLabels,
 } from "@plotkeys/utils";
-import Link from "next/link";
+import { CreditCard } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 import { initializeCheckoutAction } from "../../actions";
 
@@ -78,32 +96,74 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
     : [];
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Billing &amp; Plans
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Manage your subscription and billing history. Every plan includes
-              a {planTrialDays}-day free trial.
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Revenue workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Billing &amp; plans</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage your subscription, compare plan levels, and review billing
+              history. Every plan includes a {planTrialDays}-day free trial.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Badge
+              variant={currentStatus === "active" ? "default" : "secondary"}
+            >
+              {currentStatus === "active"
+                ? "Active"
+                : currentStatus === "past_due"
+                  ? "Past due"
+                  : "Canceled"}
+            </Badge>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            Current plan: {tierLabels[currentTier]}
+          </DashboardToolbarGroup>
+          <DashboardToolbarGroup>
+            <DashboardFilterTabs>
+              <DashboardFilterTab
+                active={selectedInterval === "monthly"}
+                href="/billing?interval=monthly"
+              >
+                Monthly
+              </DashboardFilterTab>
+              <DashboardFilterTab
+                active={selectedInterval === "annual"}
+                href="/billing?interval=annual"
+              >
+                Annual
+              </DashboardFilterTab>
+            </DashboardFilterTabs>
+            <Badge variant="secondary">Save 20%</Badge>
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
+
+      {params.success === "1" && (
+        <Card className="border-green-300/60 bg-green-50/35 dark:border-green-900/70 dark:bg-green-950/15">
+          <CardContent className="py-4">
+            <p className="text-sm text-green-800 dark:text-green-200">
+              ✓ Payment successful! Your plan has been updated.
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Current plan</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review current status, start date, and the active plan before
+              making changes.
+            </DashboardSectionDescription>
           </div>
-        </div>
-
-        {params.success === "1" && (
-          <Card className="mb-6 border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
-            <CardContent className="py-4">
-              <p className="text-sm text-green-800 dark:text-green-200">
-                ✓ Payment successful! Your plan has been updated.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Current plan */}
-        <Card className="mb-8">
+        </DashboardSectionHeader>
+        <Card className="border-border/65 bg-card/78">
           <CardHeader>
             <CardTitle className="text-lg">Current Plan</CardTitle>
             <CardDescription>
@@ -138,32 +198,19 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
             )}
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Interval toggle */}
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <Button
-            asChild
-            size="sm"
-            variant={selectedInterval === "monthly" ? "default" : "outline"}
-          >
-            <Link href="/billing?interval=monthly">Monthly</Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            variant={selectedInterval === "annual" ? "default" : "outline"}
-          >
-            <Link href="/billing?interval=annual">
-              Annual{" "}
-              <Badge variant="secondary" className="ml-1">
-                Save 20%
-              </Badge>
-            </Link>
-          </Button>
-        </div>
-
-        {/* Plan cards */}
-        <div className="mb-10 grid gap-4 md:grid-cols-3">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Available plans</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Compare tiers and upgrade into higher usage limits or premium
+              features.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <div className="grid gap-2.5 md:grid-cols-3">
           {(["starter", "plus", "pro"] as const).map((tier) => {
             const pricing = getPlanPricing(tier);
             const price =
@@ -176,7 +223,11 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
             return (
               <Card
                 key={tier}
-                className={isCurrent ? "border-2 border-primary" : ""}
+                className={
+                  isCurrent
+                    ? "border-2 border-primary/40 bg-card/80"
+                    : "border-border/65 bg-card/78"
+                }
               >
                 <CardHeader>
                   <CardTitle>{tierLabels[tier]}</CardTitle>
@@ -224,21 +275,28 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
             );
           })}
         </div>
+      </DashboardSection>
 
-        {/* Billing history */}
-        <Separator className="my-8" />
-        <h2 className="mb-4 font-serif text-xl font-semibold text-foreground">
-          Billing History
-        </h2>
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Billing history</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Recent billing line items and invoice activity for this workspace.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
 
         {recentItems.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No billing records yet.
-          </p>
+          <DashboardEmptyState
+            description="No billing records yet."
+            icon={<CreditCard className="size-5" />}
+            title="No billing history"
+          />
         ) : (
           <div className="space-y-2">
             {recentItems.map((item) => (
-              <Card key={item.id}>
+              <Card key={item.id} className="border-border/70 bg-card/82">
                 <CardContent className="flex items-center justify-between py-3">
                   <div>
                     <p className="text-sm font-medium capitalize">
@@ -271,7 +329,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

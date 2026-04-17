@@ -92,7 +92,7 @@ export function PublishConfirmationDialog({
       <DialogTrigger asChild>
         <Button>Publish current configuration</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="border-border/70 bg-card/96 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Publish configuration</DialogTitle>
           <DialogDescription>
@@ -102,7 +102,7 @@ export function PublishConfirmationDialog({
         </DialogHeader>
 
         {/* What goes live */}
-        <div className="rounded-md border border-border bg-muted/30 p-4 text-sm space-y-2">
+        <div className="space-y-2 rounded-lg border border-border/70 bg-muted/30 p-4 text-sm">
           <p className="font-medium text-foreground">What goes live</p>
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-muted-foreground">
             <span className="text-foreground">Configuration</span>

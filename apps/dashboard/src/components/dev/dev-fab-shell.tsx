@@ -72,16 +72,16 @@ export function DevFabShell({
     >
       {/* Dropdown panel */}
       {open && (
-        <div className="mb-1 w-72 overflow-hidden rounded-xl border border-amber-300 bg-white shadow-2xl dark:border-amber-700 dark:bg-slate-900">
+        <div className="mb-1 w-72 overflow-hidden rounded-xl border border-amber-500/35 bg-card/95 shadow-2xl backdrop-blur">
           {/* Panel header */}
-          <div className="flex items-center justify-between border-b border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/40">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+          <div className="flex items-center justify-between border-b border-amber-500/25 bg-amber-500/10 px-3 py-2">
+            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
               ⚡ DEV — {label}
             </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded p-0.5 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900"
+              className="rounded p-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 dark:text-amber-300"
               aria-label="Close dev panel"
             >
               ✕
@@ -98,7 +98,7 @@ export function DevFabShell({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={[
-          "flex items-center gap-1.5 rounded-full border border-amber-400 bg-amber-400 px-3 py-2 font-mono text-xs font-bold text-amber-950 shadow-lg transition-all hover:bg-amber-300 active:scale-95 dark:border-amber-500 dark:bg-amber-500 dark:text-black",
+          "flex items-center gap-1.5 rounded-full border border-amber-500/60 bg-amber-400 px-3 py-2 font-mono text-xs font-bold text-amber-950 shadow-lg transition-all hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 active:scale-95 dark:border-amber-400 dark:bg-amber-400",
           triggerClassName,
         ]
           .filter(Boolean)

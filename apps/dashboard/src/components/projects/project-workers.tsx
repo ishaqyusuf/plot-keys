@@ -2,8 +2,9 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +24,10 @@ const payBasisLabels: Record<string, string> = {
 
 const statusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   active: { label: "Active", variant: "default" },
   inactive: { label: "Inactive", variant: "secondary" },
@@ -91,7 +95,7 @@ export function WorkerList({
       {workers.map((worker) => (
         <div
           key={worker.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between rounded-xl border border-border/65 bg-card/74 p-3.5"
         >
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -105,7 +109,7 @@ export function WorkerList({
                 {payBasisLabels[worker.payBasis] ?? worker.payBasis}
               </Badge>
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               {worker.role ? `${worker.role} · ` : ""}
               Rate: {formatCurrency(worker.payRateMinor)}
               {worker.employee ? ` · Employee: ${worker.employee.name}` : ""}
@@ -201,53 +205,48 @@ export function CreateWorkerForm({ projectId }: { projectId: string }) {
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-    >
+    <form onSubmit={onSubmit} className="space-y-4">
+      <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field>
+          <FieldLabel htmlFor="workerName">Full Name *</FieldLabel>
+          <Input
+            id="workerName"
+            name="fullName"
+            required
+            placeholder="Worker name"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="workerRole">Role</FieldLabel>
+          <Input
+            id="workerRole"
+            name="role"
+            placeholder="e.g. Mason, Electrician"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="workerPayBasis">Pay Basis</FieldLabel>
+          <NativeSelect id="workerPayBasis" name="payBasis">
+            {Object.entries(payBasisLabels).map(([value, label]) => (
+              <NativeSelectOption key={value} value={value}>
+                {label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="workerPayRate">Pay Rate</FieldLabel>
+          <Input
+            id="workerPayRate"
+            name="payRate"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+          />
+        </Field>
+      </FieldGroup>
       <div>
-        <Label htmlFor="workerName">Full Name *</Label>
-        <Input
-          id="workerName"
-          name="fullName"
-          required
-          placeholder="Worker name"
-        />
-      </div>
-      <div>
-        <Label htmlFor="workerRole">Role</Label>
-        <Input
-          id="workerRole"
-          name="role"
-          placeholder="e.g. Mason, Electrician"
-        />
-      </div>
-      <div>
-        <Label htmlFor="workerPayBasis">Pay Basis</Label>
-        <select
-          id="workerPayBasis"
-          name="payBasis"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          {Object.entries(payBasisLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <Label htmlFor="workerPayRate">Pay Rate</Label>
-        <Input
-          id="workerPayRate"
-          name="payRate"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-        />
-      </div>
-      <div className="sm:col-span-2">
         <Button disabled={createMutation.isPending} type="submit">
           {createMutation.isPending ? "Adding…" : "Add Worker"}
         </Button>

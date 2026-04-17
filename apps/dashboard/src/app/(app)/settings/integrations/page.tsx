@@ -8,14 +8,64 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Input } from "@plotkeys/ui/input";
 import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { Activity, CalendarDays, MessageSquareMore, Radar } from "lucide-react";
 import Link from "next/link";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+} from "../../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../../lib/session";
 import { updateIntegrationsAction } from "../../../actions";
 
 type IntegrationsPageProps = {
   searchParams?: Promise<{ saved?: string; error?: string }>;
 };
+
+const integrationCards = [
+  {
+    name: "Google Analytics",
+    field: "googleAnalyticsId",
+    placeholder: "G-XXXXXXXXXX",
+    description: "Track website traffic with your GA4 Measurement ID.",
+    icon: Activity,
+  },
+  {
+    name: "Facebook Pixel",
+    field: "facebookPixelId",
+    placeholder: "123456789012345",
+    description:
+      "Measure conversions and audience performance with a Pixel ID.",
+    icon: Radar,
+  },
+  {
+    name: "WhatsApp Business",
+    field: "whatsappPhone",
+    placeholder: "+234 800 000 0000",
+    description:
+      "Give visitors a direct messaging route from your public site.",
+    icon: MessageSquareMore,
+  },
+  {
+    name: "Calendly",
+    field: "calendlyUrl",
+    placeholder: "https://calendly.com/your-name",
+    description: "Sync appointment scheduling with your public booking flow.",
+    icon: CalendarDays,
+  },
+] as const;
 
 export default async function IntegrationsPage({
   searchParams,
@@ -25,7 +75,6 @@ export default async function IntegrationsPage({
   const params = (await searchParams) ?? {};
 
   const prisma = createPrismaClient().db;
-
   const integration = prisma
     ? await prisma.companyIntegration.findUnique({
         where: { companyId },
@@ -33,135 +82,90 @@ export default async function IntegrationsPage({
     : null;
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-3xl">
+    <DashboardPage className="max-w-none">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {params.error ? (
-          <Alert className="mb-6" variant="destructive">
+          <Alert variant="destructive">
             <AlertDescription>{params.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {params.saved ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
+          <Alert className="border-primary/20 bg-primary/10 text-foreground">
             <AlertDescription>Integrations saved.</AlertDescription>
           </Alert>
         ) : null}
 
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Integrations
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Connect third-party services to your website and dashboard.
-            </p>
-          </div>
-          <Button asChild variant="secondary" size="sm">
-            <Link href="/settings">← Settings</Link>
-          </Button>
-        </div>
+        <DashboardPageHeader>
+          <DashboardPageHeaderRow>
+            <DashboardPageIntro>
+              <DashboardPageEyebrow>Settings module</DashboardPageEyebrow>
+              <DashboardPageTitle>Integrations</DashboardPageTitle>
+              <DashboardPageDescription>
+                Connect analytics, messaging, and scheduling services through
+                one consistent settings surface instead of scattered ad hoc
+                forms.
+              </DashboardPageDescription>
+            </DashboardPageIntro>
+            <DashboardPageActions>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/settings">Back to settings</Link>
+              </Button>
+            </DashboardPageActions>
+          </DashboardPageHeaderRow>
+        </DashboardPageHeader>
 
-        <form action={updateIntegrationsAction}>
-          {/* Google Analytics */}
-          <Card className="mb-6 bg-card">
-            <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle>Google Analytics</CardTitle>
-              <CardDescription>
-                Track website traffic with Google Analytics. Enter your GA4
-                Measurement ID (e.g. G-XXXXXXXXXX).
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="grid gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Measurement ID
-                </label>
-                <input
-                  name="googleAnalyticsId"
-                  defaultValue={integration?.googleAnalyticsId ?? ""}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="G-XXXXXXXXXX"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <DashboardSection>
+          <DashboardSectionHeader>
+            <div>
+              <DashboardSectionTitle>Connected services</DashboardSectionTitle>
+              <DashboardSectionDescription>
+                Keep operational tools wired into your site and dashboard from
+                one quieter Midday-style control panel.
+              </DashboardSectionDescription>
+            </div>
+          </DashboardSectionHeader>
 
-          {/* Facebook Pixel */}
-          <Card className="mb-6 bg-card">
-            <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle>Facebook Pixel</CardTitle>
-              <CardDescription>
-                Add your Facebook Pixel ID to track conversions and remarket to
-                visitors.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="grid gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Pixel ID
-                </label>
-                <input
-                  name="facebookPixelId"
-                  defaultValue={integration?.facebookPixelId ?? ""}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="123456789012345"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <form action={updateIntegrationsAction} className="grid gap-2.5">
+            {integrationCards.map((item) => (
+              <Card key={item.field} className="border-border/65 bg-card/78">
+                <CardHeader className="px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-full border border-border/60 bg-background/70 p-2.5">
+                      <item.icon className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <CardTitle>{item.name}</CardTitle>
+                      <CardDescription>{item.description}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 pt-0">
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor={item.field}>{item.name}</FieldLabel>
+                      <Input
+                        id={item.field}
+                        name={item.field}
+                        defaultValue={
+                          (integration?.[item.field] as string) ?? ""
+                        }
+                        placeholder={item.placeholder}
+                      />
+                    </Field>
+                  </FieldGroup>
+                </CardContent>
+              </Card>
+            ))}
 
-          {/* WhatsApp */}
-          <Card className="mb-6 bg-card">
-            <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle>WhatsApp Business</CardTitle>
-              <CardDescription>
-                Connect a WhatsApp phone number. Visitors can reach you directly
-                from your website.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="grid gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Phone number
-                </label>
-                <input
-                  name="whatsappPhone"
-                  defaultValue={integration?.whatsappPhone ?? ""}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="+234 800 000 0000"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Calendly */}
-          <Card className="mb-6 bg-card">
-            <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle>Calendly</CardTitle>
-              <CardDescription>
-                Sync appointment scheduling with your Calendly page.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="grid gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Calendly URL
-                </label>
-                <input
-                  name="calendlyUrl"
-                  defaultValue={integration?.calendlyUrl ?? ""}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="https://calendly.com/your-name"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <SubmitButton loadingLabel="Saving…">
-            Save integrations
-          </SubmitButton>
-        </form>
+            <div className="flex justify-end">
+              <SubmitButton loadingLabel="Saving…">
+                Save integrations
+              </SubmitButton>
+            </div>
+          </form>
+        </DashboardSection>
       </div>
-    </main>
+    </DashboardPage>
   );
 }

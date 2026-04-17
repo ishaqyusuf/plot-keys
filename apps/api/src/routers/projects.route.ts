@@ -45,10 +45,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  type ProjectAiContext,
   generateCustomerUpdateDraft,
   generateProjectRiskFlags,
   generateProjectSummary,
+  type ProjectAiContext,
 } from "../lib.ai";
 import { createTRPCRouter, membershipProcedure } from "../lib.trpc";
 
@@ -230,11 +230,16 @@ export const projectsRouter = createTRPCRouter({
           message: "DB unavailable.",
         });
 
-      return updateProject(db, input.projectId, ctx.auth.activeMembership.companyId, {
-        ...(input.name ? { name: input.name } : {}),
-        ...(input.status ? { status: input.status } : {}),
-        ...(input.status === "completed" ? { completedAt: new Date() } : {}),
-      });
+      return updateProject(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+        {
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.status ? { status: input.status } : {}),
+          ...(input.status === "completed" ? { completedAt: new Date() } : {}),
+        },
+      );
     }),
 
   /** Soft-delete a project. */
@@ -248,7 +253,11 @@ export const projectsRouter = createTRPCRouter({
           message: "DB unavailable.",
         });
 
-      await deleteProject(db, input.projectId, ctx.auth.activeMembership.companyId);
+      await deleteProject(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
       return { deleted: true };
     }),
 
@@ -280,7 +289,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectPhase(db, {
         projectId: input.projectId,
@@ -312,7 +324,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return updateProjectPhase(db, input.phaseId, {
         ...(input.status ? { status: input.status } : {}),
@@ -348,7 +363,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectMilestone(db, {
         projectId: input.projectId,
@@ -382,7 +400,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return updateProjectMilestone(db, input.milestoneId, {
         ...(input.status ? { status: input.status } : {}),
@@ -402,13 +423,7 @@ export const projectsRouter = createTRPCRouter({
         kind: updateKindEnum.optional().default("general"),
         summary: z.string().trim().min(1, "Summary is required."),
         details: z.string().trim().optional().nullable(),
-        progressPercent: z
-          .number()
-          .int()
-          .min(0)
-          .max(100)
-          .optional()
-          .nullable(),
+        progressPercent: z.number().int().min(0).max(100).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -425,7 +440,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectUpdate(db, {
         projectId: input.projectId,
@@ -465,7 +483,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectIssue(db, {
         projectId: input.projectId,
@@ -498,7 +519,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return updateProjectIssue(db, input.issueId, {
         ...(input.status ? { status: input.status } : {}),
@@ -535,7 +559,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return assignMemberToProject(db, {
         projectId: input.projectId,
@@ -566,7 +593,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       await removeAssignmentFromProject(db, input.assignmentId);
       return { removed: true };
@@ -618,7 +648,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return upsertProjectBudget(db, input);
     }),
@@ -652,7 +685,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createBudgetLineItem(db, {
         budgetId: input.budgetId,
@@ -695,7 +731,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const { projectId: _, lineItemId, ...data } = input;
       return updateBudgetLineItem(db, lineItemId, data);
@@ -723,7 +762,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       await deleteBudgetLineItem(db, input.lineItemId);
       return { deleted: true };
@@ -783,7 +825,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectWorker(db, {
         projectId: input.projectId,
@@ -822,7 +867,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const { projectId: _, workerId, ...data } = input;
       return updateProjectWorker(db, workerId, data);
@@ -850,7 +898,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       await deleteProjectWorker(db, input.workerId);
       return { deleted: true };
@@ -922,7 +973,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectPayrollRun(db, {
         projectId: input.projectId,
@@ -956,7 +1010,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const { projectId: _, payrollRunId, ...data } = input;
       return updateProjectPayrollRun(db, payrollRunId, data);
@@ -994,7 +1051,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectPayrollEntry(db, {
         payrollRunId: input.payrollRunId,
@@ -1035,7 +1095,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const { projectId: _, entryId, ...data } = input;
       return updateProjectPayrollEntry(db, entryId, data);
@@ -1085,7 +1148,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return grantCustomerProjectAccess(db, {
         projectId: input.projectId,
@@ -1116,7 +1182,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return revokeCustomerProjectAccess(db, input.projectId, input.customerId);
     }),
@@ -1145,7 +1214,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return createProjectCustomerNotice(db, {
         projectId: input.projectId,
@@ -1177,7 +1249,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       await deleteProjectCustomerNotice(db, input.noticeId);
       return { deleted: true };
@@ -1210,7 +1285,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return toggleMilestoneCustomerVisibility(
         db,
@@ -1242,7 +1320,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       return toggleUpdateCustomerVisibility(db, input.updateId, input.visible);
     }),
@@ -1268,7 +1349,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const enough = await hasEnoughCredits(
         db,
@@ -1283,7 +1367,10 @@ export const projectsRouter = createTRPCRouter({
 
       const budget = await getProjectBudget(db, input.projectId);
 
-      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const company = await findCompanyById(
+        db,
+        ctx.auth.activeMembership.companyId,
+      );
       const companyName = company?.name ?? "Company";
 
       const aiCtx = buildProjectAiContext(project, budget, companyName);
@@ -1329,7 +1416,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const enough = await hasEnoughCredits(
         db,
@@ -1344,7 +1434,10 @@ export const projectsRouter = createTRPCRouter({
 
       const budget = await getProjectBudget(db, input.projectId);
 
-      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const company = await findCompanyById(
+        db,
+        ctx.auth.activeMembership.companyId,
+      );
       const companyName = company?.name ?? "Company";
 
       const aiCtx = buildProjectAiContext(project, budget, companyName);
@@ -1390,7 +1483,10 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       if (!project)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found.",
+        });
 
       const enough = await hasEnoughCredits(
         db,
@@ -1405,7 +1501,10 @@ export const projectsRouter = createTRPCRouter({
 
       const budget = await getProjectBudget(db, input.projectId);
 
-      const company = await findCompanyById(db, ctx.auth.activeMembership.companyId);
+      const company = await findCompanyById(
+        db,
+        ctx.auth.activeMembership.companyId,
+      );
       const companyName = company?.name ?? "Company";
 
       const aiCtx = buildProjectAiContext(project, budget, companyName);
@@ -1468,7 +1567,7 @@ function buildProjectAiContext(
       summary: u.summary,
       details: u.details,
       progressPercent: u.progressPercent,
-      postedAt: u.postedAt.toISOString().split("T")[0],
+      postedAt: u.postedAt.toISOString().split("T")[0] ?? "",
     })),
     openIssues: project.issues
       .filter((i) => i.status === "open" || i.status === "in_progress")

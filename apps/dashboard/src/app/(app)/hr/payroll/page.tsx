@@ -2,10 +2,32 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { Label } from "@plotkeys/ui/label";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { WalletCards } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "../../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardFilterTab,
+  DashboardFilterTabs,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardStatGrid,
+  DashboardToolbarGroup,
+} from "../../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../../lib/session";
 import {
   createPayrollEntryAction,
@@ -17,11 +39,21 @@ type PayrollPageProps = {
 };
 
 const monthNames = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-function formatCurrency(amount: number, currency: string = "NGN") {
+function formatCurrency(amount: number, currency = "NGN") {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency,
@@ -35,11 +67,14 @@ export default async function PayrollPage({ searchParams }: PayrollPageProps) {
   const params = (await searchParams) ?? {};
 
   const now = new Date();
-  const periodYear = params.year ? Number.parseInt(params.year, 10) : now.getFullYear();
-  const periodMonth = params.month ? Number.parseInt(params.month, 10) : now.getMonth() + 1;
+  const periodYear = params.year
+    ? Number.parseInt(params.year, 10)
+    : now.getFullYear();
+  const periodMonth = params.month
+    ? Number.parseInt(params.month, 10)
+    : now.getMonth() + 1;
 
   const prisma = createPrismaClient().db;
-
   const [entries, employees, periods] = await Promise.all([
     prisma
       ? prisma.payrollEntry.findMany({
@@ -68,216 +103,241 @@ export default async function PayrollPage({ searchParams }: PayrollPageProps) {
       : [],
   ]);
 
-  const totalGross = entries.reduce((sum, e) => sum + e.grossAmount, 0);
-  const totalNet = entries.reduce((sum, e) => sum + e.netAmount, 0);
-  const pendingCount = entries.filter((e) => e.status === "pending").length;
-  const paidCount = entries.filter((e) => e.status === "paid").length;
+  const totalGross = entries.reduce((sum, entry) => sum + entry.grossAmount, 0);
+  const totalNet = entries.reduce((sum, entry) => sum + entry.netAmount, 0);
+  const pendingCount = entries.filter(
+    (entry) => entry.status === "pending",
+  ).length;
+  const paidCount = entries.filter((entry) => entry.status === "paid").length;
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Payroll
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {monthNames[periodMonth - 1]} {periodYear}
-              {" · "}
-              {entries.length} entr{entries.length !== 1 ? "ies" : "y"}
-            </p>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/hr/employees">← Employees</Link>
-          </Button>
-        </div>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>People workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Payroll</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage payroll periods, entries, and payment status in the same
+              compact product shell as the rest of the dashboard.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/hr/employees">Back to employees</Link>
+            </Button>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        {periods.length > 0 ? (
+          <DashboardPageToolbar>
+            <DashboardToolbarGroup>
+              <DashboardFilterTabs>
+                {periods.map((period) => {
+                  const isActive =
+                    period.periodYear === periodYear &&
+                    period.periodMonth === periodMonth;
+                  return (
+                    <DashboardFilterTab
+                      key={`${period.periodYear}-${period.periodMonth}`}
+                      active={isActive}
+                      href={`/hr/payroll?year=${period.periodYear}&month=${period.periodMonth}`}
+                    >
+                      {monthNames[period.periodMonth - 1]?.slice(0, 3)}{" "}
+                      {period.periodYear}
+                    </DashboardFilterTab>
+                  );
+                })}
+              </DashboardFilterTabs>
+            </DashboardToolbarGroup>
+          </DashboardPageToolbar>
+        ) : null}
+      </DashboardPageHeader>
 
-        {/* Period selector */}
-        {periods.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2">
-            {periods.map((p) => {
-              const isActive = p.periodYear === periodYear && p.periodMonth === periodMonth;
-              return (
-                <Button
-                  key={`${p.periodYear}-${p.periodMonth}`}
-                  asChild
-                  size="sm"
-                  variant={isActive ? "default" : "outline"}
-                >
-                  <Link href={`/hr/payroll?year=${p.periodYear}&month=${p.periodMonth}`}>
-                    {monthNames[p.periodMonth - 1]?.slice(0, 3)} {p.periodYear}
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Summary cards */}
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">Entries</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{entries.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">Gross Total</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{formatCurrency(totalGross)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">Net Total</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{formatCurrency(totalNet)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                <span className="font-semibold text-green-600">{paidCount} paid</span>
-                {pendingCount > 0 && (
-                  <span className="ml-2 text-muted-foreground">{pendingCount} pending</span>
-                )}
+      <DashboardStatGrid>
+        {[
+          { label: "Entries", value: entries.length },
+          { label: "Gross total", value: formatCurrency(totalGross) },
+          { label: "Net total", value: formatCurrency(totalNet) },
+          { label: "Paid / pending", value: `${paidCount} / ${pendingCount}` },
+        ].map((stat) => (
+          <Card key={stat.label} className="border-border/65 bg-card/78">
+            <CardContent className="px-5 py-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                {stat.label}
+              </p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">
+                {stat.value}
               </p>
             </CardContent>
           </Card>
-        </div>
+        ))}
+      </DashboardStatGrid>
 
-        {/* Add Payroll Entry Form */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Add Payroll Entry</CardTitle>
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Add payroll entry</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Record new payroll items for the active period with shared form
+              styling and spacing.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
+        <Card className="border-border/65 bg-card/78">
+          <CardHeader className="px-5 py-4">
+            <CardTitle>New payroll entry</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form action={createPayrollEntryAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="employeeId">Employee *</Label>
-                <select
-                  id="employeeId"
-                  name="employeeId"
-                  required
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="">Select employee</option>
-                  {employees.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name}{e.salaryAmount ? ` (₦${e.salaryAmount.toLocaleString()})` : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor="periodYear">Year *</Label>
+          <CardContent className="px-5 pb-5 pt-0">
+            <form action={createPayrollEntryAction} className="space-y-4">
+              <FieldGroup className="sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="employeeId">Employee</FieldLabel>
+                  <NativeSelect id="employeeId" name="employeeId" required>
+                    <NativeSelectOption value="">
+                      Select employee
+                    </NativeSelectOption>
+                    {employees.map((employee) => (
+                      <NativeSelectOption key={employee.id} value={employee.id}>
+                        {employee.name}
+                        {employee.salaryAmount
+                          ? ` (₦${employee.salaryAmount.toLocaleString()})`
+                          : ""}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <FieldGroup className="grid-cols-2 gap-2">
+                  <Field>
+                    <FieldLabel htmlFor="periodYear">Year</FieldLabel>
+                    <Input
+                      id="periodYear"
+                      name="periodYear"
+                      type="number"
+                      required
+                      defaultValue={periodYear}
+                      min={2020}
+                      max={2100}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="periodMonth">Month</FieldLabel>
+                    <NativeSelect
+                      id="periodMonth"
+                      name="periodMonth"
+                      required
+                      defaultValue={String(periodMonth)}
+                    >
+                      {monthNames.map((month, index) => (
+                        <NativeSelectOption
+                          key={month}
+                          value={String(index + 1)}
+                        >
+                          {month}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                </FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="grossAmount">
+                    Gross amount (NGN)
+                  </FieldLabel>
                   <Input
-                    id="periodYear"
-                    name="periodYear"
+                    id="grossAmount"
+                    name="grossAmount"
                     type="number"
                     required
-                    defaultValue={periodYear}
-                    min={2020}
-                    max={2100}
+                    placeholder="0"
                   />
-                </div>
-                <div>
-                  <Label htmlFor="periodMonth">Month *</Label>
-                  <select
-                    id="periodMonth"
-                    name="periodMonth"
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="netAmount">Net amount (NGN)</FieldLabel>
+                  <Input
+                    id="netAmount"
+                    name="netAmount"
+                    type="number"
                     required
-                    defaultValue={periodMonth}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                  >
-                    {monthNames.map((m, i) => (
-                      <option key={m} value={i + 1}>{m}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="grossAmount">Gross Amount (₦) *</Label>
-                <Input id="grossAmount" name="grossAmount" type="number" required placeholder="0" />
-              </div>
-              <div>
-                <Label htmlFor="netAmount">Net Amount (₦) *</Label>
-                <Input id="netAmount" name="netAmount" type="number" required placeholder="0" />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Input id="notes" name="notes" placeholder="Optional notes" />
-              </div>
-              <div className="sm:col-span-2">
-                <SubmitButton loadingLabel="Adding…">Add Entry</SubmitButton>
+                    placeholder="0"
+                  />
+                </Field>
+                <Field className="sm:col-span-2">
+                  <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                  <Input id="notes" name="notes" placeholder="Optional notes" />
+                </Field>
+              </FieldGroup>
+              <div className="flex justify-end">
+                <SubmitButton loadingLabel="Adding…">Add entry</SubmitButton>
               </div>
             </form>
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Payroll Entries List */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Period ledger</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review payroll entries for {monthNames[periodMonth - 1]}{" "}
+              {periodYear}.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+
         {entries.length === 0 ? (
-          <Card className="py-16 text-center">
-            <CardContent>
-              <p className="text-muted-foreground">
-                No payroll entries for {monthNames[periodMonth - 1]} {periodYear}. Add one above.
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            title="No payroll entries"
+            description={`No payroll entries for ${monthNames[periodMonth - 1]} ${periodYear}. Add the first one above.`}
+            icon={<WalletCards className="size-5" />}
+          />
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-2.5">
             {entries.map((entry) => (
-              <Card key={entry.id} className="bg-card">
-                <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pt-5 pb-2">
+              <Card key={entry.id} className="border-border/65 bg-card/78">
+                <CardHeader className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-base font-semibold">
                         {entry.employee.name}
                       </CardTitle>
                       <Badge
-                        variant={entry.status === "paid" ? "default" : "secondary"}
+                        variant={
+                          entry.status === "paid" ? "default" : "secondary"
+                        }
                       >
                         {entry.status === "paid" ? "Paid" : "Pending"}
                       </Badge>
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      {entry.employee.title ?? ""}
-                      {" · Gross: "}
-                      {formatCurrency(entry.grossAmount, entry.currency)}
-                      {" · Net: "}
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {entry.employee.title ?? "No title"} · Gross{" "}
+                      {formatCurrency(entry.grossAmount, entry.currency)} · Net{" "}
                       {formatCurrency(entry.netAmount, entry.currency)}
                     </p>
-                    {entry.notes && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                    {entry.notes ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {entry.notes}
                       </p>
-                    )}
+                    ) : null}
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {entry.status === "pending" && (
-                      <form action={markPayrollPaidAction}>
-                        <input type="hidden" name="payrollEntryId" value={entry.id} />
-                        <Button size="sm" type="submit" variant="default">
-                          Mark Paid
-                        </Button>
-                      </form>
-                    )}
-                  </div>
+                  {entry.status === "pending" ? (
+                    <form action={markPayrollPaidAction}>
+                      <input
+                        type="hidden"
+                        name="payrollEntryId"
+                        value={entry.id}
+                      />
+                      <Button size="sm" type="submit">
+                        Mark paid
+                      </Button>
+                    </form>
+                  ) : null}
                 </CardHeader>
               </Card>
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

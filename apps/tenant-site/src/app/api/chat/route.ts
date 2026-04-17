@@ -1,9 +1,9 @@
+import { type ChatBotMessage, getChatCompletion } from "@plotkeys/chat-bot";
 import {
   createPrismaClient,
   listAgentsForCompany,
   listFeaturedProperties,
 } from "@plotkeys/db";
-import { getChatCompletion, type ChatBotMessage } from "@plotkeys/chat-bot";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         properties: properties.map((p) => ({
           title: p.title,
           location: p.location,
-          price: p.price,
+          price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
           specs: p.specs,
         })),
         agents: agents.map((a) => ({

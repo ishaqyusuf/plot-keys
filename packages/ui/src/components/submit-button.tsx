@@ -6,10 +6,7 @@ import { cn } from "../lib/utils";
 import { Button } from "./button";
 import { Spinner } from "./spinner";
 
-type SubmitButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
-  "type"
-> & {
+type SubmitButtonProps = Omit<React.ComponentProps<typeof Button>, "type"> & {
   loadingLabel?: string;
 };
 
@@ -43,15 +40,12 @@ function SubmitButton({
       {...props}
     >
       {pending && (
-        <Spinner
-          aria-hidden="true"
-          className="mr-1 size-4 shrink-0"
-        />
+        <Spinner aria-hidden="true" className="mr-1 size-4 shrink-0" />
       )}
       {pending && loadingLabel ? loadingLabel : children}
     </Button>
   );
 }
 
-export { SubmitButton };
 export type { SubmitButtonProps };
+export { SubmitButton };

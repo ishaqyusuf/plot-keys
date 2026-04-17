@@ -4,13 +4,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { requireOnboardedSession } from "../../../../../lib/session";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+} from "../../../../../components/dashboard/dashboard-page";
 import {
   AddWorkerForm,
   CreatePayrollRunForm,
   PayrollRunList,
   WorkerList,
 } from "../../../../../components/projects/project-workforce";
+import { requireOnboardedSession } from "../../../../../lib/session";
 
 type WorkforcePageProps = {
   params: Promise<{ id: string }>;
@@ -31,13 +45,14 @@ export default async function ProjectWorkforcePage({
     select: { id: true, name: true },
   });
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
 
   const [workers, payrollRuns] = await Promise.all([
     prisma.projectWorker.findMany({
       where: { projectId },
+      include: {
+        employee: { select: { id: true, name: true, email: true } },
+      },
       orderBy: { createdAt: "asc" },
     }),
     prisma.projectPayrollRun.findMany({
@@ -47,72 +62,87 @@ export default async function ProjectWorkforcePage({
     }),
   ]);
 
-  const activeWorkers = workers.filter((w) => w.status === "active");
-  const otherWorkers = workers.filter((w) => w.status !== "active");
+  const activeWorkers = workers.filter((worker) => worker.status === "active");
+  const otherWorkers = workers.filter((worker) => worker.status !== "active");
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Workforce & Payroll
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{project.name}</p>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/projects/${projectId}`}>← Back to Project</Link>
-          </Button>
-        </div>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Project workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Workforce & Payroll</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage on-site labor and project payroll runs for {project.name}
+              inside the same shared Midday-style shell.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/projects/${projectId}`}>Back to project</Link>
+            </Button>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+      </DashboardPageHeader>
 
-        {/* Workers */}
-        <Card className="mb-8">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Site workers</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Active and off-project workers now share the same calmer section
+              framing used across the dashboard.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/70 bg-card/82">
           <CardHeader>
             <CardTitle>
-              Site Workers{" "}
-              <span className="ml-1 text-sm font-normal text-muted-foreground">
-                ({workers.length} total · {activeWorkers.length} active)
-              </span>
+              Site workers ({workers.length} total · {activeWorkers.length}{" "}
+              active)
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {workers.length > 0 && (
+          <CardContent className="space-y-4">
+            {workers.length > 0 ? (
               <>
-                {activeWorkers.length > 0 && (
+                {activeWorkers.length > 0 ? (
                   <WorkerList workers={activeWorkers} projectId={projectId} />
-                )}
-                {otherWorkers.length > 0 && (
-                  <>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Off Project / Completed
+                ) : null}
+                {otherWorkers.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+                      Off project / completed
                     </p>
-                    <WorkerList
-                      workers={otherWorkers}
-                      projectId={projectId}
-                    />
-                  </>
-                )}
+                    <WorkerList workers={otherWorkers} projectId={projectId} />
+                  </div>
+                ) : null}
               </>
-            )}
+            ) : null}
             <AddWorkerForm projectId={projectId} />
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Payroll Runs */}
-        <Card className="mb-8">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Payroll runs</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review and create project-specific payroll cycles from one
+              consistent operational view.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/70 bg-card/82">
           <CardHeader>
-            <CardTitle>Payroll Runs</CardTitle>
+            <CardTitle>Payroll runs</CardTitle>
           </CardHeader>
-          <CardContent>
-            <PayrollRunList
-              runs={payrollRuns}
-              projectId={projectId}
-            />
+          <CardContent className="space-y-4">
+            <PayrollRunList runs={payrollRuns} projectId={projectId} />
             <CreatePayrollRunForm projectId={projectId} />
           </CardContent>
         </Card>
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

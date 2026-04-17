@@ -82,9 +82,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           {
             currentOrigin: window.location.origin,
             pathname: "/onboarding",
-            tenantHostname: window.location.hostname.endsWith(
-              ".plotkeys.localhost",
-            )
+            tenantHostname: window.location.hostname.endsWith(".localhost")
               ? buildLocalSitefrontHostname(result.onboarding.subdomain)
               : undefined,
           },

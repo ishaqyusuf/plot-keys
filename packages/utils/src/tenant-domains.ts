@@ -1,8 +1,8 @@
 export const plotkeysRootDomain = "plotkeys.com";
 export const localPlotkeysRootDomain = "plotkeys.localhost";
-export const localTenantRootDomain = `tenant.${localPlotkeysRootDomain}`;
+export const localTenantRootDomain = "tenant-plotkeys.localhost";
 export const dashboardSubdomainLabel = "dashboard";
-export const localDashboardRootDomain = "app.plotkeys.localhost";
+export const localDashboardRootDomain = "app-plotkeys.localhost";
 export const platformAppHostname = `app.${plotkeysRootDomain}`;
 const reservedTenantLabels = new Set([
   "api",
@@ -87,7 +87,11 @@ function isAnyLocalPlotkeysHostname(hostname: string | null | undefined) {
 
   return (
     normalizedHostname === localPlotkeysRootDomain ||
-    normalizedHostname.endsWith(`.${localPlotkeysRootDomain}`)
+    normalizedHostname.endsWith(`.${localPlotkeysRootDomain}`) ||
+    normalizedHostname === localTenantRootDomain ||
+    normalizedHostname.endsWith(`.${localTenantRootDomain}`) ||
+    normalizedHostname === localDashboardRootDomain ||
+    normalizedHostname.endsWith(`.${localDashboardRootDomain}`)
   );
 }
 

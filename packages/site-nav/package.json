@@ -1,0 +1,22 @@
+{
+  "name": "@plotkeys/site-nav",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plotkeys/utils": "workspace:*",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0"
+  }
+}

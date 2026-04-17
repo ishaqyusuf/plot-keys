@@ -11,7 +11,7 @@
  *
  * Host patterns handled:
  *   dashboard.{slug}.plotkeys.com      -> tenant slug = {slug}
- *   dashboard.{slug}.app.plotkeys.localhost:1355 -> tenant slug = {slug}
+ *   dashboard.{slug}.app-plotkeys.localhost:1355 -> tenant slug = {slug}
  *   dashboard.{tenantDomain.com}       -> tenant hostname lookup via DB
  *   localhost / 127.x.x.x              -> no tenant slug injected
  */

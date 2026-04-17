@@ -1,17 +1,17 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@plotkeys/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@plotkeys/ui/sheet";
+import { Textarea } from "@plotkeys/ui/textarea";
 import { useState } from "react";
 import { z } from "zod";
+import {
+  DashboardSheetBody,
+  DashboardSheetFooter,
+  DashboardSheetHeader,
+} from "../../../components/dashboard/dashboard-sheet-layout";
 import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
 import {
   createQuickFillAdapter,
@@ -91,96 +91,105 @@ export function AgentForm(props: AgentFormProps) {
   const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
+    <Sheet onOpenChange={setOpen} open={open}>
+      <SheetTrigger asChild>
         <Button
           size="sm"
           variant={props.mode === "create" ? "default" : "outline"}
         >
           {props.mode === "create" ? "Add agent" : "Edit"}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {props.mode === "create" ? "Add agent" : "Edit agent"}
-          </DialogTitle>
-        </DialogHeader>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-xl">
+        <DashboardSheetHeader
+          description={
+            props.mode === "create"
+              ? "Create a polished public-facing team profile using the shared dashboard editing flow."
+              : "Update the agent profile, ordering, and featured status without leaving the team workspace."
+          }
+          title={props.mode === "create" ? "Add agent" : "Edit agent"}
+        />
 
         <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel>Name *</FieldLabel>
-              <Input
-                placeholder="e.g. Amara Okafor"
-                required
-                {...form.register("name")}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Job title</FieldLabel>
-              <Input
-                placeholder="e.g. Senior Sales Agent"
-                {...form.register("title")}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Email</FieldLabel>
-              <Input
-                placeholder="amara@agency.com"
-                type="email"
-                {...form.register("email")}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Phone</FieldLabel>
-              <Input
-                placeholder="+234 801 234 5678"
-                {...form.register("phone")}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Bio</FieldLabel>
-              <Input placeholder="Short bio…" {...form.register("bio")} />
-            </Field>
-
-            <Field>
-              <FieldLabel>Photo URL</FieldLabel>
-              <Input
-                placeholder="https://…"
-                type="url"
-                {...form.register("imageUrl")}
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
+          <DashboardSheetBody>
+            <FieldGroup>
               <Field>
-                <FieldLabel>Display order</FieldLabel>
+                <FieldLabel>Name *</FieldLabel>
                 <Input
-                  min={0}
-                  placeholder="0"
-                  type="number"
-                  {...form.register("displayOrder")}
+                  placeholder="e.g. Amara Okafor"
+                  required
+                  {...form.register("name")}
                 />
               </Field>
-              <Field>
-                <FieldLabel>Featured</FieldLabel>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  {...form.register("featured")}
-                >
-                  <option value="false">No</option>
-                  <option value="true">Yes</option>
-                </select>
-              </Field>
-            </div>
-          </FieldGroup>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+              <Field>
+                <FieldLabel>Job title</FieldLabel>
+                <Input
+                  placeholder="e.g. Senior Sales Agent"
+                  {...form.register("title")}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <Input
+                  placeholder="amara@agency.com"
+                  type="email"
+                  {...form.register("email")}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>Phone</FieldLabel>
+                <Input
+                  placeholder="+234 801 234 5678"
+                  {...form.register("phone")}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>Bio</FieldLabel>
+                <Textarea
+                  placeholder="Short bio…"
+                  rows={4}
+                  {...form.register("bio")}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>Photo URL</FieldLabel>
+                <Input
+                  placeholder="https://…"
+                  type="url"
+                  {...form.register("imageUrl")}
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field>
+                  <FieldLabel>Display order</FieldLabel>
+                  <Input
+                    min={0}
+                    placeholder="0"
+                    type="number"
+                    {...form.register("displayOrder")}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Featured</FieldLabel>
+                  <select
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    {...form.register("featured")}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </Field>
+              </div>
+            </FieldGroup>
+          </DashboardSheetBody>
+
+          <DashboardSheetFooter className="sm:flex-row sm:items-center sm:justify-between">
             <DevFormQuickFillButton onFill={() => quickFill.newAgent()} />
             <div className="flex justify-end gap-3">
               <Button
@@ -200,9 +209,9 @@ export function AgentForm(props: AgentFormProps) {
                     : "Save changes"}
               </Button>
             </div>
-          </div>
+          </DashboardSheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

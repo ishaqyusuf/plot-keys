@@ -1,17 +1,13 @@
-import { createPrismaClient } from "@plotkeys/db";
-import { getInstalledAppKeys } from "@plotkeys/db/queries/company-apps";
-import { Separator } from "@plotkeys/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@plotkeys/ui/sidebar";
-import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
+import { isWorkRole, WORK_ROLE_LABELS } from "@plotkeys/utils";
 import type { ReactNode } from "react";
 
 import { DashboardSidebar } from "../../components/nav/dashboard-sidebar";
-import { NotificationBell } from "../../components/nav/notification-bell";
-import { DEFAULT_APP_KEYS } from "../../lib/app-registry";
+import { DashboardTopbar } from "../../components/nav/dashboard-topbar";
+import {
+  GLOBAL_PLATFORM_GROUP,
+  GLOBAL_TOP_ITEMS,
+  getCompanyAppsContext,
+} from "../../lib/company-apps";
 import { getNotificationBellData } from "../../lib/notifications";
 import { requireOnboardedSession } from "../../lib/session";
 
@@ -20,41 +16,38 @@ export default async function DashboardAppLayout({
 }: {
   children: ReactNode;
 }) {
-  const [bellData, session] = await Promise.all([
+  const session = await requireOnboardedSession();
+
+  const [bellData, appsContext] = await Promise.all([
     getNotificationBellData(),
-    requireOnboardedSession(),
+    getCompanyAppsContext(),
   ]);
 
-  const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-
-  let installedAppKeys: string[] = DEFAULT_APP_KEYS;
-  if (prisma) {
-    try {
-      const keys = await getInstalledAppKeys(prisma, companyId);
-      if (keys.length > 0) installedAppKeys = keys;
-    } catch {
-      // Table may not exist yet (pending migration) — fall back to defaults
-    }
-  }
-
   return (
-    <SidebarProvider>
-      <DashboardSidebar installedAppKeys={installedAppKeys} />
-      <SidebarInset>
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="flex flex-1 items-center justify-end gap-2">
-            <NotificationBell
-              unreadCount={bellData.unreadCount}
-              recentNotifications={bellData.recent}
-            />
-            <ThemeToggle />
-          </div>
-        </header>
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="flex min-h-svh bg-transparent">
+      <DashboardSidebar
+        enabledApps={appsContext.enabledApps}
+        globalTop={GLOBAL_TOP_ITEMS}
+        platformGroup={GLOBAL_PLATFORM_GROUP}
+      />
+      <div className="relative flex min-h-svh flex-1 flex-col lg:pl-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(15,107,97,0.04),transparent_26%),radial-gradient(circle_at_right_14%_top_8%,rgba(184,138,68,0.045),transparent_22%)]" />
+        <DashboardTopbar
+          companyName={session.activeMembership.companyName}
+          enabledApps={appsContext.enabledApps}
+          globalTop={GLOBAL_TOP_ITEMS}
+          platformGroup={GLOBAL_PLATFORM_GROUP}
+          recentNotifications={bellData.recent}
+          unreadCount={bellData.unreadCount}
+          userName={session.user.name ?? session.user.email ?? "Workspace user"}
+          workRoleLabel={
+            isWorkRole(session.activeMembership.workRole)
+              ? WORK_ROLE_LABELS[session.activeMembership.workRole]
+              : "Workspace"
+          }
+        />
+        <div className="relative">{children}</div>
+      </div>
+    </div>
   );
 }

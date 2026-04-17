@@ -4,12 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { requireOnboardedSession } from "../../../../../lib/session";
 import {
-  AddBudgetLineItemForm,
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+} from "../../../../../components/dashboard/dashboard-page";
+import {
   BudgetLineItemList,
-  BudgetSummaryCard,
+  BudgetSummary,
+  CreateBudgetLineForm,
 } from "../../../../../components/projects/project-budget";
+import { requireOnboardedSession } from "../../../../../lib/session";
 
 type BudgetPageProps = {
   params: Promise<{ id: string }>;
@@ -28,9 +42,7 @@ export default async function ProjectBudgetPage({ params }: BudgetPageProps) {
     select: { id: true, name: true },
   });
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
 
   const budget = await prisma.projectBudget.findUnique({
     where: { projectId },
@@ -42,40 +54,60 @@ export default async function ProjectBudgetPage({ params }: BudgetPageProps) {
   const currency = budget?.currency ?? "NGN";
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">
-              Budget
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{project.name}</p>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/projects/${projectId}`}>← Back to Project</Link>
-          </Button>
-        </div>
+    <DashboardPage>
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>Project workspace</DashboardPageEyebrow>
+            <DashboardPageTitle>Budget</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage financial planning, BOQ line items, and budget structure
+              for {project.name}.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/projects/${projectId}`}>Back to project</Link>
+            </Button>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+      </DashboardPageHeader>
 
-        {/* Budget Summary */}
-        <Card className="mb-8">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Budget summary</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review totals and keep the project budget anchored to the new
+              dashboard surface system.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/70 bg-card/82">
           <CardHeader>
-            <CardTitle>Budget Summary</CardTitle>
+            <CardTitle>Budget summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <BudgetSummaryCard
-              budget={budget}
-              projectId={projectId}
-            />
+            <BudgetSummary budget={budget} projectId={projectId} />
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* Line Items */}
-        <Card className="mb-8">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Line items</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Track the BOQ and add new items within the same compact project
+              workflow.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/70 bg-card/82">
           <CardHeader>
-            <CardTitle>Line Items (BOQ)</CardTitle>
+            <CardTitle>Line items (BOQ)</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             {budget && budget.lineItems.length > 0 ? (
               <BudgetLineItemList
                 lineItems={budget.lineItems}
@@ -83,14 +115,19 @@ export default async function ProjectBudgetPage({ params }: BudgetPageProps) {
                 currency={currency}
               />
             ) : (
-              <p className="mb-4 text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 No line items yet.
               </p>
             )}
-            <AddBudgetLineItemForm projectId={projectId} />
+            {budget ? (
+              <CreateBudgetLineForm
+                projectId={projectId}
+                budgetId={budget.id}
+              />
+            ) : null}
           </CardContent>
         </Card>
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

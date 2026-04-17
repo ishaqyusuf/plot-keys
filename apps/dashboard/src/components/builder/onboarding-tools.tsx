@@ -85,7 +85,7 @@ export function RecommendTemplatePanel({
           🎯 Re-recommend templates
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="border-border/70 bg-card/96 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Update your profile</DialogTitle>
           <DialogDescription>

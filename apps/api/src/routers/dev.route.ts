@@ -24,9 +24,10 @@ export const devRouter = createTRPCRouter({
    */
   listTenants: publicProcedure.query(async ({ ctx }) => {
     assertDev();
-    if (!ctx.db) return [];
+    const db = ctx.db.db;
+    if (!db) return [];
 
-    const companies = await ctx.db.company.findMany({
+    const companies = await db.company.findMany({
       orderBy: { createdAt: "asc" },
       select: {
         id: true,

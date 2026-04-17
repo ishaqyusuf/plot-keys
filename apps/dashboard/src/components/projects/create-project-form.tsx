@@ -3,6 +3,7 @@
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { useState } from "react";
 import { z } from "zod";
 import { createProjectAction } from "../../app/actions";
@@ -87,17 +88,18 @@ export function CreateProjectForm() {
 
         <Field>
           <FieldLabel>Type</FieldLabel>
-          <select
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            {...form.register("type")}
-          >
-            <option value="">Select type</option>
-            <option value="building">Building</option>
-            <option value="estate">Estate</option>
-            <option value="fit_out">Fit-out</option>
-            <option value="infrastructure">Infrastructure</option>
-            <option value="renovation">Renovation</option>
-          </select>
+          <NativeSelect {...form.register("type")}>
+            <NativeSelectOption value="">Select type</NativeSelectOption>
+            <NativeSelectOption value="building">Building</NativeSelectOption>
+            <NativeSelectOption value="estate">Estate</NativeSelectOption>
+            <NativeSelectOption value="fit_out">Fit-out</NativeSelectOption>
+            <NativeSelectOption value="infrastructure">
+              Infrastructure
+            </NativeSelectOption>
+            <NativeSelectOption value="renovation">
+              Renovation
+            </NativeSelectOption>
+          </NativeSelect>
         </Field>
 
         <Field>

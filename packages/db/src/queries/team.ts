@@ -1,18 +1,18 @@
-import type { MembershipRole } from "../generated/prisma";
+import type { MembershipRole, WorkRole } from "../generated/prisma/enums";
 import type { Db } from "../prisma";
 
 const INVITE_TTL_HOURS = 72;
 
 function resolveDefaultWorkRoleForMembershipRole(role: MembershipRole) {
   if (role === "agent") {
-    return "sales_agent";
+    return "sales_agent" as WorkRole;
   }
 
   if (role === "owner" || role === "platform_admin") {
-    return "executive";
+    return "executive" as WorkRole;
   }
 
-  return "operations";
+  return "operations" as WorkRole;
 }
 
 function generateInviteToken(): string {
@@ -48,7 +48,7 @@ export async function createTeamInvite(
     companyId: string;
     email: string;
     role: MembershipRole;
-    workRole?: string | null;
+    workRole?: WorkRole | null;
     invitedById: string;
   },
 ) {

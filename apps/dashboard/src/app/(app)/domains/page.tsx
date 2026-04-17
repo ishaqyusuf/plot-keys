@@ -17,7 +17,25 @@ import {
   buildDnsInstructions,
   isVercelDomainProvisioningConfigured,
 } from "@plotkeys/utils";
+import { Globe } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardPageToolbar,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardToolbarGroup,
+} from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
 import { removeCustomDomainAction, syncDomainsAction } from "../../actions";
 
@@ -105,48 +123,52 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
     domains.length > 0 && domains.every((d) => d.status === "active");
 
   return (
-    <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-4xl">
-        {params.error ? (
-          <Alert className="mb-6" variant="destructive">
-            <AlertDescription>{params.error}</AlertDescription>
-          </Alert>
-        ) : null}
+    <DashboardPage>
+      {params.error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{params.error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {params.synced ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
-            <AlertDescription>
-              Domain sync queued. Refresh the page in a few moments to check
-              updated statuses.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+      {params.synced ? (
+        <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <AlertDescription>
+            Domain sync queued. Refresh the page in a few moments to check
+            updated statuses.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-        {params.connected ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
-            <AlertDescription>
-              Custom domain connected! Configure the DNS records below, then
-              sync to verify.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+      {params.connected ? (
+        <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <AlertDescription>
+            Custom domain connected! Configure the DNS records below, then sync
+            to verify.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-        {params.removed ? (
-          <Alert className="mb-6 border-primary/20 bg-primary/10 text-foreground">
-            <AlertDescription>
-              Custom domain removed successfully.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+      {params.removed ? (
+        <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <AlertDescription>
+            Custom domain removed successfully.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Domains</h1>
-            <p className="mt-2 text-muted-foreground">
-              Manage and monitor the hostnames provisioned for your workspace.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
+      <DashboardPageHeader>
+        <DashboardPageHeaderRow>
+          <DashboardPageIntro>
+            <DashboardPageEyebrow>
+              Infrastructure workspace
+            </DashboardPageEyebrow>
+            <DashboardPageTitle>Domains</DashboardPageTitle>
+            <DashboardPageDescription>
+              Manage provisioning, custom hostnames, and DNS verification using
+              the same controlled dashboard pattern.
+            </DashboardPageDescription>
+          </DashboardPageIntro>
+          <DashboardPageActions>
             <Badge
               variant={domainProvisioningConfigured ? "default" : "outline"}
             >
@@ -154,15 +176,27 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
                 ? "Vercel ready"
                 : "Vercel env needed"}
             </Badge>
-            <Button asChild variant="secondary" size="sm">
-              <Link href="/">← Dashboard</Link>
-            </Button>
-          </div>
-        </div>
+          </DashboardPageActions>
+        </DashboardPageHeaderRow>
+        <DashboardPageToolbar>
+          <DashboardToolbarGroup className="text-sm text-muted-foreground">
+            {domains.length} domain{domains.length === 1 ? "" : "s"} tracked
+          </DashboardToolbarGroup>
+        </DashboardPageToolbar>
+      </DashboardPageHeader>
 
-        {/* Summary card */}
-        <Card className="mb-6 bg-card">
-          <CardHeader className="px-6 pt-6 pb-4">
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Domain control</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Sync statuses, connect new hostnames, and keep provisioning
+              moving.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/65 bg-card/78">
+          <CardHeader className="px-5 py-4">
             <CardTitle className="text-base">
               {allActive
                 ? "All domains are active"
@@ -176,7 +210,7 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
                 : `${domains.length} domain${domains.length === 1 ? "" : "s"} tracked for ${session.activeMembership.companyName}.`}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-3 px-6 pb-6">
+          <CardContent className="flex flex-wrap items-center gap-3 px-5 pb-5 pt-0">
             <form action={syncDomainsAction}>
               <Button
                 type="submit"
@@ -198,77 +232,93 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
             )}
           </CardContent>
         </Card>
+      </DashboardSection>
 
-        {/* DNS Instructions for pending custom domains */}
-        {pendingCustomDomains.length > 0 && (
-          <div className="mb-6 space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              DNS Configuration Required
-            </h2>
-            {pendingCustomDomains.map((d) => (
-              <Card
-                key={d.id}
-                className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20"
-              >
-                <CardHeader className="px-6 pt-5 pb-3">
-                  <CardTitle className="text-sm font-semibold">
-                    {d.hostname}
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    {d.instructions.message}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="px-6 pb-5">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="border-b text-left text-muted-foreground">
-                          <th className="pb-2 pr-4 font-medium">Type</th>
-                          <th className="pb-2 pr-4 font-medium">Name</th>
-                          <th className="pb-2 font-medium">Value</th>
+      {pendingCustomDomains.length > 0 && (
+        <DashboardSection>
+          <DashboardSectionHeader>
+            <div>
+              <DashboardSectionTitle>
+                DNS configuration required
+              </DashboardSectionTitle>
+              <DashboardSectionDescription>
+                Complete these records at your DNS provider, then sync again to
+                verify the custom hostname.
+              </DashboardSectionDescription>
+            </div>
+          </DashboardSectionHeader>
+          {pendingCustomDomains.map((d) => (
+            <Card
+              key={d.id}
+              className="border-amber-300/60 bg-amber-50/35 dark:border-amber-900/70 dark:bg-amber-950/15"
+            >
+              <CardHeader className="px-5 py-4">
+                <CardTitle className="text-sm font-semibold">
+                  {d.hostname}
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {d.instructions.message}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-6 pb-5">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="pb-2 pr-4 font-medium">Type</th>
+                        <th className="pb-2 pr-4 font-medium">Name</th>
+                        <th className="pb-2 font-medium">Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.instructions.records.map((record) => (
+                        <tr
+                          key={`${record.type}-${record.name}-${record.value}`}
+                          className="border-b last:border-0"
+                        >
+                          <td className="py-2 pr-4">
+                            <Badge variant="outline" className="text-xs">
+                              {record.type}
+                            </Badge>
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-xs">
+                            {record.name}
+                          </td>
+                          <td className="py-2 font-mono text-xs break-all">
+                            {record.value}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {d.instructions.records.map((record) => (
-                          <tr
-                            key={`${record.type}-${record.name}-${record.value}`}
-                            className="border-b last:border-0"
-                          >
-                            <td className="py-2 pr-4">
-                              <Badge variant="outline" className="text-xs">
-                                {record.type}
-                              </Badge>
-                            </td>
-                            <td className="py-2 pr-4 font-mono text-xs">
-                              {record.name}
-                            </td>
-                            <td className="py-2 font-mono text-xs break-all">
-                              {record.value}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {d.lastError && (
+                  <div className="mt-3 rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                    {d.lastError}
                   </div>
-                  {d.lastError && (
-                    <div className="mt-3 rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                      {d.lastError}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </DashboardSection>
+      )}
 
-        {/* Domain list */}
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
+            <DashboardSectionTitle>Provisioned domains</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Review live hostnames, identify failures quickly, and remove stale
+              custom domains when necessary.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
         {domains.length === 0 ? (
-          <Card className="bg-card">
-            <CardContent className="px-6 py-10 text-center text-muted-foreground">
-              No domains have been provisioned yet. Complete onboarding or
-              trigger a sync to create them.
-            </CardContent>
-          </Card>
+          <DashboardEmptyState
+            description="No domains have been provisioned yet. Complete onboarding or trigger a sync to create them."
+            icon={<Globe className="size-5" />}
+            title="No domains provisioned"
+          />
         ) : (
           <div className="grid gap-4">
             {domains.map((domain) => {
@@ -276,7 +326,7 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
                 domain.kind === "sitefront_custom_domain" ||
                 domain.kind === "dashboard_custom_domain";
               return (
-                <Card key={domain.id} className="bg-card">
+                <Card key={domain.id} className="border-border/70 bg-card/82">
                   <CardHeader className="grid grid-cols-[1fr_auto] items-start gap-4 px-6 pt-6 pb-3">
                     <div>
                       <p className="font-semibold text-foreground text-lg">
@@ -331,7 +381,7 @@ export default async function DomainsPage({ searchParams }: DomainsPageProps) {
             })}
           </div>
         )}
-      </div>
-    </main>
+      </DashboardSection>
+    </DashboardPage>
   );
 }

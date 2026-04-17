@@ -10,21 +10,40 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Separator } from "@plotkeys/ui/separator";
 import {
   buildTenantSiteUrl,
   isVercelDomainProvisioningConfigured,
 } from "@plotkeys/utils";
-import { Icon } from "/ui/icons";
+import {
+  BarChart3,
+  Building2,
+  Calendar,
+  Globe,
+  Mail,
+  Paintbrush,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { BuilderWorkspace } from "../../components/builder/builder-workspace";
+import {
+  DashboardPage,
+  DashboardPageActions,
+  DashboardPageDescription,
+  DashboardPageEyebrow,
+  DashboardPageHeader,
+  DashboardPageHeaderRow,
+  DashboardPageIntro,
+  DashboardPageTitle,
+  DashboardSection,
+  DashboardSectionDescription,
+  DashboardSectionHeader,
+  DashboardSectionTitle,
+  DashboardStatCard,
+  DashboardStatGrid,
+} from "../../components/dashboard/dashboard-page";
 import { DevTenantFabLoader } from "../../components/dev/dev-tenant-fab-loader";
 import { getBaseUrl } from "../../lib/get-base-url";
 import { requireOnboardedSession } from "../../lib/session";
-import {
-  ensureBuilderConfigurationExists,
-  syncTenantDomainsAction,
-} from "../actions";
+import { ensureBuilderConfigurationExists } from "../actions";
 
 type DashboardHomePageProps = {
   searchParams?: Promise<{
@@ -82,305 +101,258 @@ export default async function DashboardHomePage({
 
   const stats = [
     {
+      href: "/properties",
+      icon: Building2,
       label: "Properties",
       value: propertyCount ?? 0,
-      href: "/properties",
-      icon: Icon.Building,
     },
-    { label: "Agents", value: agentCount ?? 0, href: "/agents", icon: Icon.Users },
-    { label: "Leads", value: leadCount ?? 0, href: "/leads", icon: Icon.Mail },
+    { href: "/agents", icon: Users, label: "Agents", value: agentCount ?? 0 },
+    { href: "/leads", icon: Mail, label: "Leads", value: leadCount ?? 0 },
     {
+      href: "/appointments",
+      icon: Calendar,
       label: "Appointments",
       value: appointmentCount ?? 0,
-      href: "/appointments",
-      icon: Icon.Calendar,
     },
   ];
 
   return (
     <>
-      <DevTenantFabLoader />
-      <main className="px-4 py-6 md:px-8 md:py-10">
-        <div className="mx-auto max-w-6xl">
-          {params.error ? (
-            <Alert className="mb-6" variant="destructive">
-              <AlertDescription>{params.error}</AlertDescription>
-            </Alert>
-          ) : null}
+      <DashboardPage>
+        {params.error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{params.error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-          {params.domains ? (
-            <Alert className="mb-6 border-border bg-muted/30">
-              <AlertDescription>Tenant domain sync completed.</AlertDescription>
-            </Alert>
-          ) : null}
-
-          {(() => {
-            const domains = domainStatuses ?? [];
-            const failedDomains = domains.filter((d) => d.status === "failed");
-            const pendingDomains = domains.filter(
-              (d) => d.status === "pending" || d.status === "provisioning",
-            );
-
-            if (failedDomains.length === 0 && pendingDomains.length === 0) {
-              return null;
-            }
-
-            return (
-              <div className="mb-6 flex flex-col gap-3">
-                {failedDomains.length > 0 ? (
-                  <Alert variant="destructive">
-                    <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-                      <span>
-                        {failedDomains.length} domain
-                        {failedDomains.length > 1 ? "s" : ""} failed
-                        provisioning:{" "}
-                        {failedDomains.map((d) => d.hostname).join(", ")}
-                      </span>
-                      <Button asChild size="sm" variant="outline">
-                        <Link href="/domains">View domains</Link>
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
-                {pendingDomains.length > 0 ? (
-                  <Alert className="border-warning/20 bg-warning/10">
-                    <AlertDescription className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-                      <span>
-                        {pendingDomains.length} domain
-                        {pendingDomains.length > 1 ? "s" : ""} awaiting
-                        provisioning:{" "}
-                        {pendingDomains.map((d) => d.hostname).join(", ")}
-                      </span>
-                      <form action={syncTenantDomainsAction}>
-                        <Button size="sm" type="submit" variant="outline">
-                          Provision now
-                        </Button>
-                      </form>
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
-              </div>
-            );
-          })()}
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Welcome back, {session.activeMembership.companyName}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Manage your website, listings, and business from one place.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <Link key={stat.label} href={stat.href}>
-                <Card className="h-full cursor-pointer bg-card transition-shadow hover:shadow-md">
-                  <CardContent className="flex items-center gap-4 px-5 py-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                      <stat.icon className="size-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        {stat.label}
-                      </p>
-                      <p className="mt-0.5 text-2xl font-semibold text-foreground">
-                        {stat.value}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          <section className="mt-6 space-y-3">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Website builder
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Configure your website settings and edit text directly beside
-                  the live preview.
-                </p>
-              </div>
+        <DashboardPageHeader>
+          <DashboardPageHeaderRow>
+            <DashboardPageIntro>
+              <DashboardPageEyebrow>Workspace Overview</DashboardPageEyebrow>
+              <DashboardPageTitle>
+                {session.activeMembership.companyName}
+              </DashboardPageTitle>
+              <DashboardPageDescription>
+                Track your listings, team activity, site publishing, and lead
+                flow from a single Midday-style operating surface.
+              </DashboardPageDescription>
+            </DashboardPageIntro>
+            <DashboardPageActions>
               <Button asChild variant="outline">
-                <Link href="/builder">Open dedicated builder page</Link>
+                <Link href="/live">Preview live state</Link>
               </Button>
-            </div>
+              <Button asChild>
+                <Link href="/builder">Open builder</Link>
+              </Button>
+            </DashboardPageActions>
+          </DashboardPageHeaderRow>
+        </DashboardPageHeader>
 
-            <BuilderWorkspace
-              companyId={session.activeMembership.companyId}
-              companyName={session.activeMembership.companyName}
-              companySlug={session.activeMembership.companySlug}
-              mode="dashboard"
-              userId={session.user.id}
-            />
-          </section>
+        <DashboardStatGrid>
+          {stats.map((stat) => {
+            return (
+              <DashboardStatCard
+                key={stat.label}
+                href={stat.href}
+                icon={stat.icon}
+                label={stat.label}
+                meta="Open"
+                value={stat.value}
+              />
+            );
+          })}
+        </DashboardStatGrid>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-                <CardDescription>
-                  Jump to the most common tasks.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                {[
-                  {
-                    title: "Open builder",
-                    description: "Edit your website template and content",
-                    href: "/builder",
-                    icon: Icon.Builder,
-                  },
-                  {
-                    title: "View live site",
-                    description: "Preview your published website",
-                    href: liveSiteUrl,
-                    icon: Icon.Globe,
-                  },
-                  {
-                    title: "Manage properties",
-                    description: "Add or update your property listings",
-                    href: "/properties",
-                    icon: Icon.Building,
-                  },
-                  {
-                    title: "View analytics",
-                    description: "See website traffic and visitor activity",
-                    href: "/analytics",
-                    icon: Icon.Analytics,
-                  },
-                ].map((action) => (
-                  <Link
-                    key={action.href}
-                    href={action.href}
-                    className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 transition-colors hover:bg-muted/50"
-                  >
-                    <action.icon className="size-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {action.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {action.description}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </CardContent>
-            </Card>
+        <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+          <DashboardSection>
+            <DashboardSectionHeader>
+              <div>
+                <DashboardSectionTitle>
+                  Publishing control
+                </DashboardSectionTitle>
+                <DashboardSectionDescription>
+                  Manage your public site, domain connection, and content
+                  publishing from one place.
+                </DashboardSectionDescription>
+              </div>
+            </DashboardSectionHeader>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Site Status</CardTitle>
-                <CardDescription>
-                  Your website configuration and domain status.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      Published template
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {publishedConfig?.name ?? "No template published yet"}
-                    </p>
+            <Card className="border-border/65 bg-card/78">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-[1rem] bg-primary/10 text-primary">
+                    <Globe className="size-5" />
                   </div>
-                  <Badge variant={publishedConfig ? "default" : "outline"}>
-                    {publishedConfig ? "Live" : "Draft"}
-                  </Badge>
+                  <div>
+                    <CardTitle>Site status</CardTitle>
+                    <CardDescription>
+                      {publishedConfig
+                        ? `Published version ${publishedConfig.versionNumber} is live.`
+                        : "No published version yet."}
+                    </CardDescription>
+                  </div>
                 </div>
-
-                {publishedConfig && (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        Last published
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {publishedConfig.publishedAt
-                          ? new Date(
-                              publishedConfig.publishedAt,
-                            ).toLocaleDateString("en-GB", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : "Not published yet"}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      Domain provisioning
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {(domainStatuses ?? []).length} domain
-                      {(domainStatuses ?? []).length !== 1 ? "s" : ""}{" "}
-                      configured
-                    </p>
-                  </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={publishedConfig ? "default" : "outline"}>
+                    {publishedConfig ? "Published" : "Draft only"}
+                  </Badge>
                   <Badge
                     variant={
-                      domainProvisioningConfigured ? "default" : "outline"
+                      domainProvisioningConfigured ? "secondary" : "outline"
                     }
                   >
-                    {domainProvisioningConfigured ? "Ready" : "Setup needed"}
+                    {domainProvisioningConfigured
+                      ? "Domain provisioning ready"
+                      : "Provisioning not configured"}
                   </Badge>
                 </div>
-
-                {(domainStatuses ?? []).map((domain) => (
-                  <div
-                    key={domain.id}
-                    className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {domain.hostname}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {domain.kind}
-                      </p>
-                    </div>
-                    <Badge
-                      className={
-                        domain.status === "failed"
-                          ? "border-destructive/20 bg-destructive/10 text-destructive"
-                          : undefined
-                      }
-                      variant={
-                        domain.status === "active" ? "default" : "outline"
-                      }
-                    >
-                      {domain.status}
-                    </Badge>
-                  </div>
-                ))}
-
-                <form action={syncTenantDomainsAction}>
-                  <Button
-                    className="w-full"
-                    size="sm"
-                    type="submit"
-                    variant="outline"
-                  >
-                    Provision or refresh domains
+                <div className="rounded-[1rem] border border-border/60 bg-background/55 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+                    Primary URL
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    {liveSiteUrl}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild>
+                    <a href={liveSiteUrl} rel="noreferrer" target="_blank">
+                      View site
+                    </a>
                   </Button>
-                </form>
+                  <Button asChild variant="outline">
+                    <Link href="/domains">Manage domains</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/builder">Edit website</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-          </div>
+          </DashboardSection>
+
+          <DashboardSection>
+            <DashboardSectionHeader>
+              <div>
+                <DashboardSectionTitle>Quick actions</DashboardSectionTitle>
+                <DashboardSectionDescription>
+                  The highest-value next actions for your workspace.
+                </DashboardSectionDescription>
+              </div>
+            </DashboardSectionHeader>
+
+            <div className="grid gap-2.5">
+              <Card className="border-border/65 bg-card/78">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-[1rem] bg-primary/10 text-primary">
+                      <Paintbrush className="size-5" />
+                    </div>
+                    <div>
+                      <CardTitle>Refresh your site experience</CardTitle>
+                      <CardDescription>
+                        Update content, theme, and homepage structure inside the
+                        builder.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full">
+                    <Link href="/builder">Open builder workspace</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/65 bg-card/78">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-[1rem] bg-primary/10 text-primary">
+                      <BarChart3 className="size-5" />
+                    </div>
+                    <div>
+                      <CardTitle>Inspect operations</CardTitle>
+                      <CardDescription>
+                        Review properties, appointments, and lead movement
+                        across the workspace.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  <Button asChild variant="outline">
+                    <Link href="/properties">Properties</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/leads">Leads</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/appointments">Appointments</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </DashboardSection>
         </div>
-      </main>
+
+        <DashboardSection>
+          <DashboardSectionHeader>
+            <div>
+              <DashboardSectionTitle>Connected domains</DashboardSectionTitle>
+              <DashboardSectionDescription>
+                Track connection state and identify any hostname that still
+                needs attention.
+              </DashboardSectionDescription>
+            </div>
+          </DashboardSectionHeader>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {(domainStatuses ?? []).length ? (
+              domainStatuses!.map((domain) => (
+                <Card key={domain.id} className="border-border/70 bg-card/82">
+                  <CardHeader className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <CardTitle className="text-base">
+                        {domain.hostname}
+                      </CardTitle>
+                      <Badge
+                        variant={
+                          domain.status === "active" ? "default" : "outline"
+                        }
+                      >
+                        {domain.status}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      {domain.kind} domain for {domain.apexDomain}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <Card className="border-border/70 bg-card/82 lg:col-span-2">
+                <CardContent className="flex flex-col gap-3 py-8">
+                  <p className="text-sm font-medium text-foreground">
+                    No connected domains yet.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Start with your PlotKeys subdomain, then connect a custom
+                    hostname when you are ready.
+                  </p>
+                  <div>
+                    <Button asChild variant="outline">
+                      <Link href="/domains">Open domains</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </DashboardSection>
+      </DashboardPage>
+      <DevTenantFabLoader />
     </>
   );
 }

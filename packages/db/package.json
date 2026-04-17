@@ -30,6 +30,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@plotkeys/section-registry": "workspace:*",
+    "@plotkeys/utils": "workspace:*",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "drizzle-orm": "^0.44.5",

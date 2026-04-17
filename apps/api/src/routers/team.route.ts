@@ -312,10 +312,15 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      if (
-        invite.email.trim().toLowerCase() !==
-        ctx.auth.session.user.email.trim().toLowerCase()
-      ) {
+      const sessionEmail = ctx.auth.session.user.email?.trim().toLowerCase();
+      if (!sessionEmail) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Your account must have an email address to accept invites.",
+        });
+      }
+
+      if (invite.email.trim().toLowerCase() !== sessionEmail) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This invite belongs to a different email address.",
