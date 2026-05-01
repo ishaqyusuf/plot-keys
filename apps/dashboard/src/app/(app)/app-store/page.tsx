@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { tierLabels } from "@plotkeys/utils";
 import { Lock } from "lucide-react";
 import Link from "next/link";
 
@@ -48,12 +49,6 @@ function getStatus(
   return "available";
 }
 
-const planLabels: Record<CompanyPlanTier, string> = {
-  starter: "Starter",
-  plus: "Plus",
-  pro: "Pro",
-};
-
 export default async function AppStorePage({
   searchParams,
 }: {
@@ -84,12 +79,12 @@ export default async function AppStorePage({
             <DashboardPageTitle>App Store</DashboardPageTitle>
             <DashboardPageDescription>
               Enable the feature modules your team needs. Your current plan is{" "}
-              <strong>{planLabels[planTier]}</strong> with {enabledApps.length}{" "}
+              <strong>{tierLabels[planTier]}</strong> with {enabledApps.length}{" "}
               of {availableApps.length} available apps enabled.
             </DashboardPageDescription>
           </DashboardPageIntro>
           <DashboardPageActions>
-            <Badge variant="secondary">{planLabels[planTier]} plan</Badge>
+            <Badge variant="secondary">{tierLabels[planTier]} plan</Badge>
           </DashboardPageActions>
         </DashboardPageHeaderRow>
         <DashboardPageToolbar>
@@ -105,7 +100,7 @@ export default async function AppStorePage({
           workspace. Enable it below
           {isAppAvailable(lockedApp, planTier)
             ? "."
-            : ` or upgrade to ${planLabels[lockedApp.planGate]} to unlock it.`}
+            : ` or upgrade to ${tierLabels[lockedApp.planGate]} to unlock it.`}
         </div>
       ) : null}
       <div className="flex flex-col gap-10">
@@ -150,7 +145,7 @@ export default async function AppStorePage({
                         <Button asChild size="sm" variant="outline">
                           <Link href="/billing">
                             <Lock className="mr-1.5 size-3.5" />
-                            Upgrade to {planLabels[app.planGate]}
+                            Upgrade to {tierLabels[app.planGate]}
                           </Link>
                         </Button>
                       ) : (

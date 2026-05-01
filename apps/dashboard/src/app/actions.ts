@@ -20,10 +20,7 @@ import {
   setBlogPostStatus,
   updateBlogPost,
 } from "@plotkeys/db";
-import {
-  installApp,
-  uninstallApp,
-} from "@plotkeys/db/queries/company-apps";
+import { installApp, uninstallApp } from "@plotkeys/db/queries/company-apps";
 import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
 import {
   EMPLOYEE_WORK_ROLE_VALUES,
@@ -99,6 +96,44 @@ async function ensureUniqueBlogSlug(
 
     candidate = `${baseSlug}-${suffix}`;
     suffix += 1;
+  }
+}
+
+async function ensureUniqueEstateSlug(
+  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
+  companyId: string,
+  requestedSlug: string,
+) {
+  const baseSlug = normalizeBlogSlug(requestedSlug) || "estate-launch";
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await prisma.estate.findFirst({
+      select: { id: true },
+      where: {
+        companyId,
+        deletedAt: null,
+        slug: candidate,
+      },
+    });
+
+    if (!existing) return candidate;
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+function parsePropertyPricingPlans(formData: FormData) {
+  const raw = String(formData.get("paymentPlansJson") ?? "").trim();
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
   }
 }
 
@@ -749,9 +784,12 @@ export async function createProjectAction(formData: FormData) {
 
 export async function createPropertyAction(formData: FormData) {
   let redirectUrl: string;
+  const returnTo = String(formData.get("returnTo") ?? "").trim();
   try {
+    const paymentPlansJson = parsePropertyPricingPlans(formData);
     const caller = await createServerCaller();
     await caller.workspace.createProperty({
+      estateId: String(formData.get("estateId") ?? "").trim() || null,
       title: String(formData.get("title") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim() || null,
       price: String(formData.get("price") ?? "").trim() || null,
@@ -772,6 +810,22 @@ export async function createPropertyAction(formData: FormData) {
         | "mixed_use"
         | null,
       subType: String(formData.get("subType") ?? "").trim() || null,
+      quantityAvailable: formData.get("quantityAvailable")
+        ? Number(formData.get("quantityAvailable"))
+        : null,
+      paymentPlanMonths: formData.get("paymentPlanMonths")
+        ? Number(formData.get("paymentPlanMonths"))
+        : null,
+      paymentPlanAmount:
+        String(formData.get("paymentPlanAmount") ?? "").trim() || null,
+      paymentPlanInitialDepositPercent: formData.get(
+        "paymentPlanInitialDepositPercent",
+      )
+        ? Number(formData.get("paymentPlanInitialDepositPercent"))
+        : null,
+      paymentPlanMonthlyAmount:
+        String(formData.get("paymentPlanMonthlyAmount") ?? "").trim() || null,
+      paymentPlansJson,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -780,9 +834,11 @@ export async function createPropertyAction(formData: FormData) {
       featured: formData.get("featured") === "true",
     });
     revalidatePath("/properties");
-    redirectUrl = "/properties";
+    if (returnTo) revalidatePath(returnTo);
+    redirectUrl = returnTo || "/properties";
   } catch (error) {
-    redirectUrl = `/properties?error=${encodeURIComponent(
+    const errorPath = returnTo || "/properties";
+    redirectUrl = `${errorPath}?error=${encodeURIComponent(
       error instanceof Error ? error.message : "Unable to create property.",
     )}`;
   }
@@ -793,10 +849,13 @@ export async function createPropertyAction(formData: FormData) {
 export async function updatePropertyAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
   let redirectUrl: string;
+  const returnTo = String(formData.get("returnTo") ?? "").trim();
   try {
+    const paymentPlansJson = parsePropertyPricingPlans(formData);
     const caller = await createServerCaller();
     await caller.workspace.updateProperty({
       propertyId,
+      estateId: String(formData.get("estateId") ?? "").trim() || null,
       title: String(formData.get("title") ?? "").trim() || undefined,
       description: String(formData.get("description") ?? "").trim() || null,
       price: String(formData.get("price") ?? "").trim() || null,
@@ -817,6 +876,22 @@ export async function updatePropertyAction(formData: FormData) {
         | "mixed_use"
         | null,
       subType: String(formData.get("subType") ?? "").trim() || null,
+      quantityAvailable: formData.get("quantityAvailable")
+        ? Number(formData.get("quantityAvailable"))
+        : null,
+      paymentPlanMonths: formData.get("paymentPlanMonths")
+        ? Number(formData.get("paymentPlanMonths"))
+        : null,
+      paymentPlanAmount:
+        String(formData.get("paymentPlanAmount") ?? "").trim() || null,
+      paymentPlanInitialDepositPercent: formData.get(
+        "paymentPlanInitialDepositPercent",
+      )
+        ? Number(formData.get("paymentPlanInitialDepositPercent"))
+        : null,
+      paymentPlanMonthlyAmount:
+        String(formData.get("paymentPlanMonthlyAmount") ?? "").trim() || null,
+      paymentPlansJson,
       status: String(formData.get("status") ?? "active") as
         | "active"
         | "sold"
@@ -825,9 +900,11 @@ export async function updatePropertyAction(formData: FormData) {
       featured: formData.get("featured") === "true",
     });
     revalidatePath("/properties");
-    redirectUrl = "/properties";
+    if (returnTo) revalidatePath(returnTo);
+    redirectUrl = returnTo || "/properties";
   } catch (error) {
-    redirectUrl = `/properties?error=${encodeURIComponent(
+    const errorPath = returnTo || "/properties";
+    redirectUrl = `${errorPath}?error=${encodeURIComponent(
       error instanceof Error ? error.message : "Unable to update property.",
     )}`;
   }
@@ -861,6 +938,152 @@ export async function togglePropertyFeaturedAction(formData: FormData) {
   } catch {
     // non-fatal — page will show current state on next load
   }
+}
+
+export async function createEstateAction(formData: FormData) {
+  let redirectUrl: string;
+  try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+
+    if (!prisma) {
+      throw new Error("Database unavailable.");
+    }
+
+    const title = String(formData.get("title") ?? "").trim();
+    const slugInput = String(formData.get("slug") ?? "").trim() || title;
+    const slug = await ensureUniqueEstateSlug(
+      prisma,
+      session.activeMembership.companyId,
+      slugInput,
+    );
+
+    const caller = await createServerCaller();
+    await caller.workspace.createEstate({
+      title,
+      slug,
+      description: String(formData.get("description") ?? "").trim() || null,
+      amenities: String(formData.get("amenities") ?? "").trim() || null,
+      approvals: String(formData.get("approvals") ?? "").trim() || null,
+      brochureUrl: String(formData.get("brochureUrl") ?? "").trim() || null,
+      heroImageUrl: String(formData.get("heroImageUrl") ?? "").trim() || null,
+      landmarks: String(formData.get("landmarks") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      phaseLabel: String(formData.get("phaseLabel") ?? "").trim() || null,
+      publishState: "draft",
+      specialPurposeUses:
+        String(formData.get("specialPurposeUses") ?? "").trim() || null,
+    });
+
+    revalidatePath("/estates");
+    redirectUrl = `/estates/${slug}`;
+  } catch (error) {
+    redirectUrl = `/estates?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to create estate.",
+    )}`;
+  }
+
+  redirect(redirectUrl);
+}
+
+export async function updateEstateAction(formData: FormData) {
+  const estateId = String(formData.get("estateId") ?? "").trim();
+  const estateSlug = String(formData.get("estateSlug") ?? "").trim();
+  const redirectBase = estateSlug ? `/estates/${estateSlug}` : "/estates";
+
+  let redirectUrl: string;
+  try {
+    if (!estateId) {
+      throw new Error("Estate launch not found.");
+    }
+
+    const caller = await createServerCaller();
+    await caller.workspace.updateEstate({
+      estateId,
+      title: String(formData.get("title") ?? "").trim(),
+      description: String(formData.get("description") ?? "").trim() || null,
+      amenities: String(formData.get("amenities") ?? "").trim() || null,
+      approvals: String(formData.get("approvals") ?? "").trim() || null,
+      brochureUrl: String(formData.get("brochureUrl") ?? "").trim() || null,
+      heroImageUrl: String(formData.get("heroImageUrl") ?? "").trim() || null,
+      landmarks: String(formData.get("landmarks") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      phaseLabel: String(formData.get("phaseLabel") ?? "").trim() || null,
+      publishState: String(formData.get("publishState") ?? "draft") as
+        | "draft"
+        | "published"
+        | "archived",
+      specialPurposeUses:
+        String(formData.get("specialPurposeUses") ?? "").trim() || null,
+    });
+
+    revalidatePath("/estates");
+    revalidatePath(redirectBase);
+    redirectUrl = redirectBase;
+  } catch (error) {
+    redirectUrl = `${redirectBase}?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to update estate.",
+    )}`;
+  }
+
+  redirect(redirectUrl);
+}
+
+export async function createEstateLayoutAction(formData: FormData) {
+  const estateId = String(formData.get("estateId") ?? "").trim();
+  const estateSlug = String(formData.get("estateSlug") ?? "").trim();
+  const sourceUrl = String(formData.get("sourceUrl") ?? "").trim();
+  const redirectBase = estateSlug ? `/estates/${estateSlug}` : "/estates";
+
+  let redirectUrl: string;
+  try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+
+    if (!prisma) {
+      throw new Error("Database unavailable.");
+    }
+
+    if (!estateId || !sourceUrl) {
+      throw new Error("Upload an estate plan before saving.");
+    }
+
+    const estate = await prisma.estate.findFirst({
+      select: { id: true },
+      where: {
+        companyId: session.activeMembership.companyId,
+        deletedAt: null,
+        id: estateId,
+      },
+    });
+
+    if (!estate) {
+      throw new Error("Estate launch not found.");
+    }
+
+    const latest = await prisma.estateLayout.findFirst({
+      orderBy: { version: "desc" },
+      select: { version: true },
+      where: { estateId },
+    });
+
+    await prisma.estateLayout.create({
+      data: {
+        estateId,
+        sourceUrl,
+        version: (latest?.version ?? 0) + 1,
+      },
+    });
+
+    revalidatePath(redirectBase);
+    redirectUrl = redirectBase;
+  } catch (error) {
+    redirectUrl = `${redirectBase}?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Unable to save estate plan.",
+    )}`;
+  }
+
+  redirect(redirectUrl);
 }
 
 // ─── Blog actions ─────────────────────────────────────────────────────────
@@ -1141,6 +1364,16 @@ export async function initializeCheckoutAction(formData: FormData) {
   });
 
   redirect(result.authorizationUrl);
+}
+
+export async function repairBillingPaymentAction(formData: FormData) {
+  const reference = String(formData.get("reference") ?? "").trim();
+
+  if (!reference) {
+    redirect("/billing?payment=missing-reference");
+  }
+
+  redirect(`/billing/callback?reference=${encodeURIComponent(reference)}`);
 }
 
 // ─── Appointment actions ──────────────────────────────────────────────────

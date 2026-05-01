@@ -25,10 +25,14 @@ export function Sidebar({ children }: { children?: ReactNode }) {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 hidden border-r border-border/55 bg-[color:color-mix(in_srgb,var(--color-sidebar)_94%,white_6%)]/95 shadow-[var(--shadow-soft)] backdrop-blur-xl lg:flex lg:flex-col",
-        isExpanded ? "w-72" : "w-24",
+        "fixed top-0 left-0 z-50 hidden h-screen flex-shrink-0 flex-col justify-between overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
+        isExpanded ? "w-[272px]" : "w-[84px]",
       )}
     >
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-x-6 top-[70px] h-px bg-sidebar-border" />
+        <div className="absolute inset-y-0 right-0 w-px bg-sidebar-border/70" />
+      </div>
       <nav
         aria-label="Primary navigation"
         ref={mainMenuRef}
@@ -39,7 +43,7 @@ export function Sidebar({ children }: { children?: ReactNode }) {
           expandTimeoutRef.current = setTimeout(() => {
             setIsExpanded(true);
             expandTimeoutRef.current = null;
-          }, 220);
+          }, 140);
         }}
         onMouseLeave={() => {
           if (expandTimeoutRef.current) {
@@ -48,11 +52,11 @@ export function Sidebar({ children }: { children?: ReactNode }) {
           }
           setIsExpanded(false);
         }}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        className="relative flex min-h-0 w-full flex-1 flex-col overflow-y-auto pb-[124px] pt-[70px]"
       >
-        {children}
         <NavsList />
       </nav>
+      {children}
     </aside>
   );
 }

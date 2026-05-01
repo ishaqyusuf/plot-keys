@@ -276,9 +276,18 @@ export function FarisListingSpotlightSection({
             >
               {/* Image */}
               <div className="relative h-44 overflow-hidden bg-stone-100">
-                <div className="flex h-full w-full items-center justify-center text-xs text-stone-400">
-                  {item.imageHint || "Property image"}
-                </div>
+                {item.imageUrl ? (
+                  <div
+                    aria-label={item.title}
+                    className="absolute inset-0 bg-cover bg-center"
+                    role="img"
+                    style={{ backgroundImage: `url(${item.imageUrl})` }}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-stone-400">
+                    {item.imageHint || "Property image"}
+                  </div>
+                )}
                 <span className="absolute left-3 top-3 rounded-full bg-amber-700 px-2.5 py-0.5 text-[10px] font-semibold text-white">
                   For Sale
                 </span>

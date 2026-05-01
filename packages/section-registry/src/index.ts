@@ -316,11 +316,13 @@ function createDefaultContent(
 
 function buildListingSpotlightItems(
   liveListings: LiveListingItem[] | undefined,
+  renderMode: RenderMode,
 ): ListingSpotlightItem[] {
   if (liveListings && liveListings.length > 0) {
     return liveListings.slice(0, 3).map((listing) => ({
       id: listing.id,
-      imageHint: listing.imageUrl ?? "Property listing",
+      imageHint: "Property listing",
+      imageUrl: listing.imageUrl,
       location: listing.location,
       price: listing.price ?? "Price on request",
       slug: listing.slug ?? listing.id,
@@ -373,7 +375,8 @@ type SectionBuilder = (
   templateKey?: string,
   liveBlogPosts?: LiveBlogPostItem[],
   currentBlogPost?: LiveBlogPostItem | null,
-) => HomeSectionDefinition;
+  renderMode?: RenderMode,
+) => HomeSectionDefinition | null;
 
 type ListingRouteContract = {
   detailHrefBase: string;
@@ -477,20 +480,25 @@ const sectionBuilders: Record<string, SectionBuilder> = {
     _subdomain,
     pageKey,
     templateKey,
+    _liveBlogPosts,
+    _currentBlogPost,
+    renderMode = "live",
   ) => {
+    const listingCount = liveListings?.length ?? 0;
+    const hasLiveListings = listingCount > 0;
+
     const listingRoutes = resolveListingRouteContract(templateKey, pageKey);
 
     return {
       component: ListingSpotlightSection,
       config: {
-        description:
-          liveListings && liveListings.length > 0
-            ? `${liveListings.length} featured ${liveListings.length === 1 ? "property" : "properties"} available.`
-            : "The first template supports promotional inventory cards sourced directly from the platform listing model.",
+        description: hasLiveListings
+          ? `${listingCount} featured ${listingCount === 1 ? "property" : "properties"} available.`
+          : "Publish listings from your dashboard to show available properties here.",
         detailHrefBase: listingRoutes.detailHrefBase,
-        eyebrow: "Featured inventory",
-        items: buildListingSpotlightItems(liveListings),
-        title: "Featured listings feel editorial, not templated.",
+        eyebrow: "Featured listings",
+        items: buildListingSpotlightItems(liveListings, renderMode),
+        title: "Available properties",
       },
       id: "listing-spotlight",
       type: "listing_spotlight",
@@ -985,6 +993,7 @@ function buildPageSections(
   subdomain?: string,
   liveBlogPosts?: LiveBlogPostItem[],
   currentBlogPost?: LiveBlogPostItem | null,
+  renderMode: RenderMode = "live",
 ): {
   pageKey: string;
   sections: HomeSectionDefinition[];
@@ -1007,6 +1016,7 @@ function buildPageSections(
             templateKey,
             liveBlogPosts,
             currentBlogPost,
+            renderMode,
           )
         : null;
     })
@@ -1016,7 +1026,13 @@ function buildPageSections(
   // Non-home pages intentionally return an empty section list when the template has not
   // defined any slots for that page — the caller treats an empty page as a blank canvas.
   if (sections.length === 0 && pageKey === "home") {
-    return buildDefaultHomePage(content, liveListings, liveAgents, subdomain);
+    return buildDefaultHomePage(
+      content,
+      liveListings,
+      liveAgents,
+      subdomain,
+      renderMode,
+    );
   }
 
   return { pageKey, sections };
@@ -1028,6 +1044,7 @@ function buildDefaultHomePage(
   liveListings?: LiveListingItem[],
   liveAgents?: LiveAgentItem[],
   subdomain?: string,
+  renderMode: RenderMode = "live",
 ): { pageKey: string; sections: HomeSectionDefinition[] } {
   const defaultOrder = [
     "HeroBannerSection",
@@ -1050,6 +1067,7 @@ function buildDefaultHomePage(
           undefined,
           undefined,
           undefined,
+          renderMode,
         ),
       )
       .filter((s): s is HomeSectionDefinition => s !== null),
@@ -2296,6 +2314,7 @@ export function resolveWebsitePresentation({
     subdomain,
     liveBlogPosts,
     currentBlogPost,
+    renderMode,
   );
 
   // Apply family-specific component overrides when the templateKey maps to a
@@ -2457,6 +2476,7 @@ export function resolvePage(
     tenant.subdomain,
     liveBlogPosts,
     tenant.currentBlogPost,
+    renderMode,
   );
 
   const familyOverrides = _resolveFamilySectionComponents(
@@ -2516,6 +2536,12 @@ export const sampleHomePage = buildPageSections(
   fallbackTemplate.defaultContent,
   "home",
   fallbackTemplate.key,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  "template",
 );
 
 export type {

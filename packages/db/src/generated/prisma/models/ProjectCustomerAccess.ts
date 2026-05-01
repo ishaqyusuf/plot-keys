@@ -179,7 +179,7 @@ export type ProjectCustomerAccessGroupByOutputType = {
   _max: ProjectCustomerAccessMaxAggregateOutputType | null
 }
 
-type GetProjectCustomerAccessGroupByPayload<T extends ProjectCustomerAccessGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectCustomerAccessGroupByPayload<T extends ProjectCustomerAccessGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectCustomerAccessGroupByOutputType, T['by']> &
       {

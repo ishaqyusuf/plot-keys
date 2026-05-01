@@ -6,8 +6,8 @@ import { PropertyForm } from "../../property-form";
 export function PropertiesEmptyState() {
   return (
     <DashboardEmptyState
-      title="No properties yet"
-      description="Create your first listing to start building the inventory."
+      title="No listings yet"
+      description="Create your first home or land listing to start building the inventory."
       icon={<Building2 className="size-5" />}
       actions={
         <div className="flex items-center justify-center gap-2">

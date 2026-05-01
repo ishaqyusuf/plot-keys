@@ -8,6 +8,7 @@ import {
   buildLocalDashboardHostname,
   buildLocalDashboardHostnameForTenantHostname,
   buildLocalSitefrontHostname,
+  buildPlatformAppUrl,
   buildSitefrontHostname,
   buildTenantDashboardUrl,
   buildTenantSiteUrl,
@@ -85,6 +86,50 @@ describe("tenant domain helpers", () => {
     ).toBe("https://acme.plotkeys.com/");
   });
 
+  it("builds runtime URLs from plain localhost", () => {
+    expect(
+      buildPlatformAppUrl({
+        currentOrigin: "http://localhost:3000",
+        pathname: "/sign-up",
+      }),
+    ).toBe("http://localhost:3901/sign-up");
+    expect(
+      buildTenantDashboardUrl("acme", {
+        currentOrigin: "http://localhost:3901",
+        pathname: "/onboarding",
+      }),
+    ).toBe("http://dashboard.acme.app-plotkeys.localhost:3901/onboarding");
+    expect(
+      buildTenantSiteUrl("acme", {
+        currentOrigin: "http://localhost:3903",
+        pathname: "/",
+      }),
+    ).toBe("http://acme.tenant-plotkeys.localhost:3903/");
+  });
+
+  it("keeps Vercel preview URLs on the runtime host", () => {
+    expect(
+      buildPlatformAppUrl({
+        currentOrigin: "https://plot-keys-git-preview.vercel.app",
+        pathname: "/sign-up",
+      }),
+    ).toBe("https://plot-keys-git-preview.vercel.app/sign-up");
+    expect(
+      buildTenantDashboardUrl("acme", {
+        currentOrigin: "https://plot-keys-git-preview.vercel.app",
+        pathname: "/onboarding",
+      }),
+    ).toBe(
+      "https://dashboard.acme.plot-keys-git-preview.vercel.app/onboarding",
+    );
+    expect(
+      buildTenantSiteUrl("acme", {
+        currentOrigin: "https://plot-keys-git-preview.vercel.app",
+        pathname: "/",
+      }),
+    ).toBe("https://acme.plot-keys-git-preview.vercel.app/");
+  });
+
   it("prefers provided tenant hostnames for production site and dashboard URLs", () => {
     expect(
       buildTenantDashboardUrl("acme", {
@@ -121,7 +166,9 @@ describe("tenant domain helpers", () => {
         tenantHostname: "summitpoint.tenant-plotkeys.localhost",
         pathname: "/onboarding",
       }),
-    ).toBe("http://dashboard.summitpoint.app-plotkeys.localhost:1355/onboarding");
+    ).toBe(
+      "http://dashboard.summitpoint.app-plotkeys.localhost:1355/onboarding",
+    );
   });
 
   it("parses dashboard hosts without accepting the legacy public alias", () => {

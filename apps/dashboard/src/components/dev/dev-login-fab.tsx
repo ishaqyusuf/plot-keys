@@ -38,11 +38,9 @@ export function DevLoginFab({ onFill }: Props) {
       (account) => account.subdomain === currentTenantSlug,
     );
   }, [accounts, currentTenantSlug]);
-  console.log({
-    accounts,
-  });
+
   return (
-    <DevFabShell label="Accounts">
+    <DevFabShell defaultOpen label="Accounts">
       <div className="divide-y divide-amber-100 dark:divide-amber-900/50">
         {visibleAccounts.length === 0 && (
           <p className="px-4 py-3 font-mono text-xs text-amber-600 dark:text-amber-400">
@@ -55,10 +53,10 @@ export function DevLoginFab({ onFill }: Props) {
           <button
             key={account.email}
             type="button"
+            className="w-full px-4 py-2.5 text-left transition hover:bg-amber-50 active:bg-amber-100 dark:hover:bg-amber-950/30"
             onClick={() =>
               onFill({ email: account.email, password: account.password })
             }
-            className="w-full px-4 py-2.5 text-left transition hover:bg-amber-50 active:bg-amber-100 dark:hover:bg-amber-950/30"
           >
             <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-100">
               {account.name}

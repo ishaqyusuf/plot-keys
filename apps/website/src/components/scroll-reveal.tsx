@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@plotkeys/utils/cn";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -43,7 +43,9 @@ export function ScrollReveal({
         isVisible ? "animate-fade-in-up" : "opacity-0",
         className,
       )}
-      style={isVisible && delay > 0 ? { animationDelay: `${delay}s` } : undefined}
+      style={
+        isVisible && delay > 0 ? { animationDelay: `${delay}s` } : undefined
+      }
     >
       {children}
     </div>

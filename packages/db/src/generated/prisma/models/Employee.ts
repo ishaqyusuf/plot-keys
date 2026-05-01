@@ -283,7 +283,7 @@ export type EmployeeGroupByOutputType = {
   _max: EmployeeMaxAggregateOutputType | null
 }
 
-type GetEmployeeGroupByPayload<T extends EmployeeGroupByArgs> = Prisma.PrismaPromise<
+export type GetEmployeeGroupByPayload<T extends EmployeeGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<EmployeeGroupByOutputType, T['by']> &
       {

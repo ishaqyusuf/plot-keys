@@ -7,12 +7,16 @@ import {
   createAppointment,
   createCompanyOnboardingBundle,
   createCustomDomainPair,
+  createEstate,
+  createPlot,
   createPrismaClient,
   createProperty,
   type Db,
   deductAiCredits,
   deleteAgent,
   deleteAppointment,
+  deleteEstate,
+  deletePlot,
   deleteProperty,
   findCompanyById,
   findCompanyBySlug,
@@ -37,8 +41,10 @@ import {
   listAgentsForCompany,
   listAppointmentsForCompany,
   listCustomDomainsWithVerification,
+  listEstatesForCompany,
   listFeaturedProperties,
   listLeadsForCompany,
+  listPlotsForEstate,
   listPropertiesForCompany,
   listStockImageLicensesForCompany,
   listSyncableTenantDomains,
@@ -59,8 +65,10 @@ import {
   updateCompanyPlan,
   updateCompanyProfile,
   updateDraftVersion,
+  updateEstate,
   updateLeadStatus,
   updateOnboardingProfile,
+  updatePlot,
   updateProperty,
   updateSiteConfigurationContentField,
   updateSiteConfigurationThemeField,
@@ -110,6 +118,8 @@ import {
   completeOnboardingInputSchema,
   connectCustomDomainInputSchema,
   createAppointmentInputSchema,
+  createEstateInputSchema,
+  createPlotInputSchema,
   createTemplateDraftInputSchema,
   generatePageContentInputSchema,
   initializeCheckoutInputSchema,
@@ -119,7 +129,9 @@ import {
   searchDomainInputSchema,
   smartFillFieldInputSchema,
   updateAppointmentStatusInputSchema,
+  updateEstateInputSchema,
   updateLeadStatusInputSchema,
+  updatePlotInputSchema,
   updateSiteFieldInputSchema,
 } from "../schemas/workspace.schema";
 
@@ -1833,6 +1845,91 @@ export const workspaceRouter = createTRPCRouter({
 
   // ─── Properties ───────────────────────────────────────────────────────────
 
+  listEstates: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return listEstatesForCompany(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  createEstate: membershipProcedure
+    .input(createEstateInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createEstate(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        ...input,
+      });
+    }),
+
+  updateEstate: membershipProcedure
+    .input(updateEstateInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const { estateId, ...data } = input;
+      return updateEstate(
+        db,
+        estateId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
+    }),
+
+  deleteEstate: membershipProcedure
+    .input(z.object({ estateId: z.string().uuid("Invalid estate id.") }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await deleteEstate(
+        db,
+        input.estateId,
+        ctx.auth.activeMembership.companyId,
+      );
+      return { deleted: true };
+    }),
+
+  listPlots: membershipProcedure
+    .input(z.object({ estateId: z.string().uuid("Invalid estate id.") }))
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listPlotsForEstate(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input.estateId,
+      );
+    }),
+
+  createPlot: membershipProcedure
+    .input(createPlotInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return createPlot(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        ...input,
+        coordinatesJson: (input.coordinatesJson ?? undefined) as never,
+        metadataJson: (input.metadataJson ?? undefined) as never,
+        tagsJson: (input.tagsJson ?? undefined) as never,
+      });
+    }),
+
+  updatePlot: membershipProcedure
+    .input(updatePlotInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const { plotId, ...data } = input;
+      return updatePlot(db, plotId, ctx.auth.activeMembership.companyId, {
+        ...data,
+        coordinatesJson: (data.coordinatesJson ?? undefined) as never,
+        metadataJson: (data.metadataJson ?? undefined) as never,
+        tagsJson: (data.tagsJson ?? undefined) as never,
+      });
+    }),
+
+  deletePlot: membershipProcedure
+    .input(z.object({ plotId: z.string().uuid("Invalid plot id.") }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await deletePlot(db, input.plotId, ctx.auth.activeMembership.companyId);
+      return { deleted: true };
+    }),
+
   listProperties: membershipProcedure.query(async ({ ctx }) => {
     const db = getDb();
     return listPropertiesForCompany(db, ctx.auth.activeMembership.companyId, {
@@ -1844,6 +1941,7 @@ export const workspaceRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().trim().min(1, "Title is required."),
+        estateId: z.string().uuid().optional().nullable(),
         description: z.string().trim().optional().nullable(),
         price: z.string().trim().optional().nullable(),
         location: z.string().trim().optional().nullable(),
@@ -1862,6 +1960,17 @@ export const workspaceRouter = createTRPCRouter({
           .optional()
           .nullable(),
         subType: z.string().trim().optional().nullable(),
+        quantityAvailable: z.number().int().nonnegative().optional().nullable(),
+        paymentPlanMonths: z.number().int().positive().optional().nullable(),
+        paymentPlanAmount: z.string().trim().optional().nullable(),
+        paymentPlanInitialDepositPercent: z
+          .number()
+          .min(0)
+          .max(100)
+          .optional()
+          .nullable(),
+        paymentPlanMonthlyAmount: z.string().trim().optional().nullable(),
+        paymentPlansJson: z.array(z.unknown()).optional().nullable(),
         status: z
           .enum(["active", "sold", "rented", "off_market"])
           .optional()
@@ -1871,9 +1980,11 @@ export const workspaceRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
+      const paymentPlansJson = (input.paymentPlansJson ?? undefined) as never;
       return createProperty(db, {
         companyId: ctx.auth.activeMembership.companyId,
         ...input,
+        paymentPlansJson,
       });
     }),
 
@@ -1881,6 +1992,7 @@ export const workspaceRouter = createTRPCRouter({
     .input(
       z.object({
         propertyId: z.string().trim().min(1),
+        estateId: z.string().uuid().optional().nullable(),
         title: z.string().trim().min(1).optional(),
         description: z.string().trim().optional().nullable(),
         price: z.string().trim().optional().nullable(),
@@ -1900,6 +2012,17 @@ export const workspaceRouter = createTRPCRouter({
           .optional()
           .nullable(),
         subType: z.string().trim().optional().nullable(),
+        quantityAvailable: z.number().int().nonnegative().optional().nullable(),
+        paymentPlanMonths: z.number().int().positive().optional().nullable(),
+        paymentPlanAmount: z.string().trim().optional().nullable(),
+        paymentPlanInitialDepositPercent: z
+          .number()
+          .min(0)
+          .max(100)
+          .optional()
+          .nullable(),
+        paymentPlanMonthlyAmount: z.string().trim().optional().nullable(),
+        paymentPlansJson: z.array(z.unknown()).optional().nullable(),
         status: z.enum(["active", "sold", "rented", "off_market"]).optional(),
         featured: z.boolean().optional(),
       }),
@@ -1907,11 +2030,12 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const { propertyId, ...data } = input;
+      const paymentPlansJson = (data.paymentPlansJson ?? undefined) as never;
       return updateProperty(
         db,
         propertyId,
         ctx.auth.activeMembership.companyId,
-        data,
+        { ...data, paymentPlansJson },
       );
     }),
 

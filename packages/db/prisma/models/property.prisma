@@ -2,6 +2,8 @@ model Property {
   id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   companyId    String               @map("company_id") @db.Uuid
   company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  estateId     String?              @map("estate_id") @db.Uuid
+  estate       Estate?              @relation(fields: [estateId], references: [id], onDelete: SetNull)
   title        String
   description  String?
   price        String?
@@ -12,6 +14,13 @@ model Property {
   imageUrl     String?              @map("image_url")
   type         PropertyType?
   subType      String?              @map("sub_type")
+  quantityAvailable Int?            @map("quantity_available")
+  unitLabel    String?              @map("unit_label")
+  paymentPlanMonths Int?            @map("payment_plan_months")
+  paymentPlanAmount String?         @map("payment_plan_amount")
+  paymentPlanInitialDepositPercent Float? @map("payment_plan_initial_deposit_percent")
+  paymentPlanMonthlyAmount String?  @map("payment_plan_monthly_amount")
+  paymentPlansJson Json?            @map("payment_plans_json")
   status       PropertyStatus       @default(active)
   publishState PropertyPublishState @default(draft) @map("publish_state")
   featured     Boolean              @default(false)
@@ -29,6 +38,7 @@ model Property {
   @@index([deletedAt], map: "properties_deleted_at_idx")
   @@index([companyId, publishState], map: "properties_company_publish_state_idx")
   @@index([companyId, type], map: "properties_company_type_idx")
+  @@index([companyId, estateId], map: "properties_company_estate_id_idx")
   @@map("properties")
 }
 

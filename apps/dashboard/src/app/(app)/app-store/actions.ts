@@ -5,6 +5,7 @@ import {
   findAppById,
   isAppAvailable,
 } from "@plotkeys/app-store/registry";
+import { tierLabels } from "@plotkeys/utils";
 import { revalidatePath } from "next/cache";
 
 import {
@@ -45,7 +46,7 @@ export async function setAppEnabled(
   if (enabled && !isAppAvailable(app, planTier)) {
     return {
       ok: false,
-      error: `${app.label} requires the ${app.planGate} plan.`,
+      error: `${app.label} requires the ${tierLabels[app.planGate]} plan.`,
     };
   }
 

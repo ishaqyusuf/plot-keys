@@ -1,9 +1,12 @@
-import type { AppDefinition, GlobalNavSection } from "@plotkeys/app-store/registry";
+import type {
+  AppDefinition,
+  GlobalNavSection,
+} from "@plotkeys/app-store/registry";
 import {
   getActiveLinkFromMap,
   getLinkModules,
-  validateLinks,
   type NavModule,
+  validateLinks,
 } from "@plotkeys/site-nav";
 import { createDashboardNavRegistry } from "./registry";
 
@@ -23,11 +26,14 @@ function isPathActive(pathname: string, href: string) {
   const normalizedPath = normalizePath(pathname);
   const normalizedHref = normalizePath(href);
 
-  return normalizedPath === normalizedHref || normalizedPath.startsWith(`${normalizedHref}/`);
+  return (
+    normalizedPath === normalizedHref ||
+    normalizedPath.startsWith(`${normalizedHref}/`)
+  );
 }
 
 export function getVisibleDashboardNav(input: {
-  activeApp: AppDefinition | null;
+  enabledApps: readonly AppDefinition[];
   globalTop: GlobalNavSection;
   platformGroup: GlobalNavSection;
 }): NavModule[] {
@@ -38,22 +44,37 @@ export function getVisibleDashboardNav(input: {
   );
 }
 
-export function getActiveDashboardNavItem(pathname: string, modules: NavModule[]) {
+export function getActiveDashboardNavItem(
+  pathname: string,
+  modules: NavModule[],
+) {
   const linksMap = getLinkModules(modules).linksNameMap;
   const active = getActiveLinkFromMap(pathname, linksMap);
   if (!active?.name) {
     return null;
   }
 
-  const items = modules.flatMap((module) => module.sections.flatMap((section) => section.links));
-  return items.find((item) => item.name === active.name && isPathActive(pathname, item.href ?? "")) ?? null;
+  const items = modules.flatMap((module) =>
+    module.sections.flatMap((section) => section.links),
+  );
+  return (
+    items.find(
+      (item) =>
+        item.name === active.name && isPathActive(pathname, item.href ?? ""),
+    ) ?? null
+  );
 }
 
-export function getCurrentDashboardModule(pathname: string, modules: NavModule[]) {
+export function getCurrentDashboardModule(
+  pathname: string,
+  modules: NavModule[],
+) {
   return (
     modules.find((module) =>
       module.sections.some((section) =>
-        section.links.some((item) => item.show && isPathActive(pathname, item.href ?? "")),
+        section.links.some(
+          (item) => item.show && isPathActive(pathname, item.href ?? ""),
+        ),
       ),
     ) ??
     modules[0] ??

@@ -12,13 +12,15 @@ Status: Planning only. No code changes accompany this document.
 
 ## 1. Platform Tiers (Recap)
 
-| Tier    | Monthly Price | Annual Price | Target User                          |
-|---------|--------------|--------------|--------------------------------------|
-| Starter | Free         | Free         | Solo operators, spin-off brands      |
-| Plus    | ₦15,000/mo   | ₦144,000/yr  | Growing agencies, estate companies   |
-| Pro     | ₦35,000/mo   | ₦336,000/yr  | Full-service real-estate companies   |
+| Public tier | Internal key | Monthly Price | Annual Price | Target User                          |
+|-------------|--------------|---------------|--------------|--------------------------------------|
+| Launch      | `starter`    | ₦20,000/mo    | ₦192,000/yr  | Solo operators, spin-off brands      |
+| Growth      | `plus`       | ₦45,000/mo    | ₦432,000/yr  | Growing agencies, estate companies   |
+| Scale       | `pro`        | ₦90,000/mo    | ₦864,000/yr  | Full-service real-estate companies   |
 
 These three tiers gate every feature described below.  
+Customer-facing copy should use Launch/Growth/Scale; `starter`/`plus`/`pro`
+are storage and entitlement keys only.
 Symbols used in tables: ✅ Included · 🔒 Plan-gated · ❌ Not available · 🔢 Usage-capped
 
 ---

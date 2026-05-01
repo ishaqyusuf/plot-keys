@@ -132,7 +132,7 @@ export default async function PropertyDetailPage({
               {property.publishState}
             </Badge>
             <Button asChild size="sm" variant="outline">
-              <Link href="/properties">Back to properties</Link>
+              <Link href="/properties">Back to listings</Link>
             </Button>
             {canEdit && property.publishState !== "published" ? (
               <form action={updatePropertyPublishStateAction}>
@@ -181,7 +181,7 @@ export default async function PropertyDetailPage({
             <div>
               <DashboardSectionTitle>Description</DashboardSectionTitle>
               <DashboardSectionDescription>
-                Narrative and selling points for this property listing.
+                Narrative and selling points for this listing.
               </DashboardSectionDescription>
             </div>
           </DashboardSectionHeader>

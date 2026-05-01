@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.5.0
- * Query Engine version: 280c870be64f457428992c43c1f6d557fab6e29e
+ * Prisma Client JS version: 7.7.0
+ * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.5.0",
-  engine: "280c870be64f457428992c43c1f6d557fab6e29e"
+  client: "7.7.0",
+  engine: "75cbdc1eb7150937890ad5465d861175c6624711"
 }
 
 /**
@@ -394,6 +394,7 @@ export const ModelName = {
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
   BlogPost: 'BlogPost',
+  CompanyApp: 'CompanyApp',
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
@@ -401,12 +402,19 @@ export const ModelName = {
   CustomerOffer: 'CustomerOffer',
   Department: 'Department',
   Employee: 'Employee',
+  Estate: 'Estate',
+  EstateLayout: 'EstateLayout',
   Lead: 'Lead',
   LeaveRequest: 'LeaveRequest',
   Membership: 'Membership',
   NotificationPreference: 'NotificationPreference',
   Notification: 'Notification',
   PayrollEntry: 'PayrollEntry',
+  Plot: 'Plot',
+  PlotReservation: 'PlotReservation',
+  PlotReservationChoice: 'PlotReservationChoice',
+  PlotStatusHistory: 'PlotStatusHistory',
+  PlotDocument: 'PlotDocument',
   ProjectAssignment: 'ProjectAssignment',
   ProjectBudget: 'ProjectBudget',
   ProjectBudgetLineItem: 'ProjectBudgetLineItem',
@@ -448,7 +456,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyIntegration" | "company" | "customer" | "savedListing" | "customerOffer" | "department" | "employee" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "waitlistEntry" | "website" | "websiteVersion"
+    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyApp" | "companyIntegration" | "company" | "customer" | "savedListing" | "customerOffer" | "department" | "employee" | "estate" | "estateLayout" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "plot" | "plotReservation" | "plotReservationChoice" | "plotStatusHistory" | "plotDocument" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "waitlistEntry" | "website" | "websiteVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1192,6 +1200,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CompanyApp: {
+      payload: Prisma.$CompanyAppPayload<ExtArgs>
+      fields: Prisma.CompanyAppFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompanyAppFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompanyAppFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        findFirst: {
+          args: Prisma.CompanyAppFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompanyAppFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        findMany: {
+          args: Prisma.CompanyAppFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>[]
+        }
+        create: {
+          args: Prisma.CompanyAppCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        createMany: {
+          args: Prisma.CompanyAppCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CompanyAppCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>[]
+        }
+        delete: {
+          args: Prisma.CompanyAppDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        update: {
+          args: Prisma.CompanyAppUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        deleteMany: {
+          args: Prisma.CompanyAppDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompanyAppUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CompanyAppUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>[]
+        }
+        upsert: {
+          args: Prisma.CompanyAppUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAppPayload>
+        }
+        aggregate: {
+          args: Prisma.CompanyAppAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyApp>
+        }
+        groupBy: {
+          args: Prisma.CompanyAppGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAppGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompanyAppCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompanyAppCountAggregateOutputType> | number
+        }
+      }
+    }
     CompanyIntegration: {
       payload: Prisma.$CompanyIntegrationPayload<ExtArgs>
       fields: Prisma.CompanyIntegrationFieldRefs
@@ -1710,6 +1792,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Estate: {
+      payload: Prisma.$EstatePayload<ExtArgs>
+      fields: Prisma.EstateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EstateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EstateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        findFirst: {
+          args: Prisma.EstateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EstateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        findMany: {
+          args: Prisma.EstateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>[]
+        }
+        create: {
+          args: Prisma.EstateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        createMany: {
+          args: Prisma.EstateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EstateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>[]
+        }
+        delete: {
+          args: Prisma.EstateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        update: {
+          args: Prisma.EstateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        deleteMany: {
+          args: Prisma.EstateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EstateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EstateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>[]
+        }
+        upsert: {
+          args: Prisma.EstateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstatePayload>
+        }
+        aggregate: {
+          args: Prisma.EstateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEstate>
+        }
+        groupBy: {
+          args: Prisma.EstateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EstateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EstateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EstateCountAggregateOutputType> | number
+        }
+      }
+    }
+    EstateLayout: {
+      payload: Prisma.$EstateLayoutPayload<ExtArgs>
+      fields: Prisma.EstateLayoutFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EstateLayoutFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EstateLayoutFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        findFirst: {
+          args: Prisma.EstateLayoutFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EstateLayoutFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        findMany: {
+          args: Prisma.EstateLayoutFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>[]
+        }
+        create: {
+          args: Prisma.EstateLayoutCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        createMany: {
+          args: Prisma.EstateLayoutCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EstateLayoutCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>[]
+        }
+        delete: {
+          args: Prisma.EstateLayoutDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        update: {
+          args: Prisma.EstateLayoutUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        deleteMany: {
+          args: Prisma.EstateLayoutDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EstateLayoutUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EstateLayoutUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>[]
+        }
+        upsert: {
+          args: Prisma.EstateLayoutUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EstateLayoutPayload>
+        }
+        aggregate: {
+          args: Prisma.EstateLayoutAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEstateLayout>
+        }
+        groupBy: {
+          args: Prisma.EstateLayoutGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EstateLayoutGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EstateLayoutCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EstateLayoutCountAggregateOutputType> | number
+        }
+      }
+    }
     Lead: {
       payload: Prisma.$LeadPayload<ExtArgs>
       fields: Prisma.LeadFieldRefs
@@ -2151,6 +2381,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PayrollEntryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PayrollEntryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Plot: {
+      payload: Prisma.$PlotPayload<ExtArgs>
+      fields: Prisma.PlotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        findFirst: {
+          args: Prisma.PlotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        findMany: {
+          args: Prisma.PlotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>[]
+        }
+        create: {
+          args: Prisma.PlotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        createMany: {
+          args: Prisma.PlotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>[]
+        }
+        delete: {
+          args: Prisma.PlotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        update: {
+          args: Prisma.PlotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotPayload>
+        }
+        aggregate: {
+          args: Prisma.PlotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlot>
+        }
+        groupBy: {
+          args: Prisma.PlotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlotReservation: {
+      payload: Prisma.$PlotReservationPayload<ExtArgs>
+      fields: Prisma.PlotReservationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlotReservationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlotReservationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        findFirst: {
+          args: Prisma.PlotReservationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlotReservationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        findMany: {
+          args: Prisma.PlotReservationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>[]
+        }
+        create: {
+          args: Prisma.PlotReservationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        createMany: {
+          args: Prisma.PlotReservationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlotReservationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>[]
+        }
+        delete: {
+          args: Prisma.PlotReservationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        update: {
+          args: Prisma.PlotReservationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlotReservationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlotReservationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlotReservationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlotReservationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationPayload>
+        }
+        aggregate: {
+          args: Prisma.PlotReservationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlotReservation>
+        }
+        groupBy: {
+          args: Prisma.PlotReservationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotReservationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlotReservationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotReservationCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlotReservationChoice: {
+      payload: Prisma.$PlotReservationChoicePayload<ExtArgs>
+      fields: Prisma.PlotReservationChoiceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlotReservationChoiceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlotReservationChoiceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        findFirst: {
+          args: Prisma.PlotReservationChoiceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlotReservationChoiceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        findMany: {
+          args: Prisma.PlotReservationChoiceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>[]
+        }
+        create: {
+          args: Prisma.PlotReservationChoiceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        createMany: {
+          args: Prisma.PlotReservationChoiceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlotReservationChoiceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>[]
+        }
+        delete: {
+          args: Prisma.PlotReservationChoiceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        update: {
+          args: Prisma.PlotReservationChoiceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlotReservationChoiceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlotReservationChoiceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlotReservationChoiceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlotReservationChoiceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotReservationChoicePayload>
+        }
+        aggregate: {
+          args: Prisma.PlotReservationChoiceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlotReservationChoice>
+        }
+        groupBy: {
+          args: Prisma.PlotReservationChoiceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotReservationChoiceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlotReservationChoiceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotReservationChoiceCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlotStatusHistory: {
+      payload: Prisma.$PlotStatusHistoryPayload<ExtArgs>
+      fields: Prisma.PlotStatusHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlotStatusHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlotStatusHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.PlotStatusHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlotStatusHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.PlotStatusHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.PlotStatusHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.PlotStatusHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlotStatusHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.PlotStatusHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        update: {
+          args: Prisma.PlotStatusHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlotStatusHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlotStatusHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlotStatusHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlotStatusHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotStatusHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.PlotStatusHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlotStatusHistory>
+        }
+        groupBy: {
+          args: Prisma.PlotStatusHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotStatusHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlotStatusHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotStatusHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlotDocument: {
+      payload: Prisma.$PlotDocumentPayload<ExtArgs>
+      fields: Prisma.PlotDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlotDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlotDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.PlotDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlotDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.PlotDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.PlotDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.PlotDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlotDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.PlotDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        update: {
+          args: Prisma.PlotDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlotDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlotDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlotDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlotDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlotDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.PlotDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlotDocument>
+        }
+        groupBy: {
+          args: Prisma.PlotDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlotDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlotDocumentCountAggregateOutputType> | number
         }
       }
     }
@@ -4285,6 +4885,16 @@ export const BlogPostScalarFieldEnum = {
 export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
 
 
+export const CompanyAppScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  appKey: 'appKey',
+  installedAt: 'installedAt'
+} as const
+
+export type CompanyAppScalarFieldEnum = (typeof CompanyAppScalarFieldEnum)[keyof typeof CompanyAppScalarFieldEnum]
+
+
 export const CompanyIntegrationScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -4400,6 +5010,47 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
+export const EstateScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  location: 'location',
+  landmarks: 'landmarks',
+  amenities: 'amenities',
+  approvals: 'approvals',
+  specialPurposeUses: 'specialPurposeUses',
+  phaseLabel: 'phaseLabel',
+  heroImageUrl: 'heroImageUrl',
+  brochureUrl: 'brochureUrl',
+  publishState: 'publishState',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type EstateScalarFieldEnum = (typeof EstateScalarFieldEnum)[keyof typeof EstateScalarFieldEnum]
+
+
+export const EstateLayoutScalarFieldEnum = {
+  id: 'id',
+  estateId: 'estateId',
+  sourceUrl: 'sourceUrl',
+  normalizedImageUrl: 'normalizedImageUrl',
+  imageWidth: 'imageWidth',
+  imageHeight: 'imageHeight',
+  rotationDegrees: 'rotationDegrees',
+  version: 'version',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EstateLayoutScalarFieldEnum = (typeof EstateLayoutScalarFieldEnum)[keyof typeof EstateLayoutScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -4495,6 +5146,89 @@ export const PayrollEntryScalarFieldEnum = {
 } as const
 
 export type PayrollEntryScalarFieldEnum = (typeof PayrollEntryScalarFieldEnum)[keyof typeof PayrollEntryScalarFieldEnum]
+
+
+export const PlotScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  estateId: 'estateId',
+  plotCode: 'plotCode',
+  block: 'block',
+  street: 'street',
+  sizeSqm: 'sizeSqm',
+  price: 'price',
+  type: 'type',
+  status: 'status',
+  facing: 'facing',
+  isCornerPiece: 'isCornerPiece',
+  isPremium: 'isPremium',
+  coordinatesJson: 'coordinatesJson',
+  tagsJson: 'tagsJson',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PlotScalarFieldEnum = (typeof PlotScalarFieldEnum)[keyof typeof PlotScalarFieldEnum]
+
+
+export const PlotReservationScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  estateId: 'estateId',
+  status: 'status',
+  holdExpiresAt: 'holdExpiresAt',
+  submittedAt: 'submittedAt',
+  approvedAt: 'approvedAt',
+  rejectedAt: 'rejectedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlotReservationScalarFieldEnum = (typeof PlotReservationScalarFieldEnum)[keyof typeof PlotReservationScalarFieldEnum]
+
+
+export const PlotReservationChoiceScalarFieldEnum = {
+  id: 'id',
+  reservationId: 'reservationId',
+  plotId: 'plotId',
+  rank: 'rank',
+  isPrimary: 'isPrimary',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotReservationChoiceScalarFieldEnum = (typeof PlotReservationChoiceScalarFieldEnum)[keyof typeof PlotReservationChoiceScalarFieldEnum]
+
+
+export const PlotStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  plotId: 'plotId',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  actorUserId: 'actorUserId',
+  actorCustomerId: 'actorCustomerId',
+  reason: 'reason',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotStatusHistoryScalarFieldEnum = (typeof PlotStatusHistoryScalarFieldEnum)[keyof typeof PlotStatusHistoryScalarFieldEnum]
+
+
+export const PlotDocumentScalarFieldEnum = {
+  id: 'id',
+  plotId: 'plotId',
+  kind: 'kind',
+  url: 'url',
+  label: 'label',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotDocumentScalarFieldEnum = (typeof PlotDocumentScalarFieldEnum)[keyof typeof PlotDocumentScalarFieldEnum]
 
 
 export const ProjectAssignmentScalarFieldEnum = {
@@ -4736,6 +5470,7 @@ export type PropertyMediaScalarFieldEnum = (typeof PropertyMediaScalarFieldEnum)
 export const PropertyScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
+  estateId: 'estateId',
   title: 'title',
   description: 'description',
   price: 'price',
@@ -4746,6 +5481,13 @@ export const PropertyScalarFieldEnum = {
   imageUrl: 'imageUrl',
   type: 'type',
   subType: 'subType',
+  quantityAvailable: 'quantityAvailable',
+  unitLabel: 'unitLabel',
+  paymentPlanMonths: 'paymentPlanMonths',
+  paymentPlanAmount: 'paymentPlanAmount',
+  paymentPlanInitialDepositPercent: 'paymentPlanInitialDepositPercent',
+  paymentPlanMonthlyAmount: 'paymentPlanMonthlyAmount',
+  paymentPlansJson: 'paymentPlansJson',
   status: 'status',
   publishState: 'publishState',
   featured: 'featured',
@@ -5217,6 +5959,34 @@ export type ListEnumEmployeeStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'EstatePublishState'
+ */
+export type EnumEstatePublishStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EstatePublishState'>
+    
+
+
+/**
+ * Reference to a field of type 'EstatePublishState[]'
+ */
+export type ListEnumEstatePublishStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EstatePublishState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EstateLayoutStatus'
+ */
+export type EnumEstateLayoutStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EstateLayoutStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EstateLayoutStatus[]'
+ */
+export type ListEnumEstateLayoutStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EstateLayoutStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'LeadStatus'
  */
 export type EnumLeadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadStatus'>
@@ -5297,6 +6067,76 @@ export type EnumPayrollStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'PayrollStatus[]'
  */
 export type ListEnumPayrollStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PayrollStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotType'
+ */
+export type EnumPlotTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotType'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotType[]'
+ */
+export type ListEnumPlotTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotStatus'
+ */
+export type EnumPlotStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotStatus[]'
+ */
+export type ListEnumPlotStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotReservationStatus'
+ */
+export type EnumPlotReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotReservationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotReservationStatus[]'
+ */
+export type ListEnumPlotReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotReservationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotReservationChoiceStatus'
+ */
+export type EnumPlotReservationChoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotReservationChoiceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotReservationChoiceStatus[]'
+ */
+export type ListEnumPlotReservationChoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotReservationChoiceStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotDocumentKind'
+ */
+export type EnumPlotDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotDocumentKind'>
+    
+
+
+/**
+ * Reference to a field of type 'PlotDocumentKind[]'
+ */
+export type ListEnumPlotDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlotDocumentKind[]'>
     
 
 
@@ -5796,6 +6636,7 @@ export type GlobalOmitConfig = {
   verification?: Prisma.VerificationOmit
   billingLineItem?: Prisma.BillingLineItemOmit
   blogPost?: Prisma.BlogPostOmit
+  companyApp?: Prisma.CompanyAppOmit
   companyIntegration?: Prisma.CompanyIntegrationOmit
   company?: Prisma.CompanyOmit
   customer?: Prisma.CustomerOmit
@@ -5803,12 +6644,19 @@ export type GlobalOmitConfig = {
   customerOffer?: Prisma.CustomerOfferOmit
   department?: Prisma.DepartmentOmit
   employee?: Prisma.EmployeeOmit
+  estate?: Prisma.EstateOmit
+  estateLayout?: Prisma.EstateLayoutOmit
   lead?: Prisma.LeadOmit
   leaveRequest?: Prisma.LeaveRequestOmit
   membership?: Prisma.MembershipOmit
   notificationPreference?: Prisma.NotificationPreferenceOmit
   notification?: Prisma.NotificationOmit
   payrollEntry?: Prisma.PayrollEntryOmit
+  plot?: Prisma.PlotOmit
+  plotReservation?: Prisma.PlotReservationOmit
+  plotReservationChoice?: Prisma.PlotReservationChoiceOmit
+  plotStatusHistory?: Prisma.PlotStatusHistoryOmit
+  plotDocument?: Prisma.PlotDocumentOmit
   projectAssignment?: Prisma.ProjectAssignmentOmit
   projectBudget?: Prisma.ProjectBudgetOmit
   projectBudgetLineItem?: Prisma.ProjectBudgetLineItemOmit

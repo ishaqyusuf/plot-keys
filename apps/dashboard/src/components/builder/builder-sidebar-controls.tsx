@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@plotkeys/ui/dropdown-menu";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Icon } from "@plotkeys/ui/icons";
 import { Input } from "@plotkeys/ui/input";
 import { Switch } from "@plotkeys/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
@@ -29,10 +30,10 @@ import { Textarea } from "@plotkeys/ui/textarea";
 import {
   describeTemplateAccess,
   type SubscriptionTier,
+  templateTierLabels,
   tierLabels,
 } from "@plotkeys/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Icon } from "@plotkeys/ui/icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useRef, useState, useTransition } from "react";
 
@@ -473,7 +474,7 @@ function TemplatePicker({
             {currentTemplate?.name ?? currentTemplateKey}
           </span>
           <Badge className="mt-1.5" variant="outline">
-            {currentTemplate?.tier ?? "starter"}
+            {templateTierLabels[currentTemplate?.tier ?? "starter"]}
           </Badge>
           <ChevronIcon />
         </button>
@@ -489,9 +490,11 @@ function TemplatePicker({
           value={group}
         >
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="starter">Starter</TabsTrigger>
-            <TabsTrigger value="plus">Plus</TabsTrigger>
-            <TabsTrigger value="pro">Pro</TabsTrigger>
+            <TabsTrigger value="starter">
+              {templateTierLabels.starter}
+            </TabsTrigger>
+            <TabsTrigger value="plus">{templateTierLabels.plus}</TabsTrigger>
+            <TabsTrigger value="pro">{templateTierLabels.pro}</TabsTrigger>
           </TabsList>
           <TabsContent className="mt-0" value={group}>
             <DropdownMenuRadioGroup

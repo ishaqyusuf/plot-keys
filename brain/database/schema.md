@@ -21,6 +21,13 @@ This file tracks the current and planned core entities.
 - `Agent`
 - `Property`
 - `PropertyMedia`
+- `Estate`
+- `EstateLayout`
+- `Plot`
+- `PlotReservation`
+- `PlotReservationChoice`
+- `PlotStatusHistory`
+- `PlotDocument`
 - `Lead`
 - `Client`
 - `Appointment`
@@ -64,6 +71,13 @@ This file tracks the current and planned core entities.
 - `Agent`: role-specific company member or profile
 - `Property`: listing record owned by a company
 - `PropertyMedia`: media assets attached to a property
+- `Estate`: tenant-owned land development or estate-phase container for multi-plot inventory
+- `EstateLayout`: uploaded or generated estate-layout source plus normalized render metadata
+- `Plot`: one selectable land inventory unit within an estate
+- `PlotReservation`: customer hold, processing, or approval workflow record for one allocation attempt
+- `PlotReservationChoice`: primary or backup plot choice attached to a reservation
+- `PlotStatusHistory`: immutable audit trail for plot status and assignment changes
+- `PlotDocument`: plot-specific legal or supporting asset
 - `Lead`: inbound interest tied to a property and possibly an agent
 - `Client`: CRM entity for deal progression
 - `Appointment`: scheduled viewing or meeting
@@ -117,6 +131,97 @@ This file tracks the current and planned core entities.
 - Current provider identifiers: `postgres` and `supabase-postgres`.
 - Implemented soft-delete support with nullable `deletedAt`/`deleted_at` columns on the current core tables.
 - Better Auth-owned runtime tables are not implemented yet.
+- Estate-layout and plot-allocation entities are planned but not yet implemented. See `brain/features/estate-layout-and-plot-allocation.md`.
+
+## Planned Estate Allocation Entities
+- `Estate`
+  - Planned fields:
+    - `id`
+    - `companyId`
+    - `title`
+    - `slug`
+    - `description`
+    - `location`
+    - `phaseLabel`
+    - `heroImageUrl`
+    - `publishState`
+    - `createdAt`
+    - `updatedAt`
+    - `deletedAt`
+- `EstateLayout`
+  - Planned fields:
+    - `id`
+    - `estateId`
+    - `sourceUrl`
+    - `normalizedImageUrl`
+    - `imageWidth`
+    - `imageHeight`
+    - `rotationDegrees`
+    - `version`
+    - `status`
+    - `createdById`
+    - `createdAt`
+- `Plot`
+  - Planned fields:
+    - `id`
+    - `companyId`
+    - `estateId`
+    - `plotCode`
+    - `block`
+    - `street`
+    - `sizeSqm`
+    - `price`
+    - `type`
+    - `status`
+    - `facing`
+    - `isCornerPiece`
+    - `isPremium`
+    - `coordinatesJson`
+    - `tagsJson`
+    - `createdAt`
+    - `updatedAt`
+    - `deletedAt`
+- `PlotReservation`
+  - Planned fields:
+    - `id`
+    - `companyId`
+    - `customerId`
+    - `estateId`
+    - `status`
+    - `holdExpiresAt`
+    - `submittedAt`
+    - `approvedAt`
+    - `rejectedAt`
+    - `notes`
+    - `createdAt`
+    - `updatedAt`
+- `PlotReservationChoice`
+  - Planned fields:
+    - `id`
+    - `reservationId`
+    - `plotId`
+    - `rank`
+    - `isPrimary`
+    - `status`
+- `PlotStatusHistory`
+  - Planned fields:
+    - `id`
+    - `plotId`
+    - `fromStatus`
+    - `toStatus`
+    - `actorUserId`
+    - `actorCustomerId`
+    - `reason`
+    - `metadataJson`
+    - `createdAt`
+- `PlotDocument`
+  - Planned fields:
+    - `id`
+    - `plotId`
+    - `kind`
+    - `url`
+    - `label`
+    - `createdAt`
 
 ## Implemented Website Builder Schema
 - `SiteConfiguration`

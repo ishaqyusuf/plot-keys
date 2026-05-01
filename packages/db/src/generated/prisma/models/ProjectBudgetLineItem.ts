@@ -246,7 +246,7 @@ export type ProjectBudgetLineItemGroupByOutputType = {
   _max: ProjectBudgetLineItemMaxAggregateOutputType | null
 }
 
-type GetProjectBudgetLineItemGroupByPayload<T extends ProjectBudgetLineItemGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectBudgetLineItemGroupByPayload<T extends ProjectBudgetLineItemGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectBudgetLineItemGroupByOutputType, T['by']> &
       {

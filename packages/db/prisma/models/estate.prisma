@@ -1,0 +1,66 @@
+enum EstatePublishState {
+  draft
+  published
+  archived
+
+  @@map("estate_publish_state")
+}
+
+enum EstateLayoutStatus {
+  draft
+  published
+  archived
+
+  @@map("estate_layout_status")
+}
+
+model Estate {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId          String             @map("company_id") @db.Uuid
+  title              String
+  slug               String
+  description        String?
+  location           String?
+  landmarks          String?
+  amenities          String?
+  approvals          String?
+  specialPurposeUses String?            @map("special_purpose_uses")
+  phaseLabel         String?            @map("phase_label")
+  heroImageUrl       String?            @map("hero_image_url")
+  brochureUrl        String?            @map("brochure_url")
+  publishState       EstatePublishState @default(draft) @map("publish_state")
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  company            Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  layouts            EstateLayout[]
+  properties         Property[]
+  plots              Plot[]
+  reservations       PlotReservation[]
+
+  @@unique([companyId, slug], map: "estates_company_slug_key")
+  @@index([companyId], map: "estates_company_id_idx")
+  @@index([companyId, publishState], map: "estates_company_publish_state_idx")
+  @@index([deletedAt], map: "estates_deleted_at_idx")
+  @@map("estates")
+}
+
+model EstateLayout {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estateId           String            @map("estate_id") @db.Uuid
+  sourceUrl          String            @map("source_url")
+  normalizedImageUrl String?           @map("normalized_image_url")
+  imageWidth         Int?              @map("image_width")
+  imageHeight        Int?              @map("image_height")
+  rotationDegrees    Int               @default(0) @map("rotation_degrees")
+  version            Int               @default(1)
+  status             EstateLayoutStatus @default(draft)
+  createdById        String?           @map("created_by_id")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estate             Estate            @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+  @@index([estateId], map: "estate_layouts_estate_id_idx")
+  @@index([estateId, version], map: "estate_layouts_estate_version_idx")
+  @@map("estate_layouts")
+}

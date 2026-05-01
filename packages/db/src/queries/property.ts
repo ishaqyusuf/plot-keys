@@ -1,4 +1,4 @@
-import type { Prisma } from "../generated/prisma/client";
+import { Prisma } from "../generated/prisma/client";
 import type { Db } from "../prisma";
 
 export type PropertyTypeValue =
@@ -12,6 +12,7 @@ export async function createProperty(
   db: Db,
   data: {
     companyId: string;
+    estateId?: string | null;
     title: string;
     description?: string | null;
     price?: string | null;
@@ -22,6 +23,12 @@ export async function createProperty(
     imageUrl?: string | null;
     type?: PropertyTypeValue | null;
     subType?: string | null;
+    quantityAvailable?: number | null;
+    paymentPlanMonths?: number | null;
+    paymentPlanAmount?: string | null;
+    paymentPlanInitialDepositPercent?: number | null;
+    paymentPlanMonthlyAmount?: string | null;
+    paymentPlansJson?: Prisma.InputJsonValue | null;
     status?: "active" | "sold" | "rented" | "off_market";
     featured?: boolean;
   },
@@ -29,6 +36,7 @@ export async function createProperty(
   return db.property.create({
     data: {
       companyId: data.companyId,
+      estateId: data.estateId ?? null,
       title: data.title,
       description: data.description ?? null,
       price: data.price ?? null,
@@ -39,6 +47,13 @@ export async function createProperty(
       imageUrl: data.imageUrl ?? null,
       type: data.type ?? null,
       subType: data.subType ?? null,
+      quantityAvailable: data.quantityAvailable ?? null,
+      paymentPlanMonths: data.paymentPlanMonths ?? null,
+      paymentPlanAmount: data.paymentPlanAmount ?? null,
+      paymentPlanInitialDepositPercent:
+        data.paymentPlanInitialDepositPercent ?? null,
+      paymentPlanMonthlyAmount: data.paymentPlanMonthlyAmount ?? null,
+      paymentPlansJson: data.paymentPlansJson ?? Prisma.JsonNull,
       status: data.status ?? "active",
       featured: data.featured ?? false,
     },
@@ -51,6 +66,7 @@ export async function updateProperty(
   companyId: string,
   data: {
     title?: string;
+    estateId?: string | null;
     description?: string | null;
     price?: string | null;
     location?: string | null;
@@ -60,6 +76,12 @@ export async function updateProperty(
     imageUrl?: string | null;
     type?: PropertyTypeValue | null;
     subType?: string | null;
+    quantityAvailable?: number | null;
+    paymentPlanMonths?: number | null;
+    paymentPlanAmount?: string | null;
+    paymentPlanInitialDepositPercent?: number | null;
+    paymentPlanMonthlyAmount?: string | null;
+    paymentPlansJson?: Prisma.InputJsonValue | null;
     status?: "active" | "sold" | "rented" | "off_market";
     featured?: boolean;
   },
@@ -67,6 +89,11 @@ export async function updateProperty(
   const updateData: Prisma.PropertyUpdateInput = {};
 
   if (data.title !== undefined) updateData.title = data.title;
+  if (data.estateId !== undefined) {
+    updateData.estate = data.estateId
+      ? { connect: { id: data.estateId } }
+      : { disconnect: true };
+  }
   if (data.description !== undefined) updateData.description = data.description;
   if (data.price !== undefined) updateData.price = data.price;
   if (data.location !== undefined) updateData.location = data.location ?? "";
@@ -76,6 +103,25 @@ export async function updateProperty(
   if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
   if (data.type !== undefined) updateData.type = data.type;
   if (data.subType !== undefined) updateData.subType = data.subType;
+  if (data.quantityAvailable !== undefined) {
+    updateData.quantityAvailable = data.quantityAvailable;
+  }
+  if (data.paymentPlanMonths !== undefined) {
+    updateData.paymentPlanMonths = data.paymentPlanMonths;
+  }
+  if (data.paymentPlanAmount !== undefined) {
+    updateData.paymentPlanAmount = data.paymentPlanAmount;
+  }
+  if (data.paymentPlanInitialDepositPercent !== undefined) {
+    updateData.paymentPlanInitialDepositPercent =
+      data.paymentPlanInitialDepositPercent;
+  }
+  if (data.paymentPlanMonthlyAmount !== undefined) {
+    updateData.paymentPlanMonthlyAmount = data.paymentPlanMonthlyAmount;
+  }
+  if (data.paymentPlansJson !== undefined) {
+    updateData.paymentPlansJson = data.paymentPlansJson ?? Prisma.JsonNull;
+  }
   if (data.status !== undefined) updateData.status = data.status;
   if (data.featured !== undefined) updateData.featured = data.featured;
 
@@ -114,7 +160,11 @@ export async function togglePropertyFeatured(
   });
 }
 
-export async function listFeaturedProperties(db: Db, companyId: string) {
+export async function listFeaturedProperties(
+  db: Db,
+  companyId: string,
+  options: { includeUnpublished?: boolean } = {},
+) {
   const properties = await db.property.findMany({
     include: {
       media: {
@@ -127,7 +177,7 @@ export async function listFeaturedProperties(db: Db, companyId: string) {
     where: {
       companyId,
       deletedAt: null,
-      publishState: "published",
+      ...(options.includeUnpublished ? {} : { publishState: "published" }),
       status: "active",
     },
   });

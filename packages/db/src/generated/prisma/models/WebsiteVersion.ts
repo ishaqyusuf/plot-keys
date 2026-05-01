@@ -246,7 +246,7 @@ export type WebsiteVersionGroupByOutputType = {
   _max: WebsiteVersionMaxAggregateOutputType | null
 }
 
-type GetWebsiteVersionGroupByPayload<T extends WebsiteVersionGroupByArgs> = Prisma.PrismaPromise<
+export type GetWebsiteVersionGroupByPayload<T extends WebsiteVersionGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<WebsiteVersionGroupByOutputType, T['by']> &
       {

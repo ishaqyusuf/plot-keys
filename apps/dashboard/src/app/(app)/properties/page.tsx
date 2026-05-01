@@ -1,10 +1,12 @@
 import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
+import { buildTenantSiteUrl } from "@plotkeys/utils";
 import {
   DashboardPage,
   DashboardTablePage,
   DashboardTablePageBody,
 } from "../../../components/dashboard/dashboard-page";
+import { getBaseUrl } from "../../../lib/get-base-url";
 import { requireOnboardedSession } from "../../../lib/session";
 import { PropertiesHeader } from "./properties-header";
 import { PropertiesDataTable } from "./tables/properties/data-table";
@@ -31,7 +33,7 @@ const publishVariant: Record<
 };
 
 const typeLabels: Record<string, string> = {
-  residential: "Residential",
+  residential: "Home",
   commercial: "Commercial",
   land: "Land",
   industrial: "Industrial",
@@ -46,6 +48,7 @@ export default async function PropertiesPage({
   const query = params.q?.trim() ?? "";
   const typeFilter =
     params.type && params.type !== "all" ? params.type : undefined;
+  const currentOrigin = await getBaseUrl();
 
   const prisma = createPrismaClient().db;
   const properties = prisma
@@ -77,7 +80,9 @@ export default async function PropertiesPage({
       })
     : [];
 
-  const siteUrl = `https://${session.activeMembership.companySlug}.plotkeys.com`;
+  const siteUrl = buildTenantSiteUrl(session.activeMembership.companySlug, {
+    currentOrigin,
+  });
 
   return (
     <DashboardPage>

@@ -35,11 +35,11 @@ export function PropertiesHeader({
     <DashboardTablePageHeader>
       <DashboardTableHeaderTop>
         <DashboardPageIntro className="space-y-1">
-          <DashboardPageEyebrow>Properties</DashboardPageEyebrow>
-          <DashboardPageTitle>Properties</DashboardPageTitle>
+          <DashboardPageEyebrow>Listings</DashboardPageEyebrow>
+          <DashboardPageTitle>Listings</DashboardPageTitle>
           <DashboardPageDescription>
-            All listings in one place. Filter, scan, and update inventory from a
-            single table.
+            Homes and land listings in one place. Filter, scan, and update
+            inventory from a single table.
           </DashboardPageDescription>
         </DashboardPageIntro>
         <DashboardPageActions>
@@ -58,7 +58,7 @@ export function PropertiesHeader({
 
       <DashboardTableFilters>
         <div className="space-y-1">
-          <DashboardTablePageTitle>All properties</DashboardTablePageTitle>
+          <DashboardTablePageTitle>All listings</DashboardTablePageTitle>
           <DashboardTablePageDescription>
             {count} listing{count !== 1 ? "s" : ""}
             {query ? ` matching “${query}”.` : "."}

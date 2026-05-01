@@ -200,7 +200,7 @@ export type ProjectDocumentGroupByOutputType = {
   _max: ProjectDocumentMaxAggregateOutputType | null
 }
 
-type GetProjectDocumentGroupByPayload<T extends ProjectDocumentGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectDocumentGroupByPayload<T extends ProjectDocumentGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectDocumentGroupByOutputType, T['by']> &
       {

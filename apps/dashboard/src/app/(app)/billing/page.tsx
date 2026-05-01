@@ -8,13 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Input } from "@plotkeys/ui/input";
 import {
   type BillingInterval,
   getPlanPricing,
   planTrialDays,
   tierLabels,
 } from "@plotkeys/utils";
-import { CreditCard } from "lucide-react";
+import { CreditCard, RotateCcw } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
@@ -37,10 +39,17 @@ import {
   DashboardToolbarGroup,
 } from "../../../components/dashboard/dashboard-page";
 import { requireOnboardedSession } from "../../../lib/session";
-import { initializeCheckoutAction } from "../../actions";
+import {
+  initializeCheckoutAction,
+  repairBillingPaymentAction,
+} from "../../actions";
 
 type BillingPageProps = {
-  searchParams?: Promise<{ interval?: string; success?: string }>;
+  searchParams?: Promise<{
+    interval?: string;
+    payment?: string;
+    success?: string;
+  }>;
 };
 
 const tierFeatures: Record<string, string[]> = {
@@ -148,6 +157,17 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           <CardContent className="py-4">
             <p className="text-sm text-green-800 dark:text-green-200">
               ✓ Payment successful! Your plan has been updated.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {params.payment && (
+        <Card className="border-amber-300/60 bg-amber-50/35 dark:border-amber-900/70 dark:bg-amber-950/15">
+          <CardContent className="py-4">
+            <p className="text-sm text-amber-900 dark:text-amber-200">
+              We could not confirm that payment yet. Please retry or contact
+              support with your Paystack reference.
             </p>
           </CardContent>
         </Card>
@@ -280,6 +300,46 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
       <DashboardSection>
         <DashboardSectionHeader>
           <div>
+            <DashboardSectionTitle>Repair payment</DashboardSectionTitle>
+            <DashboardSectionDescription>
+              Confirm a successful Paystack payment that did not upgrade this
+              workspace.
+            </DashboardSectionDescription>
+          </div>
+        </DashboardSectionHeader>
+        <Card className="border-border/65 bg-card/78">
+          <CardContent className="py-4">
+            <form
+              action={repairBillingPaymentAction}
+              className="grid gap-3 md:grid-cols-[1fr_auto]"
+            >
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="paystack-reference">
+                    Paystack reference
+                  </FieldLabel>
+                  <Input
+                    id="paystack-reference"
+                    name="reference"
+                    placeholder="e.g. T1234567890"
+                    required
+                  />
+                </Field>
+              </FieldGroup>
+              <div className="flex items-end">
+                <Button type="submit" variant="outline">
+                  <RotateCcw className="mr-1.5 size-3.5" />
+                  Repair payment
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </DashboardSection>
+
+      <DashboardSection>
+        <DashboardSectionHeader>
+          <div>
             <DashboardSectionTitle>Billing history</DashboardSectionTitle>
             <DashboardSectionDescription>
               Recent billing line items and invoice activity for this workspace.
@@ -323,6 +383,21 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                     >
                       {item.status}
                     </Badge>
+                    {item.kind === "subscription" &&
+                    item.status === "pending" &&
+                    item.providerRef ? (
+                      <form action={repairBillingPaymentAction}>
+                        <input
+                          name="reference"
+                          type="hidden"
+                          value={item.providerRef}
+                        />
+                        <Button size="sm" type="submit" variant="outline">
+                          <RotateCcw className="mr-1.5 size-3.5" />
+                          Repair
+                        </Button>
+                      </form>
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

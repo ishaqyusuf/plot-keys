@@ -250,7 +250,7 @@ export type ProjectPayrollEntryGroupByOutputType = {
   _max: ProjectPayrollEntryMaxAggregateOutputType | null
 }
 
-type GetProjectPayrollEntryGroupByPayload<T extends ProjectPayrollEntryGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectPayrollEntryGroupByPayload<T extends ProjectPayrollEntryGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectPayrollEntryGroupByOutputType, T['by']> &
       {

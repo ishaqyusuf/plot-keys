@@ -208,9 +208,18 @@ export function ThurayaListingSpotlightSection({
             <div key={i} {...getCardProps("listing", item)} className="group">
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-900">
-                <div className="flex h-full w-full items-center justify-center text-xs text-stone-400 transition-transform duration-500 group-hover:scale-105">
-                  {item.imageHint || "Property image"}
-                </div>
+                {item.imageUrl ? (
+                  <div
+                    aria-label={item.title}
+                    className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                    role="img"
+                    style={{ backgroundImage: `url(${item.imageUrl})` }}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-stone-400 transition-transform duration-500 group-hover:scale-105">
+                    {item.imageHint || "Property image"}
+                  </div>
+                )}
               </div>
 
               {/* Details */}

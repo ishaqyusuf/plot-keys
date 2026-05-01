@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { cn } from "@plotkeys/utils";
+import type { ReactNode } from "react";
 import { useSiteNav } from "./use-site-nav";
 
 export function SidebarShell({
@@ -14,7 +14,7 @@ export function SidebarShell({
   const { linkModules } = useSiteNav();
 
   return (
-    <div className={cn(className, !linkModules.noSidebar && "lg:pl-24")}>
+    <div className={cn(className, !linkModules.noSidebar && "md:ml-[84px]")}>
       {children}
     </div>
   );

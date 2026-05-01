@@ -10,9 +10,11 @@ import { clearSession } from "./session-bridge";
 export function SignOutButton({
   className,
   icon,
+  showLabel = true,
 }: {
   className?: string;
   icon?: ReactNode;
+  showLabel?: boolean;
 }) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
@@ -38,7 +40,7 @@ export function SignOutButton({
       variant="ghost"
     >
       {icon}
-      {isPending ? "Signing out..." : "Sign out"}
+      {showLabel ? (isPending ? "Signing out..." : "Sign out") : null}
     </Button>
   );
 }

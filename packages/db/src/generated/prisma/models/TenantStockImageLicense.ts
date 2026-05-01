@@ -166,7 +166,7 @@ export type TenantStockImageLicenseGroupByOutputType = {
   _max: TenantStockImageLicenseMaxAggregateOutputType | null
 }
 
-type GetTenantStockImageLicenseGroupByPayload<T extends TenantStockImageLicenseGroupByArgs> = Prisma.PrismaPromise<
+export type GetTenantStockImageLicenseGroupByPayload<T extends TenantStockImageLicenseGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TenantStockImageLicenseGroupByOutputType, T['by']> &
       {

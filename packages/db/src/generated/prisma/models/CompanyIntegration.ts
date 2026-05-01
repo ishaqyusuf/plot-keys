@@ -179,7 +179,7 @@ export type CompanyIntegrationGroupByOutputType = {
   _max: CompanyIntegrationMaxAggregateOutputType | null
 }
 
-type GetCompanyIntegrationGroupByPayload<T extends CompanyIntegrationGroupByArgs> = Prisma.PrismaPromise<
+export type GetCompanyIntegrationGroupByPayload<T extends CompanyIntegrationGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CompanyIntegrationGroupByOutputType, T['by']> &
       {

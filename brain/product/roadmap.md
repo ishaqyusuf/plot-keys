@@ -21,7 +21,7 @@ This file tracks the likely implementation sequence at a product level.
 - Lead capture
 - Appointment scheduling
 
-## Phase 2: Website Generator
+## Phase 2: Website Template Launch
 - Template system
 - Template management foundation
 - Theme config
@@ -31,10 +31,11 @@ This file tracks the likely implementation sequence at a product level.
 - CMS editing for content blocks
 - Draft/live publish model
 - Auto-sync property listings to public site
+- Public marketing should describe this as template-led site launch, not a full website builder: "Choose a template. Launch your site."
 
 ## Phase 3: Commercial Platform
 - Subscription billing
-- Tiered plan entitlements for Starter, Plus, and Pro
+- Tiered plan entitlements for Launch, Growth, and Scale
 - Paid template unlocks and entitlement tracking
 - Template marketplace licensing records
 - Stock image marketplace and licensing
@@ -61,6 +62,8 @@ This file tracks the likely implementation sequence at a product level.
 ## Phase 6: Expansion
 - Construction project management foundation
 - Customer project interface for active developments
+- Estate layout import and interactive plot allocation
+- Land-inventory reservation and allocation workflow
 - Project budgeting, QS, and site workforce workflows
 - AI lead reply assistant
 - AI recommendations

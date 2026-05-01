@@ -70,6 +70,12 @@ This file holds actionable work that is identified but not currently in progress
 
 ## Next Phase — Customer Tenant Features
 
+- [ ] **Estate Layout & Plot Allocation Phase 0 — Domain and Status Model** — Finalize estate-vs-property boundary, define `Estate`/`Plot`/`PlotReservation` schema, normalize status enums, and confirm plan gating plus ownership/allocation rules. See `brain/features/estate-layout-and-plot-allocation.md`.
+- [ ] **Estate Layout & Plot Allocation Phase 1 — Estate Inventory Core** — Build dashboard estate CRUD, plot CRUD, inventory filters, status badges, and estate publish-state management.
+- [ ] **Estate Layout & Plot Allocation Phase 2 — Layout Import + Builder MVP** — Add PDF/image upload, normalized layout preview, plot drawing canvas, auto-number helpers, and bulk plot editing tools.
+- [ ] **Estate Layout & Plot Allocation Phase 3 — Customer Plot Picker + Reservation Flow** — Build public estate detail page, interactive plot picker, plot hold flow, shortlist/backups, and portal reservation tracking.
+- [ ] **Estate Layout & Plot Allocation Phase 4 — Staff Processing + Allocation Queue** — Build dashboard reservation review queue, approval/rejection actions, release flow, and plot status history audit trail.
+- [ ] **Estate Layout & Plot Allocation Phase 5 — Assisted Import + Automation** — Add OCR-assisted layout parsing, row/grid suggestions, waitlists, and automation hooks for docs and payments.
 - [ ] **Customer Portal Phase 1A Follow-up — Identity Hardening** — Finalize whether customer identity stays company-scoped or becomes global-plus-tenant-bridge, replace temporary email-linking with an explicit relation, and add customer verification/2FA follow-up.
 - ✅ **Customer Portal Phase 1C — Offers Workflow** — Offer submission + status tracking live. Staff review workflow deferred.
 - [ ] **Customer Portal Phase 2 — Payments + Ownership Records** — Add customer payment records, receipts, due dates, and owned/reserved property visibility.

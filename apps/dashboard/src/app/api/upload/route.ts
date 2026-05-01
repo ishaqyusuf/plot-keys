@@ -11,8 +11,8 @@ import { requireAuthenticatedSession } from "../../../lib/session";
  * POST /api/upload
  *
  * Accepts a multipart form upload with a `file` field.
- * Uploads the file to Supabase storage (logos bucket) and returns the
- * public URL so the caller can persist it via `setCompanyLogo`.
+ * Uploads the file to Supabase storage and returns the public URL so callers
+ * can persist it against logos, estate plans, and other dashboard records.
  *
  * Auth: requires an authenticated session. During onboarding, uploads are
  * stored under a temporary user-scoped path and persisted into the company
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const file = formData.get("file");
+    const folder = String(formData.get("folder") ?? "logo").trim() || "logo";
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -39,10 +40,11 @@ export async function POST(request: Request) {
       "image/png",
       "image/webp",
       "image/svg+xml",
+      "application/pdf",
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Only JPEG, PNG, WebP, and SVG images are accepted." },
+        { error: "Only JPEG, PNG, WebP, SVG, and PDF files are accepted." },
         { status: 400 },
       );
     }
@@ -55,13 +57,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build a deterministic path so re-uploads replace the previous logo.
+    // Logo uploads remain deterministic so re-uploads replace the previous logo.
+    // Other dashboard uploads use a unique filename to preserve history.
     const ext = file.name.split(".").pop() ?? "png";
-    const fileName = `logo.${ext}`;
+    const safeBaseName = file.name
+      .replace(/\.[^.]+$/, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const fileName =
+      folder === "logo"
+        ? `logo.${ext}`
+        : `${safeBaseName || "upload"}-${Date.now()}.${ext}`;
     const path = buildTenantStoragePath({
       companyId: storageOwnerId,
       fileName,
-      folder: "logo",
+      folder,
     });
 
     const supabaseEnv = readSupabaseEnv();
@@ -72,7 +83,7 @@ export async function POST(request: Request) {
       .from(storageBuckets.logos)
       .upload(path, arrayBuffer, {
         contentType: file.type,
-        upsert: true,
+        upsert: folder === "logo",
       });
 
     if (uploadError) {

@@ -40,7 +40,7 @@ export function PropertiesSearchFilter({
           <Input
             defaultValue={query}
             name="q"
-            placeholder="Search properties..."
+            placeholder="Search listings..."
           />
           {typeFilter ? (
             <input name="type" type="hidden" value={typeFilter} />
@@ -52,14 +52,7 @@ export function PropertiesSearchFilter({
       </form>
       <DashboardTableToolbarGroup>
         <DashboardFilterTabs className="bg-background/70">
-          {[
-            "all",
-            "residential",
-            "commercial",
-            "land",
-            "industrial",
-            "mixed_use",
-          ].map((type) => {
+          {["all", "residential", "land"].map((type) => {
             const isActive =
               (type === "all" && !typeFilter) || type === typeFilter;
 

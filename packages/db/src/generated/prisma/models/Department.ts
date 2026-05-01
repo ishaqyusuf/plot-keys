@@ -172,7 +172,7 @@ export type DepartmentGroupByOutputType = {
   _max: DepartmentMaxAggregateOutputType | null
 }
 
-type GetDepartmentGroupByPayload<T extends DepartmentGroupByArgs> = Prisma.PrismaPromise<
+export type GetDepartmentGroupByPayload<T extends DepartmentGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<DepartmentGroupByOutputType, T['by']> &
       {

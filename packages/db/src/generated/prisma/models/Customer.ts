@@ -200,7 +200,7 @@ export type CustomerGroupByOutputType = {
   _max: CustomerMaxAggregateOutputType | null
 }
 
-type GetCustomerGroupByPayload<T extends CustomerGroupByArgs> = Prisma.PrismaPromise<
+export type GetCustomerGroupByPayload<T extends CustomerGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CustomerGroupByOutputType, T['by']> &
       {
@@ -233,6 +233,8 @@ export type CustomerWhereInput = {
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   savedListings?: Prisma.SavedListingListRelationFilter
   offers?: Prisma.CustomerOfferListRelationFilter
+  plotReservations?: Prisma.PlotReservationListRelationFilter
+  plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
   projectAccess?: Prisma.ProjectCustomerAccessListRelationFilter
   projectNotices?: Prisma.ProjectCustomerNoticeListRelationFilter
 }
@@ -252,6 +254,8 @@ export type CustomerOrderByWithRelationInput = {
   company?: Prisma.CompanyOrderByWithRelationInput
   savedListings?: Prisma.SavedListingOrderByRelationAggregateInput
   offers?: Prisma.CustomerOfferOrderByRelationAggregateInput
+  plotReservations?: Prisma.PlotReservationOrderByRelationAggregateInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryOrderByRelationAggregateInput
   projectAccess?: Prisma.ProjectCustomerAccessOrderByRelationAggregateInput
   projectNotices?: Prisma.ProjectCustomerNoticeOrderByRelationAggregateInput
 }
@@ -274,6 +278,8 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   savedListings?: Prisma.SavedListingListRelationFilter
   offers?: Prisma.CustomerOfferListRelationFilter
+  plotReservations?: Prisma.PlotReservationListRelationFilter
+  plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
   projectAccess?: Prisma.ProjectCustomerAccessListRelationFilter
   projectNotices?: Prisma.ProjectCustomerNoticeListRelationFilter
 }, "id">
@@ -326,6 +332,8 @@ export type CustomerCreateInput = {
   company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
 }
@@ -344,6 +352,8 @@ export type CustomerUncheckedCreateInput = {
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -362,6 +372,8 @@ export type CustomerUpdateInput = {
   company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
 }
@@ -380,6 +392,8 @@ export type CustomerUncheckedUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -482,6 +496,11 @@ export type CustomerScalarRelationFilter = {
   isNot?: Prisma.CustomerWhereInput
 }
 
+export type CustomerNullableScalarRelationFilter = {
+  is?: Prisma.CustomerWhereInput | null
+  isNot?: Prisma.CustomerWhereInput | null
+}
+
 export type CustomerCreateNestedManyWithoutCompanyInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput> | Prisma.CustomerCreateWithoutCompanyInput[] | Prisma.CustomerUncheckedCreateWithoutCompanyInput[]
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCompanyInput | Prisma.CustomerCreateOrConnectWithoutCompanyInput[]
@@ -556,6 +575,36 @@ export type CustomerUpdateOneRequiredWithoutOffersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutOffersInput, Prisma.CustomerUpdateWithoutOffersInput>, Prisma.CustomerUncheckedUpdateWithoutOffersInput>
 }
 
+export type CustomerCreateNestedOneWithoutPlotReservationsInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutPlotReservationsInput, Prisma.CustomerUncheckedCreateWithoutPlotReservationsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutPlotReservationsInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneRequiredWithoutPlotReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutPlotReservationsInput, Prisma.CustomerUncheckedCreateWithoutPlotReservationsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutPlotReservationsInput
+  upsert?: Prisma.CustomerUpsertWithoutPlotReservationsInput
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutPlotReservationsInput, Prisma.CustomerUpdateWithoutPlotReservationsInput>, Prisma.CustomerUncheckedUpdateWithoutPlotReservationsInput>
+}
+
+export type CustomerCreateNestedOneWithoutPlotStatusHistoryInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedCreateWithoutPlotStatusHistoryInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutPlotStatusHistoryInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutPlotStatusHistoryNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedCreateWithoutPlotStatusHistoryInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutPlotStatusHistoryInput
+  upsert?: Prisma.CustomerUpsertWithoutPlotStatusHistoryInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutPlotStatusHistoryInput, Prisma.CustomerUpdateWithoutPlotStatusHistoryInput>, Prisma.CustomerUncheckedUpdateWithoutPlotStatusHistoryInput>
+}
+
 export type CustomerCreateNestedOneWithoutProjectAccessInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutProjectAccessInput, Prisma.CustomerUncheckedCreateWithoutProjectAccessInput>
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutProjectAccessInput
@@ -597,6 +646,8 @@ export type CustomerCreateWithoutCompanyInput = {
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
 }
@@ -614,6 +665,8 @@ export type CustomerUncheckedCreateWithoutCompanyInput = {
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -674,6 +727,8 @@ export type CustomerCreateWithoutSavedListingsInput = {
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
 }
@@ -691,6 +746,8 @@ export type CustomerUncheckedCreateWithoutSavedListingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -724,6 +781,8 @@ export type CustomerUpdateWithoutSavedListingsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
 }
@@ -741,6 +800,8 @@ export type CustomerUncheckedUpdateWithoutSavedListingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -758,6 +819,8 @@ export type CustomerCreateWithoutOffersInput = {
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
 }
@@ -775,6 +838,8 @@ export type CustomerUncheckedCreateWithoutOffersInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -808,6 +873,8 @@ export type CustomerUpdateWithoutOffersInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
 }
@@ -825,6 +892,192 @@ export type CustomerUncheckedUpdateWithoutOffersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutPlotReservationsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutPlotReservationsInput = {
+  id?: string
+  companyId: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutPlotReservationsInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutPlotReservationsInput, Prisma.CustomerUncheckedCreateWithoutPlotReservationsInput>
+}
+
+export type CustomerUpsertWithoutPlotReservationsInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutPlotReservationsInput, Prisma.CustomerUncheckedUpdateWithoutPlotReservationsInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutPlotReservationsInput, Prisma.CustomerUncheckedCreateWithoutPlotReservationsInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutPlotReservationsInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutPlotReservationsInput, Prisma.CustomerUncheckedUpdateWithoutPlotReservationsInput>
+}
+
+export type CustomerUpdateWithoutPlotReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutPlotReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutPlotStatusHistoryInput = {
+  id?: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutPlotStatusHistoryInput = {
+  id?: string
+  companyId: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutPlotStatusHistoryInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedCreateWithoutPlotStatusHistoryInput>
+}
+
+export type CustomerUpsertWithoutPlotStatusHistoryInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedUpdateWithoutPlotStatusHistoryInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedCreateWithoutPlotStatusHistoryInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutPlotStatusHistoryInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutPlotStatusHistoryInput, Prisma.CustomerUncheckedUpdateWithoutPlotStatusHistoryInput>
+}
+
+export type CustomerUpdateWithoutPlotStatusHistoryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutPlotStatusHistoryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -843,6 +1096,8 @@ export type CustomerCreateWithoutProjectAccessInput = {
   company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
 }
 
@@ -860,6 +1115,8 @@ export type CustomerUncheckedCreateWithoutProjectAccessInput = {
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
 }
 
@@ -893,6 +1150,8 @@ export type CustomerUpdateWithoutProjectAccessInput = {
   company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
 }
 
@@ -910,6 +1169,8 @@ export type CustomerUncheckedUpdateWithoutProjectAccessInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
@@ -927,6 +1188,8 @@ export type CustomerCreateWithoutProjectNoticesInput = {
   company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
 }
 
@@ -944,6 +1207,8 @@ export type CustomerUncheckedCreateWithoutProjectNoticesInput = {
   deletedAt?: Date | string | null
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
   offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
 }
 
@@ -977,6 +1242,8 @@ export type CustomerUpdateWithoutProjectNoticesInput = {
   company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
 }
 
@@ -994,6 +1261,8 @@ export type CustomerUncheckedUpdateWithoutProjectNoticesInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
@@ -1023,6 +1292,8 @@ export type CustomerUpdateWithoutCompanyInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
 }
@@ -1040,6 +1311,8 @@ export type CustomerUncheckedUpdateWithoutCompanyInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
   offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -1065,6 +1338,8 @@ export type CustomerUncheckedUpdateManyWithoutCompanyInput = {
 export type CustomerCountOutputType = {
   savedListings: number
   offers: number
+  plotReservations: number
+  plotStatusHistory: number
   projectAccess: number
   projectNotices: number
 }
@@ -1072,6 +1347,8 @@ export type CustomerCountOutputType = {
 export type CustomerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   savedListings?: boolean | CustomerCountOutputTypeCountSavedListingsArgs
   offers?: boolean | CustomerCountOutputTypeCountOffersArgs
+  plotReservations?: boolean | CustomerCountOutputTypeCountPlotReservationsArgs
+  plotStatusHistory?: boolean | CustomerCountOutputTypeCountPlotStatusHistoryArgs
   projectAccess?: boolean | CustomerCountOutputTypeCountProjectAccessArgs
   projectNotices?: boolean | CustomerCountOutputTypeCountProjectNoticesArgs
 }
@@ -1098,6 +1375,20 @@ export type CustomerCountOutputTypeCountSavedListingsArgs<ExtArgs extends runtim
  */
 export type CustomerCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CustomerOfferWhereInput
+}
+
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountPlotReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlotReservationWhereInput
+}
+
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountPlotStatusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlotStatusHistoryWhereInput
 }
 
 /**
@@ -1130,6 +1421,8 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   savedListings?: boolean | Prisma.Customer$savedListingsArgs<ExtArgs>
   offers?: boolean | Prisma.Customer$offersArgs<ExtArgs>
+  plotReservations?: boolean | Prisma.Customer$plotReservationsArgs<ExtArgs>
+  plotStatusHistory?: boolean | Prisma.Customer$plotStatusHistoryArgs<ExtArgs>
   projectAccess?: boolean | Prisma.Customer$projectAccessArgs<ExtArgs>
   projectNotices?: boolean | Prisma.Customer$projectNoticesArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
@@ -1184,6 +1477,8 @@ export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   savedListings?: boolean | Prisma.Customer$savedListingsArgs<ExtArgs>
   offers?: boolean | Prisma.Customer$offersArgs<ExtArgs>
+  plotReservations?: boolean | Prisma.Customer$plotReservationsArgs<ExtArgs>
+  plotStatusHistory?: boolean | Prisma.Customer$plotStatusHistoryArgs<ExtArgs>
   projectAccess?: boolean | Prisma.Customer$projectAccessArgs<ExtArgs>
   projectNotices?: boolean | Prisma.Customer$projectNoticesArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
@@ -1201,6 +1496,8 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     company: Prisma.$CompanyPayload<ExtArgs>
     savedListings: Prisma.$SavedListingPayload<ExtArgs>[]
     offers: Prisma.$CustomerOfferPayload<ExtArgs>[]
+    plotReservations: Prisma.$PlotReservationPayload<ExtArgs>[]
+    plotStatusHistory: Prisma.$PlotStatusHistoryPayload<ExtArgs>[]
     projectAccess: Prisma.$ProjectCustomerAccessPayload<ExtArgs>[]
     projectNotices: Prisma.$ProjectCustomerNoticePayload<ExtArgs>[]
   }
@@ -1613,6 +1910,8 @@ export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   savedListings<T extends Prisma.Customer$savedListingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$savedListingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offers<T extends Prisma.Customer$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  plotReservations<T extends Prisma.Customer$plotReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$plotReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  plotStatusHistory<T extends Prisma.Customer$plotStatusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$plotStatusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projectAccess<T extends Prisma.Customer$projectAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$projectAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectCustomerAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projectNotices<T extends Prisma.Customer$projectNoticesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$projectNoticesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectCustomerNoticePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2101,6 +2400,54 @@ export type Customer$offersArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.CustomerOfferScalarFieldEnum | Prisma.CustomerOfferScalarFieldEnum[]
+}
+
+/**
+ * Customer.plotReservations
+ */
+export type Customer$plotReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlotReservation
+   */
+  select?: Prisma.PlotReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlotReservation
+   */
+  omit?: Prisma.PlotReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlotReservationInclude<ExtArgs> | null
+  where?: Prisma.PlotReservationWhereInput
+  orderBy?: Prisma.PlotReservationOrderByWithRelationInput | Prisma.PlotReservationOrderByWithRelationInput[]
+  cursor?: Prisma.PlotReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlotReservationScalarFieldEnum | Prisma.PlotReservationScalarFieldEnum[]
+}
+
+/**
+ * Customer.plotStatusHistory
+ */
+export type Customer$plotStatusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlotStatusHistory
+   */
+  select?: Prisma.PlotStatusHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlotStatusHistory
+   */
+  omit?: Prisma.PlotStatusHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlotStatusHistoryInclude<ExtArgs> | null
+  where?: Prisma.PlotStatusHistoryWhereInput
+  orderBy?: Prisma.PlotStatusHistoryOrderByWithRelationInput | Prisma.PlotStatusHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.PlotStatusHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlotStatusHistoryScalarFieldEnum | Prisma.PlotStatusHistoryScalarFieldEnum[]
 }
 
 /**

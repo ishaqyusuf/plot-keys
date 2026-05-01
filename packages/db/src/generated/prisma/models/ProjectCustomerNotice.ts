@@ -179,7 +179,7 @@ export type ProjectCustomerNoticeGroupByOutputType = {
   _max: ProjectCustomerNoticeMaxAggregateOutputType | null
 }
 
-type GetProjectCustomerNoticeGroupByPayload<T extends ProjectCustomerNoticeGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectCustomerNoticeGroupByPayload<T extends ProjectCustomerNoticeGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectCustomerNoticeGroupByOutputType, T['by']> &
       {

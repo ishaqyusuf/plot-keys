@@ -224,7 +224,7 @@ export type TenantDomainGroupByOutputType = {
   _max: TenantDomainMaxAggregateOutputType | null
 }
 
-type GetTenantDomainGroupByPayload<T extends TenantDomainGroupByArgs> = Prisma.PrismaPromise<
+export type GetTenantDomainGroupByPayload<T extends TenantDomainGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TenantDomainGroupByOutputType, T['by']> &
       {

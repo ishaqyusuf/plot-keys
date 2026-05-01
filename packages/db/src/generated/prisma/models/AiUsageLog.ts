@@ -220,7 +220,7 @@ export type AiUsageLogGroupByOutputType = {
   _max: AiUsageLogMaxAggregateOutputType | null
 }
 
-type GetAiUsageLogGroupByPayload<T extends AiUsageLogGroupByArgs> = Prisma.PrismaPromise<
+export type GetAiUsageLogGroupByPayload<T extends AiUsageLogGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AiUsageLogGroupByOutputType, T['by']> &
       {

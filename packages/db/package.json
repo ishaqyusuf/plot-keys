@@ -8,6 +8,7 @@
     "./prisma": "./src/prisma.ts",
     "./queries/auth": "./src/queries/auth.ts",
     "./queries/company": "./src/queries/company.ts",
+    "./queries/estate": "./src/queries/estate.ts",
     "./queries/onboarding": "./src/queries/onboarding.ts",
     "./queries/site-configuration": "./src/queries/site-configuration.ts",
     "./queries/template-license": "./src/queries/template-license.ts",

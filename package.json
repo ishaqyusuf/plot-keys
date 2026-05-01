@@ -28,6 +28,7 @@
     "dev:website:portless": "turbo dev:portless --filter=@plotkeys/website",
     "lint": "turbo lint",
     "format": "biome format --write .",
+    "terminal": "bash ./scripts/open-bun-script-terminal.sh",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {

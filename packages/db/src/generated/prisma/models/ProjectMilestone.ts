@@ -200,7 +200,7 @@ export type ProjectMilestoneGroupByOutputType = {
   _max: ProjectMilestoneMaxAggregateOutputType | null
 }
 
-type GetProjectMilestoneGroupByPayload<T extends ProjectMilestoneGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectMilestoneGroupByPayload<T extends ProjectMilestoneGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectMilestoneGroupByOutputType, T['by']> &
       {

@@ -306,11 +306,19 @@ export function BanaListingSpotlightSection({
                 {...getCardProps("listing", item)}
                 className="group overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] shadow-sm transition-shadow hover:shadow-lg"
               >
-                {/* Image placeholder */}
                 <div className="relative h-48 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                  <div className="absolute inset-0 flex items-center justify-center text-xs text-zinc-400">
-                    {item.imageHint || "Project render"}
-                  </div>
+                  {item.imageUrl ? (
+                    <div
+                      aria-label={item.title}
+                      className="absolute inset-0 bg-cover bg-center"
+                      role="img"
+                      style={{ backgroundImage: `url(${item.imageUrl})` }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-zinc-400">
+                      {item.imageHint || "Project render"}
+                    </div>
+                  )}
                   {/* Construction progress bar */}
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-700/50">
                     <div

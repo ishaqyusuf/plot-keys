@@ -69,7 +69,7 @@ export function BuilderSidebarDrawer({
           variant="outline"
           aria-label="Open builder settings"
         >
-          <Icon.Icon.Settings2 className="size-4" />
+          <Icon.Settings2 className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent

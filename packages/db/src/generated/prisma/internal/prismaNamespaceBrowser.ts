@@ -61,6 +61,7 @@ export const ModelName = {
   Verification: 'Verification',
   BillingLineItem: 'BillingLineItem',
   BlogPost: 'BlogPost',
+  CompanyApp: 'CompanyApp',
   CompanyIntegration: 'CompanyIntegration',
   Company: 'Company',
   Customer: 'Customer',
@@ -68,12 +69,19 @@ export const ModelName = {
   CustomerOffer: 'CustomerOffer',
   Department: 'Department',
   Employee: 'Employee',
+  Estate: 'Estate',
+  EstateLayout: 'EstateLayout',
   Lead: 'Lead',
   LeaveRequest: 'LeaveRequest',
   Membership: 'Membership',
   NotificationPreference: 'NotificationPreference',
   Notification: 'Notification',
   PayrollEntry: 'PayrollEntry',
+  Plot: 'Plot',
+  PlotReservation: 'PlotReservation',
+  PlotReservationChoice: 'PlotReservationChoice',
+  PlotStatusHistory: 'PlotStatusHistory',
+  PlotDocument: 'PlotDocument',
   ProjectAssignment: 'ProjectAssignment',
   ProjectBudget: 'ProjectBudget',
   ProjectBudgetLineItem: 'ProjectBudgetLineItem',
@@ -286,6 +294,16 @@ export const BlogPostScalarFieldEnum = {
 export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
 
 
+export const CompanyAppScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  appKey: 'appKey',
+  installedAt: 'installedAt'
+} as const
+
+export type CompanyAppScalarFieldEnum = (typeof CompanyAppScalarFieldEnum)[keyof typeof CompanyAppScalarFieldEnum]
+
+
 export const CompanyIntegrationScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -401,6 +419,47 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
+export const EstateScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  location: 'location',
+  landmarks: 'landmarks',
+  amenities: 'amenities',
+  approvals: 'approvals',
+  specialPurposeUses: 'specialPurposeUses',
+  phaseLabel: 'phaseLabel',
+  heroImageUrl: 'heroImageUrl',
+  brochureUrl: 'brochureUrl',
+  publishState: 'publishState',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type EstateScalarFieldEnum = (typeof EstateScalarFieldEnum)[keyof typeof EstateScalarFieldEnum]
+
+
+export const EstateLayoutScalarFieldEnum = {
+  id: 'id',
+  estateId: 'estateId',
+  sourceUrl: 'sourceUrl',
+  normalizedImageUrl: 'normalizedImageUrl',
+  imageWidth: 'imageWidth',
+  imageHeight: 'imageHeight',
+  rotationDegrees: 'rotationDegrees',
+  version: 'version',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EstateLayoutScalarFieldEnum = (typeof EstateLayoutScalarFieldEnum)[keyof typeof EstateLayoutScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -496,6 +555,89 @@ export const PayrollEntryScalarFieldEnum = {
 } as const
 
 export type PayrollEntryScalarFieldEnum = (typeof PayrollEntryScalarFieldEnum)[keyof typeof PayrollEntryScalarFieldEnum]
+
+
+export const PlotScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  estateId: 'estateId',
+  plotCode: 'plotCode',
+  block: 'block',
+  street: 'street',
+  sizeSqm: 'sizeSqm',
+  price: 'price',
+  type: 'type',
+  status: 'status',
+  facing: 'facing',
+  isCornerPiece: 'isCornerPiece',
+  isPremium: 'isPremium',
+  coordinatesJson: 'coordinatesJson',
+  tagsJson: 'tagsJson',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PlotScalarFieldEnum = (typeof PlotScalarFieldEnum)[keyof typeof PlotScalarFieldEnum]
+
+
+export const PlotReservationScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  estateId: 'estateId',
+  status: 'status',
+  holdExpiresAt: 'holdExpiresAt',
+  submittedAt: 'submittedAt',
+  approvedAt: 'approvedAt',
+  rejectedAt: 'rejectedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlotReservationScalarFieldEnum = (typeof PlotReservationScalarFieldEnum)[keyof typeof PlotReservationScalarFieldEnum]
+
+
+export const PlotReservationChoiceScalarFieldEnum = {
+  id: 'id',
+  reservationId: 'reservationId',
+  plotId: 'plotId',
+  rank: 'rank',
+  isPrimary: 'isPrimary',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotReservationChoiceScalarFieldEnum = (typeof PlotReservationChoiceScalarFieldEnum)[keyof typeof PlotReservationChoiceScalarFieldEnum]
+
+
+export const PlotStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  plotId: 'plotId',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  actorUserId: 'actorUserId',
+  actorCustomerId: 'actorCustomerId',
+  reason: 'reason',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotStatusHistoryScalarFieldEnum = (typeof PlotStatusHistoryScalarFieldEnum)[keyof typeof PlotStatusHistoryScalarFieldEnum]
+
+
+export const PlotDocumentScalarFieldEnum = {
+  id: 'id',
+  plotId: 'plotId',
+  kind: 'kind',
+  url: 'url',
+  label: 'label',
+  createdAt: 'createdAt'
+} as const
+
+export type PlotDocumentScalarFieldEnum = (typeof PlotDocumentScalarFieldEnum)[keyof typeof PlotDocumentScalarFieldEnum]
 
 
 export const ProjectAssignmentScalarFieldEnum = {
@@ -737,6 +879,7 @@ export type PropertyMediaScalarFieldEnum = (typeof PropertyMediaScalarFieldEnum)
 export const PropertyScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
+  estateId: 'estateId',
   title: 'title',
   description: 'description',
   price: 'price',
@@ -747,6 +890,13 @@ export const PropertyScalarFieldEnum = {
   imageUrl: 'imageUrl',
   type: 'type',
   subType: 'subType',
+  quantityAvailable: 'quantityAvailable',
+  unitLabel: 'unitLabel',
+  paymentPlanMonths: 'paymentPlanMonths',
+  paymentPlanAmount: 'paymentPlanAmount',
+  paymentPlanInitialDepositPercent: 'paymentPlanInitialDepositPercent',
+  paymentPlanMonthlyAmount: 'paymentPlanMonthlyAmount',
+  paymentPlansJson: 'paymentPlansJson',
   status: 'status',
   publishState: 'publishState',
   featured: 'featured',

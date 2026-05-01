@@ -5,6 +5,7 @@ export * from "./domain-service";
 export * from "./paystack";
 export * from "./phone";
 export * from "./pricing";
+export * from "./runtime-url";
 export * from "./tenant-domains";
 export * from "./tiers";
 export * from "./vercel-domains";

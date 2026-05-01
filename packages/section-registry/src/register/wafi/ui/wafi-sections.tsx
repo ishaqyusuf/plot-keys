@@ -320,9 +320,18 @@ export function WafiListingSpotlightSection({
               >
                 {/* Image */}
                 <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
-                  <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
-                    {item.imageHint || "Property image"}
-                  </div>
+                  {item.imageUrl ? (
+                    <div
+                      aria-label={item.title}
+                      className="absolute inset-0 bg-cover bg-center"
+                      role="img"
+                      style={{ backgroundImage: `url(${item.imageUrl})` }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
+                      {item.imageHint || "Property image"}
+                    </div>
+                  )}
                   <div className="absolute left-3 top-3">
                     <RentalBadge label={badge} />
                   </div>

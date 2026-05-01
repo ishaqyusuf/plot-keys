@@ -18,6 +18,8 @@ model Company {
   website            Website?
   tenantDomains      TenantDomain[]
   properties         Property[]
+  estates            Estate[]
+  plots              Plot[]
   agents             Agent[]
   templateLicenses   TenantTemplateLicense[]
   billingLineItems   BillingLineItem[]
@@ -30,6 +32,7 @@ model Company {
   teamInvites        TeamInvite[]
   notifications      Notification[]
   customers          Customer[]
+  plotReservations   PlotReservation[]
   savedListings      SavedListing[]
   customerOffers     CustomerOffer[]
   blogPosts          BlogPost[]

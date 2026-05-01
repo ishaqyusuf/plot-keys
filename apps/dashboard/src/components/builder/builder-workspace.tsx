@@ -127,7 +127,7 @@ export async function BuilderWorkspace({
     findCompanyById(prisma, companyId),
     resolveActiveDraftForCompany(prisma, companyId),
     resolvePublishedForCompany(prisma, companyId),
-    listFeaturedProperties(prisma, companyId),
+    listFeaturedProperties(prisma, companyId, { includeUnpublished: true }),
     listAgentsForCompany(prisma, companyId, { limit: 10 }),
     listBlogPostsForCompany(prisma, companyId, {
       limit: 24,

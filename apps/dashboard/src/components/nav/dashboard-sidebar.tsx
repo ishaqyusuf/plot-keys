@@ -1,152 +1,77 @@
 "use client";
 
-import type {
-  AppDefinition,
-  GlobalNavSection,
-} from "@plotkeys/app-store/registry";
+import type { AppDefinition } from "@plotkeys/app-store/registry";
 import { resolveActiveApp } from "@plotkeys/app-store/registry";
 import { RegistryIcon } from "@plotkeys/app-store/registry/icon-map";
-import { createSiteNavContext, SiteNav } from "@plotkeys/site-nav";
-import { Badge } from "@plotkeys/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@plotkeys/ui/dropdown-menu";
-import { ChevronDown, LayoutDashboard, LogOut, Store } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { getVisibleDashboardNav } from "../../features/navigation/lib";
+import { SiteNav, useSiteNav } from "@plotkeys/site-nav";
+import { PlotKeysLogo } from "@plotkeys/ui/plotkeys-logo";
+import { LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { SignOutButton } from "../auth/sign-out-button";
 
 type DashboardSidebarProps = {
   enabledApps: readonly AppDefinition[];
-  globalTop: GlobalNavSection;
-  platformGroup: GlobalNavSection;
 };
 
-export function DashboardSidebar({
-  enabledApps,
-  globalTop,
-  platformGroup,
-}: DashboardSidebarProps) {
+export function DashboardSidebar({ enabledApps }: DashboardSidebarProps) {
   const pathname = usePathname() ?? "/";
-  const router = useRouter();
+  const { isExpanded } = useSiteNav();
   const activeApp = resolveActiveApp(pathname, enabledApps);
-  const modules = getVisibleDashboardNav({
-    activeApp,
-    globalTop,
-    platformGroup,
-  });
-  const siteNav = createSiteNavContext({
-    Link,
-    linkModules: modules,
-    pathName: pathname,
-  });
 
   const headerIcon = activeApp?.icon;
-  const headerLabel = activeApp?.label ?? "PlotKeys";
-  const headerSubtitle = activeApp ? "App" : "Dashboard";
+  const headerLabel = activeApp?.label ?? "PlotKeys OS";
+  const headerSubtitle = activeApp ? "Active App" : "Workspace";
 
   return (
-    <SiteNav.Provider value={siteNav}>
-      <SiteNav.Sidebar>
-        <div className="border-b border-border/60 px-3 py-3">
-          <div className="space-y-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 rounded-[1.2rem] border border-border/50 bg-card/68 px-3 py-3 text-left transition-all duration-200 hover:border-border/65 hover:bg-card/84"
-                >
-                  <div className="flex aspect-square size-10 items-center justify-center rounded-[1rem] bg-foreground/[0.042] text-foreground">
-                    {headerIcon ? (
-                      <RegistryIcon name={headerIcon} className="size-4" />
-                    ) : (
-                      <LayoutDashboard className="size-4" />
-                    )}
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold tracking-[-0.02em]">
-                      {headerLabel}
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {headerSubtitle}
-                    </span>
-                  </div>
-                  <ChevronDown className="ml-auto size-4 text-muted-foreground" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 rounded-2xl">
-                <DropdownMenuLabel>Switch App</DropdownMenuLabel>
-                {enabledApps.map((app) => (
-                  <DropdownMenuItem
-                    key={app.id}
-                    onSelect={() => router.push(app.homeRoute)}
-                  >
-                    <RegistryIcon name={app.icon} className="size-4 shrink-0" />
-                    <span>{app.label}</span>
-                    {activeApp?.id === app.id ? (
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        Current
-                      </span>
-                    ) : null}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => router.push("/app-store")}>
-                  <Store className="size-4 shrink-0" />
-                  <span>App Store</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div
-              className={
-                siteNav.isExpanded
-                  ? "space-y-2 px-1"
-                  : "flex flex-col items-center gap-2"
-              }
-            >
-              {siteNav.isExpanded ? (
-                <div className="rounded-[1.2rem] border border-border/50 bg-card/58 px-3 py-3">
-                  <p className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
-                    Workspace
-                  </p>
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-foreground">
-                      PlotKeys OS
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className="rounded-full border-border/60 bg-background/55 px-2.5 py-0.5 text-[0.68rem]"
-                    >
-                      Live
-                    </Badge>
-                  </div>
-                </div>
-              ) : null}
-              <div className={siteNav.isExpanded ? "" : "w-full"}>
-                <SignOutButton
-                  className={
-                    siteNav.isExpanded
-                      ? "w-full justify-start rounded-2xl"
-                      : "size-10 rounded-2xl p-0"
-                  }
-                  icon={
-                    siteNav.isExpanded ? (
-                      <LogOut className="size-4" />
-                    ) : undefined
-                  }
-                />
-              </div>
-            </div>
+    <SiteNav.Sidebar>
+      <div className="absolute left-0 top-0 z-10 flex h-[70px] w-full items-center border-b border-sidebar-border bg-sidebar/95 shadow-sm backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+        <div className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-sidebar-border" />
+        <div
+          className={
+            isExpanded
+              ? "flex min-w-0 items-center gap-3 px-5"
+              : "flex w-[83px] items-center justify-center"
+          }
+        >
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-sidebar-border bg-sidebar-accent/70 text-sidebar-foreground">
+            {headerIcon ? (
+              <RegistryIcon name={headerIcon} className="size-4" />
+            ) : (
+              <PlotKeysLogo markClassName="h-6" showWordmark={false} />
+            )}
           </div>
+          {isExpanded ? (
+            <div className="min-w-0">
+              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.24em] text-sidebar-foreground/55">
+                {headerSubtitle}
+              </p>
+              <p className="truncate text-sm font-semibold text-sidebar-foreground">
+                {headerLabel}
+              </p>
+            </div>
+          ) : null}
         </div>
-      </SiteNav.Sidebar>
-    </SiteNav.Provider>
+      </div>
+      <div className="absolute bottom-5 left-0 right-0 z-10 flex w-full items-center justify-center px-3 md:justify-start">
+        <div
+          className={
+            isExpanded
+              ? "w-full rounded-[22px] border border-sidebar-border bg-sidebar-accent/70 p-1 shadow-sm backdrop-blur-xl"
+              : "flex w-full justify-center"
+          }
+        >
+          <SignOutButton
+            className={
+              isExpanded
+                ? "h-12 w-full justify-start rounded-[18px] text-sidebar-foreground hover:bg-sidebar-accent"
+                : "size-10 rounded-2xl p-0 text-sidebar-foreground hover:bg-sidebar-accent"
+            }
+            icon={<LogOut className="size-4" />}
+            showLabel={isExpanded}
+          />
+        </div>
+      </div>
+    </SiteNav.Sidebar>
   );
 }
 

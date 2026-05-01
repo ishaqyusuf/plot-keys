@@ -2,7 +2,7 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Icon } from "@plotkeys/ui/icons";
-import { cn } from "@plotkeys/ui/lib/utils";
+import { cn } from "@plotkeys/utils";
 import { useState } from "react";
 
 type PanelState = "expanded" | "collapsed" | "fab";
@@ -29,6 +29,7 @@ export function FloatingConfigPanel({
   return (
     <>
       {/* Main panel — hidden (slides out) in fab state */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: hover only previews the collapsed configuration rail. */}
       <div
         className={cn(
           "fixed left-3 top-3 z-40 flex h-[calc(100svh-1.5rem)] flex-col",
@@ -52,6 +53,7 @@ export function FloatingConfigPanel({
               }}
               className="shrink-0 rounded-md p-1.5 transition-colors hover:bg-muted/80"
               title={state === "expanded" ? "Collapse panel" : "Expand panel"}
+              type="button"
             >
               <Icon.ChevronLeft
                 className={cn(
@@ -97,6 +99,7 @@ export function FloatingConfigPanel({
               }}
               className="mb-1 rounded-md p-1.5 transition-colors hover:bg-muted/80"
               title="Minimize to corner button"
+              type="button"
             >
               <Icon.PanelLeft className="h-3.5 w-3.5 rotate-180 text-muted-foreground/70" />
             </button>
@@ -116,6 +119,7 @@ export function FloatingConfigPanel({
             : "opacity-0 scale-75 pointer-events-none",
         )}
         title="Show config panel"
+        type="button"
       >
         <Icon.Settings className="h-4 w-4 text-muted-foreground" />
       </button>

@@ -2,22 +2,40 @@
 
 import { cn } from "@plotkeys/utils";
 import type { ReactNode } from "react";
+import { MobileSidebar } from "./mobile-sidebar";
 
 export type HeaderProps = {
   children?: ReactNode;
   className?: string;
   left?: ReactNode;
+  mobileMenu?: boolean;
   right?: ReactNode;
 };
 
-export function Header({ children, className, left, right }: HeaderProps) {
+export function Header({
+  children,
+  className,
+  left,
+  mobileMenu = true,
+  right,
+}: HeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex min-h-[78px] items-center gap-4 border-b border-border/70 bg-[color:color-mix(in_srgb,var(--color-background)_74%,white_26%)]/95 px-4 shadow-[0_1px_0_rgba(16,32,51,0.04)] backdrop-blur-xl sm:px-6 lg:px-8",
+        "top-0 z-50 flex h-[70px] items-center justify-between gap-4 bg-background/70 px-6 backdrop-blur-xl transition-transform md:border-b md:backdrop-blur-none",
         className,
       )}
+      style={{
+        transform: "translateY(calc(var(--header-offset, 0px) * -1))",
+        transitionDuration: "var(--header-transition, 200ms)",
+        willChange: "transform",
+      }}
     >
+      {mobileMenu ? (
+        <div className="md:hidden">
+          <MobileSidebar />
+        </div>
+      ) : null}
       {left}
       <div className="min-w-0 flex-1">{children}</div>
       {right}

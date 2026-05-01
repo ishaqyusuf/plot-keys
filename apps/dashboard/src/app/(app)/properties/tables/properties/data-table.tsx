@@ -32,6 +32,32 @@ export function PropertiesDataTable({
   statusVariant,
   typeLabels,
 }: PropertiesDataTableProps) {
+  function getListingDetails(property: PropertyTableRow) {
+    const availability =
+      property.quantityAvailable != null
+        ? `${property.quantityAvailable} units available`
+        : null;
+
+    if (property.type === "land") {
+      return (
+        [property.specs || property.subType, availability]
+          .filter(Boolean)
+          .join(" · ") || "Land details pending"
+      );
+    }
+
+    return (
+      [
+        property.bedrooms ? `${property.bedrooms} bed` : null,
+        property.bathrooms ? `${property.bathrooms} bath` : null,
+        property.specs,
+        availability,
+      ]
+        .filter(Boolean)
+        .join(" · ") || "Home details pending"
+    );
+  }
+
   return (
     <Table>
       <TableHeader className="[&_tr]:border-border/55">
@@ -112,13 +138,7 @@ export function PropertiesDataTable({
             </TableCell>
             <TableCell className="py-4 align-top">
               <p className="text-sm text-muted-foreground">
-                {[
-                  property.bedrooms ? `${property.bedrooms} bed` : null,
-                  property.bathrooms ? `${property.bathrooms} bath` : null,
-                  property.specs,
-                ]
-                  .filter(Boolean)
-                  .join(" · ") || "—"}
+                {getListingDetails(property)}
               </p>
             </TableCell>
             <TableCell className="px-5 py-4 align-top">

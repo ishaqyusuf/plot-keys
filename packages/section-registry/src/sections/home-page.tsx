@@ -51,6 +51,7 @@ export type StoryGridConfig = {
 export type ListingSpotlightItem = {
   id?: string;
   imageHint: string;
+  imageUrl?: string | null;
   location: string;
   price: string;
   slug?: string;
@@ -413,12 +414,23 @@ export function ListingSpotlightSection({
             className="rounded-[var(--radius-lg)]"
           >
             <Surface className="overflow-hidden bg-white dark:bg-slate-900">
-              <div className="h-56 bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)] p-5">
-                <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
-                  <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
-                    {item.imageHint}
-                  </p>
-                </div>
+              <div className="relative h-56 overflow-hidden bg-slate-100 dark:bg-slate-800">
+                {item.imageUrl ? (
+                  <div
+                    aria-label={item.title}
+                    className="h-full w-full bg-cover bg-center transition duration-500 hover:scale-[1.02]"
+                    role="img"
+                    style={{ backgroundImage: `url(${item.imageUrl})` }}
+                  />
+                ) : (
+                  <div className="h-full bg-[linear-gradient(135deg,#dbeafe_0%,#fde68a_50%,#99f6e4_100%)] p-5 dark:bg-[linear-gradient(135deg,#1e3a5f_0%,#78350f_50%,#134e4a_100%)]">
+                    <div className="flex h-full items-end rounded-[calc(var(--radius-md)-0.25rem)] border border-white/60 bg-white/45 p-4 backdrop-blur-sm dark:border-white/20 dark:bg-slate-800/45">
+                      <p className="text-xs uppercase tracking-[0.32em] text-slate-600 dark:text-slate-400">
+                        {item.imageHint || "Property listing"}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="px-6 py-6">
                 <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">

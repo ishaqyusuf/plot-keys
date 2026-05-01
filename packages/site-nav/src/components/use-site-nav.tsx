@@ -1,17 +1,21 @@
 "use client";
 
 import {
+  type ComponentType,
   createContext,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
   useContext,
   useMemo,
   useRef,
   useState,
-  type ComponentType,
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
 } from "react";
-import { getActiveLinkFromMap, getLinkModules, validateLinks } from "../lib/links";
+import {
+  getActiveLinkFromMap,
+  getLinkModules,
+  validateLinks,
+} from "../lib/links";
 import type { NavModule } from "../lib/types";
 
 type SiteNavLinkComponent = ComponentType<any>;
@@ -25,7 +29,7 @@ export type SiteNavContextValue = {
     | null;
   isExpanded: boolean;
   linkModules: ReturnType<typeof getLinkModules>;
-  mainMenuRef: RefObject<HTMLDivElement | null>;
+  mainMenuRef: RefObject<HTMLElement | null>;
   modules: Array<
     ReturnType<typeof getLinkModules>["modules"][number] & {
       href?: string;
@@ -46,10 +50,10 @@ export const SiteNavContext = createContext<SiteNavContextValue | undefined>(
   undefined,
 );
 
-export function createSiteNavContext(
+export function useCreateSiteNavContext(
   props: SiteNavContextValue["props"],
 ): SiteNavContextValue {
-  const mainMenuRef = useRef<HTMLDivElement>(null);
+  const mainMenuRef = useRef<HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { activeLink, currentModule, linkModules, modules } = useMemo(() => {
@@ -60,13 +64,18 @@ export function createSiteNavContext(
       userId: props.userId,
     }) as NavModule[];
     const mapped = getLinkModules(validated);
-    const activeLink = getActiveLinkFromMap(props.pathName, mapped.linksNameMap);
+    const activeLink = getActiveLinkFromMap(
+      props.pathName,
+      mapped.linksNameMap,
+    );
     const modules = mapped.modules
       .filter((module) => module.activeLinkCount && module.name)
       .map((module) => {
         const firstVisibleLink = module.sections
           .flatMap((section) => section.links.filter((link) => link.show))
-          .sort((left, right) => (left.globalIndex ?? 0) - (right.globalIndex ?? 0))[0];
+          .sort(
+            (left, right) => (left.globalIndex ?? 0) - (right.globalIndex ?? 0),
+          )[0];
 
         const href =
           module.defaultLink ??
@@ -101,6 +110,8 @@ export function createSiteNavContext(
     setIsExpanded,
   };
 }
+
+export const createSiteNavContext = useCreateSiteNavContext;
 
 export function useSiteNav() {
   const context = useContext(SiteNavContext);

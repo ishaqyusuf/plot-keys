@@ -51,7 +51,7 @@ export function DashboardTopbar({
   const pathname = usePathname() ?? "/";
   const activeApp = resolveActiveApp(pathname, enabledApps);
   const modules = getVisibleDashboardNav({
-    activeApp,
+    enabledApps,
     globalTop,
     platformGroup,
   });
@@ -72,7 +72,7 @@ export function DashboardTopbar({
   return (
     <div className="sticky top-0 z-30">
       <SiteNav.Header
-        className="border-b-0 bg-transparent px-4 pb-3 pt-4 sm:px-6 lg:px-8"
+        className="border-b-0 bg-transparent"
         right={
           <div className="flex items-center gap-2">
             <NotificationBell
@@ -97,11 +97,11 @@ export function DashboardTopbar({
           </div>
         }
       >
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/72">
+        <p className="truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/72">
           {subtitle}
         </p>
         <div className="mt-1 flex items-center gap-2.5">
-          <h1 className="truncate text-[20px] font-semibold tracking-[-0.045em] text-foreground sm:text-[22px]">
+          <h1 className="truncate text-[18px] font-semibold tracking-[-0.035em] text-foreground sm:text-[20px]">
             {title}
           </h1>
           <Badge
@@ -113,7 +113,7 @@ export function DashboardTopbar({
         </div>
       </SiteNav.Header>
 
-      <div className="border-b border-border/65 bg-[color:color-mix(in_srgb,var(--color-background)_88%,white_12%)]/88 px-4 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8">
+      <div className="border-b border-border/65 bg-[color:color-mix(in_srgb,var(--color-background)_88%,white_12%)]/88 px-6 py-2 backdrop-blur-xl">
         <div className="flex gap-1.5 overflow-x-auto">
           {quickLinks.map((link) => (
             <Link

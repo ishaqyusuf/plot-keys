@@ -363,7 +363,7 @@ export type TenantOnboardingGroupByOutputType = {
   _max: TenantOnboardingMaxAggregateOutputType | null
 }
 
-type GetTenantOnboardingGroupByPayload<T extends TenantOnboardingGroupByArgs> = Prisma.PrismaPromise<
+export type GetTenantOnboardingGroupByPayload<T extends TenantOnboardingGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TenantOnboardingGroupByOutputType, T['by']> &
       {

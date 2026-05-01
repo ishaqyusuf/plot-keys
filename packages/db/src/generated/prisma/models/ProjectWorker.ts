@@ -227,7 +227,7 @@ export type ProjectWorkerGroupByOutputType = {
   _max: ProjectWorkerMaxAggregateOutputType | null
 }
 
-type GetProjectWorkerGroupByPayload<T extends ProjectWorkerGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectWorkerGroupByPayload<T extends ProjectWorkerGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectWorkerGroupByOutputType, T['by']> &
       {

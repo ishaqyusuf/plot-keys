@@ -1,3 +1,5 @@
+import { buildRuntimeAppUrl } from "./runtime-url";
+
 export const plotkeysRootDomain = "plotkeys.com";
 export const localPlotkeysRootDomain = "plotkeys.localhost";
 export const localTenantRootDomain = "tenant-plotkeys.localhost";
@@ -93,6 +95,19 @@ function isAnyLocalPlotkeysHostname(hostname: string | null | undefined) {
     normalizedHostname === localDashboardRootDomain ||
     normalizedHostname.endsWith(`.${localDashboardRootDomain}`)
   );
+}
+
+function isLocalhostHostname(hostname: string | null | undefined) {
+  const normalizedHostname = hostname ? stripPortFromHostname(hostname) : "";
+  return (
+    normalizedHostname === "localhost" ||
+    normalizedHostname.endsWith(".localhost")
+  );
+}
+
+function isVercelPreviewHostname(hostname: string | null | undefined) {
+  const normalizedHostname = hostname ? stripPortFromHostname(hostname) : "";
+  return normalizedHostname.endsWith(".vercel.app");
 }
 
 function extractSingleLabelSubdomain(
@@ -204,7 +219,10 @@ export function buildTenantDashboardUrl(
     : "";
   const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
 
-  if (isAnyLocalPlotkeysHostname(parsedOrigin?.hostname)) {
+  if (
+    isAnyLocalPlotkeysHostname(parsedOrigin?.hostname) ||
+    isLocalhostHostname(parsedOrigin?.hostname)
+  ) {
     const localTenantDashboardHostname = options?.tenantHostname
       ? buildLocalDashboardHostnameForTenantHostname(options.tenantHostname)
       : "";
@@ -222,6 +240,10 @@ export function buildTenantDashboardUrl(
 
   if (tenantDashboardHostname) {
     return `${protocol}://${tenantDashboardHostname}${normalizedPathname}`;
+  }
+
+  if (isVercelPreviewHostname(parsedOrigin?.hostname)) {
+    return `${protocol}://${dashboardSubdomainLabel}.${normalizedSubdomain}.${parsedOrigin?.hostname}${normalizedPathname}`;
   }
 
   return `${protocol}://${buildDashboardHostname(normalizedSubdomain)}${normalizedPathname}`;
@@ -255,7 +277,10 @@ export function buildTenantSiteUrl(
     : "";
   const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
 
-  if (isAnyLocalPlotkeysHostname(parsedOrigin?.hostname)) {
+  if (
+    isAnyLocalPlotkeysHostname(parsedOrigin?.hostname) ||
+    isLocalhostHostname(parsedOrigin?.hostname)
+  ) {
     return `${protocol}://${buildLocalSitefrontHostname(normalizedSubdomain)}${port}${normalizedPathname}`;
   }
 
@@ -263,6 +288,10 @@ export function buildTenantSiteUrl(
 
   if (tenantHostname) {
     return `${protocol}://${tenantHostname}${normalizedPathname}`;
+  }
+
+  if (isVercelPreviewHostname(parsedOrigin?.hostname)) {
+    return `${protocol}://${normalizedSubdomain}.${parsedOrigin?.hostname}${normalizedPathname}`;
   }
 
   return `${protocol}://${buildSitefrontHostname(normalizedSubdomain)}${normalizedPathname}`;
@@ -290,7 +319,24 @@ export function buildPlatformAppUrl(options?: {
     return `${protocol}://${localDashboardRootDomain}${port}${normalizedPathname}`;
   }
 
-  return `${protocol}://${platformAppHostname}${normalizedPathname}`;
+  return buildRuntimeAppUrl({
+    config: {
+      appPort: process.env.DASHBOARD_PORT ?? process.env.PORT ?? 3901,
+      appRootDomain: localDashboardRootDomain,
+      defaultProtocol: process.env.NODE_ENV === "production" ? "https" : "http",
+      isProduction: process.env.NODE_ENV === "production",
+      portlessRootDomain: localDashboardRootDomain,
+      productionRootDomain: platformAppHostname,
+      publicUrl:
+        process.env.DASHBOARD_APP_URL ??
+        process.env.NEXT_PUBLIC_DASHBOARD_APP_URL ??
+        process.env.NEXT_PUBLIC_APP_URL ??
+        process.env.VERCEL_URL,
+    },
+    currentProtocol: parsedOrigin?.protocol,
+    currentUrl: options?.currentOrigin,
+    path: normalizedPathname,
+  });
 }
 
 export function extractDashboardHostname(host: string) {

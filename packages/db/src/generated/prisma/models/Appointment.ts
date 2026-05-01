@@ -263,7 +263,7 @@ export type AppointmentGroupByOutputType = {
   _max: AppointmentMaxAggregateOutputType | null
 }
 
-type GetAppointmentGroupByPayload<T extends AppointmentGroupByArgs> = Prisma.PrismaPromise<
+export type GetAppointmentGroupByPayload<T extends AppointmentGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AppointmentGroupByOutputType, T['by']> &
       {

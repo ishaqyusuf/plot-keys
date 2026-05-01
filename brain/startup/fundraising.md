@@ -28,7 +28,7 @@ A vertical SaaS platform purpose-built for real-estate companies that combines:
 - NOTE: These figures need validation with primary research
 
 ## Business Model
-- Monthly SaaS subscriptions (Starter NGN 24,000/mo, Plus, Pro)
+- Monthly SaaS subscriptions across Launch, Growth, and Scale tiers
 - AI credit packs (content generation, property descriptions, SEO)
 - Paid template purchases and upgrades
 - Custom domain provisioning fees

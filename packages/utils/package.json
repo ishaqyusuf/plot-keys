@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./cn": "./src/cn.ts",
     "./phone": "./src/phone.ts",
+    "./runtime-url": "./src/runtime-url.ts",
     "./tenant-domains": "./src/tenant-domains.ts",
     "./vercel-domains": "./src/vercel-domains.ts"
   },

@@ -10,34 +10,46 @@ import {
 } from "@plotkeys/site-nav";
 import { iconFor } from "./icons";
 
-function createSectionLinks(section: GlobalNavSection | { label: string; items: { href: string; icon: string; label: string }[] }) {
-  return section.items.map((item, index) =>
-    createNavLink(item.label, iconFor(item.icon), item.href, [], [])
-      .level(index + 1)
-      .title(item.label).data,
+function createSectionLinks(
+  section:
+    | GlobalNavSection
+    | { label: string; items: { href: string; icon: string; label: string }[] },
+) {
+  return section.items.map(
+    (item, index) =>
+      createNavLink(item.label, iconFor(item.icon), item.href, [], [])
+        .level(index + 1)
+        .title(item.label).data,
   );
 }
 
 export function createDashboardNavRegistry({
-  activeApp,
+  enabledApps,
   globalTop,
   platformGroup,
 }: {
-  activeApp: AppDefinition | null;
+  enabledApps: readonly AppDefinition[];
   globalTop: GlobalNavSection;
   platformGroup: GlobalNavSection;
 }): NavModule[] {
   const modules: NavModule[] = [
-    createNavModule("Workspace", iconFor(globalTop.items[0]?.icon ?? "Home"), "Core navigation", [
-      createNavSection("top", globalTop.label, createSectionLinks(globalTop)),
-    ]),
+    createNavModule(
+      "Workspace",
+      iconFor(globalTop.items[0]?.icon ?? "Home"),
+      "Core navigation",
+      [createNavSection("top", globalTop.label, createSectionLinks(globalTop))],
+    ),
   ];
 
-  if (activeApp) {
+  for (const app of enabledApps) {
     modules.push(
-      createNavModule(activeApp.label, iconFor(activeApp.icon), activeApp.description, [
-        ...activeApp.navGroups.map((group) =>
-          createNavSection(group.label.toLowerCase().replace(/\s+/g, "-"), group.label, createSectionLinks(group)),
+      createNavModule(app.label, iconFor(app.icon), app.description, [
+        ...app.navGroups.map((group) =>
+          createNavSection(
+            group.label.toLowerCase().replace(/\s+/g, "-"),
+            group.label,
+            createSectionLinks(group),
+          ),
         ),
       ]),
     );
@@ -48,7 +60,13 @@ export function createDashboardNavRegistry({
       "Platform",
       iconFor(platformGroup.items[0]?.icon ?? "Settings"),
       "Settings and tools",
-      [createNavSection("platform", platformGroup.label, createSectionLinks(platformGroup))],
+      [
+        createNavSection(
+          "platform",
+          platformGroup.label,
+          createSectionLinks(platformGroup),
+        ),
+      ],
     ),
   );
 

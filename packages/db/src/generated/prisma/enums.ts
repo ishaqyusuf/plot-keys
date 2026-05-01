@@ -407,6 +407,78 @@ export const OfferStatus = {
 export type OfferStatus = (typeof OfferStatus)[keyof typeof OfferStatus]
 
 
+export const EstatePublishState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
+} as const
+
+export type EstatePublishState = (typeof EstatePublishState)[keyof typeof EstatePublishState]
+
+
+export const EstateLayoutStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
+} as const
+
+export type EstateLayoutStatus = (typeof EstateLayoutStatus)[keyof typeof EstateLayoutStatus]
+
+
+export const PlotType = {
+  residential: 'residential',
+  commercial: 'commercial',
+  mixed_use: 'mixed_use',
+  amenity: 'amenity'
+} as const
+
+export type PlotType = (typeof PlotType)[keyof typeof PlotType]
+
+
+export const PlotStatus = {
+  available: 'available',
+  held: 'held',
+  reserved: 'reserved',
+  sold: 'sold',
+  blocked: 'blocked'
+} as const
+
+export type PlotStatus = (typeof PlotStatus)[keyof typeof PlotStatus]
+
+
+export const PlotReservationStatus = {
+  draft: 'draft',
+  held: 'held',
+  processing: 'processing',
+  expired: 'expired',
+  cancelled: 'cancelled',
+  approved: 'approved',
+  rejected: 'rejected'
+} as const
+
+export type PlotReservationStatus = (typeof PlotReservationStatus)[keyof typeof PlotReservationStatus]
+
+
+export const PlotReservationChoiceStatus = {
+  selected: 'selected',
+  promoted: 'promoted',
+  released: 'released'
+} as const
+
+export type PlotReservationChoiceStatus = (typeof PlotReservationChoiceStatus)[keyof typeof PlotReservationChoiceStatus]
+
+
+export const PlotDocumentKind = {
+  survey: 'survey',
+  deed: 'deed',
+  allocation_letter: 'allocation_letter',
+  receipt: 'receipt',
+  other: 'other'
+} as const
+
+export type PlotDocumentKind = (typeof PlotDocumentKind)[keyof typeof PlotDocumentKind]
+
+
 export const PropertyMediaKind = {
   image: 'image',
   floor_plan: 'floor_plan',

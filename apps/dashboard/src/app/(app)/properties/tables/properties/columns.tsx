@@ -1,5 +1,5 @@
 export const propertyTableColumns = [
-  { id: "property", label: "Property" },
+  { id: "property", label: "Listing" },
   { id: "type", label: "Type" },
   { id: "status", label: "Status" },
   { id: "price", label: "Price" },
@@ -19,6 +19,7 @@ export type PropertyTableRow = {
   specs: string | null;
   type: string | null;
   subType: string | null;
+  quantityAvailable?: number | null;
   status: string;
   publishState: string;
   featured: boolean;

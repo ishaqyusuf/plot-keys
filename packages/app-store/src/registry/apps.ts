@@ -17,7 +17,7 @@ export const APP_REGISTRY: readonly AppDefinition[] = [
     label: "Listings",
     icon: "Building2",
     description:
-      "Manage properties, agents, leads, and viewing appointments for your real estate inventory.",
+      "Manage home and land listings, agents, leads, and viewing appointments for your real estate inventory.",
     category: "Sales",
     planGate: "starter",
     homeRoute: "/properties",
@@ -25,7 +25,8 @@ export const APP_REGISTRY: readonly AppDefinition[] = [
       {
         label: "Listings",
         items: [
-          { href: "/properties", icon: "Building2", label: "Properties" },
+          { href: "/properties", icon: "Building2", label: "Listings" },
+          { href: "/estates", icon: "Building2", label: "Estate launches" },
           { href: "/agents", icon: "UsersRound", label: "Agents" },
           { href: "/leads", icon: "Mail", label: "Leads" },
           { href: "/appointments", icon: "Calendar", label: "Appointments" },

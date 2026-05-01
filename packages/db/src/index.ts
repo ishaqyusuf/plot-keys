@@ -30,6 +30,7 @@ export * from "./queries/company";
 export * from "./queries/customer";
 export * from "./queries/department";
 export * from "./queries/employee";
+export * from "./queries/estate";
 export * from "./queries/leads";
 export * from "./queries/leave-request";
 export * from "./queries/notification-preference";

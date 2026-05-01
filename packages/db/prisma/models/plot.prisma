@@ -1,0 +1,157 @@
+enum PlotType {
+  residential
+  commercial
+  mixed_use
+  amenity
+
+  @@map("plot_type")
+}
+
+enum PlotStatus {
+  available
+  held
+  reserved
+  sold
+  blocked
+
+  @@map("plot_status")
+}
+
+enum PlotReservationStatus {
+  draft
+  held
+  processing
+  expired
+  cancelled
+  approved
+  rejected
+
+  @@map("plot_reservation_status")
+}
+
+enum PlotReservationChoiceStatus {
+  selected
+  promoted
+  released
+
+  @@map("plot_reservation_choice_status")
+}
+
+enum PlotDocumentKind {
+  survey
+  deed
+  allocation_letter
+  receipt
+  other
+
+  @@map("plot_document_kind")
+}
+
+model Plot {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId     String      @map("company_id") @db.Uuid
+  estateId      String      @map("estate_id") @db.Uuid
+  plotCode      String      @map("plot_code")
+  block         String?
+  street        String?
+  sizeSqm       Int?        @map("size_sqm")
+  price         String?
+  type          PlotType?
+  status        PlotStatus  @default(available)
+  facing        String?
+  isCornerPiece Boolean     @default(false) @map("is_corner_piece")
+  isPremium     Boolean     @default(false) @map("is_premium")
+  coordinatesJson Json?     @map("coordinates_json")
+  tagsJson      Json?       @map("tags_json")
+  metadataJson  Json?       @map("metadata_json")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  estate        Estate      @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  reservationChoices PlotReservationChoice[]
+  statusHistory PlotStatusHistory[]
+  documents     PlotDocument[]
+
+  @@unique([estateId, plotCode], map: "plots_estate_plot_code_key")
+  @@index([companyId], map: "plots_company_id_idx")
+  @@index([estateId], map: "plots_estate_id_idx")
+  @@index([companyId, status], map: "plots_company_status_idx")
+  @@index([deletedAt], map: "plots_deleted_at_idx")
+  @@map("plots")
+}
+
+model PlotReservation {
+  id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId     String                @map("company_id") @db.Uuid
+  customerId    String                @map("customer_id") @db.Uuid
+  estateId      String                @map("estate_id") @db.Uuid
+  status        PlotReservationStatus @default(draft)
+  holdExpiresAt DateTime?             @map("hold_expires_at") @db.Timestamptz(6)
+  submittedAt   DateTime?             @map("submitted_at") @db.Timestamptz(6)
+  approvedAt    DateTime?             @map("approved_at") @db.Timestamptz(6)
+  rejectedAt    DateTime?             @map("rejected_at") @db.Timestamptz(6)
+  notes         String?
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company       Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer      Customer              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  estate        Estate                @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  choices       PlotReservationChoice[]
+
+  @@index([companyId], map: "plot_reservations_company_id_idx")
+  @@index([customerId], map: "plot_reservations_customer_id_idx")
+  @@index([estateId], map: "plot_reservations_estate_id_idx")
+  @@index([customerId, status], map: "plot_reservations_customer_status_idx")
+  @@map("plot_reservations")
+}
+
+model PlotReservationChoice {
+  id            String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reservationId String                      @map("reservation_id") @db.Uuid
+  plotId        String                      @map("plot_id") @db.Uuid
+  rank          Int                         @default(1)
+  isPrimary     Boolean                     @default(false) @map("is_primary")
+  status        PlotReservationChoiceStatus @default(selected)
+  createdAt     DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  reservation   PlotReservation             @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  plot          Plot                        @relation(fields: [plotId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationId, plotId], map: "plot_reservation_choices_reservation_plot_key")
+  @@index([reservationId], map: "plot_reservation_choices_reservation_id_idx")
+  @@index([plotId], map: "plot_reservation_choices_plot_id_idx")
+  @@map("plot_reservation_choices")
+}
+
+model PlotStatusHistory {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plotId          String     @map("plot_id") @db.Uuid
+  fromStatus      PlotStatus? @map("from_status")
+  toStatus        PlotStatus  @map("to_status")
+  actorUserId     String?     @map("actor_user_id")
+  actorCustomerId String?     @map("actor_customer_id") @db.Uuid
+  reason          String?
+  metadataJson    Json?       @map("metadata_json")
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  plot            Plot        @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  actorCustomer   Customer?   @relation(fields: [actorCustomerId], references: [id], onDelete: SetNull)
+  actorUser       User?       @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([plotId], map: "plot_status_history_plot_id_idx")
+  @@index([actorUserId], map: "plot_status_history_actor_user_id_idx")
+  @@index([actorCustomerId], map: "plot_status_history_actor_customer_id_idx")
+  @@map("plot_status_history")
+}
+
+model PlotDocument {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plotId    String           @map("plot_id") @db.Uuid
+  kind      PlotDocumentKind @default(other)
+  url       String
+  label     String?
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  plot      Plot             @relation(fields: [plotId], references: [id], onDelete: Cascade)
+
+  @@index([plotId], map: "plot_documents_plot_id_idx")
+  @@map("plot_documents")
+}

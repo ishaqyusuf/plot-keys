@@ -29,16 +29,23 @@ export type AggregateProperty = {
 export type PropertyAvgAggregateOutputType = {
   bedrooms: number | null
   bathrooms: number | null
+  quantityAvailable: number | null
+  paymentPlanMonths: number | null
+  paymentPlanInitialDepositPercent: number | null
 }
 
 export type PropertySumAggregateOutputType = {
   bedrooms: number | null
   bathrooms: number | null
+  quantityAvailable: number | null
+  paymentPlanMonths: number | null
+  paymentPlanInitialDepositPercent: number | null
 }
 
 export type PropertyMinAggregateOutputType = {
   id: string | null
   companyId: string | null
+  estateId: string | null
   title: string | null
   description: string | null
   price: string | null
@@ -49,6 +56,12 @@ export type PropertyMinAggregateOutputType = {
   imageUrl: string | null
   type: $Enums.PropertyType | null
   subType: string | null
+  quantityAvailable: number | null
+  unitLabel: string | null
+  paymentPlanMonths: number | null
+  paymentPlanAmount: string | null
+  paymentPlanInitialDepositPercent: number | null
+  paymentPlanMonthlyAmount: string | null
   status: $Enums.PropertyStatus | null
   publishState: $Enums.PropertyPublishState | null
   featured: boolean | null
@@ -60,6 +73,7 @@ export type PropertyMinAggregateOutputType = {
 export type PropertyMaxAggregateOutputType = {
   id: string | null
   companyId: string | null
+  estateId: string | null
   title: string | null
   description: string | null
   price: string | null
@@ -70,6 +84,12 @@ export type PropertyMaxAggregateOutputType = {
   imageUrl: string | null
   type: $Enums.PropertyType | null
   subType: string | null
+  quantityAvailable: number | null
+  unitLabel: string | null
+  paymentPlanMonths: number | null
+  paymentPlanAmount: string | null
+  paymentPlanInitialDepositPercent: number | null
+  paymentPlanMonthlyAmount: string | null
   status: $Enums.PropertyStatus | null
   publishState: $Enums.PropertyPublishState | null
   featured: boolean | null
@@ -81,6 +101,7 @@ export type PropertyMaxAggregateOutputType = {
 export type PropertyCountAggregateOutputType = {
   id: number
   companyId: number
+  estateId: number
   title: number
   description: number
   price: number
@@ -91,6 +112,13 @@ export type PropertyCountAggregateOutputType = {
   imageUrl: number
   type: number
   subType: number
+  quantityAvailable: number
+  unitLabel: number
+  paymentPlanMonths: number
+  paymentPlanAmount: number
+  paymentPlanInitialDepositPercent: number
+  paymentPlanMonthlyAmount: number
+  paymentPlansJson: number
   status: number
   publishState: number
   featured: number
@@ -104,16 +132,23 @@ export type PropertyCountAggregateOutputType = {
 export type PropertyAvgAggregateInputType = {
   bedrooms?: true
   bathrooms?: true
+  quantityAvailable?: true
+  paymentPlanMonths?: true
+  paymentPlanInitialDepositPercent?: true
 }
 
 export type PropertySumAggregateInputType = {
   bedrooms?: true
   bathrooms?: true
+  quantityAvailable?: true
+  paymentPlanMonths?: true
+  paymentPlanInitialDepositPercent?: true
 }
 
 export type PropertyMinAggregateInputType = {
   id?: true
   companyId?: true
+  estateId?: true
   title?: true
   description?: true
   price?: true
@@ -124,6 +159,12 @@ export type PropertyMinAggregateInputType = {
   imageUrl?: true
   type?: true
   subType?: true
+  quantityAvailable?: true
+  unitLabel?: true
+  paymentPlanMonths?: true
+  paymentPlanAmount?: true
+  paymentPlanInitialDepositPercent?: true
+  paymentPlanMonthlyAmount?: true
   status?: true
   publishState?: true
   featured?: true
@@ -135,6 +176,7 @@ export type PropertyMinAggregateInputType = {
 export type PropertyMaxAggregateInputType = {
   id?: true
   companyId?: true
+  estateId?: true
   title?: true
   description?: true
   price?: true
@@ -145,6 +187,12 @@ export type PropertyMaxAggregateInputType = {
   imageUrl?: true
   type?: true
   subType?: true
+  quantityAvailable?: true
+  unitLabel?: true
+  paymentPlanMonths?: true
+  paymentPlanAmount?: true
+  paymentPlanInitialDepositPercent?: true
+  paymentPlanMonthlyAmount?: true
   status?: true
   publishState?: true
   featured?: true
@@ -156,6 +204,7 @@ export type PropertyMaxAggregateInputType = {
 export type PropertyCountAggregateInputType = {
   id?: true
   companyId?: true
+  estateId?: true
   title?: true
   description?: true
   price?: true
@@ -166,6 +215,13 @@ export type PropertyCountAggregateInputType = {
   imageUrl?: true
   type?: true
   subType?: true
+  quantityAvailable?: true
+  unitLabel?: true
+  paymentPlanMonths?: true
+  paymentPlanAmount?: true
+  paymentPlanInitialDepositPercent?: true
+  paymentPlanMonthlyAmount?: true
+  paymentPlansJson?: true
   status?: true
   publishState?: true
   featured?: true
@@ -264,6 +320,7 @@ export type PropertyGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type PropertyGroupByOutputType = {
   id: string
   companyId: string
+  estateId: string | null
   title: string
   description: string | null
   price: string | null
@@ -274,6 +331,13 @@ export type PropertyGroupByOutputType = {
   imageUrl: string | null
   type: $Enums.PropertyType | null
   subType: string | null
+  quantityAvailable: number | null
+  unitLabel: string | null
+  paymentPlanMonths: number | null
+  paymentPlanAmount: string | null
+  paymentPlanInitialDepositPercent: number | null
+  paymentPlanMonthlyAmount: string | null
+  paymentPlansJson: runtime.JsonValue | null
   status: $Enums.PropertyStatus
   publishState: $Enums.PropertyPublishState
   featured: boolean
@@ -287,7 +351,7 @@ export type PropertyGroupByOutputType = {
   _max: PropertyMaxAggregateOutputType | null
 }
 
-type GetPropertyGroupByPayload<T extends PropertyGroupByArgs> = Prisma.PrismaPromise<
+export type GetPropertyGroupByPayload<T extends PropertyGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<PropertyGroupByOutputType, T['by']> &
       {
@@ -308,6 +372,7 @@ export type PropertyWhereInput = {
   NOT?: Prisma.PropertyWhereInput | Prisma.PropertyWhereInput[]
   id?: Prisma.UuidFilter<"Property"> | string
   companyId?: Prisma.UuidFilter<"Property"> | string
+  estateId?: Prisma.UuidNullableFilter<"Property"> | string | null
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   price?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -318,6 +383,13 @@ export type PropertyWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
   subType?: Prisma.StringNullableFilter<"Property"> | string | null
+  quantityAvailable?: Prisma.IntNullableFilter<"Property"> | number | null
+  unitLabel?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanMonths?: Prisma.IntNullableFilter<"Property"> | number | null
+  paymentPlanAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanInitialDepositPercent?: Prisma.FloatNullableFilter<"Property"> | number | null
+  paymentPlanMonthlyAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlansJson?: Prisma.JsonNullableFilter<"Property">
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
@@ -325,6 +397,7 @@ export type PropertyWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
+  estate?: Prisma.XOR<Prisma.EstateNullableScalarRelationFilter, Prisma.EstateWhereInput> | null
   appointments?: Prisma.AppointmentListRelationFilter
   media?: Prisma.PropertyMediaListRelationFilter
   savedListings?: Prisma.SavedListingListRelationFilter
@@ -334,6 +407,7 @@ export type PropertyWhereInput = {
 export type PropertyOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
+  estateId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -344,6 +418,13 @@ export type PropertyOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   subType?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanMonthlyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlansJson?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
@@ -351,6 +432,7 @@ export type PropertyOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
+  estate?: Prisma.EstateOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
   media?: Prisma.PropertyMediaOrderByRelationAggregateInput
   savedListings?: Prisma.SavedListingOrderByRelationAggregateInput
@@ -363,6 +445,7 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PropertyWhereInput[]
   NOT?: Prisma.PropertyWhereInput | Prisma.PropertyWhereInput[]
   companyId?: Prisma.UuidFilter<"Property"> | string
+  estateId?: Prisma.UuidNullableFilter<"Property"> | string | null
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   price?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -373,6 +456,13 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
   subType?: Prisma.StringNullableFilter<"Property"> | string | null
+  quantityAvailable?: Prisma.IntNullableFilter<"Property"> | number | null
+  unitLabel?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanMonths?: Prisma.IntNullableFilter<"Property"> | number | null
+  paymentPlanAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanInitialDepositPercent?: Prisma.FloatNullableFilter<"Property"> | number | null
+  paymentPlanMonthlyAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlansJson?: Prisma.JsonNullableFilter<"Property">
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
@@ -380,6 +470,7 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
+  estate?: Prisma.XOR<Prisma.EstateNullableScalarRelationFilter, Prisma.EstateWhereInput> | null
   appointments?: Prisma.AppointmentListRelationFilter
   media?: Prisma.PropertyMediaListRelationFilter
   savedListings?: Prisma.SavedListingListRelationFilter
@@ -389,6 +480,7 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
 export type PropertyOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
+  estateId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -399,6 +491,13 @@ export type PropertyOrderByWithAggregationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   subType?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlanMonthlyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentPlansJson?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
@@ -418,6 +517,7 @@ export type PropertyScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PropertyScalarWhereWithAggregatesInput | Prisma.PropertyScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Property"> | string
   companyId?: Prisma.UuidWithAggregatesFilter<"Property"> | string
+  estateId?: Prisma.UuidNullableWithAggregatesFilter<"Property"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"Property"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   price?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
@@ -428,6 +528,13 @@ export type PropertyScalarWhereWithAggregatesInput = {
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   type?: Prisma.EnumPropertyTypeNullableWithAggregatesFilter<"Property"> | $Enums.PropertyType | null
   subType?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  quantityAvailable?: Prisma.IntNullableWithAggregatesFilter<"Property"> | number | null
+  unitLabel?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  paymentPlanMonths?: Prisma.IntNullableWithAggregatesFilter<"Property"> | number | null
+  paymentPlanAmount?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  paymentPlanInitialDepositPercent?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
+  paymentPlanMonthlyAmount?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  paymentPlansJson?: Prisma.JsonNullableWithAggregatesFilter<"Property">
   status?: Prisma.EnumPropertyStatusWithAggregatesFilter<"Property"> | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateWithAggregatesFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolWithAggregatesFilter<"Property"> | boolean
@@ -448,6 +555,13 @@ export type PropertyCreateInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -455,6 +569,7 @@ export type PropertyCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
   media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
@@ -464,6 +579,7 @@ export type PropertyCreateInput = {
 export type PropertyUncheckedCreateInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -474,6 +590,13 @@ export type PropertyUncheckedCreateInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -498,6 +621,13 @@ export type PropertyUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -505,6 +635,7 @@ export type PropertyUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
   media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
@@ -514,6 +645,7 @@ export type PropertyUpdateInput = {
 export type PropertyUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -524,6 +656,13 @@ export type PropertyUncheckedUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -539,6 +678,7 @@ export type PropertyUncheckedUpdateInput = {
 export type PropertyCreateManyInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -549,6 +689,13 @@ export type PropertyCreateManyInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -569,6 +716,13 @@ export type PropertyUpdateManyMutationInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -580,6 +734,7 @@ export type PropertyUpdateManyMutationInput = {
 export type PropertyUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -590,6 +745,13 @@ export type PropertyUncheckedUpdateManyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -621,6 +783,7 @@ export type PropertyScalarRelationFilter = {
 export type PropertyCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
+  estateId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -631,6 +794,13 @@ export type PropertyCountOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   type?: Prisma.SortOrder
   subType?: Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrder
+  unitLabel?: Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrder
+  paymentPlanAmount?: Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrder
+  paymentPlanMonthlyAmount?: Prisma.SortOrder
+  paymentPlansJson?: Prisma.SortOrder
   status?: Prisma.SortOrder
   publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
@@ -642,11 +812,15 @@ export type PropertyCountOrderByAggregateInput = {
 export type PropertyAvgOrderByAggregateInput = {
   bedrooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrder
 }
 
 export type PropertyMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
+  estateId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -657,6 +831,12 @@ export type PropertyMaxOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   type?: Prisma.SortOrder
   subType?: Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrder
+  unitLabel?: Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrder
+  paymentPlanAmount?: Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrder
+  paymentPlanMonthlyAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
@@ -668,6 +848,7 @@ export type PropertyMaxOrderByAggregateInput = {
 export type PropertyMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
+  estateId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -678,6 +859,12 @@ export type PropertyMinOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   type?: Prisma.SortOrder
   subType?: Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrder
+  unitLabel?: Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrder
+  paymentPlanAmount?: Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrder
+  paymentPlanMonthlyAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   publishState?: Prisma.SortOrder
   featured?: Prisma.SortOrder
@@ -689,6 +876,9 @@ export type PropertyMinOrderByAggregateInput = {
 export type PropertySumOrderByAggregateInput = {
   bedrooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
+  quantityAvailable?: Prisma.SortOrder
+  paymentPlanMonths?: Prisma.SortOrder
+  paymentPlanInitialDepositPercent?: Prisma.SortOrder
 }
 
 export type PropertyCreateNestedOneWithoutAppointmentsInput = {
@@ -777,6 +967,48 @@ export type PropertyUpdateOneRequiredWithoutOffersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutOffersInput, Prisma.PropertyUpdateWithoutOffersInput>, Prisma.PropertyUncheckedUpdateWithoutOffersInput>
 }
 
+export type PropertyCreateNestedManyWithoutEstateInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput> | Prisma.PropertyCreateWithoutEstateInput[] | Prisma.PropertyUncheckedCreateWithoutEstateInput[]
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutEstateInput | Prisma.PropertyCreateOrConnectWithoutEstateInput[]
+  createMany?: Prisma.PropertyCreateManyEstateInputEnvelope
+  connect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+}
+
+export type PropertyUncheckedCreateNestedManyWithoutEstateInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput> | Prisma.PropertyCreateWithoutEstateInput[] | Prisma.PropertyUncheckedCreateWithoutEstateInput[]
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutEstateInput | Prisma.PropertyCreateOrConnectWithoutEstateInput[]
+  createMany?: Prisma.PropertyCreateManyEstateInputEnvelope
+  connect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+}
+
+export type PropertyUpdateManyWithoutEstateNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput> | Prisma.PropertyCreateWithoutEstateInput[] | Prisma.PropertyUncheckedCreateWithoutEstateInput[]
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutEstateInput | Prisma.PropertyCreateOrConnectWithoutEstateInput[]
+  upsert?: Prisma.PropertyUpsertWithWhereUniqueWithoutEstateInput | Prisma.PropertyUpsertWithWhereUniqueWithoutEstateInput[]
+  createMany?: Prisma.PropertyCreateManyEstateInputEnvelope
+  set?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  disconnect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  delete?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  connect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  update?: Prisma.PropertyUpdateWithWhereUniqueWithoutEstateInput | Prisma.PropertyUpdateWithWhereUniqueWithoutEstateInput[]
+  updateMany?: Prisma.PropertyUpdateManyWithWhereWithoutEstateInput | Prisma.PropertyUpdateManyWithWhereWithoutEstateInput[]
+  deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
+}
+
+export type PropertyUncheckedUpdateManyWithoutEstateNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput> | Prisma.PropertyCreateWithoutEstateInput[] | Prisma.PropertyUncheckedCreateWithoutEstateInput[]
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutEstateInput | Prisma.PropertyCreateOrConnectWithoutEstateInput[]
+  upsert?: Prisma.PropertyUpsertWithWhereUniqueWithoutEstateInput | Prisma.PropertyUpsertWithWhereUniqueWithoutEstateInput[]
+  createMany?: Prisma.PropertyCreateManyEstateInputEnvelope
+  set?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  disconnect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  delete?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  connect?: Prisma.PropertyWhereUniqueInput | Prisma.PropertyWhereUniqueInput[]
+  update?: Prisma.PropertyUpdateWithWhereUniqueWithoutEstateInput | Prisma.PropertyUpdateWithWhereUniqueWithoutEstateInput[]
+  updateMany?: Prisma.PropertyUpdateManyWithWhereWithoutEstateInput | Prisma.PropertyUpdateManyWithWhereWithoutEstateInput[]
+  deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
+}
+
 export type PropertyCreateNestedOneWithoutMediaInput = {
   create?: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
   connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMediaInput
@@ -815,6 +1047,13 @@ export type PropertyCreateWithoutAppointmentsInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -822,6 +1061,7 @@ export type PropertyCreateWithoutAppointmentsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutPropertyInput
@@ -830,6 +1070,7 @@ export type PropertyCreateWithoutAppointmentsInput = {
 export type PropertyUncheckedCreateWithoutAppointmentsInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -840,6 +1081,13 @@ export type PropertyUncheckedCreateWithoutAppointmentsInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -879,6 +1127,13 @@ export type PropertyUpdateWithoutAppointmentsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -886,6 +1141,7 @@ export type PropertyUpdateWithoutAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutPropertyNestedInput
@@ -894,6 +1150,7 @@ export type PropertyUpdateWithoutAppointmentsInput = {
 export type PropertyUncheckedUpdateWithoutAppointmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -904,6 +1161,13 @@ export type PropertyUncheckedUpdateWithoutAppointmentsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -927,12 +1191,20 @@ export type PropertyCreateWithoutCompanyInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
   media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
@@ -941,6 +1213,7 @@ export type PropertyCreateWithoutCompanyInput = {
 
 export type PropertyUncheckedCreateWithoutCompanyInput = {
   id?: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -951,6 +1224,13 @@ export type PropertyUncheckedCreateWithoutCompanyInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -995,6 +1275,7 @@ export type PropertyScalarWhereInput = {
   NOT?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
   id?: Prisma.UuidFilter<"Property"> | string
   companyId?: Prisma.UuidFilter<"Property"> | string
+  estateId?: Prisma.UuidNullableFilter<"Property"> | string | null
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   price?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -1005,6 +1286,13 @@ export type PropertyScalarWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   type?: Prisma.EnumPropertyTypeNullableFilter<"Property"> | $Enums.PropertyType | null
   subType?: Prisma.StringNullableFilter<"Property"> | string | null
+  quantityAvailable?: Prisma.IntNullableFilter<"Property"> | number | null
+  unitLabel?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanMonths?: Prisma.IntNullableFilter<"Property"> | number | null
+  paymentPlanAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlanInitialDepositPercent?: Prisma.FloatNullableFilter<"Property"> | number | null
+  paymentPlanMonthlyAmount?: Prisma.StringNullableFilter<"Property"> | string | null
+  paymentPlansJson?: Prisma.JsonNullableFilter<"Property">
   status?: Prisma.EnumPropertyStatusFilter<"Property"> | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFilter<"Property"> | $Enums.PropertyPublishState
   featured?: Prisma.BoolFilter<"Property"> | boolean
@@ -1025,6 +1313,13 @@ export type PropertyCreateWithoutSavedListingsInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1032,6 +1327,7 @@ export type PropertyCreateWithoutSavedListingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
   media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutPropertyInput
@@ -1040,6 +1336,7 @@ export type PropertyCreateWithoutSavedListingsInput = {
 export type PropertyUncheckedCreateWithoutSavedListingsInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -1050,6 +1347,13 @@ export type PropertyUncheckedCreateWithoutSavedListingsInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1089,6 +1393,13 @@ export type PropertyUpdateWithoutSavedListingsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1096,6 +1407,7 @@ export type PropertyUpdateWithoutSavedListingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
   media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutPropertyNestedInput
@@ -1104,6 +1416,7 @@ export type PropertyUpdateWithoutSavedListingsInput = {
 export type PropertyUncheckedUpdateWithoutSavedListingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1114,6 +1427,13 @@ export type PropertyUncheckedUpdateWithoutSavedListingsInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1137,6 +1457,13 @@ export type PropertyCreateWithoutOffersInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1144,6 +1471,7 @@ export type PropertyCreateWithoutOffersInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
   media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
@@ -1152,6 +1480,7 @@ export type PropertyCreateWithoutOffersInput = {
 export type PropertyUncheckedCreateWithoutOffersInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -1162,6 +1491,13 @@ export type PropertyUncheckedCreateWithoutOffersInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1201,6 +1537,13 @@ export type PropertyUpdateWithoutOffersInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1208,6 +1551,7 @@ export type PropertyUpdateWithoutOffersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
   media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
@@ -1216,6 +1560,7 @@ export type PropertyUpdateWithoutOffersInput = {
 export type PropertyUncheckedUpdateWithoutOffersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1226,6 +1571,13 @@ export type PropertyUncheckedUpdateWithoutOffersInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1235,6 +1587,96 @@ export type PropertyUncheckedUpdateWithoutOffersInput = {
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPropertyNestedInput
   media?: Prisma.PropertyMediaUncheckedUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutEstateInput = {
+  id?: string
+  title: string
+  description?: string | null
+  price?: string | null
+  location: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  specs?: string | null
+  imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
+  featured?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaCreateNestedManyWithoutPropertyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
+  offers?: Prisma.CustomerOfferCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutEstateInput = {
+  id?: string
+  companyId: string
+  title: string
+  description?: string | null
+  price?: string | null
+  location: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  specs?: string | null
+  imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
+  featured?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPropertyInput
+  media?: Prisma.PropertyMediaUncheckedCreateNestedManyWithoutPropertyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutPropertyInput
+  offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutEstateInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput>
+}
+
+export type PropertyCreateManyEstateInputEnvelope = {
+  data: Prisma.PropertyCreateManyEstateInput | Prisma.PropertyCreateManyEstateInput[]
+  skipDuplicates?: boolean
+}
+
+export type PropertyUpsertWithWhereUniqueWithoutEstateInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutEstateInput, Prisma.PropertyUncheckedUpdateWithoutEstateInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutEstateInput, Prisma.PropertyUncheckedCreateWithoutEstateInput>
+}
+
+export type PropertyUpdateWithWhereUniqueWithoutEstateInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutEstateInput, Prisma.PropertyUncheckedUpdateWithoutEstateInput>
+}
+
+export type PropertyUpdateManyWithWhereWithoutEstateInput = {
+  where: Prisma.PropertyScalarWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateManyMutationInput, Prisma.PropertyUncheckedUpdateManyWithoutEstateInput>
 }
 
 export type PropertyCreateWithoutMediaInput = {
@@ -1249,6 +1691,13 @@ export type PropertyCreateWithoutMediaInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1256,6 +1705,7 @@ export type PropertyCreateWithoutMediaInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   company: Prisma.CompanyCreateNestedOneWithoutPropertiesInput
+  estate?: Prisma.EstateCreateNestedOneWithoutPropertiesInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPropertyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutPropertyInput
   offers?: Prisma.CustomerOfferCreateNestedManyWithoutPropertyInput
@@ -1264,6 +1714,7 @@ export type PropertyCreateWithoutMediaInput = {
 export type PropertyUncheckedCreateWithoutMediaInput = {
   id?: string
   companyId: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -1274,6 +1725,13 @@ export type PropertyUncheckedCreateWithoutMediaInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1313,6 +1771,13 @@ export type PropertyUpdateWithoutMediaInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1320,6 +1785,7 @@ export type PropertyUpdateWithoutMediaInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
   offers?: Prisma.CustomerOfferUpdateManyWithoutPropertyNestedInput
@@ -1328,6 +1794,7 @@ export type PropertyUpdateWithoutMediaInput = {
 export type PropertyUncheckedUpdateWithoutMediaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1338,6 +1805,13 @@ export type PropertyUncheckedUpdateWithoutMediaInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1351,6 +1825,7 @@ export type PropertyUncheckedUpdateWithoutMediaInput = {
 
 export type PropertyCreateManyCompanyInput = {
   id?: string
+  estateId?: string | null
   title: string
   description?: string | null
   price?: string | null
@@ -1361,6 +1836,13 @@ export type PropertyCreateManyCompanyInput = {
   imageUrl?: string | null
   type?: $Enums.PropertyType | null
   subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.PropertyStatus
   publishState?: $Enums.PropertyPublishState
   featured?: boolean
@@ -1381,12 +1863,20 @@ export type PropertyUpdateWithoutCompanyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estate?: Prisma.EstateUpdateOneWithoutPropertiesNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
   media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
@@ -1395,6 +1885,7 @@ export type PropertyUpdateWithoutCompanyInput = {
 
 export type PropertyUncheckedUpdateWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1405,6 +1896,13 @@ export type PropertyUncheckedUpdateWithoutCompanyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1419,6 +1917,7 @@ export type PropertyUncheckedUpdateWithoutCompanyInput = {
 
 export type PropertyUncheckedUpdateManyWithoutCompanyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  estateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1429,6 +1928,133 @@ export type PropertyUncheckedUpdateManyWithoutCompanyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
   subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type PropertyCreateManyEstateInput = {
+  id?: string
+  companyId: string
+  title: string
+  description?: string | null
+  price?: string | null
+  location: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  specs?: string | null
+  imageUrl?: string | null
+  type?: $Enums.PropertyType | null
+  subType?: string | null
+  quantityAvailable?: number | null
+  unitLabel?: string | null
+  paymentPlanMonths?: number | null
+  paymentPlanAmount?: string | null
+  paymentPlanInitialDepositPercent?: number | null
+  paymentPlanMonthlyAmount?: string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PropertyStatus
+  publishState?: $Enums.PropertyPublishState
+  featured?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type PropertyUpdateWithoutEstateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutPropertiesNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUpdateManyWithoutPropertyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutPropertyNestedInput
+  offers?: Prisma.CustomerOfferUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutEstateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
+  publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPropertyNestedInput
+  media?: Prisma.PropertyMediaUncheckedUpdateManyWithoutPropertyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutPropertyNestedInput
+  offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateManyWithoutEstateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  specs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableEnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType | null
+  subType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantityAvailable?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unitLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentPlanAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlanInitialDepositPercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  paymentPlanMonthlyAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentPlansJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumPropertyStatusFieldUpdateOperationsInput | $Enums.PropertyStatus
   publishState?: Prisma.EnumPropertyPublishStateFieldUpdateOperationsInput | $Enums.PropertyPublishState
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1498,6 +2124,7 @@ export type PropertyCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types
 export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companyId?: boolean
+  estateId?: boolean
   title?: boolean
   description?: boolean
   price?: boolean
@@ -1508,6 +2135,13 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   imageUrl?: boolean
   type?: boolean
   subType?: boolean
+  quantityAvailable?: boolean
+  unitLabel?: boolean
+  paymentPlanMonths?: boolean
+  paymentPlanAmount?: boolean
+  paymentPlanInitialDepositPercent?: boolean
+  paymentPlanMonthlyAmount?: boolean
+  paymentPlansJson?: boolean
   status?: boolean
   publishState?: boolean
   featured?: boolean
@@ -1515,6 +2149,7 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
   appointments?: boolean | Prisma.Property$appointmentsArgs<ExtArgs>
   media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
   savedListings?: boolean | Prisma.Property$savedListingsArgs<ExtArgs>
@@ -1525,6 +2160,7 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companyId?: boolean
+  estateId?: boolean
   title?: boolean
   description?: boolean
   price?: boolean
@@ -1535,6 +2171,13 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   imageUrl?: boolean
   type?: boolean
   subType?: boolean
+  quantityAvailable?: boolean
+  unitLabel?: boolean
+  paymentPlanMonths?: boolean
+  paymentPlanAmount?: boolean
+  paymentPlanInitialDepositPercent?: boolean
+  paymentPlanMonthlyAmount?: boolean
+  paymentPlansJson?: boolean
   status?: boolean
   publishState?: boolean
   featured?: boolean
@@ -1542,11 +2185,13 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   updatedAt?: boolean
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
 export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companyId?: boolean
+  estateId?: boolean
   title?: boolean
   description?: boolean
   price?: boolean
@@ -1557,6 +2202,13 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   imageUrl?: boolean
   type?: boolean
   subType?: boolean
+  quantityAvailable?: boolean
+  unitLabel?: boolean
+  paymentPlanMonths?: boolean
+  paymentPlanAmount?: boolean
+  paymentPlanInitialDepositPercent?: boolean
+  paymentPlanMonthlyAmount?: boolean
+  paymentPlansJson?: boolean
   status?: boolean
   publishState?: boolean
   featured?: boolean
@@ -1564,11 +2216,13 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   updatedAt?: boolean
   deletedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
 export type PropertySelectScalar = {
   id?: boolean
   companyId?: boolean
+  estateId?: boolean
   title?: boolean
   description?: boolean
   price?: boolean
@@ -1579,6 +2233,13 @@ export type PropertySelectScalar = {
   imageUrl?: boolean
   type?: boolean
   subType?: boolean
+  quantityAvailable?: boolean
+  unitLabel?: boolean
+  paymentPlanMonths?: boolean
+  paymentPlanAmount?: boolean
+  paymentPlanInitialDepositPercent?: boolean
+  paymentPlanMonthlyAmount?: boolean
+  paymentPlansJson?: boolean
   status?: boolean
   publishState?: boolean
   featured?: boolean
@@ -1587,9 +2248,10 @@ export type PropertySelectScalar = {
   deletedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "title" | "description" | "price" | "location" | "bedrooms" | "bathrooms" | "specs" | "imageUrl" | "type" | "subType" | "status" | "publishState" | "featured" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "estateId" | "title" | "description" | "price" | "location" | "bedrooms" | "bathrooms" | "specs" | "imageUrl" | "type" | "subType" | "quantityAvailable" | "unitLabel" | "paymentPlanMonths" | "paymentPlanAmount" | "paymentPlanInitialDepositPercent" | "paymentPlanMonthlyAmount" | "paymentPlansJson" | "status" | "publishState" | "featured" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
   appointments?: boolean | Prisma.Property$appointmentsArgs<ExtArgs>
   media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
   savedListings?: boolean | Prisma.Property$savedListingsArgs<ExtArgs>
@@ -1598,15 +2260,18 @@ export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
 }
 export type PropertyIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
+  estate?: boolean | Prisma.Property$estateArgs<ExtArgs>
 }
 
 export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Property"
   objects: {
     company: Prisma.$CompanyPayload<ExtArgs>
+    estate: Prisma.$EstatePayload<ExtArgs> | null
     appointments: Prisma.$AppointmentPayload<ExtArgs>[]
     media: Prisma.$PropertyMediaPayload<ExtArgs>[]
     savedListings: Prisma.$SavedListingPayload<ExtArgs>[]
@@ -1615,6 +2280,7 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     companyId: string
+    estateId: string | null
     title: string
     description: string | null
     price: string | null
@@ -1625,6 +2291,13 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     imageUrl: string | null
     type: $Enums.PropertyType | null
     subType: string | null
+    quantityAvailable: number | null
+    unitLabel: string | null
+    paymentPlanMonths: number | null
+    paymentPlanAmount: string | null
+    paymentPlanInitialDepositPercent: number | null
+    paymentPlanMonthlyAmount: string | null
+    paymentPlansJson: runtime.JsonValue | null
     status: $Enums.PropertyStatus
     publishState: $Enums.PropertyPublishState
     featured: boolean
@@ -2026,6 +2699,7 @@ readonly fields: PropertyFieldRefs;
 export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  estate<T extends Prisma.Property$estateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$estateArgs<ExtArgs>>): Prisma.Prisma__EstateClient<runtime.Types.Result.GetResult<Prisma.$EstatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   appointments<T extends Prisma.Property$appointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   media<T extends Prisma.Property$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savedListings<T extends Prisma.Property$savedListingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$savedListingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2061,6 +2735,7 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
 export interface PropertyFieldRefs {
   readonly id: Prisma.FieldRef<"Property", 'String'>
   readonly companyId: Prisma.FieldRef<"Property", 'String'>
+  readonly estateId: Prisma.FieldRef<"Property", 'String'>
   readonly title: Prisma.FieldRef<"Property", 'String'>
   readonly description: Prisma.FieldRef<"Property", 'String'>
   readonly price: Prisma.FieldRef<"Property", 'String'>
@@ -2071,6 +2746,13 @@ export interface PropertyFieldRefs {
   readonly imageUrl: Prisma.FieldRef<"Property", 'String'>
   readonly type: Prisma.FieldRef<"Property", 'PropertyType'>
   readonly subType: Prisma.FieldRef<"Property", 'String'>
+  readonly quantityAvailable: Prisma.FieldRef<"Property", 'Int'>
+  readonly unitLabel: Prisma.FieldRef<"Property", 'String'>
+  readonly paymentPlanMonths: Prisma.FieldRef<"Property", 'Int'>
+  readonly paymentPlanAmount: Prisma.FieldRef<"Property", 'String'>
+  readonly paymentPlanInitialDepositPercent: Prisma.FieldRef<"Property", 'Float'>
+  readonly paymentPlanMonthlyAmount: Prisma.FieldRef<"Property", 'String'>
+  readonly paymentPlansJson: Prisma.FieldRef<"Property", 'Json'>
   readonly status: Prisma.FieldRef<"Property", 'PropertyStatus'>
   readonly publishState: Prisma.FieldRef<"Property", 'PropertyPublishState'>
   readonly featured: Prisma.FieldRef<"Property", 'Boolean'>
@@ -2475,6 +3157,25 @@ export type PropertyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Properties to delete.
    */
   limit?: number
+}
+
+/**
+ * Property.estate
+ */
+export type Property$estateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Estate
+   */
+  select?: Prisma.EstateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Estate
+   */
+  omit?: Prisma.EstateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EstateInclude<ExtArgs> | null
+  where?: Prisma.EstateWhereInput
 }
 
 /**

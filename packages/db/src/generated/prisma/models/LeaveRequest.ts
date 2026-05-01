@@ -200,7 +200,7 @@ export type LeaveRequestGroupByOutputType = {
   _max: LeaveRequestMaxAggregateOutputType | null
 }
 
-type GetLeaveRequestGroupByPayload<T extends LeaveRequestGroupByArgs> = Prisma.PrismaPromise<
+export type GetLeaveRequestGroupByPayload<T extends LeaveRequestGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<LeaveRequestGroupByOutputType, T['by']> &
       {

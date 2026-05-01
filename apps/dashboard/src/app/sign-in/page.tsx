@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
+import { PlotKeysLogo } from "@plotkeys/ui/plotkeys-logo";
 import { buildPlatformAppUrl } from "@plotkeys/utils";
 import { resolveDashboardLandingRoute } from "@plotkeys/utils";
 import { CheckCircle2 } from "lucide-react";
@@ -71,12 +72,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           className="inline-flex items-center gap-3 rounded-full border border-border/70 bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur transition hover:border-primary hover:text-primary"
           href="/"
         >
-          <span className="flex size-8 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--primary)_0%,color-mix(in_srgb,var(--primary)_70%,white)_100%)] text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground">
-            PK
-          </span>
-          <span className="font-medium uppercase tracking-[0.18em]">
-            PlotKeys
-          </span>
+          <PlotKeysLogo markClassName="h-8" wordmarkClassName="text-sm" />
         </Link>
         {!tenantSlug ? (
           <Button asChild className="hidden sm:inline-flex" variant="secondary">

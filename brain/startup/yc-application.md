@@ -29,7 +29,7 @@ TODO: Personal founder story and motivation
 TODO: Founder background and relevant experience
 
 ### How do or will you make money?
-Monthly SaaS subscriptions across three tiers (Starter at NGN ~$16/mo, Plus, Pro), plus revenue from AI credit packs, paid template purchases, and custom domain provisioning. Future revenue from transaction fees on customer payments processed through tenant sites.
+Monthly SaaS subscriptions across three tiers (Launch, Growth, Scale), plus revenue from AI credit packs, paid template purchases, and custom domain provisioning. Future revenue from transaction fees on customer payments processed through tenant sites.
 
 ### How far along are you?
 TODO: Update with current state. Currently:

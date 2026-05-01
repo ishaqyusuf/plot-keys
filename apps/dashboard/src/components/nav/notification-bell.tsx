@@ -39,7 +39,7 @@ function formatRelativeTime(dateString: string) {
   return date.toLocaleDateString("en-NG", { day: "numeric", month: "short" });
 }
 
-export function NotificationIcon.Bell({
+export function NotificationBell({
   unreadCount,
   recentNotifications,
 }: NotificationBellProps) {
@@ -47,7 +47,7 @@ export function NotificationIcon.Bell({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon-sm" className="relative">
-          <Icon.Icon.Bell className="size-4" />
+          <Icon.Bell className="size-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -68,7 +68,7 @@ export function NotificationIcon.Bell({
         <div className="max-h-72 overflow-y-auto">
           {recentNotifications.length === 0 ? (
             <div className="px-4 py-8 text-center">
-              <Icon.Icon.Bell className="mx-auto size-6 text-muted-foreground/50" />
+              <Icon.Bell className="mx-auto size-6 text-muted-foreground/50" />
               <p className="mt-2 text-xs text-muted-foreground">
                 No notifications yet
               </p>

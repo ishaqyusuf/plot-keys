@@ -25,6 +25,8 @@ type DevFabShellProps = {
   label: string;
   /** Optional extra classes on the fixed-position wrapper. */
   containerClassName?: string;
+  /** Whether the dropdown panel should start open. */
+  defaultOpen?: boolean;
   /** Optional extra classes on the trigger button. */
   triggerClassName?: string;
 };
@@ -32,10 +34,11 @@ type DevFabShellProps = {
 export function DevFabShell({
   children,
   containerClassName = "",
+  defaultOpen = false,
   label,
   triggerClassName = "",
 }: DevFabShellProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const ref = useRef<HTMLDivElement>(null);
 
   // Close on outside click

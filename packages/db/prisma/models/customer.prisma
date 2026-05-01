@@ -22,6 +22,8 @@ model Customer {
   company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   savedListings   SavedListing[]
   offers          CustomerOffer[]
+  plotReservations PlotReservation[]
+  plotStatusHistory PlotStatusHistory[]
   projectAccess   ProjectCustomerAccess[]
   projectNotices  ProjectCustomerNotice[]
 

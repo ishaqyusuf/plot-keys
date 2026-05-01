@@ -207,7 +207,7 @@ export type AiCreditLedgerGroupByOutputType = {
   _max: AiCreditLedgerMaxAggregateOutputType | null
 }
 
-type GetAiCreditLedgerGroupByPayload<T extends AiCreditLedgerGroupByArgs> = Prisma.PrismaPromise<
+export type GetAiCreditLedgerGroupByPayload<T extends AiCreditLedgerGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AiCreditLedgerGroupByOutputType, T['by']> &
       {

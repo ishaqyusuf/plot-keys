@@ -1,0 +1,42 @@
+const PLOTKEYS_MARK_DATA_URI =
+  "data:image/png;base64,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";
+
+function cx(...values: Array<string | undefined>) {
+  return values.filter(Boolean).join(" ");
+}
+
+type PlotKeysLogoProps = {
+  alt?: string;
+  className?: string;
+  markClassName?: string;
+  showWordmark?: boolean;
+  wordmarkClassName?: string;
+};
+
+export function PlotKeysLogo({
+  alt = "PlotKeys logo",
+  className,
+  markClassName,
+  showWordmark = true,
+  wordmarkClassName,
+}: PlotKeysLogoProps) {
+  return (
+    <span className={cx("inline-flex items-center gap-3", className)}>
+      <img
+        alt={alt}
+        className={cx("h-8 w-auto shrink-0", markClassName)}
+        src={PLOTKEYS_MARK_DATA_URI}
+      />
+      {showWordmark ? (
+        <span
+          className={cx(
+            "font-semibold uppercase tracking-[0.18em] text-current",
+            wordmarkClassName,
+          )}
+        >
+          PlotKeys
+        </span>
+      ) : null}
+    </span>
+  );
+}

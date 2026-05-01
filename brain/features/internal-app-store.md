@@ -60,7 +60,7 @@ The rail lives **outside** `SidebarProvider` as a flex sibling so shadcn's `Side
 
 - **enabled** — Switch toggle (on) → calls `setAppEnabled(id, false)`.
 - **available** — Switch toggle (off) → calls `setAppEnabled(id, true)`.
-- **locked** — "Upgrade to {planGate}" CTA link to `/billing`.
+- **locked** — "Upgrade to {public plan label}" CTA link to `/billing`.
 
 Reads `?locked=<id>` from query string to show an amber banner when a user was redirected from a disabled app.
 
@@ -110,9 +110,21 @@ The former `/app-store` (third-party integrations for Google Analytics, Facebook
 
 Run with `cd packages/app-store && bun test`.
 
+## Plan naming convention
+
+Customer-facing copy uses the public plan names from `@plotkeys/utils`:
+
+- **Launch** — internal key `starter`
+- **Growth** — internal key `plus`
+- **Scale** — internal key `pro`
+
+Do not show "Plus" as a plan name in dashboard billing, App Store, locked-route
+banners, or upgrade CTAs. The `plus` key remains valid in code, database enum
+values, route guards, and template/app entitlement checks.
+
 ## Interaction with existing plan tiers
 
-Plan tiers still govern *availability*:
+Plan tiers still govern *availability* through internal keys:
 
 - **starter** — listings, blog, analytics, ai-assistant
 - **plus** — adds crm, hrm, projects

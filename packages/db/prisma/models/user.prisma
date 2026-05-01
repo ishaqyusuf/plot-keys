@@ -23,6 +23,7 @@ model User {
   notifications             Notification[]
   notificationPreferences   NotificationPreference[]
   blogPosts                 BlogPost[]
+  plotStatusHistory         PlotStatusHistory[]
 
   @@index([email], map: "users_email_idx")
   @@index([deletedAt], map: "users_deleted_at_idx")

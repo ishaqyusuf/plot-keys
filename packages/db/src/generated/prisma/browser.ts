@@ -73,6 +73,11 @@ export type BillingLineItem = Prisma.BillingLineItemModel
  */
 export type BlogPost = Prisma.BlogPostModel
 /**
+ * Model CompanyApp
+ * 
+ */
+export type CompanyApp = Prisma.CompanyAppModel
+/**
  * Model CompanyIntegration
  * 
  */
@@ -108,6 +113,16 @@ export type Department = Prisma.DepartmentModel
  */
 export type Employee = Prisma.EmployeeModel
 /**
+ * Model Estate
+ * 
+ */
+export type Estate = Prisma.EstateModel
+/**
+ * Model EstateLayout
+ * 
+ */
+export type EstateLayout = Prisma.EstateLayoutModel
+/**
  * Model Lead
  * 
  */
@@ -137,6 +152,31 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type PayrollEntry = Prisma.PayrollEntryModel
+/**
+ * Model Plot
+ * 
+ */
+export type Plot = Prisma.PlotModel
+/**
+ * Model PlotReservation
+ * 
+ */
+export type PlotReservation = Prisma.PlotReservationModel
+/**
+ * Model PlotReservationChoice
+ * 
+ */
+export type PlotReservationChoice = Prisma.PlotReservationChoiceModel
+/**
+ * Model PlotStatusHistory
+ * 
+ */
+export type PlotStatusHistory = Prisma.PlotStatusHistoryModel
+/**
+ * Model PlotDocument
+ * 
+ */
+export type PlotDocument = Prisma.PlotDocumentModel
 /**
  * Model ProjectAssignment
  * 

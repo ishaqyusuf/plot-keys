@@ -206,7 +206,7 @@ export type PropertyMediaGroupByOutputType = {
   _max: PropertyMediaMaxAggregateOutputType | null
 }
 
-type GetPropertyMediaGroupByPayload<T extends PropertyMediaGroupByArgs> = Prisma.PrismaPromise<
+export type GetPropertyMediaGroupByPayload<T extends PropertyMediaGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<PropertyMediaGroupByOutputType, T['by']> &
       {

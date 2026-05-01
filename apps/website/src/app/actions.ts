@@ -25,7 +25,9 @@ export async function requestEarlyAccess(
   try {
     const prisma = createPrismaClient().db!;
     await prisma.waitlistEntry.upsert({
-      where: { email_type: { email: email.toLowerCase(), type: "early_access" } },
+      where: {
+        email_type: { email: email.toLowerCase(), type: "early_access" },
+      },
       create: {
         email: email.toLowerCase(),
         name: name.trim(),
@@ -34,7 +36,10 @@ export async function requestEarlyAccess(
       update: { name: name.trim() },
     });
 
-    return { success: true, message: "You're on the list! We'll be in touch soon." };
+    return {
+      success: true,
+      message: "You're on the list! We'll be in touch soon.",
+    };
   } catch {
     return {
       success: false,

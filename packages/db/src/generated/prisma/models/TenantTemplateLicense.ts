@@ -173,7 +173,7 @@ export type TenantTemplateLicenseGroupByOutputType = {
   _max: TenantTemplateLicenseMaxAggregateOutputType | null
 }
 
-type GetTenantTemplateLicenseGroupByPayload<T extends TenantTemplateLicenseGroupByArgs> = Prisma.PrismaPromise<
+export type GetTenantTemplateLicenseGroupByPayload<T extends TenantTemplateLicenseGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TenantTemplateLicenseGroupByOutputType, T['by']> &
       {

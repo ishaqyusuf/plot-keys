@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@plotkeys/utils";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";

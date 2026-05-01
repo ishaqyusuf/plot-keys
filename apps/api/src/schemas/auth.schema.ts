@@ -4,6 +4,15 @@ import {
   normalizePhoneNumber,
 } from "@plotkeys/utils";
 
+const optionalNonEmptyTrimmedString = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}, z.string().min(1).optional());
+
 export const signUpInputSchema = z.object({
   company: z.string().trim().min(1, "Company name is required."),
   email: z.string().trim().email("Enter a valid email address."),
@@ -35,8 +44,8 @@ export const signInInputSchema = z.object({
 });
 
 export const verifyEmailInputSchema = z.object({
-  company: z.string().trim().min(1).optional(),
-  subdomain: z.string().trim().min(1).optional(),
+  company: optionalNonEmptyTrimmedString,
+  subdomain: optionalNonEmptyTrimmedString,
   token: z.string().trim().min(1, "Verification token is required."),
 });
 

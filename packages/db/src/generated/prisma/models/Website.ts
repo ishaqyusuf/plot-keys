@@ -190,7 +190,7 @@ export type WebsiteGroupByOutputType = {
   _max: WebsiteMaxAggregateOutputType | null
 }
 
-type GetWebsiteGroupByPayload<T extends WebsiteGroupByArgs> = Prisma.PrismaPromise<
+export type GetWebsiteGroupByPayload<T extends WebsiteGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<WebsiteGroupByOutputType, T['by']> &
       {

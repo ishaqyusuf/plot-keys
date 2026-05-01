@@ -8,6 +8,7 @@ export type QuickFillProfile =
   | "invite-employee"
   | "invite-member"
   | "new-agent"
+  | "new-estate"
   | "new-project"
   | "new-property"
   | "onboarding-brand-style"
@@ -160,16 +161,10 @@ const DEFAULT_PAYLOADS: QuickFillPayloads = {
   propertySubTypes: [
     "Detached Duplex",
     "Serviced Apartment",
-    "Office Suite",
-    "Mixed-use Development",
+    "Residential Plot",
+    "Commercial Plot",
   ],
-  propertyTypes: [
-    "residential",
-    "commercial",
-    "land",
-    "industrial",
-    "mixed_use",
-  ],
+  propertyTypes: ["residential", "land"],
   propertyTypeSets: [
     ["apartments", "houses"],
     ["luxury", "apartments"],
@@ -328,6 +323,8 @@ export class QuickFill<
         return this.onboardingLaunch();
       case "new-agent":
         return this.newAgent();
+      case "new-estate":
+        return this.newEstate();
       case "new-project":
         return this.newProject();
       case "new-property":
@@ -424,19 +421,55 @@ export class QuickFill<
   }
 
   newProperty() {
+    const type = pickRandom(this.payloads.propertyTypes);
+    const isLand = type === "land";
+
     this.merge({
-      bathrooms: "3",
-      bedrooms: "4",
+      bathrooms: isLand ? "" : "3",
+      bedrooms: isLand ? "" : "4",
       description: `${this.seed.description} Contact ${this.seed.fullName} for follow-up.`,
       featured: "true",
       imageUrl: `https://images.example.com/properties/${this.seed.slug}.jpg`,
       location: this.seed.location,
+      paymentPlanAmount: "45000000",
+      paymentPlanInitialDepositPercent: "20",
+      paymentPlanMonths: "12",
       price: this.seed.price,
-      specs: "4 bed · 3 bath · pool · 24/7 power",
+      quantityAvailable: isLand ? "12" : "1",
+      specs: isLand
+        ? "500sqm · dry land · C of O · good road access"
+        : "4 bed · 3 bath · pool · 24/7 power",
       status: pickRandom(this.payloads.propertyStatuses),
       subType: pickRandom(this.payloads.propertySubTypes),
       title: this.seed.title,
-      type: pickRandom(this.payloads.propertyTypes),
+      type,
+    });
+  }
+
+  newEstate() {
+    const title = `${this.seed.company} ${pickRandom([
+      "Gardens",
+      "Heights",
+      "Court",
+      "Terraces",
+    ])} Phase ${Math.floor(Math.random() * 4) + 1}`;
+
+    this.merge({
+      amenities:
+        "Golf course, artificial lake, clubhouse, medical centre, sports centre, swimming pool, green areas, solar streetlights, underground wiring",
+      approvals: "FCDA approved · C of O in progress",
+      brochureUrl: `https://images.example.com/estates/${this.seed.slug}-brochure.pdf`,
+      description: [
+        `${title} is a land presale launch in ${this.seed.location}.`,
+        "Early buyers get introductory pricing, flexible payment terms, and priority allocation before the public release.",
+        "Ideal for residential buyers and investors looking for titled, accessible land in a growing corridor.",
+      ].join(" "),
+      heroImageUrl: `https://images.example.com/estates/${this.seed.slug}.jpg`,
+      landmarks: "Airport Road, Centenary City, major filling station",
+      location: this.seed.location,
+      phaseLabel: "Phase 1 presale",
+      specialPurposeUses: "Schools, clinics, worship centres, gas stations",
+      title,
     });
   }
 

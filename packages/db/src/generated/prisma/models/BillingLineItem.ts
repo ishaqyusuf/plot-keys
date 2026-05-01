@@ -253,7 +253,7 @@ export type BillingLineItemGroupByOutputType = {
   _max: BillingLineItemMaxAggregateOutputType | null
 }
 
-type GetBillingLineItemGroupByPayload<T extends BillingLineItemGroupByArgs> = Prisma.PrismaPromise<
+export type GetBillingLineItemGroupByPayload<T extends BillingLineItemGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<BillingLineItemGroupByOutputType, T['by']> &
       {

@@ -259,11 +259,19 @@ export function NoorListingSpotlightSection({
               {...getCardProps("listing", item)}
               className="group overflow-hidden rounded-xl border border-[color:var(--border)] bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900"
             >
-              {/* Image placeholder */}
               <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
-                  {item.imageHint || "Property image"}
-                </div>
+                {item.imageUrl ? (
+                  <div
+                    aria-label={item.title}
+                    className="absolute inset-0 bg-cover bg-center"
+                    role="img"
+                    style={{ backgroundImage: `url(${item.imageUrl})` }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
+                    {item.imageHint || "Property image"}
+                  </div>
+                )}
                 <span className="absolute left-3 top-3 rounded-sm bg-[color:var(--primary)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   For Sale
                 </span>

@@ -16,13 +16,20 @@ This Brain is the working memory for the real-estate SaaS. It records the curren
 - Frontend stack should use the latest practical versions of Next.js and Tailwind CSS at implementation time.
 
 ## Key References
-- [System Overview](/Users/M1PRO/Documents/code/real-estate-saas/brain/SYSTEM_OVERVIEW.md)
-- [Project Index](/Users/M1PRO/Documents/code/real-estate-saas/brain/PROJECT_INDEX.md)
+- [System Overview](/Users/M1PRO/Documents/code/plot-keys/brain/SYSTEM_OVERVIEW.md)
+- [Project Index](/Users/M1PRO/Documents/code/plot-keys/brain/PROJECT_INDEX.md)
 - [Design System](/Users/M1PRO/Documents/code/plot-keys/brain/system/design-system.md)
-- [AI Workflow](/Users/M1PRO/Documents/code/real-estate-saas/brain/AI_WORKFLOW.md)
-- [AI Prompt Rules](/Users/M1PRO/Documents/code/real-estate-saas/brain/AI_PROMPT_RULES.md)
-- [Product Vision](/Users/M1PRO/Documents/code/real-estate-saas/brain/product/vision.md)
-- [Repo Structure](/Users/M1PRO/Documents/code/real-estate-saas/brain/engineering/repo-structure.md)
+- [AI Workflow](/Users/M1PRO/Documents/code/plot-keys/brain/AI_WORKFLOW.md)
+- [AI Prompt Rules](/Users/M1PRO/Documents/code/plot-keys/brain/AI_PROMPT_RULES.md)
+- [Product Vision](/Users/M1PRO/Documents/code/plot-keys/brain/product/vision.md)
+- [Public Website Launch](/Users/M1PRO/Documents/code/plot-keys/brain/features/public-website-launch.md)
+- [Repo Structure](/Users/M1PRO/Documents/code/plot-keys/brain/engineering/repo-structure.md)
+
+## Important Project References
+- `midday`: `/Users/M1PRO/Documents/code/_kitchen_sink/midday`
+- `gnd`: `/Users/M1PRO/Documents/code/_turbo/gnd`
+- `school-clerk`: `/Users/M1PRO/Documents/code/school-clerk`
+- `halaal-coperative`: `/Users/M1PRO/Documents/code/halaal-coperative`
 
 ## Working Rules
 - Prefer documenting only what is known today.

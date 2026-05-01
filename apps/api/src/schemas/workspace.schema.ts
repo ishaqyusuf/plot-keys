@@ -143,3 +143,90 @@ export const connectCustomDomainInputSchema = z.object({
 export const removeCustomDomainInputSchema = z.object({
   domainId: z.string().uuid("Invalid domain id."),
 });
+
+export const createEstateInputSchema = z.object({
+  title: z.string().trim().min(1, "Title is required."),
+  slug: z.string().trim().min(1, "Slug is required."),
+  description: z.string().trim().optional().nullable(),
+  location: z.string().trim().optional().nullable(),
+  landmarks: z.string().trim().optional().nullable(),
+  amenities: z.string().trim().optional().nullable(),
+  approvals: z.string().trim().optional().nullable(),
+  specialPurposeUses: z.string().trim().optional().nullable(),
+  phaseLabel: z.string().trim().optional().nullable(),
+  heroImageUrl: z.string().url().optional().nullable(),
+  brochureUrl: z.string().url().optional().nullable(),
+  publishState: z.enum(["draft", "published", "archived"]).optional(),
+});
+
+export const updateEstateInputSchema = z.object({
+  estateId: z.string().uuid("Invalid estate id."),
+  title: z.string().trim().min(1).optional(),
+  slug: z.string().trim().min(1).optional(),
+  description: z.string().trim().optional().nullable(),
+  location: z.string().trim().optional().nullable(),
+  landmarks: z.string().trim().optional().nullable(),
+  amenities: z.string().trim().optional().nullable(),
+  approvals: z.string().trim().optional().nullable(),
+  specialPurposeUses: z.string().trim().optional().nullable(),
+  phaseLabel: z.string().trim().optional().nullable(),
+  heroImageUrl: z.string().url().optional().nullable(),
+  brochureUrl: z.string().url().optional().nullable(),
+  publishState: z.enum(["draft", "published", "archived"]).optional(),
+});
+
+export const createPlotInputSchema = z.object({
+  estateId: z.string().uuid("Invalid estate id."),
+  plotCode: z.string().trim().min(1, "Plot code is required."),
+  block: z.string().trim().optional().nullable(),
+  street: z.string().trim().optional().nullable(),
+  sizeSqm: z.number().int().nonnegative().optional().nullable(),
+  price: z.string().trim().optional().nullable(),
+  type: z
+    .enum(["residential", "commercial", "mixed_use", "amenity"])
+    .optional()
+    .nullable(),
+  status: z
+    .enum(["available", "held", "reserved", "sold", "blocked"])
+    .optional(),
+  facing: z.string().trim().optional().nullable(),
+  isCornerPiece: z.boolean().optional(),
+  isPremium: z.boolean().optional(),
+  coordinatesJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+  tagsJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+  metadataJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+});
+
+export const updatePlotInputSchema = z.object({
+  plotId: z.string().uuid("Invalid plot id."),
+  plotCode: z.string().trim().min(1).optional(),
+  block: z.string().trim().optional().nullable(),
+  street: z.string().trim().optional().nullable(),
+  sizeSqm: z.number().int().nonnegative().optional().nullable(),
+  price: z.string().trim().optional().nullable(),
+  type: z
+    .enum(["residential", "commercial", "mixed_use", "amenity"])
+    .optional()
+    .nullable(),
+  status: z
+    .enum(["available", "held", "reserved", "sold", "blocked"])
+    .optional(),
+  facing: z.string().trim().optional().nullable(),
+  isCornerPiece: z.boolean().optional(),
+  isPremium: z.boolean().optional(),
+  coordinatesJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+  tagsJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+  metadataJson: z
+    .custom<Record<string, unknown> | Array<unknown> | null>()
+    .optional(),
+});
