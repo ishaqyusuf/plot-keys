@@ -46,8 +46,7 @@ export function EarlyAccessForm({ className }: { className?: string }) {
           {state.message}
         </p>
         <p className="text-sm text-muted-foreground">
-          We review each company manually and prioritize teams with active
-          listings, estates, or construction operations.
+          We will follow up with setup details if your team is a fit.
         </p>
       </div>
     );
@@ -66,8 +65,7 @@ export function EarlyAccessForm({ className }: { className?: string }) {
           Early access
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          For operators ready to centralize sites, leads, listings, estates,
-          and teams.
+          Request an invite for your company.
         </p>
       </div>
 
@@ -91,7 +89,7 @@ export function EarlyAccessForm({ className }: { className?: string }) {
             required
           />
           <FieldDescription>
-            No drip campaign. Just access details when your workspace is ready.
+            Use the email you want tied to your workspace.
           </FieldDescription>
         </Field>
       </FieldGroup>
