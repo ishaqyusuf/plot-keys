@@ -5,6 +5,8 @@ import { TAG_INPUT_SYSTEM_SUGGESTIONS } from "../tag-input";
 export type QuickFillProfile =
   | "auth-sign-up"
   | "generic"
+  | "invite-profile-complete"
+  | "invite-sign-up"
   | "invite-employee"
   | "invite-member"
   | "new-agent"
@@ -331,6 +333,10 @@ export class QuickFill<
         return this.newProperty();
       case "invite-member":
         return this.inviteMember();
+      case "invite-sign-up":
+        return this.inviteSignUp();
+      case "invite-profile-complete":
+        return this.inviteProfileComplete();
       case "invite-employee":
         return this.inviteEmployee();
       case "publish-configuration":
@@ -495,6 +501,22 @@ export class QuickFill<
     this.merge({
       email: `team-${this.seed.slug}@plotkeys.test`,
       role: pickRandom(this.payloads.inviteRoles),
+    });
+  }
+
+  inviteSignUp() {
+    this.merge({
+      name: this.seed.fullName,
+      password: this.seed.signUpPassword,
+    });
+  }
+
+  inviteProfileComplete() {
+    this.merge({
+      bio: this.seed.bio,
+      imageUrl: `https://images.example.com/agents/${this.seed.slug}.jpg`,
+      name: this.seed.fullName,
+      phone: this.seed.phone,
     });
   }
 

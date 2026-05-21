@@ -44,7 +44,7 @@ export function FloatingConfigPanel({
         onMouseLeave={() => setHovered(false)}
       >
         {/* Header — flex-row-reverse keeps the collapse button at the right edge, always visible at w-10 */}
-        <div className="shrink-0 border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)]">
+        <div className="shrink-0 border-b border-border/70 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),transparent)]">
           <div className="flex flex-row-reverse items-center gap-2 px-2 py-3">
             <button
               onClick={() => {

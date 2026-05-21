@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@plotkeys/ui/field";
+import { Icon } from "@plotkeys/ui/icons";
 import { Input } from "@plotkeys/ui/input";
 import { cn } from "@plotkeys/utils/cn";
 import { useActionState } from "react";
@@ -11,7 +19,12 @@ import { requestEarlyAccess } from "../app/actions";
 function SubmitBtn() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full px-6 py-3">
+    <Button type="submit" disabled={pending} className="w-full" size="lg">
+      {pending ? (
+        <Icon.Loader data-icon="inline-start" className="animate-spin" />
+      ) : (
+        <Icon.Sparkles data-icon="inline-start" />
+      )}
       {pending ? "Submitting..." : "Request early access"}
     </Button>
   );
@@ -24,12 +37,18 @@ export function EarlyAccessForm({ className }: { className?: string }) {
     return (
       <div
         className={cn(
-          "rounded-2xl border border-border bg-card/60 p-6 text-center backdrop-blur-md",
+          "flex flex-col items-center gap-3 rounded-xl border bg-card p-6 text-center text-card-foreground shadow-sm",
           className,
         )}
       >
-        <div className="mb-2 text-2xl">&#10003;</div>
-        <p className="font-serif text-lg text-foreground">{state.message}</p>
+        <Icon.CheckCircle className="size-8 text-primary" />
+        <p className="text-base font-medium text-foreground">
+          {state.message}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          We review each company manually and prioritize teams with active
+          listings, estates, or construction operations.
+        </p>
       </div>
     );
   }
@@ -38,24 +57,47 @@ export function EarlyAccessForm({ className }: { className?: string }) {
     <form
       action={action}
       className={cn(
-        "flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md",
+        "flex flex-col gap-5 rounded-xl border bg-card p-6 text-card-foreground shadow-sm",
         className,
       )}
     >
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-primary">
+        <p className="text-sm font-medium uppercase text-primary">
           Early access
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Be among the first to try PlotKeys.
+          For operators ready to centralize sites, leads, listings, estates,
+          and teams.
         </p>
       </div>
 
-      <Input name="name" placeholder="Your name" required />
-      <Input name="email" type="email" placeholder="you@company.com" required />
+      <FieldGroup className="gap-4">
+        <Field>
+          <FieldLabel htmlFor="early-access-name">Name</FieldLabel>
+          <Input
+            id="early-access-name"
+            name="name"
+            placeholder="Your name"
+            required
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="early-access-email">Work email</FieldLabel>
+          <Input
+            id="early-access-email"
+            name="email"
+            type="email"
+            placeholder="you@company.com"
+            required
+          />
+          <FieldDescription>
+            No drip campaign. Just access details when your workspace is ready.
+          </FieldDescription>
+        </Field>
+      </FieldGroup>
 
       {state?.message && !state.success && (
-        <p className="text-sm text-destructive">{state.message}</p>
+        <FieldError>{state.message}</FieldError>
       )}
 
       <SubmitBtn />

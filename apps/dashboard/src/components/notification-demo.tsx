@@ -36,7 +36,7 @@ export function NotificationDemo() {
             notifications.service.send("site_configuration_saved", {
               payload: {
                 description:
-                  "The latest builder changes were stored for your tenant workspace.",
+                  "The latest website changes were saved to your company dashboard.",
               },
               recipients: makeUserRecipients({
                 displayName: "Workspace admin",

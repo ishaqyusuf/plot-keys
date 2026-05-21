@@ -442,7 +442,7 @@ export function BuilderPreviewPanel({
               <div
                 className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
                 style={{
-                  backgroundColor: "hsl(var(--background))",
+                  backgroundColor: "var(--background)",
                   fontFamily: "Satoshi, sans-serif",
                 }}
               >
@@ -471,7 +471,7 @@ export function BuilderPreviewPanel({
                 <div
                   className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
                   style={{
-                    backgroundColor: "hsl(var(--background))",
+                    backgroundColor: "var(--background)",
                     fontFamily: "Satoshi, sans-serif",
                   }}
                 >

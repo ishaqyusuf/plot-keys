@@ -390,7 +390,7 @@ export async function BuilderWorkspace({
             .join(" ")}
         >
           <div className="flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/86 shadow-[var(--shadow-card)] backdrop-blur-sm">
-            <div className="border-b border-border/60 bg-[linear-gradient(180deg,hsl(var(--primary)/0.08),transparent)] px-4 py-4">
+            <div className="border-b border-border/60 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_8%,transparent),transparent)] px-4 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
                   Website config

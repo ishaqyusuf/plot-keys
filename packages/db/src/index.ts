@@ -24,6 +24,7 @@ export * from "./queries/agent";
 export * from "./queries/ai-credits";
 export * from "./queries/analytics";
 export * from "./queries/appointments";
+export * from "./queries/asset";
 export * from "./queries/auth";
 export * from "./queries/blog";
 export * from "./queries/company";

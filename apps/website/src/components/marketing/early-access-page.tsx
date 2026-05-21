@@ -2,8 +2,17 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@plotkeys/ui/card";
+import { Icon } from "@plotkeys/ui/icons";
 import { PlotKeysLogo } from "@plotkeys/ui/plotkeys-logo";
-import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { Separator } from "@plotkeys/ui/separator";
 import Link from "next/link";
 
 import { EarlyAccessForm } from "../early-access-form";
@@ -13,111 +22,173 @@ type EarlyAccessPageProps = {
   showLandingPreviewLink?: boolean;
 };
 
-const accessNotes = [
-  "Template-led website launch",
-  "Estate, plot, and listing operations",
-  "Lead capture with team handoff",
+const operatorSignals = [
+  {
+    label: "Launch pipeline",
+    value: "12 sites",
+    detail: "Template-led workspaces moving from draft to live.",
+  },
+  {
+    label: "Estate inventory",
+    value: "840 plots",
+    detail: "Allocation, reservation, and customer-facing visibility.",
+  },
+  {
+    label: "Lead operations",
+    value: "3.8x",
+    detail: "Faster handoff from public inquiry to team action.",
+  },
+];
+
+const platformModules = [
+  "Branded property websites",
+  "Listings, estates, and plot allocation",
+  "Customer portal and offer tracking",
+  "Construction project visibility",
 ];
 
 export function EarlyAccessPage({
   showLandingPreviewLink = false,
 }: EarlyAccessPageProps) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f7f4ee] text-[#121b24]">
-      <section className="relative isolate flex min-h-screen items-center px-5 py-8 sm:px-8 lg:px-12">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,#f7f4ee_0%,#f2eadf_42%,#dce8e4_100%)]" />
-        <div className="absolute inset-x-0 top-0 -z-10 h-24 border-b border-[#121b24]/10 bg-white/35 backdrop-blur-xl" />
-        <div className="absolute bottom-0 left-0 -z-10 h-1/2 w-full bg-[linear-gradient(0deg,rgba(18,27,36,0.08),transparent)]" />
-
-        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div>
-            <header className="mb-14 flex items-center justify-between gap-5">
-              <PlotKeysLogo
-                className="text-[#0f6b61]"
-                markClassName="h-10"
-                wordmarkClassName="text-sm tracking-[0.32em]"
-              />
-              {showLandingPreviewLink ? (
-                <Button
-                  asChild
-                  variant="secondary"
-                  className="hidden rounded-full border border-[#121b24]/10 bg-white/60 px-5 text-sm shadow-none backdrop-blur sm:inline-flex"
-                >
-                  <Link href="/landing">
-                    View landing
-                    <ArrowUpRight className="size-4" />
-                  </Link>
-                </Button>
-              ) : null}
-            </header>
-
-            <Badge className="rounded-full bg-[#121b24] px-4 py-2 text-xs uppercase tracking-[0.24em] text-white">
-              Early access
-            </Badge>
-
-            <h1 className="mt-7 max-w-4xl text-5xl font-semibold leading-[0.95] tracking-normal text-[#121b24] sm:text-6xl lg:text-7xl">
-              PlotKeys is opening to selected real-estate teams.
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-[#445260]">
-              Run listings, estates, plots, leads, and branded site launches
-              from one operating layer built for serious property companies.
-            </p>
-
-            <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">
-              {accessNotes.map((note) => (
-                <div
-                  className="border-l border-[#0f6b61]/40 bg-white/45 px-4 py-3 text-sm font-medium text-[#24313d] backdrop-blur"
-                  key={note}
-                >
-                  {note}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -left-4 top-8 hidden h-[84%] w-3 border-y border-l border-[#121b24]/15 lg:block" />
-            <div className="border border-[#121b24]/12 bg-[#121b24] p-3 shadow-[0_30px_80px_rgba(18,27,36,0.22)]">
-              <div className="bg-[#fdfbf7] p-5 sm:p-7">
-                <div className="mb-6 flex items-center justify-between border-b border-[#121b24]/10 pb-5">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-[#6a7682]">
-                      Private rollout
-                    </p>
-                    <p className="mt-1 text-2xl font-semibold tracking-normal">
-                      Request access
-                    </p>
-                  </div>
-                  <div className="flex size-11 items-center justify-center rounded-full bg-[#0f6b61] text-white">
-                    <CheckCircle2 className="size-5" />
-                  </div>
-                </div>
-
-                <EarlyAccessForm className="rounded-none border-[#121b24]/10 bg-white p-5 shadow-none" />
-
-                <div className="mt-5 border border-[#121b24]/10 bg-[#f5efe5] p-5">
-                  <p className="text-sm font-semibold text-[#121b24]">
-                    Want launch notes instead?
-                  </p>
-                  <div className="mt-4">
-                    <NewsletterForm />
-                  </div>
-                </div>
-
-                {showLandingPreviewLink ? (
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="mt-5 w-full rounded-none border border-[#121b24]/10"
-                  >
-                    <Link href="/landing">Preview the full landing page</Link>
-                  </Button>
-                ) : null}
-              </div>
-            </div>
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b bg-background/95">
+        <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <PlotKeysLogo
+            className="text-primary"
+            markClassName="h-9"
+            wordmarkClassName="text-sm"
+          />
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">Private beta</Badge>
+            {showLandingPreviewLink ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/landing">
+                  View landing
+                  <Icon.ExternalLink data-icon="inline-end" />
+                </Link>
+              </Button>
+            ) : null}
           </div>
         </div>
+      </header>
+
+      <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] lg:px-8 lg:py-16">
+        <div className="flex flex-col gap-8">
+          <div className="flex max-w-4xl flex-col gap-6">
+            <Badge className="w-fit" variant="outline">
+              Early access for serious property operators
+            </Badge>
+            <div className="flex flex-col gap-5">
+              <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-balance sm:text-5xl lg:text-6xl">
+                The operating system for real-estate companies scaling beyond
+                spreadsheets.
+              </h1>
+              <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                PlotKeys brings branded websites, listings, estates, customer
+                portals, leads, and construction workflows into one controlled
+                workspace for teams that intend to grow.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <a href="#request-access">
+                  Request access
+                  <Icon.ArrowRight data-icon="inline-end" />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            {operatorSignals.map((signal) => (
+              <Card key={signal.label}>
+                <CardHeader>
+                  <CardDescription>{signal.label}</CardDescription>
+                  <CardTitle className="text-2xl">{signal.value}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {signal.detail}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>What early access unlocks</CardTitle>
+              <CardDescription>
+                A focused rollout for teams that need operational leverage, not
+                another generic website builder.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {platformModules.map((module) => (
+                  <div className="flex items-start gap-3" key={module}>
+                    <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border bg-muted">
+                      <Icon.Check data-icon="inline-start" />
+                    </div>
+                    <p className="text-sm font-medium leading-6">{module}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+          <div id="request-access">
+            <EarlyAccessForm />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Built for the first 100 category leaders</CardTitle>
+              <CardDescription>
+                We are onboarding a small group of high-intent teams before the
+                broader public launch.
+              </CardDescription>
+              <CardAction>
+                <Icon.Award className="size-5 text-primary" />
+              </CardAction>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Separator />
+              <div className="grid gap-3 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">Rollout</span>
+                  <span className="font-medium">Manual approval</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">Best fit</span>
+                  <span className="font-medium">Active operators</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">Goal</span>
+                  <span className="font-medium">$100M company standard</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Launch notes</CardTitle>
+              <CardDescription>
+                Follow product updates while access is still limited.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <NewsletterForm className="border-0 bg-transparent p-0 shadow-none" />
+            </CardContent>
+          </Card>
+        </aside>
       </section>
     </main>
   );

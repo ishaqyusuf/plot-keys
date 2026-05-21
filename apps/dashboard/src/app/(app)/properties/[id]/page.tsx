@@ -1,3 +1,7 @@
+import {
+  createPublicImageProvider,
+  type PublicImageProviderName,
+} from "@plotkeys/api/public-image-providers";
 import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
@@ -26,13 +30,19 @@ import { requireOnboardedSession } from "../../../../lib/session";
 import {
   addPropertyMediaAction,
   deletePropertyMediaAction,
+  importPublicImageToPropertyAction,
   setPropertyCoverAction,
+  uploadPropertyMediaAction,
   updatePropertyPublishStateAction,
 } from "../../../actions";
 
 type PropertyDetailPageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    imageProvider?: string;
+    imageQuery?: string;
+  }>;
 };
 
 const publishVariant: Record<
@@ -49,6 +59,12 @@ const kindLabels: Record<string, string> = {
   floor_plan: "Floor plan",
   virtual_tour: "Virtual tour",
 };
+
+function parseImageProvider(value?: string): PublicImageProviderName {
+  return value === "pexels" || value === "pixabay" || value === "unsplash"
+    ? value
+    : "unsplash";
+}
 
 export default async function PropertyDetailPage({
   params,
@@ -72,6 +88,7 @@ export default async function PropertyDetailPage({
   if (!property) return notFound();
 
   const media = await prisma.propertyMedia.findMany({
+    include: { asset: true },
     where: { propertyId: id },
     orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
   });
@@ -108,6 +125,21 @@ export default async function PropertyDetailPage({
     session.activeMembership.role === "owner" ||
     session.activeMembership.role === "admin" ||
     session.activeMembership.role === "agent";
+  const imageQuery =
+    sp.imageQuery?.trim() ||
+    [property.type, property.subType, property.location]
+      .filter(Boolean)
+      .join(" ");
+  const imageProvider = parseImageProvider(sp.imageProvider);
+  const publicImageResults =
+    canEdit && imageQuery.length >= 2
+      ? await createPublicImageProvider(imageProvider)
+          .search({
+            orientation: "landscape",
+            query: imageQuery,
+          })
+          .catch(() => [])
+      : [];
 
   return (
     <DashboardPage>
@@ -243,62 +275,215 @@ export default async function PropertyDetailPage({
           </CardHeader>
           <CardContent className="space-y-6">
             {canEdit ? (
-              <form
-                action={addPropertyMediaAction}
-                className="space-y-3 rounded-[calc(var(--radius-lg)+0.125rem)] border border-dashed border-border/70 bg-background/55 p-4"
-              >
-                <p className="text-sm font-medium text-foreground">Add media</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="property-media-url"
-                      className="mb-1 block text-xs text-muted-foreground"
-                    >
-                      URL
-                    </label>
-                    <input
-                      id="property-media-url"
-                      name="url"
-                      required
-                      type="url"
-                      placeholder="https://..."
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    />
+              <div className="grid gap-4 lg:grid-cols-2">
+                <form
+                  action={uploadPropertyMediaAction}
+                  className="space-y-3 rounded-[calc(var(--radius-lg)+0.125rem)] border border-dashed border-border/70 bg-background/55 p-4"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    Upload media
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="property-media-file"
+                        className="mb-1 block text-xs text-muted-foreground"
+                      >
+                        File
+                      </label>
+                      <input
+                        id="property-media-file"
+                        name="file"
+                        required
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/svg+xml,application/pdf"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="property-media-upload-kind"
+                        className="mb-1 block text-xs text-muted-foreground"
+                      >
+                        Type
+                      </label>
+                      <select
+                        id="property-media-upload-kind"
+                        name="kind"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="image">Photo</option>
+                        <option value="floor_plan">Floor plan</option>
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="property-media-kind"
-                      className="mb-1 block text-xs text-muted-foreground"
-                    >
-                      Type
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        name="isCover"
+                        value="true"
+                        className="h-3.5 w-3.5"
+                      />
+                      Set as cover image
                     </label>
-                    <select
-                      id="property-media-kind"
-                      name="kind"
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    >
-                      <option value="image">Photo</option>
-                      <option value="floor_plan">Floor plan</option>
-                      <option value="virtual_tour">Virtual tour</option>
-                    </select>
+                    <Button size="sm" type="submit" variant="outline">
+                      Upload
+                    </Button>
                   </div>
+                  <input type="hidden" name="propertyId" value={id} />
+                </form>
+
+                <form
+                  action={addPropertyMediaAction}
+                  className="space-y-3 rounded-[calc(var(--radius-lg)+0.125rem)] border border-dashed border-border/70 bg-background/55 p-4"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    Import by URL
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="property-media-url"
+                        className="mb-1 block text-xs text-muted-foreground"
+                      >
+                        URL
+                      </label>
+                      <input
+                        id="property-media-url"
+                        name="url"
+                        required
+                        type="url"
+                        placeholder="https://..."
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="property-media-kind"
+                        className="mb-1 block text-xs text-muted-foreground"
+                      >
+                        Type
+                      </label>
+                      <select
+                        id="property-media-kind"
+                        name="kind"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="image">Photo</option>
+                        <option value="floor_plan">Floor plan</option>
+                        <option value="virtual_tour">Virtual tour</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        name="isCover"
+                        value="true"
+                        className="h-3.5 w-3.5"
+                      />
+                      Set as cover image
+                    </label>
+                    <Button size="sm" type="submit" variant="outline">
+                      Add URL
+                    </Button>
+                  </div>
+                  <input type="hidden" name="propertyId" value={id} />
+                </form>
+              </div>
+            ) : null}
+
+            {canEdit ? (
+              <div className="space-y-4 rounded-[calc(var(--radius-lg)+0.125rem)] border border-border/70 bg-background/55 p-4">
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Find free public images
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Search a public image source and import the selected image
+                    into your storage before it is attached to this listing.
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      name="isCover"
-                      value="true"
-                      className="h-3.5 w-3.5"
-                    />
-                    Set as cover image
-                  </label>
+                <form
+                  className="grid gap-3 sm:grid-cols-[1fr_160px_auto]"
+                  method="GET"
+                >
+                  <input
+                    name="imageQuery"
+                    defaultValue={imageQuery}
+                    placeholder="Modern apartment exterior"
+                    className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <select
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    defaultValue={imageProvider}
+                    name="imageProvider"
+                  >
+                    <option value="unsplash">Unsplash</option>
+                    <option value="pexels">Pexels</option>
+                    <option value="pixabay">Pixabay</option>
+                  </select>
                   <Button size="sm" type="submit" variant="outline">
-                    Add
+                    Search
                   </Button>
-                </div>
-                <input type="hidden" name="propertyId" value={id} />
-              </form>
+                </form>
+
+                {publicImageResults.length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {publicImageResults.slice(0, 8).map((image) => (
+                      <div
+                        className="overflow-hidden rounded-[calc(var(--radius-lg)+0.125rem)] border border-border/70 bg-card"
+                        key={`${image.provider}-${image.id}`}
+                      >
+                        {/* biome-ignore lint/performance/noImgElement: provider thumbnails are remote previews */}
+                        <img
+                          alt={image.attributionText ?? image.authorName}
+                          className="aspect-video w-full object-cover"
+                          loading="lazy"
+                          src={image.thumbnailUrl}
+                        />
+                        <div className="space-y-2 p-3">
+                          <p className="truncate text-xs text-muted-foreground">
+                            {image.attributionText}
+                          </p>
+                          <form action={importPublicImageToPropertyAction}>
+                            <input name="propertyId" type="hidden" value={id} />
+                            <input
+                              name="provider"
+                              type="hidden"
+                              value={image.provider}
+                            />
+                            <input
+                              name="imageId"
+                              type="hidden"
+                              value={image.id}
+                            />
+                            <label className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                              <input
+                                className="h-3.5 w-3.5"
+                                name="isCover"
+                                type="checkbox"
+                                value="true"
+                              />
+                              Set as cover
+                            </label>
+                            <Button size="sm" type="submit" variant="outline">
+                              Import
+                            </Button>
+                          </form>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    No images loaded yet. Search with at least two characters,
+                    or configure Unsplash to enable results.
+                  </p>
+                )}
+              </div>
             ) : null}
 
             {media.length === 0 ? (
@@ -309,51 +494,76 @@ export default async function PropertyDetailPage({
               />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                {media.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`overflow-hidden rounded-[calc(var(--radius-lg)+0.125rem)] border bg-background/55 ${
-                      item.isCover
-                        ? "border-primary ring-2 ring-primary/15"
-                        : "border-border/70"
-                    }`}
-                  >
-                    {item.kind === "image" || item.kind === "floor_plan" ? (
-                      <div className="relative aspect-video bg-muted">
-                        {/* biome-ignore lint/performance/noImgElement: existing remote media URLs vary by provider */}
-                        <img
-                          src={item.url}
-                          alt={kindLabels[item.kind] ?? item.kind}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex aspect-video items-center justify-center bg-muted">
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary underline underline-offset-2"
-                        >
-                          Virtual tour ↗
-                        </a>
-                      </div>
-                    )}
+                {media.map((item) => {
+                  const displayUrl = item.asset?.publicUrl ?? item.url;
 
-                    <div className="flex items-center justify-between gap-1 px-3 py-2">
-                      <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className="text-xs">
-                          {kindLabels[item.kind] ?? item.kind}
-                        </Badge>
-                        {item.isCover ? (
-                          <Badge className="text-xs">Cover</Badge>
-                        ) : null}
-                      </div>
-                      {canEdit ? (
-                        <div className="flex items-center gap-1">
-                          {!item.isCover && item.kind === "image" ? (
-                            <form action={setPropertyCoverAction}>
+                  return (
+                    <div
+                      key={item.id}
+                      className={`overflow-hidden rounded-[calc(var(--radius-lg)+0.125rem)] border bg-background/55 ${
+                        item.isCover
+                          ? "border-primary ring-2 ring-primary/15"
+                          : "border-border/70"
+                      }`}
+                    >
+                      {item.kind === "image" || item.kind === "floor_plan" ? (
+                        <div className="relative aspect-video bg-muted">
+                          {/* biome-ignore lint/performance/noImgElement: existing remote media URLs vary by provider */}
+                          <img
+                            src={displayUrl ?? ""}
+                            alt={
+                              item.altText ?? kindLabels[item.kind] ?? item.kind
+                            }
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex aspect-video items-center justify-center bg-muted">
+                          <a
+                            href={displayUrl ?? "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary underline underline-offset-2"
+                          >
+                            Virtual tour ↗
+                          </a>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-1 px-3 py-2">
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="outline" className="text-xs">
+                            {kindLabels[item.kind] ?? item.kind}
+                          </Badge>
+                          {item.isCover ? (
+                            <Badge className="text-xs">Cover</Badge>
+                          ) : null}
+                        </div>
+                        {canEdit ? (
+                          <div className="flex items-center gap-1">
+                            {!item.isCover && item.kind === "image" ? (
+                              <form action={setPropertyCoverAction}>
+                                <input
+                                  type="hidden"
+                                  name="mediaId"
+                                  value={item.id}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="propertyId"
+                                  value={id}
+                                />
+                                <button
+                                  type="submit"
+                                  title="Set as cover"
+                                  className="rounded p-1 text-muted-foreground hover:text-foreground"
+                                >
+                                  <StarIcon className="size-3.5" />
+                                </button>
+                              </form>
+                            ) : null}
+                            <form action={deletePropertyMediaAction}>
                               <input
                                 type="hidden"
                                 name="mediaId"
@@ -366,33 +576,18 @@ export default async function PropertyDetailPage({
                               />
                               <button
                                 type="submit"
-                                title="Set as cover"
-                                className="rounded p-1 text-muted-foreground hover:text-foreground"
+                                title="Remove"
+                                className="rounded p-1 text-muted-foreground hover:text-destructive"
                               >
-                                <StarIcon className="size-3.5" />
+                                <Trash2Icon className="size-3.5" />
                               </button>
                             </form>
-                          ) : null}
-                          <form action={deletePropertyMediaAction}>
-                            <input
-                              type="hidden"
-                              name="mediaId"
-                              value={item.id}
-                            />
-                            <input type="hidden" name="propertyId" value={id} />
-                            <button
-                              type="submit"
-                              title="Remove"
-                              className="rounded p-1 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2Icon className="size-3.5" />
-                            </button>
-                          </form>
-                        </div>
-                      ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

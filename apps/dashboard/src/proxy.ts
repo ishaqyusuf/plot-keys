@@ -49,7 +49,10 @@ const PUBLIC_PREFIXES = [
 const PLATFORM_ONLY_PREFIXES = [authRoutes.signUp];
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  return (
+    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    /^\/join\/[^/]+$/.test(pathname)
+  );
 }
 
 function isOnboardingPath(pathname: string): boolean {
@@ -58,7 +61,7 @@ function isOnboardingPath(pathname: string): boolean {
 
 function hasSessionCookie(request: NextRequest): boolean {
   const sessionScope = resolveDashboardSessionScope(
-    request.headers.get("host"),
+    getRequestHost(request),
   );
   const cookieName = getScopedAuthSessionCookieName(
     sessionScope ?? platformSessionScope,
@@ -68,6 +71,14 @@ function hasSessionCookie(request: NextRequest): boolean {
     !!request.cookies.get(cookieName)?.value ||
     (sessionScope !== null &&
       !!request.cookies.get(authSessionCookieName)?.value)
+  );
+}
+
+function getRequestHost(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    ""
   );
 }
 
@@ -99,7 +110,7 @@ async function isTenantAlreadyOnboarded(input: {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const host = request.headers.get("host") ?? "";
+  const host = getRequestHost(request);
   const tenantHostname = extractDashboardHostname(host);
   const tenantSlug = extractDashboardTenantSlug(host);
   const isTenantMode = isTenantDashboardHost(host);
@@ -119,11 +130,6 @@ export async function proxy(request: NextRequest) {
   ) {
     const signInUrl = new URL(authRoutes.signIn, request.url);
     return NextResponse.redirect(signInUrl);
-  }
-
-  if (!isTenantMode && pathname.startsWith(authRoutes.signIn)) {
-    const signUpUrl = new URL(authRoutes.signUp, request.url);
-    return NextResponse.redirect(signUpUrl);
   }
 
   if (
@@ -148,7 +154,10 @@ export async function proxy(request: NextRequest) {
   // Full session validation happens inside server components.
   if (!isPublicPath(pathname) && !hasSessionCookie(request)) {
     const signInUrl = new URL(authRoutes.signIn, request.url);
-    signInUrl.searchParams.set("callbackUrl", pathname);
+    signInUrl.searchParams.set(
+      "redirect",
+      `${pathname}${request.nextUrl.search}`,
+    );
     return NextResponse.redirect(signInUrl);
   }
 

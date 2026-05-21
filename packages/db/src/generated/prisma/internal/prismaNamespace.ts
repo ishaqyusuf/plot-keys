@@ -389,6 +389,7 @@ export const ModelName = {
   AiCreditLedger: 'AiCreditLedger',
   AnalyticsEvent: 'AnalyticsEvent',
   Appointment: 'Appointment',
+  Asset: 'Asset',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
@@ -456,7 +457,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyApp" | "companyIntegration" | "company" | "customer" | "savedListing" | "customerOffer" | "department" | "employee" | "estate" | "estateLayout" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "plot" | "plotReservation" | "plotReservationChoice" | "plotStatusHistory" | "plotDocument" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "waitlistEntry" | "website" | "websiteVersion"
+    modelProps: "agent" | "aiUsageLog" | "aiCreditLedger" | "analyticsEvent" | "appointment" | "asset" | "session" | "account" | "verification" | "billingLineItem" | "blogPost" | "companyApp" | "companyIntegration" | "company" | "customer" | "savedListing" | "customerOffer" | "department" | "employee" | "estate" | "estateLayout" | "lead" | "leaveRequest" | "membership" | "notificationPreference" | "notification" | "payrollEntry" | "plot" | "plotReservation" | "plotReservationChoice" | "plotStatusHistory" | "plotDocument" | "projectAssignment" | "projectBudget" | "projectBudgetLineItem" | "projectCustomerAccess" | "projectCustomerNotice" | "projectDocument" | "projectIssue" | "projectMilestone" | "projectPayrollRun" | "projectPayrollEntry" | "projectPhase" | "projectUpdate" | "projectWorker" | "project" | "propertyMedia" | "property" | "siteConfiguration" | "tenantStockImageLicense" | "teamInvite" | "tenantDomain" | "tenantOnboarding" | "tenantTemplateLicense" | "user" | "waitlistEntry" | "website" | "websiteVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -827,6 +828,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AppointmentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AppointmentCountAggregateOutputType> | number
+        }
+      }
+    }
+    Asset: {
+      payload: Prisma.$AssetPayload<ExtArgs>
+      fields: Prisma.AssetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AssetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AssetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        findFirst: {
+          args: Prisma.AssetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AssetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        findMany: {
+          args: Prisma.AssetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>[]
+        }
+        create: {
+          args: Prisma.AssetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        createMany: {
+          args: Prisma.AssetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AssetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>[]
+        }
+        delete: {
+          args: Prisma.AssetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        update: {
+          args: Prisma.AssetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        deleteMany: {
+          args: Prisma.AssetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AssetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AssetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>[]
+        }
+        upsert: {
+          args: Prisma.AssetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssetPayload>
+        }
+        aggregate: {
+          args: Prisma.AssetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAsset>
+        }
+        groupBy: {
+          args: Prisma.AssetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AssetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AssetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AssetCountAggregateOutputType> | number
         }
       }
     }
@@ -4801,6 +4876,28 @@ export const AppointmentScalarFieldEnum = {
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
+export const AssetScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  provider: 'provider',
+  bucket: 'bucket',
+  key: 'key',
+  publicUrl: 'publicUrl',
+  contentType: 'contentType',
+  byteSize: 'byteSize',
+  checksum: 'checksum',
+  width: 'width',
+  height: 'height',
+  originKind: 'originKind',
+  originMeta: 'originMeta',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
+
+
 export const SessionScalarFieldEnum = {
   id: 'id',
   expiresAt: 'expiresAt',
@@ -5457,8 +5554,11 @@ export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeo
 export const PropertyMediaScalarFieldEnum = {
   id: 'id',
   propertyId: 'propertyId',
+  assetId: 'assetId',
   kind: 'kind',
   url: 'url',
+  altText: 'altText',
+  caption: 'caption',
   isCover: 'isCover',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt'
@@ -5815,6 +5915,34 @@ export type EnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'AppointmentStatus[]'
  */
 export type ListEnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AppointmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AssetOriginKind'
+ */
+export type EnumAssetOriginKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssetOriginKind'>
+    
+
+
+/**
+ * Reference to a field of type 'AssetOriginKind[]'
+ */
+export type ListEnumAssetOriginKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssetOriginKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AssetStatus'
+ */
+export type EnumAssetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssetStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AssetStatus[]'
+ */
+export type ListEnumAssetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssetStatus[]'>
     
 
 
@@ -6631,6 +6759,7 @@ export type GlobalOmitConfig = {
   aiCreditLedger?: Prisma.AiCreditLedgerOmit
   analyticsEvent?: Prisma.AnalyticsEventOmit
   appointment?: Prisma.AppointmentOmit
+  asset?: Prisma.AssetOmit
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit

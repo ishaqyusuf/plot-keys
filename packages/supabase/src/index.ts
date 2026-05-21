@@ -13,3 +13,4 @@
 
 export * from "./storage";
 export * from "./supabase";
+export * from "./vercel-blob";

@@ -358,6 +358,28 @@ export const AppointmentStatus = {
 export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
 
 
+export const AssetOriginKind = {
+  upload: 'upload',
+  unsplash: 'unsplash',
+  pexels: 'pexels',
+  pixabay: 'pixabay',
+  import: 'import'
+} as const
+
+export type AssetOriginKind = (typeof AssetOriginKind)[keyof typeof AssetOriginKind]
+
+
+export const AssetStatus = {
+  uploading: 'uploading',
+  ready: 'ready',
+  moving: 'moving',
+  failed: 'failed',
+  deleted: 'deleted'
+} as const
+
+export type AssetStatus = (typeof AssetStatus)[keyof typeof AssetStatus]
+
+
 export const BillingLineItemKind = {
   subscription: 'subscription',
   template_purchase: 'template_purchase',

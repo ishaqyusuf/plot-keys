@@ -21,7 +21,30 @@ export type StorageUploadResult = {
   publicUrl: string;
 };
 
+export type StoragePutInput = {
+  body: Blob | ArrayBuffer | Uint8Array | ReadableStream;
+  bucket?: string;
+  contentType: string;
+  key: string;
+};
+
+export type StoragePutResult = {
+  bucket?: string;
+  byteSize?: number;
+  checksum?: string;
+  key: string;
+  publicUrl?: string;
+};
+
+export type StorageReadResult = {
+  body: ReadableStream | ArrayBuffer;
+  contentType?: string;
+};
+
 export interface StorageProvider {
+  /** Stable provider identifier persisted against assets. */
+  readonly name: string;
+
   /** Returns the public URL of an object at `path` without fetching it. */
   getPublicUrl(bucket: string, path: string): string;
 
@@ -35,6 +58,20 @@ export interface StorageProvider {
 
   /** Deletes an object at `path` from the bucket. */
   delete(bucket: string, path: string): Promise<void>;
+
+  /** Provider-neutral object write used by the AssetService. */
+  put?(input: StoragePutInput): Promise<StoragePutResult>;
+
+  /** Reads object bytes for storage-to-storage migration. */
+  read?(input: { bucket?: string; key: string }): Promise<StorageReadResult>;
+
+  /** Copies one object to another key within the same provider when supported. */
+  copy?(input: {
+    fromBucket?: string;
+    fromKey: string;
+    toBucket?: string;
+    toKey: string;
+  }): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,3 +112,62 @@ export const storageBuckets = {
   /** Site assets (hero images, section images, etc.) uploaded by tenants. */
   tenantAssets: "tenant-assets",
 } as const;
+
+export type AssetStorageScope =
+  | "agents"
+  | "companies"
+  | "estates"
+  | "properties"
+  | "sites";
+
+export function buildAssetStorageKey({
+  assetId,
+  companyId,
+  extension,
+  fileName = "original",
+  scope,
+  scopeId,
+}: {
+  assetId: string;
+  companyId: string;
+  extension: string;
+  fileName?: string;
+  scope: AssetStorageScope;
+  scopeId?: string | null;
+}): string {
+  const safeExtension = extension.replace(/^\./, "").toLowerCase() || "bin";
+  const safeFileName = fileName
+    .replace(/\.[^.]+$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return [
+    "companies",
+    companyId,
+    scope,
+    scopeId,
+    "assets",
+    assetId,
+    `${safeFileName || "original"}.${safeExtension}`,
+  ]
+    .filter((segment): segment is string => Boolean(segment))
+    .join("/");
+}
+
+export function extensionFromContentType(contentType: string): string {
+  switch (contentType.toLowerCase()) {
+    case "image/jpeg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "image/svg+xml":
+      return "svg";
+    case "application/pdf":
+      return "pdf";
+    default:
+      return "bin";
+  }
+}

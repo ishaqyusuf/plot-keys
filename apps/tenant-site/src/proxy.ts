@@ -20,8 +20,16 @@
 import { resolveTenantSiteHostContext } from "@plotkeys/utils";
 import { type NextRequest, NextResponse } from "next/server";
 
+function getRequestHost(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    ""
+  );
+}
+
 export function proxy(request: NextRequest) {
-  const host = request.headers.get("host") ?? "";
+  const host = getRequestHost(request);
   const { tenantHostname, tenantSubdomain } =
     resolveTenantSiteHostContext(host);
 

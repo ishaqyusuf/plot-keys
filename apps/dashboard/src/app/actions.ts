@@ -1,6 +1,7 @@
 "use server";
 
 import { buildRequestContext } from "@plotkeys/api/context";
+import { createAssetService } from "@plotkeys/api/asset-service";
 import { appRouter } from "@plotkeys/api/router";
 import {
   authRoutes,
@@ -13,9 +14,11 @@ import {
   verifyUserEmail,
 } from "@plotkeys/auth";
 import {
+  acceptTeamInvite,
   createBlogPost,
   createPrismaClient,
   deleteBlogPost,
+  findUserByEmail,
   getBlogPostForCompany,
   setBlogPostStatus,
   updateBlogPost,
@@ -135,6 +138,34 @@ function parsePropertyPricingPlans(formData: FormData) {
   } catch {
     return null;
   }
+}
+
+async function syncPropertyCoverImageUrl(
+  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
+  input: { companyId: string; propertyId: string },
+) {
+  const cover = await prisma.propertyMedia.findFirst({
+    include: { asset: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    where: {
+      isCover: true,
+      kind: "image",
+      property: {
+        companyId: input.companyId,
+        deletedAt: null,
+        id: input.propertyId,
+      },
+    },
+  });
+
+  await prisma.property.update({
+    data: { imageUrl: cover?.asset?.publicUrl ?? cover?.url ?? null },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.propertyId,
+    },
+  });
 }
 
 async function assertSubdomainAvailability(
@@ -258,6 +289,7 @@ async function inviteWorkspaceUser(input: {
     await sendWorkspaceInvitationNotification({
       companyName: company?.name ?? "your company",
       inviteUrl: new URL(result.inviteUrl, getDashboardAppUrl()).toString(),
+      inviterId: session.user.id,
       inviterName: session.user.name ?? session.user.email,
       recipientEmail: input.email.trim().toLowerCase(),
       roleLabel:
@@ -1567,6 +1599,86 @@ export async function acceptInviteAction(formData: FormData) {
   redirect("/");
 }
 
+export async function signUpForInviteAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const prisma = createPrismaClient().db;
+  let redirectUrl: string | null = null;
+
+  try {
+    if (!prisma) {
+      throw new Error("Database not configured.");
+    }
+
+    if (!name) {
+      throw new Error("Full name is required.");
+    }
+
+    if (password.length < 8) {
+      throw new Error("Password must be at least 8 characters long.");
+    }
+
+    const invite = await prisma.teamInvite.findUnique({
+      where: { token },
+    });
+
+    if (!invite) {
+      throw new Error("Invite not found.");
+    }
+
+    if (invite.acceptedAt) {
+      throw new Error("Invite already accepted.");
+    }
+
+    if (invite.revokedAt) {
+      throw new Error("Invite has been revoked.");
+    }
+
+    if (invite.expiresAt < new Date()) {
+      throw new Error("Invite has expired.");
+    }
+
+    const email = invite.email.trim().toLowerCase();
+    const existingUser = await findUserByEmail(prisma, email);
+
+    if (existingUser) {
+      throw new Error(
+        "An account already exists for this email. Sign in to accept the invite.",
+      );
+    }
+
+    const { user } = await signUpUser({
+      db: prisma,
+      email,
+      emailVerified: true,
+      name,
+      password,
+    });
+
+    await acceptTeamInvite(prisma, {
+      token,
+      userId: user.id,
+    });
+    await setSessionCookie(user.id);
+
+    revalidatePath("/team");
+    revalidatePath("/agents");
+    revalidatePath("/hr/employees");
+
+    redirectUrl =
+      invite.role === "agent" || invite.role === "staff"
+        ? `/join/${token}/complete`
+        : "/";
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to create invite account.";
+    redirectUrl = createRedirectUrl(`/join/${token}`, { error: message });
+  }
+
+  redirect(redirectUrl);
+}
+
 export async function inviteMemberAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const role = String(formData.get("role") ?? "staff") as
@@ -1648,7 +1760,10 @@ export async function completeInviteProfileAction(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim() || null;
-  const title = String(formData.get("title") ?? "").trim() || null;
+  const title =
+    invite.role === "agent"
+      ? "Agent"
+      : (WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole);
 
   if (!name) {
     redirect(
@@ -1863,12 +1978,120 @@ export async function addPropertyMediaAction(formData: FormData) {
 
   let errorRedirect: string | null = null;
   try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+    if (!prisma) throw new Error("DB unavailable.");
+
+    const property = await prisma.property.findFirst({
+      select: { id: true },
+      where: {
+        companyId: session.activeMembership.companyId,
+        deletedAt: null,
+        id: propertyId,
+      },
+    });
+    if (!property) throw new Error("Property not found.");
+
     const caller = await createServerCaller();
-    await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
+    if (kind === "virtual_tour") {
+      await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
+    } else {
+      const assetService = createAssetService(prisma);
+      const asset = await assetService.createFromRemoteUrl({
+        companyId: session.activeMembership.companyId,
+        fileName: kind,
+        originKind: "import",
+        originMeta: { sourceUrl: url },
+        scope: "properties",
+        scopeId: propertyId,
+        url,
+      });
+
+      await caller.propertyMedia.addMedia({
+        assetId: asset.id,
+        isCover,
+        kind,
+        propertyId,
+      });
+    }
+
+    if (isCover && kind === "image") {
+      await syncPropertyCoverImageUrl(prisma, {
+        companyId: session.activeMembership.companyId,
+        propertyId,
+      });
+    }
+
     revalidatePath("/properties");
     revalidatePath(`/properties/${propertyId}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to add media.";
+    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
+      error: message,
+    });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+}
+
+export async function uploadPropertyMediaAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const file = formData.get("file");
+  const kind = String(formData.get("kind") ?? "image") as
+    | "image"
+    | "floor_plan";
+  const isCover = formData.get("isCover") === "true";
+
+  let errorRedirect: string | null = null;
+  try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+    if (!prisma) throw new Error("DB unavailable.");
+    if (!file || !(file instanceof File)) {
+      throw new Error("Choose a file to upload.");
+    }
+
+    const property = await prisma.property.findFirst({
+      select: { id: true },
+      where: {
+        companyId: session.activeMembership.companyId,
+        deletedAt: null,
+        id: propertyId,
+      },
+    });
+    if (!property) throw new Error("Property not found.");
+
+    const assetService = createAssetService(prisma);
+    const asset = await assetService.createFromUpload({
+      body: await file.arrayBuffer(),
+      byteSize: file.size,
+      companyId: session.activeMembership.companyId,
+      contentType: file.type,
+      fileName: file.name,
+      scope: "properties",
+      scopeId: propertyId,
+    });
+
+    const caller = await createServerCaller();
+    await caller.propertyMedia.addMedia({
+      assetId: asset.id,
+      isCover,
+      kind,
+      propertyId,
+    });
+    if (isCover && kind === "image") {
+      await syncPropertyCoverImageUrl(prisma, {
+        companyId: session.activeMembership.companyId,
+        propertyId,
+      });
+    }
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to upload media.";
     errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
       error: message,
     });
@@ -1898,12 +2121,64 @@ export async function setPropertyCoverAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
 
   try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+    if (!prisma) throw new Error("DB unavailable.");
     const caller = await createServerCaller();
     await caller.propertyMedia.setCover({ mediaId, propertyId });
+    await syncPropertyCoverImageUrl(prisma, {
+      companyId: session.activeMembership.companyId,
+      propertyId,
+    });
     revalidatePath("/properties");
     revalidatePath(`/properties/${propertyId}`);
   } catch {
     // Silent
+  }
+}
+
+export async function importPublicImageToPropertyAction(formData: FormData) {
+  const propertyId = String(formData.get("propertyId") ?? "");
+  const imageId = String(formData.get("imageId") ?? "");
+  const provider = String(formData.get("provider") ?? "unsplash") as
+    | "unsplash"
+    | "pexels"
+    | "pixabay";
+  const isCover = formData.get("isCover") === "true";
+
+  let errorRedirect: string | null = null;
+  try {
+    const session = await requireOnboardedSession();
+    const prisma = createPrismaClient().db;
+    if (!prisma) throw new Error("DB unavailable.");
+
+    const caller = await createServerCaller();
+    await caller.publicImages.importToProperty({
+      imageId,
+      isCover,
+      propertyId,
+      provider,
+    });
+
+    if (isCover) {
+      await syncPropertyCoverImageUrl(prisma, {
+        companyId: session.activeMembership.companyId,
+        propertyId,
+      });
+    }
+
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to import image.";
+    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
+      error: message,
+    });
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
   }
 }
 

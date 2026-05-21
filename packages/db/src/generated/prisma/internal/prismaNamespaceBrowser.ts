@@ -56,6 +56,7 @@ export const ModelName = {
   AiCreditLedger: 'AiCreditLedger',
   AnalyticsEvent: 'AnalyticsEvent',
   Appointment: 'Appointment',
+  Asset: 'Asset',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
@@ -208,6 +209,28 @@ export const AppointmentScalarFieldEnum = {
 } as const
 
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
+
+
+export const AssetScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  provider: 'provider',
+  bucket: 'bucket',
+  key: 'key',
+  publicUrl: 'publicUrl',
+  contentType: 'contentType',
+  byteSize: 'byteSize',
+  checksum: 'checksum',
+  width: 'width',
+  height: 'height',
+  originKind: 'originKind',
+  originMeta: 'originMeta',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -866,8 +889,11 @@ export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeo
 export const PropertyMediaScalarFieldEnum = {
   id: 'id',
   propertyId: 'propertyId',
+  assetId: 'assetId',
   kind: 'kind',
   url: 'url',
+  altText: 'altText',
+  caption: 'caption',
   isCover: 'isCover',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt'

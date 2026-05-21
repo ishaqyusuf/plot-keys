@@ -1,4 +1,5 @@
 import { authRoutes } from "@plotkeys/auth/shared";
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { resolveDashboardLandingRoute } from "@plotkeys/utils";
 import { redirect } from "next/navigation";
 
@@ -11,8 +12,8 @@ import {
 import { getTenantSignInUrlForSubdomain } from "../../../lib/tenant-dashboard-url";
 
 const signUpBenefits = [
-  "Reserve your PlotKeys website and dashboard subdomains early",
-  "Create the owner account and move directly into company setup",
+  "Reserve your PlotKeys website and dashboard links early",
+  "Create the owner account and move directly into website setup",
   "Carry your chosen hostnames into onboarding without re-entering them",
 ];
 
@@ -48,8 +49,9 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
   return (
     <FlowShell
-      badge="Tenant signup"
-      description="Create the owner account for a new tenant workspace, reserve the subdomain, and continue directly into onboarding."
+      badge="Website launch"
+      description="Create the owner account for your company website, reserve the subdomain, and continue directly into setup."
+      headerAction={<ThemeToggle />}
       sidePanel={
         <>
           <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
@@ -67,7 +69,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           </ul>
         </>
       }
-      title="Create the account that will own the tenant workspace."
+      title="Create the account that will launch your company website."
     >
       <SignUpForm initialError={params.error} />
     </FlowShell>

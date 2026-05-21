@@ -3,9 +3,12 @@ import type { Db } from "../prisma";
 export async function addPropertyMedia(
   db: Db,
   input: {
+    assetId?: string | null;
+    altText?: string | null;
+    caption?: string | null;
     propertyId: string;
     kind: "image" | "floor_plan" | "virtual_tour";
-    url: string;
+    url?: string | null;
     isCover?: boolean;
     sortOrder?: number;
   },
@@ -20,20 +23,30 @@ export async function addPropertyMedia(
 
   return db.propertyMedia.create({
     data: {
+      assetId: input.assetId ?? null,
+      altText: input.altText ?? null,
+      caption: input.caption ?? null,
       propertyId: input.propertyId,
       kind: input.kind,
-      url: input.url,
+      url: input.url ?? null,
       isCover: input.isCover ?? false,
       sortOrder: input.sortOrder ?? 0,
     },
+    include: { asset: true },
   });
 }
 
 export async function listPropertyMedia(db: Db, propertyId: string) {
-  return db.propertyMedia.findMany({
+  const media = await db.propertyMedia.findMany({
+    include: { asset: true },
     where: { propertyId },
     orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
   });
+
+  return media.map((item) => ({
+    ...item,
+    displayUrl: item.asset?.publicUrl ?? item.url,
+  }));
 }
 
 export async function deletePropertyMedia(
@@ -58,6 +71,7 @@ export async function setPropertyCover(
   });
 
   return db.propertyMedia.update({
+    include: { asset: true },
     where: {
       id: input.mediaId,
       propertyId: input.propertyId,
@@ -68,12 +82,15 @@ export async function setPropertyCover(
 
 export async function reorderPropertyMedia(
   db: Db,
-  items: Array<{ id: string; sortOrder: number }>,
+  items: Array<{ id: string; propertyId?: string; sortOrder: number }>,
 ) {
   return db.$transaction(
     items.map((item) =>
       db.propertyMedia.update({
-        where: { id: item.id },
+        where: {
+          id: item.id,
+          ...(item.propertyId ? { propertyId: item.propertyId } : {}),
+        },
         data: { sortOrder: item.sortOrder },
       }),
     ),

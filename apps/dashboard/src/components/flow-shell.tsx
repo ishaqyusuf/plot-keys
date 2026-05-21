@@ -18,6 +18,7 @@ type FlowShellProps = {
   children: ReactNode;
   description: string;
   eyebrow?: string;
+  headerAction?: ReactNode;
   sidePanel: ReactNode;
   title: string;
 };
@@ -30,25 +31,29 @@ export function FlowShell({
   children,
   description,
   eyebrow = "Tenant setup",
+  headerAction,
   sidePanel,
   title,
 }: FlowShellProps) {
   return (
     <main className="min-h-screen bg-background px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 inline-flex items-start gap-3 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground">
-          <OnboardingBrandAvatar
-            brandName={brandName}
-            editable={brandEditable}
-            logoUrl={brandLogoUrl}
-          />
-          <Link
-            aria-label="Go to homepage"
-            className="self-center pr-1 font-medium uppercase tracking-[0.18em] transition hover:text-primary"
-            href="/"
-          >
-            {brandName}
-          </Link>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="inline-flex items-start gap-3 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground">
+            <OnboardingBrandAvatar
+              brandName={brandName}
+              editable={brandEditable}
+              logoUrl={brandLogoUrl}
+            />
+            <Link
+              aria-label="Go to homepage"
+              className="self-center pr-1 font-medium uppercase tracking-[0.18em] transition hover:text-primary"
+              href="/"
+            >
+              {brandName}
+            </Link>
+          </div>
+          {headerAction}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">

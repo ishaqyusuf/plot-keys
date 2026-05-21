@@ -8,6 +8,7 @@
     "./supabase": "./src/supabase.ts"
   },
   "dependencies": {
+    "@vercel/blob": "^1.1.1",
     "@supabase/supabase-js": "^2.49.0"
   },
   "scripts": {

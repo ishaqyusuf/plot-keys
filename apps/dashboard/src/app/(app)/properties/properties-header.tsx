@@ -15,9 +15,11 @@ import { ExportCsvButton } from "../../../components/export-csv-button";
 import { exportPropertiesCsvAction } from "../../actions";
 import { PropertiesSearchFilter } from "./properties-search-filter";
 import { PropertyForm } from "./property-form";
+import type { PageFilterData } from "../../../components/search-filter/types";
 
 type PropertiesHeaderProps = {
   count: number;
+  filterList: PageFilterData[];
   query: string;
   siteUrl: string;
   typeFilter?: string;
@@ -26,10 +28,9 @@ type PropertiesHeaderProps = {
 
 export function PropertiesHeader({
   count,
+  filterList,
   query,
   siteUrl,
-  typeFilter,
-  typeLabels,
 }: PropertiesHeaderProps) {
   return (
     <DashboardTablePageHeader>
@@ -66,9 +67,7 @@ export function PropertiesHeader({
         </div>
 
         <PropertiesSearchFilter
-          query={query}
-          typeFilter={typeFilter}
-          typeLabels={typeLabels}
+          filterList={filterList}
         />
       </DashboardTableFilters>
     </DashboardTablePageHeader>

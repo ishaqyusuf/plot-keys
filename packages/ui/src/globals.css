@@ -7,39 +7,56 @@
 @source "../../section-registry/**/*.{ts,tsx}";
 
 :root {
-  --background: #f6f3ee;
-  --foreground: #17212b;
-  --muted: #6b7785;
-  --muted-foreground: #576270;
-  --border: rgba(107, 119, 133, 0.18);
-  --input: rgba(107, 119, 133, 0.3);
-  --surface: rgba(255, 252, 248, 0.8);
-  --surface-strong: #fffdfa;
-  --surface-inverse: #17212b;
-  --primary: #0f6b61;
-  --primary-foreground: #f7fffd;
-  --accent: #b88a44;
-  --accent-foreground: #231a0d;
-  --success: #1b8f66;
-  --warning: #b9832d;
-  --destructive: #cb4c41;
-  --ring: rgba(15, 107, 97, 0.18);
-  --shadow-soft: 0 22px 50px rgba(23, 33, 43, 0.06);
-  --shadow-card: 0 14px 28px rgba(23, 33, 43, 0.05);
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 7%);
+  --muted: hsl(40 11% 89%);
+  --muted-foreground: hsl(0 0% 38%);
+  --border: hsl(45 5% 85%);
+  --input: hsl(240 5.9% 90%);
+  --surface: hsl(45 18% 96%);
+  --surface-strong: hsl(45 18% 96%);
+  --surface-inverse: hsl(240 5.9% 10%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(40 11% 89%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --accent: hsl(40 10% 94%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --success: hsl(142 71% 45%);
+  --warning: hsl(38 92% 50%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --ring: hsl(240 5.9% 10%);
+  --shadow-soft: 0 22px 50px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 14px 28px rgba(0, 0, 0, 0.05);
   --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius: var(--radius-md);
+  --radius-md: 0.5rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius: 0.5rem;
   --content-width: 72rem;
-  --sidebar: #f3eee7;
-  --sidebar-foreground: #27323d;
-  --sidebar-primary: #17212b;
-  --sidebar-primary-foreground: #fffdfa;
-  --sidebar-accent: rgba(23, 33, 43, 0.055);
-  --sidebar-accent-foreground: #17212b;
-  --sidebar-border: rgba(107, 119, 133, 0.14);
-  --sidebar-ring: rgba(15, 107, 97, 0.24);
+  --sidebar: hsl(45 18% 96%);
+  --sidebar-foreground: hsl(0 0% 7%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(40 10% 94%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(45 5% 85%);
+  --sidebar-ring: hsl(240 5.9% 10%);
+  --chart-grid-stroke: #e6e6e6;
+  --chart-axis-text: #707070;
+  --chart-reference-line-stroke: #e6e6e6;
+  --chart-reference-label: #707070;
+  --chart-actual-line: #000000;
+  --chart-forecast-line: #666666;
+  --chart-tooltip-cursor: #666666;
+  --chart-pattern-bg: white;
+  --chart-pattern-stroke: #707070;
+  --chart-bar-fill: #000000;
+  --chart-bar-fill-secondary: #6666664d;
+  --chart-gradient-start: #707070;
+  --chart-gradient-end: #000000;
+  --chart-line-secondary: #666666;
 }
 
 * {
@@ -56,23 +73,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(
-      circle at top left,
-      color-mix(in srgb, var(--primary) 8%, transparent),
-      transparent 24%
-    ),
-    radial-gradient(
-      circle at right 12% top 8%,
-      color-mix(in srgb, var(--accent) 8%, transparent),
-      transparent 22%
-    ),
-    linear-gradient(
-      180deg,
-      var(--background) 0%,
-      color-mix(in srgb, var(--background) 92%, white) 42%,
-      color-mix(in srgb, var(--background) 96%, var(--foreground) 4%) 100%
-    );
+  background: var(--background);
   color: var(--foreground);
   font-family: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
   text-rendering: optimizeLegibility;
@@ -90,8 +91,7 @@ button {
 
 input,
 textarea,
-select,
-button {
+select {
   color: inherit;
 }
 
@@ -113,33 +113,50 @@ p {
 }
 
 .dark {
-  --background: #101720;
-  --foreground: #edf2f5;
-  --muted: #93a0ad;
-  --muted-foreground: #b2bdc7;
-  --border: rgba(178, 189, 199, 0.14);
-  --input: rgba(178, 189, 199, 0.24);
-  --surface: rgba(21, 29, 39, 0.82);
-  --surface-strong: #161f29;
-  --surface-inverse: #edf2f5;
-  --primary: #2aa89b;
-  --primary-foreground: #081513;
-  --accent: #c39a56;
-  --accent-foreground: #1e1508;
-  --success: #39b27d;
-  --warning: #d6a551;
-  --destructive: #eb7268;
-  --ring: rgba(42, 168, 155, 0.24);
+  --background: hsl(0 0% 5%);
+  --foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 11%);
+  --muted-foreground: hsl(0 0% 38%);
+  --border: hsl(0 0% 11%);
+  --input: hsl(0 0% 11%);
+  --surface: hsl(0 0% 7%);
+  --surface-strong: hsl(0 0% 7%);
+  --surface-inverse: hsl(0 0% 98%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 5.9% 10%);
+  --secondary: hsl(0 0% 7%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --accent: hsl(0 0% 11%);
+  --accent-foreground: hsl(0 0% 98%);
+  --success: hsl(142 71% 45%);
+  --warning: hsl(38 92% 50%);
+  --destructive: hsl(359 100% 61%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --ring: hsl(240 4.9% 83.9%);
   --shadow-soft: 0 22px 52px rgba(0, 0, 0, 0.24);
   --shadow-card: 0 14px 30px rgba(0, 0, 0, 0.24);
-  --sidebar: #121a23;
-  --sidebar-foreground: #e7edf1;
-  --sidebar-primary: #e7edf1;
-  --sidebar-primary-foreground: #121a23;
-  --sidebar-accent: rgba(231, 237, 241, 0.06);
-  --sidebar-accent-foreground: #e7edf1;
-  --sidebar-border: rgba(178, 189, 199, 0.1);
-  --sidebar-ring: rgba(42, 168, 155, 0.3);
+  --sidebar: hsl(0 0% 7%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(0 0% 98%);
+  --sidebar-primary-foreground: hsl(240 5.9% 10%);
+  --sidebar-accent: hsl(0 0% 11%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(0 0% 11%);
+  --sidebar-ring: hsl(240 4.9% 83.9%);
+  --chart-grid-stroke: #1d1d1d;
+  --chart-axis-text: #666666;
+  --chart-reference-line-stroke: #333333;
+  --chart-reference-label: #666666;
+  --chart-actual-line: #ffffff;
+  --chart-forecast-line: #999999;
+  --chart-tooltip-cursor: #999999;
+  --chart-pattern-bg: #0c0c0c;
+  --chart-pattern-stroke: #666666;
+  --chart-bar-fill: white;
+  --chart-bar-fill-secondary: #6666664d;
+  --chart-gradient-start: #666666;
+  --chart-gradient-end: #ffffff;
+  --chart-line-secondary: #999999;
 }
 
 /* ---- Marketing page animations ---- */
@@ -228,7 +245,7 @@ p {
   .animate-fade-in,
   .animate-gradient-shift,
   .animate-pulse-glow {
-    animation: none !important;
+    animation: none;
   }
 }
 
@@ -241,15 +258,16 @@ p {
   --color-popover-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: color-mix(in srgb, var(--foreground) 8%, white);
-  --color-secondary-foreground: var(--foreground);
-  --color-muted: color-mix(in srgb, var(--foreground) 8%, white);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

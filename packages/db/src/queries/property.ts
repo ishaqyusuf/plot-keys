@@ -8,6 +8,22 @@ export type PropertyTypeValue =
   | "industrial"
   | "mixed_use";
 
+export const propertyTypeValues = [
+  "residential",
+  "commercial",
+  "land",
+  "industrial",
+  "mixed_use",
+] as const satisfies readonly PropertyTypeValue[];
+
+function normalizePropertyType(
+  value: string | null | undefined,
+): PropertyTypeValue | undefined {
+  return propertyTypeValues.includes(value as PropertyTypeValue)
+    ? (value as PropertyTypeValue)
+    : undefined;
+}
+
 export async function createProperty(
   db: Db,
   data: {
@@ -168,6 +184,7 @@ export async function listFeaturedProperties(
   const properties = await db.property.findMany({
     include: {
       media: {
+        include: { asset: true },
         where: { isCover: true },
         take: 1,
       },
@@ -184,7 +201,8 @@ export async function listFeaturedProperties(
 
   return properties.map((p) => ({
     ...p,
-    imageUrl: p.imageUrl ?? p.media[0]?.url ?? null,
+    imageUrl:
+      p.imageUrl ?? p.media[0]?.asset?.publicUrl ?? p.media[0]?.url ?? null,
   }));
 }
 
@@ -200,6 +218,38 @@ export async function listPropertiesForCompany(
       companyId,
       deletedAt: null,
       ...(options.featured !== undefined && { featured: options.featured }),
+    },
+  });
+}
+
+export type PropertyListFilters = {
+  q?: string | null;
+  type?: string | null;
+};
+
+export async function listFilteredPropertiesForCompany(
+  db: Db,
+  companyId: string,
+  filters: PropertyListFilters = {},
+) {
+  const query = filters.q?.trim() ?? "";
+  const type = normalizePropertyType(filters.type);
+
+  return db.property.findMany({
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    where: {
+      companyId,
+      deletedAt: null,
+      ...(type ? { type } : {}),
+      ...(query
+        ? {
+            OR: [
+              { title: { contains: query, mode: "insensitive" } },
+              { location: { contains: query, mode: "insensitive" } },
+              { price: { contains: query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
     },
   });
 }

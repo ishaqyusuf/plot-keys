@@ -1,12 +1,17 @@
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  createPrismaClient,
+  listFilteredPropertiesForCompany,
+} from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { buildTenantSiteUrl } from "@plotkeys/utils";
+import { propertiesPageFilter } from "@plotkeys/api/filters";
 import {
   DashboardPage,
   DashboardTablePage,
   DashboardTablePageBody,
 } from "../../../components/dashboard/dashboard-page";
 import { getBaseUrl } from "../../../lib/get-base-url";
+import { loadPropertiesFilterParams } from "../../../lib/properties-filter-params";
 import { requireOnboardedSession } from "../../../lib/session";
 import { PropertiesHeader } from "./properties-header";
 import { PropertiesDataTable } from "./tables/properties/data-table";
@@ -45,40 +50,20 @@ export default async function PropertiesPage({
 }: PropertiesPageProps) {
   const session = await requireOnboardedSession();
   const params = (await searchParams) ?? {};
-  const query = params.q?.trim() ?? "";
-  const typeFilter =
-    params.type && params.type !== "all" ? params.type : undefined;
+  const filters = loadPropertiesFilterParams(params);
+  const query = filters.q?.trim() ?? "";
+  const typeFilter = filters.type ?? undefined;
   const currentOrigin = await getBaseUrl();
 
   const prisma = createPrismaClient().db;
   const properties = prisma
-    ? await prisma.property.findMany({
-        orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-        where: {
-          companyId: session.activeMembership.companyId,
-          deletedAt: null,
-          ...(typeFilter
-            ? {
-                type: typeFilter as
-                  | "residential"
-                  | "commercial"
-                  | "land"
-                  | "industrial"
-                  | "mixed_use",
-              }
-            : {}),
-          ...(query
-            ? {
-                OR: [
-                  { title: { contains: query, mode: "insensitive" } },
-                  { location: { contains: query, mode: "insensitive" } },
-                  { price: { contains: query, mode: "insensitive" } },
-                ],
-              }
-            : {}),
-        },
-      })
+    ? await listFilteredPropertiesForCompany(
+        prisma,
+        session.activeMembership.companyId,
+        filters,
+      )
     : [];
+  const filterList = await propertiesPageFilter();
 
   const siteUrl = buildTenantSiteUrl(session.activeMembership.companySlug, {
     currentOrigin,
@@ -95,6 +80,7 @@ export default async function PropertiesPage({
       <DashboardTablePage>
         <PropertiesHeader
           count={properties.length}
+          filterList={filterList}
           query={query}
           siteUrl={siteUrl}
           typeFilter={typeFilter}

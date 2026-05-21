@@ -46,6 +46,8 @@ type AgentsPageProps = {
 export default async function AgentsPage({ searchParams }: AgentsPageProps) {
   const session = await requireOnboardedSession();
   const params = (await searchParams) ?? {};
+  const isDevMode = process.env.NODE_ENV === "development";
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
 
   const prisma = createPrismaClient().db;
   const [agents, pendingInvites] = prisma
@@ -166,29 +168,46 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
         </DashboardSectionHeader>
         {pendingInvites.length > 0 ? (
           <div className="grid gap-3">
-            {pendingInvites.map((invite) => (
-              <Card
-                key={invite.id}
-                className="border-border/70 border-dashed bg-card/82"
-              >
-                <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {invite.email}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Pending agent setup
-                    </p>
-                  </div>
-                  <form action={revokeInviteAction}>
-                    <input name="inviteId" type="hidden" value={invite.id} />
-                    <Button size="sm" type="submit" variant="ghost">
-                      Revoke
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            ))}
+            {pendingInvites.map((invite) => {
+              const inviteUrl = `${appBaseUrl}/join/${invite.token}`;
+
+              return (
+                <Card
+                  key={invite.id}
+                  className="border-border/70 border-dashed bg-card/82"
+                >
+                  <CardContent className="flex items-center justify-between gap-4 px-5 py-4">
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">
+                        {invite.email}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Pending agent setup
+                      </p>
+                      {isDevMode ? (
+                        <p className="mt-1 text-xs text-muted-foreground break-all">
+                          Dev invite link:{" "}
+                          <a
+                            className="underline underline-offset-2"
+                            href={inviteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {inviteUrl}
+                          </a>
+                        </p>
+                      ) : null}
+                    </div>
+                    <form action={revokeInviteAction}>
+                      <input name="inviteId" type="hidden" value={invite.id} />
+                      <Button size="sm" type="submit" variant="ghost">
+                        Revoke
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <DashboardEmptyState

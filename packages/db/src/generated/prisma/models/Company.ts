@@ -255,6 +255,7 @@ export type CompanyWhereInput = {
   website?: Prisma.XOR<Prisma.WebsiteNullableScalarRelationFilter, Prisma.WebsiteWhereInput> | null
   tenantDomains?: Prisma.TenantDomainListRelationFilter
   properties?: Prisma.PropertyListRelationFilter
+  assets?: Prisma.AssetListRelationFilter
   estates?: Prisma.EstateListRelationFilter
   plots?: Prisma.PlotListRelationFilter
   agents?: Prisma.AgentListRelationFilter
@@ -302,6 +303,7 @@ export type CompanyOrderByWithRelationInput = {
   website?: Prisma.WebsiteOrderByWithRelationInput
   tenantDomains?: Prisma.TenantDomainOrderByRelationAggregateInput
   properties?: Prisma.PropertyOrderByRelationAggregateInput
+  assets?: Prisma.AssetOrderByRelationAggregateInput
   estates?: Prisma.EstateOrderByRelationAggregateInput
   plots?: Prisma.PlotOrderByRelationAggregateInput
   agents?: Prisma.AgentOrderByRelationAggregateInput
@@ -352,6 +354,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   website?: Prisma.XOR<Prisma.WebsiteNullableScalarRelationFilter, Prisma.WebsiteWhereInput> | null
   tenantDomains?: Prisma.TenantDomainListRelationFilter
   properties?: Prisma.PropertyListRelationFilter
+  assets?: Prisma.AssetListRelationFilter
   estates?: Prisma.EstateListRelationFilter
   plots?: Prisma.PlotListRelationFilter
   agents?: Prisma.AgentListRelationFilter
@@ -439,6 +442,7 @@ export type CompanyCreateInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -486,6 +490,7 @@ export type CompanyUncheckedCreateInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -533,6 +538,7 @@ export type CompanyUpdateInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -580,6 +586,7 @@ export type CompanyUncheckedUpdateInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -788,6 +795,20 @@ export type CompanyUpdateOneRequiredWithoutAppointmentsNestedInput = {
   upsert?: Prisma.CompanyUpsertWithoutAppointmentsInput
   connect?: Prisma.CompanyWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutAppointmentsInput, Prisma.CompanyUpdateWithoutAppointmentsInput>, Prisma.CompanyUncheckedUpdateWithoutAppointmentsInput>
+}
+
+export type CompanyCreateNestedOneWithoutAssetsInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutAssetsInput, Prisma.CompanyUncheckedCreateWithoutAssetsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutAssetsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+}
+
+export type CompanyUpdateOneRequiredWithoutAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutAssetsInput, Prisma.CompanyUncheckedCreateWithoutAssetsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutAssetsInput
+  upsert?: Prisma.CompanyUpsertWithoutAssetsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutAssetsInput, Prisma.CompanyUpdateWithoutAssetsInput>, Prisma.CompanyUncheckedUpdateWithoutAssetsInput>
 }
 
 export type CompanyCreateNestedOneWithoutBillingLineItemsInput = {
@@ -1177,6 +1198,7 @@ export type CompanyCreateWithoutAgentsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
@@ -1223,6 +1245,7 @@ export type CompanyUncheckedCreateWithoutAgentsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
@@ -1285,6 +1308,7 @@ export type CompanyUpdateWithoutAgentsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
@@ -1331,6 +1355,7 @@ export type CompanyUncheckedUpdateWithoutAgentsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1377,6 +1402,7 @@ export type CompanyCreateWithoutAiUsageLogsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -1423,6 +1449,7 @@ export type CompanyUncheckedCreateWithoutAiUsageLogsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -1485,6 +1512,7 @@ export type CompanyUpdateWithoutAiUsageLogsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -1531,6 +1559,7 @@ export type CompanyUncheckedUpdateWithoutAiUsageLogsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1577,6 +1606,7 @@ export type CompanyCreateWithoutAiCreditLedgerInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -1623,6 +1653,7 @@ export type CompanyUncheckedCreateWithoutAiCreditLedgerInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -1685,6 +1716,7 @@ export type CompanyUpdateWithoutAiCreditLedgerInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -1731,6 +1763,7 @@ export type CompanyUncheckedUpdateWithoutAiCreditLedgerInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1777,6 +1810,7 @@ export type CompanyCreateWithoutAnalyticsEventsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -1823,6 +1857,7 @@ export type CompanyUncheckedCreateWithoutAnalyticsEventsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -1885,6 +1920,7 @@ export type CompanyUpdateWithoutAnalyticsEventsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -1931,6 +1967,7 @@ export type CompanyUncheckedUpdateWithoutAnalyticsEventsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1977,6 +2014,7 @@ export type CompanyCreateWithoutAppointmentsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -2023,6 +2061,7 @@ export type CompanyUncheckedCreateWithoutAppointmentsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -2085,6 +2124,7 @@ export type CompanyUpdateWithoutAppointmentsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -2131,12 +2171,217 @@ export type CompanyUncheckedUpdateWithoutAppointmentsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
   leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
+  customerOffers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUncheckedUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutCompanyNestedInput
+  installedApps?: Prisma.CompanyAppUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyCreateWithoutAssetsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
+  plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
+  customerOffers?: Prisma.CustomerOfferCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutCompanyInput
+  installedApps?: Prisma.CompanyAppCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyUncheckedCreateWithoutAssetsInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
+  plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
+  customerOffers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationUncheckedCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutCompanyInput
+  installedApps?: Prisma.CompanyAppUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyCreateOrConnectWithoutAssetsInput = {
+  where: Prisma.CompanyWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutAssetsInput, Prisma.CompanyUncheckedCreateWithoutAssetsInput>
+}
+
+export type CompanyUpsertWithoutAssetsInput = {
+  update: Prisma.XOR<Prisma.CompanyUpdateWithoutAssetsInput, Prisma.CompanyUncheckedUpdateWithoutAssetsInput>
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutAssetsInput, Prisma.CompanyUncheckedCreateWithoutAssetsInput>
+  where?: Prisma.CompanyWhereInput
+}
+
+export type CompanyUpdateToOneWithWhereWithoutAssetsInput = {
+  where?: Prisma.CompanyWhereInput
+  data: Prisma.XOR<Prisma.CompanyUpdateWithoutAssetsInput, Prisma.CompanyUncheckedUpdateWithoutAssetsInput>
+}
+
+export type CompanyUpdateWithoutAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
+  plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
+  customerOffers?: Prisma.CustomerOfferUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutCompanyNestedInput
+  installedApps?: Prisma.CompanyAppUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyUncheckedUpdateWithoutAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
+  plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCompanyNestedInput
   stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedUpdateManyWithoutCompanyNestedInput
   aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutCompanyNestedInput
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2177,6 +2422,7 @@ export type CompanyCreateWithoutBillingLineItemsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -2223,6 +2469,7 @@ export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -2285,6 +2532,7 @@ export type CompanyUpdateWithoutBillingLineItemsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -2331,6 +2579,7 @@ export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2377,6 +2626,7 @@ export type CompanyCreateWithoutBlogPostsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -2423,6 +2673,7 @@ export type CompanyUncheckedCreateWithoutBlogPostsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -2485,6 +2736,7 @@ export type CompanyUpdateWithoutBlogPostsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -2531,6 +2783,7 @@ export type CompanyUncheckedUpdateWithoutBlogPostsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2577,6 +2830,7 @@ export type CompanyCreateWithoutInstalledAppsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -2623,6 +2877,7 @@ export type CompanyUncheckedCreateWithoutInstalledAppsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -2685,6 +2940,7 @@ export type CompanyUpdateWithoutInstalledAppsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -2731,6 +2987,7 @@ export type CompanyUncheckedUpdateWithoutInstalledAppsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2777,6 +3034,7 @@ export type CompanyCreateWithoutIntegrationInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -2823,6 +3081,7 @@ export type CompanyUncheckedCreateWithoutIntegrationInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -2885,6 +3144,7 @@ export type CompanyUpdateWithoutIntegrationInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -2931,6 +3191,7 @@ export type CompanyUncheckedUpdateWithoutIntegrationInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2977,6 +3238,7 @@ export type CompanyCreateWithoutCustomersInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -3023,6 +3285,7 @@ export type CompanyUncheckedCreateWithoutCustomersInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -3085,6 +3348,7 @@ export type CompanyUpdateWithoutCustomersInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -3131,6 +3395,7 @@ export type CompanyUncheckedUpdateWithoutCustomersInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3177,6 +3442,7 @@ export type CompanyCreateWithoutSavedListingsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -3223,6 +3489,7 @@ export type CompanyUncheckedCreateWithoutSavedListingsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -3285,6 +3552,7 @@ export type CompanyUpdateWithoutSavedListingsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -3331,6 +3599,7 @@ export type CompanyUncheckedUpdateWithoutSavedListingsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3377,6 +3646,7 @@ export type CompanyCreateWithoutCustomerOffersInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -3423,6 +3693,7 @@ export type CompanyUncheckedCreateWithoutCustomerOffersInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -3485,6 +3756,7 @@ export type CompanyUpdateWithoutCustomerOffersInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -3531,6 +3803,7 @@ export type CompanyUncheckedUpdateWithoutCustomerOffersInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3577,6 +3850,7 @@ export type CompanyCreateWithoutDepartmentsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -3623,6 +3897,7 @@ export type CompanyUncheckedCreateWithoutDepartmentsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -3685,6 +3960,7 @@ export type CompanyUpdateWithoutDepartmentsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -3731,6 +4007,7 @@ export type CompanyUncheckedUpdateWithoutDepartmentsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3777,6 +4054,7 @@ export type CompanyCreateWithoutEmployeesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -3823,6 +4101,7 @@ export type CompanyUncheckedCreateWithoutEmployeesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -3885,6 +4164,7 @@ export type CompanyUpdateWithoutEmployeesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -3931,6 +4211,7 @@ export type CompanyUncheckedUpdateWithoutEmployeesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3977,6 +4258,7 @@ export type CompanyCreateWithoutEstatesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
@@ -4023,6 +4305,7 @@ export type CompanyUncheckedCreateWithoutEstatesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
@@ -4085,6 +4368,7 @@ export type CompanyUpdateWithoutEstatesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
@@ -4131,6 +4415,7 @@ export type CompanyUncheckedUpdateWithoutEstatesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4177,6 +4462,7 @@ export type CompanyCreateWithoutLeadsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -4223,6 +4509,7 @@ export type CompanyUncheckedCreateWithoutLeadsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -4285,6 +4572,7 @@ export type CompanyUpdateWithoutLeadsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -4331,6 +4619,7 @@ export type CompanyUncheckedUpdateWithoutLeadsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4376,6 +4665,7 @@ export type CompanyCreateWithoutMembershipsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -4422,6 +4712,7 @@ export type CompanyUncheckedCreateWithoutMembershipsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -4484,6 +4775,7 @@ export type CompanyUpdateWithoutMembershipsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -4530,6 +4822,7 @@ export type CompanyUncheckedUpdateWithoutMembershipsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4577,6 +4870,7 @@ export type CompanyCreateWithoutNotificationPreferencesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -4623,6 +4917,7 @@ export type CompanyUncheckedCreateWithoutNotificationPreferencesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -4685,6 +4980,7 @@ export type CompanyUpdateWithoutNotificationPreferencesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -4731,6 +5027,7 @@ export type CompanyUncheckedUpdateWithoutNotificationPreferencesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4777,6 +5074,7 @@ export type CompanyCreateWithoutNotificationsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -4823,6 +5121,7 @@ export type CompanyUncheckedCreateWithoutNotificationsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -4885,6 +5184,7 @@ export type CompanyUpdateWithoutNotificationsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -4931,6 +5231,7 @@ export type CompanyUncheckedUpdateWithoutNotificationsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4977,6 +5278,7 @@ export type CompanyCreateWithoutPayrollEntriesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -5023,6 +5325,7 @@ export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -5085,6 +5388,7 @@ export type CompanyUpdateWithoutPayrollEntriesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -5131,6 +5435,7 @@ export type CompanyUncheckedUpdateWithoutPayrollEntriesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5177,6 +5482,7 @@ export type CompanyCreateWithoutPlotsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
@@ -5223,6 +5529,7 @@ export type CompanyUncheckedCreateWithoutPlotsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
@@ -5285,6 +5592,7 @@ export type CompanyUpdateWithoutPlotsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
@@ -5331,6 +5639,7 @@ export type CompanyUncheckedUpdateWithoutPlotsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
   templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5377,6 +5686,7 @@ export type CompanyCreateWithoutPlotReservationsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -5423,6 +5733,7 @@ export type CompanyUncheckedCreateWithoutPlotReservationsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -5485,6 +5796,7 @@ export type CompanyUpdateWithoutPlotReservationsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -5531,6 +5843,7 @@ export type CompanyUncheckedUpdateWithoutPlotReservationsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5577,6 +5890,7 @@ export type CompanyCreateWithoutProjectsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -5623,6 +5937,7 @@ export type CompanyUncheckedCreateWithoutProjectsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -5685,6 +6000,7 @@ export type CompanyUpdateWithoutProjectsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -5731,6 +6047,7 @@ export type CompanyUncheckedUpdateWithoutProjectsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5776,6 +6093,7 @@ export type CompanyCreateWithoutPropertiesInput = {
   siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -5822,6 +6140,7 @@ export type CompanyUncheckedCreateWithoutPropertiesInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -5884,6 +6203,7 @@ export type CompanyUpdateWithoutPropertiesInput = {
   siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -5930,6 +6250,7 @@ export type CompanyUncheckedUpdateWithoutPropertiesInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5976,6 +6297,7 @@ export type CompanyCreateWithoutSiteConfigurationsInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -6022,6 +6344,7 @@ export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -6084,6 +6407,7 @@ export type CompanyUpdateWithoutSiteConfigurationsInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -6130,6 +6454,7 @@ export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6177,6 +6502,7 @@ export type CompanyCreateWithoutStockImageLicensesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -6223,6 +6549,7 @@ export type CompanyUncheckedCreateWithoutStockImageLicensesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -6285,6 +6612,7 @@ export type CompanyUpdateWithoutStockImageLicensesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -6331,6 +6659,7 @@ export type CompanyUncheckedUpdateWithoutStockImageLicensesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6377,6 +6706,7 @@ export type CompanyCreateWithoutTeamInvitesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -6423,6 +6753,7 @@ export type CompanyUncheckedCreateWithoutTeamInvitesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -6485,6 +6816,7 @@ export type CompanyUpdateWithoutTeamInvitesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -6531,6 +6863,7 @@ export type CompanyUncheckedUpdateWithoutTeamInvitesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6576,6 +6909,7 @@ export type CompanyCreateWithoutTenantDomainsInput = {
   siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -6622,6 +6956,7 @@ export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -6684,6 +7019,7 @@ export type CompanyUpdateWithoutTenantDomainsInput = {
   siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -6730,6 +7066,7 @@ export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6777,6 +7114,7 @@ export type CompanyCreateWithoutTemplateLicensesInput = {
   website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -6823,6 +7161,7 @@ export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
   website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -6885,6 +7224,7 @@ export type CompanyUpdateWithoutTemplateLicensesInput = {
   website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -6931,6 +7271,7 @@ export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
   website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6976,6 +7317,7 @@ export type CompanyCreateWithoutWebsiteInput = {
   siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
@@ -7022,6 +7364,7 @@ export type CompanyUncheckedCreateWithoutWebsiteInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
   tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
   estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
   plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
   agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
@@ -7084,6 +7427,7 @@ export type CompanyUpdateWithoutWebsiteInput = {
   siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
@@ -7130,6 +7474,7 @@ export type CompanyUncheckedUpdateWithoutWebsiteInput = {
   siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
   tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
   estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
   plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
   agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
@@ -7167,6 +7512,7 @@ export type CompanyCountOutputType = {
   siteConfigurations: number
   tenantDomains: number
   properties: number
+  assets: number
   estates: number
   plots: number
   agents: number
@@ -7198,6 +7544,7 @@ export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   siteConfigurations?: boolean | CompanyCountOutputTypeCountSiteConfigurationsArgs
   tenantDomains?: boolean | CompanyCountOutputTypeCountTenantDomainsArgs
   properties?: boolean | CompanyCountOutputTypeCountPropertiesArgs
+  assets?: boolean | CompanyCountOutputTypeCountAssetsArgs
   estates?: boolean | CompanyCountOutputTypeCountEstatesArgs
   plots?: boolean | CompanyCountOutputTypeCountPlotsArgs
   agents?: boolean | CompanyCountOutputTypeCountAgentsArgs
@@ -7260,6 +7607,13 @@ export type CompanyCountOutputTypeCountTenantDomainsArgs<ExtArgs extends runtime
  */
 export type CompanyCountOutputTypeCountPropertiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PropertyWhereInput
+}
+
+/**
+ * CompanyCountOutputType without action
+ */
+export type CompanyCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetWhereInput
 }
 
 /**
@@ -7451,6 +7805,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   website?: boolean | Prisma.Company$websiteArgs<ExtArgs>
   tenantDomains?: boolean | Prisma.Company$tenantDomainsArgs<ExtArgs>
   properties?: boolean | Prisma.Company$propertiesArgs<ExtArgs>
+  assets?: boolean | Prisma.Company$assetsArgs<ExtArgs>
   estates?: boolean | Prisma.Company$estatesArgs<ExtArgs>
   plots?: boolean | Prisma.Company$plotsArgs<ExtArgs>
   agents?: boolean | Prisma.Company$agentsArgs<ExtArgs>
@@ -7537,6 +7892,7 @@ export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   website?: boolean | Prisma.Company$websiteArgs<ExtArgs>
   tenantDomains?: boolean | Prisma.Company$tenantDomainsArgs<ExtArgs>
   properties?: boolean | Prisma.Company$propertiesArgs<ExtArgs>
+  assets?: boolean | Prisma.Company$assetsArgs<ExtArgs>
   estates?: boolean | Prisma.Company$estatesArgs<ExtArgs>
   plots?: boolean | Prisma.Company$plotsArgs<ExtArgs>
   agents?: boolean | Prisma.Company$agentsArgs<ExtArgs>
@@ -7575,6 +7931,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     website: Prisma.$WebsitePayload<ExtArgs> | null
     tenantDomains: Prisma.$TenantDomainPayload<ExtArgs>[]
     properties: Prisma.$PropertyPayload<ExtArgs>[]
+    assets: Prisma.$AssetPayload<ExtArgs>[]
     estates: Prisma.$EstatePayload<ExtArgs>[]
     plots: Prisma.$PlotPayload<ExtArgs>[]
     agents: Prisma.$AgentPayload<ExtArgs>[]
@@ -8015,6 +8372,7 @@ export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends runtime.
   website<T extends Prisma.Company$websiteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$websiteArgs<ExtArgs>>): Prisma.Prisma__WebsiteClient<runtime.Types.Result.GetResult<Prisma.$WebsitePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tenantDomains<T extends Prisma.Company$tenantDomainsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$tenantDomainsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   properties<T extends Prisma.Company$propertiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$propertiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assets<T extends Prisma.Company$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   estates<T extends Prisma.Company$estatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$estatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EstatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plots<T extends Prisma.Company$plotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$plotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   agents<T extends Prisma.Company$agentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$agentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8588,6 +8946,30 @@ export type Company$propertiesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.PropertyScalarFieldEnum | Prisma.PropertyScalarFieldEnum[]
+}
+
+/**
+ * Company.assets
+ */
+export type Company$assetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Asset
+   */
+  select?: Prisma.AssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Asset
+   */
+  omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  where?: Prisma.AssetWhereInput
+  orderBy?: Prisma.AssetOrderByWithRelationInput | Prisma.AssetOrderByWithRelationInput[]
+  cursor?: Prisma.AssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetScalarFieldEnum | Prisma.AssetScalarFieldEnum[]
 }
 
 /**

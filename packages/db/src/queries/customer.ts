@@ -1,5 +1,21 @@
 import type { Db } from "../prisma";
 
+export type CustomerStatusValue = "active" | "inactive" | "vip";
+
+export const customerStatusValues = [
+  "active",
+  "inactive",
+  "vip",
+] as const satisfies readonly CustomerStatusValue[];
+
+function normalizeCustomerStatus(
+  value: string | null | undefined,
+): CustomerStatusValue | undefined {
+  return customerStatusValues.includes(value as CustomerStatusValue)
+    ? (value as CustomerStatusValue)
+    : undefined;
+}
+
 export type SavedListingOverview = {
   id: string;
   savedAt: Date;
@@ -78,6 +94,40 @@ export async function listCustomersForCompany(
     },
     orderBy: { createdAt: "desc" },
     take: options.take ?? 100,
+  });
+}
+
+export type CustomerListFilters = {
+  filter?: string | null;
+  q?: string | null;
+  take?: number;
+};
+
+export async function listFilteredCustomersForCompany(
+  db: Db,
+  companyId: string,
+  filters: CustomerListFilters = {},
+) {
+  const query = filters.q?.trim() ?? "";
+  const status = normalizeCustomerStatus(filters.filter);
+
+  return db.customer.findMany({
+    orderBy: { createdAt: "desc" },
+    take: filters.take ?? 100,
+    where: {
+      companyId,
+      deletedAt: null,
+      ...(status ? { status } : {}),
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { email: { contains: query, mode: "insensitive" } },
+              { phone: { contains: query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
   });
 }
 

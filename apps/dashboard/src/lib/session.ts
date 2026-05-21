@@ -93,7 +93,7 @@ export async function requireOnboardedSession() {
   if (!session.activeMembership) {
     if (tenantSlug) {
       redirect(
-        `${authRoutes.signIn}?error=${encodeURIComponent("This account does not belong to the current tenant workspace.")}`,
+        `${authRoutes.signIn}?error=${encodeURIComponent("This account does not belong to the current company dashboard.")}`,
       );
     }
 

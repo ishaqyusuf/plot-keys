@@ -1,0 +1,46 @@
+enum AssetOriginKind {
+  upload
+  unsplash
+  pexels
+  pixabay
+  import
+
+  @@map("asset_origin_kind")
+}
+
+enum AssetStatus {
+  uploading
+  ready
+  moving
+  failed
+  deleted
+
+  @@map("asset_status")
+}
+
+/// One tenant-owned stored file, independent of the storage provider.
+model Asset {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId   String          @map("company_id") @db.Uuid
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  provider    String
+  bucket      String?
+  key         String
+  publicUrl   String?         @map("public_url")
+  contentType String          @map("content_type")
+  byteSize    Int?            @map("byte_size")
+  checksum    String?
+  width       Int?
+  height      Int?
+  originKind  AssetOriginKind @default(upload) @map("origin_kind")
+  originMeta  Json?           @map("origin_meta")
+  status      AssetStatus     @default(ready)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  propertyMedia PropertyMedia[]
+
+  @@index([companyId], map: "assets_company_id_idx")
+  @@index([provider, bucket], map: "assets_provider_bucket_idx")
+  @@index([status], map: "assets_status_idx")
+  @@map("assets")
+}

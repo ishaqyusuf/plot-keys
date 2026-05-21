@@ -20,10 +20,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@plotkeys/ui/dropdown-menu";
+import { Icon } from "@plotkeys/ui/icons";
 import { Separator } from "@plotkeys/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@plotkeys/ui/tabs";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import { Icon } from "@plotkeys/ui/icons";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -108,12 +108,12 @@ export default function BuilderPreviewPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.08),transparent_40%),hsl(var(--background))] px-2 py-2 md:px-3 md:py-3">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--primary)_8%,transparent),transparent_40%),var(--background)] px-2 py-2 md:px-3 md:py-3">
       <div className="mx-auto grid max-w-464 gap-3 rounded-[calc(var(--radius-xl)+0.125rem)] border border-border/70 bg-background/70 p-3 shadow-[var(--shadow-card)] backdrop-blur xl:grid-cols-[14rem_minmax(0,1fr)]">
         {/* ── Builder Config Sidebar (hidden on mobile) ── */}
         <aside className="hidden xl:sticky xl:top-3 xl:block xl:h-[calc(100svh-1.5rem)]">
           <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card">
-            <div className="border-b border-border/70 bg-[linear-gradient(180deg,hsl(var(--primary)/0.14),transparent)] px-4 py-4">
+            <div className="border-b border-border/70 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),transparent)] px-4 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
                   Template Preview
@@ -435,7 +435,7 @@ export default function BuilderPreviewPage() {
           </div>
 
           {/* Template preview */}
-          <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_hsl(var(--foreground)/0.45)]">
+          <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_30px_70px_-35px_color-mix(in_srgb,var(--foreground)_45%,transparent)]">
             {/* Browser bar */}
             <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
               <div className="flex items-center gap-2">

@@ -3,7 +3,13 @@ import {
   getScopedAuthSessionCookieName,
   platformSessionScope,
 } from "@plotkeys/auth/shared";
-import { resolveDashboardSessionScope } from "@plotkeys/utils";
+import {
+  localDashboardRootDomain,
+  platformAppHostname,
+  plotkeysRootDomain,
+  resolveDashboardSessionScope,
+  stripPortFromHostname,
+} from "@plotkeys/utils";
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
 const pendingOnboardingCookieName = "plotkeys_pending_onboarding";
@@ -26,6 +32,23 @@ function resolveSessionCookieScope(host?: string | null) {
   return resolveDashboardSessionScope(host) ?? platformSessionScope;
 }
 
+function resolveSharedCookieDomain(host?: string | null) {
+  const hostname = stripPortFromHostname(host ?? "");
+
+  if (hostname === platformAppHostname || hostname.endsWith(".plotkeys.com")) {
+    return `.${plotkeysRootDomain}`;
+  }
+
+  if (
+    hostname === localDashboardRootDomain ||
+    hostname.endsWith(`.${localDashboardRootDomain}`)
+  ) {
+    return `.${localDashboardRootDomain}`;
+  }
+
+  return null;
+}
+
 export function getScopedAuthSessionCookieNameForHost(host?: string | null) {
   return getScopedAuthSessionCookieName(resolveSessionCookieScope(host));
 }
@@ -36,6 +59,16 @@ export function clearAuthSessionCookie(
 ) {
   cookieStore.delete(getScopedAuthSessionCookieNameForHost(host));
   cookieStore.delete(authSessionCookieName);
+
+  const sharedDomain = resolveSharedCookieDomain(host);
+
+  if (sharedDomain) {
+    cookieStore.delete({
+      domain: sharedDomain,
+      name: authSessionCookieName,
+      path: "/",
+    });
+  }
 }
 
 export function setAuthSessionCookie(
@@ -50,6 +83,19 @@ export function setAuthSessionCookie(
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
   });
+
+  const sharedDomain = resolveSharedCookieDomain(host);
+
+  if (sharedDomain) {
+    cookieStore.set(authSessionCookieName, sessionToken, {
+      domain: sharedDomain,
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 }
 
 export function setPendingOnboardingCookie(

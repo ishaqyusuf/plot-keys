@@ -19,6 +19,7 @@ function logNotificationPlan(label: string, plan: NotificationDeliveryPlan) {
 export async function sendWorkspaceInvitationNotification(input: {
   companyName: string;
   inviteUrl: string;
+  inviterId: string;
   inviterName: string;
   recipientEmail: string;
   roleLabel: string;
@@ -44,6 +45,7 @@ export async function sendWorkspaceInvitationNotification(input: {
 
       return deliveryPlan;
     },
+    { userId: input.inviterId },
   ).setRecipients(
     makeSubscriberRecipients({
       displayName: input.recipientEmail,

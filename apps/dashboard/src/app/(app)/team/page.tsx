@@ -120,6 +120,7 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
     cap !== null &&
     members.filter((m) => m.status !== "suspended").length >= cap;
 
+  const isDevMode = process.env.NODE_ENV === "development";
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
 
   return (
@@ -322,17 +323,19 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
                         </Badge>
                         <Badge variant="secondary">Pending</Badge>
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground break-all">
-                        Invite link:{" "}
-                        <a
-                          className="underline underline-offset-2"
-                          href={inviteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {inviteUrl}
-                        </a>
-                      </p>
+                      {isDevMode ? (
+                        <p className="mt-1 text-xs text-muted-foreground break-all">
+                          Dev invite link:{" "}
+                          <a
+                            className="underline underline-offset-2"
+                            href={inviteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {inviteUrl}
+                          </a>
+                        </p>
+                      ) : null}
                       <p className="text-xs text-muted-foreground">
                         Expires {formatDate(inv.expiresAt)}
                       </p>

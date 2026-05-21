@@ -18,6 +18,7 @@ model Company {
   website            Website?
   tenantDomains      TenantDomain[]
   properties         Property[]
+  assets             Asset[]
   estates            Estate[]
   plots              Plot[]
   agents             Agent[]

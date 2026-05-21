@@ -9,13 +9,15 @@ Track the public PlotKeys website positioning and launch gating rules.
 - Preferred short line: "Choose a template. Launch your site."
 
 ## Public Site Modes
-- The website app uses a server-only `PLOTKEYS_PUBLIC_SITE_MODE` setting.
-- Supported values are `early-access` and `landing`.
+- The website app uses a server-only `EARLY_ACCESS` flag.
+- Set `EARLY_ACCESS=true` to show the early access page at `/`.
+- Set `EARLY_ACCESS=false` to show the full landing page at `/`.
+- Legacy `PLOTKEYS_PUBLIC_SITE_MODE` values of `early-access` and `landing` remain supported as a fallback when `EARLY_ACCESS` is not set.
 - Production defaults to `early-access` when the setting is missing.
 - Development defaults to `landing` and exposes preview routes for both experiences.
 
 ## Routes
-- `/` renders the public mode selected by `PLOTKEYS_PUBLIC_SITE_MODE`.
+- `/` renders the public mode selected by `EARLY_ACCESS`.
 - `/landing` previews the full landing page in development.
 - `/early-access` previews the early access page in development.
 - Preview routes should not be publicly available in production unless that decision changes intentionally.

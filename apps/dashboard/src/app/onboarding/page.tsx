@@ -3,6 +3,7 @@ import { createPrismaClient } from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import {
   buildTenantDashboardUrl,
   resolveDashboardLandingRoute,
@@ -108,7 +109,8 @@ export default async function OnboardingPage({
           badge="Flow 02"
           brandLogoUrl={null}
           brandName={params.company ?? "PlotKeys"}
-          description="Email verification now continues on the tenant workspace host so onboarding stays scoped to the right company from the first click."
+          description="Email verification now continues on your company website dashboard so setup stays connected to the right company from the first click."
+          headerAction={<ThemeToggle />}
           sidePanel={
             <>
               <p className="text-sm uppercase tracking-wide text-muted-foreground">
@@ -116,9 +118,9 @@ export default async function OnboardingPage({
               </p>
               <div className="mt-6 grid gap-3">
                 {[
-                  "Verification happens on the tenant workspace host.",
-                  "Successful verification continues directly into onboarding.",
-                  "The shared app host is only used to create new workspaces.",
+                  "Verification happens on your company website dashboard.",
+                  "Successful verification continues directly into setup.",
+                  "The shared app host is only used to launch new company websites.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -230,7 +232,7 @@ export default async function OnboardingPage({
 
   if (tenantSlug && tenantSlug !== subdomain) {
     redirect(
-      `${authRoutes.signIn}?error=${encodeURIComponent("This onboarding flow belongs to a different tenant workspace.")}`,
+      `${authRoutes.signIn}?error=${encodeURIComponent("This website setup belongs to a different company dashboard.")}`,
     );
   }
 
@@ -273,6 +275,7 @@ export default async function OnboardingPage({
         brandLogoUrl={pendingOnboarding?.logoUrl ?? null}
         brandName={companyName || "PlotKeys"}
         description={stepDescription(currentStepId)}
+        headerAction={<ThemeToggle />}
         sidePanel={
           <StepSidePanel
             companyName={companyName}
@@ -411,9 +414,7 @@ function StepSidePanel({
       </div>
       {companyName && subdomain ? (
         <div className="mt-8 rounded-lg border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">
-            {companyName}
-          </p>
+          <p className="font-medium text-foreground">{companyName}</p>
           <p className="mt-1">{subdomain}.plotkeys.com</p>
         </div>
       ) : null}

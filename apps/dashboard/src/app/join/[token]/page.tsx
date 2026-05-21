@@ -10,7 +10,9 @@ import {
 } from "@plotkeys/ui/card";
 import Link from "next/link";
 import { getCurrentAppSession } from "../../../lib/session";
+import { getTenantSignInUrlForSubdomain } from "../../../lib/tenant-dashboard-url";
 import { acceptInviteAction } from "../../actions";
+import { InviteSignUpForm } from "./invite-sign-up-form";
 
 type JoinPageProps = {
   params: Promise<{ token: string }>;
@@ -30,7 +32,7 @@ export default async function JoinPage({
   const invite = prisma
     ? await prisma.teamInvite.findUnique({
         where: { token },
-        include: { company: { select: { name: true } } },
+        include: { company: { select: { name: true, slug: true } } },
       })
     : null;
 
@@ -78,7 +80,10 @@ export default async function JoinPage({
   const companyName = invite.company.name;
   const role = invite.role;
   const redirectTo = `/join/${token}`;
-  const signInHref = `/sign-in?redirect=${encodeURIComponent(redirectTo)}`;
+  const signInHref = await getTenantSignInUrlForSubdomain(
+    invite.company.slug,
+    redirectTo,
+  );
   const profileCompletionHref =
     role === "agent" || role === "staff" ? `/join/${token}/complete` : "/";
 
@@ -104,16 +109,26 @@ export default async function JoinPage({
         </CardHeader>
 
         {!session ? (
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-5">
             <p className="text-sm text-muted-foreground">
-              Sign in with <strong>{invite.email}</strong> to accept this
-              invitation.
+              Create your account for <strong>{invite.email}</strong> to accept
+              this invitation.
             </p>
-            <div className="flex flex-col gap-3">
-              <Button asChild>
-                <Link href={signInHref}>Sign in to continue</Link>
-              </Button>
-            </div>
+            <InviteSignUpForm
+              companyName={invite.company.name}
+              companySlug={invite.company.slug}
+              email={invite.email}
+              token={token}
+            />
+            <p className="text-center text-xs text-muted-foreground">
+              Already have an account?{" "}
+              <Link
+                className="underline underline-offset-2"
+                href={signInHref}
+              >
+                Sign in instead
+              </Link>
+            </p>
           </CardContent>
         ) : null}
 

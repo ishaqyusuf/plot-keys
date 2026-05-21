@@ -9,13 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@plotkeys/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
-import { Input } from "@plotkeys/ui/input";
 import { WORK_ROLE_LABELS } from "@plotkeys/utils";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuthenticatedSession } from "../../../../lib/session";
-import { completeInviteProfileAction } from "../../../actions";
+import { InviteProfileCompletionForm } from "./invite-profile-completion-form";
 
 type InviteProfilePageProps = {
   params: Promise<{ token: string }>;
@@ -89,6 +86,9 @@ export default async function InviteProfilePage({
   const pageDescription = isAgentInvite
     ? "Add the details that should appear on your company site and dashboard."
     : "Add the basic work details your company needs to recognize you in the workspace.";
+  const assignedRoleLabel = isAgentInvite
+    ? "Agent"
+    : (WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
@@ -120,97 +120,23 @@ export default async function InviteProfilePage({
             </Alert>
           ) : null}
 
-          <form action={completeInviteProfileAction} className="space-y-6">
-            <input name="token" type="hidden" value={token} />
-
-            <FieldGroup>
-              <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input disabled value={invite.email} />
-              </Field>
-
-              <Field>
-                <FieldLabel>Name *</FieldLabel>
-                <Input
-                  defaultValue={
-                    (isAgentInvite
-                      ? agentProfile?.name
-                      : employeeProfile?.name) ??
-                    session.user.name ??
-                    ""
-                  }
-                  name="name"
-                  placeholder="Your full name"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel>
-                  {isAgentInvite ? "Professional title" : "Job title"}
-                </FieldLabel>
-                <Input
-                  defaultValue={
-                    isAgentInvite
-                      ? (agentProfile?.title ?? "")
-                      : (employeeProfile?.title ?? "")
-                  }
-                  name="title"
-                  placeholder={
-                    isAgentInvite
-                      ? "e.g. Senior Sales Advisor"
-                      : "e.g. Operations Executive"
-                  }
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel>Phone</FieldLabel>
-                <Input
-                  defaultValue={
-                    (isAgentInvite
-                      ? agentProfile?.phone
-                      : employeeProfile?.phone) ??
-                    session.user.phoneNumber ??
-                    ""
-                  }
-                  name="phone"
-                  placeholder="+2348012345678"
-                  type="tel"
-                />
-              </Field>
-
-              {isAgentInvite ? (
-                <>
-                  <Field>
-                    <FieldLabel>Bio</FieldLabel>
-                    <Input
-                      defaultValue={agentProfile?.bio ?? ""}
-                      name="bio"
-                      placeholder="Short professional bio"
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>Photo URL</FieldLabel>
-                    <Input
-                      defaultValue={agentProfile?.imageUrl ?? ""}
-                      name="imageUrl"
-                      placeholder="https://..."
-                      type="url"
-                    />
-                  </Field>
-                </>
-              ) : null}
-            </FieldGroup>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button asChild type="button" variant="ghost">
-                <Link href="/">Skip for now</Link>
-              </Button>
-              <Button type="submit">Save and continue</Button>
-            </div>
-          </form>
+          <InviteProfileCompletionForm
+            assignedRoleLabel={assignedRoleLabel}
+            defaultBio={agentProfile?.bio}
+            defaultImageUrl={agentProfile?.imageUrl}
+            defaultName={
+              (isAgentInvite ? agentProfile?.name : employeeProfile?.name) ??
+              session.user.name ??
+              ""
+            }
+            defaultPhone={
+              (isAgentInvite ? agentProfile?.phone : employeeProfile?.phone) ??
+              session.user.phoneNumber
+            }
+            email={invite.email}
+            isAgentInvite={isAgentInvite}
+            token={token}
+          />
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground">
           You can update these details later from the dashboard.

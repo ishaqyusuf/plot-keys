@@ -1,6 +1,13 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@plotkeys/ui/field";
+import { Icon } from "@plotkeys/ui/icons";
 import { Input } from "@plotkeys/ui/input";
 import { cn } from "@plotkeys/utils/cn";
 import { useActionState } from "react";
@@ -15,8 +22,13 @@ function SubmitBtn() {
       type="submit"
       variant="secondary"
       disabled={pending}
-      className="w-full px-6 py-3 sm:w-auto"
+      className="w-full sm:w-auto"
     >
+      {pending ? (
+        <Icon.Loader data-icon="inline-start" className="animate-spin" />
+      ) : (
+        <Icon.Mail data-icon="inline-start" />
+      )}
       {pending ? "Subscribing..." : "Stay updated"}
     </Button>
   );
@@ -29,12 +41,12 @@ export function NewsletterForm({ className }: { className?: string }) {
     return (
       <div
         className={cn(
-          "rounded-2xl border border-border bg-card/60 p-6 text-center backdrop-blur-md",
+          "flex flex-col items-center gap-3 rounded-xl border bg-card p-6 text-center text-card-foreground shadow-sm",
           className,
         )}
       >
-        <div className="mb-2 text-2xl">&#10003;</div>
-        <p className="font-serif text-lg text-foreground">{state.message}</p>
+        <Icon.CheckCircle className="size-8 text-primary" />
+        <p className="text-sm font-medium text-foreground">{state.message}</p>
       </div>
     );
   }
@@ -43,12 +55,12 @@ export function NewsletterForm({ className }: { className?: string }) {
     <form
       action={action}
       className={cn(
-        "flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md",
+        "flex flex-col gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-sm",
         className,
       )}
     >
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="text-sm font-medium uppercase text-muted-foreground">
           Newsletter
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -56,19 +68,27 @@ export function NewsletterForm({ className }: { className?: string }) {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
-          name="email"
-          type="email"
-          placeholder="you@company.com"
-          required
-          className="flex-1"
-        />
-        <SubmitBtn />
-      </div>
+      <FieldGroup className="gap-3">
+        <Field>
+          <FieldLabel htmlFor="newsletter-email" className="sr-only">
+            Email
+          </FieldLabel>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              id="newsletter-email"
+              name="email"
+              type="email"
+              placeholder="you@company.com"
+              required
+              className="flex-1"
+            />
+            <SubmitBtn />
+          </div>
+        </Field>
+      </FieldGroup>
 
       {state?.message && !state.success && (
-        <p className="text-sm text-destructive">{state.message}</p>
+        <FieldError>{state.message}</FieldError>
       )}
     </form>
   );

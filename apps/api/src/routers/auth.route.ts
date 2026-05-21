@@ -87,8 +87,12 @@ async function assertSubdomainAvailability(
 
 async function resolvePostAuthRedirect(
   userId: string,
-  tenantSlug?: string | null,
+  options?: {
+    currentOrigin?: string | null;
+    tenantSlug?: string | null;
+  },
 ) {
+  const tenantSlug = options?.tenantSlug ?? null;
   const { signedSessionToken } = await createBetterAuthSession(userId);
 
   // Build synthetic headers so we can load the session from the DB
@@ -99,11 +103,27 @@ async function resolvePostAuthRedirect(
     syntheticHeaders.set("x-tenant-subdomain", tenantSlug);
   }
   const appSession = await getAppSessionFromBetterAuth(syntheticHeaders);
+  const redirectPath = resolvePostLoginRoute(appSession?.activeMembership);
 
   return {
-    redirectTo: resolvePostLoginRoute(appSession?.activeMembership),
+    redirectTo:
+      !tenantSlug && appSession?.activeMembership
+        ? buildTenantDashboardUrl(appSession.activeMembership.companySlug, {
+            currentOrigin: options?.currentOrigin,
+            pathname: redirectPath,
+          })
+        : redirectPath,
     sessionToken: signedSessionToken,
   };
+}
+
+function getCurrentOrigin(headers: Headers) {
+  const host = headers.get("x-forwarded-host") ?? headers.get("host");
+  const protocol =
+    headers.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+
+  return host ? `${protocol}://${host}` : null;
 }
 
 async function getRequestedTenantSlug(
@@ -166,23 +186,20 @@ export const authRouter = createTRPCRouter({
       const db = requireDb();
       const requestedTenantSlug = await getRequestedTenantSlug(db, ctx.headers);
 
-      if (!requestedTenantSlug) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message:
-            "Sign in from your tenant workspace URL. The shared app host only supports signup.",
-        });
-      }
-
       try {
         const user = await signInUser(input);
-        await assertTenantScopedAuthAccess({
-          db,
-          requestedTenantSlug,
-          userId: user.id,
-        });
+        if (requestedTenantSlug) {
+          await assertTenantScopedAuthAccess({
+            db,
+            requestedTenantSlug,
+            userId: user.id,
+          });
+        }
 
-        return resolvePostAuthRedirect(user.id, requestedTenantSlug);
+        return resolvePostAuthRedirect(user.id, {
+          currentOrigin: getCurrentOrigin(ctx.headers),
+          tenantSlug: requestedTenantSlug,
+        });
       } catch (error) {
         throw new TRPCError({
           code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
@@ -301,7 +318,10 @@ export const authRouter = createTRPCRouter({
           });
         }
 
-        return resolvePostAuthRedirect(user.id, resolvedTenantSlug);
+        return resolvePostAuthRedirect(user.id, {
+          currentOrigin: getCurrentOrigin(ctx.headers),
+          tenantSlug: resolvedTenantSlug,
+        });
       } catch (error) {
         throw new TRPCError({
           code: error instanceof TRPCError ? error.code : "BAD_REQUEST",

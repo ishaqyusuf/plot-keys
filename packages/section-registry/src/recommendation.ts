@@ -5,7 +5,7 @@
  * Runs server-side after each onboarding step save.
  */
 
-import type { TenantContentRecord, TemplateDefinition } from "./index";
+import type { TemplateDefinition, TenantContentRecord } from "./index";
 import { templateCatalog } from "./index";
 
 // ---------------------------------------------------------------------------
@@ -144,7 +144,7 @@ export function buildBusinessSummary(snap: OnboardingSnapshot): string {
     parts.push(`— "${snap.tagline}"`);
   }
 
-  return parts.join(", ") + ".";
+  return `${parts.join(", ")}.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +239,7 @@ export function deriveProfile(snap: OnboardingSnapshot): DerivedProfile {
 
 export function deriveDesignConfig(
   profile: Pick<DerivedProfile, "designIntent" | "segment">,
-  snap: Pick<OnboardingSnapshot, "tone" | "stylePreference">,
+  _snap: Pick<OnboardingSnapshot, "tone" | "stylePreference">,
 ): DerivedDesignConfig {
   type DesignPreset = Omit<DerivedDesignConfig, never>;
 
@@ -295,8 +295,7 @@ export function deriveDesignConfig(
     },
   };
 
-  return (presets[resolvedIntent] ??
-    presets["editorial"]) as DerivedDesignConfig;
+  return (presets[resolvedIntent] ?? presets.editorial) as DerivedDesignConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -456,187 +455,30 @@ type TemplateScoringTags = {
 
 const templateTags: Record<string, TemplateScoringTags> = {
   "template-1": {
-    // Aster Grove — luxury, editorial, premium
+    // Zara — luxury, editorial, premium launch
     conversionFocusTags: ["brand", "leads"],
     designIntentTags: ["editorial"],
     segmentTags: ["luxury", "residential"],
   },
   "template-2": {
-    // Atlas Urban — modern, clean, urban/commercial
+    // Leila — modern, clean, urban/commercial growth
     conversionFocusTags: ["listings", "balanced"],
     designIntentTags: ["clean", "bold"],
     segmentTags: ["commercial", "mixed", "residential"],
   },
   "template-3": {
-    // Palmstone — warm, trust-led, family/investor
+    // Cedar — warm, trust-led, family/investor pro
     conversionFocusTags: ["leads", "balanced"],
     designIntentTags: ["warm", "editorial"],
     segmentTags: ["mixed", "residential", "rental"],
   },
-  "template-4": {
-    // Meridian — clean, listing-first, residential volume
-    conversionFocusTags: ["listings", "balanced"],
-    designIntentTags: ["clean"],
-    segmentTags: ["residential", "rental", "mixed"],
-  },
-  "template-5": {
-    // Thornfield — bold, investor, commercial
+  "template-45": {
+    // Omar — premium concierge pro
     conversionFocusTags: ["brand", "balanced"],
-    designIntentTags: ["bold"],
-    segmentTags: ["commercial", "mixed"],
-  },
-  "template-6": {
-    // Crestview — warm, family, mid-market
-    conversionFocusTags: ["leads", "balanced"],
-    designIntentTags: ["warm"],
-    segmentTags: ["residential", "rental"],
-  },
-  "template-7": {
-    // Vega Lite — clean, volume residential, starter
-    conversionFocusTags: ["listings", "balanced"],
-    designIntentTags: ["clean"],
-    segmentTags: ["residential", "rental"],
-  },
-  "template-8": {
-    // Nova Basic — bold, urban professional, starter
-    conversionFocusTags: ["brand", "balanced"],
-    designIntentTags: ["bold"],
-    segmentTags: ["commercial", "residential", "luxury"],
-  },
-  "template-9": {
-    // Lyra Basic — bold, growth, lead-gen starter
-    conversionFocusTags: ["leads", "listings"],
-    designIntentTags: ["bold", "clean"],
-    segmentTags: ["residential", "mixed"],
-  },
-  "template-10": {
-    // Myra Basic — clean, rental & property management, starter
-    conversionFocusTags: ["leads", "balanced"],
-    designIntentTags: ["clean"],
-    segmentTags: ["rental", "residential"],
-  },
-  "template-11": {
-    // Maia Growth — editorial, lifestyle, brand-first, plus
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["editorial", "warm"],
-    segmentTags: ["luxury", "residential", "mixed"],
-  },
-  "template-12": {
-    // Horizon Plus — clean, versatile, mixed portfolio, plus
-    conversionFocusTags: ["listings", "balanced"],
-    designIntentTags: ["clean", "editorial"],
-    segmentTags: ["mixed", "residential", "commercial", "rental"],
-  },
-  "template-13": {
-    // Nova Pro — bold, dark, luxury commercial, pro
-    conversionFocusTags: ["brand", "balanced"],
-    designIntentTags: ["bold"],
-    segmentTags: ["luxury", "commercial"],
-  },
-  "template-14": {
-    // Hana — warm/family starter
-    conversionFocusTags: ["leads", "balanced"],
-    designIntentTags: ["warm"],
-    segmentTags: ["residential", "rental"],
-  },
-  "template-15": {
-    // Farah — bright/conversion starter
-    conversionFocusTags: ["leads", "listings"],
-    designIntentTags: ["bold", "clean"],
-    segmentTags: ["residential", "mixed"],
-  },
-  "template-16": {
-    // Dara — trustworthy/mid-market starter
-    conversionFocusTags: ["balanced", "leads"],
-    designIntentTags: ["clean"],
-    segmentTags: ["residential", "rental"],
-  },
-  "template-17": {
-    // Layla — elegant/boutique starter
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["editorial", "warm"],
-    segmentTags: ["luxury", "residential"],
-  },
-  "template-18": {
-    // Jouri — fresh/lifestyle starter
-    conversionFocusTags: ["leads", "listings"],
-    designIntentTags: ["clean", "bold"],
-    segmentTags: ["residential", "mixed"],
-  },
-  "template-19": {
-    // Amal — aspirational/brand storytelling plus
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["editorial"],
-    segmentTags: ["luxury", "residential"],
-  },
-  "template-20": {
-    // Bayan — clear/data-forward plus
-    conversionFocusTags: ["listings", "balanced"],
-    designIntentTags: ["clean"],
-    segmentTags: ["commercial", "mixed", "residential"],
-  },
-  "template-21": {
-    // Yasmin — warm/elegant boutique plus
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["warm", "editorial"],
-    segmentTags: ["luxury", "residential", "rental"],
-  },
-  "template-22": {
-    // Sahar — fresh/dawn positioning plus
-    conversionFocusTags: ["leads", "balanced"],
-    designIntentTags: ["clean", "bold"],
-    segmentTags: ["residential", "mixed"],
-  },
-  "template-23": {
-    // Tamar — community/trusted plus
-    conversionFocusTags: ["leads", "balanced"],
-    designIntentTags: ["warm"],
-    segmentTags: ["residential", "rental", "mixed"],
-  },
-  "template-24": {
-    // Zain — graceful/modern minimal plus
-    conversionFocusTags: ["brand", "balanced"],
-    designIntentTags: ["clean", "bold"],
-    segmentTags: ["commercial", "residential", "luxury"],
-  },
-  "template-25": {
-    // Shams — bright luxury pro
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["warm", "editorial"],
-    segmentTags: ["luxury", "residential"],
-  },
-  "template-26": {
-    // Karim — full-featured/generous pro
-    conversionFocusTags: ["balanced", "brand"],
-    designIntentTags: ["clean", "editorial"],
-    segmentTags: ["mixed", "commercial", "residential"],
-  },
-  "template-27": {
-    // Rafiq — trusted-advisor pro
-    conversionFocusTags: ["leads", "brand"],
-    designIntentTags: ["editorial", "warm"],
-    segmentTags: ["residential", "rental", "luxury"],
-  },
-  "template-28": {
-    // Amber — rich/warm luxury pro
-    conversionFocusTags: ["brand", "leads"],
-    designIntentTags: ["warm"],
-    segmentTags: ["luxury", "residential"],
-  },
-  "template-29": {
-    // Saffron — premium/exclusive pro
-    conversionFocusTags: ["brand", "balanced"],
-    designIntentTags: ["bold", "editorial"],
-    segmentTags: ["luxury", "commercial"],
-  },
-  "template-30": {
-    // Coral — coastal/aspirational pro
-    conversionFocusTags: ["listings", "brand"],
     designIntentTags: ["bold", "clean"],
     segmentTags: ["luxury", "residential", "mixed"],
   },
 };
-
 type PartialProfile = Omit<
   DerivedProfile,
   "complexity" | "recommendedTemplateKey"

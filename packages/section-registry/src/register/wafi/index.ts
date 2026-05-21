@@ -10,28 +10,16 @@
 import type { TemplateFamilyMeta, TemplatePlanVariant } from "../types";
 
 import { wafiContentSchema } from "./common/content-schema";
-import { wafiPlaceholderData } from "./common/placeholder-data";
-import { wafiNavConfig } from "./common/nav";
 import { wafiFooterConfig } from "./common/footer";
-
-import { wafiStarterPages } from "./starter/pages";
-import { wafiStarterTheme } from "./starter/theme";
-import { wafiStarterContent } from "./starter/content";
-
-import { wafiPlusPages } from "./plus/pages";
-import { wafiPlusTheme } from "./plus/theme";
-import { wafiPlusContent } from "./plus/content";
-
-import { wafiProPages } from "./pro/pages";
-import { wafiProTheme } from "./pro/theme";
-import { wafiProContent } from "./pro/content";
+import { wafiNavConfig } from "./common/nav";
+import { wafiPlaceholderData } from "./common/placeholder-data";
 
 // Re-export shared assets so consumers can import from a single path.
 export {
   wafiContentSchema,
-  wafiPlaceholderData,
-  wafiNavConfig,
   wafiFooterConfig,
+  wafiNavConfig,
+  wafiPlaceholderData,
 };
 
 // ---------------------------------------------------------------------------
@@ -52,42 +40,8 @@ export const wafiFamilyMeta: TemplateFamilyMeta = {
 // Plan variants
 // ---------------------------------------------------------------------------
 
-export const wafiStarter: TemplatePlanVariant = {
-  key: "wafi-starter",
-  name: "Wafi Starter",
-  family: "manager",
-  tier: "starter",
-  pages: wafiStarterPages,
-  defaultContent: wafiStarterContent,
-  ...wafiStarterTheme,
-};
-
-export const wafiPlus: TemplatePlanVariant = {
-  key: "wafi-plus",
-  name: "Wafi Plus",
-  family: "manager",
-  tier: "plus",
-  pages: wafiPlusPages,
-  defaultContent: wafiPlusContent,
-  ...wafiPlusTheme,
-};
-
-export const wafiPro: TemplatePlanVariant = {
-  key: "wafi-pro",
-  name: "Wafi Pro",
-  family: "manager",
-  tier: "pro",
-  pages: wafiProPages,
-  defaultContent: wafiProContent,
-  ...wafiProTheme,
-};
-
 // ---------------------------------------------------------------------------
-// Convenience array — ordered starter → plus → pro
+// Convenience array — ordered starter → plus
 // ---------------------------------------------------------------------------
 
-export const wafiVariants: TemplatePlanVariant[] = [
-  wafiStarter,
-  wafiPlus,
-  wafiPro,
-];
+export const wafiVariants: TemplatePlanVariant[] = [];

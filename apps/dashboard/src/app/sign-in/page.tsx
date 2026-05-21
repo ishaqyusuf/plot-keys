@@ -1,4 +1,3 @@
-import { authRoutes } from "@plotkeys/auth/shared";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import {
@@ -9,8 +8,11 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import { PlotKeysLogo } from "@plotkeys/ui/plotkeys-logo";
-import { buildPlatformAppUrl } from "@plotkeys/utils";
-import { resolveDashboardLandingRoute } from "@plotkeys/utils";
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
+import {
+  buildPlatformAppUrl,
+  resolveDashboardLandingRoute,
+} from "@plotkeys/utils";
 import { CheckCircle2 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -74,27 +76,34 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         >
           <PlotKeysLogo markClassName="h-8" wordmarkClassName="text-sm" />
         </Link>
-        {!tenantSlug ? (
-          <Button asChild className="hidden sm:inline-flex" variant="secondary">
-            <Link href={createWorkspaceHref}>Create workspace</Link>
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {!tenantSlug ? (
+            <Button
+              asChild
+              className="hidden sm:inline-flex"
+              variant="secondary"
+            >
+              <Link href={createWorkspaceHref}>Launch your website</Link>
+            </Button>
+          ) : null}
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_0.8fr] lg:items-center">
         <section className="max-w-2xl">
-          <Badge variant="secondary">Existing workspace</Badge>
+          <Badge variant="secondary">Company website dashboard</Badge>
           <h1 className="mt-5 font-serif text-4xl tracking-[-0.04em] text-foreground md:text-6xl">
             Sign in and continue your work.
           </h1>
           <p className="mt-5 text-base leading-8 text-muted-foreground md:text-lg">
-            Access the current tenant workspace, reopen pending onboarding, and
+            Access your company website dashboard, reopen pending setup, and
             continue from protected pages without extra steps.
           </p>
 
           <div className="mt-8 grid gap-3">
             {[
-              "Tenant-aware sign-in keeps access scoped to the current workspace.",
+              "Company-aware sign-in keeps access scoped to your website dashboard.",
               "Verified users return to onboarding or dashboard automatically.",
               "Dev account autofill remains available for matching tenant accounts.",
             ].map((item) => (
@@ -119,7 +128,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 Welcome back
               </CardTitle>
               <CardDescription className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
-                Use your owner or staff account to open this workspace.
+                Use your owner or staff account to open your company dashboard.
               </CardDescription>
             </CardHeader>
             <CardContent className="px-7 pb-7 md:px-9 md:pb-9">

@@ -59,37 +59,22 @@ import { wafiPlaceholderData } from "./wafi/common/placeholder-data";
 
 export {
   banaFamilyMeta,
-  banaPlus,
-  banaPro,
-  banaStarter,
   banaVariants,
 } from "./bana/index";
 export {
   farisFamilyMeta,
-  farisPlus,
-  farisPro,
-  farisStarter,
   farisVariants,
 } from "./faris/index";
 export {
   noorFamilyMeta,
-  noorPlus,
-  noorPro,
-  noorStarter,
   noorVariants,
 } from "./noor/index";
 export {
   sakanFamilyMeta,
-  sakanPlus,
-  sakanPro,
-  sakanStarter,
   sakanVariants,
 } from "./sakan/index";
 export {
   thurayaFamilyMeta,
-  thurayaPlus,
-  thurayaPro,
-  thurayaStarter,
   thurayaVariants,
 } from "./thuraya/index";
 // Re-export types for consumers
@@ -109,9 +94,6 @@ export type {
 export type { SectionComponentOverrides } from "./ui-types";
 export {
   wafiFamilyMeta,
-  wafiPlus,
-  wafiPro,
-  wafiStarter,
   wafiVariants,
 } from "./wafi/index";
 

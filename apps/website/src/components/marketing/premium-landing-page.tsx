@@ -108,7 +108,7 @@ export function PremiumLandingPage({
                 Access
               </a>
               <Button asChild className="rounded-full px-5">
-                <Link href={createWorkspaceHref}>Create workspace</Link>
+                <Link href={createWorkspaceHref}>Launch your website</Link>
               </Button>
             </nav>
           </header>
@@ -129,7 +129,7 @@ export function PremiumLandingPage({
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Button asChild className="rounded-full px-7 py-6 text-base">
                   <Link href={createWorkspaceHref}>
-                    Create workspace
+                    Launch your company website
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
@@ -283,15 +283,18 @@ export function PremiumLandingPage({
                 the assets you sell.
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-white/68">
-                Start with the workspace, organize the real estate operation,
-                then publish from a template when the public presence is ready.
+                Start with your company website, organize the real estate
+                operation behind it, then publish from a template when the
+                public presence is ready.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button
                   asChild
                   className="rounded-full bg-white px-7 py-6 text-base text-[#121b24] hover:bg-white/90"
                 >
-                  <Link href={createWorkspaceHref}>Create workspace</Link>
+                  <Link href={createWorkspaceHref}>
+                    Launch your company website
+                  </Link>
                 </Button>
                 {showEarlyAccessCta ? (
                   <Button

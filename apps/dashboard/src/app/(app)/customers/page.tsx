@@ -1,4 +1,9 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { customersPageFilter } from "@plotkeys/api/filters";
+import {
+  countCustomersByStatus,
+  createPrismaClient,
+  listFilteredCustomersForCompany,
+} from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -16,8 +21,6 @@ import {
 import { UsersIcon } from "lucide-react";
 import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
 import {
-  DashboardFilterTab,
-  DashboardFilterTabs,
   DashboardPage,
   DashboardPageActions,
   DashboardPageDescription,
@@ -31,10 +34,9 @@ import {
   DashboardTablePageDescription,
   DashboardTablePageHeader,
   DashboardTablePageTitle,
-  DashboardTableToolbar,
-  DashboardTableToolbarGroup,
 } from "../../../components/dashboard/dashboard-page";
 import { ExportCsvButton } from "../../../components/export-csv-button";
+import { loadCustomersFilterParams } from "../../../lib/customers-filter-params";
 import { requireOnboardedSession } from "../../../lib/session";
 import {
   createCustomerAction,
@@ -42,6 +44,7 @@ import {
   exportCustomersCsvAction,
   updateCustomerStatusAction,
 } from "../../actions";
+import { CustomersSearchFilter } from "./customers-search-filter";
 
 type CustomersPageProps = {
   searchParams?: Promise<{
@@ -71,64 +74,22 @@ export default async function CustomersPage({
 }: CustomersPageProps) {
   const session = await requireOnboardedSession();
   const sp = (await searchParams) ?? {};
-  const query = sp.q?.trim() ?? "";
-  const statusFilter = sp.filter && sp.filter !== "all" ? sp.filter : undefined;
+  const filters = loadCustomersFilterParams(sp);
+  const query = filters.q?.trim() ?? "";
+  const statusFilter = filters.filter ?? undefined;
 
   const prisma = createPrismaClient().db;
   const companyId = session.activeMembership.companyId;
 
   const [customers, stats] = await Promise.all([
-    prisma
-      ? prisma.customer.findMany({
-          where: {
-            companyId,
-            deletedAt: null,
-            ...(statusFilter
-              ? { status: statusFilter as "active" | "inactive" | "vip" }
-              : {}),
-            ...(query
-              ? {
-                  OR: [
-                    { name: { contains: query, mode: "insensitive" } },
-                    { email: { contains: query, mode: "insensitive" } },
-                    { phone: { contains: query, mode: "insensitive" } },
-                  ],
-                }
-              : {}),
-          },
-          orderBy: { createdAt: "desc" },
-          take: 100,
-        })
-      : [],
-    prisma
-      ? prisma.customer.groupBy({
-          by: ["status"],
-          where: { companyId, deletedAt: null },
-          _count: { id: true },
-        })
-      : [],
+    prisma ? listFilteredCustomersForCompany(prisma, companyId, filters) : [],
+    prisma ? countCustomersByStatus(prisma, companyId) : {},
   ]);
 
   const statMap: Record<string, number> = { active: 0, inactive: 0, vip: 0 };
-  for (const s of stats) {
-    statMap[s.status] = s._count.id;
-  }
+  Object.assign(statMap, stats);
   const total = Object.values(statMap).reduce((a, b) => a + b, 0);
-
-  function buildFilterHref(filter: string) {
-    const next = new URLSearchParams();
-
-    if (query) {
-      next.set("q", query);
-    }
-
-    if (filter !== "all") {
-      next.set("filter", filter);
-    }
-
-    const qs = next.toString();
-    return qs ? `/customers?${qs}` : "/customers";
-  }
+  const filterList = await customersPageFilter();
 
   const canManage =
     session.activeMembership.role === "owner" ||
@@ -245,41 +206,7 @@ export default async function CustomersPage({
                 {query ? ` matching “${query}”` : ""}.
               </DashboardTablePageDescription>
             </div>
-            <DashboardTableToolbar>
-              <form action="/customers" className="w-full max-w-sm">
-                <div className="flex items-center gap-2">
-                  <Input
-                    defaultValue={query}
-                    name="q"
-                    placeholder="Search name, email, or phone"
-                  />
-                  {statusFilter ? (
-                    <input name="filter" type="hidden" value={statusFilter} />
-                  ) : null}
-                  <Button size="sm" type="submit" variant="outline">
-                    Search
-                  </Button>
-                </div>
-              </form>
-              <DashboardTableToolbarGroup>
-                <DashboardFilterTabs className="bg-background/70">
-                  {["all", "active", "vip", "inactive"].map((f) => {
-                    const isActive =
-                      (f === "all" && !statusFilter) || f === statusFilter;
-                    return (
-                      <DashboardFilterTab
-                        key={f}
-                        active={isActive}
-                        href={buildFilterHref(f)}
-                      >
-                        {f === "all" ? "All" : f}
-                        {f === "all" ? ` (${total})` : ` (${statMap[f] ?? 0})`}
-                      </DashboardFilterTab>
-                    );
-                  })}
-                </DashboardFilterTabs>
-              </DashboardTableToolbarGroup>
-            </DashboardTableToolbar>
+            <CustomersSearchFilter filterList={filterList} />
           </DashboardTablePageHeader>
           <DashboardTablePageBody>
             <Table>

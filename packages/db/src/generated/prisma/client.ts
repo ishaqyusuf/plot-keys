@@ -70,6 +70,11 @@ export type AnalyticsEvent = Prisma.AnalyticsEventModel
  */
 export type Appointment = Prisma.AppointmentModel
 /**
+ * Model Asset
+ * One tenant-owned stored file, independent of the storage provider.
+ */
+export type Asset = Prisma.AssetModel
+/**
  * Model Session
  * 
  */

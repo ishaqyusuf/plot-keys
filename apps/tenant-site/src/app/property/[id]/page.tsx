@@ -8,7 +8,10 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { submitOfferAction, toggleSavedListingAction } from "../../portal/actions";
+import {
+  submitOfferAction,
+  toggleSavedListingAction,
+} from "../../portal/actions";
 import { getPortalCustomerSession } from "../../../lib/customer-session";
 
 type PropertyDetailPageProps = {
@@ -61,6 +64,16 @@ export default async function PropertyDetailPage({
   }
 
   const property = await prisma.property.findFirst({
+    include: {
+      media: {
+        include: { asset: true },
+        orderBy: [
+          { isCover: "desc" },
+          { sortOrder: "asc" },
+          { createdAt: "asc" },
+        ],
+      },
+    },
     where: { companyId: company.id, deletedAt: null, id },
   });
 
@@ -80,6 +93,16 @@ export default async function PropertyDetailPage({
     : false;
   const savedStatus = sp.savedStatus;
   const offerStatus = sp.offerStatus;
+  const gallery = property.media
+    .map((item) => ({
+      ...item,
+      displayUrl: item.asset?.publicUrl ?? item.url,
+    }))
+    .filter((item) => Boolean(item.displayUrl));
+  const coverUrl =
+    gallery.find((item) => item.isCover)?.displayUrl ??
+    property.imageUrl ??
+    gallery[0]?.displayUrl;
 
   return (
     <main className="min-h-screen px-4 py-8 md:px-8 md:py-12">
@@ -91,16 +114,46 @@ export default async function PropertyDetailPage({
           ← Back to listings
         </Link>
 
-        {property.imageUrl ? (
+        {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt={property.title}
             className="mt-6 h-72 w-full rounded-2xl object-cover md:h-96"
-            src={property.imageUrl}
+            src={coverUrl}
           />
         ) : (
           <div className="mt-6 h-72 w-full rounded-2xl bg-gradient-to-br from-blue-100 via-amber-100 to-teal-100 md:h-96" />
         )}
+
+        {gallery.length > 1 ? (
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {gallery.slice(0, 8).map((item) => (
+              <div
+                className="overflow-hidden rounded-xl border border-[color:var(--pk-border,#e2e8f0)] bg-white/70"
+                key={item.id}
+              >
+                {item.kind === "virtual_tour" ? (
+                  <a
+                    className="flex aspect-video items-center justify-center px-3 text-center text-xs font-medium text-[color:var(--pk-primary,#0f766e)] underline-offset-4 hover:underline"
+                    href={item.displayUrl ?? "#"}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Virtual tour
+                  </a>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt={item.altText ?? property.title}
+                    className="aspect-video w-full object-cover"
+                    loading="lazy"
+                    src={item.displayUrl ?? ""}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="mt-8">
           <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
@@ -117,16 +170,24 @@ export default async function PropertyDetailPage({
           )}
 
           {property.specs && (
-            <p className="mt-3 text-base text-muted-foreground">{property.specs}</p>
+            <p className="mt-3 text-base text-muted-foreground">
+              {property.specs}
+            </p>
           )}
 
           {(property.bedrooms != null || property.bathrooms != null) && (
             <div className="mt-4 flex gap-6 text-sm text-muted-foreground">
               {property.bedrooms != null && (
-                <span>{property.bedrooms} bedroom{property.bedrooms !== 1 ? "s" : ""}</span>
+                <span>
+                  {property.bedrooms} bedroom
+                  {property.bedrooms !== 1 ? "s" : ""}
+                </span>
               )}
               {property.bathrooms != null && (
-                <span>{property.bathrooms} bathroom{property.bathrooms !== 1 ? "s" : ""}</span>
+                <span>
+                  {property.bathrooms} bathroom
+                  {property.bathrooms !== 1 ? "s" : ""}
+                </span>
               )}
             </div>
           )}
@@ -156,7 +217,10 @@ export default async function PropertyDetailPage({
           {offerStatus === "submitted" ? (
             <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
               Your offer has been submitted.{" "}
-              <Link className="font-medium underline underline-offset-4" href="/portal/offers">
+              <Link
+                className="font-medium underline underline-offset-4"
+                href="/portal/offers"
+              >
                 Track it in your portal.
               </Link>
             </p>
@@ -164,7 +228,10 @@ export default async function PropertyDetailPage({
           {offerStatus === "already-pending" ? (
             <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
               You already have a pending offer on this property.{" "}
-              <Link className="font-medium underline underline-offset-4" href="/portal/offers">
+              <Link
+                className="font-medium underline underline-offset-4"
+                href="/portal/offers"
+              >
                 View it in your portal.
               </Link>
             </p>
@@ -201,7 +268,10 @@ export default async function PropertyDetailPage({
             )}
 
             {isSignedInCustomer ? (
-              <form action={submitOfferAction} className="flex flex-wrap items-end gap-3">
+              <form
+                action={submitOfferAction}
+                className="flex flex-wrap items-end gap-3"
+              >
                 <input name="propertyId" type="hidden" value={property.id} />
                 <input
                   name="redirectTo"
