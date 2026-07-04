@@ -5,8 +5,8 @@
  * Runs server-side after each onboarding step save.
  */
 
-import type { TemplateDefinition, TenantContentRecord } from "./index";
 import { templateCatalog } from "./index";
+import type { TemplateDefinition, TenantContentRecord } from "./types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -479,6 +479,65 @@ const templateTags: Record<string, TemplateScoringTags> = {
     segmentTags: ["luxury", "residential", "mixed"],
   },
 };
+
+const segmentTagValues: DerivedProfile["segment"][] = [
+  "luxury",
+  "commercial",
+  "residential",
+  "rental",
+  "mixed",
+];
+const designIntentTagValues: DerivedProfile["designIntent"][] = [
+  "editorial",
+  "bold",
+  "warm",
+  "clean",
+];
+const conversionFocusTagValues: DerivedProfile["conversionFocus"][] = [
+  "leads",
+  "listings",
+  "brand",
+  "balanced",
+];
+const registerTemplateTag = "register-template";
+
+function pickTags<T extends string>(source: Set<string>, values: T[]): T[] {
+  return values.filter((value) => source.has(value));
+}
+
+function getTemplateScoringTags(
+  template: TemplateDefinition,
+): TemplateScoringTags | undefined {
+  const source = new Set(template.tags ?? []);
+  const fallback = templateTags[template.key];
+
+  if (fallback) {
+    for (const tag of fallback.segmentTags) source.add(tag);
+    for (const tag of fallback.designIntentTags) source.add(tag);
+    for (const tag of fallback.conversionFocusTags) source.add(tag);
+  }
+
+  const tags: TemplateScoringTags = {
+    conversionFocusTags: pickTags(source, conversionFocusTagValues),
+    designIntentTags: pickTags(source, designIntentTagValues),
+    segmentTags: pickTags(source, segmentTagValues),
+  };
+
+  if (
+    tags.conversionFocusTags.length === 0 &&
+    tags.designIntentTags.length === 0 &&
+    tags.segmentTags.length === 0
+  ) {
+    return undefined;
+  }
+
+  return tags;
+}
+
+function hasRegisterTemplateTag(template: TemplateDefinition): boolean {
+  return (template.tags ?? []).includes(registerTemplateTag);
+}
+
 type PartialProfile = Omit<
   DerivedProfile,
   "complexity" | "recommendedTemplateKey"
@@ -488,7 +547,7 @@ function scoreTemplate(
   profile: PartialProfile,
   template: TemplateDefinition,
 ): number {
-  const tags = templateTags[template.key];
+  const tags = getTemplateScoringTags(template);
   if (!tags) return 0;
 
   let score = 0;
@@ -513,7 +572,7 @@ export function scoreTemplates(
   return catalog
     .map((template) => {
       const score = scoreTemplate(profile, template);
-      const tags = templateTags[template.key];
+      const tags = getTemplateScoringTags(template);
       const reason = buildRecommendationReason(profile, template, tags);
       const upgradeRequired = accessibleTiers
         ? !accessibleTiers.has(template.tier)
@@ -526,7 +585,14 @@ export function scoreTemplates(
         upgradeRequired,
       };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => {
+      const scoreDiff = b.score - a.score;
+      if (scoreDiff !== 0) return scoreDiff;
+      return (
+        Number(hasRegisterTemplateTag(b.template)) -
+        Number(hasRegisterTemplateTag(a.template))
+      );
+    });
 }
 
 function buildRecommendationReason(

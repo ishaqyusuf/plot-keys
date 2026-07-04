@@ -1,0 +1,28 @@
+/**
+ * Saved mock website profile used to test template rendering without creating
+ * a tenant, Website, WebsiteVersion, or TenantDomain.
+ */
+model TemplateSandboxProfile {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shareId        String          @unique @map("share_id")
+  ownerUserId    String          @map("owner_user_id")
+  name           String
+  templateKey    String          @map("template_key")
+  planTier       CompanyPlanTier @default(starter) @map("plan_tier")
+  companyName    String          @map("company_name")
+  market         String?
+  subdomainLabel String?         @map("subdomain_label")
+  themeJson      Json            @default("{}") @map("theme_json")
+  contentJson    Json            @default("{}") @map("content_json")
+  sampleDataJson Json            @default("{}") @map("sample_data_json")
+  profileJson    Json            @default("{}") @map("profile_json")
+  archivedAt     DateTime?       @map("archived_at") @db.Timestamptz(6)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner User @relation("TemplateSandboxProfileOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUserId, archivedAt], map: "template_sandbox_profiles_owner_archived_idx")
+  @@index([templateKey], map: "template_sandbox_profiles_template_key_idx")
+  @@map("template_sandbox_profiles")
+}

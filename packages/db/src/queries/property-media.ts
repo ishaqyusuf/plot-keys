@@ -1,5 +1,33 @@
 import type { Db } from "../prisma";
 
+export async function syncPropertyCoverImageUrl(
+  db: Db,
+  input: { companyId: string; propertyId: string },
+) {
+  const cover = await db.propertyMedia.findFirst({
+    include: { asset: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    where: {
+      isCover: true,
+      kind: "image",
+      property: {
+        companyId: input.companyId,
+        deletedAt: null,
+        id: input.propertyId,
+      },
+    },
+  });
+
+  return db.property.update({
+    data: { imageUrl: cover?.asset?.publicUrl ?? cover?.url ?? null },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.propertyId,
+    },
+  });
+}
+
 export async function addPropertyMedia(
   db: Db,
   input: {

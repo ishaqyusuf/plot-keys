@@ -5,8 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./registry": "./src/registry/index.ts",
-    "./registry/icon-map": "./src/registry/icon-map.tsx",
-    "./whatsapp-client": "./src/whatsapp-client.ts"
+    "./registry/icon-map": "./src/registry/icon-map.tsx"
   },
   "scripts": {
     "build": "tsc --noEmit",

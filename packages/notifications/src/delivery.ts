@@ -17,6 +17,14 @@ function supportsChannel(
     return Boolean(contact.phoneNumber);
   }
 
+  if (channel === "sms") {
+    return Boolean(contact.phoneNumber);
+  }
+
+  if (channel === "phone") {
+    return Boolean(contact.phoneNumber);
+  }
+
   return contact.kind === "user";
 }
 
@@ -37,9 +45,13 @@ export function planNotificationDeliveries(
         reason:
           channel === "whatsapp"
             ? "No recipients had a phone number for WhatsApp delivery."
-            : channel === "email"
-              ? "No recipients had an email address for email delivery."
-              : "No user recipients were available for in-app delivery.",
+            : channel === "sms"
+              ? "No recipients had a phone number for SMS delivery."
+              : channel === "phone"
+                ? "No recipients had a phone number for phone delivery."
+                : channel === "email"
+                  ? "No recipients had an email address for email delivery."
+                  : "No user recipients were available for in-app delivery.",
       });
       continue;
     }

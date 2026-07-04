@@ -1,6 +1,11 @@
 import type { NotificationContact } from "./contacts";
 
-export type NotificationChannel = "email" | "in_app" | "whatsapp";
+export type NotificationChannel =
+  | "email"
+  | "in_app"
+  | "phone"
+  | "sms"
+  | "whatsapp";
 
 export type NotificationVariant = "info" | "success" | "warning" | "error";
 

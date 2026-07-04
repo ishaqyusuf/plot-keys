@@ -1,27 +1,44 @@
 /**
- * RegisterFooter — renders the family-specific site footer for a register
- * template. Reads the family's FooterConfig (link groups + tagline).
+ * RegisterFooter — renders the template-owned site footer for a register
+ * template. Reads the template's FooterConfig (link groups + tagline).
  *
  * Server component — no client state needed.
  *
  * Usage:
  *   <RegisterFooter
- *     familyKey="agency"
+ *     templateKey="riwaq-starter"
  *     companyName="Noor Properties"
  *   />
  */
 
-import { getFamilyFooterConfig } from "@plotkeys/section-registry";
-import type { TemplateFamilyKey } from "@plotkeys/section-registry";
+import { getRegisterFooterConfig } from "@plotkeys/section-registry";
 import Link from "next/link";
 
 type RegisterFooterProps = {
   companyName: string;
-  familyKey: TemplateFamilyKey;
+  hrefPrefix?: string;
+  templateKey: string;
 };
 
-export function RegisterFooter({ companyName, familyKey }: RegisterFooterProps) {
-  const footer = getFamilyFooterConfig(familyKey);
+function scopedHref(href: string, hrefPrefix?: string) {
+  if (
+    !hrefPrefix ||
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("#")
+  ) {
+    return href;
+  }
+
+  return href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+}
+
+export function RegisterFooter({
+  companyName,
+  hrefPrefix,
+  templateKey,
+}: RegisterFooterProps) {
+  const footer = getRegisterFooterConfig(templateKey);
   const year = new Date().getFullYear();
 
   return (
@@ -40,7 +57,7 @@ export function RegisterFooter({ companyName, familyKey }: RegisterFooterProps) 
                     <li key={link.href}>
                       <Link
                         className="text-sm text-[color:var(--pk-muted-foreground,#64748b)] transition-colors hover:text-[color:var(--pk-foreground,#0f172a)]"
-                        href={link.href}
+                        href={scopedHref(link.href, hrefPrefix)}
                       >
                         {link.label}
                       </Link>

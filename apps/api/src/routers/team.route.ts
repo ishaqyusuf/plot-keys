@@ -3,6 +3,7 @@ import {
   acceptTeamInvite,
   countActiveMemberships,
   createTeamInvite,
+  findCompanyById,
   findTeamInviteByToken,
   findUserByEmail,
   listMembershipsForCompany,
@@ -33,8 +34,8 @@ const planMemberCap: Record<string, number> = {
 };
 
 export const teamRouter = createTRPCRouter({
-  /** List all memberships (active, invited, suspended) for the caller's company. */
-  listMembers: membershipProcedure.query(async ({ ctx }) => {
+  /** Team plan metadata used by the dashboard team page. */
+  getOverview: membershipProcedure.query(async ({ ctx }) => {
     const db = ctx.db.db;
     if (!db)
       throw new TRPCError({
@@ -42,8 +43,51 @@ export const teamRouter = createTRPCRouter({
         message: "DB unavailable.",
       });
 
-    return listMembershipsForCompany(db, ctx.auth.activeMembership.companyId);
+    const company = await findCompanyById(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+    const planTier = company?.planTier ?? "starter";
+    const cap = planMemberCap[planTier] ?? planMemberCap.starter;
+    const activeCount = await countActiveMemberships(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    return {
+      activeCount,
+      cap: cap === Infinity ? null : cap,
+      planTier,
+    };
   }),
+
+  /** List all memberships (active, invited, suspended) for the caller's company. */
+  listMembers: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.union([z.string(), z.number()]).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.union([z.string(), z.number()]).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      return listMembershipsForCompany(db, ctx.auth.activeMembership.companyId, {
+        cursor: input?.cursor,
+        q: input?.q,
+        size: input?.size,
+        sort: input?.sort,
+      });
+    }),
 
   /** List pending (not accepted, not revoked, not expired) invites. */
   listInvites: minRoleProcedure("admin").query(async ({ ctx }) => {

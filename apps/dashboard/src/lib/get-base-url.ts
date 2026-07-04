@@ -1,3 +1,4 @@
+import { buildDashboardUrl } from "@plotkeys/utils/app-urls";
 import { headers } from "next/headers";
 
 export async function getBaseUrl() {
@@ -11,9 +12,5 @@ export async function getBaseUrl() {
     return `${protocol}://${host}`;
   }
 
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-
-  return "http://localhost:3901";
+  return buildDashboardUrl();
 }

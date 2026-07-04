@@ -18,9 +18,9 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { SignInForm } from "../../components/auth/sign-in-form";
-import { getCurrentAppSession, getTenantSlugFromHost } from "../../lib/session";
-import { getTenantSignInUrlForSubdomain } from "../../lib/tenant-dashboard-url";
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { getCurrentAppSession, getTenantSlugFromHost } from "@/lib/session";
+import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
 
 type SignInPageProps = {
   searchParams?: Promise<{

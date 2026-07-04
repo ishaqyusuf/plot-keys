@@ -1,5 +1,5 @@
 import { Prisma } from "../generated/prisma/client";
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
 
 export type PropertyTypeValue =
   | "residential"
@@ -158,6 +158,16 @@ export async function deleteProperty(
   });
 }
 
+export async function getPropertyForCompany(
+  db: Db,
+  propertyId: string,
+  companyId: string,
+) {
+  return db.property.findFirst({
+    where: { id: propertyId, companyId, deletedAt: null },
+  });
+}
+
 export async function togglePropertyFeatured(
   db: Db,
   propertyId: string,
@@ -222,10 +232,84 @@ export async function listPropertiesForCompany(
   });
 }
 
+export async function listPropertyExportRows(db: Db, companyId: string) {
+  return db.property.findMany({
+    orderBy: { createdAt: "desc" },
+    where: { companyId, deletedAt: null },
+  });
+}
+
+export type PropertyExportRows = Awaited<
+  ReturnType<typeof listPropertyExportRows>
+>;
+
+export type PropertyExportRowsResult =
+  | { data: PropertyExportRows; ok: true }
+  | { ok: false; reason: "database-unavailable" };
+
+export async function getPropertyExportRows(
+  companyId: string,
+): Promise<PropertyExportRowsResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  return { data: await listPropertyExportRows(db, companyId), ok: true };
+}
+
 export type PropertyListFilters = {
+  cursor?: string | number | null;
   q?: string | null;
+  size?: string | number | null;
+  sort?: string[] | null;
   type?: string | null;
 };
+
+function normalizePageSize(size: string | number | null | undefined) {
+  const value = Number(size ?? 20);
+
+  if (!Number.isFinite(value)) {
+    return 20;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), 100);
+}
+
+function normalizeCursor(cursor: string | number | null | undefined) {
+  const value = Number(cursor ?? 0);
+
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
+}
+
+function getPropertyOrderBy(
+  sort: string[] | null | undefined,
+): Prisma.PropertyOrderByWithRelationInput[] {
+  const [field, value] = sort ?? [];
+  const direction = value === "asc" || value === "desc" ? value : null;
+
+  if (!direction) {
+    return [{ featured: "desc" }, { createdAt: "desc" }];
+  }
+
+  switch (field) {
+    case "price":
+      return [{ price: direction }, { createdAt: "desc" }];
+    case "status":
+      return [{ status: direction }, { createdAt: "desc" }];
+    case "title":
+      return [{ title: direction }, { createdAt: "desc" }];
+    case "type":
+      return [{ type: direction }, { createdAt: "desc" }];
+    default:
+      return [{ featured: "desc" }, { createdAt: "desc" }];
+  }
+}
 
 export async function listFilteredPropertiesForCompany(
   db: Db,
@@ -234,22 +318,41 @@ export async function listFilteredPropertiesForCompany(
 ) {
   const query = filters.q?.trim() ?? "";
   const type = normalizePropertyType(filters.type);
+  const size = normalizePageSize(filters.size);
+  const offset = normalizeCursor(filters.cursor);
+  const where: Prisma.PropertyWhereInput = {
+    companyId,
+    deletedAt: null,
+    ...(type ? { type } : {}),
+    ...(query
+      ? {
+          OR: [
+            { title: { contains: query, mode: "insensitive" } },
+            { location: { contains: query, mode: "insensitive" } },
+            { price: { contains: query, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
 
-  return db.property.findMany({
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-    where: {
-      companyId,
-      deletedAt: null,
-      ...(type ? { type } : {}),
-      ...(query
-        ? {
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { location: { contains: query, mode: "insensitive" } },
-              { price: { contains: query, mode: "insensitive" } },
-            ],
-          }
-        : {}),
+  const [count, data] = await db.$transaction([
+    db.property.count({ where }),
+    db.property.findMany({
+      orderBy: getPropertyOrderBy(filters.sort),
+      skip: offset,
+      take: size,
+      where,
+    }),
+  ]);
+  const nextCursor = offset + size < count ? String(offset + size) : null;
+
+  return {
+    data,
+    meta: {
+      count,
+      cursor: nextCursor,
+      hasNextPage: nextCursor !== null,
+      size,
     },
-  });
+  };
 }

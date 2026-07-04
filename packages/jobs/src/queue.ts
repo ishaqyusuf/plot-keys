@@ -14,7 +14,7 @@ export type JobRecord<TPayload = unknown> = {
 export type JobHandler<TPayload = unknown> = (
   payload: TPayload,
   attempt: number,
-) => Promise<void>;
+) => Promise<unknown>;
 
 export type RetryOptions = {
   baseDelayMs?: number;
@@ -64,7 +64,13 @@ export async function runWithRetry<TPayload>(
 export async function runInBackground<TPayload>(
   handler: JobHandler<TPayload>,
   payload: TPayload,
-  options: RetryOptions & { onComplete?: (result: { attempts: number; error?: string; success: boolean }) => void } = {},
+  options: RetryOptions & {
+    onComplete?: (result: {
+      attempts: number;
+      error?: string;
+      success: boolean;
+    }) => void;
+  } = {},
 ): Promise<void> {
   // Schedule the job to run asynchronously without blocking
   setImmediate(async () => {

@@ -32,6 +32,7 @@ model Company {
   analyticsEvents    AnalyticsEvent[]
   teamInvites        TeamInvite[]
   notifications      Notification[]
+  notificationMessageLogs NotificationMessageLog[]
   customers          Customer[]
   plotReservations   PlotReservation[]
   savedListings      SavedListing[]

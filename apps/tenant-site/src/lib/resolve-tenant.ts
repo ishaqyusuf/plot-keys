@@ -16,10 +16,7 @@ import {
   resolvePublishedForCompany,
   resolveTenantByHostname,
 } from "@plotkeys/db";
-import type {
-  TemplateFamilyKey,
-  TemplateTier,
-} from "@plotkeys/section-registry";
+import type { TemplateTier } from "@plotkeys/section-registry";
 import {
   deserializeTemplateConfig,
   getRegisterTemplate,
@@ -42,8 +39,8 @@ export type TenantContext = {
     websiteId: string;
   };
   templateKey: string;
-  /** Family key if this is a register template, otherwise undefined. */
-  familyKey: TemplateFamilyKey | undefined;
+  /** Concrete register template key, if this is a register template. */
+  registerTemplateKey: string | undefined;
   /** Plan tier if this is a register template, otherwise undefined. */
   tier: TemplateTier | undefined;
   /** Deserialized template config (color system, font, style preset, etc.). */
@@ -143,7 +140,7 @@ export async function resolveTenantContext(searchParams?: {
   const registerVariant = getRegisterTemplate(publishedConfig.templateKey);
   const templateConfig = deserializeTemplateConfig(publishedConfig.themeJson);
 
-  const [featuredProperties, agents, blogPosts] = await Promise.all([
+  const [featuredProperties, agentsPage, blogPosts] = await Promise.all([
     listFeaturedProperties(prisma, company.id),
     listAgentsForCompany(prisma, company.id, { limit: 10 }),
     listPublishedBlogPostsForCompany(prisma, company.id, { limit: 24 }),
@@ -153,7 +150,7 @@ export async function resolveTenantContext(searchParams?: {
     company,
     publishedConfig,
     templateKey: publishedConfig.templateKey,
-    familyKey: registerVariant?.family,
+    registerTemplateKey: registerVariant?.key,
     tier: registerVariant?.tier,
     templateConfig,
     liveListings: featuredProperties.map((p) => ({
@@ -165,7 +162,7 @@ export async function resolveTenantContext(searchParams?: {
       specs: p.specs,
       title: p.title,
     })),
-    liveAgents: agents.map((a) => ({
+    liveAgents: agentsPage.data.map((a) => ({
       id: a.id,
       imageUrl: a.imageUrl,
       name: a.name,
@@ -198,7 +195,7 @@ export type TenantShell = {
     market: string | null;
   };
   templateKey: string;
-  familyKey: TemplateFamilyKey | undefined;
+  registerTemplateKey: string | undefined;
   tier: TemplateTier | undefined;
   templateConfig: ReturnType<typeof deserializeTemplateConfig>;
 };
@@ -257,7 +254,7 @@ export async function resolveTenantShell(): Promise<TenantShell | null> {
   return {
     company,
     templateKey: publishedRaw.templateKey,
-    familyKey: registerVariant?.family,
+    registerTemplateKey: registerVariant?.key,
     tier: registerVariant?.tier,
     templateConfig,
   };

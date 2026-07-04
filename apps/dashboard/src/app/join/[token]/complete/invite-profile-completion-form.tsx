@@ -5,12 +5,13 @@ import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import Link from "next/link";
 import { useMemo, useRef } from "react";
-import { DevFormQuickFillButton } from "../../../../components/dev/dev-form-quick-fill-button";
+
+import { completeInviteProfileAction } from "@/app/actions";
+import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
 import {
   createQuickFillAdapter,
   QuickFill,
-} from "../../../../components/dev/quick-fill";
-import { completeInviteProfileAction } from "../../../actions";
+} from "@/components/dev/quick-fill";
 
 type InviteProfileCompletionValues = {
   bio?: string;

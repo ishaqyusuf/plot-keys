@@ -1,8 +1,8 @@
-
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createPrismaClient } from "@plotkeys/db";
 import { authCookiePrefix } from "./shared";
+import { getTrustedOrigins } from "./trusted-origins";
 
 function requirePrismaForAuth() {
   const { db } = createPrismaClient();
@@ -26,6 +26,7 @@ export const auth = betterAuth({
     cookiePrefix: authCookiePrefix,
     generateId: () => crypto.randomUUID(),
   },
+  trustedOrigins: getTrustedOrigins(),
   user: {
     additionalFields: {
       phoneNumber: {

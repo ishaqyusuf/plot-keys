@@ -4,21 +4,20 @@ import {
   makeUserRecipients,
   type NotificationDeliveryPlan,
   NotificationService,
+  type NotificationTriggerInput,
   planNotificationDeliveries,
   plotKeysNotificationTypes,
+  type PlotKeysNotificationType,
   WhatsAppService,
 } from "@plotkeys/notifications";
-import type {
-  NotificationTriggerInput,
-  PlotKeysNotificationType,
-} from "@plotkeys/notifications/payload-utils";
 import {
+  buildDashboardUrl,
   buildDashboardHostnameForTenantHostname,
   buildTenantDashboardUrl,
 } from "@plotkeys/utils";
 
 function getDashboardAppUrl() {
-  return process.env.DASHBOARD_APP_URL ?? "http://localhost:3901";
+  return buildDashboardUrl();
 }
 
 function logNotificationPlan(label: string, plan: NotificationDeliveryPlan) {

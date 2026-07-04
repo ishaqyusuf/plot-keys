@@ -76,7 +76,7 @@ export function createNotificationFromType<
 
   return {
     ...input,
-    channels: input?.channels ?? definition.defaultChannels ?? ["in_app"],
+    channels: input?.channels ?? definition.defaultChannels ?? ["email"],
     description: input?.description ?? definition.description,
     notificationType,
     title: input?.title ?? definition.title ?? "Notification",
@@ -118,7 +118,7 @@ export function createNotificationDispatchFromType<
 
   return {
     ...input,
-    channels: input?.channels ?? definition.defaultChannels ?? ["in_app"],
+    channels: input?.channels ?? definition.defaultChannels ?? ["email"],
     description: input?.description ?? definition.description,
     notificationType,
     payload,

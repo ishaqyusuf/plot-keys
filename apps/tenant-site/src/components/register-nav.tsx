@@ -1,6 +1,6 @@
 /**
- * RegisterNav — renders the family-specific navigation bar for a register
- * template. Reads the family's NavConfig (filtered to the active plan tier)
+ * RegisterNav — renders the template-owned navigation bar for a register
+ * template. Reads the template's NavConfig (filtered to the active plan tier)
  * and produces a responsive nav: full inline on desktop, hamburger on mobile.
  *
  * This is a server component. It uses no client state. The mobile menu
@@ -9,7 +9,7 @@
  *
  * Usage:
  *   <RegisterNav
- *     familyKey="agency"
+ *     templateKey="riwaq-starter"
  *     tier="starter"
  *     companyName="Noor Properties"
  *     logoUrl={company.logoUrl}
@@ -17,30 +17,41 @@
  *   />
  */
 
-import {
-  getFamilyNavConfig,
-  getRegisterTemplate,
-} from "@plotkeys/section-registry";
-import type { TemplateFamilyKey, TemplateTier } from "@plotkeys/section-registry";
+import { getRegisterNavConfig } from "@plotkeys/section-registry";
+import type { TemplateTier } from "@plotkeys/section-registry";
 import Link from "next/link";
 
 type RegisterNavProps = {
   companyName: string;
   currentPath?: string;
-  familyKey: TemplateFamilyKey;
+  hrefPrefix?: string;
   logoUrl?: string | null;
-  templateKey?: string;
+  templateKey: string;
   tier: TemplateTier;
 };
+
+function scopedHref(href: string, hrefPrefix?: string) {
+  if (
+    !hrefPrefix ||
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("#")
+  ) {
+    return href;
+  }
+
+  return href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+}
 
 export function RegisterNav({
   companyName,
   currentPath = "/",
-  familyKey,
+  hrefPrefix,
   logoUrl,
+  templateKey,
   tier,
 }: RegisterNavProps) {
-  const nav = getFamilyNavConfig(familyKey, tier);
+  const nav = getRegisterNavConfig(templateKey, tier);
 
   return (
     <header className="sticky top-0 z-30 border-b border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)]/95 backdrop-blur">
@@ -48,7 +59,7 @@ export function RegisterNav({
         {/* Logo / brand */}
         <Link
           className="flex shrink-0 items-center gap-2.5 text-sm font-semibold text-[color:var(--pk-foreground,#0f172a)]"
-          href="/"
+          href={scopedHref("/", hrefPrefix)}
         >
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -61,7 +72,8 @@ export function RegisterNav({
         {/* Desktop nav */}
         <nav aria-label="Primary navigation" className="hidden items-center gap-1 md:flex">
           {nav.primary.map((link) => {
-            const isActive = currentPath === link.href;
+            const href = scopedHref(link.href, hrefPrefix);
+            const isActive = currentPath === href;
             return (
               <Link
                 key={link.href}
@@ -73,7 +85,7 @@ export function RegisterNav({
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                href={link.href}
+                href={href}
               >
                 {link.label}
               </Link>
@@ -85,7 +97,7 @@ export function RegisterNav({
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <Link
             className="rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            href={nav.ctaHref}
+            href={scopedHref(nav.ctaHref, hrefPrefix)}
           >
             {nav.ctaLabel}
           </Link>
@@ -122,7 +134,8 @@ export function RegisterNav({
           {/* Mobile dropdown */}
           <div className="absolute right-0 top-full mt-1 w-64 rounded-xl border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)] p-2 shadow-lg">
             {nav.mobile.map((link) => {
-              const isActive = currentPath === link.href;
+              const href = scopedHref(link.href, hrefPrefix);
+              const isActive = currentPath === href;
               return (
                 <Link
                   key={link.href}
@@ -134,7 +147,7 @@ export function RegisterNav({
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  href={link.href}
+                  href={href}
                 >
                   {link.label}
                 </Link>
@@ -143,7 +156,7 @@ export function RegisterNav({
             <div className="mt-2 border-t border-[color:var(--pk-border,#e2e8f0)] pt-2">
               <Link
                 className="block rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-3 py-2 text-center text-sm font-medium text-white"
-                href={nav.ctaHref}
+                href={scopedHref(nav.ctaHref, hrefPrefix)}
               >
                 {nav.ctaLabel}
               </Link>

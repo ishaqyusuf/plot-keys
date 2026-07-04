@@ -1,8 +1,4 @@
-import {
-  createPrismaClient,
-  syncPlanIncludedLicenses,
-  updateCompanyPlan,
-} from "@plotkeys/db";
+import { activateSubscriptionPayment } from "@plotkeys/db/queries";
 import { templateCatalog } from "@plotkeys/section-registry";
 import {
   canAccessTemplateTier,
@@ -64,67 +60,37 @@ export default async function BillingCallbackPage({
     redirect("/billing?payment=missing-metadata");
   }
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) {
-    redirect("/billing?payment=database-unavailable");
-  }
+  const allowedKeys = templateCatalog
+    .filter((template) => canAccessTemplateTier(planTier, template.tier))
+    .map((template) => template.key);
+  const paidAt = transaction.paid_at
+    ? new Date(transaction.paid_at)
+    : new Date();
+  let activation: Awaited<ReturnType<typeof activateSubscriptionPayment>>;
 
   try {
-    await updateCompanyPlan(prisma, companyId, planTier, "active");
-
-    const allowedKeys = templateCatalog
-      .filter((template) => canAccessTemplateTier(planTier, template.tier))
-      .map((template) => template.key);
-    await syncPlanIncludedLicenses(prisma, companyId, allowedKeys);
-
-    const paidAt = transaction.paid_at
-      ? new Date(transaction.paid_at)
-      : new Date();
-    const updated = await prisma.billingLineItem.updateMany({
-      data: {
-        amountMinorUnits: transaction.amount,
-        currency: transaction.currency ?? "NGN",
-        meta: {
-          customerCode: transaction.customer?.customer_code,
-          planTier,
-          reference: transaction.reference,
-        },
-        paidAt,
-        status: "active",
-      },
-      where: {
-        companyId,
-        kind: "subscription",
-        providerRef: transaction.reference,
-      },
+    activation = await activateSubscriptionPayment({
+      allowedTemplateKeys: allowedKeys,
+      amountMinorUnits: transaction.amount,
+      companyId,
+      currency: transaction.currency,
+      customerCode: transaction.customer?.customer_code,
+      paidAt,
+      planTier,
+      reference: transaction.reference,
     });
-
-    if (updated.count === 0) {
-      await prisma.billingLineItem.create({
-        data: {
-          amountMinorUnits: transaction.amount,
-          companyId,
-          currency: transaction.currency ?? "NGN",
-          kind: "subscription",
-          meta: {
-            customerCode: transaction.customer?.customer_code,
-            planTier,
-            reference: transaction.reference,
-          },
-          paidAt,
-          providerRef: transaction.reference,
-          status: "active",
-        },
-      });
-    }
-
-    revalidatePath("/billing");
-    revalidatePath("/app-store");
-    revalidatePath("/", "layout");
   } catch (error) {
     console.error("[billing-callback] Unable to activate payment:", error);
     redirect("/billing?payment=activation-failed");
   }
+
+  if (!activation.ok) {
+    redirect(`/billing?payment=${activation.reason}`);
+  }
+
+  revalidatePath("/billing");
+  revalidatePath("/app-store");
+  revalidatePath("/", "layout");
 
   redirect("/billing?success=1");
 }

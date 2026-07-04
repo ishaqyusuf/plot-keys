@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { getTeamInviteProfileCompletionData } from "@plotkeys/db/queries";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Button } from "@plotkeys/ui/button";
 import {
@@ -11,7 +11,9 @@ import {
 } from "@plotkeys/ui/card";
 import { WORK_ROLE_LABELS } from "@plotkeys/utils";
 import { redirect } from "next/navigation";
-import { requireAuthenticatedSession } from "../../../../lib/session";
+
+import { requireAuthenticatedSession } from "@/lib/session";
+
 import { InviteProfileCompletionForm } from "./invite-profile-completion-form";
 
 type InviteProfilePageProps = {
@@ -26,24 +28,13 @@ export default async function InviteProfilePage({
   const { token } = await params;
   const sp = (await searchParams) ?? {};
   const session = await requireAuthenticatedSession();
-  const prisma = createPrismaClient().db;
 
-  const invite = prisma
-    ? await prisma.teamInvite.findUnique({
-        include: {
-          company: {
-            select: { id: true, name: true },
-          },
-        },
-        where: { token },
-      })
-    : null;
+  const inviteData = await getTeamInviteProfileCompletionData({
+    token,
+    userEmail: session.user.email,
+  });
 
-  if (!invite) {
-    redirect("/");
-  }
-
-  if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
+  if (!inviteData.ok && inviteData.reason === "email-mismatch") {
     redirect(
       `/join/${token}?error=${encodeURIComponent(
         "This invite belongs to a different email address.",
@@ -51,35 +42,17 @@ export default async function InviteProfilePage({
     );
   }
 
-  if (!invite.acceptedAt) {
+  if (!inviteData.ok && inviteData.reason === "invite-not-accepted") {
     redirect(`/join/${token}`);
   }
 
-  if (invite.role !== "agent" && invite.role !== "staff") {
+  if (!inviteData.ok) {
     redirect("/");
   }
 
+  const { agentProfile, employeeProfile, invite } = inviteData;
+
   const isAgentInvite = invite.role === "agent";
-  const agentProfile =
-    prisma && isAgentInvite
-      ? await prisma.agent.findFirst({
-          where: {
-            companyId: invite.companyId,
-            deletedAt: null,
-            email: invite.email,
-          },
-        })
-      : null;
-  const employeeProfile =
-    prisma && !isAgentInvite
-      ? await prisma.employee.findFirst({
-          where: {
-            companyId: invite.companyId,
-            deletedAt: null,
-            email: invite.email,
-          },
-        })
-      : null;
   const pageTitle = isAgentInvite
     ? "Complete your agent profile"
     : "Complete your employee profile";

@@ -26,6 +26,7 @@ model Customer {
   plotStatusHistory PlotStatusHistory[]
   projectAccess   ProjectCustomerAccess[]
   projectNotices  ProjectCustomerNotice[]
+  notificationMessageLogs NotificationMessageLog[]
 
   @@index([companyId], map: "customers_company_id_idx")
   @@index([companyId, status], map: "customers_company_status_idx")

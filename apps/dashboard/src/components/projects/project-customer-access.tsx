@@ -5,8 +5,8 @@ import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
 import { useTRPC } from "../../trpc/client";
 
 // ---------------------------------------------------------------------------
@@ -52,14 +52,12 @@ export function CustomerAccessList({
   accessList: CustomerAccess[];
   projectId: string;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const revokeMutation = useMutation(
     trpc.projects.revokeCustomerAccess.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 
@@ -116,14 +114,12 @@ export function GrantCustomerAccessForm({
   customers: Customer[];
   grantedCustomerIds: Set<string>;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const grantMutation = useMutation(
     trpc.projects.grantCustomerAccess.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 
@@ -211,14 +207,12 @@ export function SendNoticeForm({
   projectId: string;
   accessList: CustomerAccess[];
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const createMutation = useMutation(
     trpc.projects.createCustomerNotice.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 

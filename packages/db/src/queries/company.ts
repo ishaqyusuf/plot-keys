@@ -1,4 +1,8 @@
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
+
+export type CompanyDisplayNameResult =
+  | { name: string | null; ok: true }
+  | { ok: false; reason: "database-unavailable" };
 
 export async function findCompanyBySlug(db: Db, slug: string) {
   return db.company.findFirst({
@@ -16,6 +20,26 @@ export async function findCompanyById(db: Db, id: string) {
       id,
     },
   });
+}
+
+export async function getCompanyDisplayName(
+  companyId: string,
+): Promise<CompanyDisplayNameResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const company = await db.company.findFirst({
+    select: { name: true },
+    where: {
+      deletedAt: null,
+      id: companyId,
+    },
+  });
+
+  return { name: company?.name ?? null, ok: true };
 }
 
 export async function updateCompanyProfile(

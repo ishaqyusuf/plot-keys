@@ -7,6 +7,8 @@ import { useRef, useState } from "react";
 type BlogRichTextEditorProps = {
   defaultValue?: string;
   name: string;
+  onChange?: (value: string) => void;
+  value?: string;
 };
 
 const tools = [
@@ -45,9 +47,20 @@ const tools = [
 export function BlogRichTextEditor({
   defaultValue = "",
   name,
+  onChange,
+  value,
 }: BlogRichTextEditorProps) {
-  const [value, setValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorValue = value ?? internalValue;
+
+  function setEditorValue(nextValue: string) {
+    if (value === undefined) {
+      setInternalValue(nextValue);
+    }
+
+    onChange?.(nextValue);
+  }
 
   function insertSnippet(prefix: string, suffix: string, placeholder: string) {
     const textarea = textareaRef.current;
@@ -55,12 +68,14 @@ export function BlogRichTextEditor({
 
     const selectionStart = textarea.selectionStart ?? 0;
     const selectionEnd = textarea.selectionEnd ?? 0;
-    const selectedText = value.slice(selectionStart, selectionEnd);
+    const selectedText = editorValue.slice(selectionStart, selectionEnd);
     const replacement = `${prefix}${selectedText || placeholder}${suffix}`;
     const nextValue =
-      value.slice(0, selectionStart) + replacement + value.slice(selectionEnd);
+      editorValue.slice(0, selectionStart) +
+      replacement +
+      editorValue.slice(selectionEnd);
 
-    setValue(nextValue);
+    setEditorValue(nextValue);
 
     requestAnimationFrame(() => {
       const cursorPosition =
@@ -93,8 +108,8 @@ export function BlogRichTextEditor({
         className="min-h-[320px] text-sm leading-7"
         name={name}
         placeholder="Write your article using headings, short paragraphs, lists, and links."
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        value={editorValue}
+        onChange={(event) => setEditorValue(event.target.value)}
       />
       <p className="text-xs text-muted-foreground">
         Supports a lightweight markdown format: headings, bullet lists, bold,

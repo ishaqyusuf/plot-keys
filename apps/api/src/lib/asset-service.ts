@@ -1,6 +1,8 @@
 import {
   createAsset,
+  createPrismaClient,
   getAssetForCompany,
+  getPropertyForCompany,
   updateAssetStatus,
   updateAssetStorageLocation,
   type AssetOriginKindValue,
@@ -42,6 +44,8 @@ export type AssetScopeInput = {
   scopeId?: string | null;
 };
 
+export type AssetUploadScope = AssetStorageScope;
+
 export type CreateAssetInput = AssetScopeInput & {
   body: ArrayBuffer | Blob | ReadableStream | Uint8Array;
   byteSize?: number | null;
@@ -62,6 +66,12 @@ export type RemoteAssetInput = AssetScopeInput & {
   originMeta?: Record<string, unknown> | null;
   url: string;
 };
+
+export type CreateTenantAssetFromUploadInput = CreateAssetInput;
+
+export type CreateTenantAssetFromUploadResult =
+  | { asset: Awaited<ReturnType<AssetService["createFromUpload"]>>; ok: true }
+  | { ok: false; reason: "database-unavailable" | "property-not-found" };
 
 function assertAllowedContentType(contentType: string) {
   const normalized = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
@@ -246,4 +256,30 @@ export class AssetService {
 
 export function createAssetService(db: Db, storage?: StorageProvider) {
   return new AssetService(db, storage);
+}
+
+export async function createTenantAssetFromUpload(
+  input: CreateTenantAssetFromUploadInput,
+): Promise<CreateTenantAssetFromUploadResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  if (input.scope === "properties" && input.scopeId) {
+    const property = await getPropertyForCompany(
+      db,
+      input.scopeId,
+      input.companyId,
+    );
+
+    if (!property) {
+      return { ok: false, reason: "property-not-found" };
+    }
+  }
+
+  const asset = await createAssetService(db).createFromUpload(input);
+
+  return { asset, ok: true };
 }

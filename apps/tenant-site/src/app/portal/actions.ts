@@ -12,6 +12,7 @@ import {
   isListingSavedForCustomer,
   removeSavedListingForCustomer,
   saveListingForCustomer,
+  selectPreferredPlotForAcceptedOffer,
   submitOfferForCustomer,
   withdrawOfferForCustomer,
 } from "@plotkeys/db";
@@ -92,11 +93,7 @@ function normalizeRedirectTarget(
 
 function buildRedirectWithStatus(
   pathname: string,
-  status:
-    | "already-saved"
-    | "removed"
-    | "saved"
-    | "sign-in-required",
+  status: "already-saved" | "removed" | "saved" | "sign-in-required",
 ) {
   const url = new URL(pathname, "https://portal.plotkeys.local");
   url.searchParams.set("savedStatus", status);
@@ -279,9 +276,8 @@ export async function toggleSavedListingAction(formData: FormData) {
     normalizeString(formData.get("redirectTo")),
     `/property/${propertyId}`,
   );
-  const mode = normalizeString(formData.get("mode")) === "remove"
-    ? "remove"
-    : "save";
+  const mode =
+    normalizeString(formData.get("mode")) === "remove" ? "remove" : "save";
 
   const [shell, session] = await Promise.all([
     resolveTenantShell(),
@@ -444,4 +440,61 @@ export async function withdrawOfferAction(formData: FormData) {
   revalidatePath("/portal/dashboard");
   revalidatePath("/portal/offers");
   redirect(buildRedirectWithOfferStatus(redirectTo, "withdrawn"));
+}
+
+export async function selectPreferredPlotAction(formData: FormData) {
+  const offerId = assertRequired(
+    normalizeString(formData.get("offerId")),
+    "Offer",
+  );
+  const plotId = assertRequired(
+    normalizeString(formData.get("plotId")),
+    "Plot",
+  );
+  const redirectTo = normalizeRedirectTarget(
+    normalizeString(formData.get("redirectTo")),
+    `/portal/offers/${offerId}/select-plot`,
+  );
+
+  const [shell, session] = await Promise.all([
+    resolveTenantShell(),
+    getPortalCustomerSession(),
+  ]);
+  const prisma = createPrismaClient().db;
+
+  if (!shell || !prisma) {
+    redirect(
+      buildErrorRedirect(
+        "/portal/login",
+        "Customer portal is not available for this tenant.",
+      ),
+    );
+  }
+
+  if (!session) {
+    redirect(`/portal/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+
+  try {
+    await selectPreferredPlotForAcceptedOffer(prisma, {
+      companyId: shell.company.id,
+      customerId: session.customer.id,
+      offerId,
+      plotId,
+    });
+  } catch (error) {
+    redirect(
+      buildErrorRedirect(
+        redirectTo,
+        error instanceof Error
+          ? error.message
+          : "Unable to reserve that plot. Please try another plot.",
+      ),
+    );
+  }
+
+  revalidatePath("/portal/dashboard");
+  revalidatePath("/portal/offers");
+  revalidatePath(`/portal/offers/${offerId}/select-plot`);
+  redirect(`${redirectTo}?selected=1`);
 }

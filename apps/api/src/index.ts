@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { auth } from "@plotkeys/auth";
+import { auth, getTrustedOrigins } from "@plotkeys/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -8,18 +8,20 @@ import { buildRequestContext, createTRPCContext } from "./context";
 import { appRouter } from "./routers/_app";
 
 const app = new Hono();
-const dashboardOrigin =
-  process.env.DASHBOARD_APP_URL ?? "http://localhost:3901";
+const trustedOrigins = getTrustedOrigins();
+const corsOptions = {
+  allowHeaders: ["Content-Type", "Authorization"],
+  allowMethods: ["GET", "POST", "OPTIONS"],
+  credentials: true,
+  origin: (origin) =>
+    trustedOrigins.includes(origin) ? origin : trustedOrigins[0],
+};
 
 app.use(
   "/trpc/*",
-  cors({
-    allowHeaders: ["Content-Type"],
-    allowMethods: ["GET", "POST", "OPTIONS"],
-    credentials: true,
-    origin: dashboardOrigin,
-  }),
+  cors(corsOptions),
 );
+app.use("/api/*", cors(corsOptions));
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => {
   return auth.handler(c.req.raw);

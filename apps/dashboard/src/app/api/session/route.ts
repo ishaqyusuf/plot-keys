@@ -8,7 +8,7 @@ import {
   clearPendingOnboardingCookie,
   setAuthSessionCookie,
   setPendingOnboardingCookie,
-} from "../../../lib/session-cookie";
+} from "@/lib/session-cookie";
 
 const sessionPayloadSchema = sessionBridgeInputSchema.extend({
   onboarding: z

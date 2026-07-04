@@ -1,5 +1,5 @@
-import { BuilderWorkspace } from "../../../components/builder/builder-workspace";
-import { requireOnboardedSession } from "../../../lib/session";
+import { BuilderWorkspace } from "@/components/builder/builder-workspace";
+import { requireOnboardedSession } from "@/lib/session";
 
 type BuilderPageProps = {
   searchParams?: Promise<{

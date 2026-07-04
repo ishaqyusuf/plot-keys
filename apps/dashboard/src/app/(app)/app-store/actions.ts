@@ -11,8 +11,8 @@ import { revalidatePath } from "next/cache";
 import {
   getCompanyAppsState,
   setCompanyEnabledAppIds,
-} from "../../../lib/company-apps";
-import { requireOnboardedSession } from "../../../lib/session";
+} from "@/lib/company-apps";
+import { requireOnboardedSession } from "@/lib/session";
 
 export type SetAppEnabledResult = { ok: true } | { error: string; ok: false };
 

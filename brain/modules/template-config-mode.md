@@ -169,6 +169,18 @@ Components consume resolved config through hooks.
 - useTemplateStylePreset
 - useTemplateImage
 
+## Template UI Primitive Contract
+
+Template-local primitives should compose the active style preset rather than hardcoding radius or density per family.
+
+Implemented registry helpers:
+- `templateButtonVariants()`
+- `templateInputVariants()`
+- `templateSurfaceVariants()`
+- `createTemplateUiResolver()`
+
+These helpers translate Vega/Nova/Maia/Myra/Lyra radius settings into reusable button, input, and surface classes for future template-local `ui/*` components.
+
 ## Recommended Internal Layers
 - user-facing template config
 - resolved color-system tokens

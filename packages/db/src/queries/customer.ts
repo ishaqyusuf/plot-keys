@@ -1,4 +1,9 @@
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
+import {
+  composeQuery,
+  composeQueryData,
+  type PaginationQuery,
+} from "@plotkeys/utils/query-response";
 
 export type CustomerStatusValue = "active" | "inactive" | "vip";
 
@@ -97,11 +102,110 @@ export async function listCustomersForCompany(
   });
 }
 
+export async function listCustomerExportRows(db: Db, companyId: string) {
+  return db.customer.findMany({
+    orderBy: { createdAt: "desc" },
+    where: { companyId, deletedAt: null },
+  });
+}
+
+export type CustomerExportRows = Awaited<
+  ReturnType<typeof listCustomerExportRows>
+>;
+
+export type CustomerExportRowsResult =
+  | { data: CustomerExportRows; ok: true }
+  | { ok: false; reason: "database-unavailable" };
+
+export async function getCustomerExportRows(
+  companyId: string,
+): Promise<CustomerExportRowsResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  return { data: await listCustomerExportRows(db, companyId), ok: true };
+}
+
 export type CustomerListFilters = {
   filter?: string | null;
   q?: string | null;
   take?: number;
 };
+
+export type CustomerListQuery = PaginationQuery & {
+  filter?: string | null;
+};
+
+export type CustomerRowDto = {
+  createdAt: Date;
+  email: string | null;
+  id: string;
+  name: string;
+  notes: string | null;
+  phone: string | null;
+  status: string;
+};
+
+function customerDto(customer: CustomerRowDto): CustomerRowDto {
+  return {
+    createdAt: customer.createdAt,
+    email: customer.email,
+    id: customer.id,
+    name: customer.name,
+    notes: customer.notes,
+    phone: customer.phone,
+    status: customer.status,
+  };
+}
+
+export function whereCustomers(query: CustomerListQuery, companyId: string) {
+  const search = query.q?.trim();
+  const status = normalizeCustomerStatus(query.filter);
+
+  return composeQuery([
+    { companyId },
+    status ? { status } : null,
+    search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { phone: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : null,
+  ]);
+}
+
+export async function getCustomers(
+  db: Db,
+  companyId: string,
+  query: CustomerListQuery,
+) {
+  const where = whereCustomers(query, companyId);
+  const { queryProps, response } = await composeQueryData(
+    query,
+    where,
+    db.customer,
+  );
+  const customers = await db.customer.findMany({
+    ...queryProps,
+    select: {
+      createdAt: true,
+      email: true,
+      id: true,
+      name: true,
+      notes: true,
+      phone: true,
+      status: true,
+    },
+  });
+
+  return response(customers.map(customerDto));
+}
 
 export async function listFilteredCustomersForCompany(
   db: Db,
@@ -368,14 +472,58 @@ export type CustomerOfferOverview = {
   offerAmount: string | null;
   message: string | null;
   submittedAt: Date;
+  selectedPlot: {
+    id: string;
+    plotCode: string;
+    status: "available" | "held" | "reserved" | "sold" | "blocked";
+  } | null;
   property: {
     id: string;
     title: string;
     location: string;
     price: string | null;
     imageUrl: string | null;
+    estateId: string | null;
   };
 };
+
+type CustomerOfferSelectedPlot = NonNullable<
+  CustomerOfferOverview["selectedPlot"]
+>;
+
+export type CustomerPlotSelectionDetails = {
+  offer: CustomerOfferOverview;
+  estate: {
+    id: string;
+    title: string;
+    slug: string;
+    location: string | null;
+  };
+  layout: {
+    id: string;
+    sourceUrl: string;
+    normalizedImageUrl: string | null;
+    imageWidth: number | null;
+    imageHeight: number | null;
+    version: number;
+  };
+  plots: Array<{
+    id: string;
+    plotCode: string;
+    block: string | null;
+    street: string | null;
+    sizeSqm: number | null;
+    price: string | null;
+    status: "available" | "held" | "reserved" | "sold" | "blocked";
+    coordinatesJson: unknown;
+  }>;
+};
+
+const offerSelectionNotePrefix = "customer_offer:";
+
+function buildOfferSelectionNote(offerId: string) {
+  return `${offerSelectionNotePrefix}${offerId}`;
+}
 
 export async function hasPendingOfferForCustomer(
   db: Db,
@@ -539,6 +687,7 @@ export async function listOffersForCustomer(
       createdAt: true,
       property: {
         select: {
+          estateId: true,
           id: true,
           title: true,
           location: true,
@@ -549,12 +698,343 @@ export async function listOffersForCustomer(
     },
   });
 
-  return offers.map((offer) => ({
-    id: offer.id,
-    status: offer.status as CustomerOfferOverview["status"],
-    offerAmount: offer.offerAmount,
-    message: offer.message,
-    submittedAt: offer.createdAt,
-    property: offer.property,
-  }));
+  return Promise.all(
+    offers.map(async (offer) => {
+      const selectedPlot = offer.property.estateId
+        ? await db.plot.findFirst({
+            select: {
+              id: true,
+              plotCode: true,
+              status: true,
+            },
+            where: {
+              companyId: input.companyId,
+              deletedAt: null,
+              reservationChoices: {
+                some: {
+                  isPrimary: true,
+                  reservation: {
+                    companyId: input.companyId,
+                    customerId: input.customerId,
+                    estateId: offer.property.estateId,
+                    notes: { contains: buildOfferSelectionNote(offer.id) },
+                    status: "approved",
+                  },
+                },
+              },
+            },
+          })
+        : null;
+
+      return {
+        id: offer.id,
+        status: offer.status as CustomerOfferOverview["status"],
+        offerAmount: offer.offerAmount,
+        message: offer.message,
+        selectedPlot: selectedPlot
+          ? {
+              id: selectedPlot.id,
+              plotCode: selectedPlot.plotCode,
+              status:
+                selectedPlot.status as CustomerOfferSelectedPlot["status"],
+            }
+          : null,
+        submittedAt: offer.createdAt,
+        property: offer.property,
+      };
+    }),
+  );
+}
+
+export async function getCustomerPlotSelectionDetails(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    offerId: string;
+  },
+): Promise<CustomerPlotSelectionDetails | null> {
+  const offer = await db.customerOffer.findFirst({
+    where: {
+      companyId: input.companyId,
+      customerId: input.customerId,
+      id: input.offerId,
+      status: "accepted",
+      customer: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+      property: {
+        companyId: input.companyId,
+        deletedAt: null,
+        estateId: { not: null },
+      },
+    },
+    select: {
+      id: true,
+      status: true,
+      offerAmount: true,
+      message: true,
+      createdAt: true,
+      property: {
+        select: {
+          estate: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              location: true,
+              layouts: {
+                orderBy: [
+                  { status: "desc" },
+                  { version: "desc" },
+                  { createdAt: "desc" },
+                ],
+                select: {
+                  id: true,
+                  sourceUrl: true,
+                  normalizedImageUrl: true,
+                  imageWidth: true,
+                  imageHeight: true,
+                  version: true,
+                },
+                take: 1,
+                where: {
+                  status: { in: ["published", "draft"] },
+                },
+              },
+              plots: {
+                orderBy: [{ plotCode: "asc" }, { createdAt: "asc" }],
+                select: {
+                  id: true,
+                  plotCode: true,
+                  block: true,
+                  street: true,
+                  sizeSqm: true,
+                  price: true,
+                  status: true,
+                  coordinatesJson: true,
+                },
+                where: { deletedAt: null },
+              },
+            },
+          },
+          estateId: true,
+          id: true,
+          imageUrl: true,
+          location: true,
+          price: true,
+          title: true,
+        },
+      },
+    },
+  });
+
+  const estate = offer?.property.estate;
+  const layout = estate?.layouts[0];
+
+  if (!offer || !estate || !layout) return null;
+
+  const selectedPlot = await db.plot.findFirst({
+    select: {
+      id: true,
+      plotCode: true,
+      status: true,
+    },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      reservationChoices: {
+        some: {
+          isPrimary: true,
+          reservation: {
+            companyId: input.companyId,
+            customerId: input.customerId,
+            estateId: estate.id,
+            notes: { contains: buildOfferSelectionNote(offer.id) },
+            status: "approved",
+          },
+        },
+      },
+    },
+  });
+
+  return {
+    estate: {
+      id: estate.id,
+      location: estate.location,
+      slug: estate.slug,
+      title: estate.title,
+    },
+    layout,
+    offer: {
+      id: offer.id,
+      message: offer.message,
+      offerAmount: offer.offerAmount,
+      property: {
+        estateId: offer.property.estateId,
+        id: offer.property.id,
+        imageUrl: offer.property.imageUrl,
+        location: offer.property.location,
+        price: offer.property.price,
+        title: offer.property.title,
+      },
+      selectedPlot: selectedPlot
+        ? {
+            id: selectedPlot.id,
+            plotCode: selectedPlot.plotCode,
+            status: selectedPlot.status as CustomerOfferSelectedPlot["status"],
+          }
+        : null,
+      status: offer.status as CustomerOfferOverview["status"],
+      submittedAt: offer.createdAt,
+    },
+    plots: estate.plots.map((plot) => ({
+      ...plot,
+      coordinatesJson: plot.coordinatesJson,
+      status:
+        plot.status as CustomerPlotSelectionDetails["plots"][number]["status"],
+    })),
+  };
+}
+
+export async function selectPreferredPlotForAcceptedOffer(
+  db: Db,
+  input: {
+    companyId: string;
+    customerId: string;
+    offerId: string;
+    plotId: string;
+  },
+) {
+  return db.$transaction(async (tx) => {
+    const offer = await tx.customerOffer.findFirst({
+      where: {
+        companyId: input.companyId,
+        customerId: input.customerId,
+        id: input.offerId,
+        status: "accepted",
+        customer: {
+          companyId: input.companyId,
+          deletedAt: null,
+        },
+        property: {
+          companyId: input.companyId,
+          deletedAt: null,
+          estateId: { not: null },
+        },
+      },
+      select: {
+        id: true,
+        property: {
+          select: {
+            estateId: true,
+          },
+        },
+      },
+    });
+
+    const estateId = offer?.property.estateId;
+
+    if (!offer || !estateId) {
+      throw new Error(
+        "Plot selection is only available for accepted estate offers.",
+      );
+    }
+
+    const existingReservation = await tx.plotReservation.findFirst({
+      select: { id: true },
+      where: {
+        companyId: input.companyId,
+        customerId: input.customerId,
+        estateId,
+        notes: { contains: buildOfferSelectionNote(offer.id) },
+        status: "approved",
+      },
+    });
+
+    if (existingReservation) {
+      throw new Error("A plot has already been selected for this offer.");
+    }
+
+    const plot = await tx.plot.findFirst({
+      select: {
+        id: true,
+        status: true,
+      },
+      where: {
+        companyId: input.companyId,
+        deletedAt: null,
+        estateId,
+        id: input.plotId,
+      },
+    });
+
+    if (!plot) {
+      throw new Error("Selected plot could not be found for this estate.");
+    }
+
+    if (plot.status !== "available") {
+      throw new Error(
+        "That plot is no longer available. Please choose another plot.",
+      );
+    }
+
+    const updateResult = await tx.plot.updateMany({
+      data: { status: "reserved" },
+      where: {
+        companyId: input.companyId,
+        deletedAt: null,
+        estateId,
+        id: input.plotId,
+        status: "available",
+      },
+    });
+
+    if (updateResult.count !== 1) {
+      throw new Error(
+        "That plot is no longer available. Please choose another plot.",
+      );
+    }
+
+    const reservation = await tx.plotReservation.create({
+      data: {
+        approvedAt: new Date(),
+        choices: {
+          create: {
+            isPrimary: true,
+            plotId: input.plotId,
+            rank: 1,
+            status: "selected",
+          },
+        },
+        companyId: input.companyId,
+        customerId: input.customerId,
+        estateId,
+        notes: `${buildOfferSelectionNote(offer.id)}; source:portal_plot_selection`,
+        status: "approved",
+        submittedAt: new Date(),
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await tx.plotStatusHistory.create({
+      data: {
+        actorCustomerId: input.customerId,
+        fromStatus: "available",
+        metadataJson: {
+          customerOfferId: offer.id,
+          plotReservationId: reservation.id,
+          source: "portal_plot_selection",
+        },
+        plotId: input.plotId,
+        reason: "Customer selected preferred plot from accepted offer.",
+        toStatus: "reserved",
+      },
+    });
+
+    return { plotId: input.plotId, reservationId: reservation.id };
+  });
 }

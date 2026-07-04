@@ -67,6 +67,12 @@ describe("tenant domain helpers", () => {
       }),
     ).toBe("http://dashboard.acme.app-plotkeys.localhost:1355/onboarding");
     expect(
+      buildPlatformAppUrl({
+        currentOrigin: "http://plotkeys.localhost:1355",
+        pathname: "/sign-up",
+      }),
+    ).toBe("http://app-plotkeys.localhost:1355/sign-up");
+    expect(
       buildTenantDashboardUrl("acme", {
         currentOrigin: "https://acme.plotkeys.com",
         pathname: "/onboarding",
@@ -75,6 +81,12 @@ describe("tenant domain helpers", () => {
     expect(
       buildTenantSiteUrl("acme", {
         currentOrigin: "http://plotkeys.localhost:1355",
+        pathname: "/",
+      }),
+    ).toBe("http://acme.tenant-plotkeys.localhost:1355/");
+    expect(
+      buildTenantSiteUrl("acme", {
+        currentOrigin: "https://plotkeys.localhost:1355",
         pathname: "/",
       }),
     ).toBe("http://acme.tenant-plotkeys.localhost:1355/");

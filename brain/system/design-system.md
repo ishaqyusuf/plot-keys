@@ -132,6 +132,7 @@ This file defines the shared design-system foundation for PlotKeys across the da
 ## Current Implementation
 - `packages/ui/src/globals.css` now provides the first semantic token contract for background, foreground, muted text, surface layers, borders, radius, shadows, and primary/accent roles.
 - `packages/ui/src/globals.css` is now also responsible for the default dark-mode token contract; page code should not compensate for missing dark colors with app-local overrides.
+- `packages/ui/src/assets/logo.svg`, `logo-horizontal.svg`, and `logo-vertical.svg` are the canonical PlotKeys logo vector sources. Run `bun run brand:logos` from the repo root to regenerate synced SVG, PNG, app icon, and favicon assets for `apps/website`, `apps/dashboard`, `apps/tenant-site`, and `packages/ui`.
 - Typography now intentionally splits between serif display headings and a sans-serif product reading stack.
 - Shared starter primitives now follow a shadcn-style API and include `Alert`, `Badge`, `Button`, `Card`, `Input`, `Label`, `Select`, `Textarea`, and `SectionHeading`.
 - `packages/ui/src/components` now holds the installed Shadcn-derived component set directly, replacing the previous custom primitive implementations and exposing each component through explicit package subpath exports rather than a shared barrel file.

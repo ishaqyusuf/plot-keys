@@ -2,8 +2,8 @@
 
 import { Button } from "@plotkeys/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
 import { useTRPC } from "../../trpc/client";
 
 export function UpdateProjectStatusButton({
@@ -17,14 +17,12 @@ export function UpdateProjectStatusButton({
   label: string;
   variant?: "default" | "outline" | "secondary" | "destructive";
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const mutation = useMutation(
     trpc.projects.update.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 
@@ -41,14 +39,12 @@ export function UpdateProjectStatusButton({
 }
 
 export function DeleteProjectButton({ projectId }: { projectId: string }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const mutation = useMutation(
     trpc.projects.delete.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { buildRequestContext } from "@plotkeys/api/context";
-import { createAssetService } from "@plotkeys/api/asset-service";
+import { createTenantAssetFromUpload } from "@plotkeys/api/asset-service";
 import { appRouter } from "@plotkeys/api/router";
 import {
   authRoutes,
@@ -14,18 +14,42 @@ import {
   verifyUserEmail,
 } from "@plotkeys/auth";
 import {
-  acceptTeamInvite,
-  createBlogPost,
-  createPrismaClient,
-  deleteBlogPost,
-  findUserByEmail,
-  getBlogPostForCompany,
-  setBlogPostStatus,
-  updateBlogPost,
-} from "@plotkeys/db";
-import { installApp, uninstallApp } from "@plotkeys/db/queries/company-apps";
-import { resolveActiveDraftForCompany } from "@plotkeys/db/queries/website";
+  acceptTeamInviteForUser,
+  checkTenantSubdomainAvailability,
+  completeTeamInviteProfile,
+  createCompanyDepartment,
+  createCompanyEmployee,
+  createCompanyLeaveRequest,
+  createCompanyPayrollEntry,
+  deleteCompanyDepartment,
+  deleteCompanyEmployee,
+  getAgentReportCsv,
+  getAppointmentExportRows,
+  getBusinessSummaryCsv,
+  getCustomerExportRows,
+  getEmployeeExportRows,
+  getLeadExportRows,
+  getListingsReportCsv,
+  getCompanyDisplayName,
+  getActiveDraftForCompany,
+  getPropertyExportRows,
+  getUniqueEstateSlugForCompany,
+  getTeamInviteProfileCompletionData,
+  getTeamInviteSignupData,
+  getTenantOnboardingForUser,
+  installCompanyApp,
+  markCompanyPayrollPaid,
+  saveTenantOnboardingCompletionProgress,
+  setCompanyLeaveRequestStatus,
+  uninstallCompanyApp,
+  updateCompanyDepartment,
+  updateCompanyEmployee,
+  type EmployeeEmploymentTypeValue,
+  type EmployeeStatusValue,
+  type LeaveTypeValue,
+} from "@plotkeys/db/queries";
 import {
+  buildDashboardUrl,
   EMPLOYEE_WORK_ROLE_VALUES,
   isWorkRole,
   normalizeSubdomainLabel,
@@ -36,18 +60,18 @@ import {
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { sendWorkspaceInvitationNotification } from "../lib/invite-notifications";
+import { sendWorkspaceInvitationNotification } from "@/lib/invite-notifications";
 import {
   requireAuthenticatedSession,
   requireOnboardedSession,
-} from "../lib/session";
+} from "@/lib/session";
 import {
   clearAuthSessionCookie,
   clearPendingOnboardingCookie,
   readPendingOnboardingCookie,
   setPendingOnboardingCookie,
-} from "../lib/session-cookie";
-import { getTenantSignInUrlForSubdomain } from "../lib/tenant-dashboard-url";
+} from "@/lib/session-cookie";
+import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
 
 const reservedSubdomains = new Set([
   "admin",
@@ -65,69 +89,6 @@ function createRedirectUrl(path: string, params: Record<string, string>) {
   return `${path}?${searchParams.toString()}`;
 }
 
-function normalizeBlogSlug(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
-
-async function ensureUniqueBlogSlug(
-  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
-  companyId: string,
-  requestedSlug: string,
-  excludeId?: string,
-) {
-  const baseSlug = normalizeBlogSlug(requestedSlug) || "untitled-post";
-  let candidate = baseSlug;
-  let suffix = 2;
-
-  while (true) {
-    const existing = await prisma.blogPost.findFirst({
-      select: { id: true },
-      where: {
-        companyId,
-        deletedAt: null,
-        slug: candidate,
-        ...(excludeId ? { id: { not: excludeId } } : {}),
-      },
-    });
-
-    if (!existing) return candidate;
-
-    candidate = `${baseSlug}-${suffix}`;
-    suffix += 1;
-  }
-}
-
-async function ensureUniqueEstateSlug(
-  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
-  companyId: string,
-  requestedSlug: string,
-) {
-  const baseSlug = normalizeBlogSlug(requestedSlug) || "estate-launch";
-  let candidate = baseSlug;
-  let suffix = 2;
-
-  while (true) {
-    const existing = await prisma.estate.findFirst({
-      select: { id: true },
-      where: {
-        companyId,
-        deletedAt: null,
-        slug: candidate,
-      },
-    });
-
-    if (!existing) return candidate;
-
-    candidate = `${baseSlug}-${suffix}`;
-    suffix += 1;
-  }
-}
-
 function parsePropertyPricingPlans(formData: FormData) {
   const raw = String(formData.get("paymentPlansJson") ?? "").trim();
   if (!raw) return null;
@@ -140,38 +101,7 @@ function parsePropertyPricingPlans(formData: FormData) {
   }
 }
 
-async function syncPropertyCoverImageUrl(
-  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
-  input: { companyId: string; propertyId: string },
-) {
-  const cover = await prisma.propertyMedia.findFirst({
-    include: { asset: true },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    where: {
-      isCover: true,
-      kind: "image",
-      property: {
-        companyId: input.companyId,
-        deletedAt: null,
-        id: input.propertyId,
-      },
-    },
-  });
-
-  await prisma.property.update({
-    data: { imageUrl: cover?.asset?.publicUrl ?? cover?.url ?? null },
-    where: {
-      companyId: input.companyId,
-      deletedAt: null,
-      id: input.propertyId,
-    },
-  });
-}
-
-async function assertSubdomainAvailability(
-  prisma: NonNullable<ReturnType<typeof createPrismaClient>["db"]>,
-  subdomain: string,
-) {
+async function assertSubdomainAvailability(subdomain: string) {
   if (!subdomain || subdomain.length < 3) {
     throw new Error("Choose a subdomain with at least 3 characters.");
   }
@@ -180,14 +110,13 @@ async function assertSubdomainAvailability(
     throw new Error("That subdomain is reserved. Choose another one.");
   }
 
-  const existingCompany = await prisma.company.findFirst({
-    where: {
-      deletedAt: null,
-      slug: subdomain,
-    },
-  });
+  const availability = await checkTenantSubdomainAvailability(subdomain);
 
-  if (existingCompany) {
+  if (!availability.ok && availability.reason === "database-unavailable") {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+
+  if (!availability.ok) {
     throw new Error("That subdomain is already in use.");
   }
 }
@@ -231,7 +160,7 @@ async function createServerCaller() {
 }
 
 function getDashboardAppUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901";
+  return buildDashboardUrl();
 }
 
 async function getRequestOrigin() {
@@ -268,7 +197,6 @@ async function inviteWorkspaceUser(input: {
   workRole?: WorkRole | null;
 }) {
   const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
   let errorRedirect: string | null = null;
 
   try {
@@ -279,15 +207,15 @@ async function inviteWorkspaceUser(input: {
       workRole: input.workRole,
     });
 
-    const company = prisma
-      ? await prisma.company.findUnique({
-          select: { name: true },
-          where: { id: session.activeMembership.companyId },
-        })
-      : null;
+    const company = await getCompanyDisplayName(
+      session.activeMembership.companyId,
+    );
 
     await sendWorkspaceInvitationNotification({
-      companyName: company?.name ?? "your company",
+      companyId: session.activeMembership.companyId,
+      companyName: company.ok
+        ? (company.name ?? "your company")
+        : "your company",
       inviteUrl: new URL(result.inviteUrl, getDashboardAppUrl()).toString(),
       inviterId: session.user.id,
       inviterName: session.user.name ?? session.user.email,
@@ -319,18 +247,13 @@ export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const phoneNumber = String(formData.get("phoneNumber") ?? "");
-  const prisma = createPrismaClient().db;
   const subdomain = normalizeSubdomainLabel(
     String(formData.get("subdomain") ?? ""),
   );
 
   let redirectUrl: string;
   try {
-    if (!prisma) {
-      throw new Error("DATABASE_URL is not configured.");
-    }
-
-    await assertSubdomainAvailability(prisma, subdomain);
+    await assertSubdomainAvailability(subdomain);
 
     const { user, verificationToken } = await signUpUser({
       email,
@@ -420,11 +343,11 @@ export async function completeOnboardingAction(formData: FormData) {
 
   // Load persisted onboarding record from DB (durable across devices/sessions).
   // Fall back to the cookie for users who signed up before DB persistence was added.
-  const prisma = createPrismaClient().db;
-  const savedOnboarding = prisma
-    ? await prisma.tenantOnboarding.findUnique({
-        where: { userId: session.user.id },
-      })
+  const savedOnboardingResult = await getTenantOnboardingForUser(
+    session.user.id,
+  );
+  const savedOnboarding = savedOnboardingResult.ok
+    ? savedOnboardingResult.onboarding
     : null;
 
   const companyName =
@@ -453,22 +376,23 @@ export async function completeOnboardingAction(formData: FormData) {
 
     // Persist the final market + template selection so the record is up-to-date
     // before the workspace procedure reads it.
-    if (savedOnboarding && prisma) {
-      await prisma.tenantOnboarding.update({
-        data: {
-          currentStep: "completing",
-          hasAgents: formData.get("hasAgents") === "on",
-          hasBlogContent: formData.get("hasBlogContent") === "on",
-          hasExistingContent: formData.get("hasExistingContent") === "on",
-          hasListings: formData.get("hasListings") === "on",
-          hasLogo: formData.get("hasLogo") === "on",
-          hasProjects: formData.get("hasProjects") === "on",
-          hasTestimonials: formData.get("hasTestimonials") === "on",
-          market,
-          templateKey,
-        },
-        where: { userId: session.user.id },
+    if (savedOnboarding) {
+      const progressResult = await saveTenantOnboardingCompletionProgress({
+        hasAgents: formData.get("hasAgents") === "on",
+        hasBlogContent: formData.get("hasBlogContent") === "on",
+        hasExistingContent: formData.get("hasExistingContent") === "on",
+        hasListings: formData.get("hasListings") === "on",
+        hasLogo: formData.get("hasLogo") === "on",
+        hasProjects: formData.get("hasProjects") === "on",
+        hasTestimonials: formData.get("hasTestimonials") === "on",
+        market,
+        templateKey,
+        userId: session.user.id,
       });
+
+      if (!progressResult.ok) {
+        throw new Error("DATABASE_URL is not configured.");
+      }
     }
 
     const caller = await createServerCaller();
@@ -501,12 +425,11 @@ export async function setPendingOnboardingLogoAction(logoUrl: string | null) {
   const session = await requireAuthenticatedSession();
   const cookieStore = await cookies();
   const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
-  const prisma = createPrismaClient().db;
-
-  const savedOnboarding = prisma
-    ? await prisma.tenantOnboarding.findUnique({
-        where: { userId: session.user.id },
-      })
+  const savedOnboardingResult = await getTenantOnboardingForUser(
+    session.user.id,
+  );
+  const savedOnboarding = savedOnboardingResult.ok
+    ? savedOnboardingResult.onboarding
     : null;
 
   const company =
@@ -555,6 +478,119 @@ export async function createTemplateDraftSilentAction(formData: FormData) {
 
   revalidatePath("/builder");
   return result;
+}
+
+export async function createTemplateSandboxProfileAction(formData: FormData) {
+  const caller = await createServerCaller();
+  const result = await caller.templateSandbox.create({
+    companyName: String(formData.get("companyName") ?? "Sandbox Homes"),
+    market: String(formData.get("market") ?? "Lagos"),
+    name: String(formData.get("name") ?? "").trim() || undefined,
+    planTier:
+      (String(formData.get("planTier") ?? "starter") as
+        | "starter"
+        | "plus"
+        | "pro") ?? "starter",
+    subdomainLabel: normalizeSubdomainLabel(
+      String(formData.get("subdomainLabel") ?? "sandbox"),
+    ),
+    templateKey: String(formData.get("templateKey") ?? "riwaq-starter"),
+  });
+
+  revalidatePath("/template-sandbox");
+  redirect(`/template-sandbox/${result.id}?created=1`);
+}
+
+export async function updateTemplateSandboxProfileAction(formData: FormData) {
+  const profileId = String(formData.get("profileId") ?? "");
+  const caller = await createServerCaller();
+  await caller.templateSandbox.update({
+    companyName: String(formData.get("companyName") ?? "").trim() || undefined,
+    market: String(formData.get("market") ?? "").trim() || null,
+    name: String(formData.get("name") ?? "").trim() || undefined,
+    planTier:
+      (String(formData.get("planTier") ?? "") as
+        | "starter"
+        | "plus"
+        | "pro"
+        | "") || undefined,
+    profileId,
+    subdomainLabel:
+      normalizeSubdomainLabel(String(formData.get("subdomainLabel") ?? "")) ||
+      null,
+    templateKey: String(formData.get("templateKey") ?? "").trim() || undefined,
+  });
+
+  revalidatePath("/template-sandbox");
+  revalidatePath(`/template-sandbox/${profileId}`);
+}
+
+export async function updateTemplateSandboxContentFieldAction(
+  formData: FormData,
+) {
+  const profileId = String(
+    formData.get("profileId") ?? formData.get("configId") ?? "",
+  );
+  const caller = await createServerCaller();
+  await caller.templateSandbox.updateContentField({
+    contentKey: String(formData.get("contentKey") ?? ""),
+    profileId,
+    value: String(formData.get("value") ?? ""),
+  });
+
+  revalidatePath(`/template-sandbox/${profileId}`);
+}
+
+export async function updateTemplateSandboxThemeFieldAction(
+  formData: FormData,
+) {
+  const profileId = String(
+    formData.get("profileId") ?? formData.get("configId") ?? "",
+  );
+  const caller = await createServerCaller();
+  await caller.templateSandbox.updateThemeField({
+    profileId,
+    themeKey: String(formData.get("themeKey") ?? ""),
+    value: String(formData.get("value") ?? ""),
+  });
+
+  revalidatePath(`/template-sandbox/${profileId}`);
+}
+
+export async function smartFillTemplateSandboxFieldAction(formData: FormData) {
+  const profileId = String(
+    formData.get("profileId") ?? formData.get("configId") ?? "",
+  );
+  const contentKey = String(formData.get("contentKey") ?? "");
+  const label = String(formData.get("shortDetail") ?? contentKey)
+    .replace(/\./g, " ")
+    .trim();
+  const caller = await createServerCaller();
+  await caller.templateSandbox.updateContentField({
+    contentKey,
+    profileId,
+    value: `Sandbox ${label || "content"} for rapid template testing.`,
+  });
+
+  revalidatePath(`/template-sandbox/${profileId}`);
+}
+
+export async function cloneTemplateSandboxProfileAction(formData: FormData) {
+  const profileId = String(formData.get("profileId") ?? "");
+  const caller = await createServerCaller();
+  const result = await caller.templateSandbox.clone({ profileId });
+
+  revalidatePath("/template-sandbox");
+  redirect(`/template-sandbox/${result.id}?cloned=1`);
+}
+
+export async function archiveTemplateSandboxProfileAction(formData: FormData) {
+  const profileId = String(formData.get("profileId") ?? "");
+  const caller = await createServerCaller();
+  await caller.templateSandbox.archive({ profileId });
+
+  revalidatePath("/template-sandbox");
+  redirect("/template-sandbox?archived=1");
 }
 
 export async function updateSiteThemeFieldAction(formData: FormData) {
@@ -693,19 +729,15 @@ export async function ensureBuilderConfigurationExists() {
     const result = await caller.workspace.ensureBuilderConfigurationExists();
 
     const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-
-    if (!prisma) {
-      redirect("/sign-in?error=DATABASE_URL is not configured.");
-    }
-
-    // Phase 4: Check WebsiteVersion instead of SiteConfiguration
-    const draft = await resolveActiveDraftForCompany(
-      prisma,
+    const draftResult = await getActiveDraftForCompany(
       session.activeMembership.companyId,
     );
 
-    if (!draft) {
+    if (!draftResult.ok) {
+      redirect("/sign-in?error=DATABASE_URL is not configured.");
+    }
+
+    if (!draftResult.activeDraft) {
       redirect(`/builder?configId=${result.configId}`);
     }
   } catch {}
@@ -976,19 +1008,17 @@ export async function createEstateAction(formData: FormData) {
   let redirectUrl: string;
   try {
     const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-
-    if (!prisma) {
-      throw new Error("Database unavailable.");
-    }
 
     const title = String(formData.get("title") ?? "").trim();
     const slugInput = String(formData.get("slug") ?? "").trim() || title;
-    const slug = await ensureUniqueEstateSlug(
-      prisma,
-      session.activeMembership.companyId,
-      slugInput,
-    );
+    const slugResult = await getUniqueEstateSlugForCompany({
+      companyId: session.activeMembership.companyId,
+      requestedSlug: slugInput,
+    });
+    if (!slugResult.ok) {
+      throw new Error("Database unavailable.");
+    }
+    const slug = slugResult.slug;
 
     const caller = await createServerCaller();
     await caller.workspace.createEstate({
@@ -1016,247 +1046,6 @@ export async function createEstateAction(formData: FormData) {
   }
 
   redirect(redirectUrl);
-}
-
-export async function updateEstateAction(formData: FormData) {
-  const estateId = String(formData.get("estateId") ?? "").trim();
-  const estateSlug = String(formData.get("estateSlug") ?? "").trim();
-  const redirectBase = estateSlug ? `/estates/${estateSlug}` : "/estates";
-
-  let redirectUrl: string;
-  try {
-    if (!estateId) {
-      throw new Error("Estate launch not found.");
-    }
-
-    const caller = await createServerCaller();
-    await caller.workspace.updateEstate({
-      estateId,
-      title: String(formData.get("title") ?? "").trim(),
-      description: String(formData.get("description") ?? "").trim() || null,
-      amenities: String(formData.get("amenities") ?? "").trim() || null,
-      approvals: String(formData.get("approvals") ?? "").trim() || null,
-      brochureUrl: String(formData.get("brochureUrl") ?? "").trim() || null,
-      heroImageUrl: String(formData.get("heroImageUrl") ?? "").trim() || null,
-      landmarks: String(formData.get("landmarks") ?? "").trim() || null,
-      location: String(formData.get("location") ?? "").trim() || null,
-      phaseLabel: String(formData.get("phaseLabel") ?? "").trim() || null,
-      publishState: String(formData.get("publishState") ?? "draft") as
-        | "draft"
-        | "published"
-        | "archived",
-      specialPurposeUses:
-        String(formData.get("specialPurposeUses") ?? "").trim() || null,
-    });
-
-    revalidatePath("/estates");
-    revalidatePath(redirectBase);
-    redirectUrl = redirectBase;
-  } catch (error) {
-    redirectUrl = `${redirectBase}?error=${encodeURIComponent(
-      error instanceof Error ? error.message : "Unable to update estate.",
-    )}`;
-  }
-
-  redirect(redirectUrl);
-}
-
-export async function createEstateLayoutAction(formData: FormData) {
-  const estateId = String(formData.get("estateId") ?? "").trim();
-  const estateSlug = String(formData.get("estateSlug") ?? "").trim();
-  const sourceUrl = String(formData.get("sourceUrl") ?? "").trim();
-  const redirectBase = estateSlug ? `/estates/${estateSlug}` : "/estates";
-
-  let redirectUrl: string;
-  try {
-    const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-
-    if (!prisma) {
-      throw new Error("Database unavailable.");
-    }
-
-    if (!estateId || !sourceUrl) {
-      throw new Error("Upload an estate plan before saving.");
-    }
-
-    const estate = await prisma.estate.findFirst({
-      select: { id: true },
-      where: {
-        companyId: session.activeMembership.companyId,
-        deletedAt: null,
-        id: estateId,
-      },
-    });
-
-    if (!estate) {
-      throw new Error("Estate launch not found.");
-    }
-
-    const latest = await prisma.estateLayout.findFirst({
-      orderBy: { version: "desc" },
-      select: { version: true },
-      where: { estateId },
-    });
-
-    await prisma.estateLayout.create({
-      data: {
-        estateId,
-        sourceUrl,
-        version: (latest?.version ?? 0) + 1,
-      },
-    });
-
-    revalidatePath(redirectBase);
-    redirectUrl = redirectBase;
-  } catch (error) {
-    redirectUrl = `${redirectBase}?error=${encodeURIComponent(
-      error instanceof Error ? error.message : "Unable to save estate plan.",
-    )}`;
-  }
-
-  redirect(redirectUrl);
-}
-
-// ─── Blog actions ─────────────────────────────────────────────────────────
-
-export async function createBlogPostAction() {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    redirect("/blog?error=Database%20unavailable.");
-  }
-
-  const companyId = session.activeMembership.companyId;
-
-  try {
-    const slug = await ensureUniqueBlogSlug(prisma, companyId, "untitled-post");
-    const post = await createBlogPost(prisma, {
-      authorId: session.user.id,
-      companyId,
-      content: "# Untitled post\n\nStart writing here.",
-      excerpt: "Add a short summary for this article.",
-      slug,
-      title: "Untitled post",
-    });
-
-    revalidatePath("/blog");
-    redirect(`/blog/${post.id}?created=1`);
-  } catch (error) {
-    redirect(
-      `/blog?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to create blog post.",
-      )}`,
-    );
-  }
-}
-
-export async function updateBlogPostAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-  const blogPostId = String(formData.get("blogPostId") ?? "");
-
-  if (!prisma) {
-    redirect(`/blog/${blogPostId}?error=Database%20unavailable.`);
-  }
-
-  const companyId = session.activeMembership.companyId;
-
-  try {
-    const existing = await getBlogPostForCompany(prisma, blogPostId, companyId);
-    if (!existing) {
-      throw new Error("Blog post not found.");
-    }
-
-    const title = String(formData.get("title") ?? "").trim() || existing.title;
-    const slugInput =
-      String(formData.get("slug") ?? "").trim() || title || existing.slug;
-    const slug = await ensureUniqueBlogSlug(
-      prisma,
-      companyId,
-      slugInput,
-      blogPostId,
-    );
-
-    await updateBlogPost(prisma, blogPostId, companyId, {
-      content: String(formData.get("content") ?? "").trim(),
-      excerpt: String(formData.get("excerpt") ?? "").trim() || null,
-      featuredImage: String(formData.get("featuredImage") ?? "").trim() || null,
-      slug,
-      title,
-    });
-
-    revalidatePath("/blog");
-    revalidatePath(`/blog/${blogPostId}`);
-    redirect(`/blog/${blogPostId}?saved=1`);
-  } catch (error) {
-    redirect(
-      `/blog/${blogPostId}?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to save blog post.",
-      )}`,
-    );
-  }
-}
-
-export async function updateBlogPostStatusAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-  const blogPostId = String(formData.get("blogPostId") ?? "");
-  const status = String(formData.get("status") ?? "").trim() as
-    | "draft"
-    | "published"
-    | "archived";
-
-  if (!prisma) {
-    redirect(`/blog/${blogPostId}?error=Database%20unavailable.`);
-  }
-
-  try {
-    await setBlogPostStatus(
-      prisma,
-      blogPostId,
-      session.activeMembership.companyId,
-      status,
-    );
-    revalidatePath("/blog");
-    revalidatePath(`/blog/${blogPostId}`);
-    redirect(`/blog/${blogPostId}?saved=1`);
-  } catch (error) {
-    redirect(
-      `/blog/${blogPostId}?error=${encodeURIComponent(
-        error instanceof Error
-          ? error.message
-          : "Unable to update blog status.",
-      )}`,
-    );
-  }
-}
-
-export async function deleteBlogPostAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
-  const blogPostId = String(formData.get("blogPostId") ?? "");
-
-  if (!prisma) {
-    redirect("/blog?error=Database%20unavailable.");
-  }
-
-  try {
-    await deleteBlogPost(
-      prisma,
-      blogPostId,
-      session.activeMembership.companyId,
-    );
-    revalidatePath("/blog");
-    redirect("/blog");
-  } catch (error) {
-    redirect(
-      `/blog/${blogPostId}?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unable to delete blog post.",
-      )}`,
-    );
-  }
 }
 
 // ─── Agent actions ────────────────────────────────────────────────────────
@@ -1603,14 +1392,9 @@ export async function signUpForInviteAction(formData: FormData) {
   const token = String(formData.get("token") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const prisma = createPrismaClient().db;
   let redirectUrl: string | null = null;
 
   try {
-    if (!prisma) {
-      throw new Error("Database not configured.");
-    }
-
     if (!name) {
       throw new Error("Full name is required.");
     }
@@ -1619,47 +1403,52 @@ export async function signUpForInviteAction(formData: FormData) {
       throw new Error("Password must be at least 8 characters long.");
     }
 
-    const invite = await prisma.teamInvite.findUnique({
-      where: { token },
-    });
+    const inviteData = await getTeamInviteSignupData(token);
 
-    if (!invite) {
-      throw new Error("Invite not found.");
-    }
+    if (!inviteData.ok) {
+      let message: string;
 
-    if (invite.acceptedAt) {
-      throw new Error("Invite already accepted.");
-    }
+      switch (inviteData.reason) {
+        case "database-unavailable":
+          message = "Database not configured.";
+          break;
+        case "invite-accepted":
+          message = "Invite already accepted.";
+          break;
+        case "invite-revoked":
+          message = "Invite has been revoked.";
+          break;
+        case "invite-expired":
+          message = "Invite has expired.";
+          break;
+        case "user-exists":
+          message = [
+            "An account already exists for this email.",
+            "Sign in to accept the invite.",
+          ].join(" ");
+          break;
+        default:
+          message = "Invite not found.";
+      }
 
-    if (invite.revokedAt) {
-      throw new Error("Invite has been revoked.");
-    }
-
-    if (invite.expiresAt < new Date()) {
-      throw new Error("Invite has expired.");
-    }
-
-    const email = invite.email.trim().toLowerCase();
-    const existingUser = await findUserByEmail(prisma, email);
-
-    if (existingUser) {
-      throw new Error(
-        "An account already exists for this email. Sign in to accept the invite.",
-      );
+      throw new Error(message);
     }
 
     const { user } = await signUpUser({
-      db: prisma,
-      email,
+      email: inviteData.email,
       emailVerified: true,
       name,
       password,
     });
 
-    await acceptTeamInvite(prisma, {
+    const acceptResult = await acceptTeamInviteForUser({
       token,
       userId: user.id,
     });
+    if (!acceptResult.ok) {
+      throw new Error("Database not configured.");
+    }
+
     await setSessionCookie(user.id);
 
     revalidatePath("/team");
@@ -1667,7 +1456,7 @@ export async function signUpForInviteAction(formData: FormData) {
     revalidatePath("/hr/employees");
 
     redirectUrl =
-      invite.role === "agent" || invite.role === "staff"
+      inviteData.invite.role === "agent" || inviteData.invite.role === "staff"
         ? `/join/${token}/complete`
         : "/";
   } catch (err) {
@@ -1725,45 +1514,9 @@ export async function inviteEmployeeAction(formData: FormData) {
 
 export async function completeInviteProfileAction(formData: FormData) {
   const session = await requireAuthenticatedSession();
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
   const token = String(formData.get("token") ?? "").trim();
-  const invite = await prisma.teamInvite.findUnique({
-    include: {
-      company: {
-        select: { id: true, name: true },
-      },
-    },
-    where: { token },
-  });
-
-  if (!invite) {
-    redirect(createRedirectUrl("/", { error: "Invite not found." }));
-  }
-
-  if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
-    redirect(
-      createRedirectUrl(`/join/${token}`, {
-        error: "This invite belongs to a different email address.",
-      }),
-    );
-  }
-
-  if (!invite.acceptedAt) {
-    redirect(
-      createRedirectUrl(`/join/${token}`, {
-        error: "Accept the invite before completing your profile.",
-      }),
-    );
-  }
-
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim() || null;
-  const title =
-    invite.role === "agent"
-      ? "Agent"
-      : (WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole);
 
   if (!name) {
     redirect(
@@ -1773,75 +1526,67 @@ export async function completeInviteProfileAction(formData: FormData) {
     );
   }
 
-  if (invite.role === "agent") {
-    const bio = String(formData.get("bio") ?? "").trim() || null;
-    const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
-    const existingAgent = await prisma.agent.findFirst({
-      where: {
-        companyId: invite.companyId,
-        deletedAt: null,
-        email: invite.email,
-      },
-    });
+  const inviteData = await getTeamInviteProfileCompletionData({
+    token,
+    userEmail: session.user.email,
+  });
 
-    if (existingAgent) {
-      await prisma.agent.update({
-        data: {
-          bio,
-          imageUrl,
-          name,
-          phone,
-          title,
-        },
-        where: { id: existingAgent.id },
-      });
-    } else {
-      await prisma.agent.create({
-        data: {
-          bio,
-          companyId: invite.companyId,
-          email: invite.email,
-          imageUrl,
-          name,
-          phone,
-          title,
-        },
-      });
-    }
+  if (!inviteData.ok) {
+    const error =
+      inviteData.reason === "email-mismatch"
+        ? "This invite belongs to a different email address."
+        : inviteData.reason === "invite-not-accepted"
+          ? "Accept the invite before completing your profile."
+          : inviteData.reason === "database-unavailable"
+            ? "Database not configured."
+            : "Invite not found.";
+    const redirectPath =
+      inviteData.reason === "email-mismatch" ||
+      inviteData.reason === "invite-not-accepted"
+        ? `/join/${token}`
+        : "/";
 
+    redirect(createRedirectUrl(redirectPath, { error }));
+  }
+
+  const { invite } = inviteData;
+  const isAgentInvite = invite.role === "agent";
+  const title = isAgentInvite
+    ? "Agent"
+    : (WORK_ROLE_LABELS[invite.workRole] ?? invite.workRole);
+  const result = await completeTeamInviteProfile({
+    bio: isAgentInvite ? String(formData.get("bio") ?? "").trim() || null : null,
+    imageUrl: isAgentInvite
+      ? String(formData.get("imageUrl") ?? "").trim() || null
+      : null,
+    name,
+    phone,
+    title,
+    token,
+    userEmail: session.user.email,
+  });
+
+  if (!result.ok) {
+    const error =
+      result.reason === "email-mismatch"
+        ? "This invite belongs to a different email address."
+        : result.reason === "invite-not-accepted"
+          ? "Accept the invite before completing your profile."
+          : result.reason === "database-unavailable"
+            ? "Database not configured."
+            : "Invite not found.";
+    const redirectPath =
+      result.reason === "email-mismatch" ||
+      result.reason === "invite-not-accepted"
+        ? `/join/${token}`
+        : "/";
+
+    redirect(createRedirectUrl(redirectPath, { error }));
+  }
+
+  if (result.profileKind === "agent") {
     revalidatePath("/agents");
-  } else if (invite.role === "staff") {
-    const existingEmployee = await prisma.employee.findFirst({
-      where: {
-        companyId: invite.companyId,
-        deletedAt: null,
-        email: invite.email,
-      },
-    });
-
-    if (existingEmployee) {
-      await prisma.employee.update({
-        data: {
-          name,
-          phone,
-          title,
-          workRole: invite.workRole,
-        },
-        where: { id: existingEmployee.id },
-      });
-    } else {
-      await prisma.employee.create({
-        data: {
-          companyId: invite.companyId,
-          email: invite.email,
-          name,
-          phone,
-          title,
-          workRole: invite.workRole,
-        },
-      });
-    }
-
+  } else {
     revalidatePath("/hr/employees");
     revalidatePath("/hr/leave");
   }
@@ -1950,92 +1695,6 @@ export async function revokeInviteAction(formData: FormData) {
 
 // ─── Property media + publish state ──────────────────────────────────────
 
-export async function updatePropertyPublishStateAction(formData: FormData) {
-  const propertyId = String(formData.get("propertyId") ?? "");
-  const publishState = String(formData.get("publishState") ?? "draft") as
-    | "draft"
-    | "published"
-    | "archived";
-
-  try {
-    const caller = await createServerCaller();
-    await caller.propertyMedia.updatePublishState({ propertyId, publishState });
-    revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
-  } catch {
-    // Silent — page reload will show current state
-  }
-}
-
-export async function addPropertyMediaAction(formData: FormData) {
-  const propertyId = String(formData.get("propertyId") ?? "");
-  const url = String(formData.get("url") ?? "");
-  const kind = String(formData.get("kind") ?? "image") as
-    | "image"
-    | "floor_plan"
-    | "virtual_tour";
-  const isCover = formData.get("isCover") === "true";
-
-  let errorRedirect: string | null = null;
-  try {
-    const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-    if (!prisma) throw new Error("DB unavailable.");
-
-    const property = await prisma.property.findFirst({
-      select: { id: true },
-      where: {
-        companyId: session.activeMembership.companyId,
-        deletedAt: null,
-        id: propertyId,
-      },
-    });
-    if (!property) throw new Error("Property not found.");
-
-    const caller = await createServerCaller();
-    if (kind === "virtual_tour") {
-      await caller.propertyMedia.addMedia({ propertyId, url, kind, isCover });
-    } else {
-      const assetService = createAssetService(prisma);
-      const asset = await assetService.createFromRemoteUrl({
-        companyId: session.activeMembership.companyId,
-        fileName: kind,
-        originKind: "import",
-        originMeta: { sourceUrl: url },
-        scope: "properties",
-        scopeId: propertyId,
-        url,
-      });
-
-      await caller.propertyMedia.addMedia({
-        assetId: asset.id,
-        isCover,
-        kind,
-        propertyId,
-      });
-    }
-
-    if (isCover && kind === "image") {
-      await syncPropertyCoverImageUrl(prisma, {
-        companyId: session.activeMembership.companyId,
-        propertyId,
-      });
-    }
-
-    revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to add media.";
-    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
-      error: message,
-    });
-  }
-
-  if (errorRedirect) {
-    redirect(errorRedirect);
-  }
-}
-
 export async function uploadPropertyMediaAction(formData: FormData) {
   const propertyId = String(formData.get("propertyId") ?? "");
   const file = formData.get("file");
@@ -2047,24 +1706,11 @@ export async function uploadPropertyMediaAction(formData: FormData) {
   let errorRedirect: string | null = null;
   try {
     const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-    if (!prisma) throw new Error("DB unavailable.");
     if (!file || !(file instanceof File)) {
       throw new Error("Choose a file to upload.");
     }
 
-    const property = await prisma.property.findFirst({
-      select: { id: true },
-      where: {
-        companyId: session.activeMembership.companyId,
-        deletedAt: null,
-        id: propertyId,
-      },
-    });
-    if (!property) throw new Error("Property not found.");
-
-    const assetService = createAssetService(prisma);
-    const asset = await assetService.createFromUpload({
+    const result = await createTenantAssetFromUpload({
       body: await file.arrayBuffer(),
       byteSize: file.size,
       companyId: session.activeMembership.companyId,
@@ -2073,105 +1719,26 @@ export async function uploadPropertyMediaAction(formData: FormData) {
       scope: "properties",
       scopeId: propertyId,
     });
+    if (!result.ok) {
+      throw new Error(
+        result.reason === "property-not-found"
+          ? "Property not found."
+          : "DB unavailable.",
+      );
+    }
 
     const caller = await createServerCaller();
     await caller.propertyMedia.addMedia({
-      assetId: asset.id,
+      assetId: result.asset.id,
       isCover,
       kind,
       propertyId,
     });
-    if (isCover && kind === "image") {
-      await syncPropertyCoverImageUrl(prisma, {
-        companyId: session.activeMembership.companyId,
-        propertyId,
-      });
-    }
     revalidatePath("/properties");
     revalidatePath(`/properties/${propertyId}`);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to upload media.";
-    errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
-      error: message,
-    });
-  }
-
-  if (errorRedirect) {
-    redirect(errorRedirect);
-  }
-}
-
-export async function deletePropertyMediaAction(formData: FormData) {
-  const mediaId = String(formData.get("mediaId") ?? "");
-  const propertyId = String(formData.get("propertyId") ?? "");
-
-  try {
-    const caller = await createServerCaller();
-    await caller.propertyMedia.deleteMedia({ mediaId, propertyId });
-    revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
-  } catch {
-    // Silent
-  }
-}
-
-export async function setPropertyCoverAction(formData: FormData) {
-  const mediaId = String(formData.get("mediaId") ?? "");
-  const propertyId = String(formData.get("propertyId") ?? "");
-
-  try {
-    const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-    if (!prisma) throw new Error("DB unavailable.");
-    const caller = await createServerCaller();
-    await caller.propertyMedia.setCover({ mediaId, propertyId });
-    await syncPropertyCoverImageUrl(prisma, {
-      companyId: session.activeMembership.companyId,
-      propertyId,
-    });
-    revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
-  } catch {
-    // Silent
-  }
-}
-
-export async function importPublicImageToPropertyAction(formData: FormData) {
-  const propertyId = String(formData.get("propertyId") ?? "");
-  const imageId = String(formData.get("imageId") ?? "");
-  const provider = String(formData.get("provider") ?? "unsplash") as
-    | "unsplash"
-    | "pexels"
-    | "pixabay";
-  const isCover = formData.get("isCover") === "true";
-
-  let errorRedirect: string | null = null;
-  try {
-    const session = await requireOnboardedSession();
-    const prisma = createPrismaClient().db;
-    if (!prisma) throw new Error("DB unavailable.");
-
-    const caller = await createServerCaller();
-    await caller.publicImages.importToProperty({
-      imageId,
-      isCover,
-      propertyId,
-      provider,
-    });
-
-    if (isCover) {
-      await syncPropertyCoverImageUrl(prisma, {
-        companyId: session.activeMembership.companyId,
-        propertyId,
-      });
-    }
-
-    revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to import image.";
     errorRedirect = createRedirectUrl(`/properties/${propertyId}`, {
       error: message,
     });
@@ -2194,69 +1761,13 @@ export async function markAllNotificationsReadAction() {
   }
 }
 
-// ─── Customers ────────────────────────────────────────────────────────────
-
-export async function createCustomerAction(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").trim() || null;
-  const notes = String(formData.get("notes") ?? "").trim() || null;
-  const status = String(formData.get("status") ?? "active") as
-    | "active"
-    | "inactive"
-    | "vip";
-  const sourceLeadId =
-    String(formData.get("sourceLeadId") ?? "").trim() || null;
-
-  let errorRedirect: string | null = null;
-  try {
-    const caller = await createServerCaller();
-    await caller.customers.create({
-      name,
-      email,
-      phone,
-      notes,
-      status,
-      sourceLeadId,
-    });
-    revalidatePath("/customers");
-    revalidatePath("/leads");
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to create customer.";
-    errorRedirect = createRedirectUrl("/customers", { error: message });
-  }
-
-  if (errorRedirect) {
-    redirect(errorRedirect);
-  } else {
-    redirect("/customers?created=1");
-  }
-}
-
-export async function updateCustomerStatusAction(formData: FormData) {
-  const customerId = String(formData.get("customerId") ?? "");
-  const status = String(formData.get("status") ?? "active") as
-    | "active"
-    | "inactive"
-    | "vip";
+export async function markNotificationReadAction(formData: FormData) {
+  const notificationId = String(formData.get("notificationId") ?? "");
 
   try {
     const caller = await createServerCaller();
-    await caller.customers.update({ customerId, status });
-    revalidatePath("/customers");
-  } catch {
-    // Silent
-  }
-}
-
-export async function deleteCustomerAction(formData: FormData) {
-  const customerId = String(formData.get("customerId") ?? "");
-
-  try {
-    const caller = await createServerCaller();
-    await caller.customers.delete({ customerId });
-    revalidatePath("/customers");
+    await caller.notifications.markRead({ notificationId });
+    revalidatePath("/notifications");
   } catch {
     // Silent
   }
@@ -2303,8 +1814,6 @@ export async function convertLeadToCustomerAction(formData: FormData) {
 export async function createEmployeeAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim() || null;
@@ -2315,7 +1824,7 @@ export async function createEmployeeAction(formData: FormData) {
     String(formData.get("departmentId") ?? "").trim() || null;
   const employmentType = String(
     formData.get("employmentType") ?? "full_time",
-  ) as "full_time" | "part_time" | "contract" | "intern";
+  ) as EmployeeEmploymentTypeValue;
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
   const salaryRaw = String(formData.get("salaryAmount") ?? "").trim();
   const workRole = isWorkRole(rawWorkRole) ? rawWorkRole : "operations";
@@ -2326,20 +1835,20 @@ export async function createEmployeeAction(formData: FormData) {
     );
   }
 
-  await prisma.employee.create({
-    data: {
-      companyId,
-      name,
-      email,
-      phone,
-      title,
-      workRole,
-      departmentId,
-      employmentType,
-      startDate: startDateRaw ? new Date(startDateRaw) : null,
-      salaryAmount: salaryRaw ? Number.parseInt(salaryRaw, 10) : null,
-    },
+  const result = await createCompanyEmployee({
+    companyId,
+    departmentId,
+    email,
+    employmentType,
+    name,
+    phone,
+    salaryAmount: salaryRaw ? Number.parseInt(salaryRaw, 10) : null,
+    startDate: startDateRaw ? new Date(startDateRaw) : null,
+    title,
+    workRole,
   });
+
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/employees");
   redirect("/hr/employees?created=1");
@@ -2348,8 +1857,6 @@ export async function createEmployeeAction(formData: FormData) {
 export async function updateEmployeeAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const employeeId = String(formData.get("employeeId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
@@ -2370,19 +1877,11 @@ export async function updateEmployeeAction(formData: FormData) {
   const employmentType =
     rawEmploymentType === null
       ? undefined
-      : (String(rawEmploymentType).trim() as
-          | "full_time"
-          | "part_time"
-          | "contract"
-          | "intern");
+      : (String(rawEmploymentType).trim() as EmployeeEmploymentTypeValue);
   const status =
     rawStatus === null
       ? undefined
-      : (String(rawStatus).trim() as
-          | "active"
-          | "on_leave"
-          | "suspended"
-          | "terminated");
+      : (String(rawStatus).trim() as EmployeeStatusValue);
   const workRole: WorkRole | undefined =
     rawWorkRole === null
       ? undefined
@@ -2390,19 +1889,22 @@ export async function updateEmployeeAction(formData: FormData) {
         ? (String(rawWorkRole).trim() as WorkRole)
         : "operations";
 
-  await prisma.employee.update({
-    where: { id: employeeId, companyId },
+  const result = await updateCompanyEmployee({
+    companyId,
     data: {
-      name,
+      departmentId,
       email,
+      employmentType,
+      name,
       phone,
+      status,
       title,
       workRole,
-      departmentId,
-      employmentType,
-      status,
     },
+    employeeId,
   });
+
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/employees");
 }
@@ -2410,15 +1912,11 @@ export async function updateEmployeeAction(formData: FormData) {
 export async function deleteEmployeeAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const employeeId = String(formData.get("employeeId") ?? "");
+  const result = await deleteCompanyEmployee({ companyId, employeeId });
 
-  await prisma.employee.update({
-    where: { id: employeeId, companyId },
-    data: { deletedAt: new Date() },
-  });
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/employees");
 }
@@ -2430,8 +1928,6 @@ export async function deleteEmployeeAction(formData: FormData) {
 export async function createDepartmentAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
@@ -2442,9 +1938,9 @@ export async function createDepartmentAction(formData: FormData) {
     );
   }
 
-  await prisma.department.create({
-    data: { companyId, name, description },
-  });
+  const result = await createCompanyDepartment({ companyId, description, name });
+
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/departments");
   redirect("/hr/departments?created=1");
@@ -2453,17 +1949,17 @@ export async function createDepartmentAction(formData: FormData) {
 export async function updateDepartmentAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const departmentId = String(formData.get("departmentId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
-
-  await prisma.department.update({
-    where: { id: departmentId, companyId },
-    data: { name, description },
+  const result = await updateCompanyDepartment({
+    companyId,
+    data: { description, name },
+    departmentId,
   });
+
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/departments");
 }
@@ -2471,15 +1967,11 @@ export async function updateDepartmentAction(formData: FormData) {
 export async function deleteDepartmentAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const departmentId = String(formData.get("departmentId") ?? "");
+  const result = await deleteCompanyDepartment({ companyId, departmentId });
 
-  await prisma.department.update({
-    where: { id: departmentId, companyId },
-    data: { deletedAt: new Date() },
-  });
+  if (!result.ok) throw new Error("Database not configured.");
 
   revalidatePath("/hr/departments");
 }
@@ -2506,13 +1998,9 @@ function toCsvRow(
 export async function exportLeadsCsvAction() {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const leads = await prisma.lead.findMany({
-    where: { companyId },
-    orderBy: { createdAt: "desc" },
-  });
+  const result = await getLeadExportRows(companyId);
+  if (!result.ok) throw new Error("Database not configured.");
+  const leads = result.data;
 
   const header = toCsvRow([
     "Name",
@@ -2541,13 +2029,9 @@ export async function exportLeadsCsvAction() {
 export async function exportPropertiesCsvAction() {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const properties = await prisma.property.findMany({
-    where: { companyId, deletedAt: null },
-    orderBy: { createdAt: "desc" },
-  });
+  const result = await getPropertyExportRows(companyId);
+  if (!result.ok) throw new Error("Database not configured.");
+  const properties = result.data;
 
   const header = toCsvRow([
     "Title",
@@ -2582,13 +2066,9 @@ export async function exportPropertiesCsvAction() {
 export async function exportCustomersCsvAction() {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const customers = await prisma.customer.findMany({
-    where: { companyId, deletedAt: null },
-    orderBy: { createdAt: "desc" },
-  });
+  const result = await getCustomerExportRows(companyId);
+  if (!result.ok) throw new Error("Database not configured.");
+  const customers = result.data;
 
   const header = toCsvRow([
     "Name",
@@ -2615,17 +2095,9 @@ export async function exportCustomersCsvAction() {
 export async function exportAppointmentsCsvAction() {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const appointments = await prisma.appointment.findMany({
-    where: { companyId },
-    include: {
-      property: { select: { title: true } },
-      agent: { select: { name: true } },
-    },
-    orderBy: { scheduledAt: "desc" },
-  });
+  const result = await getAppointmentExportRows(companyId);
+  if (!result.ok) throw new Error("Database not configured.");
+  const appointments = result.data;
 
   const header = toCsvRow([
     "Client Name",
@@ -2658,14 +2130,9 @@ export async function exportAppointmentsCsvAction() {
 export async function exportEmployeesCsvAction() {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const employees = await prisma.employee.findMany({
-    where: { companyId, deletedAt: null },
-    include: { department: { select: { name: true } } },
-    orderBy: { name: "asc" },
-  });
+  const result = await getEmployeeExportRows(companyId);
+  if (!result.ok) throw new Error("Database not configured.");
+  const employees = result.data;
 
   const header = toCsvRow([
     "Name",
@@ -2702,17 +2169,11 @@ export async function exportEmployeesCsvAction() {
 export async function createLeaveRequestAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const leaveType = String(formData.get("leaveType") ?? "annual") as
-    | "annual"
-    | "sick"
-    | "maternity"
-    | "paternity"
-    | "unpaid"
-    | "compassionate";
+  const leaveType = String(
+    formData.get("leaveType") ?? "annual",
+  ) as LeaveTypeValue;
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
   const endDateRaw = String(formData.get("endDate") ?? "").trim();
   const reason = String(formData.get("reason") ?? "").trim() || null;
@@ -2725,23 +2186,22 @@ export async function createLeaveRequestAction(formData: FormData) {
     );
   }
 
-  // Verify employee belongs to this company
-  const employee = await prisma.employee.findFirst({
-    where: { id: employeeId, companyId, deletedAt: null },
+  const result = await createCompanyLeaveRequest({
+    companyId,
+    employeeId,
+    endDate: new Date(endDateRaw),
+    leaveType,
+    reason,
+    startDate: new Date(startDateRaw),
   });
-  if (!employee) {
-    redirect(createRedirectUrl("/hr/leave", { error: "Employee not found." }));
+
+  if (!result.ok && result.reason === "database-unavailable") {
+    throw new Error("Database not configured.");
   }
 
-  await prisma.leaveRequest.create({
-    data: {
-      employeeId,
-      leaveType,
-      startDate: new Date(startDateRaw),
-      endDate: new Date(endDateRaw),
-      reason,
-    },
-  });
+  if (!result.ok) {
+    redirect(createRedirectUrl("/hr/leave", { error: "Employee not found." }));
+  }
 
   revalidatePath("/hr/leave");
   redirect("/hr/leave?created=1");
@@ -2750,25 +2210,20 @@ export async function createLeaveRequestAction(formData: FormData) {
 export async function approveLeaveRequestAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
-
-  // Verify the leave request belongs to an employee of this company
-  const request = await prisma.leaveRequest.findFirst({
-    where: { id: leaveRequestId, employee: { companyId } },
+  const result = await setCompanyLeaveRequestStatus({
+    approvedById: session.user.id,
+    companyId,
+    leaveRequestId,
+    status: "approved",
   });
-  if (!request) return;
 
-  await prisma.leaveRequest.update({
-    where: { id: leaveRequestId },
-    data: {
-      status: "approved",
-      approvedById: session.user.id,
-      approvedAt: new Date(),
-    },
-  });
+  if (!result.ok && result.reason === "database-unavailable") {
+    throw new Error("Database not configured.");
+  }
+
+  if (!result.ok) return;
 
   revalidatePath("/hr/leave");
 }
@@ -2776,20 +2231,19 @@ export async function approveLeaveRequestAction(formData: FormData) {
 export async function rejectLeaveRequestAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
-
-  const request = await prisma.leaveRequest.findFirst({
-    where: { id: leaveRequestId, employee: { companyId } },
+  const result = await setCompanyLeaveRequestStatus({
+    companyId,
+    leaveRequestId,
+    status: "rejected",
   });
-  if (!request) return;
 
-  await prisma.leaveRequest.update({
-    where: { id: leaveRequestId },
-    data: { status: "rejected" },
-  });
+  if (!result.ok && result.reason === "database-unavailable") {
+    throw new Error("Database not configured.");
+  }
+
+  if (!result.ok) return;
 
   revalidatePath("/hr/leave");
 }
@@ -2797,20 +2251,19 @@ export async function rejectLeaveRequestAction(formData: FormData) {
 export async function cancelLeaveRequestAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const leaveRequestId = String(formData.get("leaveRequestId") ?? "");
-
-  const request = await prisma.leaveRequest.findFirst({
-    where: { id: leaveRequestId, employee: { companyId } },
+  const result = await setCompanyLeaveRequestStatus({
+    companyId,
+    leaveRequestId,
+    status: "cancelled",
   });
-  if (!request) return;
 
-  await prisma.leaveRequest.update({
-    where: { id: leaveRequestId },
-    data: { status: "cancelled" },
-  });
+  if (!result.ok && result.reason === "database-unavailable") {
+    throw new Error("Database not configured.");
+  }
+
+  if (!result.ok) return;
 
   revalidatePath("/hr/leave");
 }
@@ -2822,8 +2275,6 @@ export async function cancelLeaveRequestAction(formData: FormData) {
 export async function createPayrollEntryAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const employeeId = String(formData.get("employeeId") ?? "").trim();
   const periodYear = Number.parseInt(
@@ -2852,27 +2303,25 @@ export async function createPayrollEntryAction(formData: FormData) {
     );
   }
 
-  // Verify employee belongs to this company
-  const employee = await prisma.employee.findFirst({
-    where: { id: employeeId, companyId, deletedAt: null },
+  const result = await createCompanyPayrollEntry({
+    companyId,
+    employeeId,
+    grossAmount,
+    netAmount,
+    notes,
+    periodMonth,
+    periodYear,
   });
-  if (!employee) {
+
+  if (!result.ok && result.reason === "database-unavailable") {
+    throw new Error("Database not configured.");
+  }
+
+  if (!result.ok) {
     redirect(
       createRedirectUrl("/hr/payroll", { error: "Employee not found." }),
     );
   }
-
-  await prisma.payrollEntry.create({
-    data: {
-      companyId,
-      employeeId,
-      periodYear,
-      periodMonth,
-      grossAmount,
-      netAmount,
-      notes,
-    },
-  });
 
   revalidatePath("/hr/payroll");
   redirect(`/hr/payroll?year=${periodYear}&month=${periodMonth}&created=1`);
@@ -2881,15 +2330,13 @@ export async function createPayrollEntryAction(formData: FormData) {
 export async function markPayrollPaidAction(formData: FormData) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
 
   const payrollEntryId = String(formData.get("payrollEntryId") ?? "");
+  const result = await markCompanyPayrollPaid({ companyId, payrollEntryId });
 
-  await prisma.payrollEntry.update({
-    where: { id: payrollEntryId, companyId },
-    data: { status: "paid", paidAt: new Date() },
-  });
+  if (!result.ok) {
+    throw new Error("Database not configured.");
+  }
 
   revalidatePath("/hr/payroll");
 }
@@ -2899,12 +2346,6 @@ export async function markPayrollPaidAction(formData: FormData) {
 // ---------------------------------------------------------------------------
 
 export async function updateNotificationPreferenceAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const companyId = session.activeMembership.companyId;
-  const userId = session.user.id;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
   const type = String(formData.get("type") ?? "");
   const channel = String(formData.get("channel") ?? "");
   const enabled = String(formData.get("enabled") ?? "true") === "true";
@@ -2918,13 +2359,8 @@ export async function updateNotificationPreferenceAction(formData: FormData) {
   const inApp = channel === "inApp" ? enabled : currentInApp;
   const email = channel === "email" ? enabled : currentEmail;
 
-  await prisma.notificationPreference.upsert({
-    where: {
-      companyId_userId_type: { companyId, userId, type },
-    },
-    create: { companyId, userId, type, inApp, email },
-    update: { inApp, email },
-  });
+  const caller = await createServerCaller();
+  await caller.notifications.updatePreference({ email, inApp, type });
 
   revalidatePath("/settings/notifications");
 }
@@ -2939,17 +2375,9 @@ export async function exportBusinessSummaryCsvAction(
 ): Promise<string> {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const { getMonthlyBusinessSummary, businessSummaryToCsv } = await import(
-    "@plotkeys/db"
-  );
-  const summary = await getMonthlyBusinessSummary(prisma, companyId, {
-    year,
-    month,
-  });
-  return businessSummaryToCsv(summary);
+  const result = await getBusinessSummaryCsv({ companyId, month, year });
+  if (!result.ok) throw new Error("Database not configured.");
+  return result.csv;
 }
 
 export async function exportAgentReportCsvAction(
@@ -2958,30 +2386,17 @@ export async function exportAgentReportCsvAction(
 ): Promise<string> {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const { getAgentPerformanceReport, agentPerformanceToCsv } = await import(
-    "@plotkeys/db"
-  );
-  const report = await getAgentPerformanceReport(prisma, companyId, {
-    year,
-    month,
-  });
-  return agentPerformanceToCsv(report);
+  const result = await getAgentReportCsv({ companyId, month, year });
+  if (!result.ok) throw new Error("Database not configured.");
+  return result.csv;
 }
 
 export async function exportListingsReportCsvAction(): Promise<string> {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
-  const { getListingsReport, listingsReportToCsv } = await import(
-    "@plotkeys/db"
-  );
-  const report = await getListingsReport(prisma, companyId);
-  return listingsReportToCsv(report);
+  const result = await getListingsReportCsv({ companyId });
+  if (!result.ok) throw new Error("Database not configured.");
+  return result.csv;
 }
 
 // ---------------------------------------------------------------------------
@@ -2989,11 +2404,6 @@ export async function exportListingsReportCsvAction(): Promise<string> {
 // ---------------------------------------------------------------------------
 
 export async function updateIntegrationsAction(formData: FormData) {
-  const session = await requireOnboardedSession();
-  const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("Database not configured.");
-
   const googleAnalyticsId =
     String(formData.get("googleAnalyticsId") ?? "").trim() || null;
   const facebookPixelId =
@@ -3002,23 +2412,15 @@ export async function updateIntegrationsAction(formData: FormData) {
     String(formData.get("whatsappPhone") ?? "").trim() || null;
   const calendlyUrl = String(formData.get("calendlyUrl") ?? "").trim() || null;
 
-  await prisma.companyIntegration.upsert({
-    where: { companyId },
-    create: {
-      companyId,
-      googleAnalyticsId,
-      facebookPixelId,
-      whatsappPhone,
-      calendlyUrl,
-    },
-    update: {
-      googleAnalyticsId,
-      facebookPixelId,
-      whatsappPhone,
-      calendlyUrl,
-    },
+  const caller = await createServerCaller();
+  await caller.workspace.updateCompanyIntegration({
+    calendlyUrl,
+    facebookPixelId,
+    googleAnalyticsId,
+    whatsappPhone,
   });
 
+  revalidatePath("/integrations");
   revalidatePath("/settings/integrations");
   redirect("/settings/integrations?saved=1");
 }
@@ -3030,17 +2432,15 @@ export async function updateIntegrationsAction(formData: FormData) {
 export async function installAppAction(appKey: string) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("DATABASE_URL is not configured.");
-  await installApp(prisma, companyId, appKey);
+  const result = await installCompanyApp({ appKey, companyId });
+  if (!result.ok) throw new Error("DATABASE_URL is not configured.");
   revalidatePath("/app-store");
 }
 
 export async function uninstallAppAction(appKey: string) {
   const session = await requireOnboardedSession();
   const companyId = session.activeMembership.companyId;
-  const prisma = createPrismaClient().db;
-  if (!prisma) throw new Error("DATABASE_URL is not configured.");
-  await uninstallApp(prisma, companyId, appKey);
+  const result = await uninstallCompanyApp({ appKey, companyId });
+  if (!result.ok) throw new Error("DATABASE_URL is not configured.");
   revalidatePath("/app-store");
 }

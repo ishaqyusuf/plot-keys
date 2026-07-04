@@ -9,8 +9,13 @@ export function getSearchKey(filters: Record<string, unknown>) {
 }
 
 export const searchIcons: Record<string, IconName> = {
-  filter: "Users",
+  department: "Briefcase",
+  featured: "Star",
+  filter: "CheckCircle",
+  period: "Calendar",
   publishState: "Globe",
+  role: "UserSettings",
   status: "CheckCircle",
   type: "Building",
+  view: "Calendar",
 };

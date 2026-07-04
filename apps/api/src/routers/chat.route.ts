@@ -69,9 +69,11 @@ export const chatRouter = createTRPCRouter({
       }
 
       // Fetch tenant context for the system prompt
-      const [properties, agents] = await Promise.all([
+      const [properties, agentsPage] = await Promise.all([
         listFeaturedProperties(db, company.id).catch(() => []),
-        listAgentsForCompany(db, company.id, { limit: 10 }).catch(() => []),
+        listAgentsForCompany(db, company.id, { limit: 10 }).catch(() => ({
+          data: [],
+        })),
       ]);
 
       // Fetch onboarding business summary if available
@@ -106,7 +108,7 @@ export const chatRouter = createTRPCRouter({
             price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
             specs: p.specs,
           })),
-          agents: agents.map((a) => ({
+          agents: agentsPage.data.map((a) => ({
             name: a.name,
             title: a.title,
             bio: a.bio,

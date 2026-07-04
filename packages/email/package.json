@@ -10,9 +10,9 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "node ../../scripts/with-workspace-env.mjs email dev -p 3003",
+    "dev": "bun ../../scripts/with-workspace-env.mjs --mode local -- email dev -p 3904",
     "lint": "biome check .",
-    "start": "node ../../scripts/with-workspace-env.mjs email start",
+    "start": "bun ../../scripts/with-workspace-env.mjs --mode production -- email start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

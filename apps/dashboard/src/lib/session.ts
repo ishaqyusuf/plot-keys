@@ -6,7 +6,7 @@ import {
   getScopedAuthSessionCookieName,
   platformSessionScope,
 } from "@plotkeys/auth";
-import { createPrismaClient, resolveTenantByHostname } from "@plotkeys/db";
+import { resolveDashboardTenantSlugByHostname } from "@plotkeys/db/queries";
 import {
   resolveDashboardLandingRoute,
   resolveDashboardSessionScope,
@@ -132,12 +132,11 @@ export async function getTenantSlugFromHost(): Promise<string | null> {
   }
 
   const tenantHostname = requestHeaders.get("x-tenant-hostname");
-  const prisma = createPrismaClient().db;
 
-  if (!tenantHostname || !prisma) {
+  if (!tenantHostname) {
     return null;
   }
 
-  const resolvedTenant = await resolveTenantByHostname(prisma, tenantHostname);
-  return resolvedTenant?.companySlug ?? null;
+  const result = await resolveDashboardTenantSlugByHostname(tenantHostname);
+  return result.ok ? result.tenantSlug : null;
 }

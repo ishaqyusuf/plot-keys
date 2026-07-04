@@ -1,23 +1,9 @@
-import {
-  createPrismaClient,
-  findCompanyById,
-  findLicensedTemplateKeys,
-  findTenantOnboardingByUserId,
-  getOrCreateDraftVersion,
-  listAgentsForCompany,
-  listBlogPostsForCompany,
-  listFeaturedProperties,
-  upsertDraftWebsiteVersion,
-} from "@plotkeys/db";
-import {
-  resolveActiveDraftForCompany,
-  resolvePublishedForCompany,
-} from "@plotkeys/db/queries/website";
+import { getBuilderWorkspaceData } from "@plotkeys/db/queries";
 import {
   createInitialSiteConfigurationInput,
   deserializeTemplateConfig,
   getTemplateDefinition,
-  getTemplatePageInventory,
+  getTemplatePageInventoryStrict,
   resolveWebsitePresentation,
   templateCatalog,
 } from "@plotkeys/section-registry";
@@ -40,6 +26,9 @@ import {
   tierLabels,
 } from "@plotkeys/utils";
 import Link from "next/link";
+import { PublishConfirmationDialog } from "@/components/modals/publish-confirmation-dialog";
+import { RecommendTemplatePanel } from "@/components/modals/recommend-template-panel-modal";
+import { BuilderSidebarDrawer } from "@/components/sheets/builder-sidebar-drawer";
 
 import {
   createTemplateDraftSilentAction,
@@ -52,13 +41,10 @@ import {
 import { getBaseUrl } from "../../lib/get-base-url";
 import { BuilderPreviewPanel } from "./builder-preview-panel";
 import { BuilderSidebarControls } from "./builder-sidebar-controls";
-import { BuilderSidebarDrawer } from "./builder-sidebar-drawer";
 import {
   AiContentBootstrapButton,
   GeneratePageContentButton,
-  RecommendTemplatePanel,
 } from "./onboarding-tools";
-import { PublishConfirmationDialog } from "./publish-confirmation-dialog";
 
 type PageNavItem = {
   label: string;
@@ -94,10 +80,22 @@ export async function BuilderWorkspace({
   previewPath,
   userId,
 }: BuilderWorkspaceProps) {
-  const prisma = createPrismaClient().db;
   const currentOrigin = await getBaseUrl();
+  const starterTemplate = getTemplateDefinition("template-1");
+  const fallbackDraft = createInitialSiteConfigurationInput({
+    companyName,
+    market: companyName,
+    subdomain: companySlug,
+    templateKey: starterTemplate.key,
+  });
+  const builderData = await getBuilderWorkspaceData({
+    companyId,
+    companySlug,
+    fallbackDraft,
+    userId,
+  });
 
-  if (!prisma) {
+  if (builderData.status === "database-unavailable") {
     return (
       <Card className="mx-auto max-w-3xl">
         <CardContent className="p-8">
@@ -114,30 +112,7 @@ export async function BuilderWorkspace({
     );
   }
 
-  const [
-    company,
-    activeDraft,
-    publishedVersion,
-    featuredProperties,
-    agents,
-    blogPosts,
-    licensedTemplateKeys,
-    onboarding,
-  ] = await Promise.all([
-    findCompanyById(prisma, companyId),
-    resolveActiveDraftForCompany(prisma, companyId),
-    resolvePublishedForCompany(prisma, companyId),
-    listFeaturedProperties(prisma, companyId, { includeUnpublished: true }),
-    listAgentsForCompany(prisma, companyId, { limit: 10 }),
-    listBlogPostsForCompany(prisma, companyId, {
-      limit: 24,
-      status: "published",
-    }),
-    findLicensedTemplateKeys(prisma, companyId),
-    findTenantOnboardingByUserId(prisma, userId),
-  ]);
-
-  if (!company) {
+  if (builderData.status === "company-not-found") {
     return (
       <Card className="mx-auto max-w-3xl">
         <CardContent className="p-8">
@@ -154,56 +129,7 @@ export async function BuilderWorkspace({
     );
   }
 
-  let resolvedActiveDraft = activeDraft;
-
-  if (!resolvedActiveDraft) {
-    const latestConfiguration = await prisma.siteConfiguration.findFirst({
-      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-      where: {
-        companyId,
-        deletedAt: null,
-      },
-    });
-
-    if (publishedVersion) {
-      await getOrCreateDraftVersion(prisma, {
-        contentJson: publishedVersion.contentJson,
-        createdById: userId,
-        themeJson: publishedVersion.themeJson,
-        websiteId: publishedVersion.websiteId,
-      });
-    } else if (latestConfiguration) {
-      await upsertDraftWebsiteVersion(prisma, {
-        companyId,
-        contentJson: latestConfiguration.contentJson as Record<string, string>,
-        createdById: userId,
-        name: latestConfiguration.name,
-        subdomain: companySlug,
-        templateKey: latestConfiguration.templateKey,
-        themeJson: latestConfiguration.themeJson as Record<string, string>,
-        updatedById: userId,
-      });
-    } else {
-      const starterTemplate = getTemplateDefinition("template-1");
-      const initialSiteConfiguration = createInitialSiteConfigurationInput({
-        companyName,
-        market: companyName,
-        subdomain: companySlug,
-        templateKey: starterTemplate.key,
-      });
-
-      await upsertDraftWebsiteVersion(prisma, {
-        ...initialSiteConfiguration,
-        companyId,
-        createdById: userId,
-        updatedById: userId,
-      });
-    }
-
-    resolvedActiveDraft = await resolveActiveDraftForCompany(prisma, companyId);
-  }
-
-  if (!resolvedActiveDraft) {
+  if (builderData.status === "draft-not-found") {
     return (
       <Card className="mx-auto max-w-3xl">
         <CardContent className="p-8">
@@ -219,6 +145,17 @@ export async function BuilderWorkspace({
       </Card>
     );
   }
+
+  const {
+    activeDraft: resolvedActiveDraft,
+    company,
+    publishedVersion,
+    featuredProperties,
+    agents,
+    blogPosts,
+    licensedTemplateKeys,
+    onboarding,
+  } = builderData;
 
   const configId = resolvedActiveDraft.id;
   const changedFieldCount = (() => {
@@ -253,7 +190,7 @@ export async function BuilderWorkspace({
   const liveSiteUrl = buildTenantSiteUrl(companySlug, {
     currentOrigin,
   });
-  const pageInventory = getTemplatePageInventory(
+  const pageInventory = getTemplatePageInventoryStrict(
     resolvedActiveDraft.templateKey,
   );
   const availablePages: PageNavItem[] = pageInventory.pages.map((page) => ({

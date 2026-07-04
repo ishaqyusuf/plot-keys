@@ -5,8 +5,8 @@ import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
 import { useTRPC } from "../../trpc/client";
 
 // ---------------------------------------------------------------------------
@@ -41,14 +41,12 @@ export function PhaseList({
   phases: Phase[];
   projectId: string;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const updateMutation = useMutation(
     trpc.projects.updatePhase.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 
@@ -116,14 +114,12 @@ export function CreatePhaseForm({
   projectId: string;
   nextOrder: number;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const createMutation = useMutation(
     trpc.projects.createPhase.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 

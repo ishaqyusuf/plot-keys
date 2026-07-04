@@ -11,12 +11,9 @@ const STATUS_LABEL: Record<CustomerOfferOverview["status"], string> = {
 };
 
 const STATUS_CLASS: Record<CustomerOfferOverview["status"], string> = {
-  pending:
-    "border-amber-200 bg-amber-50 text-amber-700",
-  accepted:
-    "border-emerald-200 bg-emerald-50 text-emerald-700",
-  rejected:
-    "border-red-200 bg-red-50 text-red-700",
+  pending: "border-amber-200 bg-amber-50 text-amber-700",
+  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  rejected: "border-red-200 bg-red-50 text-red-700",
   withdrawn:
     "border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-surface,#f8fafc)] text-[color:var(--pk-muted-foreground,#64748b)]",
 };
@@ -32,7 +29,7 @@ export function PortalOfferCard({ offer, redirectTo }: PortalOfferCardProps) {
   return (
     <article className="overflow-hidden rounded-[1.5rem] border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-card,#ffffff)] shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
       {property.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
+        // biome-ignore lint/performance/noImgElement: Tenant listing images are external URLs.
         <img
           alt={property.title}
           className="h-44 w-full object-cover"
@@ -92,6 +89,15 @@ export function PortalOfferCard({ offer, redirectTo }: PortalOfferCardProps) {
                 Withdraw
               </button>
             </form>
+          ) : offer.status === "accepted" ? (
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--pk-border,#e2e8f0)] px-4 py-2 text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition hover:border-[color:var(--pk-primary,#0f766e)] hover:text-[color:var(--pk-primary,#0f766e)]"
+              href={`/portal/offers/${offer.id}/select-plot`}
+            >
+              {offer.selectedPlot
+                ? `Plot ${offer.selectedPlot.plotCode}`
+                : "Select plot"}
+            </Link>
           ) : (
             <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--pk-muted-foreground,#64748b)]">
               {offer.submittedAt.toLocaleDateString()}

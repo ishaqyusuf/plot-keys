@@ -1,88 +1,152 @@
+#!/usr/bin/env node
+
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseEnv } from "node:util";
 
-const __filename = fileURLToPath(import.meta.url);
-const repoRoot = path.resolve(path.dirname(__filename), "..");
-const workspaceDir = process.cwd();
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(scriptDir, "..");
 
-function mergeEnvFile(filePath, targetEnv) {
-  if (!existsSync(filePath)) {
-    return;
-  }
+function parseArgs(argv) {
+  const args = [...argv];
+  let mode = process.env.NODE_ENV === "production" ? "production" : "local";
 
-  const contents = readFileSync(filePath, "utf8");
-  const parsed = parseEnv(contents);
+  while (args.length > 0) {
+    const arg = args.shift();
 
-  for (const [key, value] of Object.entries(parsed)) {
-    targetEnv[key] = value;
-  }
-}
-
-function buildEnv() {
-  const env = { ...process.env };
-  const rootEnvFiles = [
-    path.join(repoRoot, ".env"),
-    path.join(repoRoot, ".env.development"),
-  ];
-  const workspaceEnvFiles = [
-    path.join(workspaceDir, ".env"),
-    path.join(workspaceDir, ".env.development"),
-  ];
-
-  for (const filePath of rootEnvFiles) {
-    mergeEnvFile(filePath, env);
-  }
-
-  if (workspaceDir !== repoRoot) {
-    for (const filePath of workspaceEnvFiles) {
-      mergeEnvFile(filePath, env);
-    }
-  }
-
-  return env;
-}
-
-function parseCommand(argv) {
-  const envAssignments = {};
-  let index = 0;
-
-  while (index < argv.length) {
-    const token = argv[index];
-
-    if (!/^[A-Za-z_][A-Za-z0-9_]*=/.test(token)) {
+    if (arg === "--") {
       break;
     }
 
-    const separatorIndex = token.indexOf("=");
-    const key = token.slice(0, separatorIndex);
-    const value = token.slice(separatorIndex + 1);
-    envAssignments[key] = value;
-    index += 1;
+    if (arg === "--mode") {
+      mode = args.shift() ?? "";
+      continue;
+    }
+
+    if (arg?.startsWith("--mode=")) {
+      mode = arg.slice("--mode=".length);
+      continue;
+    }
+
+    args.unshift(arg);
+    break;
   }
 
-  const command = argv[index];
-  const args = argv.slice(index + 1);
-
-  if (!command) {
-    console.error("Expected a command to run.");
-    process.exit(1);
-  }
-
-  return { envAssignments, command, args };
+  return { command: args, mode };
 }
 
-const { envAssignments, command, args } = parseCommand(process.argv.slice(2));
-const env = {
-  ...buildEnv(),
-  ...envAssignments,
-};
+function parseEnvFile(filePath) {
+  const parsed = {};
 
-const child = spawn(command, args, {
-  cwd: workspaceDir,
-  env,
+  if (!existsSync(filePath)) {
+    return parsed;
+  }
+
+  for (const line of readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const match = trimmed.match(
+      /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/,
+    );
+
+    if (!match) {
+      continue;
+    }
+
+    const [, key, rawValue] = match;
+    let value = rawValue.trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    parsed[key] = value;
+  }
+
+  return parsed;
+}
+
+function envFilesForMode(mode) {
+  if (mode === "production") {
+    return [".env.production"];
+  }
+
+  if (mode === "local" || mode === "development") {
+    return [".env.local", ".env", ".env.development"];
+  }
+
+  throw new Error(`Unknown env mode "${mode}". Use "local" or "production".`);
+}
+
+function loadModeEnv(mode) {
+  for (const envFile of envFilesForMode(mode)) {
+    const parsed = parseEnvFile(resolve(workspaceRoot, envFile));
+    if (Object.keys(parsed).length > 0) return { envFile, parsed };
+  }
+
+  return { envFile: "", parsed: {} };
+}
+
+function mergeParsedEnvFiles(envFiles) {
+  return envFiles.reduce(
+    (merged, envFile) => ({
+      ...merged,
+      ...parseEnvFile(resolve(workspaceRoot, envFile)),
+    }),
+    {},
+  );
+}
+
+function buildProcessEnv(mode, selectedEnvFile, fileEnv) {
+  const processEnv = { ...process.env };
+  const fallbackEnvFiles =
+    mode === "production"
+      ? envFilesForMode("local")
+      : envFilesForMode(mode).filter((envFile) => envFile !== selectedEnvFile);
+  const fallbackEnv = mergeParsedEnvFiles(fallbackEnvFiles);
+
+  for (const [key, value] of Object.entries(fallbackEnv)) {
+    if (
+      processEnv[key] === value &&
+      fileEnv[key] !== undefined &&
+      fileEnv[key] !== value
+    ) {
+      delete processEnv[key];
+    }
+  }
+
+  return processEnv;
+}
+
+const { command, mode } = parseArgs(process.argv.slice(2));
+
+if (command.length === 0) {
+  console.error(
+    "Usage: with-workspace-env.mjs --mode local -- <command> [args...]",
+  );
+  process.exit(1);
+}
+
+const { envFile, parsed: fileEnv } = loadModeEnv(mode);
+const processEnv = buildProcessEnv(mode, envFile, fileEnv);
+
+const child = spawn(command[0], command.slice(1), {
+  cwd: process.cwd(),
+  env: {
+    ...fileEnv,
+    ...processEnv,
+    PLOTKEYS_ENV_MODE: mode === "production" ? "production" : "local",
+    PLOTKEYS_WORKSPACE_ROOT: workspaceRoot,
+  },
+  shell: process.platform === "win32",
   stdio: "inherit",
 });
 
@@ -92,7 +156,7 @@ child.on("exit", (code, signal) => {
     return;
   }
 
-  process.exit(code ?? 0);
+  process.exit(code ?? 1);
 });
 
 child.on("error", (error) => {

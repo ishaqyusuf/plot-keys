@@ -1,4 +1,4 @@
-import { optionFilter, searchFilter, type PageFilterData } from "./common";
+import { optionFilter, type PageFilterData, searchFilter } from "./common";
 
 export type CustomersPageFilterKey = "filter" | "q";
 

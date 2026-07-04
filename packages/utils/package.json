@@ -5,9 +5,13 @@
   "exports": {
     ".": "./src/index.ts",
     "./cn": "./src/cn.ts",
+    "./app-urls": "./src/app-urls.ts",
+    "./email": "./src/email.ts",
     "./phone": "./src/phone.ts",
+    "./query-response": "./src/query-response.ts",
     "./runtime-url": "./src/runtime-url.ts",
     "./tenant-domains": "./src/tenant-domains.ts",
+    "./template-sandbox-url": "./src/template-sandbox-url.ts",
     "./vercel-domains": "./src/vercel-domains.ts"
   },
   "scripts": {

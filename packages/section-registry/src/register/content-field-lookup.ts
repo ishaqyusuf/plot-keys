@@ -1,10 +1,5 @@
-import { banaContentSchema } from "./bana/common/content-schema";
-import { farisContentSchema } from "./faris/common/content-schema";
-import { noorContentSchema } from "./noor/common/content-schema";
-import { sakanContentSchema } from "./sakan/common/content-schema";
-import { thurayaContentSchema } from "./thuraya/common/content-schema";
+import { riwaqContentSchema } from "./starter/riwaq/content";
 import type { ContentFieldDef } from "./types";
-import { wafiContentSchema } from "./wafi/common/content-schema";
 
 const sharedContentFields: ContentFieldDef[] = [
   {
@@ -67,12 +62,7 @@ const sharedContentFields: ContentFieldDef[] = [
 
 const allContentSchemas = [
   ...sharedContentFields,
-  ...noorContentSchema,
-  ...banaContentSchema,
-  ...wafiContentSchema,
-  ...farisContentSchema,
-  ...thurayaContentSchema,
-  ...sakanContentSchema,
+  ...riwaqContentSchema,
 ];
 
 const contentFieldLookup = new Map<string, ContentFieldDef>();

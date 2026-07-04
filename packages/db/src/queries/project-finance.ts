@@ -15,6 +15,26 @@ export async function getProjectBudget(db: Db, projectId: string) {
   });
 }
 
+export async function getProjectBudgetDetail(
+  db: Db,
+  projectId: string,
+  companyId: string,
+) {
+  const project = await db.project.findFirst({
+    where: { id: projectId, companyId, deletedAt: null },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!project) return null;
+
+  const budget = await getProjectBudget(db, projectId);
+
+  return { budget, project };
+}
+
 export async function upsertProjectBudget(
   db: Db,
   input: {
@@ -202,6 +222,29 @@ export async function listProjectPayrollRuns(db: Db, projectId: string) {
     },
     orderBy: { periodStart: "desc" },
   });
+}
+
+export async function getProjectWorkforceDetail(
+  db: Db,
+  projectId: string,
+  companyId: string,
+) {
+  const project = await db.project.findFirst({
+    where: { id: projectId, companyId, deletedAt: null },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!project) return null;
+
+  const [workers, payrollRuns] = await Promise.all([
+    listProjectWorkers(db, projectId),
+    listProjectPayrollRuns(db, projectId),
+  ]);
+
+  return { payrollRuns, project, workers };
 }
 
 export async function getProjectPayrollRun(db: Db, payrollRunId: string) {

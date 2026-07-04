@@ -10,6 +10,7 @@ export const GLOBAL_TOP_ITEMS: GlobalNavSection = {
   items: [
     { href: "/", icon: "Home", label: "Dashboard" },
     { href: "/builder", icon: "Paintbrush", label: "Builder" },
+    { href: "/template-sandbox", icon: "Paintbrush", label: "Sandbox" },
     { href: "/live", icon: "Globe", label: "Live Preview" },
   ],
 };
@@ -34,6 +35,7 @@ export const GLOBAL_PLATFORM_GROUP: GlobalNavSection = {
  */
 export const GLOBAL_ROUTE_PREFIXES: readonly string[] = [
   "/builder",
+  "/template-sandbox",
   "/live",
   "/billing",
   "/domains",

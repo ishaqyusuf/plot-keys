@@ -1,3 +1,10 @@
+import type { Prisma } from "../generated/prisma/client";
+import {
+  ProjectStatus as ProjectStatusEnum,
+  ProjectType as ProjectTypeEnum,
+  type ProjectStatus as ProjectStatusValue,
+  type ProjectType as ProjectTypeValue,
+} from "../generated/prisma/enums";
 import type { Db } from "../prisma";
 
 // ---------------------------------------------------------------------------
@@ -41,36 +48,134 @@ export async function listProjectsForCompany(
   db: Db,
   companyId: string,
   options: {
-    status?:
-      | "draft"
-      | "active"
-      | "paused"
-      | "delayed"
-      | "completed"
-      | "archived";
+    cursor?: string | number | null;
+    q?: string | null;
+    size?: string | number | null;
+    sort?: string[] | null;
+    status?: ProjectStatusValue;
     take?: number;
   } = {},
 ) {
-  return db.project.findMany({
-    where: {
-      companyId,
-      deletedAt: null,
-      ...(options.status ? { status: options.status } : {}),
-    },
-    include: {
-      _count: {
-        select: {
-          phases: true,
-          milestones: true,
-          updates: true,
-          issues: true,
-          assignments: true,
+  const query = options.q?.trim();
+  const size = normalizePageSize(options.size ?? options.take);
+  const offset = normalizeCursor(options.cursor);
+  const where: Prisma.ProjectWhereInput = {
+    companyId,
+    deletedAt: null,
+    ...(options.status ? { status: options.status } : {}),
+    ...(query ? { OR: getProjectSearchFilters(query) } : {}),
+  };
+
+  const [count, data] = await db.$transaction([
+    db.project.count({ where }),
+    db.project.findMany({
+      include: {
+        _count: {
+          select: {
+            phases: true,
+            milestones: true,
+            updates: true,
+            issues: true,
+            assignments: true,
+          },
         },
       },
+      orderBy: getProjectOrderBy(options.sort),
+      skip: offset,
+      take: size,
+      where,
+    }),
+  ]);
+  const nextCursor = offset + size < count ? String(offset + size) : null;
+
+  return {
+    data,
+    meta: {
+      count,
+      cursor: nextCursor,
+      hasNextPage: nextCursor !== null,
+      size,
     },
-    orderBy: { createdAt: "desc" },
-    take: options.take ?? 200,
-  });
+  };
+}
+
+function normalizePageSize(size: string | number | null | undefined) {
+  const value = Number(size ?? 50);
+
+  if (!Number.isFinite(value)) {
+    return 50;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), 100);
+}
+
+function normalizeCursor(cursor: string | number | null | undefined) {
+  const value = Number(cursor ?? 0);
+
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
+}
+
+function getProjectSearchFilters(query: string): Prisma.ProjectWhereInput[] {
+  const filters: Prisma.ProjectWhereInput[] = [
+    { code: { contains: query, mode: "insensitive" } },
+    { description: { contains: query, mode: "insensitive" } },
+    { location: { contains: query, mode: "insensitive" } },
+    { name: { contains: query, mode: "insensitive" } },
+  ];
+
+  if (isProjectStatusValue(query)) {
+    filters.push({ status: { equals: query } });
+  }
+
+  if (isProjectTypeValue(query)) {
+    filters.push({ type: { equals: query } });
+  }
+
+  return filters;
+}
+
+function getProjectOrderBy(
+  sort: string[] | null | undefined,
+): Prisma.ProjectOrderByWithRelationInput {
+  const [field, value] = sort ?? [];
+  const direction = value === "asc" || value === "desc" ? value : null;
+
+  if (!direction) {
+    return { createdAt: "desc" };
+  }
+
+  switch (field) {
+    case "code":
+      return { code: direction };
+    case "createdAt":
+      return { createdAt: direction };
+    case "location":
+      return { location: direction };
+    case "name":
+      return { name: direction };
+    case "startDate":
+      return { startDate: direction };
+    case "status":
+      return { status: direction };
+    case "targetCompletionDate":
+      return { targetCompletionDate: direction };
+    case "type":
+      return { type: direction };
+    default:
+      return { createdAt: "desc" };
+  }
+}
+
+function isProjectStatusValue(value: string): value is ProjectStatusValue {
+  return Object.values(ProjectStatusEnum).includes(value as ProjectStatusValue);
+}
+
+function isProjectTypeValue(value: string): value is ProjectTypeValue {
+  return Object.values(ProjectTypeEnum).includes(value as ProjectTypeValue);
 }
 
 export async function getProjectById(
@@ -117,6 +222,75 @@ export async function getProjectById(
       },
     },
   });
+}
+
+export async function getProjectOverviewDetail(
+  db: Db,
+  projectId: string,
+  companyId: string,
+) {
+  const project = await getProjectById(db, projectId, companyId);
+
+  if (!project) return null;
+
+  const [teamMembers, budget, workers, payrollRuns, customerAccess, customers] =
+    await Promise.all([
+      db.membership.findMany({
+        where: { companyId, deletedAt: null, status: "active" },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+      }),
+      db.projectBudget.findUnique({
+        where: { projectId },
+        include: {
+          lineItems: { orderBy: { createdAt: "asc" } },
+        },
+      }),
+      db.projectWorker.findMany({
+        where: { projectId },
+        include: {
+          employee: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+      db.projectPayrollRun.findMany({
+        where: { projectId },
+        include: { _count: { select: { entries: true } } },
+        orderBy: { periodStart: "desc" },
+      }),
+      db.projectCustomerAccess.findMany({
+        where: { projectId, disabledAt: null },
+        include: {
+          customer: {
+            select: {
+              email: true,
+              id: true,
+              name: true,
+              phone: true,
+              status: true,
+            },
+          },
+        },
+        orderBy: { enabledAt: "desc" },
+      }),
+      db.customer.findMany({
+        where: { companyId, deletedAt: null },
+        orderBy: { name: "asc" },
+        select: { email: true, id: true, name: true },
+      }),
+    ]);
+
+  return {
+    budget,
+    customerAccess,
+    customers,
+    payrollRuns,
+    project,
+    teamMembers,
+    workers,
+  };
 }
 
 export async function updateProject(
@@ -178,9 +352,11 @@ export async function countProjectsByStatus(db: Db, companyId: string) {
     delayed: 0,
     completed: 0,
     archived: 0,
+    total: 0,
   };
   for (const row of rows) {
     result[row.status] = row._count.id;
+    result.total += row._count.id;
   }
   return result;
 }

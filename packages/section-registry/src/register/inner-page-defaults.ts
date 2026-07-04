@@ -1,5 +1,5 @@
 /**
- * Default content for inner pages across all register-family templates.
+ * Default content for inner pages across register templates.
  *
  * Keys use page-prefixed dot-notation (e.g. "about.hero.title") so they
  * don't collide with the home-page keys ("hero.title"). The content aliasing
@@ -150,6 +150,14 @@ export const innerPageDefaults: Record<string, Record<string, string>> = {
     "resources.hero.subtitle":
       "Guides, checklists, and tools to help you buy, sell, or rent with confidence.",
     "resources.hero.ctaText": "Explore resources",
+  },
+
+  roadmap: {
+    "roadmap.hero.eyebrow": "Project History",
+    "roadmap.hero.title": "A visible record of delivery",
+    "roadmap.hero.subtitle":
+      "Track the milestones, launches, handovers, and improvements that shaped the company over time.",
+    "roadmap.hero.ctaText": "Contact the team",
   },
 };
 

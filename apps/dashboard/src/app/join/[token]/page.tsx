@@ -1,4 +1,4 @@
-import { createPrismaClient } from "@plotkeys/db";
+import { getTeamInviteJoinPageData } from "@plotkeys/db/queries";
 import { Button } from "@plotkeys/ui/button";
 import {
   Card,
@@ -9,9 +9,11 @@ import {
   CardTitle,
 } from "@plotkeys/ui/card";
 import Link from "next/link";
-import { getCurrentAppSession } from "../../../lib/session";
-import { getTenantSignInUrlForSubdomain } from "../../../lib/tenant-dashboard-url";
-import { acceptInviteAction } from "../../actions";
+
+import { acceptInviteAction } from "@/app/actions";
+import { getCurrentAppSession } from "@/lib/session";
+import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
+
 import { InviteSignUpForm } from "./invite-sign-up-form";
 
 type JoinPageProps = {
@@ -27,16 +29,9 @@ export default async function JoinPage({
   const sp = (await searchParams) ?? {};
   const session = await getCurrentAppSession();
 
-  const prisma = createPrismaClient().db;
+  const inviteData = await getTeamInviteJoinPageData(token);
 
-  const invite = prisma
-    ? await prisma.teamInvite.findUnique({
-        where: { token },
-        include: { company: { select: { name: true, slug: true } } },
-      })
-    : null;
-
-  if (!invite) {
+  if (!inviteData.ok) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-4">
         <Card className="w-full max-w-sm text-center">
@@ -55,6 +50,8 @@ export default async function JoinPage({
       </main>
     );
   }
+
+  const { invite } = inviteData;
 
   if (invite.revokedAt || invite.expiresAt < new Date()) {
     return (

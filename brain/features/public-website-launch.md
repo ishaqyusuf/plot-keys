@@ -21,3 +21,12 @@ Track the public PlotKeys website positioning and launch gating rules.
 - `/landing` previews the full landing page in development.
 - `/early-access` previews the early access page in development.
 - Preview routes should not be publicly available in production unless that decision changes intentionally.
+
+## Tenant Site Public Routes
+- Tenant public pages now use explicit App Router files instead of a public `[...slug]` catch-all route.
+- Shared tenant page rendering lives in `apps/tenant-site/src/lib/tenant-page.tsx`.
+- Route-to-template-page mapping lives in `apps/tenant-site/src/lib/tenant-route-map.ts`.
+- Supported explicit tenant routes include core pages, listing-style pages, blog/insight pages, template plan pages, roadmap/history pages, and utility/legal placeholders.
+- The tenant root layout initializes registry runtime context through `RegistryProvider`, so future template pages and sections can call `useRegistry()` for tenant/template/mode/page info.
+- `packages/section-registry` now exposes `templates.<page>.resolve(ctx)` for template-owned page handles, registry-scoped query/mutation helpers for tenant-safe data calls, and style-preset UI variant helpers for future template-local primitives.
+- The active starter register template is `riwaq-starter`, with `/`, `/blog`, `/contact`, and `/roadmap` as its primary public surfaces.

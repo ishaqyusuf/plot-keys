@@ -4,6 +4,7 @@ import { TAG_INPUT_SYSTEM_SUGGESTIONS } from "../tag-input";
 
 export type QuickFillProfile =
   | "auth-sign-up"
+  | "connect-domain"
   | "generic"
   | "invite-profile-complete"
   | "invite-sign-up"
@@ -311,6 +312,8 @@ export class QuickFill<
     switch (profile) {
       case "auth-sign-up":
         return this.authSignUp();
+      case "connect-domain":
+        return this.connectDomain();
       case "onboarding-business-identity":
         return this.onboardingBusinessIdentity();
       case "onboarding-market-focus":
@@ -362,6 +365,12 @@ export class QuickFill<
       password: this.seed.signUpPassword,
       phoneNumber: this.seed.phone,
       subdomain: this.seed.signUpSubdomain,
+    });
+  }
+
+  connectDomain() {
+    this.merge({
+      hostname: `${this.seed.slug}.com.ng`,
     });
   }
 

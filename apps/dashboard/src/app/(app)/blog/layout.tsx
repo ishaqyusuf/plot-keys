@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { assertAppEnabledById } from "../../../lib/assert-app-enabled";
+import { assertAppEnabledById } from "@/lib/assert-app-enabled";
 
 export default async function BlogLayout({
   children,

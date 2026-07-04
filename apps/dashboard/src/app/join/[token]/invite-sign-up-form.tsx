@@ -4,13 +4,14 @@ import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { useMemo, useRef } from "react";
-import { DevFormQuickFillButton } from "../../../components/dev/dev-form-quick-fill-button";
+
+import { signUpForInviteAction } from "@/app/actions";
+import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
 import {
   createQuickFillAdapter,
   QuickFill,
-} from "../../../components/dev/quick-fill";
-import { useDevToolsStore } from "../../../stores/dev-tools";
-import { signUpForInviteAction } from "../../actions";
+} from "@/components/dev/quick-fill";
+import { useDevToolsStore } from "@/stores/dev-tools";
 
 type InviteSignUpValues = {
   name: string;

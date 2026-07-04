@@ -48,14 +48,14 @@
 | Template usage analytics (TemplatePicker) | ✅ Done |
 | SEO & Meta Tags (per-page title/description/OG) | ✅ Done |
 | Blog/CMS Module | ✅ Done — model, editor, sections, rendering |
-| **Plan-based template register (18 templates)** | ✅ Done — register data + family UI components |
-| **Template family UI design system** | ✅ Done — 6 × `{family}-sections.tsx` wired via `resolveFamilySectionComponents` |
+| **Plan-based template register** | ✅ Done — plan-owned register with active `riwaq-starter` template |
+| **Template-owned UI system** | ✅ Done — Riwaq-owned pages, UI, hooks, and roadmap section wired by template key |
 | **Template Registry M3 — Runtime Wiring** | ✅ Done — page inventory bridge, `resolvePage()`, builder wiring, ClickGuard + InlineOverview |
 | **Template Registry M4 — Tenant-Site Integration** | ✅ Done — nav/footer shell, CSS var injection, inner-page routing, home-page simplification |
 | Multi-page Website Support | ✅ Done — builder page selector + URL-backed page state |
 | Customer Portal Foundation Planning | ✅ Done — central branded `/portal/*` route group implemented in tenant-site |
 | AI-Powered Page Content Generation | ✅ Done — per-page AI content generation in builder sidebar (10 credits) |
-| Template Family Differentiation | ✅ Done — register family homes now vary by business model and conversion spine |
+| Template Differentiation | ✅ Done — current register direction uses concrete plan-owned templates instead of shared family variants |
 | Preview-Safe Action Interception | ✅ Done — forms, buttons, and links safely intercepted in non-live modes |
 | Builder UI Shadcn Standardization | ✅ Done — PickerButton, ChevronIcon, textarea, alert all use shadcn/ui primitives |
 | Listing Overview Standardization | ✅ Done — shared route + query contract for public overview pages |
@@ -69,6 +69,129 @@
 | Trigger.dev Job Integration | ✅ Done |
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
+
+## 2026-07-03 — Midday Table Structure + Notification Dispatch Alignment
+
+**What changed:**
+- Replaced tenant public catch-all template routing with explicit App Router files for core, blog, listing-style, template-plan, roadmap, and utility/legal routes; shared behavior now lives in `apps/tenant-site/src/lib/tenant-page.tsx`.
+- Added `apps/tenant-site/src/lib/tenant-route-map.ts` for route aliases, dynamic slug mapping, and active-template page support checks.
+- Added `RegistryProvider` / `useRegistry()` in `packages/section-registry` and wired tenant layout initialization with tenant identity, template key, render mode, template config, and page capability info.
+- Added `templatePages` / `templates` in `packages/section-registry` so future template-owned pages can resolve handles such as `templates.aboutPage.resolve(ctx)` with manifest-backed `{ Page, info }` metadata.
+- Added registry-scoped query and mutation option builders that inject tenant/template/page/runtime scope, use dev mock resolvers outside live mode, and block live mutations in dev/preview unless explicitly mocked.
+- Added template UI variant primitives for style-preset-driven button, input, and surface classes.
+- Replaced the shared register family model with a plan-owned register model. The active register now contains only `starter/riwaq` (`riwaq-starter`); `plus` and `pro` are empty until their own concrete templates are added.
+- Added Riwaq-owned landing, blog, contact, and roadmap page components plus nav, footer, content schema, placeholder data, local UI, local hook, and roadmap timeline section.
+- Added explicit tenant `/roadmap` routing and template route support for Riwaq's project-history page.
+- Added the Midday-standard dashboard table foundation under `apps/dashboard/src/components/tables/core`, plus app-local table settings, sticky-column, and scroll helpers.
+- Moved active customer and property table/search modules into `apps/dashboard/src/components/tables/<domain>/*`, removing route-local table folders from those pages.
+- Standardized the properties search filter onto the same provider/search-filter pattern used by customer tables.
+- Refactored the properties table to column-definition driven table composition with domain empty/no-results/skeleton states under `components/tables/properties`.
+- Refactored the team page into a Midday-style thin route with hydrated `team.listMembers` / `team.listInvites` prefetching, a `components/tables/teams` table slice, and extracted invite member form/sheet components.
+- Refactored invite account signup so invite validation, duplicate-user checks, and invite acceptance DB setup live in `packages/db/src/queries/team.ts`, leaving the dashboard action to validate form fields, create the user through auth, set the session, revalidate, and redirect.
+- Added a Midday-style `@plotkeys/db/queries` barrel export and moved dashboard query consumers off the db root barrel so dashboard app code imports query APIs through the dedicated package surface.
+- Tightened the Midday-style table core by adding the dashboard `Portal`, the `components/tables/resize-handle.tsx` helper, global `scrollbar-hide`, and matching table skeleton / virtual-row hover and action-cell styling more closely to the Midday reference.
+- Added Midday's draggable table header support by installing the `@dnd-kit` dashboard dependencies and adding `components/tables/draggable-header.tsx` plus `hooks/use-table-dnd.ts` for TanStack column-order updates.
+- Added Midday's virtualized infinite-scroll table runtime by installing `@tanstack/react-virtual` for the dashboard and adding `hooks/use-infinite-scroll.ts` for virtualizer-backed next-page loading.
+- Re-aligned the shared dashboard table core files with the Midday source shape, restoring Midday comments/interfaces/class ordering and removing the notification-specific `VirtualRow` row-class extension from the shared primitive.
+- Added Midday's `nuqs` URL-sort foundation by wrapping the dashboard root layout in `NuqsAdapter` and adding `hooks/use-sort-params.ts` / `hooks/use-sort-query.ts` for table route loaders and sortable headers.
+- Migrated the active customers and properties table filter params from the custom query shim to Midday-style `nuqs` schemas/loaders while preserving the existing `use*FilterParams` hook names and `setFilters(null)` clearing behavior.
+- Re-aligned the shared dashboard search-filter surface with Midday's search-filter behavior by moving hotkeys to `react-hotkeys-hook`, switching search updates to submit/clear handling instead of debounce-on-type, and declaring the dashboard app dependency already present in the lockfile.
+- Re-aligned the shared dashboard filter-chip helper with Midday's `FilterList` presentation by excluding the search query from active filter chips, removing the extra clear-all chip, and switching chips to the Midday square secondary button styling.
+- Migrated the customer sheet/detail URL params to Midday-style `nuqs` via `hooks/use-customer-params.ts` and removed the old custom filter-query loader/state shim.
+- Refactored the agents page into a hydrated Midday-style route using `workspace.listAgents`, with `components/tables/agents`, extracted agent/invite forms, and agent/invite sheets.
+- Refactored the leads page into a hydrated Midday-style route using `workspace.getLeadStats` / `workspace.listLeads`, with `components/tables/leads` owning status tabs, search, columns, empty states, skeleton, and row actions.
+- Refactored the appointments page into a hydrated Midday-style route using `workspace.getAppointmentStats` / `workspace.listAppointments`, with `components/tables/appointments` and an extracted appointment form/sheet.
+- Refactored the HR employees page into a hydrated Midday-style route using `workspace.getEmployeeStats` / `workspace.listEmployees`, with `components/tables/employees` and an extracted employee invite form/sheet.
+- Refactored the HR departments page into a hydrated Midday-style route using `workspace.listDepartments`, with `components/tables/departments` and an extracted department form/sheet; restored employee `department` filtering for department-to-roster links.
+- Refactored the HR leave requests page into a hydrated Midday-style route using `workspace.getLeaveRequestStats` / `workspace.listLeaveRequests`, with `components/tables/leave-requests` and an extracted leave request form/sheet.
+- Refactored the HR payroll page into a hydrated Midday-style route using `workspace.listPayrollPeriods` / `workspace.getPayrollSummary` / `workspace.listPayrollEntries`, with `components/tables/payroll` and an extracted payroll entry form/sheet.
+- Refactored the notifications page into a hydrated Midday-style route using `notifications.list` / `notifications.unreadCount`, with `components/tables/notifications`, search, unread filters, and row-level mark-read actions.
+- Refactored the blog editorial queue into a hydrated Midday-style route using `workspace.getBlogPostStats` / `workspace.listBlogPosts`, with `components/tables/blog` owning status filters, search, summary cards, empty states, skeleton, and row actions.
+- Refactored the projects pipeline page into a hydrated Midday-style route using `projects.stats` / `projects.list`, with `components/tables/projects` and extracted project form/sheet components.
+- Refactored the analytics page into a hydrated Midday-style route using an expanded `workspace.getAnalytics` bundle, with `components/analytics` owning metrics, chart/list sections, empty state, and skeleton.
+- Refactored the dashboard overview page into a hydrated Midday-style route using `workspace.getDashboardOverview`, with `components/dashboard/home` owning the overview header, stats, publishing controls, domain cards, and skeleton.
+- Refactored the reports page into a hydrated Midday-style route using `workspace.getReports`, with `components/reports` owning period tabs, report sections, exports, empty state, and skeleton while `components/tables/reports` owns the report table renderers.
+- Rewrapped the template sandbox index route in the Midday page shell with `HydrateClient`, `ErrorBoundary`, `Suspense`, metadata, and a feature-local skeleton around the client data view.
+- Slimmed the app-store route into a Midday-style server composer with metadata and moved the app-store header/grid/toggle surface into `components/app-store`, keeping company-app reads in the route/lib boundary.
+- Completed the customers page migration to a Midday-style hydrated route using `customers.stats`, `filters.customers`, and `customers.get`; moved customer header/summary into `components/tables/customers`, extracted the create flow into `components/forms/customer-form` and `components/sheets/customer-sheet`, and switched customer create/update/delete UI to tRPC mutations with query invalidation.
+- Refactored the listings page into a hydrated Midday-style route using filtered `workspace.listProperties` plus `filters.properties`, moved the listings header/table composition into `components/tables/properties`, and relocated the route-local property form to `components/forms/property-form`.
+- Refactored the domains page into a hydrated Midday-style route using `workspace.getTenantDomainStatus` and `workspace.getCustomDomainDnsInstructions`, with `components/tables/domains` owning the page header, domain control card, DNS record table, provisioned domain list, and skeleton.
+- Removed the remaining direct company-plan Prisma read from the team route by adding `team.getOverview` and hydrating plan cap metadata alongside `team.listMembers` / `team.listInvites`.
+- Refactored the billing page into a hydrated Midday-style route using `workspace.getBillingInfo`, with `components/tables/billing` owning the page header, plan comparison, payment repair form, billing history table, and skeleton while billing history reads now go through `packages/db/src/queries/billing.ts`.
+- Added Midday-style customer column visibility plumbing by introducing `apps/dashboard/src/store/customers.ts`, wiring `CustomersDataTable` to publish leaf columns, and adding the Tune popover control to the customer table header actions.
+- Refactored the estate launches page into a hydrated Midday-style route using `workspace.listEstates`, with `components/tables/estates` owning the page header, summary cards, launch grid, empty state, and skeleton, and moved the create estate sheet form into `components/forms/estate-form`.
+- Split the estate launches grid into Midday-style table-owned `columns.tsx` and `empty-states.tsx`, keeping `table.tsx` focused on section/list composition and sharing publish-state badge logic with the estate detail surface.
+- Refactored the AI credits page into a hydrated Midday-style route using `workspace.getAiCreditInfo`, with `components/tables/ai-credits` owning the page header, summary cards, top-up card, usage table, empty state, and skeleton while AI credit purchases now create billing line items through `packages/db/src/queries/billing.ts`.
+- Refactored notification preferences into a hydrated Midday-style settings route using `notifications.listPreferences` and `notifications.updatePreference`, with `components/tables/notification-preferences` owning the page header, summary cards, event routing table, info card, and skeleton.
+- Refactored the integrations overview and settings pages into hydrated Midday-style routes using `workspace.getCompanyIntegration` / `workspace.updateCompanyIntegration`, with `components/tables/integrations` owning the overview cards, credential form, shared catalog, and skeletons while integration persistence now goes through `packages/db/src/queries/company-integration.ts`.
+- Split the integrations overview card rendering into Midday-style table-owned `columns.tsx` and `empty-states.tsx`, keeping `table.tsx` focused on section/grid composition and sharing connection-count logic with the page wrapper.
+- Refactored the main settings page into a hydrated Midday-style route using `workspace.getCompanySettings`, with `components/tables/settings` owning the page header, profile form, workspace plan card, branding/logo controls, workspace shortcuts, danger zone, and skeleton.
+- Split the settings table slice into Midday-style `columns.tsx` and `empty-states.tsx`, moving reusable read-only fields, plan/status badges, shortcut cards, danger action UI, and unavailable state out of the table wrapper.
+- Refactored the blog editor detail page into a hydrated Midday-style route using `workspace.getBlogPost` plus blog create/update/status/delete mutations, moved the editor into `components/forms/blog-post-form`, moved detail UI into `components/tables/blog`, and shifted blog slug uniqueness into `packages/db/src/queries/blog.ts`.
+- Refactored the property detail page into a hydrated Midday-style route using `workspace.getPropertyDetail`, `propertyMedia.listMedia`, and public image tRPC calls, with `components/tables/properties` owning the detail header, analytics cards, media gallery controls, and skeleton while property reads now go through `packages/db/src/queries/property.ts`.
+- Refactored the estate detail page into a hydrated Midday-style route using `workspace.getEstateDetail` and `workspace.createEstateLayout`, moved launch detail/plan upload forms into `components/forms`, moved the detail surface into `components/tables/estates`, and shifted estate detail/layout reads and writes into `packages/db/src/queries/estate.ts`.
+- Refactored the project budget page into a hydrated Midday-style route using `projects.getBudgetDetail`, moved budget forms into `components/forms`, moved the budget detail surface into `components/tables/projects`, and shifted the page payload read into `packages/db/src/queries/project-finance.ts`.
+- Refactored the project workforce page into a hydrated Midday-style route using `projects.getWorkforceDetail`, moved worker/payroll-run forms into `components/forms`, moved workforce/payroll tables into `components/tables/projects`, and shifted the page payload read into `packages/db/src/queries/project-finance.ts`.
+- Refactored the project overview page into a hydrated Midday-style route using `projects.getOverviewDetail`, moved the overview detail surface into `components/tables/projects`, shifted the page payload read into `packages/db/src/queries/project.ts`, and added shared project cache invalidation for nested project mutations.
+- Refactored the billing callback route so payment activation persistence lives in `packages/db/src/queries/billing.ts` via `activateSubscriptionPayment`, leaving the dashboard route to verify Paystack metadata, derive plan template access, revalidate affected paths, and redirect.
+- Refactored the live preview page so tenant/company/published-site/listing/agent reads live in `packages/db/src/queries/website.ts` via `getLivePreviewData`, leaving the dashboard route to render empty states and published site sections.
+- Refactored the builder workspace so company/draft/published/listing/agent/blog/license/onboarding reads and draft fallback creation live in `packages/db/src/queries/website.ts` via `getBuilderWorkspaceData`, leaving the dashboard component to render status states and builder presentation.
+- Refactored the Paystack webhook route so subscription activation, subscription-created status updates, cancellation/license sync, past-due marking, and subscription billing rows live in `packages/db/src/queries/billing.ts`, leaving the dashboard route to verify signatures and dispatch event payloads.
+- Refactored dashboard company-app state helpers so enabled-app/plan reads and enabled-app writes live in `packages/db/src/queries/company-apps.ts`, leaving `apps/dashboard/src/lib/company-apps.ts` to resolve app registry context and request caching.
+- Refactored dashboard notification bell data so unread-count and recent-notification reads live in `packages/db/src/queries/notifications.ts` via `getNotificationBellDataForUser`, leaving the dashboard lib to resolve session state and serialize dates for navigation props.
+- Refactored the dashboard asset upload route so DB setup, property ownership validation, and upload persistence live behind `@plotkeys/api/asset-service` via `createTenantAssetFromUpload`, leaving the route to validate form input and map upload results to HTTP responses.
+- Aligned the dashboard table scroll hook with Midday's column-width scroll behavior and moved the customers table off the UI-package scroll shim onto the dashboard-local hook.
+- Moved the active customers table off the shared UI data-table provider and onto Midday-style feature-owned TanStack table rendering with persisted table settings, draggable/resizable headers, sticky columns, virtual rows, infinite loading, horizontal pagination controls, and server-loaded sort/table settings.
+- Moved the active listings/properties table off the shared UI data-table provider and onto Midday-style feature-owned TanStack table rendering with persisted table settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed sort for `workspace.listProperties`.
+- Moved the active leads table onto Midday-style feature-owned TanStack table rendering with persisted table settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/sort for `workspace.listLeads`.
+- Moved the active employees roster onto the same Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/sort for `workspace.listEmployees`.
+- Moved the active departments table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/sort for `workspace.listDepartments`.
+- Moved the active appointments table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/upcoming/sort for `workspace.listAppointments`.
+- Moved the active payroll table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/sort while preserving period-scoped `workspace.listPayrollEntries` fetching.
+- Moved the active projects table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/sort for `projects.list`.
+- Moved the active leave requests table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/sort for `workspace.listLeaveRequests`.
+- Moved the active notifications table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, unread-row styling through the shared virtual row primitive, and URL/server-backed search/unread/sort for `notifications.list`.
+- Moved the active team members table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/sort for `team.listMembers`.
+- Moved the active agents table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/sort for `workspace.listAgents`.
+- Moved the active blog table onto the Midday-style table architecture with persisted settings, draggable/resizable headers, sticky/action columns, virtual rows, horizontal pagination controls, and URL/server-backed search/status/sort for `workspace.listBlogPosts`.
+- Normalized the reports analytics tables to the shared dashboard table presentation shell with overflow containment, bordered headers/rows/cells, and no legacy `border-separate` table styling.
+- Normalized the project budget/workforce detail subtables to the shared dashboard table presentation shell and removed the remaining legacy `border-separate` table styling from project detail tables.
+- Added a Midday-style dashboard `ErrorFallback` and wrapped the dashboard home and analytics hydrated data views in `ErrorBoundary` around their Suspense boundaries.
+- Refactored the public team-invite join and profile-completion pages so invite lookup, invite validation, and existing agent/employee profile reads live in `packages/db/src/queries/team.ts`, leaving the dashboard pages to render invite states and redirects.
+- Aligned the PlotKeys notification job task layout toward after-service by grouping the Trigger `notification` task and `email-smoke-test` task in `packages/jobs/src/tasks/notifications.ts` while preserving the existing package-owned handlers and task exports.
+- Tightened PlotKeys email provider configuration toward after-service by requiring `EMAIL_FROM_ADDRESS` for notification email sends instead of falling back to a hardcoded sender address.
+- Aligned the PlotKeys notifications package boundary toward after-service by moving the remaining payload-utils consumer to the root `@plotkeys/notifications` export and collapsing the package export map to the single root entrypoint.
+- Made the PlotKeys notifications root barrel explicit by replacing broad wildcard re-exports with the intentional public notification classes, schemas, delivery helpers, services, contact helpers, and types currently consumed by apps/packages.
+- Split the WhatsApp provider out of `@plotkeys/app-store` into a dedicated `@plotkeys/whatsapp` package with the after-service-style Twilio client contract, so notification delivery depends on a provider package instead of an app-store integration package.
+- Added Midday-style properties/listings column visibility plumbing by introducing a properties table column store, wiring `PropertiesDataTable` to publish leaf columns, and adding the Tune popover control to the listings table header actions.
+- Added Midday-style leads column visibility plumbing by introducing a leads table column store, wiring `LeadsDataTable` to publish leaf columns, and adding the Tune popover control to the lead queue header actions.
+- Added Midday-style column visibility plumbing across the remaining active table-settings tables: agents, appointments, blog, departments, employees, leave requests, notifications, payroll, projects, and team members now publish TanStack leaf columns to domain stores and expose the Tune popover control in their table headers.
+- Tightened the shared dashboard search-filter dropdown toward Midday's semantic filter presentation by expanding the filter icon registry for status, customer-status, listing type, department, role, period, featured, and view filter keys.
+- Refactored invite profile completion so accepted-invite validation plus agent/employee profile upsert writes live in `packages/db/src/queries/team.ts` via `completeTeamInviteProfile`, leaving the server action to parse form values, choose display labels, revalidate paths, and redirect.
+- Refactored dashboard CSV exports so lead/property/customer/appointment/employee export rows and report CSV assembly live in `packages/db/src/queries/*`, leaving server actions to authorize the tenant, preserve current CSV formatting, and surface database-unavailable errors.
+- Refactored HR leave and payroll server actions so company-scoped employee validation, leave status transitions, payroll entry creation, and paid marking live in `packages/db/src/queries/leave-request.ts` and `packages/db/src/queries/payroll.ts`, leaving dashboard actions to parse form data, revalidate paths, and redirect.
+- Refactored HR employee and department server actions so company-scoped employee CRUD, work-role persistence, and department CRUD live in `packages/db/src/queries/employee.ts` and `packages/db/src/queries/department.ts`, leaving dashboard actions to parse forms, revalidate paths, and redirect.
+- Refactored property media upload plumbing so property-scoped asset upload uses `createTenantAssetFromUpload`, cover-image sync lives in `packages/db/src/queries/property-media.ts`, and the property-media router reuses package queries for property ownership checks.
+- Refactored workspace app-store install/uninstall actions so company-app DB setup and mutations live in `packages/db/src/queries/company-apps.ts`, leaving dashboard actions to authorize the session and revalidate the app-store page.
+- Refactored signup/onboarding server actions so subdomain availability checks, persisted onboarding reads, and final onboarding progress updates live behind `packages/db/src/queries/onboarding.ts`, while dashboard actions retain cookie fallback, redirects, and workspace procedure orchestration.
+- Refactored workspace invite notification context so company display-name lookup lives in `packages/db/src/queries/company.ts`, leaving the shared invite action to create invites, send notifications, revalidate paths, and redirect.
+- Refactored builder configuration existence checks so active draft lookup lives behind `packages/db/src/queries/website.ts` via `getActiveDraftForCompany`, leaving the dashboard action to call workspace orchestration and redirect when a draft must be selected.
+- Refactored estate creation slug collision handling so slug normalization and uniqueness checks live in `packages/db/src/queries/estate.ts`, leaving the dashboard action to parse the form, call workspace creation, revalidate, and redirect.
+- Refactored the onboarding route so durable saved onboarding-state reads live in `packages/db/src/queries/onboarding.ts` via `getTenantOnboardingForUser`, leaving the page to handle host/cookie fallbacks and step rendering.
+- Tightened the shared dashboard sticky-column runtime by removing the domain-specific fallback from `useStickyColumns` and making `TableSkeleton` derive explicit sticky widths from its own column IDs, so loading tables align with each table's Midday-style sticky configuration.
+- Moved the active listings/properties data flow from a finite table query to the Midday-style infinite table contract: `workspace.listProperties` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized properties table triggers `useInfiniteScroll` for next-page loading.
+- Moved the active leads queue from a capped finite list to the Midday-style infinite table contract: `workspace.listLeads` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized leads table triggers `useInfiniteScroll` while preserving URL-backed search/status/sort.
+- Moved the active appointments table from a capped finite list to the Midday-style infinite table contract: `workspace.listAppointments` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized appointments table triggers `useInfiniteScroll` while preserving URL-backed search/status/view/sort.
+- Moved the active employees roster from a capped finite list to the Midday-style infinite table contract: `workspace.listEmployees` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized employees table triggers `useInfiniteScroll` while leave/payroll employee option sheets read the paginated `data` payload.
+- Refactored dashboard session/proxy tenant host checks so custom-host slug resolution and tenant-onboarded checks live in `packages/db/src/queries/tenant-domain.ts`, leaving dashboard plumbing to manage headers, cookies, and redirects.
+- Replaced placeholder notification job logging with real dispatch through `@plotkeys/notifications` email, WhatsApp, and in-app delivery planning.
+- Added after-service-style email recipient override support through `resolveEmailRecipients()` and structured email send results.
+- Added an after-service-style `email-smoke-test` Trigger task and exported job handler so production email delivery can be verified through the same `EmailService` path used by notification jobs.
+- Added the after-service-style direct `email:test` script and `scripts/send-test-email.mjs` path so local Resend configuration can be verified with `TEST_EMAIL` through the workspace env loader without running the full app.
+
+**Verification note:**
+- Dashboard `tsc --noEmit` passed before the later fast-command discipline switch.
+- After the fast-command switch, validation stayed limited to scoped source inspection, exact-symbol searches, and scoped `git diff --check`.
 
 ## 2026-04-06 — Customer Portal Phase 1C — Offers Workflow
 
@@ -1089,7 +1212,7 @@
 - Created customer DB queries: createCustomer, listCustomersForCompany, getCustomerById, updateCustomer, softDeleteCustomer, countCustomersByStatus
 - Created `customers.route.ts` tRPC router: list, stats, create, update, delete
 - Registered `customersRouter` in `_app.ts`
-- Added server actions: createCustomerAction, updateCustomerStatusAction, deleteCustomerAction, convertLeadToCustomerAction
+- Added server actions: createCustomerAction, updateCustomerStatusAction, deleteCustomerAction, convertLeadToCustomerAction. Superseded on 2026-07-03: customer create/update/delete dashboard UI now uses tRPC mutations; lead conversion still uses `convertLeadToCustomerAction`.
 - Created `/customers` dashboard page with stats strip, status filter tabs, customer cards with status management
 - Added "→ Customer" convert button on qualified leads in `/leads` page
 - Updated `DashboardSidebar` Customers link from `#` to `/customers`
@@ -1135,3 +1258,140 @@
 - `packages/db` typecheck remains blocked in this sandbox because `@plotkeys/tsconfig/base.json` is not resolvable here.
 - `apps/api` typecheck remains blocked in this sandbox because installed package resolution for the workspace dependencies is incomplete (`drizzle-orm/node-postgres` and related modules unavailable to `tsc` here).
 - Manual code-path verification confirmed the builder now uses `resolvedActiveDraft.id` as `configId`, and the targeted website builder mutations no longer call `createSiteConfiguration`, `updateSiteConfigurationContentField`, `updateSiteConfigurationThemeField`, or `publishSiteConfiguration`.
+
+## 2026-05-22 — Customers Dashboard Midday-Style Migration
+
+### What was built
+- Started the page-by-page dashboard UI + structure migration task in `brain/tasks/in-progress.md`, using Midday's invoice page and invoice table modules as the reference structure.
+- Refactored `apps/dashboard/src/app/(app)/customers/page.tsx` into a thinner route with `metadata`, loaded URL filter params, success/error alerts, and a Suspense-wrapped content component.
+- Split customers UI into feature-owned modules:
+  - `customers-header.tsx` for the page/table header, search filters, export action, and create-customer action.
+  - `customers-summary.tsx` for status summary cards above the table.
+  - `tables/customers/columns.tsx` for table column metadata and row typing.
+  - `tables/customers/data-table.tsx` for the customer table and row actions.
+  - `tables/customers/empty-states.tsx` for no-data/no-filtered-data presentation.
+  - `tables/customers/skeleton.tsx` for the Suspense loading state.
+- Superseded on 2026-07-03: this pass initially preserved the server-action and Prisma query flow; the current customers page now uses the Midday-style hydrated tRPC table route and client mutation flow.
+
+### Validation notes
+- `bun run --cwd apps/dashboard typecheck` passed.
+- Scoped Biome check passed for all migrated customers files.
+- Full `bun run --cwd apps/dashboard lint` still fails on pre-existing diagnostics outside the customers migration, including import ordering/formatting in estates, properties, tRPC, and proxy files plus existing array-index key warnings.
+
+### Customer form slice
+- Extracted the inline customer creation dropdown from `customers-header.tsx` into `customer-form.tsx`.
+- Implemented the create flow as a dashboard sheet using the same `DashboardSheetHeader`, `DashboardSheetBody`, and `DashboardSheetFooter` pattern used by listing forms.
+- Superseded on 2026-07-03: client-side Zod validation remains, but the create flow now uses `trpc.customers.create` with query invalidation instead of `createCustomerAction`.
+- Validation: scoped Biome check passed for `customer-form.tsx` and `customers-header.tsx`; `bun run --cwd apps/dashboard typecheck` passed.
+
+### Search filter slice
+- Moved the customer-specific search/filter wrapper from the customers page root into `tables/customers/search-filter.tsx` so the customers table folder owns filtering alongside columns, table, empty state, and skeleton modules.
+- Added `tables/customers/search-filter-skeleton.tsx` and wired it into the customers table skeleton for a more complete Midday-style loading state.
+- Updated `customers-header.tsx` to import the table-owned search filter and deleted the old root-level `customers-search-filter.tsx`.
+- Validation: scoped Biome check passed for the touched search/filter files; `bun run --cwd apps/dashboard typecheck` passed.
+
+## 2026-05-22 — Customers GND Sales-Book Table Migration
+
+### What was built
+- Ported the reusable GND-style table shell into `@plotkeys/ui/data-table`, including `Table.Provider`, `useTableData`, table header/body/row/load-more/summary primitives, skeletons, sticky-column support, table-scroll hook, and `cells.selectColumn`.
+- Ported the GND-style search/filter shell into `@plotkeys/ui/search-filter`, including provider context, search input, generated filter menu, chips, clear behavior, debounced URL submission, and keyboard shortcut focus handling.
+- Added the reusable list-query helper in `@plotkeys/utils/query-response` with `composeQuery`, `queryMeta`, `queryResponse`, and `composeQueryData`, preserving the offset cursor contract (`cursor = currentOffset + size`, `null` at the end).
+- Rebuilt customers data loading around `customers.get` tRPC infinite query, `getCustomersSchema`, `whereCustomers`, and `getCustomers`; superseded on 2026-07-03 to use tRPC mutations for create/update/delete UI as well.
+- Reworked `/customers` to server-fetch the generated filter list, prefetch the infinite customer list, hydrate the client, and render the shared table system with GND-style columns, row selection, load-more, search, status filter chips, export, summary cards, and create-customer sheet.
+
+### Validation notes
+- `bun run --cwd packages/ui typecheck` passed.
+- `bun run --cwd packages/utils typecheck` passed.
+- `bun run --cwd apps/api typecheck` passed.
+- `bun run --cwd apps/dashboard typecheck` passed.
+- Scoped `bunx biome check --write` passed for the new UI table/search-filter files, list-query helper, customer API/query/filter files, customers dashboard route/components, customer URL hook, and dashboard tRPC server.
+
+## 2026-07-03 — Dashboard Route Error Boundaries
+
+- Added Midday-style `ErrorBoundary` + shared `ErrorFallback` composition around hydrated Suspense table/detail surfaces across dashboard home, analytics, reports, billing, notifications, team, agents, customers, properties, leads, appointments, projects, estates, blog, settings, integrations, domains, AI credits, HR employees/departments/leave/payroll, and project detail budget/workforce pages.
+- Left the template sandbox route unchanged because it hydrates a sandbox index without the Suspense table/detail boundary shape covered by this pass.
+- Added the Midday `batchPrefetch` helper to the dashboard tRPC server helper and converted multi-query dashboard pages to batch their prefetch orchestration, leaving single-query routes on `prefetch`.
+- Moved customer and property table search filters off the shared `@plotkeys/ui/search-filter` package and onto the dashboard-local `DashboardSearchFilter`, then removed the unused shared UI search-filter export/files so filter UI ownership matches Midday's dashboard component boundary.
+- Added dashboard-local `DashboardSearchFilter` wrappers for leads, projects, and blog, replacing their ad hoc table-header search inputs while preserving URL-backed `q/status` filter params and existing status summary tabs.
+- Added dashboard-local q-only search-filter wrappers for agents, team members, and departments, and updated `DashboardSearchFilter` so q-only tables do not render an empty filter dropdown while still using the shared search/chip behavior.
+- Added dashboard-local search-filter wrappers for employees, notifications, leave requests, appointments, and payroll, replacing the remaining raw `Input` table-header searches with URL-backed Midday-style filter components.
+- Aligned PlotKeys notification Trigger tasks with the after-service job pattern by adding `logger.info` dispatch summaries, notification task max duration, and notification queue concurrency metadata.
+- Added an after-service-style generic `notification` Trigger task for PlotKeys that accepts typed notification registry payloads, supports channel overrides and the production-safe `sendEmail` gate, falls back to the company owner recipient, and preserves the existing `notifications.dispatch` tenant-site adapter path.
+- Moved generic notification delivery orchestration into `@plotkeys/notifications` via a package-owned `Notifications.send(...)` service, matching the after-service package boundary while keeping Trigger tasks as thin adapters.
+- Added a PlotKeys notification message log table/query and wired `Notifications.send(...)` email dispatches to persist after-service-style provider/status audit rows while preserving the `sendEmail` dry-run gate.
+- Extended notification message-log persistence to WhatsApp dispatches by exposing per-recipient WhatsApp send outcomes and recording provider/status/error rows from the package-owned notification service.
+- Aligned the PlotKeys `email-smoke-test` handler with after-service by creating smoke-test company/lead records, sending through `Notifications.send(...)`, reading the persisted notification message log, and logging dispatch/message-log status from the Trigger task.
+- Extended notification message-log persistence to in-app dispatches so package-owned notification delivery now records sent, skipped, and failed audit rows for email, WhatsApp, and in-app channels.
+- Added after-service-style `sms` channel support to the PlotKeys notification contract, including phone-number delivery planning, `NotificationResult.dispatches.sms`, and package-owned SMS message-log rows.
+- Added the after-service `phone` channel to the PlotKeys notification contract, including phone-number delivery planning, package-owned phone message-log rows, and `NotificationResult.dispatches.phone`.
+- Added an after-service-style `NotificationTypes` schema map export for PlotKeys notifications and switched `NotificationTaskPayload` / `Notifications.send(...)` payload typing to use that shared contract.
+- Added message-log persistence for the remaining legacy tenant-site property inquiry receipt and newsletter welcome email sends so `notifications.dispatch` now records provider/status audit rows for those customer-facing emails too.
+- Added an after-service-style schema-backed notification job payload contract and switched the generic PlotKeys notification Trigger task to `schemaTask` with `machine: "micro"`, max duration, and queue concurrency metadata.
+- Extended PlotKeys `NotificationService` with an after-service-style tasks-client transport that triggers the generic `notification` job, preserved its in-memory function transport for React/local planners, and moved dashboard workspace invite emails onto the queued notification job path with message-log persistence.
+- Split the domains provisioned-hostname surface into Midday-style table files by adding `components/tables/domains/columns.tsx` and `empty-states.tsx`, then replacing the provisioned-domain card grid with a structured table that keeps cell rendering/actions in the table slice.
+- Split billing history into Midday-style table files by moving billing row type, amount/date/reference/status/action cell helpers into `components/tables/billing/columns.tsx` and the no-history state into `empty-states.tsx`, leaving `table.tsx` as the section/table composition layer.
+- Split AI credits usage into Midday-style table files by moving feature usage row typing and feature/count cell helpers into `components/tables/ai-credits/columns.tsx` and the no-usage state into `empty-states.tsx`, leaving `table.tsx` focused on section/table composition.
+- Split notification preferences into Midday-style table files by moving preference row typing, event label/status cells, and channel toggle actions into `components/tables/notification-preferences/columns.tsx`, and moving the info card into `empty-states.tsx`.
+- Split reports tables into Midday-style table files by moving agent/listing row types, badge cells, and report number cells into `components/tables/reports/columns.tsx`, then moving report empty states into `empty-states.tsx` and wiring the reports view through the table folder exports.
+- Slimmed the custom-domain connection route into a Midday-style server composer with metadata, moved the page surface into `components/domains/connect-domain-view.tsx`, and moved hostname validation/submission into `components/forms/connect-domain-form.tsx`.
+- Slimmed the live preview route into a Midday-style server composer with metadata and moved empty states, published-site header, presentation resolution, and section rendering into `components/live/live-preview.tsx`.
+- Slimmed the builder template preview route into a Midday-style metadata composer and moved the client-only template preview studio into `components/builder/builder-template-preview.tsx`.
+- Re-aligned `hooks/use-table-scroll.ts` exactly to Midday's table-scroll hook, restoring ArrowLeft/ArrowRight hotkey scrolling and the original column-width scroll/index synchronization behavior.
+- Re-aligned `hooks/use-table-settings.ts` exactly to Midday's table settings hook, preserving the unified cookie persistence shape for column visibility, sizing, and ordering.
+- Re-aligned `hooks/use-sticky-columns.ts` to Midday's sticky column calculation shape, preserving only the PlotKeys-local default sticky config because this dashboard does not have Midday's `transactions` table id.
+- Re-shaped `utils/table-configs.ts` to Midday's documented table config layout and object ordering while preserving PlotKeys-specific table ids, sticky columns, sort field maps, and row heights.
+
+## 2026-07-04 — Dashboard Sheet Registry
+
+- Added a Midday-style `GlobalSheetsProvider`/`GlobalSheets` registry for dashboard sheets, moved the customer create sheet into an always-mounted URL-param sheet, and changed customer header/empty-state actions into lightweight `createCustomer=true` triggers.
+- Split property listing and estate launch creation sheets out of their form files into `components/sheets/property-sheet.tsx` and `components/sheets/estate-create-sheet.tsx`, leaving the forms focused on validation, fields, and submit behavior while table/header/empty-state callers import sheet wrappers.
+- Split estate launch editing into `components/sheets/estate-launch-details-sheet.tsx` plus a pure `components/forms/estate-launch-details-form.tsx`, removing the last sheet primitive usage from the dashboard forms folder.
+- Added a Midday-style `components/modals` folder for dashboard dialogs by moving builder publish confirmation and template re-recommendation dialogs out of the builder feature folder, leaving `components/builder/onboarding-tools.tsx` focused on non-modal AI actions.
+- Split analytics display cards, chart, and sections into `components/analytics/sections.tsx` so `components/analytics/index.tsx` is the query/composition layer, and aligned dashboard home plus analytics routes to the Midday `batchPrefetch([...])` server prefetch pattern.
+- Split reports header, summary, and performance sections into `components/reports/sections.tsx` so `components/reports/index.tsx` is the query/composition layer, and aligned the reports route to the Midday `batchPrefetch([...])` server prefetch pattern.
+- Replaced the remaining dashboard route-level single-query `prefetch(...)` calls with Midday-style `batchPrefetch([...])` across billing, integrations, settings, estates, project detail, blog detail, AI credits, and HR department routes.
+- Split the project budget and workforce/payroll detail tables into Midday-style table slices by moving row/header cell rendering into `projects/budget/columns.tsx` and `projects/workforce/columns.tsx`, moving no-data/project-missing states into matching `empty-states.tsx` files, and leaving the public `budget.tsx` / `workforce.tsx` modules as query and section composition layers.
+- Split the property form pricing-plan field array out of `property-form.tsx` into `property-pricing-plan-fields.tsx`, keeping the main form focused on defaults/submission while the dedicated field component owns the payment-plan table rendering, add/remove controls, and normalization helpers.
+- Added the after-service-compatible `emailSmokeTest` Trigger task export while preserving PlotKeys' existing `emailSmokeTestTask` alias, aligning the jobs task surface without breaking current imports.
+- Aligned the dashboard-local search filter with Midday checkbox behavior by keeping dropdown submenus open on checkbox selection and adding array-toggle handling for `checkbox` filters while preserving single-select filter semantics.
+- Aligned the dashboard tRPC query client with Midday's data-fetching defaults by adding request-aware server/browser retry behavior, two-minute stale time, ten-minute cache retention, pending-query dehydration, superjson hydrate/dehydrate transforms, and a browser redirect to `/sign-in` on unauthorized query errors.
+- Re-aligned the repeated table `data-table-header.tsx` implementations with Midday's draggable-header shape by passing sticky header classes into `DraggableHeader`, removing the extra inner wrapper around header content, and guarding draggable-column resize handles with `header.column.getCanResize()`.
+- Moved the builder mobile sidebar drawer into `components/sheets/builder-sidebar-drawer.tsx`, keeping Sheet primitives inside the sheet boundary while the builder workspace imports the drawer through the dashboard-local sheets alias.
+- Tightened analytics and reports composition empty-state handling so genuinely empty payloads render a single page-level empty state while populated report pages can still show section-level inline fallbacks.
+- Re-aligned the dashboard-local shared search filter trigger with Midday's compact icon-only dropdown control and added a `Filter` icon alias to the PlotKeys UI icon namespace for table filter controls.
+- Tightened the dashboard-local filter chip list to render from known filter definitions in definition order, matching Midday's processed active-filter list semantics instead of raw filter-object iteration.
+- Aligned the notification registry fallback with after-service by defaulting unspecified notification channels to email while preserving PlotKeys' explicit per-type channel defaults.
+- Moved the dashboard sheet layout helpers into `components/sheets/dashboard-sheet-layout.tsx` and rewired form/sheet callers so Sheet primitive wrappers live inside the Midday-style sheet boundary.
+- Split form body/footer layout out of the sheet helper into `components/forms/form-layout.tsx`, removing the remaining form imports from the sheet boundary while preserving the previous sheet footer flex/spacing behavior.
+- Moved project budget/workforce shared formatting and option helpers out of the table folder into `components/projects`, removing form dependencies on table-owned internals while keeping table slices focused on rendering.
+- Normalized repeated dashboard table header rows to Midday's dense `h-[45px]` table-header height across customer, CRM, HR, project, notification, payroll, and blog table slices.
+- Moved the remaining table-local domain utility modules for employees, appointments, leads, leave requests, notifications, payroll, blog, and projects into feature component folders, removing form/sheet dependencies on table-owned utility paths.
+- Switched the `emailSmokeTest` Trigger job to the same schema-backed `schemaTask` pattern as the generic notification job, exporting its Zod payload schema from `@plotkeys/jobs` and declaring the jobs package's `zod` dependency.
+- Switched the legacy `notifications.dispatch` Trigger task to a schema-backed `schemaTask`, composing the generic notification payload schema with contact-form, property-inquiry, and newsletter-signup schemas while exporting the dispatch schemas from `@plotkeys/jobs`.
+- Wired the tenant-site contact API route into the shared `notifications.dispatch` job path after lead creation, carrying the created lead id through the dispatch payload so tenant contact submissions use the same after-service-style notification job pipeline.
+- Added Zod validation to the tenant-site contact API boundary before lead creation and notification dispatch, keeping public contact submissions compatible with the schema-backed notification job payload contract.
+- Rewired dashboard route pages for appointments, blog, employees, leave requests, payroll, leads, and projects to import domain guards/helpers from feature utility modules instead of table-local utility paths.
+- Tightened the shared dashboard search filter active-state logic so only configured menu filters can light up the filter trigger or render chips, matching the Midday known-filter surface instead of unrelated URL params.
+- Corrected the generic notification Trigger task to import its schema and payload type from `@plotkeys/notifications`, keeping the after-service-style job contract owned by the notification package instead of the handler module.
+- Aligned the shared horizontal table pagination control with Midday's back/forward icon contract by adding `ArrowBack`/`ArrowForward` aliases to the PlotKeys icon namespace and using them in the table pager.
+- Rewrote the primary CRM, HR, blog, customer, lead, appointment, payroll, and project table route composers to use Midday-style `@/` dashboard imports instead of route-relative component, hook, lib, tRPC, and utility paths.
+- Rewrote the analytics, reports, notifications, and notification-preferences route composers to use Midday-style `@/` dashboard imports for page components, skeletons, filters, session helpers, and tRPC prefetch wiring.
+- Rewrote the agents, team, properties, domains, billing, integrations, AI credits, estates, and HR departments route composers to use Midday-style `@/` dashboard imports for table components, filters, session helpers, tRPC prefetching, and table settings.
+- Rewrote the blog detail, estate detail, project detail/budget/workforce, property detail, settings, and integration-settings route composers to use Midday-style `@/` dashboard imports for table components, skeletons, session helpers, and tRPC prefetch wiring.
+- Rewrote the dashboard home, live preview, and app-store route composers to use Midday-style `@/` dashboard imports, leaving no remaining route-relative dashboard-local imports in `(app)` `page.tsx` files.
+- Rewrote the central dashboard server actions and app-store server action imports to use Midday-style `@/lib` aliases for session, session-cookie, invite notification, tenant URL, and company-app helpers.
+- Rewrote the dashboard shell and app-gate layouts to use Midday-style `@/` imports for chrome, global sheets, app gating, notification bell data, company-app context, and session helpers, leaving no remaining route-relative dashboard-local imports in `(app)` `layout.tsx` files.
+- Rewrote the dashboard root layout plus sign-in, tenant sign-up, onboarding, and verify-email route composers to use Midday-style `@/` imports for auth forms, flow shell, onboarding forms, session helpers, tenant URLs, dev loaders, and tRPC provider wiring.
+- Rewrote the remaining dashboard app route shells and invite flow helpers to use Midday-style `@/` imports for session helpers, session cookies, app actions, builder workspace, upload routes, dev quick-fill tools, and app-store install actions.
+- Aligned the dashboard table-settings server action with Midday's exact cookie persistence contract by using `date-fns/addYears` for the ten-year expiry and declaring `date-fns` directly in the dashboard package manifest.
+- Re-aligned the shared dashboard search-filter dropdown internals with Midday by extracting menu/checkbox item helpers, adding an empty-options disabled row, and making single-select filter clicks preserve the selected value until the active chip removes it.
+- Aligned the PlotKeys notification package closer to after-service channel semantics by adding provider-channel support guards for email and WhatsApp templates, then skipping unsupported forced provider channels before delivery planning instead of letting jobs fail on unsupported rendered dispatches.
+- Aligned WhatsApp notification logging closer to after-service by treating an unavailable WhatsApp provider as a log-only sent dispatch with no provider/error details instead of marking configured WhatsApp dispatches as skipped before logging.
+- Moved the active agents roster from a capped finite list to the Midday-style infinite table contract: `workspace.listAgents` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized agents table triggers `useInfiniteScroll` while appointment pickers and public-site agent consumers unwrap the paginated `data` payload.
+- Moved the HR leave requests table from a capped finite list to the Midday-style infinite table contract: `workspace.listLeaveRequests` now accepts cursor/size pagination, returns `{ data, meta }`, the route prefetches with `infiniteQueryOptions`, and the virtualized leave requests table triggers `useInfiniteScroll` while preserving URL-backed search/status/sort.
+- Moved the HR payroll entries table from a finite period list to the Midday-style infinite table contract: `workspace.listPayrollEntries` now accepts cursor/size pagination, returns `{ data, meta }`, the payroll route prefetches with `infiniteQueryOptions`, and the virtualized payroll table triggers `useInfiniteScroll` while summary and period selectors stay on finite queries.
+- Moved the projects overview table from a capped finite list to the Midday-style infinite table contract: `projects.list` now accepts cursor/size pagination, returns `{ data, meta }`, the projects route prefetches with `infiniteQueryOptions`, and the virtualized projects table triggers `useInfiniteScroll` while preserving URL-backed search/status/sort.
+- Moved the notifications table from a capped finite list to the Midday-style infinite table contract: `notifications.list` now accepts cursor/size pagination, returns `{ data, meta }`, the notifications route prefetches with `infiniteQueryOptions`, and the virtualized notifications table triggers `useInfiniteScroll` while the topbar bell unwraps the paginated recent-notification `data` payload.
+- Moved the blog posts table from a capped finite list to the Midday-style infinite table contract: `workspace.listBlogPosts` now accepts cursor/size pagination, returns `{ data, meta }`, the blog route prefetches with `infiniteQueryOptions`, and the virtualized blog table triggers `useInfiniteScroll` while the builder workspace unwraps the paginated `data` payload.
+- Moved the HR departments table from a finite list to the Midday-style infinite table contract: `workspace.listDepartments` now accepts cursor/size pagination, returns `{ data, meta }`, the departments route prefetches with `infiniteQueryOptions`, and the virtualized departments table triggers `useInfiniteScroll` while preserving URL-backed search/sort.
+- Moved the team members table from a finite membership list to the Midday-style infinite table contract: `team.listMembers` now accepts cursor/size pagination, returns `{ data, meta }`, the team route prefetches with `infiniteQueryOptions`, and the virtualized team table triggers `useInfiniteScroll` while invite-cap checks use the authoritative `team.getOverview.activeCount`.

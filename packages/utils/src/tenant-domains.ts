@@ -1,4 +1,4 @@
-import { buildRuntimeAppUrl } from "./runtime-url";
+import { buildDashboardUrl } from "./app-urls";
 
 export const plotkeysRootDomain = "plotkeys.com";
 export const localPlotkeysRootDomain = "plotkeys.localhost";
@@ -110,6 +110,24 @@ function isVercelPreviewHostname(hostname: string | null | undefined) {
   return normalizedHostname.endsWith(".vercel.app");
 }
 
+function resolveProtocol(
+  parsedOrigin: URL | null,
+  protocol?: "http" | "https",
+) {
+  if (protocol) {
+    return protocol;
+  }
+
+  if (
+    isAnyLocalPlotkeysHostname(parsedOrigin?.hostname) ||
+    isLocalhostHostname(parsedOrigin?.hostname)
+  ) {
+    return "http";
+  }
+
+  return parsedOrigin?.protocol.replace(":", "") ?? "https";
+}
+
 function extractSingleLabelSubdomain(
   hostname: string,
   rootDomain: string,
@@ -209,8 +227,7 @@ export function buildTenantDashboardUrl(
   const parsedOrigin = options?.currentOrigin
     ? parseOriginLike(options.currentOrigin)
     : null;
-  const protocol =
-    options?.protocol ?? parsedOrigin?.protocol.replace(":", "") ?? "https";
+  const protocol = resolveProtocol(parsedOrigin, options?.protocol);
   const pathname = options?.pathname ?? "";
   const normalizedPathname = pathname
     ? pathname.startsWith("/")
@@ -267,8 +284,7 @@ export function buildTenantSiteUrl(
   const parsedOrigin = options?.currentOrigin
     ? parseOriginLike(options.currentOrigin)
     : null;
-  const protocol =
-    options?.protocol ?? parsedOrigin?.protocol.replace(":", "") ?? "https";
+  const protocol = resolveProtocol(parsedOrigin, options?.protocol);
   const pathname = options?.pathname ?? "";
   const normalizedPathname = pathname
     ? pathname.startsWith("/")
@@ -305,35 +321,16 @@ export function buildPlatformAppUrl(options?: {
   const parsedOrigin = options?.currentOrigin
     ? parseOriginLike(options.currentOrigin)
     : null;
-  const protocol =
-    options?.protocol ?? parsedOrigin?.protocol.replace(":", "") ?? "https";
+  const protocol = resolveProtocol(parsedOrigin, options?.protocol);
   const pathname = options?.pathname ?? "";
   const normalizedPathname = pathname
     ? pathname.startsWith("/")
       ? pathname
       : `/${pathname}`
     : "";
-  const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
 
-  if (isAnyLocalPlotkeysHostname(parsedOrigin?.hostname)) {
-    return `${protocol}://${localDashboardRootDomain}${port}${normalizedPathname}`;
-  }
-
-  return buildRuntimeAppUrl({
-    config: {
-      appPort: process.env.DASHBOARD_PORT ?? process.env.PORT ?? 3901,
-      appRootDomain: localDashboardRootDomain,
-      defaultProtocol: process.env.NODE_ENV === "production" ? "https" : "http",
-      isProduction: process.env.NODE_ENV === "production",
-      portlessRootDomain: localDashboardRootDomain,
-      productionRootDomain: platformAppHostname,
-      publicUrl:
-        process.env.DASHBOARD_APP_URL ??
-        process.env.NEXT_PUBLIC_DASHBOARD_APP_URL ??
-        process.env.NEXT_PUBLIC_APP_URL ??
-        process.env.VERCEL_URL,
-    },
-    currentProtocol: parsedOrigin?.protocol,
+  return buildDashboardUrl({
+    currentProtocol: protocol,
     currentUrl: options?.currentOrigin,
     path: normalizedPathname,
   });

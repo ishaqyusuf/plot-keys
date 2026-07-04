@@ -92,19 +92,111 @@ export async function toggleAgentFeatured(
 export async function listAgentsForCompany(
   db: Db,
   companyId: string,
-  options: { limit?: number; featured?: boolean } = {},
+  options: {
+    cursor?: string | number | null;
+    featured?: boolean;
+    limit?: number;
+    q?: string | null;
+    size?: string | number | null;
+    sort?: string[] | null;
+  } = {},
 ) {
-  return db.agent.findMany({
-    orderBy: [
+  const query = options.q?.trim();
+  const size = normalizePageSize(options.size ?? options.limit);
+  const offset = normalizeCursor(options.cursor);
+  const where: Prisma.AgentWhereInput = {
+    companyId,
+    deletedAt: null,
+    ...(options.featured !== undefined && { featured: options.featured }),
+    ...(query ? { OR: getAgentSearchFilters(query) } : {}),
+  };
+
+  const [count, data] = await db.$transaction([
+    db.agent.count({ where }),
+    db.agent.findMany({
+      orderBy: getAgentOrderBy(options.sort),
+      skip: offset,
+      take: size,
+      where,
+    }),
+  ]);
+  const nextCursor = offset + size < count ? String(offset + size) : null;
+
+  return {
+    data,
+    meta: {
+      count,
+      cursor: nextCursor,
+      hasNextPage: nextCursor !== null,
+      size,
+    },
+  };
+}
+
+function normalizePageSize(size: string | number | null | undefined) {
+  const value = Number(size ?? 50);
+
+  if (!Number.isFinite(value)) {
+    return 50;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), 100);
+}
+
+function normalizeCursor(cursor: string | number | null | undefined) {
+  const value = Number(cursor ?? 0);
+
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
+}
+
+function getAgentSearchFilters(query: string): Prisma.AgentWhereInput[] {
+  return [
+    { bio: { contains: query, mode: "insensitive" } },
+    { email: { contains: query, mode: "insensitive" } },
+    { name: { contains: query, mode: "insensitive" } },
+    { phone: { contains: query, mode: "insensitive" } },
+    { title: { contains: query, mode: "insensitive" } },
+  ];
+}
+
+function getAgentOrderBy(
+  sort: string[] | null | undefined,
+): Prisma.AgentOrderByWithRelationInput[] {
+  const [field, value] = sort ?? [];
+  const direction = value === "asc" || value === "desc" ? value : null;
+
+  if (!direction) {
+    return [
       { featured: "desc" },
       { displayOrder: "asc" },
       { createdAt: "asc" },
-    ],
-    take: options.limit ?? 20,
-    where: {
-      companyId,
-      deletedAt: null,
-      ...(options.featured !== undefined && { featured: options.featured }),
-    },
-  });
+    ];
+  }
+
+  switch (field) {
+    case "bio":
+      return [{ bio: direction }];
+    case "createdAt":
+      return [{ createdAt: direction }];
+    case "displayOrder":
+      return [{ displayOrder: direction }];
+    case "email":
+      return [{ email: direction }];
+    case "featured":
+      return [{ featured: direction }];
+    case "name":
+      return [{ name: direction }];
+    case "title":
+      return [{ title: direction }];
+    default:
+      return [
+        { featured: "desc" },
+        { displayOrder: "asc" },
+        { createdAt: "asc" },
+      ];
+  }
 }

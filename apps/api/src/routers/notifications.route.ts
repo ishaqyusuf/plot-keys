@@ -1,9 +1,11 @@
 import {
   countUnreadNotifications,
   createNotification,
+  listNotificationPreferences,
   listNotificationsForUser,
   markAllNotificationsRead,
   markNotificationRead,
+  upsertNotificationPreference,
 } from "@plotkeys/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -15,19 +17,32 @@ export const notificationsRouter = createTRPCRouter({
   list: membershipProcedure
     .input(
       z.object({
-        take: z.number().int().min(1).max(100).default(50),
+        cursor: z.union([z.string(), z.number()]).optional().nullable(),
         onlyUnread: z.boolean().default(false),
+        q: z.string().optional().nullable(),
+        size: z.union([z.string(), z.number()]).optional().nullable(),
+        sort: z.array(z.string()).optional().nullable(),
+        take: z.number().int().min(1).max(100).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) return [];
+      if (!db) {
+        return {
+          data: [],
+          meta: { count: 0, cursor: null, hasNextPage: false, size: 0 },
+        };
+      }
 
       return listNotificationsForUser(db, {
         companyId: ctx.auth.activeMembership.companyId,
-        userId: ctx.auth.session.user.id,
-        take: input.take,
+        cursor: input.cursor,
         onlyUnread: input.onlyUnread,
+        q: input.q,
+        size: input.size,
+        sort: input.sort,
+        take: input.take,
+        userId: ctx.auth.session.user.id,
       });
     }),
 
@@ -47,7 +62,11 @@ export const notificationsRouter = createTRPCRouter({
     .input(z.object({ notificationId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable." });
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
 
       return markNotificationRead(db, {
         notificationId: input.notificationId,
@@ -58,11 +77,52 @@ export const notificationsRouter = createTRPCRouter({
   /** Mark all notifications as read. */
   markAllRead: membershipProcedure.mutation(async ({ ctx }) => {
     const db = ctx.db.db;
-    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable." });
+    if (!db)
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "DB unavailable.",
+      });
 
     return markAllNotificationsRead(db, {
       companyId: ctx.auth.activeMembership.companyId,
       userId: ctx.auth.session.user.id,
     });
   }),
+
+  /** List notification preferences for the current user. */
+  listPreferences: membershipProcedure.query(async ({ ctx }) => {
+    const db = ctx.db.db;
+    if (!db) return [];
+
+    return listNotificationPreferences(db, {
+      companyId: ctx.auth.activeMembership.companyId,
+      userId: ctx.auth.session.user.id,
+    });
+  }),
+
+  /** Update one notification preference for the current user. */
+  updatePreference: membershipProcedure
+    .input(
+      z.object({
+        email: z.boolean(),
+        inApp: z.boolean(),
+        type: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
+
+      return upsertNotificationPreference(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        email: input.email,
+        inApp: input.inApp,
+        type: input.type,
+        userId: ctx.auth.session.user.id,
+      });
+    }),
 });

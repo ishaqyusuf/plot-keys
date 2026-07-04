@@ -5,7 +5,8 @@ import {
   storageBuckets,
 } from "@plotkeys/platform-integrations";
 import { NextResponse } from "next/server";
-import { requireAuthenticatedSession } from "../../../lib/session";
+
+import { requireAuthenticatedSession } from "@/lib/session";
 
 /**
  * POST /api/upload

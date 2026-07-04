@@ -1,5 +1,5 @@
-const PLOTKEYS_MARK_SRC = "/logo.png";
-const PLOTKEYS_HORIZONTAL_SRC = "/logo-horizontal.png";
+const PLOTKEYS_MARK_SRC = "/logo.svg";
+const PLOTKEYS_HORIZONTAL_SRC = "/logo-horizontal.svg";
 
 function cx(...values: Array<string | undefined | false>) {
   return values.filter(Boolean).join(" ");

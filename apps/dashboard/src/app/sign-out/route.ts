@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import {
   clearAuthSessionCookie,
   clearPendingOnboardingCookie,
-} from "../../lib/session-cookie";
+} from "@/lib/session-cookie";
 
 export async function GET(request: Request) {
   const cookieStore = await cookies();

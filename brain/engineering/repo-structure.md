@@ -56,6 +56,17 @@ brain/
 - `packages/db/src/queries/*`: database-facing query and mutation modules grouped by domain
 - `apps/dashboard/src/trpc/client.tsx`: browser-side tRPC provider and `useTRPC` access
 - `apps/dashboard/src/trpc/server.tsx`: server-side tRPC query options, hydration, and prefetch helpers
+- `apps/dashboard/src/components/tables/core`: shared table primitives and behavior
+- `apps/dashboard/src/components/tables/<domain>/columns.tsx`: domain table column definitions
+- `apps/dashboard/src/components/tables/<domain>/data-table.tsx`: domain table composition
+- `apps/dashboard/src/components/tables/<domain>/table-header.tsx`: domain table header, filters, and actions
+- `apps/dashboard/src/components/tables/<domain>/skeleton.tsx`: domain table loading state
+- `apps/dashboard/src/components/tables/<domain>/empty-states.tsx`: domain table empty and zero-result states
+- `apps/dashboard/src/components/tables/<domain>/bottom-bar.tsx`: optional domain table bottom bar
+- `apps/dashboard/src/components/tables/<domain>/action-menu.tsx`: optional row or bulk action menu
+- `apps/dashboard/src/components/sheets/global-sheets.tsx`: global sheet registry
+- `apps/dashboard/src/components/sheets/global-sheets-provider.tsx`: global sheet provider and state boundary
+- `apps/dashboard/src/components/sheets/*`: sheet implementations grouped by domain or workflow
 
 ## Structural Rules
 - Prefer adding a new module under `packages/db/src/queries/*` before writing inline Prisma in an app or router.
@@ -63,6 +74,13 @@ brain/
 - Prefer adding a schema under `apps/api/src/schemas/*` before defining a new API contract in an app component or shared utility package.
 - Keep routers thin; if a procedure is doing substantial data shaping or persistence work, extract that work downward into query or service modules.
 - Every frontend app under `apps/*` should maintain a local `DESIGN_SYSTEM.md` describing that app's visual-system rules, with tenant-site documenting template/theming constraints instead of a fixed brand language.
+- Pages, tables, modals, sheets, forms, onboarding, sidebar, sign-out, and shared dashboard components must follow Midday architecture, file naming, and coding patterns.
+- Dashboard tables must follow the `components/tables/core` plus `components/tables/<domain>/*` structure unless an explicit Brain decision documents why the feature diverges.
+- Dashboard sheets must follow the global sheets structure under `components/sheets/*`.
+- Forms must use Midday validation, error handling, and mutation patterns.
+- Data fetching and mutations must use standard Midday tRPC patterns, including invalidation, loading states, errors, and caching behavior.
+- Use shadcn standard components and patterns. Never directly modify shadcn source components; create wrapper components for project-specific behavior.
+- Tenant-site public pages must use explicit App Router page routes; do not add a public `[...slug]` catch-all unless an ADR documents a narrow exception.
 
 ## Later Additions
 - Add new packages only when a responsibility cannot live cleanly in the current baseline packages.

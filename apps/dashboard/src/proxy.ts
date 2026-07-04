@@ -22,11 +22,7 @@ import {
   getScopedAuthSessionCookieName,
   platformSessionScope,
 } from "@plotkeys/auth/shared";
-import {
-  createPrismaClient,
-  findCompanyBySlug,
-  resolveTenantByHostname,
-} from "@plotkeys/db";
+import { isDashboardTenantAlreadyOnboarded } from "@plotkeys/db/queries";
 import {
   extractDashboardHostname,
   extractDashboardTenantSlug,
@@ -86,26 +82,8 @@ async function isTenantAlreadyOnboarded(input: {
   tenantHostname: string | null;
   tenantSlug: string | null;
 }) {
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    return false;
-  }
-
-  if (input.tenantSlug) {
-    const company = await findCompanyBySlug(prisma, input.tenantSlug);
-    return Boolean(company);
-  }
-
-  if (input.tenantHostname) {
-    const resolvedTenant = await resolveTenantByHostname(
-      prisma,
-      input.tenantHostname,
-    );
-    return Boolean(resolvedTenant);
-  }
-
-  return false;
+  const result = await isDashboardTenantAlreadyOnboarded(input);
+  return result.ok ? result.onboarded : false;
 }
 
 export async function proxy(request: NextRequest) {

@@ -1,9 +1,17 @@
 import type { JSX } from "react";
-import { getEnabledSections, getTemplatePageInventory } from "./page-inventory";
+import { getTemplatePageInventory } from "./page-inventory";
 import {
   innerPageDefaults,
   pageAliasFields,
 } from "./register/inner-page-defaults";
+import {
+  type RiwaqRoadmapTimelineConfig,
+  RiwaqRoadmapTimelineSection,
+} from "./register/starter/riwaq/sections/roadmap-timeline";
+import { RiwaqBlogPage } from "./register/starter/riwaq/pages/blog";
+import { RiwaqContactPage } from "./register/starter/riwaq/pages/contact";
+import { RiwaqLandingPage } from "./register/starter/riwaq/pages/landing";
+import { RiwaqRoadmapPage } from "./register/starter/riwaq/pages/roadmap";
 import {
   type BlogListConfig,
   BlogListSection,
@@ -44,10 +52,31 @@ import {
   TestimonialStripSection,
   type ThemeConfig,
 } from "./sections/home-page";
-import type { RenderMode } from "./types";
+import {
+  createTemplateManifestRegistry,
+  getTemplateManifest as getManifestFromRegistry,
+  manifestToPageInventory,
+  resolveTemplateManifestRoute,
+  type TemplateManifest,
+  templateManifestToDefinition,
+} from "./template-manifest";
+import { createTemplatePageRegistry } from "./template-pages";
+import type {
+  EditableFieldDefinition,
+  RenderMode,
+  TemplateDefinition,
+  TemplateTier,
+  TenantContentRecord,
+  TenantThemeRecord,
+} from "./types";
 
-export type TemplateTier = "starter" | "plus" | "pro";
-export type { TemplateFamilyKey } from "./register";
+export type {
+  EditableFieldDefinition,
+  TemplateDefinition,
+  TemplateTier,
+  TenantContentRecord,
+  TenantThemeRecord,
+} from "./types";
 
 export type SectionDefinition<TConfig> = {
   component: (props: { config: TConfig; theme: ThemeConfig }) => JSX.Element;
@@ -72,52 +101,8 @@ export type HomeSectionDefinition =
   | SectionDefinition<WhyChooseUsConfig>
   | SectionDefinition<ServiceHighlightsConfig>
   | SectionDefinition<BlogListConfig>
-  | SectionDefinition<BlogPostConfig>;
-
-export type EditableFieldDefinition = {
-  aiEnabled?: boolean;
-  contentKey: string;
-  fieldType: "text" | "textarea";
-  label: string;
-  longDetail: string;
-  placeholder?: string;
-  preferredLength?: string;
-  shortDetail: string;
-};
-
-export type TenantContentRecord = Record<string, string>;
-
-export type TenantThemeRecord = Partial<
-  Pick<
-    ThemeConfig,
-    | "accentColor"
-    | "backgroundColor"
-    | "fontFamily"
-    | "headingFontFamily"
-    | "logo"
-    | "logoUrl"
-    | "market"
-    | "supportLine"
-  >
->;
-
-export type TemplateDefinition = {
-  defaultContent: TenantContentRecord;
-  defaultTheme: ThemeConfig;
-  description: string;
-  editableFields: EditableFieldDefinition[];
-  key: string;
-  /** Human-readable marketing tagline shown in the template picker. */
-  marketingTagline: string;
-  name: string;
-  /** Named image defaults exposed to the builder for URL replacement. */
-  namedImageSlots?: Record<string, string>;
-  /** Whether this template can be individually purchased without a plan upgrade. */
-  purchasable: boolean;
-  /** URL of the preview thumbnail used in template cards. */
-  previewImageUrl?: string;
-  tier: TemplateTier;
-};
+  | SectionDefinition<BlogPostConfig>
+  | SectionDefinition<RiwaqRoadmapTimelineConfig>;
 
 export type LiveListingItem = {
   imageUrl?: string | null;
@@ -148,16 +133,77 @@ export type LiveBlogPostItem = {
   title: string;
 };
 
+export type {
+  RegistryDataMode,
+  RegistryDataResolver,
+  RegistryMutationEndpoint,
+  RegistryQueryEndpoint,
+  RegistryQueryScope,
+  RegistryScopedQueryKey,
+} from "./registry-data";
+export {
+  createRegistryMutationOptions,
+  createRegistryQueryKey,
+  createRegistryQueryOptions,
+  createRegistryQueryScope,
+  RegistryMutationDisabledError,
+} from "./registry-data";
+export type { TemplateManifest, TemplateRouteMatch } from "./template-manifest";
+export {
+  createTemplateManifestRegistry,
+  defineTemplateManifest,
+  getTemplateAllowedContentKeys,
+  getTemplateManifest as getTemplateManifestFromRegistry,
+  isTemplateContentKeyAllowed,
+  isTemplateThemeKeyAllowed,
+  manifestToPageInventory,
+  normalizeTemplateContentFieldUpdate,
+  normalizeTemplateThemeFieldUpdate,
+  resolveTemplateManifestRoute,
+  templateManifestToDefinition,
+} from "./template-manifest";
+export type {
+  EmptyTemplatePageProps,
+  RouteSlugTemplatePageProps,
+  TemplatePageComponent,
+  TemplatePageContext,
+  TemplatePageHandle,
+  TemplatePageInfo,
+  TemplatePageRegistration,
+  TemplatePageRegistry,
+  TemplatePageRegistryOptions,
+  TemplatePageResolution,
+  TemplatePageSlot,
+} from "./template-pages";
+export {
+  createTemplatePageRegistry,
+  createTemplatePageSlot,
+} from "./template-pages";
+export type {
+  TemplateUiIntent,
+  TemplateUiResolver,
+  TemplateUiSize,
+  TemplateUiVariantOptions,
+} from "./template-ui";
+export {
+  createTemplateUiResolver,
+  resolveTemplateStylePreset,
+  templateButtonVariants,
+  templateInputVariants,
+  templateSurfaceVariants,
+} from "./template-ui";
 export type { RenderMode, TenantResource } from "./types";
 
 // ---------------------------------------------------------------------------
 // Plan-based template register
 // ---------------------------------------------------------------------------
 import {
-  getFamilyPlaceholderData as _getFamilyPlaceholderData,
   getPlaceholderContent as _getPlaceholderContent,
+  getRegisterContentSchema as _getRegisterContentSchema,
+  getRegisterPlaceholderData as _getRegisterPlaceholderData,
   getRegisterTemplate as _getRegisterTemplate,
-  resolveFamilySectionComponents as _resolveFamilySectionComponents,
+  registerTemplateCatalog as _registerTemplateCatalog,
+  resolveRegisterSectionComponents as _resolveRegisterSectionComponents,
 } from "./register/index";
 
 export type {
@@ -169,17 +215,18 @@ export type {
 } from "./register/index";
 export {
   getAccessibleRegisterTemplates,
-  getFamilyFooterConfig,
-  getFamilyMetaForBusinessType,
-  getFamilyNavConfig,
-  getFamilyPlaceholderData,
   getPlaceholderContent,
-  getRegisterFamily,
+  getRegisterFooterConfig,
+  getRegisterNavConfig,
+  getRegisterPlaceholderData,
+  getRegisterContentSchema,
   getRegisterTemplate,
   getRegisterTemplateForBusiness,
+  getRegisterTemplatesForPlan,
+  riwaqStarterTemplate,
   registerTemplateCatalog,
-  resolveFamilySectionComponents,
-  templateFamilyRegistry,
+  registerTemplatesByPlan,
+  resolveRegisterSectionComponents,
 } from "./register/index";
 
 export type ResolvedWebsitePresentation = {
@@ -416,7 +463,7 @@ function resolveListingRouteContract(
     };
   }
 
-  const inventory = getTemplatePageInventory(templateKey);
+  const inventory = getTemplatePageInventoryStrict(templateKey);
   const currentPage = currentPageKey
     ? inventory.pages.find((page) => page.pageKey === currentPageKey)
     : undefined;
@@ -862,6 +909,42 @@ const sectionBuilders: Record<string, SectionBuilder> = {
       type: "blog_post",
     };
   },
+  RiwaqRoadmapTimelineSection: (content) => ({
+    component: RiwaqRoadmapTimelineSection,
+    config: {
+      description:
+        content["roadmap.subtitle"] ??
+        "Use the roadmap to show what has been launched, improved, handed over, or planned across time.",
+      eyebrow: content["roadmap.eyebrow"] ?? "Project history",
+      items: [
+        {
+          body:
+            content["roadmap.item1.body"] ??
+            "Started with a focused portfolio and a commitment to transparent communication.",
+          title:
+            content["roadmap.item1.title"] ?? "First documented milestone",
+          year: content["roadmap.item1.year"] ?? "2016",
+        },
+        {
+          body:
+            content["roadmap.item2.body"] ??
+            "Expanded into new communities and documented progress for customers and partners.",
+          title: content["roadmap.item2.title"] ?? "Market expansion",
+          year: content["roadmap.item2.year"] ?? "2019",
+        },
+        {
+          body:
+            content["roadmap.item3.body"] ??
+            "Moved project updates and enquiry paths into one public tenant website.",
+          title: content["roadmap.item3.title"] ?? "Digital trust layer",
+          year: content["roadmap.item3.year"] ?? "2024",
+        },
+      ],
+      title: content["roadmap.title"] ?? "A visible record of delivery.",
+    },
+    id: "roadmap-timeline",
+    type: "riwaq_roadmap_timeline",
+  }),
 };
 
 /**
@@ -938,6 +1021,10 @@ export const sectionComponents: Record<
     config: unknown;
     theme: ThemeConfig;
   }) => JSX.Element,
+  riwaq_roadmap_timeline: RiwaqRoadmapTimelineSection as (props: {
+    config: unknown;
+    theme: ThemeConfig;
+  }) => JSX.Element,
 };
 
 /**
@@ -998,7 +1085,12 @@ function buildPageSections(
   pageKey: string;
   sections: HomeSectionDefinition[];
 } {
-  const slots = getEnabledSections(templateKey, pageKey);
+  const inventory = getTemplatePageInventoryStrict(templateKey);
+  const slots =
+    inventory.pages
+      .find((page) => page.pageKey === pageKey)
+      ?.sections.filter((section) => section.defaultEnabled)
+      .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
 
   // Alias page-prefixed content keys to base keys so builders remain unchanged.
   const resolvedContent = resolvePageContent(content, pageKey);
@@ -1075,11 +1167,84 @@ function buildDefaultHomePage(
 }
 
 // ---------------------------------------------------------------------------
-// Template catalog
+// Template manifest catalog
 // ---------------------------------------------------------------------------
 
-export const templateCatalog: TemplateDefinition[] = [
+function supportedPlansForTier(tier: TemplateTier): TemplateTier[] {
+  switch (tier) {
+    case "starter":
+      return ["starter", "plus", "pro"];
+    case "plus":
+      return ["plus", "pro"];
+    case "pro":
+      return ["pro"];
+  }
+}
+
+function registerVariantToManifest(
+  variant: (typeof _registerTemplateCatalog)[number],
+): TemplateManifest {
+  const dataRequirements = Array.from(
+    new Set(
+      variant.pages.flatMap((page) =>
+        page.sections.flatMap((section) => [
+          ...(section.dataSource ? [section.dataSource] : []),
+          ...(section.requiredResources ?? []),
+        ]),
+      ),
+    ),
+  );
+  return {
+    dataRequirements,
+    defaultContent: variant.defaultContent,
+    defaultTheme: {
+      accentColor: variant.defaultAccentColor,
+      backgroundColor: variant.defaultBackgroundColor,
+      colorSystem: variant.defaultColorSystem,
+      fontFamily: variant.defaultFontFamily,
+      headingFontFamily: variant.defaultHeadingFontFamily,
+      logo: variant.name,
+      market: "Nigeria",
+      stylePreset: variant.defaultStylePreset,
+      supportLine: "hello@plotkeys.com",
+    },
+    description: variant.description,
+    editableFields: _getRegisterContentSchema(variant.key).map((field) => ({
+      aiEnabled: field.aiEnabled,
+      contentKey: field.contentKey,
+      fieldType:
+        field.contentKey.includes("body") ||
+        field.contentKey.includes("description") ||
+        field.contentKey.includes("subtitle") ||
+        field.contentKey.includes("address")
+          ? "textarea"
+          : "text",
+      label: field.label,
+      longDetail: `Write ${field.label.toLowerCase()} for the ${variant.name} real-estate website template.`,
+      placeholder: field.placeholderValue,
+      shortDetail: field.label,
+    })),
+    features: [
+      "multi-page",
+      variant.tier,
+      ...variant.features,
+      ...dataRequirements,
+    ],
+    key: variant.key,
+    marketingTagline: variant.marketingTagline,
+    name: variant.name,
+    pages: variant.pages,
+    purchasable: variant.purchasable,
+    supportedPlans: variant.supportedPlans,
+    tags: ["register-template", variant.tier, ...variant.tags],
+    tier: variant.tier,
+    version: 1,
+  };
+}
+
+const templateManifestDefinitions: TemplateManifest[] = [
   {
+    dataRequirements: ["listings", "agents", "contact"],
     defaultContent: createDefaultContent(
       "Zara Realty",
       "Lekki, Lagos",
@@ -1088,23 +1253,31 @@ export const templateCatalog: TemplateDefinition[] = [
     defaultTheme: {
       accentColor: "#0f766e",
       backgroundColor: "#f8fafc",
+      colorSystem: "forest",
       fontFamily: "Satoshi, Avenir Next, sans-serif",
       headingFontFamily: 'Georgia, "Times New Roman", serif',
       logo: "Zara Realty",
       market: "Lekki, Lagos",
+      stylePreset: "maia",
       supportLine: "+234 803 000 1204",
     },
     description:
       "Premium luxury positioning with calm, editorial presentation.",
     editableFields: baseEditableFields,
+    features: ["multi-page", "listings", "agents", "contact"],
     key: "template-1",
     marketingTagline:
       "A calm, editorial layout built for luxury and premium residential brands.",
     name: "Zara",
+    pages: getTemplatePageInventory("template-1").pages,
     purchasable: false,
+    supportedPlans: supportedPlansForTier("starter"),
+    tags: ["luxury", "editorial", "residential", "brand", "leads", "starter"],
     tier: "starter",
+    version: 1,
   },
   {
+    dataRequirements: ["listings", "agents", "contact"],
     defaultContent: createDefaultContent(
       "Leila Homes",
       "Ikoyi, Lagos",
@@ -1113,22 +1286,39 @@ export const templateCatalog: TemplateDefinition[] = [
     defaultTheme: {
       accentColor: "#1d4ed8",
       backgroundColor: "#f8fafc",
+      colorSystem: "slate",
       fontFamily: "Satoshi, Avenir Next, sans-serif",
       headingFontFamily: 'Georgia, "Times New Roman", serif',
       logo: "Leila Homes",
       market: "Ikoyi, Lagos",
+      stylePreset: "lyra",
       supportLine: "+234 803 555 0141",
     },
     description: "Sharper city-led positioning for modern urban inventory.",
     editableFields: baseEditableFields,
+    features: ["multi-page", "listings", "testimonials", "contact"],
     key: "template-2",
     marketingTagline:
       "Bold, listing-first layout for urban agencies and commercial portfolios.",
     name: "Leila",
+    pages: getTemplatePageInventory("template-2").pages,
     purchasable: true,
+    supportedPlans: supportedPlansForTier("plus"),
+    tags: [
+      "urban",
+      "commercial",
+      "mixed",
+      "clean",
+      "bold",
+      "listings",
+      "balanced",
+      "plus",
+    ],
     tier: "plus",
+    version: 1,
   },
   {
+    dataRequirements: ["listings", "agents", "contact"],
     defaultContent: createDefaultContent(
       "Cedar Properties",
       "Abuja",
@@ -1137,23 +1327,40 @@ export const templateCatalog: TemplateDefinition[] = [
     defaultTheme: {
       accentColor: "#b45309",
       backgroundColor: "#fffaf0",
+      colorSystem: "forest",
       fontFamily: "Satoshi, Avenir Next, sans-serif",
       headingFontFamily: 'Georgia, "Times New Roman", serif',
       logo: "Cedar Properties",
       market: "Abuja",
+      stylePreset: "maia",
       supportLine: "+234 809 222 4431",
     },
     description:
       "Warm, trust-led presentation for family and investor audiences.",
     editableFields: baseEditableFields,
+    features: ["multi-page", "listings", "agents", "contact"],
     key: "template-3",
     marketingTagline:
       "Warm, trust-driven layout ideal for family buyers and investor audiences.",
     name: "Cedar",
+    pages: getTemplatePageInventory("template-3").pages,
     purchasable: true,
+    supportedPlans: supportedPlansForTier("pro"),
+    tags: [
+      "warm",
+      "editorial",
+      "residential",
+      "rental",
+      "investor",
+      "leads",
+      "balanced",
+      "pro",
+    ],
     tier: "pro",
+    version: 1,
   },
   {
+    dataRequirements: ["listings", "agents", "contact"],
     defaultContent: createDefaultContent(
       "Omar Realty",
       "Lekki, Lagos",
@@ -1162,32 +1369,109 @@ export const templateCatalog: TemplateDefinition[] = [
     defaultTheme: {
       accentColor: "#0f766e",
       backgroundColor: "#0f172a",
+      colorSystem: "slate",
       fontFamily: "Satoshi, Avenir Next, sans-serif",
       headingFontFamily: "'Space Grotesk', Helvetica, sans-serif",
       logo: "Omar Realty",
       market: "Lekki, Lagos",
+      stylePreset: "nova",
       supportLine: "+234 808 500 4501",
     },
     description:
       "Dark premium pro combining search hero with story and personal agent service.",
     editableFields: baseEditableFields,
+    features: ["multi-page", "search", "listings", "agents", "faq"],
     key: "template-45",
     marketingTagline:
       "Premium concierge layout with search hero and personal service focus.",
     name: "Omar",
+    pages: getTemplatePageInventory("template-45").pages,
     purchasable: true,
+    supportedPlans: supportedPlansForTier("pro"),
+    tags: [
+      "premium",
+      "concierge",
+      "search",
+      "luxury",
+      "residential",
+      "mixed",
+      "bold",
+      "clean",
+      "brand",
+      "balanced",
+      "pro",
+    ],
     tier: "pro",
+    version: 1,
   },
+  ..._registerTemplateCatalog.map(registerVariantToManifest),
 ];
+
+export const templateManifestRegistry = createTemplateManifestRegistry(
+  templateManifestDefinitions,
+);
+
+export const templateManifestCatalog: TemplateManifest[] = Array.from(
+  templateManifestRegistry.values(),
+);
+
+// Compatibility catalog for existing dashboard/API consumers.
+export const templateCatalog: TemplateDefinition[] =
+  templateManifestCatalog.map(templateManifestToDefinition);
 
 const fallbackTemplate = templateCatalog[0] as TemplateDefinition;
 
+export function getTemplateManifest(templateKey: string): TemplateManifest {
+  return getManifestFromRegistry(templateManifestRegistry, templateKey);
+}
+
 export function getTemplateDefinition(templateKey: string): TemplateDefinition {
-  return (
-    templateCatalog.find((template) => template.key === templateKey) ??
-    fallbackTemplate
+  return templateManifestToDefinition(getTemplateManifest(templateKey));
+}
+
+export function getTemplatePageInventoryStrict(
+  templateKey: string,
+): ReturnType<typeof manifestToPageInventory> {
+  return manifestToPageInventory(getTemplateManifest(templateKey));
+}
+
+export function resolveTemplateRoute(
+  templateKey: string,
+  pathname: string,
+): ReturnType<typeof resolveTemplateManifestRoute> {
+  return resolveTemplateManifestRoute(
+    getTemplateManifest(templateKey),
+    pathname,
   );
 }
+
+export const templatePages = createTemplatePageRegistry({
+  registrations: {
+    "riwaq-starter": {
+      blog: { Page: RiwaqBlogPage },
+      contact: { Page: RiwaqContactPage },
+      home: { Page: RiwaqLandingPage },
+      roadmap: { Page: RiwaqRoadmapPage },
+    },
+  },
+  resolveTemplatePage(templateKey, pageKey) {
+    const manifest = getTemplateManifest(templateKey);
+    const page = manifest.pages.find(
+      (candidate) => candidate.pageKey === pageKey,
+    );
+
+    if (!page) return undefined;
+
+    return {
+      page,
+      supportedPlans: manifest.supportedPlans,
+      templateKey: manifest.key,
+      templateName: manifest.name,
+    };
+  },
+});
+
+export const templates = templatePages;
 
 export function createInitialSiteConfigurationInput({
   companyName,
@@ -1257,22 +1541,21 @@ export function resolveWebsitePresentation({
     renderMode,
   );
 
-  // Apply family-specific component overrides when the templateKey maps to a
-  // register family (e.g. "noor-starter" → family "agency"). Old template keys
-  // (e.g. "template-1") return undefined family → no overrides, generic fallback.
+  // Apply template-specific component overrides when the template key maps to a
+  // register template. Old template keys return no overrides.
   const registerVariant = _getRegisterTemplate(templateKey);
-  const familyOverrides = _resolveFamilySectionComponents(
-    registerVariant?.family,
+  const templateOverrides = _resolveRegisterSectionComponents(
+    registerVariant?.key,
   );
 
-  // Swap in family-branded components where the override map provides one.
-  // When familyOverrides is empty (stub or old template key) this is a no-op.
+  // Swap in template-owned components where the override map provides one.
+  // When templateOverrides is empty this is a no-op.
   const page = {
     ...builtPage,
     sections: builtPage.sections.map((s) => ({
       ...s,
       component:
-        (familyOverrides[s.type] as typeof s.component | undefined) ??
+        (templateOverrides[s.type] as typeof s.component | undefined) ??
         s.component,
     })) as HomeSectionDefinition[],
   };
@@ -1318,7 +1601,7 @@ export type TenantSnapshot = {
 };
 
 /**
- * Resolved output of a single page — sections with family-branded components
+ * Resolved output of a single page — sections with template-owned components
  * already applied, plus the fully merged theme.
  */
 export type ResolvedPageConfig = {
@@ -1332,20 +1615,19 @@ export type ResolvedPageConfig = {
  * Resolves a single page from a register template key.
  *
  * Differences from resolveWebsitePresentation:
- * - In "template" render mode, uses placeholderValue content from the
- *   family's content-schema and placeholder listings/agents from
- *   placeholder-data.ts instead of live tenant data.
+ * - In "template" render mode, uses placeholderValue content and placeholder
+ *   data from the concrete register template instead of live tenant data.
  * - Returns a flat ResolvedPageConfig rather than a full presentation
  *   object — no editableFields, no template metadata.
- * - Applies family component overrides in the same way as
+ * - Applies template component overrides in the same way as
  *   resolveWebsitePresentation does.
  *
  * @example
  * // Template browse mode — placeholder data, no tenant required
- * const page = resolvePage("noor-starter", "home", {}, "template");
+ * const page = resolvePage("riwaq-starter", "home", {}, "template");
  *
  * // Live rendering
- * const page = resolvePage("noor-starter", "listings", tenant, "live");
+ * const page = resolvePage("riwaq-starter", "roadmap", tenant, "live");
  */
 export function resolvePage(
   templateKey: string,
@@ -1356,15 +1638,15 @@ export function resolvePage(
   const registerVariant = _getRegisterTemplate(templateKey);
   const template = getTemplateDefinition(templateKey);
 
-  // In template mode, substitute placeholder content and data for the family.
+  // In template mode, substitute placeholder content and data for the template.
   let content: TenantContentRecord;
   let liveListings: LiveListingItem[] | undefined;
   let liveAgents: LiveAgentItem[] | undefined;
   let liveBlogPosts: LiveBlogPostItem[] | undefined;
 
   if (renderMode === "template" && registerVariant) {
-    content = _getPlaceholderContent(registerVariant.family);
-    const phData = _getFamilyPlaceholderData(registerVariant.family);
+    content = _getPlaceholderContent(registerVariant.key);
+    const phData = _getRegisterPlaceholderData(registerVariant.key);
     liveListings = phData.listings?.map((l) => ({
       id: l.id,
       imageUrl: l.imageUrl ?? null,
@@ -1382,18 +1664,15 @@ export function resolvePage(
       slug: a.slug,
       title: a.role,
     }));
-    liveBlogPosts = [
-      {
-        content:
-          "# Market update\n\nBrowse placeholder insight content while previewing this template.",
-        excerpt:
-          "Browse placeholder insight content while previewing this template.",
-        id: "placeholder-blog-post",
-        publishedAt: new Date().toISOString(),
-        slug: "market-update",
-        title: "A sample market update",
-      },
-    ];
+    liveBlogPosts = phData.blogPosts?.map((post) => ({
+      content: post.content,
+      excerpt: post.excerpt,
+      featuredImageUrl: post.featuredImageUrl ?? null,
+      id: post.id,
+      publishedAt: post.publishedAt,
+      slug: post.slug,
+      title: post.title,
+    }));
   } else {
     const pageDefaults =
       pageKey !== "home" ? (innerPageDefaults[pageKey] ?? {}) : {};
@@ -1419,13 +1698,13 @@ export function resolvePage(
     renderMode,
   );
 
-  const familyOverrides = _resolveFamilySectionComponents(
-    registerVariant?.family,
+  const templateOverrides = _resolveRegisterSectionComponents(
+    registerVariant?.key,
   );
   const sections = builtPage.sections.map((s) => ({
     ...s,
     component:
-      (familyOverrides[s.type] as typeof s.component | undefined) ??
+      (templateOverrides[s.type] as typeof s.component | undefined) ??
       s.component,
   })) as HomeSectionDefinition[];
 
@@ -1560,13 +1839,22 @@ export {
   useSmartFill,
 } from "./runtime/smart-fill-context";
 export type {
+  RegistryContextValue,
+  RegistryLinkComponent,
+  RegistryLinkComponentProps,
+  RegistryPageInfo,
+  RegistryProviderProps,
+  RegistryTenantInfo,
   WebsiteRuntimeContextValue,
   WebsiteRuntimeProviderProps,
 } from "./runtime-context";
 // Runtime context — WebsiteRuntimeProvider + hooks
 export {
+  RegistryProvider,
   useColorSystem,
   useIsDraftMode,
+  useRegistry,
+  useRegistryLinkComponent,
   useRenderMode,
   useResolvedFont,
   useTemplateConfig,

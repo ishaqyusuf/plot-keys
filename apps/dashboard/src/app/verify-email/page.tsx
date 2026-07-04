@@ -1,12 +1,12 @@
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { buildTenantDashboardUrl } from "@plotkeys/utils";
+import { buildDashboardUrl, buildTenantDashboardUrl } from "@plotkeys/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { VerifyEmailForm } from "../../components/auth/verify-email-form";
-import { FlowShell } from "../../components/flow-shell";
+import { VerifyEmailForm } from "@/components/auth/verify-email-form";
+import { FlowShell } from "@/components/flow-shell";
 
 type VerifyEmailPageProps = {
   searchParams?: Promise<{
@@ -56,7 +56,7 @@ export default async function VerifyEmailPage({
 
   const email = params.email ?? "your email address";
   const token = params.token ?? "";
-  const verificationLink = new URL(currentOrigin ?? "http://localhost:3901");
+  const verificationLink = new URL(currentOrigin ?? buildDashboardUrl());
   verificationLink.pathname = "/verify-email";
   if (params.company) {
     verificationLink.searchParams.set("company", params.company);

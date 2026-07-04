@@ -1,4 +1,4 @@
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
 
 // ---------------------------------------------------------------------------
 // Monthly business summary
@@ -297,4 +297,60 @@ export function listingsReportToCsv(
     ].join(","),
   );
   return [header, ...rows].join("\n");
+}
+
+export type ReportCsvResult =
+  | { csv: string; ok: true }
+  | { ok: false; reason: "database-unavailable" };
+
+export async function getBusinessSummaryCsv(input: {
+  companyId: string;
+  month: number;
+  year: number;
+}): Promise<ReportCsvResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const summary = await getMonthlyBusinessSummary(db, input.companyId, {
+    month: input.month,
+    year: input.year,
+  });
+
+  return { csv: businessSummaryToCsv(summary), ok: true };
+}
+
+export async function getAgentReportCsv(input: {
+  companyId: string;
+  month: number;
+  year: number;
+}): Promise<ReportCsvResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const report = await getAgentPerformanceReport(db, input.companyId, {
+    month: input.month,
+    year: input.year,
+  });
+
+  return { csv: agentPerformanceToCsv(report), ok: true };
+}
+
+export async function getListingsReportCsv(input: {
+  companyId: string;
+}): Promise<ReportCsvResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const report = await getListingsReport(db, input.companyId);
+
+  return { csv: listingsReportToCsv(report), ok: true };
 }

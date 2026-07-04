@@ -11,6 +11,7 @@ import { projectsRouter } from "./projects.route";
 import { propertyMediaRouter } from "./property-media.route";
 import { publicImagesRouter } from "./public-images.route";
 import { teamRouter } from "./team.route";
+import { templateSandboxRouter } from "./template-sandbox.route";
 import { workspaceRouter } from "./workspace.route";
 
 export const appRouter = createTRPCRouter({
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   propertyMedia: propertyMediaRouter,
   publicImages: publicImagesRouter,
   team: teamRouter,
+  templateSandbox: templateSandboxRouter,
   workspace: workspaceRouter,
 });
 

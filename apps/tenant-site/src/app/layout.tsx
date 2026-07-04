@@ -13,6 +13,7 @@ import { RegisterFooter } from "../components/register-footer";
 import { RegisterNav } from "../components/register-nav";
 import { TenantInteractionShell } from "../components/tenant-interaction-shell";
 import { resolveTenantShell } from "../lib/resolve-tenant";
+import { resolveTenantRegistryPageInfo } from "../lib/tenant-route-map";
 
 const fallbackMetadata: Metadata = {
   title: "PlotKeys",
@@ -129,10 +130,11 @@ export default async function RootLayout({
     resolveRequestPathname(),
   ]);
   const isPortalRoute = pathname?.startsWith("/portal") ?? false;
+  const pageInfo = resolveTenantRegistryPageInfo(shell?.templateKey, pathname);
 
-  // Determine if this is a register template with family nav/footer
+  // Determine if this is a register template with template-owned nav/footer
   const hasRegisterShell =
-    shell !== null && shell.familyKey !== undefined && !isPortalRoute;
+    shell !== null && shell.registerTemplateKey !== undefined && !isPortalRoute;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -146,24 +148,36 @@ export default async function RootLayout({
           <NotificationsProvider>
             <TenantInteractionShell
               colorSystemKey={shell?.templateConfig.colorSystem}
+              pageInfo={pageInfo}
               templateConfig={shell?.templateConfig ?? {}}
+              templateKey={shell?.templateKey}
+              tenant={
+                shell
+                  ? {
+                      companyId: shell.company.id,
+                      companyName: shell.company.name,
+                      logoUrl: shell.company.logoUrl,
+                      market: shell.company.market,
+                      subdomain: shell.company.slug,
+                    }
+                  : undefined
+              }
             >
-              {hasRegisterShell && shell.familyKey && shell.tier ? (
+              {hasRegisterShell && shell.registerTemplateKey && shell.tier ? (
                 <RegisterNav
                   companyName={shell.company.name}
-                  familyKey={shell.familyKey}
                   logoUrl={shell.company.logoUrl}
-                  templateKey={shell.templateKey}
+                  templateKey={shell.registerTemplateKey}
                   tier={shell.tier}
                 />
               ) : null}
 
               <main>{children}</main>
 
-              {hasRegisterShell && shell.familyKey ? (
+              {hasRegisterShell && shell.registerTemplateKey ? (
                 <RegisterFooter
                   companyName={shell.company.name}
-                  familyKey={shell.familyKey}
+                  templateKey={shell.registerTemplateKey}
                 />
               ) : null}
             </TenantInteractionShell>

@@ -1,16 +1,14 @@
 import "server-only";
 
 import type { AppRouter } from "@plotkeys/api/router";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import {
-  createTRPCClient,
-  httpBatchLink,
-  loggerLink,
-} from "@trpc/client";
+import { buildDashboardUrl } from "@plotkeys/utils/app-urls";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
   createTRPCOptionsProxy,
   type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
+import { headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
 
@@ -27,6 +25,13 @@ function createServerLink(url: string) {
         (opts.direction === "down" && opts.result instanceof Error),
     }),
     httpBatchLink({
+      headers: async () => {
+        const requestHeaders = await headers();
+
+        return {
+          cookie: requestHeaders.get("cookie") ?? "",
+        };
+      },
       transformer: superjson,
       url,
     }),
@@ -36,7 +41,7 @@ function createServerLink(url: string) {
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   client: createTRPCClient<AppRouter>({
     links: createServerLink(
-      `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901"}/api/trpc`,
+      buildDashboardUrl({ path: "/api/trpc" }),
     ),
   }),
   queryClient: getQueryClient,
@@ -64,8 +69,30 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
   const queryClient = getQueryClient();
 
   if (queryOptions.queryKey[1]?.type === "infinite") {
-    void queryClient.prefetchInfiniteQuery(queryOptions as any);
+    void queryClient.prefetchInfiniteQuery(queryOptions as any).catch(() => {
+      // Avoid unhandled promise rejections from fire-and-forget prefetches.
+    });
   } else {
-    void queryClient.prefetchQuery(queryOptions);
+    void queryClient.prefetchQuery(queryOptions).catch(() => {
+      // Avoid unhandled promise rejections from fire-and-forget prefetches.
+    });
+  }
+}
+
+export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
+  queryOptionsArray: T[],
+) {
+  const queryClient = getQueryClient();
+
+  for (const queryOptions of queryOptionsArray) {
+    if (queryOptions.queryKey[1]?.type === "infinite") {
+      void queryClient.prefetchInfiniteQuery(queryOptions as any).catch(() => {
+        // Avoid unhandled promise rejections from fire-and-forget prefetches.
+      });
+    } else {
+      void queryClient.prefetchQuery(queryOptions).catch(() => {
+        // Avoid unhandled promise rejections from fire-and-forget prefetches.
+      });
+    }
   }
 }

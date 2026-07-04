@@ -1,4 +1,4 @@
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
 
 export type OnboardingStepProgressInput = {
   userId: string;
@@ -151,6 +151,91 @@ export async function findTenantOnboardingByUserId(db: Db, userId: string) {
   return db.tenantOnboarding.findUnique({
     where: { userId },
   });
+}
+
+export type TenantOnboardingForUserResult =
+  | {
+      onboarding: Awaited<ReturnType<typeof findTenantOnboardingByUserId>>;
+      ok: true;
+    }
+  | { ok: false; reason: "database-unavailable" };
+
+export type TenantSubdomainAvailabilityResult =
+  | { ok: true }
+  | { ok: false; reason: "database-unavailable" | "subdomain-taken" };
+
+export async function getTenantOnboardingForUser(
+  userId: string,
+): Promise<TenantOnboardingForUserResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  return {
+    onboarding: await findTenantOnboardingByUserId(db, userId),
+    ok: true,
+  };
+}
+
+export async function checkTenantSubdomainAvailability(
+  subdomain: string,
+): Promise<TenantSubdomainAvailabilityResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const existingCompany = await db.company.findFirst({
+    select: { id: true },
+    where: {
+      deletedAt: null,
+      slug: subdomain,
+    },
+  });
+
+  if (existingCompany) {
+    return { ok: false, reason: "subdomain-taken" };
+  }
+
+  return { ok: true };
+}
+
+export async function saveTenantOnboardingCompletionProgress(input: {
+  hasAgents: boolean;
+  hasBlogContent: boolean;
+  hasExistingContent: boolean;
+  hasListings: boolean;
+  hasLogo: boolean;
+  hasProjects: boolean;
+  hasTestimonials: boolean;
+  market: string;
+  templateKey: string;
+  userId: string;
+}): Promise<{ ok: true } | { ok: false; reason: "database-unavailable" }> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  await saveOnboardingStepProgress(db, {
+    currentStep: "completing",
+    hasAgents: input.hasAgents,
+    hasBlogContent: input.hasBlogContent,
+    hasExistingContent: input.hasExistingContent,
+    hasListings: input.hasListings,
+    hasLogo: input.hasLogo,
+    hasProjects: input.hasProjects,
+    hasTestimonials: input.hasTestimonials,
+    market: input.market,
+    templateKey: input.templateKey,
+    userId: input.userId,
+  });
+
+  return { ok: true };
 }
 
 export async function completeTenantOnboarding(db: Db, userId: string) {

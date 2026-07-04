@@ -70,9 +70,11 @@ export async function POST(request: Request) {
     }
 
     // Build context from company data
-    const [properties, agents] = await Promise.all([
+    const [properties, agentsPage] = await Promise.all([
       listFeaturedProperties(prisma, company.id).catch(() => []),
-      listAgentsForCompany(prisma, company.id, { limit: 10 }).catch(() => []),
+      listAgentsForCompany(prisma, company.id, { limit: 10 }).catch(() => ({
+        data: [],
+      })),
     ]);
 
     const onboarding = await prisma.tenantOnboarding
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
           price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
           specs: p.specs,
         })),
-        agents: agents.map((a) => ({
+        agents: agentsPage.data.map((a) => ({
           name: a.name,
           title: a.title,
           bio: a.bio,

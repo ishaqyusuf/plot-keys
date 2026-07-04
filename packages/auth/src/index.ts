@@ -21,6 +21,7 @@ import {
 } from "./shared";
 
 export { auth } from "./better-auth";
+export { getTrustedOrigins } from "./trusted-origins";
 export {
   authCookiePrefix,
   authRoutes,

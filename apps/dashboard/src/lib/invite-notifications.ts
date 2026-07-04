@@ -1,22 +1,13 @@
 import {
-  createNotificationDispatchFromType,
-  EmailService,
-  makeSubscriberRecipients,
-  type NotificationDeliveryPlan,
-  NotificationService,
-  planNotificationDeliveries,
-  plotKeysNotificationTypes,
-} from "@plotkeys/notifications";
-import type {
-  NotificationTriggerInput,
-  PlotKeysNotificationType,
-} from "@plotkeys/notifications/payload-utils";
-
-function logNotificationPlan(label: string, plan: NotificationDeliveryPlan) {
-  console.info(`[notifications] ${label}`, JSON.stringify(plan, null, 2));
-}
+  notificationHandler,
+  triggerJob,
+  type NotificationTaskPayload,
+} from "@plotkeys/jobs";
+import { notification } from "@plotkeys/jobs/tasks";
+import { NotificationService } from "@plotkeys/notifications";
 
 export async function sendWorkspaceInvitationNotification(input: {
+  companyId: string;
   companyName: string;
   inviteUrl: string;
   inviterId: string;
@@ -24,36 +15,24 @@ export async function sendWorkspaceInvitationNotification(input: {
   recipientEmail: string;
   roleLabel: string;
 }) {
-  const notifications = new NotificationService(
-    async <TType extends PlotKeysNotificationType>(
-      type: TType,
-      triggerInput: NotificationTriggerInput<TType>,
-    ) => {
-      const notification = createNotificationDispatchFromType(
-        plotKeysNotificationTypes,
-        type,
-        triggerInput.payload,
-        {
-          channels: triggerInput.channels,
-          recipients: triggerInput.recipients ?? [],
-        },
-      );
-      const deliveryPlan = planNotificationDeliveries(notification);
-
-      logNotificationPlan(type, deliveryPlan);
-      await new EmailService().sendBulk(deliveryPlan.dispatches);
-
-      return deliveryPlan;
+  const tasksClient = {
+    trigger: async (_taskId: string, payload: NotificationTaskPayload) => {
+      await triggerJob(notification, notificationHandler, payload);
     },
-    { userId: input.inviterId },
-  ).setRecipients(
-    makeSubscriberRecipients({
+  };
+
+  const notifications = new NotificationService(tasksClient, {
+    companyId: input.companyId,
+    userId: input.inviterId,
+  }).setRecipients([
+    {
       displayName: input.recipientEmail,
       email: input.recipientEmail,
+      kind: "subscriber",
       subscriberId: `workspace-invite:${input.recipientEmail.toLowerCase()}`,
       topic: "workspace-invitation",
-    }),
-  );
+    },
+  ]);
 
   await notifications.send("workspace_invitation_sent", {
     channels: ["email"],
@@ -64,5 +43,6 @@ export async function sendWorkspaceInvitationNotification(input: {
       recipientEmail: input.recipientEmail,
       roleLabel: input.roleLabel,
     },
+    sendEmail: true,
   });
 }

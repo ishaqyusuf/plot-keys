@@ -69,9 +69,14 @@ This file records the intended high-level architecture and boundaries between ap
   - initial draft installation
 - Tenant website requests should resolve tenant context first using custom domain, subdomain, preview token, or editor preview route.
 - Runtime context should provide tenant identity, website identity, mode, branding, and feature availability to sections and data hooks.
-- Public tenant-site marketing and discovery pages should remain template-driven through the section registry and WebsiteVersion page inventory.
+- Public tenant-site marketing and discovery pages should use explicit App Router files in `apps/tenant-site/src/app/*` rather than a public catch-all route. Shared tenant rendering lives behind the registry route helper so page files stay thin while route ownership remains visible.
+- Public template rendering is initialized by a registry runtime provider. `RegistryProvider` / `useRegistry()` expose tenant identity, selected template, render mode, template config, and page capability info to template-owned pages, sections, and UI primitives.
+- Template-owned page migration should use the registry page facade (`templates.aboutPage.resolve(ctx)`, `templates.blogContentPage.resolve(ctx)`, etc.) so each page can receive typed props and manifest-backed `info` before concrete page components replace the compatibility section-stack renderer.
+- Tenant-site data fetching for future template pages and sections should use registry-scoped query/mutation contracts so tenant identity, template key, page key, and dev/live mode are injected into every query key and resolver call.
+- Template-local UI primitives should derive button, input, and surface classes from the active style preset through the registry UI variant helpers rather than duplicating radius/density decisions per template.
+- Public tenant-site marketing and discovery pages should remain template-driven through the section registry and WebsiteVersion page inventory while the migration to concrete template-owned page components proceeds.
 - Customer auth, dashboard, payments, saved listings, offers, and account pages should live in a central `apps/tenant-site` route group (for example `/portal/*`) rather than inside the template page inventory.
-- Template pages may link into the customer portal, but portal page composition should come from shared application UI, not family-specific section trees.
+- Template pages may link into the customer portal, but portal page composition should come from shared application UI, not template-specific section trees.
 - Listing overview pages should remain template-based, but listing search/filter/pagination/data-loading behavior should come from a shared central contract so templates vary visually without diverging functionally.
 - The preferred runtime stack is:
   - tenant website runtime
@@ -103,6 +108,7 @@ This file records the intended high-level architecture and boundaries between ap
   - color system selection
   - style preset selection
   - named image assignment
+- The register catalog should support plan-owned access through `registerTemplatesByPlan` / `getRegisterTemplatesForPlan()`. Concrete templates are owned by plan folders and resolved by template key.
 - Marketplace and asset purchases should converge through a shared billing boundary rather than bespoke payment flows per asset type.
 
 ## Current Implementation Notes
@@ -114,8 +120,8 @@ This file records the intended high-level architecture and boundaries between ap
 - The current website-builder implementation effectively combines website root, draft state, live state, theme overrides, and editable content inside `SiteConfiguration`, while future docs point toward a richer `Website`/`WebsiteVersion` model.
 - Tenant subdomain ownership is now modeled explicitly through Prisma `TenantDomain` records.
 - Current hostname direction:
-  - local public website target: `{subdomain}.tenant.plotkeys.localhost`
-  - local dashboard target: `dashboard.{subdomain}.app.plotkeys.localhost`
+  - local public website target: `{subdomain}.tenant-plotkeys.localhost`
+  - local dashboard target: `dashboard.{subdomain}.app-plotkeys.localhost`
   - production public website target: `{subdomain}.plotkeys.com`
   - production dashboard target: `dashboard.{subdomain}.plotkeys.com`
   - production custom public target: `{tenantDomain.com}`
@@ -124,6 +130,10 @@ This file records the intended high-level architecture and boundaries between ap
 - Vercel domain attachment can now be triggered from the dashboard through a server action that syncs pending or failed tenant domains against the configured Vercel projects.
 - Public website rendering can now resolve the tenant by hostname when a matching `TenantDomain` record exists, with slug/query fallback still present for previews and local development.
 - Customer portal direction: use the same tenant-site app and hostname resolution as public tenant pages, but protect `/portal/*` with central customer-session guards instead of template page resolution.
+- Tenant public page delivery now uses explicit routes for supported template page surfaces such as `/about`, `/blog`, `/blog/[slug]`, `/roadmap`, `/projects`, `/properties`, `/rentals`, `/portfolio`, `/contact`, legal placeholders, and plan-owned template pages. The previous public `[...slug]` catch-all route has been removed.
+- `apps/tenant-site/src/lib/tenant-route-map.ts` is the central route alias and dynamic route mapping for template pages. It maps aliases such as `/blogs` and `/contact-us` onto stable registry page keys.
+- `apps/tenant-site/src/lib/tenant-page.tsx` is the shared server renderer for explicit tenant pages and preserves metadata, blog post lookup, listing overview filters, unsupported-template-page checks, and preview fallback behavior.
+- `packages/section-registry` now exports `templatePages` / `templates`, registry-scoped query and mutation option builders, and template UI variant helpers as the contract layer for replacing compatibility pages with concrete template-owned page builds.
 - Dashboard tenant auth and session scoping now resolve against dashboard-prefixed hosts only; the legacy `{subdomain}.plotkeys.com` dashboard alias is no longer accepted.
 - Tenant domain provisioning is now modeled as explicit paired hostnames, so first-party and custom registrations attach both the public hostname and the dashboard hostname separately.
 - Notifications now use a split-package pattern: framework-agnostic models in `packages/notifications` and React hooks/provider rendering in `packages/notifications-react`.

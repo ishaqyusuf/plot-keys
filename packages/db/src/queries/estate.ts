@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma/client";
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
 
 export type EstatePublishStateValue = "draft" | "published" | "archived";
 export type PlotStatusValue =
@@ -16,12 +16,30 @@ export type PlotTypeValue =
 
 type JsonValue = Prisma.InputJsonValue | typeof Prisma.JsonNull;
 
+export type UniqueEstateSlugResult =
+  | { ok: true; slug: string }
+  | { ok: false; reason: "database-unavailable" };
+
+function normalizeEstateSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
 export async function listEstatesForCompany(db: Db, companyId: string) {
   return db.estate.findMany({
     include: {
       _count: {
         select: {
           plots: {
+            where: {
+              deletedAt: null,
+            },
+          },
+          properties: {
             where: {
               deletedAt: null,
             },
@@ -34,6 +52,36 @@ export async function listEstatesForCompany(db: Db, companyId: string) {
     where: {
       companyId,
       deletedAt: null,
+    },
+  });
+}
+
+export async function getEstateDetailForCompany(
+  db: Db,
+  companyId: string,
+  slug: string,
+) {
+  return db.estate.findFirst({
+    include: {
+      layouts: {
+        orderBy: [{ version: "desc" }, { createdAt: "desc" }],
+        take: 3,
+      },
+      properties: {
+        orderBy: [{ createdAt: "desc" }],
+        take: 200,
+        where: { deletedAt: null },
+      },
+      _count: {
+        select: {
+          reservations: true,
+        },
+      },
+    },
+    where: {
+      companyId,
+      deletedAt: null,
+      slug,
     },
   });
 }
@@ -73,6 +121,50 @@ export async function createEstate(
       publishState: data.publishState ?? "draft",
     },
   });
+}
+
+export async function resolveUniqueEstateSlug(
+  db: Db,
+  input: {
+    companyId: string;
+    requestedSlug: string;
+  },
+) {
+  const baseSlug = normalizeEstateSlug(input.requestedSlug) || "estate-launch";
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await db.estate.findFirst({
+      select: { id: true },
+      where: {
+        companyId: input.companyId,
+        deletedAt: null,
+        slug: candidate,
+      },
+    });
+
+    if (!existing) return candidate;
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+export async function getUniqueEstateSlugForCompany(input: {
+  companyId: string;
+  requestedSlug: string;
+}): Promise<UniqueEstateSlugResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  return {
+    ok: true,
+    slug: await resolveUniqueEstateSlug(db, input),
+  };
 }
 
 export async function updateEstate(
@@ -133,6 +225,40 @@ export async function deleteEstate(
   return db.estate.update({
     data: { deletedAt: new Date() },
     where: { id: estateId, companyId, deletedAt: null },
+  });
+}
+
+export async function createEstateLayoutForCompany(
+  db: Db,
+  input: {
+    companyId: string;
+    estateId: string;
+    sourceUrl: string;
+  },
+) {
+  const estate = await db.estate.findFirst({
+    select: { id: true },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.estateId,
+    },
+  });
+
+  if (!estate) return null;
+
+  const latest = await db.estateLayout.findFirst({
+    orderBy: { version: "desc" },
+    select: { version: true },
+    where: { estateId: input.estateId },
+  });
+
+  return db.estateLayout.create({
+    data: {
+      estateId: input.estateId,
+      sourceUrl: input.sourceUrl,
+      version: (latest?.version ?? 0) + 1,
+    },
   });
 }
 

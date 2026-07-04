@@ -1,5 +1,5 @@
 import { authRoutes } from "@plotkeys/auth/shared";
-import { createPrismaClient } from "@plotkeys/db";
+import { getTenantOnboardingForUser } from "@plotkeys/db/queries";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
@@ -11,19 +11,19 @@ import {
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { VerifyEmailForm } from "../../components/auth/verify-email-form";
-import { FlowShell } from "../../components/flow-shell";
+import { VerifyEmailForm } from "@/components/auth/verify-email-form";
+import { FlowShell } from "@/components/flow-shell";
 import {
   BrandStyleStepForm,
   BusinessIdentityStepForm,
   ContactOperationsStepForm,
   ContentReadinessStepForm,
   MarketFocusStepForm,
-} from "../../components/onboarding/onboarding-step-forms";
-import { OnboardingSignupNotification } from "../../components/onboarding-signup-notification";
-import { getCurrentAppSession, getTenantSlugFromHost } from "../../lib/session";
-import { readPendingOnboardingCookie } from "../../lib/session-cookie";
-import { getTenantSignInUrlForSubdomain } from "../../lib/tenant-dashboard-url";
+} from "@/components/onboarding/onboarding-step-forms";
+import { OnboardingSignupNotification } from "@/components/onboarding-signup-notification";
+import { getCurrentAppSession, getTenantSlugFromHost } from "@/lib/session";
+import { readPendingOnboardingCookie } from "@/lib/session-cookie";
+import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
 
 // ---------------------------------------------------------------------------
 // Step definitions
@@ -200,11 +200,9 @@ export default async function OnboardingPage({
   }
 
   // Load saved onboarding state from DB (durable, survives cookie expiry)
-  const prisma = createPrismaClient().db;
-  const savedOnboarding = prisma
-    ? await prisma.tenantOnboarding.findUnique({
-        where: { userId: session.user.id },
-      })
+  const onboardingResult = await getTenantOnboardingForUser(session.user.id);
+  const savedOnboarding = onboardingResult.ok
+    ? onboardingResult.onboarding
     : null;
 
   // Fall back to cookie for sessions that pre-date DB persistence

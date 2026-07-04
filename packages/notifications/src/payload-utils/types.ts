@@ -27,4 +27,5 @@ export type NotificationTriggerInput<TType extends PlotKeysNotificationType> =
   Omit<NotificationEvent<TType>, "author" | "recipients" | "type"> & {
     author?: NotificationAuthor;
     recipients?: NotificationRecipients;
+    sendEmail?: boolean;
   };

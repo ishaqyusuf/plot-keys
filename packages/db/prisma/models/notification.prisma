@@ -17,3 +17,30 @@ model Notification {
   @@index([createdAt], map: "notifications_created_at_idx")
   @@map("notifications")
 }
+
+/// Delivery log for notification emails, WhatsApp messages, SMS messages,
+/// and in-app dispatches that need provider/status auditability.
+model NotificationMessageLog {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId    String    @map("company_id") @db.Uuid
+  customerId   String?   @map("customer_id") @db.Uuid
+  leadId       String?   @map("lead_id") @db.Uuid
+  channel      String
+  recipient    String
+  subject      String?
+  body         String
+  provider     String?
+  providerId   String?   @map("provider_id")
+  errorDetails Json?     @map("error_details")
+  status       String    @default("draft")
+  sentAt       DateTime? @map("sent_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  lead         Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt], map: "notification_message_logs_company_created_idx")
+  @@index([companyId, channel], map: "notification_message_logs_company_channel_idx")
+  @@index([companyId, leadId], map: "notification_message_logs_company_lead_idx")
+  @@map("notification_message_logs")
+}

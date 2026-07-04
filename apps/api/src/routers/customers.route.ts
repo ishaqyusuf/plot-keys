@@ -1,6 +1,7 @@
 import {
   countCustomersByStatus,
   createCustomer,
+  getCustomers,
   listCustomersForCompany,
   softDeleteCustomer,
   updateCustomer,
@@ -10,7 +11,30 @@ import { z } from "zod";
 
 import { createTRPCRouter, membershipProcedure } from "../lib.trpc";
 
+export const paginationSchema = z.object({
+  bin: z.boolean().optional().nullable(),
+  cursor: z.string().optional().nullable(),
+  q: z.string().optional().nullable(),
+  size: z.number().or(z.string()).optional().nullable(),
+  sort: z.array(z.string()).optional().nullable(),
+});
+
+export const getCustomersSchema = paginationSchema.extend({
+  filter: z.string().optional().nullable(),
+});
+
 export const customersRouter = createTRPCRouter({
+  get: membershipProcedure
+    .input(getCustomersSchema)
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) {
+        return { data: [], meta: { count: 0, cursor: null, size: 20 } };
+      }
+
+      return getCustomers(db, ctx.auth.activeMembership.companyId, input);
+    }),
+
   /** List all customers for the company. */
   list: membershipProcedure
     .input(
@@ -43,13 +67,20 @@ export const customersRouter = createTRPCRouter({
         email: z.string().email().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         notes: z.string().trim().optional().nullable(),
-        status: z.enum(["active", "inactive", "vip"]).optional().default("active"),
+        status: z
+          .enum(["active", "inactive", "vip"])
+          .optional()
+          .default("active"),
         sourceLeadId: z.string().uuid().optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable." });
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
 
       return createCustomer(db, {
         companyId: ctx.auth.activeMembership.companyId,
@@ -71,10 +102,19 @@ export const customersRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable." });
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
 
       const { customerId, ...data } = input;
-      return updateCustomer(db, customerId, ctx.auth.activeMembership.companyId, data);
+      return updateCustomer(
+        db,
+        customerId,
+        ctx.auth.activeMembership.companyId,
+        data,
+      );
     }),
 
   /** Soft-delete a customer. */
@@ -82,9 +122,17 @@ export const customersRouter = createTRPCRouter({
     .input(z.object({ customerId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable." });
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable.",
+        });
 
-      await softDeleteCustomer(db, input.customerId, ctx.auth.activeMembership.companyId);
+      await softDeleteCustomer(
+        db,
+        input.customerId,
+        ctx.auth.activeMembership.companyId,
+      );
       return { deleted: true };
     }),
 });

@@ -2,7 +2,8 @@
 
 import { Button } from "@plotkeys/ui/button";
 import { useTransition } from "react";
-import { installAppAction, uninstallAppAction } from "../../actions";
+
+import { installAppAction, uninstallAppAction } from "@/app/actions";
 
 type Props = {
   appKey: string;

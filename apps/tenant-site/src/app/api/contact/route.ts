@@ -1,28 +1,35 @@
 import { createLead, createPrismaClient } from "@plotkeys/db";
+import {
+  notificationDispatchHandler,
+  triggerJob,
+} from "@plotkeys/jobs";
+import { notificationDispatchTask } from "@plotkeys/jobs/tasks";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const contactRequestSchema = z.object({
+  email: z.string().trim().email("A valid email address is required."),
+  message: z.string().trim().min(1, "Message cannot be empty.").max(2000),
+  name: z.string().trim().min(1, "Name is required.").max(120),
+  phone: z.string().trim().optional(),
+  subdomain: z.string().trim().min(1, "Subdomain is required."),
+});
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, phone, message, subdomain } = body as {
-      name?: string;
-      email?: string;
-      phone?: string;
-      message?: string;
-      subdomain?: string;
-    };
+    const parsed = contactRequestSchema.safeParse(await request.json());
 
-    if (
-      !name?.trim() ||
-      !email?.trim() ||
-      !message?.trim() ||
-      !subdomain?.trim()
-    ) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "name, email, message, and subdomain are required." },
+        {
+          error:
+            parsed.error.issues[0]?.message ?? "Invalid contact request.",
+        },
         { status: 400 },
       );
     }
+
+    const { email, message, name, phone, subdomain } = parsed.data;
 
     const prisma = createPrismaClient().db;
     if (!prisma) {
@@ -44,16 +51,32 @@ export async function POST(request: Request) {
       );
     }
 
-    await createLead(prisma, {
+    const lead = await createLead(prisma, {
       companyId: company.id,
-      email: email.trim(),
-      message: message.trim(),
-      name: name.trim(),
-      phone: phone?.trim() || undefined,
+      email,
+      message,
+      name,
+      phone: phone || undefined,
       source: "contact_form",
     });
 
-    // TODO: trigger email notification via Trigger.dev job
+    triggerJob(
+      notificationDispatchTask,
+      notificationDispatchHandler,
+      {
+        kind: "contact_form" as const,
+        data: {
+          companyId: company.id,
+          email,
+          leadId: lead.id,
+          message,
+          name,
+          phone: phone || undefined,
+        },
+      },
+    ).catch(() => {
+      // Notification delivery failures are non-blocking.
+    });
 
     return NextResponse.json({ received: true });
   } catch {

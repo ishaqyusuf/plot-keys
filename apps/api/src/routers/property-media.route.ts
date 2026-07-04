@@ -2,9 +2,11 @@ import {
   addPropertyMedia,
   deletePropertyMedia,
   getAssetForCompany,
+  getPropertyForCompany,
   listPropertyMedia,
   reorderPropertyMedia,
   setPropertyCover,
+  syncPropertyCoverImageUrl,
   updatePropertyPublishState,
 } from "@plotkeys/db";
 import { TRPCError } from "@trpc/server";
@@ -16,47 +18,17 @@ async function getCompanyPropertyOrThrow(
   db: NonNullable<Parameters<typeof listPropertyMedia>[0]>,
   input: { companyId: string; propertyId: string },
 ) {
-  const property = await db.property.findFirst({
-    where: {
-      companyId: input.companyId,
-      deletedAt: null,
-      id: input.propertyId,
-    },
-  });
+  const property = await getPropertyForCompany(
+    db,
+    input.propertyId,
+    input.companyId,
+  );
 
   if (!property) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Property not found." });
   }
 
   return property;
-}
-
-async function syncPropertyCoverImageUrl(
-  db: NonNullable<Parameters<typeof listPropertyMedia>[0]>,
-  input: { companyId: string; propertyId: string },
-) {
-  const cover = await db.propertyMedia.findFirst({
-    include: { asset: true },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    where: {
-      isCover: true,
-      kind: "image",
-      property: {
-        companyId: input.companyId,
-        deletedAt: null,
-        id: input.propertyId,
-      },
-    },
-  });
-
-  await db.property.update({
-    data: { imageUrl: cover?.asset?.publicUrl ?? cover?.url ?? null },
-    where: {
-      companyId: input.companyId,
-      deletedAt: null,
-      id: input.propertyId,
-    },
-  });
 }
 
 export const propertyMediaRouter = createTRPCRouter({

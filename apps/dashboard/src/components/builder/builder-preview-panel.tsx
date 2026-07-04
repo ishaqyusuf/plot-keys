@@ -9,7 +9,7 @@ import {
   ClickGuardProvider,
   getRegisterTemplate,
   InlineOverview,
-  resolveFamilySectionComponents,
+  resolveRegisterSectionComponents,
   SmartFillProvider,
   sectionComponents,
   WebsiteRuntimeProvider,
@@ -335,8 +335,8 @@ export function BuilderPreviewPanel({
     router.push(`?${params.toString()}`);
   }
 
-  const familyOverrides = resolveFamilySectionComponents(
-    getRegisterTemplate(templateKey ?? "")?.family,
+  const familyOverrides = resolveRegisterSectionComponents(
+    getRegisterTemplate(templateKey ?? "")?.key,
   ) as Record<
     string,
     (props: { config: unknown; theme: unknown }) => JSX.Element

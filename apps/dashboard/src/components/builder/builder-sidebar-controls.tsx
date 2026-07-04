@@ -2,7 +2,7 @@
 
 import {
   colorSystems,
-  getTemplatePageInventory,
+  getTemplatePageInventoryStrict,
   stylePresets,
   type TemplateConfig,
   templateCatalog,
@@ -578,7 +578,7 @@ function PagePicker({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pages = getTemplatePageInventory(currentTemplateKey).pages;
+  const pages = getTemplatePageInventoryStrict(currentTemplateKey).pages;
   const currentPage =
     pages.find((page) => page.pageKey === currentPageKey) ?? pages[0];
 

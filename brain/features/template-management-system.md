@@ -101,6 +101,7 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
   - `useTenantAgents()`
   - `useTenantContactInfo()`
   - `useTemplateConfig()`
+- Current registry runtime surfaces include `RegistryProvider`, `useRegistry()`, `templates.<page>.resolve(ctx)`, registry-scoped query/mutation option builders, and template UI variant helpers for style-preset-driven primitives.
 - Recommended package split:
   - `apps/web/(dashboard)`
   - `apps/web/(website-runtime)`
@@ -180,14 +181,17 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 
 ## Current Implementation Alignment
 - The repo already has a structured website builder with code-backed templates, section registry ownership, draft/published `SiteConfiguration` records, and plan-aware template gating.
+- Tenant public pages now have explicit App Router files and a registry page facade for incremental migration from section-stack rendering to concrete template-owned page components.
+- Registry-scoped query/mutation helpers and style-preset UI variant helpers are implemented in `packages/section-registry` as the contract layer for future template page builds.
+- The active register model is plan-owned, not family-shared. The first concrete register template is `riwaq-starter` under `register/starter/riwaq`.
 - The current onboarding flow is still much narrower than the intended onboarding-driven draft generation model.
 - The broader marketplace, version graph, stock-image marketplace, logo system, and unified billing center are still planned rather than implemented.
 - The imported reference docs describe the target direction and should be treated as design guidance until corresponding code and schema land.
 
 ## Current Template Gap
 - The older template catalog was historically differentiated more by theme, copy defaults, and marketing positioning than by truly distinct page systems or information architecture.
-- That gap has narrowed now that the register families ship with multi-page inventories and differentiated home-page compositions by business model.
-- Remaining work is less about raw page count and more about deepening each family's unique section system, richer conversion journeys, and more family-specific content defaults.
+- The active register direction now favors fewer concrete plan-owned templates with full ownership of pages, sections, UI, hooks, nav, footer, placeholder data, and content schema.
+- Remaining work is less about raw page count and more about deepening each concrete template's unique section system, conversion journey, and content defaults.
 - The working evidence for this gap is documented in:
   - [brain/modules/templates-catalog.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/templates-catalog.md)
   - [brain/modules/pages-inventory.md](/Users/M1PRO/Documents/code/plot-keys/brain/modules/pages-inventory.md)
@@ -195,41 +199,31 @@ Allow a tenant to browse, license, configure, install, edit, preview, and publis
 ## Template Uniqueness Direction
 - Future template work should improve both visual uniqueness and structural uniqueness.
 - Structural uniqueness should include:
-  - distinct page inventories per template family
+  - distinct page inventories per concrete template
   - different home-page section compositions
   - varied navigation models
   - business-model-specific page sets such as listings-heavy, developer/project-focused, rental-management, or luxury/editorial
 - A template should not be considered meaningfully unique if the only differences are colors, fonts, seed copy, or image choices.
-- Template usage counts should remain visible, but uniqueness should be improved primarily by stronger template families and multi-page depth rather than marketing copy alone.
+- Template usage counts should remain visible, but uniqueness should be improved primarily by stronger concrete templates and multi-page depth rather than marketing copy alone.
 
-## Template Family Direction
-- The catalog should evolve toward a smaller number of stronger template families, each with clearer structural identity.
-- Example family directions:
+## Template Direction
+- The catalog should evolve toward a smaller number of stronger concrete templates, each with clearer structural identity.
+- Example template directions:
   - listing-first agency templates
   - luxury editorial templates
   - developer and project-led templates
   - rental/property-management templates
   - corporate real-estate templates
-- Each family should have a defined page inventory, section system, and conversion strategy before variants are multiplied.
+- Each concrete template should have a defined page inventory, section system, UI primitive set, and conversion strategy before variants are multiplied.
 
-### 2026-03-31 progress
-- Register-family home pages are now materially differentiated at the inventory level:
-  - `Noor` = listings / market proof / team
-  - `Bana` = project showcase / developer proof
-  - `Wafi` = services / owner acquisition
-  - `Faris` = personal agent / trust
-  - `Thuraya` = editorial portfolio / luxury proof
-  - `Sakan` = rental search / renter conversion
-- Existing family nav models and CTA labels already aligned with these business models, so this phase focused on home-page composition rather than introducing new nav primitives.
+## Template Register
 
-## Template Register (2026-03-23)
+The plan-owned template register lives at `packages/section-registry/src/register/`. Full specification in `brain/modules/template-register-plan.md`. Current decisions:
 
-A new plan-based template register is being built at `packages/section-registry/src/register/`. Full specification in `brain/modules/template-register-plan.md`. Key decisions:
-
-- **18 templates** — 6 company-type families × 3 plan tiers (Starter / Plus / Pro)
-- **Arabic/MENA naming accent** — consistent with existing catalog (Noor, Bana, Wafi, Faris, Thuraya, Sakan)
-- **One name per family** — plan variants live under one folder: `noor/common/`, `noor/starter/`, `noor/plus/`, `noor/pro/`
-- **Full page inventories** — all pages per family/plan including Login, Sign Up, Saved Listings, Inquiry Basket, 404, Privacy, Terms
+- **Plan-owned folders** — templates live directly under `starter/`, `plus/`, or `pro`
+- **One active register template** — `starter/riwaq` (`riwaq-starter`)
+- **No shared family layer** — concrete templates own their own name, pages, content, nav, footer, placeholder data, sections, UI, and hooks
+- **Riwaq page inventory** — landing, blog, contact, roadmap, privacy, terms
 - **Formal content injection contract** — `dataSource` + `requiredResources` on `SectionSlot`; `resolvePage()` resolver; two content channels (static text vs live DB data)
 - **4th render mode** — `"template"` added to `RenderMode` for marketplace browse (placeholder data, intercepted clicks)
 - **Three non-negotiable standards** — editable boundary (static only), UI system split (sections = raw Tailwind + CSS vars; overlays = shadcn), mobile responsive baseline (mandatory for all tiers)

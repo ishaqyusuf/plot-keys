@@ -1,4 +1,13 @@
-import type { Db } from "../prisma";
+import { createPrismaClient, type Db } from "../prisma";
+import { findCompanyBySlug } from "./company";
+
+export type DashboardTenantHostResult =
+  | { ok: false; reason: "database-unavailable" }
+  | { ok: true; tenantSlug: string | null };
+
+export type DashboardTenantOnboardedResult =
+  | { ok: false; reason: "database-unavailable" }
+  | { onboarded: boolean; ok: true };
 
 /**
  * Resolves a tenant company from a fully-qualified hostname.
@@ -42,6 +51,50 @@ export async function resolveTenantByHostname(
   }
 
   return null;
+}
+
+export async function resolveDashboardTenantSlugByHostname(
+  tenantHostname: string | null,
+): Promise<DashboardTenantHostResult> {
+  if (!tenantHostname) {
+    return { ok: true, tenantSlug: null };
+  }
+
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const resolvedTenant = await resolveTenantByHostname(db, tenantHostname);
+
+  return { ok: true, tenantSlug: resolvedTenant?.companySlug ?? null };
+}
+
+export async function isDashboardTenantAlreadyOnboarded(input: {
+  tenantHostname: string | null;
+  tenantSlug: string | null;
+}): Promise<DashboardTenantOnboardedResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  if (input.tenantSlug) {
+    const company = await findCompanyBySlug(db, input.tenantSlug);
+    return { onboarded: Boolean(company), ok: true };
+  }
+
+  if (input.tenantHostname) {
+    const resolvedTenant = await resolveTenantByHostname(
+      db,
+      input.tenantHostname,
+    );
+    return { onboarded: Boolean(resolvedTenant), ok: true };
+  }
+
+  return { onboarded: false, ok: true };
 }
 
 /**

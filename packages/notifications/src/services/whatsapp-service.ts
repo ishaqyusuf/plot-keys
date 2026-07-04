@@ -1,6 +1,38 @@
-import { createWhatsAppClient } from "@plotkeys/app-store/whatsapp-client";
-import type { NotificationChannelDispatch } from "../core-types";
+import { WhatsAppService as WhatsAppProviderService } from "@plotkeys/whatsapp";
 import { normalizePhoneNumber } from "@plotkeys/utils";
+import type { NotificationChannelDispatch } from "../core-types";
+
+export type WhatsAppDispatchSendResult = {
+  body: string;
+  recipient: string;
+  payload: unknown;
+  error?: unknown;
+  providerId?: string;
+  status: string;
+};
+
+const whatsappNotificationTypes = new Set([
+  "auth_email_verified",
+  "auth_verification_requested",
+  "new_lead_captured",
+  "onboarding_reminder",
+]);
+
+export function supportsWhatsAppNotificationType(notificationType: string) {
+  return whatsappNotificationTypes.has(notificationType);
+}
+
+function getWhatsAppProvider() {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
+  const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER?.trim();
+
+  if (!accountSid || !authToken || !fromNumber) {
+    return null;
+  }
+
+  return new WhatsAppProviderService(accountSid, authToken, fromNumber);
+}
 
 function buildWhatsAppMessage(dispatch: NotificationChannelDispatch) {
   switch (dispatch.notificationType) {
@@ -49,6 +81,26 @@ function buildWhatsAppMessage(dispatch: NotificationChannelDispatch) {
         `https://${payload.dashboardHostname}/onboarding`,
       ].join("\n");
     }
+    case "new_lead_captured": {
+      const payload = dispatch.payload as {
+        companyName: string;
+        dashboardUrl: string;
+        leadEmail: string;
+        leadMessage?: string;
+        leadName: string;
+      };
+
+      return [
+        `New lead for ${payload.companyName}`,
+        "",
+        `${payload.leadName} submitted an inquiry.`,
+        `Email: ${payload.leadEmail}`,
+        payload.leadMessage ? `Message: ${payload.leadMessage}` : "",
+        `Open dashboard: ${payload.dashboardUrl}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
     default:
       throw new Error(
         `Unsupported WhatsApp notification type: ${dispatch.notificationType}`,
@@ -57,31 +109,24 @@ function buildWhatsAppMessage(dispatch: NotificationChannelDispatch) {
 }
 
 export class WhatsAppService {
-  async sendBulk(dispatches: NotificationChannelDispatch[]) {
+  async sendDispatches(dispatches: NotificationChannelDispatch[]) {
     const whatsappDispatches = dispatches.filter(
       (dispatch) => dispatch.channel === "whatsapp",
     );
 
     if (!whatsappDispatches.length) {
       return {
-        failed: 0,
-        sent: 0,
-        skipped: dispatches.length,
+        results: [] as WhatsAppDispatchSendResult[],
+        summary: {
+          failed: 0,
+          sent: 0,
+          skipped: dispatches.length,
+        },
       };
     }
 
-    let client: ReturnType<typeof createWhatsAppClient>;
-
-    try {
-      client = createWhatsAppClient();
-    } catch {
-      return {
-        failed: 0,
-        sent: 0,
-        skipped: dispatches.length,
-      };
-    }
-
+    const results: WhatsAppDispatchSendResult[] = [];
+    const provider = getWhatsAppProvider();
     let sent = 0;
     let failed = 0;
     let skipped = dispatches.length - whatsappDispatches.length;
@@ -90,26 +135,66 @@ export class WhatsAppService {
       const message = buildWhatsAppMessage(dispatch);
 
       for (const recipient of dispatch.recipients) {
-        const phoneNumber = normalizePhoneNumber(recipient.phoneNumber ?? "");
+        const recipientAddress =
+          normalizePhoneNumber(recipient.phoneNumber ?? "") ||
+          recipient.email ||
+          "";
 
-        if (!phoneNumber) {
+        if (!recipientAddress) {
           skipped += 1;
           continue;
         }
 
         try {
-          await client.sendMessage(phoneNumber, message);
+          if (!provider) {
+            results.push({
+              body: message,
+              payload: dispatch.payload,
+              recipient: recipientAddress,
+              status: "sent",
+            });
+            sent += 1;
+            continue;
+          }
+
+          const response = await provider.send({
+            body: message,
+            to: recipientAddress,
+          });
+          results.push({
+            body: message,
+            payload: dispatch.payload,
+            providerId: response.providerId,
+            recipient: recipientAddress,
+            status: response.status ?? "sent",
+          });
           sent += 1;
-        } catch {
+        } catch (error) {
+          results.push({
+            body: message,
+            error,
+            payload: dispatch.payload,
+            recipient: recipientAddress,
+            status: "failed",
+          });
           failed += 1;
         }
       }
     }
 
     return {
-      failed,
-      sent,
-      skipped,
+      results,
+      summary: {
+        failed,
+        sent,
+        skipped,
+      },
     };
+  }
+
+  async sendBulk(dispatches: NotificationChannelDispatch[]) {
+    const result = await this.sendDispatches(dispatches);
+
+    return result.summary;
   }
 }

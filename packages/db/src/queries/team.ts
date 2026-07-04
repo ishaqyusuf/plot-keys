@@ -1,5 +1,14 @@
-import type { MembershipRole, WorkRole } from "../generated/prisma/enums";
-import type { Db } from "../prisma";
+import type { Agent, Employee, Prisma } from "../generated/prisma/client";
+import {
+  MembershipRole as MembershipRoleEnum,
+  MembershipStatus as MembershipStatusEnum,
+  WorkRole as WorkRoleEnum,
+  type MembershipRole,
+  type MembershipStatus,
+  type WorkRole,
+} from "../generated/prisma/enums";
+import { createPrismaClient, type Db } from "../prisma";
+import { findUserByEmail } from "./auth";
 
 const INVITE_TTL_HOURS = 72;
 
@@ -22,24 +31,144 @@ function generateInviteToken(): string {
   );
 }
 
-export async function listMembershipsForCompany(db: Db, companyId: string) {
-  return db.membership.findMany({
-    where: {
-      companyId,
-      deletedAt: null,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
+export async function listMembershipsForCompany(
+  db: Db,
+  companyId: string,
+  options: {
+    cursor?: string | number | null;
+    q?: string | null;
+    size?: string | number | null;
+    sort?: string[] | null;
+  } = {},
+) {
+  const query = options.q?.trim();
+  const size = normalizePageSize(options.size);
+  const offset = normalizeCursor(options.cursor);
+  const where: Prisma.MembershipWhereInput = {
+    companyId,
+    deletedAt: null,
+    ...(query ? { OR: getMembershipSearchFilters(query) } : {}),
+  };
+
+  const [count, data] = await db.$transaction([
+    db.membership.count({ where }),
+    db.membership.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
         },
       },
+      orderBy: getMembershipOrderBy(options.sort),
+      skip: offset,
+      take: size,
+      where,
+    }),
+  ]);
+  const nextCursor = offset + size < count ? String(offset + size) : null;
+
+  return {
+    data,
+    meta: {
+      count,
+      cursor: nextCursor,
+      hasNextPage: nextCursor !== null,
+      size,
     },
-    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-  });
+  };
+}
+
+function normalizePageSize(size: string | number | null | undefined) {
+  const value = Number(size ?? 50);
+
+  if (!Number.isFinite(value)) {
+    return 50;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), 100);
+}
+
+function normalizeCursor(cursor: string | number | null | undefined) {
+  const value = Number(cursor ?? 0);
+
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
+}
+
+function getMembershipSearchFilters(
+  query: string,
+): Prisma.MembershipWhereInput[] {
+  const filters: Prisma.MembershipWhereInput[] = [
+    {
+      user: { is: { email: { contains: query, mode: "insensitive" } } },
+    },
+    {
+      user: { is: { name: { contains: query, mode: "insensitive" } } },
+    },
+  ];
+
+  if (isMembershipRoleValue(query)) {
+    filters.push({ role: { equals: query } });
+  }
+
+  if (isMembershipStatusValue(query)) {
+    filters.push({ status: { equals: query } });
+  }
+
+  if (isWorkRoleValue(query)) {
+    filters.push({ workRole: { equals: query } });
+  }
+
+  return filters;
+}
+
+function getMembershipOrderBy(
+  sort: string[] | null | undefined,
+): Prisma.MembershipOrderByWithRelationInput[] {
+  const [field, value] = sort ?? [];
+  const direction = value === "asc" || value === "desc" ? value : null;
+
+  if (!direction) {
+    return [{ role: "asc" }, { createdAt: "asc" }];
+  }
+
+  switch (field) {
+    case "createdAt":
+      return [{ createdAt: direction }];
+    case "email":
+      return [{ user: { email: direction } }];
+    case "name":
+      return [{ user: { name: direction } }];
+    case "role":
+      return [{ role: direction }];
+    case "status":
+      return [{ status: direction }];
+    case "workRole":
+      return [{ workRole: direction }];
+    default:
+      return [{ role: "asc" }, { createdAt: "asc" }];
+  }
+}
+
+function isMembershipRoleValue(value: string): value is MembershipRole {
+  return Object.values(MembershipRoleEnum).includes(value as MembershipRole);
+}
+
+function isMembershipStatusValue(value: string): value is MembershipStatus {
+  return Object.values(MembershipStatusEnum).includes(
+    value as MembershipStatus,
+  );
+}
+
+function isWorkRoleValue(value: string): value is WorkRole {
+  return Object.values(WorkRoleEnum).includes(value as WorkRole);
 }
 
 export async function createTeamInvite(
@@ -95,6 +224,281 @@ export async function findTeamInviteByToken(db: Db, token: string) {
       },
     },
   });
+}
+
+export type TeamInviteJoinPageDataResult =
+  | { ok: false; reason: "database-unavailable" | "invite-not-found" }
+  | {
+      invite: NonNullable<Awaited<ReturnType<typeof findTeamInviteByToken>>>;
+      ok: true;
+    };
+
+export async function getTeamInviteJoinPageData(
+  token: string,
+): Promise<TeamInviteJoinPageDataResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const invite = await findTeamInviteByToken(db, token);
+
+  if (!invite) {
+    return { ok: false, reason: "invite-not-found" };
+  }
+
+  return { invite, ok: true };
+}
+
+export type TeamInviteProfileCompletionDataResult =
+  | {
+      ok: false;
+      reason:
+        | "database-unavailable"
+        | "email-mismatch"
+        | "invite-not-accepted"
+        | "invite-not-found"
+        | "unsupported-role";
+    }
+  | {
+      agentProfile: Agent | null;
+      employeeProfile: Employee | null;
+      invite: NonNullable<Awaited<ReturnType<typeof findTeamInviteByToken>>>;
+      ok: true;
+    };
+
+export type CompleteTeamInviteProfileResult =
+  | {
+      ok: false;
+      reason:
+        | "database-unavailable"
+        | "email-mismatch"
+        | "invite-not-accepted"
+        | "invite-not-found"
+        | "unsupported-role";
+    }
+  | { ok: true; profileKind: "agent" | "staff" };
+
+export type TeamInviteSignupDataResult =
+  | {
+      ok: false;
+      reason:
+        | "database-unavailable"
+        | "invite-accepted"
+        | "invite-expired"
+        | "invite-not-found"
+        | "invite-revoked"
+        | "user-exists";
+    }
+  | {
+      email: string;
+      invite: NonNullable<Awaited<ReturnType<typeof findTeamInviteByToken>>>;
+      ok: true;
+    };
+
+export type AcceptTeamInviteResult =
+  | { ok: true }
+  | { ok: false; reason: "database-unavailable" };
+
+export async function getTeamInviteProfileCompletionData(input: {
+  token: string;
+  userEmail: string;
+}): Promise<TeamInviteProfileCompletionDataResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const invite = await findTeamInviteByToken(db, input.token);
+
+  if (!invite) {
+    return { ok: false, reason: "invite-not-found" };
+  }
+
+  if (invite.email.toLowerCase() !== input.userEmail.toLowerCase()) {
+    return { ok: false, reason: "email-mismatch" };
+  }
+
+  if (!invite.acceptedAt) {
+    return { ok: false, reason: "invite-not-accepted" };
+  }
+
+  if (invite.role !== "agent" && invite.role !== "staff") {
+    return { ok: false, reason: "unsupported-role" };
+  }
+
+  const isAgentInvite = invite.role === "agent";
+  const [agentProfile, employeeProfile] = await Promise.all([
+    isAgentInvite
+      ? db.agent.findFirst({
+          where: {
+            companyId: invite.companyId,
+            deletedAt: null,
+            email: invite.email,
+          },
+        })
+      : Promise.resolve(null),
+    !isAgentInvite
+      ? db.employee.findFirst({
+          where: {
+            companyId: invite.companyId,
+            deletedAt: null,
+            email: invite.email,
+          },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  return {
+    agentProfile,
+    employeeProfile,
+    invite,
+    ok: true,
+  };
+}
+
+export async function completeTeamInviteProfile(input: {
+  bio?: string | null;
+  imageUrl?: string | null;
+  name: string;
+  phone?: string | null;
+  title: string;
+  token: string;
+  userEmail: string;
+}): Promise<CompleteTeamInviteProfileResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const invite = await findTeamInviteByToken(db, input.token);
+
+  if (!invite) {
+    return { ok: false, reason: "invite-not-found" };
+  }
+
+  if (invite.email.toLowerCase() !== input.userEmail.toLowerCase()) {
+    return { ok: false, reason: "email-mismatch" };
+  }
+
+  if (!invite.acceptedAt) {
+    return { ok: false, reason: "invite-not-accepted" };
+  }
+
+  if (invite.role === "agent") {
+    const existingAgent = await db.agent.findFirst({
+      where: {
+        companyId: invite.companyId,
+        deletedAt: null,
+        email: invite.email,
+      },
+    });
+
+    const data = {
+      bio: input.bio ?? null,
+      imageUrl: input.imageUrl ?? null,
+      name: input.name,
+      phone: input.phone ?? null,
+      title: input.title,
+    };
+
+    if (existingAgent) {
+      await db.agent.update({
+        data,
+        where: { id: existingAgent.id },
+      });
+    } else {
+      await db.agent.create({
+        data: {
+          ...data,
+          companyId: invite.companyId,
+          email: invite.email,
+        },
+      });
+    }
+
+    return { ok: true, profileKind: "agent" };
+  }
+
+  if (invite.role === "staff") {
+    const existingEmployee = await db.employee.findFirst({
+      where: {
+        companyId: invite.companyId,
+        deletedAt: null,
+        email: invite.email,
+      },
+    });
+
+    const data = {
+      name: input.name,
+      phone: input.phone ?? null,
+      title: input.title,
+      workRole: invite.workRole,
+    };
+
+    if (existingEmployee) {
+      await db.employee.update({
+        data,
+        where: { id: existingEmployee.id },
+      });
+    } else {
+      await db.employee.create({
+        data: {
+          ...data,
+          companyId: invite.companyId,
+          email: invite.email,
+        },
+      });
+    }
+
+    return { ok: true, profileKind: "staff" };
+  }
+
+  return { ok: false, reason: "unsupported-role" };
+}
+
+export async function getTeamInviteSignupData(
+  token: string,
+): Promise<TeamInviteSignupDataResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  const invite = await findTeamInviteByToken(db, token);
+
+  if (!invite) {
+    return { ok: false, reason: "invite-not-found" };
+  }
+
+  if (invite.acceptedAt) {
+    return { ok: false, reason: "invite-accepted" };
+  }
+
+  if (invite.revokedAt) {
+    return { ok: false, reason: "invite-revoked" };
+  }
+
+  if (invite.expiresAt < new Date()) {
+    return { ok: false, reason: "invite-expired" };
+  }
+
+  const email = invite.email.trim().toLowerCase();
+  const existingUser = await findUserByEmail(db, email);
+
+  if (existingUser) {
+    return { ok: false, reason: "user-exists" };
+  }
+
+  return {
+    email,
+    invite,
+    ok: true,
+  };
 }
 
 export async function acceptTeamInvite(
@@ -160,6 +564,21 @@ export async function acceptTeamInvite(
   ]);
 
   return membership;
+}
+
+export async function acceptTeamInviteForUser(input: {
+  token: string;
+  userId: string;
+}): Promise<AcceptTeamInviteResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  await acceptTeamInvite(db, input);
+
+  return { ok: true };
 }
 
 export async function updateMemberRole(

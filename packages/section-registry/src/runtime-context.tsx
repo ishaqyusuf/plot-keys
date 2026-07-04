@@ -14,8 +14,20 @@
  *   </WebsiteRuntimeProvider>
  */
 
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-import { resolveFontStack, resolveHeadingFontStack, resolveSlotFont, type FontFallbackMap } from "./fonts";
+import {
+  type AnchorHTMLAttributes,
+  type ComponentType,
+  createContext,
+  type ReactNode,
+  useContext,
+  useMemo,
+} from "react";
+import {
+  resolveFontStack,
+  resolveHeadingFontStack,
+  resolveSlotFont,
+  type FontFallbackMap,
+} from "./fonts";
 import {
   colorSystems,
   type ColorSystem,
@@ -42,6 +54,72 @@ const WebsiteRuntimeContext = createContext<WebsiteRuntimeContextValue>({
   renderMode: "live",
   stylePreset: undefined,
   templateConfig: {},
+});
+
+export type RegistryTenantInfo = {
+  companyId?: string;
+  companyName?: string;
+  logoUrl?: string | null;
+  market?: string | null;
+  subdomain?: string;
+};
+
+export type RegistryPageInfo = {
+  canonicalPath?: string;
+  pageDisabled: boolean;
+  pageKey?: string;
+  pageNotSupported: boolean;
+  routeSlug?: string | null;
+};
+
+export type RegistryLinkComponentProps = Omit<
+  AnchorHTMLAttributes<HTMLAnchorElement>,
+  "href"
+> & {
+  children: ReactNode;
+  href: string;
+};
+
+export type RegistryLinkComponent = ComponentType<RegistryLinkComponentProps>;
+
+function DefaultRegistryLink({
+  children,
+  href,
+  ...props
+}: RegistryLinkComponentProps) {
+  return (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  );
+}
+
+export type RegistryContextValue = {
+  isDevMode: boolean;
+  linkComponent: RegistryLinkComponent;
+  mode: RenderMode;
+  page: RegistryPageInfo;
+  renderMode: RenderMode;
+  templateConfig: TemplateConfig;
+  templateKey?: string;
+  tenant?: RegistryTenantInfo;
+  theme: TemplateConfig;
+};
+
+const defaultRegistryPageInfo: RegistryPageInfo = {
+  pageDisabled: false,
+  pageNotSupported: false,
+  routeSlug: null,
+};
+
+const RegistryContext = createContext<RegistryContextValue>({
+  isDevMode: false,
+  linkComponent: DefaultRegistryLink,
+  mode: "live",
+  page: defaultRegistryPageInfo,
+  renderMode: "live",
+  templateConfig: {},
+  theme: {},
 });
 
 // ---------------------------------------------------------------------------
@@ -95,6 +173,63 @@ export function WebsiteRuntimeProvider({
   );
 }
 
+export type RegistryProviderProps = {
+  children: ReactNode;
+  colorSystemKey?: string;
+  linkComponent?: RegistryLinkComponent;
+  pageInfo?: Partial<RegistryPageInfo>;
+  renderMode?: RenderMode;
+  templateConfig?: TemplateConfig;
+  templateKey?: string;
+  tenant?: RegistryTenantInfo;
+};
+
+export function RegistryProvider({
+  children,
+  colorSystemKey,
+  linkComponent = DefaultRegistryLink,
+  pageInfo,
+  renderMode = "live",
+  templateConfig = {},
+  templateKey,
+  tenant,
+}: RegistryProviderProps) {
+  const page = useMemo<RegistryPageInfo>(
+    () => ({
+      ...defaultRegistryPageInfo,
+      ...pageInfo,
+    }),
+    [pageInfo],
+  );
+
+  const value = useMemo<RegistryContextValue>(
+    () => ({
+      isDevMode: renderMode !== "live",
+      linkComponent,
+      mode: renderMode,
+      page,
+      renderMode,
+      templateConfig,
+      templateKey,
+      tenant,
+      theme: templateConfig,
+    }),
+    [linkComponent, page, renderMode, templateConfig, templateKey, tenant],
+  );
+
+  return (
+    <RegistryContext.Provider value={value}>
+      <WebsiteRuntimeProvider
+        colorSystemKey={colorSystemKey}
+        renderMode={renderMode}
+        templateConfig={templateConfig}
+      >
+        {children}
+      </WebsiteRuntimeProvider>
+    </RegistryContext.Provider>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Hooks
 // ---------------------------------------------------------------------------
@@ -140,6 +275,14 @@ export function useResolvedFont(slot: keyof FontFallbackMap = "eyebrow"): string
 export function useTemplateImage(slot: string): string | undefined {
   const { templateConfig } = useContext(WebsiteRuntimeContext);
   return templateConfig.namedImages?.[slot];
+}
+
+export function useRegistry(): RegistryContextValue {
+  return useContext(RegistryContext);
+}
+
+export function useRegistryLinkComponent(): RegistryLinkComponent {
+  return useContext(RegistryContext).linkComponent;
 }
 
 // Re-export font helpers for convenience

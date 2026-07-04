@@ -6,6 +6,7 @@ export const newLeadCapturedPayloadSchema = z.object({
   dashboardUrl: z.string().min(1),
   fullName: z.string().min(1),
   leadEmail: z.string().min(1),
+  leadId: z.string().optional(),
   leadMessage: z.string().optional(),
   leadName: z.string().min(1),
 });

@@ -1,8 +1,25 @@
-import { propertiesFilterParams } from "../lib/properties-filter-params";
-import { useQueryFilterStates } from "../lib/use-filter-query-states";
+"use client";
+
+import { useQueryStates } from "nuqs";
+import { useCallback } from "react";
+import {
+  propertiesFilterParams,
+  type PropertiesFilters,
+} from "../lib/properties-filter-params";
+
+const clearPropertiesFilters: PropertiesFilters = {
+  q: null,
+  type: null,
+};
 
 export function usePropertiesFilterParams() {
-  const [filters, setFilters] = useQueryFilterStates(propertiesFilterParams);
+  const [filters, setFilterParams] = useQueryStates(propertiesFilterParams);
+  const setFilters = useCallback(
+    (next: Partial<PropertiesFilters> | null) => {
+      void setFilterParams(next ?? clearPropertiesFilters);
+    },
+    [setFilterParams],
+  );
 
   return {
     filters,

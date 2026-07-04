@@ -1,14 +1,15 @@
 import { isWorkRole, WORK_ROLE_LABELS } from "@plotkeys/utils";
 import type { ReactNode } from "react";
 
-import { DashboardChrome } from "../../components/nav/dashboard-chrome";
+import { DashboardChrome } from "@/components/nav/dashboard-chrome";
+import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
 import {
   GLOBAL_PLATFORM_GROUP,
   GLOBAL_TOP_ITEMS,
   getCompanyAppsContext,
-} from "../../lib/company-apps";
-import { getNotificationBellData } from "../../lib/notifications";
-import { requireOnboardedSession } from "../../lib/session";
+} from "@/lib/company-apps";
+import { getNotificationBellData } from "@/lib/notifications";
+import { requireOnboardedSession } from "@/lib/session";
 
 export default async function DashboardAppLayout({
   children,
@@ -40,6 +41,7 @@ export default async function DashboardAppLayout({
       >
         {children}
       </DashboardChrome>
+      <GlobalSheetsProvider />
     </div>
   );
 }

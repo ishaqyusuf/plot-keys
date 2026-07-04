@@ -1,48 +1,19 @@
-import { createPrismaClient, findCompanyById } from "@plotkeys/db";
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@plotkeys/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
-import { Input } from "@plotkeys/ui/input";
-import {
-  type BillingInterval,
-  getPlanPricing,
-  planTrialDays,
-  tierLabels,
-} from "@plotkeys/utils";
-import { CreditCard, RotateCcw } from "lucide-react";
-import { redirect } from "next/navigation";
+import { Alert, AlertDescription } from "@plotkeys/ui/alert";
+import type { BillingInterval } from "@plotkeys/utils";
+import type { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { Suspense } from "react";
 
-import { DashboardEmptyState } from "../../../components/dashboard/dashboard-empty-state";
-import {
-  DashboardFilterTab,
-  DashboardFilterTabs,
-  DashboardPage,
-  DashboardPageActions,
-  DashboardPageDescription,
-  DashboardPageEyebrow,
-  DashboardPageHeader,
-  DashboardPageHeaderRow,
-  DashboardPageIntro,
-  DashboardPageTitle,
-  DashboardPageToolbar,
-  DashboardSection,
-  DashboardSectionDescription,
-  DashboardSectionHeader,
-  DashboardSectionTitle,
-  DashboardToolbarGroup,
-} from "../../../components/dashboard/dashboard-page";
-import { requireOnboardedSession } from "../../../lib/session";
-import {
-  initializeCheckoutAction,
-  repairBillingPaymentAction,
-} from "../../actions";
+import { DashboardPage } from "@/components/dashboard/dashboard-page";
+import { ErrorFallback } from "@/components/error-fallback";
+import { BillingTable } from "@/components/tables/billing";
+import { BillingSkeleton } from "@/components/tables/billing/skeleton";
+import { requireOnboardedSession } from "@/lib/session";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+
+export const metadata: Metadata = {
+  title: "Billing & Plans | Plot Keys",
+};
 
 type BillingPageProps = {
   searchParams?: Promise<{
@@ -52,359 +23,43 @@ type BillingPageProps = {
   }>;
 };
 
-const tierFeatures: Record<string, string[]> = {
-  plus: [
-    "Everything in Launch",
-    "Custom domain",
-    "Up to 8 team seats",
-    "WhatsApp integration",
-    "Customer accounts",
-    "Light AI allocation",
-  ],
-  pro: [
-    "Everything in Growth",
-    "All premium templates",
-    "Higher AI allocation",
-    "Advanced branding controls",
-    "Priority support",
-  ],
-  starter: [
-    "1 live website",
-    "Starter templates",
-    "Subdomain hosting",
-    "Lead capture",
-    "Up to 2 team seats",
-  ],
-};
+function resolveBillingInterval(interval?: string): BillingInterval {
+  return interval === "annual" ? "annual" : "monthly";
+}
 
 export default async function BillingPage({ searchParams }: BillingPageProps) {
+  await requireOnboardedSession();
   const params = (await searchParams) ?? {};
-  const session = await requireOnboardedSession();
-  const prisma = createPrismaClient().db;
+  const selectedInterval = resolveBillingInterval(params.interval);
 
-  const company = prisma
-    ? await findCompanyById(prisma, session.activeMembership.companyId)
-    : null;
-
-  if (!company) redirect("/");
-
-  const currentTier = (company.planTier ?? "starter") as
-    | "starter"
-    | "plus"
-    | "pro";
-  const currentStatus = company.planStatus ?? "active";
-  const selectedInterval: BillingInterval =
-    params.interval === "annual" ? "annual" : "monthly";
-
-  const recentItems = prisma
-    ? await prisma.billingLineItem.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 10,
-        where: { companyId: company.id },
-      })
-    : [];
+  batchPrefetch([trpc.workspace.getBillingInfo.queryOptions()]);
 
   return (
     <DashboardPage>
-      <DashboardPageHeader>
-        <DashboardPageHeaderRow>
-          <DashboardPageIntro>
-            <DashboardPageEyebrow>Revenue workspace</DashboardPageEyebrow>
-            <DashboardPageTitle>Billing &amp; plans</DashboardPageTitle>
-            <DashboardPageDescription>
-              Manage your subscription, compare plan levels, and review billing
-              history. Every plan includes a {planTrialDays}-day free trial.
-            </DashboardPageDescription>
-          </DashboardPageIntro>
-          <DashboardPageActions>
-            <Badge
-              variant={currentStatus === "active" ? "default" : "secondary"}
-            >
-              {currentStatus === "active"
-                ? "Active"
-                : currentStatus === "past_due"
-                  ? "Past due"
-                  : "Canceled"}
-            </Badge>
-          </DashboardPageActions>
-        </DashboardPageHeaderRow>
-        <DashboardPageToolbar>
-          <DashboardToolbarGroup className="text-sm text-muted-foreground">
-            Current plan: {tierLabels[currentTier]}
-          </DashboardToolbarGroup>
-          <DashboardToolbarGroup>
-            <DashboardFilterTabs>
-              <DashboardFilterTab
-                active={selectedInterval === "monthly"}
-                href="/billing?interval=monthly"
-              >
-                Monthly
-              </DashboardFilterTab>
-              <DashboardFilterTab
-                active={selectedInterval === "annual"}
-                href="/billing?interval=annual"
-              >
-                Annual
-              </DashboardFilterTab>
-            </DashboardFilterTabs>
-            <Badge variant="secondary">Save 20%</Badge>
-          </DashboardToolbarGroup>
-        </DashboardPageToolbar>
-      </DashboardPageHeader>
+      {params.success === "1" ? (
+        <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <AlertDescription>
+            Payment successful. Your plan has been updated.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-      {params.success === "1" && (
-        <Card className="border-green-300/60 bg-green-50/35 dark:border-green-900/70 dark:bg-green-950/15">
-          <CardContent className="py-4">
-            <p className="text-sm text-green-800 dark:text-green-200">
-              ✓ Payment successful! Your plan has been updated.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {params.payment ? (
+        <Alert className="border-amber-300/60 bg-amber-50/35 text-amber-950 dark:border-amber-900/70 dark:bg-amber-950/15 dark:text-amber-100">
+          <AlertDescription>
+            We could not confirm that payment yet. Please retry or contact
+            support with your Paystack reference.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
-      {params.payment && (
-        <Card className="border-amber-300/60 bg-amber-50/35 dark:border-amber-900/70 dark:bg-amber-950/15">
-          <CardContent className="py-4">
-            <p className="text-sm text-amber-900 dark:text-amber-200">
-              We could not confirm that payment yet. Please retry or contact
-              support with your Paystack reference.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <DashboardSection>
-        <DashboardSectionHeader>
-          <div>
-            <DashboardSectionTitle>Current plan</DashboardSectionTitle>
-            <DashboardSectionDescription>
-              Review current status, start date, and the active plan before
-              making changes.
-            </DashboardSectionDescription>
-          </div>
-        </DashboardSectionHeader>
-        <Card className="border-border/65 bg-card/78">
-          <CardHeader>
-            <CardTitle className="text-lg">Current Plan</CardTitle>
-            <CardDescription>
-              You are on the <strong>{tierLabels[currentTier]}</strong> plan.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex items-center gap-4">
-            <Badge
-              variant={currentStatus === "active" ? "default" : "secondary"}
-            >
-              {currentStatus === "active"
-                ? "Active"
-                : currentStatus === "past_due"
-                  ? "Past due"
-                  : "Canceled"}
-            </Badge>
-            {company.planStartedAt && (
-              <span className="text-xs text-muted-foreground">
-                Since{" "}
-                {new Intl.DateTimeFormat("en-NG", {
-                  dateStyle: "medium",
-                }).format(company.planStartedAt)}
-              </span>
-            )}
-            {company.planEndsAt && (
-              <span className="text-xs text-muted-foreground">
-                · Ends{" "}
-                {new Intl.DateTimeFormat("en-NG", {
-                  dateStyle: "medium",
-                }).format(company.planEndsAt)}
-              </span>
-            )}
-          </CardContent>
-        </Card>
-      </DashboardSection>
-
-      <DashboardSection>
-        <DashboardSectionHeader>
-          <div>
-            <DashboardSectionTitle>Available plans</DashboardSectionTitle>
-            <DashboardSectionDescription>
-              Compare tiers and upgrade into higher usage limits or premium
-              features.
-            </DashboardSectionDescription>
-          </div>
-        </DashboardSectionHeader>
-        <div className="grid gap-2.5 md:grid-cols-3">
-          {(["starter", "plus", "pro"] as const).map((tier) => {
-            const pricing = getPlanPricing(tier);
-            const price =
-              selectedInterval === "monthly" ? pricing.monthly : pricing.annual;
-            const isCurrent = tier === currentTier;
-            const isUpgrade =
-              ["starter", "plus", "pro"].indexOf(tier) >
-              ["starter", "plus", "pro"].indexOf(currentTier);
-
-            return (
-              <Card
-                key={tier}
-                className={
-                  isCurrent
-                    ? "border-2 border-primary/40 bg-card/80"
-                    : "border-border/65 bg-card/78"
-                }
-              >
-                <CardHeader>
-                  <CardTitle>{tierLabels[tier]}</CardTitle>
-                  <CardDescription>
-                    <span className="text-2xl font-bold text-foreground">
-                      {price.formatted}
-                    </span>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {pricing.annual.minorUnits === 0
-                        ? `${planTrialDays}-day free trial`
-                        : `${planTrialDays}-day free trial · ${pricing.annual.formatted} billed annually`}
-                    </p>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="mb-6 space-y-2 text-sm text-muted-foreground">
-                    {(tierFeatures[tier] ?? []).map((feature) => (
-                      <li key={feature}>✓ {feature}</li>
-                    ))}
-                  </ul>
-
-                  {isCurrent ? (
-                    <Button disabled variant="outline" className="w-full">
-                      Current plan
-                    </Button>
-                  ) : isUpgrade ? (
-                    <form action={initializeCheckoutAction}>
-                      <input type="hidden" name="planTier" value={tier} />
-                      <input
-                        type="hidden"
-                        name="interval"
-                        value={selectedInterval}
-                      />
-                      <Button type="submit" className="w-full">
-                        Upgrade to {tierLabels[tier]}
-                      </Button>
-                    </form>
-                  ) : (
-                    <Button disabled variant="outline" className="w-full">
-                      Contact support
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </DashboardSection>
-
-      <DashboardSection>
-        <DashboardSectionHeader>
-          <div>
-            <DashboardSectionTitle>Repair payment</DashboardSectionTitle>
-            <DashboardSectionDescription>
-              Confirm a successful Paystack payment that did not upgrade this
-              workspace.
-            </DashboardSectionDescription>
-          </div>
-        </DashboardSectionHeader>
-        <Card className="border-border/65 bg-card/78">
-          <CardContent className="py-4">
-            <form
-              action={repairBillingPaymentAction}
-              className="grid gap-3 md:grid-cols-[1fr_auto]"
-            >
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="paystack-reference">
-                    Paystack reference
-                  </FieldLabel>
-                  <Input
-                    id="paystack-reference"
-                    name="reference"
-                    placeholder="e.g. T1234567890"
-                    required
-                  />
-                </Field>
-              </FieldGroup>
-              <div className="flex items-end">
-                <Button type="submit" variant="outline">
-                  <RotateCcw className="mr-1.5 size-3.5" />
-                  Repair payment
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </DashboardSection>
-
-      <DashboardSection>
-        <DashboardSectionHeader>
-          <div>
-            <DashboardSectionTitle>Billing history</DashboardSectionTitle>
-            <DashboardSectionDescription>
-              Recent billing line items and invoice activity for this workspace.
-            </DashboardSectionDescription>
-          </div>
-        </DashboardSectionHeader>
-
-        {recentItems.length === 0 ? (
-          <DashboardEmptyState
-            description="No billing records yet."
-            icon={<CreditCard className="size-5" />}
-            title="No billing history"
-          />
-        ) : (
-          <div className="space-y-2">
-            {recentItems.map((item) => (
-              <Card key={item.id} className="border-border/70 bg-card/82">
-                <CardContent className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium capitalize">
-                      {item.kind.replace("_", " ")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Intl.DateTimeFormat("en-NG", {
-                        dateStyle: "medium",
-                      }).format(item.createdAt)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">
-                      ₦{(item.amountMinorUnits / 100).toLocaleString("en-NG")}
-                    </span>
-                    <Badge
-                      variant={
-                        item.status === "active"
-                          ? "default"
-                          : item.status === "pending"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {item.status}
-                    </Badge>
-                    {item.kind === "subscription" &&
-                    item.status === "pending" &&
-                    item.providerRef ? (
-                      <form action={repairBillingPaymentAction}>
-                        <input
-                          name="reference"
-                          type="hidden"
-                          value={item.providerRef}
-                        />
-                        <Button size="sm" type="submit" variant="outline">
-                          <RotateCcw className="mr-1.5 size-3.5" />
-                          Repair
-                        </Button>
-                      </form>
-                    ) : null}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </DashboardSection>
+      <HydrateClient>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<BillingSkeleton />}>
+            <BillingTable selectedInterval={selectedInterval} />
+          </Suspense>
+        </ErrorBoundary>
+      </HydrateClient>
     </DashboardPage>
   );
 }

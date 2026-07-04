@@ -4,8 +4,8 @@ import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { Label } from "@plotkeys/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
 import { useTRPC } from "../../trpc/client";
 
 // ---------------------------------------------------------------------------
@@ -79,14 +79,12 @@ export function AssignMemberForm({
   teamMembers: TeamMember[];
   assignedMemberIds: Set<string>;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const assignMutation = useMutation(
     trpc.projects.assignMember.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 

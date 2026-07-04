@@ -41,6 +41,30 @@ This file defines implementation guardrails for the repository.
 - Quick fill must not rely on `querySelector`, hidden DOM probing, or click automation for field population. Use the form instance as the source of truth.
 - Generic fallback quick fill is acceptable only as a temporary stopgap while a new form is being introduced; new forms should ship with their own stable profile before the work is considered complete.
 
+## Midday Architecture Standards
+- Midday is the primary implementation standard for pages, tables, modals, sheets, sidebar, forms, onboarding, layouts, tRPC calls, loading states, error states, and caching patterns.
+- Pages, tables, modals, sheets, forms, onboarding, sidebar, sign-out, and shared dashboard components must follow Midday architecture, file naming, and coding patterns.
+- Tables should use the Midday table layout:
+  - `components/tables/core`
+  - `components/tables/<domain>/columns.tsx`
+  - `components/tables/<domain>/data-table.tsx`
+  - `components/tables/<domain>/table-header.tsx`
+  - `components/tables/<domain>/skeleton.tsx`
+  - `components/tables/<domain>/empty-states.tsx`
+  - `components/tables/<domain>/bottom-bar.tsx` when needed
+  - `components/tables/<domain>/action-menu.tsx` when needed
+- Sheets should use the Midday global sheet pattern:
+  - `components/sheets/global-sheets.tsx`
+  - `components/sheets/global-sheets-provider.tsx`
+  - `components/sheets/...`
+- Forms must follow Midday validation, error handling, and mutation patterns.
+- Data fetching and mutations must use standard Midday tRPC patterns, including invalidation, loading states, errors, and caching behavior.
+- Loading states should be implemented with domain-specific skeletons and stable layout dimensions instead of ad hoc spinners in page bodies.
+- Error states should be explicit, recoverable where possible, and colocated with the interaction or data surface that failed.
+- Use shadcn standard components and patterns. Never directly modify shadcn source components; create wrapper components for project-specific behavior.
+- Use GND as the reference for the standard notification package system.
+- Use After Service as the reference for local URL handling, portless/proxy support, root env mode loading, and generated app links.
+
 ## Multi-Tenant Rules
 - Scope tenant data explicitly in every app and service boundary.
 - Prevent tenant-specific content leakage across rendering or caching layers.
@@ -57,3 +81,14 @@ This file defines implementation guardrails for the repository.
 - Keep a `.env.example` file in every runnable `apps/*` directory, even if some entries are placeholders for future wiring.
 - Add or update `packages/jobs/.env.example` when that package begins using environment variables.
 - Shared packages should document required env vars through the consuming app's `.env.example` rather than package-local env files.
+
+<!-- personal-coding-rules:start -->
+## Global Personal Coding Rules
+
+Agents must treat these global coding rule references as non-negotiable:
+
+- `/Users/M1PRO/.me/coding-standards/global.md`
+- `/Users/M1PRO/.me/coding-standards/nextjs.md`
+
+Project-specific exceptions require an ADR in `brain/decisions/` before agents may diverge.
+<!-- personal-coding-rules:end -->

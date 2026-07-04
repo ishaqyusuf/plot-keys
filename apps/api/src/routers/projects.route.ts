@@ -18,8 +18,11 @@ import {
   deleteProjectWorker,
   findCompanyById,
   getProjectBudget,
+  getProjectBudgetDetail,
   getProjectById,
+  getProjectOverviewDetail,
   getProjectPayrollRun,
+  getProjectWorkforceDetail,
   grantCustomerProjectAccess,
   hasEnoughCredits,
   listCustomerAccessForProject,
@@ -131,14 +134,27 @@ export const projectsRouter = createTRPCRouter({
   list: membershipProcedure
     .input(
       z.object({
+        cursor: z.union([z.string(), z.number()]).optional().nullable(),
+        q: z.string().optional().nullable(),
+        size: z.union([z.string(), z.number()]).optional().nullable(),
+        sort: z.array(z.string()).optional().nullable(),
         status: projectStatusEnum.optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const db = ctx.db.db;
-      if (!db) return [];
+      if (!db) {
+        return {
+          data: [],
+          meta: { count: 0, cursor: null, hasNextPage: false, size: 0 },
+        };
+      }
 
       return listProjectsForCompany(db, ctx.auth.activeMembership.companyId, {
+        cursor: input.cursor,
+        q: input.q,
+        size: input.size,
+        sort: input.sort,
         status: input.status,
       });
     }),
@@ -157,6 +173,20 @@ export const projectsRouter = createTRPCRouter({
       );
     }),
 
+  /** Get the project overview page payload. */
+  getOverviewDetail: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) return null;
+
+      return getProjectOverviewDetail(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+    }),
+
   /** Project count by status. */
   stats: membershipProcedure.query(async ({ ctx }) => {
     const db = ctx.db.db;
@@ -168,6 +198,7 @@ export const projectsRouter = createTRPCRouter({
         delayed: 0,
         completed: 0,
         archived: 0,
+        total: 0,
       };
     }
 
@@ -623,6 +654,20 @@ export const projectsRouter = createTRPCRouter({
       return getProjectBudget(db, input.projectId);
     }),
 
+  /** Get the lightweight project budget page payload. */
+  getBudgetDetail: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) return null;
+
+      return getProjectBudgetDetail(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+    }),
+
   /** Create or update the project budget summary. */
   upsertBudget: membershipProcedure
     .input(
@@ -774,6 +819,20 @@ export const projectsRouter = createTRPCRouter({
   // -------------------------------------------------------------------------
   // Workers
   // -------------------------------------------------------------------------
+
+  /** Get the lightweight project workforce page payload. */
+  getWorkforceDetail: membershipProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) return null;
+
+      return getProjectWorkforceDetail(
+        db,
+        input.projectId,
+        ctx.auth.activeMembership.companyId,
+      );
+    }),
 
   /** List workers on a project. */
   listWorkers: membershipProcedure

@@ -11,6 +11,7 @@ import VerificationEmail from "@plotkeys/email/emails/verification";
 import WelcomeEmail from "@plotkeys/email/emails/welcome";
 import WorkspaceInvitationEmail from "@plotkeys/email/emails/workspace-invitation";
 import { render } from "@plotkeys/email/render";
+import { resolveEmailRecipients } from "@plotkeys/utils";
 import type { NotificationChannelDispatch } from "../core-types";
 
 type ResendEmailPayload = {
@@ -21,16 +22,93 @@ type ResendEmailPayload = {
   to: string[];
 };
 
+export type EmailInput = {
+  body?: string;
+  data?: Record<string, unknown>;
+  from?: string;
+  html?: string;
+  replyTo?: string;
+  subject: string;
+  to: string | string[];
+};
+
+export type EmailSendResult = {
+  error?: unknown;
+  originalRecipients: string[];
+  providerId?: string;
+  recipients: string[];
+  status: "sent" | "failed" | "skipped";
+  wasRecipientOverridden: boolean;
+};
+
+export type EmailDispatchInput = {
+  body: string;
+  subject: string;
+  to: string[];
+};
+
+export type EmailDispatchSendResult = {
+  email: EmailDispatchInput;
+  result: EmailSendResult;
+};
+
+const emailNotificationTypes = new Set([
+  "auth_email_verified",
+  "auth_verification_requested",
+  "new_lead_captured",
+  "onboarding_reminder",
+  "site_published",
+  "workspace_invitation_sent",
+]);
+
+export function supportsEmailNotificationType(notificationType: string) {
+  return emailNotificationTypes.has(notificationType);
+}
+
+function readNonEmptyEnv(key: string) {
+  const value = process.env[key]?.trim();
+  return value ? value : undefined;
+}
+
 function getEmailFrom() {
-  return process.env.EMAIL_FROM ?? "PlotKeys <notifications@plotkeys.com>";
+  return readNonEmptyEnv("EMAIL_FROM_ADDRESS");
 }
 
 function getEmailReplyTo() {
-  return process.env.EMAIL_REPLY_TO;
+  return readNonEmptyEnv("EMAIL_REPLY_TO");
 }
 
 function getResendApiKey() {
-  return process.env.RESEND_API_KEY;
+  return readNonEmptyEnv("RESEND_API_KEY");
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function textToHtml(value: string) {
+  return escapeHtml(value).replaceAll("\n", "<br />");
+}
+
+function htmlFromEmailInput(email: EmailInput) {
+  if (email.html?.trim()) {
+    return email.html;
+  }
+
+  if (email.body?.trim()) {
+    return textToHtml(email.body);
+  }
+
+  if (email.data) {
+    return `<pre>${escapeHtml(JSON.stringify(email.data, null, 2))}</pre>`;
+  }
+
+  return "";
 }
 
 async function sendEmail(payload: ResendEmailPayload) {
@@ -48,14 +126,22 @@ async function sendEmail(payload: ResendEmailPayload) {
     },
     method: "POST",
   });
+  const responsePayload = (await response.json().catch(() => null)) as {
+    error?: unknown;
+    id?: string;
+  } | null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-
+  if (!response.ok || responsePayload?.error) {
     throw new Error(
-      `Resend request failed with ${response.status}: ${errorText}`,
+      `Resend request failed with ${response.status}: ${
+        responsePayload?.error
+          ? JSON.stringify(responsePayload.error)
+          : response.statusText
+      }`,
     );
   }
+
+  return responsePayload;
 }
 
 function getEmailRecipients(dispatch: NotificationChannelDispatch) {
@@ -202,6 +288,75 @@ async function buildEmailPayload(dispatch: NotificationChannelDispatch) {
 }
 
 export class EmailService {
+  async createDispatchEmail(
+    dispatch: NotificationChannelDispatch,
+  ): Promise<EmailDispatchInput> {
+    const recipients = getEmailRecipients(dispatch);
+    const emailPayload = await buildEmailPayload(dispatch);
+
+    return {
+      body: emailPayload.html,
+      subject: emailPayload.subject,
+      to: recipients,
+    };
+  }
+
+  async sendDispatch(
+    dispatch: NotificationChannelDispatch,
+  ): Promise<EmailDispatchSendResult> {
+    const email = await this.createDispatchEmail(dispatch);
+    const result = await this.send({
+      html: email.body,
+      subject: email.subject,
+      to: email.to,
+    });
+
+    return {
+      email,
+      result,
+    };
+  }
+
+  async send(email: EmailInput): Promise<EmailSendResult> {
+    const recipients = resolveEmailRecipients(email.to);
+    const from = email.from ?? getEmailFrom();
+
+    if (!getResendApiKey() || !from || recipients.recipients.length === 0) {
+      return {
+        originalRecipients: recipients.originalRecipients,
+        recipients: recipients.recipients,
+        status: "skipped",
+        wasRecipientOverridden: recipients.isOverridden,
+      };
+    }
+
+    try {
+      const result = await sendEmail({
+        from,
+        html: htmlFromEmailInput(email),
+        reply_to: email.replyTo ?? getEmailReplyTo(),
+        subject: email.subject,
+        to: recipients.recipients,
+      });
+
+      return {
+        originalRecipients: recipients.originalRecipients,
+        providerId: result?.id,
+        recipients: recipients.recipients,
+        status: "sent",
+        wasRecipientOverridden: recipients.isOverridden,
+      };
+    } catch (error) {
+      return {
+        error,
+        originalRecipients: recipients.originalRecipients,
+        recipients: recipients.recipients,
+        status: "failed",
+        wasRecipientOverridden: recipients.isOverridden,
+      };
+    }
+  }
+
   async sendBulk(dispatches: NotificationChannelDispatch[]) {
     const emailDispatches = dispatches.filter(
       (dispatch) => dispatch.channel === "email",
@@ -217,35 +372,24 @@ export class EmailService {
 
     let sent = 0;
     let failed = 0;
+    let skipped = dispatches.length - emailDispatches.length;
 
     for (const dispatch of emailDispatches) {
-      const recipients = getEmailRecipients(dispatch);
+      const { result } = await this.sendDispatch(dispatch);
 
-      if (!recipients.length) {
-        continue;
-      }
-
-      try {
-        const emailPayload = await buildEmailPayload(dispatch);
-
-        await sendEmail({
-          from: getEmailFrom(),
-          html: emailPayload.html,
-          reply_to: getEmailReplyTo(),
-          subject: emailPayload.subject,
-          to: recipients,
-        });
-
+      if (result.status === "sent") {
         sent += 1;
-      } catch {
+      } else if (result.status === "failed") {
         failed += 1;
+      } else {
+        skipped += 1;
       }
     }
 
     return {
       failed,
       sent,
-      skipped: dispatches.length - emailDispatches.length,
+      skipped,
     };
   }
 }

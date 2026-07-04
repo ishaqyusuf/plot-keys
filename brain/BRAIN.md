@@ -24,12 +24,16 @@ This Brain is the working memory for the real-estate SaaS. It records the curren
 - [Product Vision](/Users/M1PRO/Documents/code/plot-keys/brain/product/vision.md)
 - [Public Website Launch](/Users/M1PRO/Documents/code/plot-keys/brain/features/public-website-launch.md)
 - [Repo Structure](/Users/M1PRO/Documents/code/plot-keys/brain/engineering/repo-structure.md)
+- [Coding Standards](/Users/M1PRO/Documents/code/plot-keys/brain/engineering/coding-standards.md)
+- [Reference Projects](/Users/M1PRO/Documents/code/plot-keys/brain/system/reference-projects.md)
 
 ## Important Project References
 - `midday`: `/Users/M1PRO/Documents/code/_kitchen_sink/midday`
 - `gnd`: `/Users/M1PRO/Documents/code/_turbo/gnd`
 - `school-clerk`: `/Users/M1PRO/Documents/code/school-clerk`
 - `halaal-coperative`: `/Users/M1PRO/Documents/code/halaal-coperative`
+- `after-service`: `/Users/M1PRO/Documents/code/micro-startups/after-service`
+- `plot-keys`: `/Users/M1PRO/Documents/code/plot-keys`
 
 ## Working Rules
 - Prefer documenting only what is known today.

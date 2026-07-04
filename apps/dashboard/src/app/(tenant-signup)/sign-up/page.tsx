@@ -3,13 +3,13 @@ import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { resolveDashboardLandingRoute } from "@plotkeys/utils";
 import { redirect } from "next/navigation";
 
-import { SignUpForm } from "../../../components/auth/sign-up-form";
-import { FlowShell } from "../../../components/flow-shell";
+import { SignUpForm } from "@/components/auth/sign-up-form";
+import { FlowShell } from "@/components/flow-shell";
 import {
   getCurrentAppSession,
   getTenantSlugFromHost,
-} from "../../../lib/session";
-import { getTenantSignInUrlForSubdomain } from "../../../lib/tenant-dashboard-url";
+} from "@/lib/session";
+import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
 
 const signUpBenefits = [
   "Reserve your PlotKeys website and dashboard links early",

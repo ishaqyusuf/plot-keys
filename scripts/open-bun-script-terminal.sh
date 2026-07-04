@@ -9,7 +9,12 @@ fi
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPT_NAME="$1"
-COMMAND_TEXT="cd '$REPO_ROOT' && bun run '$SCRIPT_NAME'"
+
+if [[ "$SCRIPT_NAME" == "kill:ports" ]]; then
+  COMMAND_TEXT="cd '$REPO_ROOT' && bun run '$SCRIPT_NAME'"
+else
+  COMMAND_TEXT="cd '$REPO_ROOT' && bun run kill:ports && bun run '$SCRIPT_NAME'"
+fi
 
 osascript >/dev/null <<EOF
 set commandText to "$COMMAND_TEXT"

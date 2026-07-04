@@ -6,7 +6,10 @@ import {
   getAvailableApps,
   getEnabledApps,
 } from "@plotkeys/app-store/registry";
-import { createPrismaClient } from "@plotkeys/db";
+import {
+  getCompanyAppsState as getCompanyAppsStateQuery,
+  setCompanyEnabledAppIds as setCompanyEnabledAppIdsQuery,
+} from "@plotkeys/db/queries";
 import { cache } from "react";
 
 import { requireOnboardedSession } from "./session";
@@ -22,58 +25,22 @@ type CompanyAppsState = {
   planTier: CompanyPlanTier;
 };
 
-type CompanyAppsStateRow = {
-  enabledApps: string[] | null;
-  planTier: CompanyPlanTier | null;
-};
-
 export async function getCompanyAppsState(
   companyId: string,
 ): Promise<CompanyAppsState | null> {
-  const prisma = createPrismaClient().db;
-
-  if (!prisma) {
-    return null;
-  }
-
-  const rows = await prisma.$queryRaw<CompanyAppsStateRow[]>`
-    SELECT
-      enabled_apps AS "enabledApps",
-      plan_tier AS "planTier"
-    FROM companies
-    WHERE id = CAST(${companyId} AS uuid)
-    LIMIT 1
-  `;
-
-  const company = rows[0];
-
-  if (!company) {
-    return null;
-  }
-
-  return {
-    enabledIds: company.enabledApps ?? [],
-    planTier: (company.planTier ?? "starter") as CompanyPlanTier,
-  };
+  const result = await getCompanyAppsStateQuery(companyId);
+  return result.ok ? result.data : null;
 }
 
 export async function setCompanyEnabledAppIds(
   companyId: string,
   enabledIds: readonly string[],
 ): Promise<void> {
-  const prisma = createPrismaClient().db;
+  const result = await setCompanyEnabledAppIdsQuery({ companyId, enabledIds });
 
-  if (!prisma) {
+  if (!result.ok) {
     throw new Error("Database unavailable.");
   }
-
-  await prisma.$executeRaw`
-    UPDATE companies
-    SET
-      enabled_apps = ${Array.from(enabledIds)},
-      updated_at = NOW()
-    WHERE id = CAST(${companyId} AS uuid)
-  `;
 }
 
 /**

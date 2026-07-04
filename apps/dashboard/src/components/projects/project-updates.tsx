@@ -5,8 +5,8 @@ import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
 import { useTRPC } from "../../trpc/client";
 
 // ---------------------------------------------------------------------------
@@ -63,14 +63,12 @@ export function UpdatesList({
   updates: ProjectUpdateItem[];
   projectId: string;
 }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const visibilityMutation = useMutation(
     trpc.projects.toggleUpdateVisibility.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 
@@ -125,14 +123,12 @@ export function UpdatesList({
 // ---------------------------------------------------------------------------
 
 export function CreateUpdateForm({ projectId }: { projectId: string }) {
-  const router = useRouter();
   const trpc = useTRPC();
+  const invalidateProjectCache = useProjectCacheInvalidation(projectId);
 
   const createMutation = useMutation(
     trpc.projects.createUpdate.mutationOptions({
-      onSuccess() {
-        router.refresh();
-      },
+      onSuccess: invalidateProjectCache,
     }),
   );
 

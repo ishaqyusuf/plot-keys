@@ -1,48 +1,33 @@
-import {
-  createPrismaClient,
-  listFilteredPropertiesForCompany,
-} from "@plotkeys/db";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { buildTenantSiteUrl } from "@plotkeys/utils";
-import { propertiesPageFilter } from "@plotkeys/api/filters";
-import {
-  DashboardPage,
-  DashboardTablePage,
-  DashboardTablePageBody,
-} from "../../../components/dashboard/dashboard-page";
-import { getBaseUrl } from "../../../lib/get-base-url";
-import { loadPropertiesFilterParams } from "../../../lib/properties-filter-params";
-import { requireOnboardedSession } from "../../../lib/session";
-import { PropertiesHeader } from "./properties-header";
-import { PropertiesDataTable } from "./tables/properties/data-table";
-import { PropertiesEmptyState } from "./tables/properties/empty-states";
+import type { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import type { SearchParams } from "nuqs";
+import { Suspense } from "react";
+import { DashboardPage } from "@/components/dashboard/dashboard-page";
+import { ErrorFallback } from "@/components/error-fallback";
+import { PropertiesTable } from "@/components/tables/properties";
+import { PropertiesSkeleton } from "@/components/tables/properties/skeleton";
+import { loadSortParams } from "@/hooks/use-sort-params";
+import { getBaseUrl } from "@/lib/get-base-url";
+import { loadPropertiesFilterParams } from "@/lib/properties-filter-params";
+import { requireOnboardedSession } from "@/lib/session";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { getInitialTableSettings } from "@/utils/columns";
 
 type PropertiesPageProps = {
-  searchParams?: Promise<{ error?: string; q?: string; type?: string }>;
+  searchParams?: Promise<
+    SearchParams & {
+      error?: string;
+      q?: string;
+      sort?: string | string[];
+      type?: string;
+    }
+  >;
 };
 
-const statusVariant: Record<string, "default" | "outline" | "secondary"> = {
-  active: "default",
-  off_market: "outline",
-  rented: "secondary",
-  sold: "outline",
-};
-
-const publishVariant: Record<
-  string,
-  "default" | "outline" | "secondary" | "destructive"
-> = {
-  draft: "outline",
-  published: "default",
-  archived: "secondary",
-};
-
-const typeLabels: Record<string, string> = {
-  residential: "Home",
-  commercial: "Commercial",
-  land: "Land",
-  industrial: "Industrial",
-  mixed_use: "Mixed use",
+export const metadata: Metadata = {
+  title: "Listings | Plot Keys",
 };
 
 export default async function PropertiesPage({
@@ -51,23 +36,22 @@ export default async function PropertiesPage({
   const session = await requireOnboardedSession();
   const params = (await searchParams) ?? {};
   const filters = loadPropertiesFilterParams(params);
-  const query = filters.q?.trim() ?? "";
-  const typeFilter = filters.type ?? undefined;
+  const { sort } = loadSortParams(params);
+  const initialSettings = await getInitialTableSettings("properties");
   const currentOrigin = await getBaseUrl();
-
-  const prisma = createPrismaClient().db;
-  const properties = prisma
-    ? await listFilteredPropertiesForCompany(
-        prisma,
-        session.activeMembership.companyId,
-        filters,
-      )
-    : [];
-  const filterList = await propertiesPageFilter();
-
   const siteUrl = buildTenantSiteUrl(session.activeMembership.companySlug, {
     currentOrigin,
   });
+
+  batchPrefetch([
+    trpc.filters.properties.queryOptions(),
+    trpc.workspace.listProperties.infiniteQueryOptions(
+      { ...filters, sort },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
+  ]);
 
   return (
     <DashboardPage>
@@ -77,31 +61,16 @@ export default async function PropertiesPage({
         </Alert>
       ) : null}
 
-      <DashboardTablePage>
-        <PropertiesHeader
-          count={properties.length}
-          filterList={filterList}
-          query={query}
-          siteUrl={siteUrl}
-          typeFilter={typeFilter}
-          typeLabels={typeLabels}
-        />
-
-        <DashboardTablePageBody>
-          {properties.length === 0 ? (
-            <div className="p-5">
-              <PropertiesEmptyState />
-            </div>
-          ) : (
-            <PropertiesDataTable
-              properties={properties}
-              publishVariant={publishVariant}
-              statusVariant={statusVariant}
-              typeLabels={typeLabels}
+      <HydrateClient>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<PropertiesSkeleton />}>
+            <PropertiesTable
+              initialSettings={initialSettings}
+              siteUrl={siteUrl}
             />
-          )}
-        </DashboardTablePageBody>
-      </DashboardTablePage>
+          </Suspense>
+        </ErrorBoundary>
+      </HydrateClient>
     </DashboardPage>
   );
 }

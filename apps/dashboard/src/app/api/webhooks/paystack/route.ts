@@ -1,8 +1,9 @@
 import {
-  createPrismaClient,
-  syncPlanIncludedLicenses,
-  updateCompanyPlan,
-} from "@plotkeys/db";
+  activateCompanySubscription,
+  activateSubscriptionPayment,
+  cancelCompanySubscription,
+  markCompanySubscriptionPastDue,
+} from "@plotkeys/db/queries";
 import { canAccessTemplateTier, verifyWebhookSignature } from "@plotkeys/utils";
 import { templateCatalog } from "@plotkeys/section-registry";
 import { NextResponse } from "next/server";
@@ -96,102 +97,48 @@ async function handleChargeSuccess(data: PaystackEvent["data"]) {
     | undefined;
   if (!planTier) return;
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) return;
-
-  // Update company plan to active
-  await updateCompanyPlan(prisma, companyId, planTier, "active");
-
-  // Sync template licenses
   const allowedKeys = templateCatalog
     .filter((t) => canAccessTemplateTier(planTier, t.tier))
     .map((t) => t.key);
-  await syncPlanIncludedLicenses(prisma, companyId, allowedKeys);
-
-  // Record billing line item
-  await prisma.billingLineItem
-    .create({
-      data: {
-        amountMinorUnits: data.amount,
-        companyId,
-        currency: data.currency ?? "NGN",
-        kind: "subscription",
-        meta: {
-          customerCode: data.customer?.customer_code,
-          planTier,
-          subscriptionCode: data.subscription_code,
-        },
-        paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
-        providerRef: data.reference ?? String(data.id),
-        status: "active",
-      },
-    })
-    .catch(() => null);
+  await activateSubscriptionPayment({
+    allowedTemplateKeys: allowedKeys,
+    amountMinorUnits: data.amount,
+    companyId,
+    currency: data.currency,
+    customerCode: data.customer?.customer_code,
+    paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
+    planTier,
+    reference: data.reference ?? String(data.id),
+    subscriptionCode: data.subscription_code,
+  });
 }
 
 async function handleSubscriptionCreate(data: PaystackEvent["data"]) {
   const companyId = data.metadata?.companyId as string | undefined;
   if (!companyId) return;
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) return;
-
-  // Store subscription code for future management
-  await prisma.company
-    .update({
-      data: {
-        planStatus: "active",
-      },
-      where: { id: companyId },
-    })
-    .catch(() => null);
+  await activateCompanySubscription({ companyId });
 }
 
 async function handleSubscriptionDisable(data: PaystackEvent["data"]) {
   const companyId = data.metadata?.companyId as string | undefined;
   if (!companyId) return;
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) return;
-
-  await updateCompanyPlan(prisma, companyId, "starter", "canceled");
-
   // Revoke plan-included licenses (keep free + purchased)
   const starterKeys = templateCatalog
     .filter((t) => canAccessTemplateTier("starter", t.tier))
     .map((t) => t.key);
-  await syncPlanIncludedLicenses(prisma, companyId, starterKeys);
-
-  await prisma.billingLineItem
-    .create({
-      data: {
-        amountMinorUnits: 0,
-        companyId,
-        currency: "NGN",
-        kind: "subscription",
-        meta: {
-          event: "subscription.disable",
-          subscriptionCode: data.subscription_code,
-        },
-        providerRef: data.subscription_code ?? String(data.id),
-        status: "cancelled",
-      },
-    })
-    .catch(() => null);
+  await cancelCompanySubscription({
+    companyId,
+    eventId: String(data.id),
+    starterTemplateKeys: starterKeys,
+    subscriptionCode: data.subscription_code,
+  });
 }
 
 async function handlePaymentFailed(data: PaystackEvent["data"]) {
   const companyId = data.metadata?.companyId as string | undefined;
   if (!companyId) return;
 
-  const prisma = createPrismaClient().db;
-  if (!prisma) return;
-
-  // Mark plan as past_due — grace period applies
-  await prisma.company
-    .update({
-      data: { planStatus: "past_due" },
-      where: { id: companyId },
-    })
-    .catch(() => null);
+  await markCompanySubscriptionPastDue({ companyId });
 }

@@ -1,14 +1,10 @@
-import { loadQueryParams, parseAsString } from "./filter-query-loader";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const propertiesFilterParams = {
   q: parseAsString,
   type: parseAsString,
 };
 
-export function loadPropertiesFilterParams(
-  searchParams: Record<string, string | string[] | undefined>,
-) {
-  return loadQueryParams(propertiesFilterParams, searchParams);
-}
+export const loadPropertiesFilterParams = createLoader(propertiesFilterParams);
 
 export type PropertiesFilters = ReturnType<typeof loadPropertiesFilterParams>;

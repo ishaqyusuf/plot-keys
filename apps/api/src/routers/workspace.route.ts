@@ -1,13 +1,19 @@
 import {
   completeTenantOnboarding,
   countAppointmentsByStatus,
+  countBlogPostsByStatus,
   countCompaniesByTemplateKey,
+  countEmployeesByStatus,
   countLeadsByStatus,
+  countLeaveRequestsByStatus,
   createAgent,
   createAppointment,
+  createBillingLineItem,
+  createBlogPost as createBlogPostRecord,
   createCompanyOnboardingBundle,
   createCustomDomainPair,
   createEstate,
+  createEstateLayoutForCompany,
   createPlot,
   createPrismaClient,
   createProperty,
@@ -15,9 +21,11 @@ import {
   deductAiCredits,
   deleteAgent,
   deleteAppointment,
+  deleteBlogPost as deleteBlogPostRecord,
   deleteEstate,
   deletePlot,
   deleteProperty,
+  ensureUniqueBlogSlugForCompany,
   findCompanyById,
   findCompanyBySlug,
   findDraftVersionById,
@@ -29,9 +37,25 @@ import {
   findTenantOnboardingByUserId,
   getAiCreditBalance,
   getAiUsageStats,
+  getAgentPerformanceStats,
   getAnalyticsSummary,
+  getAvailablePayrollPeriods,
+  getBlogPostForCompany,
+  getCompanyIntegration,
+  getDashboardOverview,
+  getEstateDetailForCompany,
+  getAgentPerformanceReport,
+  getLeadSourceBreakdown,
+  getListingsReport,
+  getMonthlyBusinessSummary,
   getOrCreateDraftVersion,
   getPageViewsByDay,
+  getPayrollSummaryForPeriod,
+  getPropertyDetailAnalytics,
+  getPropertyAnalytics,
+  getPropertyForCompany,
+  getTopPages,
+  getTrafficSources,
   grantAiCredits,
   grantStockImageLicense,
   grantTemplateLicense,
@@ -40,12 +64,18 @@ import {
   hasTemplateLicense,
   listAgentsForCompany,
   listAppointmentsForCompany,
+  listBillingLineItemsForCompany,
+  listBlogPostsForCompany,
   listCustomDomainsWithVerification,
+  listDepartmentsForCompany,
+  listEmployeesForCompany,
   listEstatesForCompany,
   listFeaturedProperties,
+  listFilteredPropertiesForCompany,
   listLeadsForCompany,
+  listLeaveRequestsForCompany,
+  listPayrollForPeriod,
   listPlotsForEstate,
-  listPropertiesForCompany,
   listStockImageLicensesForCompany,
   listSyncableTenantDomains,
   listTenantDomainsForCompany,
@@ -57,13 +87,16 @@ import {
   resolvePublishedForCompany,
   saveOnboardingStepProgress,
   syncPlanIncludedLicenses,
+  setBlogPostStatus as setBlogPostStatusRecord,
   toggleAgentFeatured,
   togglePropertyFeatured,
   updateAgent,
   updateAppointmentStatus,
+  updateBlogPost as updateBlogPostRecord,
   updateCompanyLogo,
   updateCompanyPlan,
   updateCompanyProfile,
+  upsertCompanyIntegration,
   updateDraftVersion,
   updateEstate,
   updateLeadStatus,
@@ -83,11 +116,15 @@ import {
   deriveDesignConfig,
   derivePersonalizedContent,
   deriveProfile,
+  getTemplateManifest,
   getTemplateDefinition,
+  normalizeTemplateContentFieldUpdate,
+  normalizeTemplateThemeFieldUpdate,
   scoreTemplates,
   templateCatalog,
 } from "@plotkeys/section-registry";
 import {
+  buildDashboardUrl,
   buildDashboardHostname,
   buildDnsInstructions,
   buildSitefrontHostname,
@@ -240,6 +277,52 @@ async function assertCompanyCanUseTemplate(
   return company;
 }
 
+function normalizeContentFieldUpdateOrThrow(input: {
+  content: Record<string, string>;
+  contentKey: string;
+  templateKey: string;
+  value: string;
+}) {
+  try {
+    return normalizeTemplateContentFieldUpdate(
+      getTemplateManifest(input.templateKey),
+      input.content,
+      input.contentKey,
+      input.value,
+    );
+  } catch (error) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Invalid template content field.",
+    });
+  }
+}
+
+function normalizeThemeFieldUpdateOrThrow(input: {
+  templateKey: string;
+  theme: Record<string, string>;
+  themeKey: string;
+  value: string;
+}) {
+  try {
+    return normalizeTemplateThemeFieldUpdate(
+      getTemplateManifest(input.templateKey),
+      input.theme,
+      input.themeKey,
+      input.value,
+    );
+  } catch (error) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message:
+        error instanceof Error ? error.message : "Invalid template theme field.",
+    });
+  }
+}
+
 async function assertSubdomainAvailability(db: Db, subdomain: string) {
   if (!subdomain || subdomain.length < 3) {
     throw new TRPCError({
@@ -264,6 +347,20 @@ async function assertSubdomainAvailability(db: Db, subdomain: string) {
     });
   }
 }
+
+const blogPostStatusInputSchema = z.enum(["draft", "published", "archived"]);
+
+const blogPostIdInputSchema = z.object({
+  blogPostId: z.string().min(1, "Blog post id is required."),
+});
+
+const updateBlogPostInputSchema = blogPostIdInputSchema.extend({
+  content: z.string().optional(),
+  excerpt: z.string().optional().nullable(),
+  featuredImage: z.string().url("Enter a valid URL.").or(z.literal("")),
+  slug: z.string().trim().min(1, "Slug is required."),
+  title: z.string().trim().min(1, "Title is required."),
+});
 
 export const workspaceRouter = createTRPCRouter({
   completeOnboarding: authenticatedProcedure
@@ -571,6 +668,40 @@ export const workspaceRouter = createTRPCRouter({
         recommendations.find((r) => !r.upgradeRequired)?.key ?? "template-1",
     };
   }),
+  getDashboardOverview: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const overview = await getDashboardOverview(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    return {
+      ...overview,
+      domainProvisioningConfigured: isVercelDomainProvisioningConfigured(),
+    };
+  }),
+  getReports: membershipProcedure
+    .input(
+      z.object({
+        month: z.number().int().min(1).max(12),
+        year: z.number().int().min(2020).max(2100),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+      const [summary, agentReport, listingsReport] = await Promise.all([
+        getMonthlyBusinessSummary(db, companyId, input),
+        getAgentPerformanceReport(db, companyId, input),
+        getListingsReport(db, companyId),
+      ]);
+
+      return {
+        agentReport,
+        listingsReport,
+        summary,
+      };
+    }),
   refreshOnboardingProfile: authenticatedProcedure.mutation(async ({ ctx }) => {
     const db = getDb();
     const userId = ctx.auth.session.user.id;
@@ -1391,21 +1522,29 @@ export const workspaceRouter = createTRPCRouter({
           : `${input.shortDetail} for ${company.name}.`);
 
       if (configuration) {
+        const normalizedContent = normalizeContentFieldUpdateOrThrow({
+          content: configuration.contentJson as Record<string, string>,
+          contentKey: input.contentKey,
+          templateKey,
+          value: suggestion,
+        });
         await updateSiteConfigurationContentField(db, {
           configId: configuration.id,
           contentKey: input.contentKey,
           currentContent: configuration.contentJson as Record<string, string>,
           updatedById: ctx.auth.session.user.id,
-          value: suggestion,
+          value: normalizedContent[input.contentKey] ?? suggestion,
           version: configuration.version,
         });
         return { configId: configuration.id };
       }
 
-      const newContent = {
-        ...(version!.contentJson as Record<string, string>),
-        [input.contentKey]: suggestion,
-      };
+      const newContent = normalizeContentFieldUpdateOrThrow({
+        content: version!.contentJson as Record<string, string>,
+        contentKey: input.contentKey,
+        templateKey,
+        value: suggestion,
+      });
       await updateDraftVersion(db, {
         contentJson: newContent,
         updatedById: ctx.auth.session.user.id,
@@ -1453,9 +1592,16 @@ export const workspaceRouter = createTRPCRouter({
     );
 
     const hasFailure = domains.some((d) => d.status === "failed");
-    const allProvisioned = domains.every((d) => d.status === "active");
+    const allProvisioned =
+      domains.length > 0 && domains.every((d) => d.status === "active");
+    const company = await findCompanyById(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
 
     return {
+      companyName: company?.name ?? "your workspace",
+      domainProvisioningConfigured: isVercelDomainProvisioningConfigured(),
       domains: domains.map((d) => ({
         hostname: d.hostname,
         id: d.id,
@@ -1647,12 +1793,18 @@ export const workspaceRouter = createTRPCRouter({
           companyId,
           configuration.templateKey,
         );
+        const normalizedContent = normalizeContentFieldUpdateOrThrow({
+          content: configuration.contentJson as Record<string, string>,
+          contentKey: input.contentKey,
+          templateKey: configuration.templateKey,
+          value: input.value,
+        });
         await updateSiteConfigurationContentField(db, {
           configId: configuration.id,
           contentKey: input.contentKey,
           currentContent: configuration.contentJson as Record<string, string>,
           updatedById: ctx.auth.session.user.id,
-          value: input.value,
+          value: normalizedContent[input.contentKey] ?? input.value,
           version: configuration.version,
         });
         return { configId: configuration.id };
@@ -1673,10 +1825,12 @@ export const workspaceRouter = createTRPCRouter({
         companyId,
         version.website.templateKey,
       );
-      const newContent = {
-        ...(version.contentJson as Record<string, string>),
-        [input.contentKey]: input.value,
-      };
+      const newContent = normalizeContentFieldUpdateOrThrow({
+        content: version.contentJson as Record<string, string>,
+        contentKey: input.contentKey,
+        templateKey: version.website.templateKey,
+        value: input.value,
+      });
       await updateDraftVersion(db, {
         contentJson: newContent,
         updatedById: ctx.auth.session.user.id,
@@ -1707,12 +1861,18 @@ export const workspaceRouter = createTRPCRouter({
           companyId,
           configuration.templateKey,
         );
+        const normalizedTheme = normalizeThemeFieldUpdateOrThrow({
+          templateKey: configuration.templateKey,
+          theme: configuration.themeJson as Record<string, string>,
+          themeKey: input.themeKey,
+          value: input.value,
+        });
         await updateSiteConfigurationThemeField(db, {
           configId: configuration.id,
           currentTheme: configuration.themeJson as Record<string, string>,
           themeKey: input.themeKey,
           updatedById: ctx.auth.session.user.id,
-          value: input.value,
+          value: normalizedTheme[input.themeKey] ?? input.value,
           version: configuration.version,
         });
         return { configId: configuration.id };
@@ -1733,10 +1893,12 @@ export const workspaceRouter = createTRPCRouter({
         companyId,
         version.website.templateKey,
       );
-      const newTheme = {
-        ...(version.themeJson as Record<string, string>),
-        [input.themeKey]: input.value,
-      };
+      const newTheme = normalizeThemeFieldUpdateOrThrow({
+        templateKey: version.website.templateKey,
+        theme: version.themeJson as Record<string, string>,
+        themeKey: input.themeKey,
+        value: input.value,
+      });
       await updateDraftVersion(db, {
         themeJson: newTheme,
         updatedById: ctx.auth.session.user.id,
@@ -1826,6 +1988,26 @@ export const workspaceRouter = createTRPCRouter({
       return { companyId: company.id, logoUrl: company.logoUrl };
     }),
 
+  getCompanySettings: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    const company = await findCompanyById(
+      db,
+      ctx.auth.activeMembership.companyId,
+    );
+
+    if (!company) return null;
+
+    return {
+      id: company.id,
+      logoUrl: company.logoUrl,
+      market: company.market,
+      name: company.name,
+      planStatus: company.planStatus,
+      planTier: company.planTier,
+      slug: company.slug,
+    };
+  }),
+
   updateCompanyProfile: membershipProcedure
     .input(
       z.object({
@@ -1843,12 +2025,48 @@ export const workspaceRouter = createTRPCRouter({
       );
     }),
 
+  getCompanyIntegration: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return getCompanyIntegration(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  updateCompanyIntegration: membershipProcedure
+    .input(
+      z.object({
+        calendlyUrl: z.string().trim().optional().nullable(),
+        facebookPixelId: z.string().trim().optional().nullable(),
+        googleAnalyticsId: z.string().trim().optional().nullable(),
+        whatsappPhone: z.string().trim().optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      assertMinRole(ctx.auth.activeMembership.role, "admin");
+
+      return upsertCompanyIntegration(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input,
+      );
+    }),
+
   // ─── Properties ───────────────────────────────────────────────────────────
 
   listEstates: membershipProcedure.query(async ({ ctx }) => {
     const db = getDb();
     return listEstatesForCompany(db, ctx.auth.activeMembership.companyId);
   }),
+
+  getEstateDetail: membershipProcedure
+    .input(z.object({ slug: z.string().trim().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return getEstateDetailForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input.slug,
+      );
+    }),
 
   createEstate: membershipProcedure
     .input(createEstateInputSchema)
@@ -1883,6 +2101,31 @@ export const workspaceRouter = createTRPCRouter({
         ctx.auth.activeMembership.companyId,
       );
       return { deleted: true };
+    }),
+
+  createEstateLayout: membershipProcedure
+    .input(
+      z.object({
+        estateId: z.string().uuid("Invalid estate id."),
+        sourceUrl: z.string().url("Plan upload URL is required."),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const layout = await createEstateLayoutForCompany(db, {
+        companyId: ctx.auth.activeMembership.companyId,
+        estateId: input.estateId,
+        sourceUrl: input.sourceUrl,
+      });
+
+      if (!layout) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Estate launch not found.",
+        });
+      }
+
+      return layout;
     }),
 
   listPlots: membershipProcedure
@@ -1930,12 +2173,51 @@ export const workspaceRouter = createTRPCRouter({
       return { deleted: true };
     }),
 
-  listProperties: membershipProcedure.query(async ({ ctx }) => {
-    const db = getDb();
-    return listPropertiesForCompany(db, ctx.auth.activeMembership.companyId, {
-      limit: 100,
-    });
-  }),
+  listProperties: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.string().or(z.number()).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.string().or(z.number()).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+          type: z.string().optional().nullable(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listFilteredPropertiesForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input ?? {},
+      );
+    }),
+
+  getPropertyDetail: membershipProcedure
+    .input(z.object({ propertyId: z.string().trim().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+      const property = await getPropertyForCompany(
+        db,
+        input.propertyId,
+        companyId,
+      );
+
+      if (!property) return null;
+
+      const analytics = await getPropertyDetailAnalytics(
+        db,
+        companyId,
+        input.propertyId,
+      );
+
+      return {
+        analytics,
+        property,
+      };
+    }),
 
   createProperty: membershipProcedure
     .input(
@@ -2071,12 +2353,26 @@ export const workspaceRouter = createTRPCRouter({
 
   // ─── Agents ───────────────────────────────────────────────────────────────
 
-  listAgents: membershipProcedure.query(async ({ ctx }) => {
-    const db = getDb();
-    return listAgentsForCompany(db, ctx.auth.activeMembership.companyId, {
-      limit: 100,
-    });
-  }),
+  listAgents: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.union([z.string(), z.number()]).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.union([z.string(), z.number()]).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listAgentsForCompany(db, ctx.auth.activeMembership.companyId, {
+        cursor: input?.cursor,
+        q: input?.q,
+        size: input?.size,
+        sort: input?.sort,
+      });
+    }),
 
   createAgent: membershipProcedure
     .input(
@@ -2146,10 +2442,169 @@ export const workspaceRouter = createTRPCRouter({
       }
       return { agentId: result.id, featured: result.featured };
     }),
+
+  // ─── Employees ───────────────────────────────────────────────────────────
+
+  listEmployees: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.string().or(z.number()).optional().nullable(),
+          departmentId: z.string().trim().min(1).optional(),
+          q: z.string().optional().nullable(),
+          size: z.string().or(z.number()).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+          status: z
+            .enum(["active", "on_leave", "suspended", "terminated"])
+            .optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listEmployeesForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        {
+          cursor: input?.cursor,
+          departmentId: input?.departmentId,
+          q: input?.q,
+          size: input?.size,
+          sort: input?.sort,
+          status: input?.status,
+        },
+      );
+    }),
+
+  getEmployeeStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countEmployeesByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  // ─── Departments ─────────────────────────────────────────────────────────
+
+  listDepartments: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.union([z.string(), z.number()]).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.union([z.string(), z.number()]).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listDepartmentsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        {
+          cursor: input?.cursor,
+          q: input?.q,
+          size: input?.size,
+          sort: input?.sort,
+        },
+      );
+    }),
+
+  // ─── Leave Requests ──────────────────────────────────────────────────────
+
+  listLeaveRequests: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.union([z.string(), z.number()]).optional().nullable(),
+          employeeId: z.string().trim().min(1).optional(),
+          q: z.string().optional().nullable(),
+          size: z.union([z.string(), z.number()]).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+          status: z
+            .enum(["pending", "approved", "rejected", "cancelled"])
+            .optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listLeaveRequestsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        {
+          employeeId: input?.employeeId,
+          cursor: input?.cursor,
+          q: input?.q,
+          size: input?.size,
+          sort: input?.sort,
+          status: input?.status,
+        },
+      );
+    }),
+
+  getLeaveRequestStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countLeaveRequestsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  // ─── Payroll ─────────────────────────────────────────────────────────────
+
+  listPayrollEntries: membershipProcedure
+    .input(
+      z.object({
+        cursor: z.union([z.string(), z.number()]).optional().nullable(),
+        periodMonth: z.number().int().min(1).max(12),
+        periodYear: z.number().int().min(2020).max(2100),
+        q: z.string().optional().nullable(),
+        size: z.union([z.string(), z.number()]).optional().nullable(),
+        sort: z.array(z.string()).optional().nullable(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listPayrollForPeriod(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input.periodYear,
+        input.periodMonth,
+        {
+          cursor: input.cursor,
+          q: input.q,
+          size: input.size,
+          sort: input.sort,
+        },
+      );
+    }),
+
+  getPayrollSummary: membershipProcedure
+    .input(
+      z.object({
+        periodMonth: z.number().int().min(1).max(12),
+        periodYear: z.number().int().min(2020).max(2100),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return getPayrollSummaryForPeriod(
+        db,
+        ctx.auth.activeMembership.companyId,
+        input.periodYear,
+        input.periodMonth,
+      );
+    }),
+
+  listPayrollPeriods: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return getAvailablePayrollPeriods(db, ctx.auth.activeMembership.companyId);
+  }),
+
   listLeads: membershipProcedure
     .input(
       z
         .object({
+          cursor: z.string().or(z.number()).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.string().or(z.number()).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
           status: z
             .enum(["new", "contacted", "qualified", "closed"])
             .optional(),
@@ -2159,8 +2614,11 @@ export const workspaceRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const db = getDb();
       return listLeadsForCompany(db, ctx.auth.activeMembership.companyId, {
+        q: input?.q,
+        cursor: input?.cursor,
+        size: input?.size,
+        sort: input?.sort,
         status: input?.status,
-        limit: 100,
       });
     }),
   getLeadStats: membershipProcedure.query(async ({ ctx }) => {
@@ -2179,6 +2637,133 @@ export const workspaceRouter = createTRPCRouter({
       return { leadId: lead.id, status: lead.status };
     }),
 
+  // ─── Blog ───────────────────────────────────────────────────────────────
+
+  listBlogPosts: membershipProcedure
+    .input(
+      z
+        .object({
+          cursor: z.union([z.string(), z.number()]).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.union([z.string(), z.number()]).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+          status: blogPostStatusInputSchema.optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return listBlogPostsForCompany(
+        db,
+        ctx.auth.activeMembership.companyId,
+        {
+          cursor: input?.cursor,
+          q: input?.q,
+          size: input?.size,
+          sort: input?.sort,
+          status: input?.status,
+        },
+      );
+    }),
+
+  getBlogPostStats: membershipProcedure.query(async ({ ctx }) => {
+    const db = getDb();
+    return countBlogPostsByStatus(db, ctx.auth.activeMembership.companyId);
+  }),
+
+  getBlogPost: membershipProcedure
+    .input(blogPostIdInputSchema)
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return getBlogPostForCompany(
+        db,
+        input.blogPostId,
+        ctx.auth.activeMembership.companyId,
+      );
+    }),
+
+  createBlogPost: membershipProcedure.mutation(async ({ ctx }) => {
+    const db = getDb();
+    const companyId = ctx.auth.activeMembership.companyId;
+    const slug = await ensureUniqueBlogSlugForCompany(
+      db,
+      companyId,
+      "untitled-post",
+    );
+
+    return createBlogPostRecord(db, {
+      authorId: ctx.auth.session.user.id,
+      companyId,
+      content: "# Untitled post\n\nStart writing here.",
+      excerpt: "Add a short summary for this article.",
+      slug,
+      title: "Untitled post",
+    });
+  }),
+
+  updateBlogPost: membershipProcedure
+    .input(updateBlogPostInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const companyId = ctx.auth.activeMembership.companyId;
+      const existing = await getBlogPostForCompany(
+        db,
+        input.blogPostId,
+        companyId,
+      );
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Blog post not found.",
+        });
+      }
+
+      const slug = await ensureUniqueBlogSlugForCompany(
+        db,
+        companyId,
+        input.slug,
+        input.blogPostId,
+      );
+
+      return updateBlogPostRecord(db, input.blogPostId, companyId, {
+        content: input.content?.trim() ?? "",
+        excerpt: input.excerpt?.trim() || null,
+        featuredImage: input.featuredImage.trim() || null,
+        slug,
+        title: input.title.trim(),
+      });
+    }),
+
+  updateBlogPostStatus: membershipProcedure
+    .input(
+      blogPostIdInputSchema.extend({
+        status: blogPostStatusInputSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      return setBlogPostStatusRecord(
+        db,
+        input.blogPostId,
+        ctx.auth.activeMembership.companyId,
+        input.status,
+      );
+    }),
+
+  deleteBlogPost: membershipProcedure
+    .input(blogPostIdInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      await deleteBlogPostRecord(
+        db,
+        input.blogPostId,
+        ctx.auth.activeMembership.companyId,
+      );
+
+      return { blogPostId: input.blogPostId };
+    }),
+
   // ─── Billing ──────────────────────────────────────────────────────────
 
   getBillingInfo: membershipProcedure.query(async ({ ctx }) => {
@@ -2189,10 +2774,9 @@ export const workspaceRouter = createTRPCRouter({
     if (!company)
       throw new TRPCError({ code: "NOT_FOUND", message: "Company not found." });
 
-    const recentItems = await db.billingLineItem.findMany({
-      orderBy: { createdAt: "desc" },
+    const recentItems = await listBillingLineItemsForCompany(db, {
+      companyId,
       take: 20,
-      where: { companyId },
     });
 
     return {
@@ -2242,7 +2826,7 @@ export const workspaceRouter = createTRPCRouter({
 
       const callbackUrl =
         input.callbackUrl ??
-        `${process.env.DASHBOARD_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3901"}/billing/callback`;
+        buildDashboardUrl({ path: "/billing/callback" });
       const checkoutEmail =
         process.env.NODE_ENV === "development" && process.env.TEST_EMAIL
           ? process.env.TEST_EMAIL
@@ -2293,7 +2877,13 @@ export const workspaceRouter = createTRPCRouter({
     .input(
       z
         .object({
-          status: z.string().optional(),
+          cursor: z.string().or(z.number()).optional().nullable(),
+          q: z.string().optional().nullable(),
+          size: z.string().or(z.number()).optional().nullable(),
+          sort: z.array(z.string()).optional().nullable(),
+          status: z
+            .enum(["pending", "confirmed", "completed", "cancelled"])
+            .optional(),
           upcoming: z.boolean().optional(),
         })
         .optional(),
@@ -2303,7 +2893,14 @@ export const workspaceRouter = createTRPCRouter({
       return listAppointmentsForCompany(
         db,
         ctx.auth.activeMembership.companyId,
-        { status: input?.status, upcoming: input?.upcoming, limit: 50 },
+        {
+          cursor: input?.cursor,
+          q: input?.q,
+          size: input?.size,
+          sort: input?.sort,
+          status: input?.status,
+          upcoming: input?.upcoming,
+        },
       );
     }),
 
@@ -2424,16 +3021,13 @@ export const workspaceRouter = createTRPCRouter({
     const { aiCreditsBlockPrice } = await import("@plotkeys/utils");
 
     // Record billing
-    const item = await db.billingLineItem.create({
-      data: {
-        amountMinorUnits: aiCreditsBlockPrice.minorUnits,
-        companyId,
-        currency: "NGN",
-        kind: "ai_credits",
-        meta: { credits: aiCreditsBlockPrice.creditsPerBlock },
-        paidAt: new Date(),
-        status: "active",
-      },
+    const item = await createBillingLineItem(db, {
+      amountMinorUnits: aiCreditsBlockPrice.minorUnits,
+      companyId,
+      kind: "ai_credits",
+      meta: { credits: aiCreditsBlockPrice.creditsPerBlock },
+      paidAt: new Date(),
+      status: "active",
     });
 
     // Grant credits
@@ -2454,11 +3048,32 @@ export const workspaceRouter = createTRPCRouter({
     const db = getDb();
     const companyId = ctx.auth.activeMembership.companyId;
 
-    const [summary, pageViewsByDay] = await Promise.all([
+    const [
+      summary,
+      pageViewsByDay,
+      topPages,
+      trafficSources,
+      propertyViews,
+      leadSources,
+      agentStats,
+    ] = await Promise.all([
       getAnalyticsSummary(db, companyId),
       getPageViewsByDay(db, companyId, 30),
+      getTopPages(db, companyId),
+      getTrafficSources(db, companyId),
+      getPropertyAnalytics(db, companyId),
+      getLeadSourceBreakdown(db, companyId),
+      getAgentPerformanceStats(db, companyId),
     ]);
 
-    return { ...summary, pageViewsByDay };
+    return {
+      ...summary,
+      agentStats,
+      leadSources,
+      pageViewsByDay,
+      propertyViews,
+      topPages,
+      trafficSources,
+    };
   }),
 });

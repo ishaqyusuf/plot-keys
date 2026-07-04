@@ -1,4 +1,5 @@
-import type { Db } from "../prisma";
+import type { Prisma } from "../generated/prisma/client";
+import { createPrismaClient, type Db } from "../prisma";
 
 export async function createLead(
   db: Db,
@@ -27,18 +28,122 @@ export async function listLeadsForCompany(
   db: Db,
   companyId: string,
   options?: {
+    cursor?: string | number | null;
     limit?: number;
+    q?: string | null;
+    size?: string | number | null;
+    sort?: string[] | null;
     status?: "new" | "contacted" | "qualified" | "closed";
   },
 ) {
+  const query = options?.q?.trim();
+  const size = normalizePageSize(options?.size ?? options?.limit);
+  const offset = normalizeCursor(options?.cursor);
+  const where: Prisma.LeadWhereInput = {
+    companyId,
+    ...(options?.status ? { status: options.status } : {}),
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" } },
+            { email: { contains: query, mode: "insensitive" } },
+            { phone: { contains: query, mode: "insensitive" } },
+            { message: { contains: query, mode: "insensitive" } },
+            { source: { contains: query, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const [count, data] = await db.$transaction([
+    db.lead.count({ where }),
+    db.lead.findMany({
+      orderBy: getLeadOrderBy(options?.sort),
+      skip: offset,
+      take: size,
+      where,
+    }),
+  ]);
+  const nextCursor = offset + size < count ? String(offset + size) : null;
+
+  return {
+    data,
+    meta: {
+      count,
+      cursor: nextCursor,
+      hasNextPage: nextCursor !== null,
+      size,
+    },
+  };
+}
+
+function normalizePageSize(size: string | number | null | undefined) {
+  const value = Number(size ?? 50);
+
+  if (!Number.isFinite(value)) {
+    return 50;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), 100);
+}
+
+function normalizeCursor(cursor: string | number | null | undefined) {
+  const value = Number(cursor ?? 0);
+
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
+}
+
+function getLeadOrderBy(
+  sort: string[] | null | undefined,
+): Prisma.LeadOrderByWithRelationInput {
+  const [field, value] = sort ?? [];
+  const direction = value === "asc" || value === "desc" ? value : null;
+
+  if (!direction) {
+    return { createdAt: "desc" };
+  }
+
+  switch (field) {
+    case "createdAt":
+      return { createdAt: direction };
+    case "name":
+      return { name: direction };
+    case "source":
+      return { source: direction };
+    case "status":
+      return { status: direction };
+    default:
+      return { createdAt: "desc" };
+  }
+}
+
+export async function listLeadExportRows(db: Db, companyId: string) {
   return db.lead.findMany({
     orderBy: { createdAt: "desc" },
-    take: options?.limit ?? 50,
-    where: {
-      companyId,
-      ...(options?.status ? { status: options.status } : {}),
-    },
+    where: { companyId },
   });
+}
+
+export type LeadExportRows = Awaited<ReturnType<typeof listLeadExportRows>>;
+
+export type LeadExportRowsResult =
+  | { data: LeadExportRows; ok: true }
+  | { ok: false; reason: "database-unavailable" };
+
+export async function getLeadExportRows(
+  companyId: string,
+): Promise<LeadExportRowsResult> {
+  const db = createPrismaClient().db;
+
+  if (!db) {
+    return { ok: false, reason: "database-unavailable" };
+  }
+
+  return { data: await listLeadExportRows(db, companyId), ok: true };
 }
 
 export async function countLeadsByStatus(db: Db, companyId: string) {
