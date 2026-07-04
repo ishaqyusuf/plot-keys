@@ -50,6 +50,7 @@ import {
 } from "@plotkeys/db/queries";
 import {
   buildDashboardUrl,
+  buildTemplateSandboxUrl,
   EMPLOYEE_WORK_ROLE_VALUES,
   isWorkRole,
   normalizeSubdomainLabel,
@@ -87,6 +88,14 @@ function createRedirectUrl(path: string, params: Record<string, string>) {
   const searchParams = new URLSearchParams(params);
 
   return `${path}?${searchParams.toString()}`;
+}
+
+function withUrlParam(url: string, key: string, value: string) {
+  if (!url) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(
+    value,
+  )}`;
 }
 
 function parsePropertyPricingPlans(formData: FormData) {
@@ -498,6 +507,7 @@ export async function createTemplateSandboxProfileAction(formData: FormData) {
   });
 
   revalidatePath("/template-sandbox");
+  revalidatePath("/template-sandbox/profiles");
   redirect(`/template-sandbox/${result.id}?created=1`);
 }
 
@@ -522,6 +532,7 @@ export async function updateTemplateSandboxProfileAction(formData: FormData) {
   });
 
   revalidatePath("/template-sandbox");
+  revalidatePath("/template-sandbox/profiles");
   revalidatePath(`/template-sandbox/${profileId}`);
 }
 
@@ -581,6 +592,7 @@ export async function cloneTemplateSandboxProfileAction(formData: FormData) {
   const result = await caller.templateSandbox.clone({ profileId });
 
   revalidatePath("/template-sandbox");
+  revalidatePath("/template-sandbox/profiles");
   redirect(`/template-sandbox/${result.id}?cloned=1`);
 }
 
@@ -590,7 +602,32 @@ export async function archiveTemplateSandboxProfileAction(formData: FormData) {
   await caller.templateSandbox.archive({ profileId });
 
   revalidatePath("/template-sandbox");
-  redirect("/template-sandbox?archived=1");
+  revalidatePath("/template-sandbox/profiles");
+  redirect("/template-sandbox/profiles?archived=1");
+}
+
+export async function generateTemplateSandboxLiveWebsiteAction(
+  formData: FormData,
+) {
+  const profileId = String(formData.get("profileId") ?? "");
+  const pathname = String(formData.get("pathname") ?? "/");
+  const caller = await createServerCaller();
+  const profile = await caller.templateSandbox.generateLiveWebsite({
+    profileId,
+  });
+  const liveUrl = withUrlParam(
+    buildTemplateSandboxUrl(profile.shareId, {
+      currentOrigin: await getRequestOrigin(),
+      pathname,
+    }),
+    "mode",
+    "live",
+  );
+
+  revalidatePath("/template-sandbox");
+  revalidatePath("/template-sandbox/profiles");
+  revalidatePath(`/template-sandbox/${profileId}`);
+  redirect(liveUrl);
 }
 
 export async function updateSiteThemeFieldAction(formData: FormData) {

@@ -8,6 +8,7 @@ import {
   type RegistryLinkComponentProps,
   type RegistryPageInfo,
   type RegistryTenantInfo,
+  type RenderMode,
   type TemplateConfig,
 } from "@plotkeys/section-registry";
 import Link from "next/link";
@@ -20,6 +21,7 @@ type TenantInteractionShellProps = {
   children: ReactNode;
   colorSystemKey?: string;
   pageInfo?: RegistryPageInfo;
+  renderMode?: RenderMode;
   templateConfig: TemplateConfig;
   templateKey?: string;
   tenant?: RegistryTenantInfo;
@@ -41,19 +43,24 @@ export function TenantInteractionShell({
   children,
   colorSystemKey,
   pageInfo,
+  renderMode,
   templateConfig,
   templateKey,
   tenant,
 }: TenantInteractionShellProps) {
   const searchParams = useSearchParams();
-  const renderMode = parseTenantRenderMode(searchParams.get("renderMode"));
+  const resolvedRenderMode =
+    renderMode ??
+    parseTenantRenderMode(
+      searchParams.get("renderMode") ?? searchParams.get("mode"),
+    );
 
   return (
     <RegistryProvider
       colorSystemKey={colorSystemKey}
       linkComponent={TenantRegistryLink}
       pageInfo={pageInfo}
-      renderMode={renderMode}
+      renderMode={resolvedRenderMode}
       templateConfig={templateConfig}
       templateKey={templateKey}
       tenant={tenant}

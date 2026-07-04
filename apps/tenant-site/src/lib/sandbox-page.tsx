@@ -4,6 +4,7 @@ import {
   getTemplatePageInventoryStrict,
   resolvePage,
   type HomeSectionDefinition,
+  type RenderMode,
 } from "@plotkeys/section-registry";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -11,14 +12,20 @@ import type { JSX } from "react";
 import { RegisterFooter } from "../components/register-footer";
 import { RegisterNav } from "../components/register-nav";
 import { TenantInteractionShell } from "../components/tenant-interaction-shell";
+import { parseTenantRenderMode } from "./render-mode";
 import { resolveSandboxProfileRenderData } from "./sandbox-profile";
 
 export type SandboxPageRouteProps<TParams = { shareId?: string; slug?: string }> = {
   params?: Promise<TParams>;
+  searchParams?: Promise<{
+    mode?: string;
+    renderMode?: string;
+  }>;
 };
 
 type SandboxPageOptions = {
   pageKey: string;
+  renderMode: RenderMode;
   routeSlug?: string | null;
   shareId: string;
 };
@@ -73,10 +80,13 @@ export async function generateSandboxPageMetadata(): Promise<Metadata> {
 
 export async function renderSandboxPage({
   pageKey,
+  renderMode,
   routeSlug,
   shareId,
 }: SandboxPageOptions) {
-  const sandbox = await resolveSandboxProfileRenderData(shareId, routeSlug);
+  const sandbox = await resolveSandboxProfileRenderData(shareId, routeSlug, {
+    useLiveSnapshot: renderMode === "live",
+  });
   if (!sandbox) notFound();
 
   if (!pageSupported(sandbox.templateKey, pageKey)) {
@@ -101,13 +111,14 @@ export async function renderSandboxPage({
       subdomain: sandbox.subdomain,
       theme: sandbox.theme,
     },
-    "draft",
+    renderMode,
   );
   const templateConfig = deserializeTemplateConfig(
     resolved.theme as Record<string, string>,
   );
   const registerTemplate = getRegisterTemplate(sandbox.templateKey);
   const hrefPrefix = `/sandbox/${sandbox.shareId}`;
+  const hrefQuery = `mode=${renderMode === "live" ? "live" : "draft"}`;
   const canonicalPath = canonicalSandboxPath(
     sandbox.shareId,
     pageKey,
@@ -124,6 +135,7 @@ export async function renderSandboxPage({
         pageNotSupported: false,
         routeSlug: routeSlug ?? null,
       }}
+      renderMode={renderMode}
       templateConfig={templateConfig}
       templateKey={sandbox.templateKey}
       tenant={{
@@ -138,6 +150,7 @@ export async function renderSandboxPage({
             companyName={sandbox.companyName}
             currentPath={canonicalPath}
             hrefPrefix={hrefPrefix}
+            hrefQuery={hrefQuery}
             templateKey={registerTemplate.key}
             tier={registerTemplate.tier}
           />
@@ -151,6 +164,7 @@ export async function renderSandboxPage({
           <RegisterFooter
             companyName={sandbox.companyName}
             hrefPrefix={hrefPrefix}
+            hrefQuery={hrefQuery}
             templateKey={registerTemplate.key}
           />
         ) : null}
@@ -162,10 +176,17 @@ export async function renderSandboxPage({
 export function createSandboxPageRoute(pageKey: string) {
   async function Page({
     params,
+    searchParams,
   }: SandboxPageRouteProps<{ shareId?: string; slug?: string }>) {
     const resolvedParams = (await params) ?? {};
+    const resolvedSearchParams = (await searchParams) ?? {};
+    const renderMode = resolvedSearchParams.renderMode
+      ? parseTenantRenderMode(resolvedSearchParams.renderMode)
+      : parseTenantRenderMode(resolvedSearchParams.mode ?? "draft");
+
     return renderSandboxPage({
       pageKey,
+      renderMode,
       routeSlug: resolvedParams.slug ?? null,
       shareId: resolvedParams.shareId ?? "",
     });

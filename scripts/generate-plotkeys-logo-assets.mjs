@@ -9,7 +9,13 @@ import sharp from "sharp";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
-const brandBlue = "#0F3E7C";
+const brandBlue = "#16324F";
+const offWhite = "#F7F1E3";
+const midnight = "#0B1726";
+const brandAccent = "#C9A227";
+const appSurface = "#FBF7EF";
+const appRing = "#E8D8B8";
+const devAmber = "#D6AE2D";
 const appPublicDirs = [
   "apps/website/public",
   "apps/dashboard/public",
@@ -21,6 +27,12 @@ const appIconDirs = [
   "apps/tenant-site/src/app",
 ];
 const packageAssetsDir = "packages/ui/src/assets";
+const logoIconSourceName = "logo-icon-source.png";
+const logoIconSourcePath = path.join(
+  root,
+  packageAssetsDir,
+  logoIconSourceName,
+);
 const pngToIco = pngToIcoModule.default ?? pngToIcoModule;
 const wordmarkD =
   "M27.60 114.97L9.24 114.97L9.24 24.06L38.70 24.06Q55.44 24.06 60.52 25.42L60.52 25.42Q68.34 27.47 73.61 34.32Q78.88 41.18 78.88 52.03L78.88 52.03Q78.88 60.40 75.84 66.10Q72.80 71.81 68.12 75.07Q63.44 78.32 58.60 79.38L58.60 79.38Q52.03 80.68 39.56 80.68L39.56 80.68L27.60 80.68L27.60 114.97ZM36.46 39.44L27.60 39.44L27.60 65.24L37.64 65.24Q48.49 65.24 52.15 63.81Q55.81 62.38 57.89 59.35Q59.97 56.31 59.97 52.28L59.97 52.28Q59.97 47.31 57.05 44.09Q54.14 40.87 49.67 40.06L49.67 40.06Q46.38 39.44 36.46 39.44L36.46 39.44ZM111.25 114.97L93.82 114.97L93.82 24.06L111.25 24.06L111.25 114.97ZM125.08 81.11L125.08 81.11Q125.08 72.43 129.36 64.31Q133.64 56.18 141.48 51.90Q149.32 47.63 159.00 47.63L159.00 47.63Q173.94 47.63 183.49 57.33Q193.04 67.03 193.04 81.86L193.04 81.86Q193.04 96.80 183.40 106.63Q173.76 116.46 159.12 116.46L159.12 116.46Q150.07 116.46 141.85 112.37Q133.64 108.27 129.36 100.37Q125.08 92.46 125.08 81.11ZM142.94 82.04L142.94 82.04Q142.94 91.84 147.59 97.05Q152.24 102.26 159.06 102.26L159.06 102.26Q165.88 102.26 170.50 97.05Q175.12 91.84 175.12 81.92L175.12 81.92Q175.12 72.24 170.50 67.03Q165.88 61.83 159.06 61.83L159.06 61.83Q152.24 61.83 147.59 67.03Q142.94 72.24 142.94 82.04ZM224.98 49.11L236.88 49.11L236.88 63.00L224.98 63.00L224.98 89.54Q224.98 97.61 225.32 98.94Q225.66 100.27 226.87 101.14Q228.08 102.01 229.82 102.01L229.82 102.01Q232.23 102.01 236.82 100.33L236.82 100.33L238.31 113.85Q232.23 116.46 224.54 116.46L224.54 116.46Q219.83 116.46 216.05 114.88Q212.27 113.30 210.50 110.78Q208.73 108.27 208.05 103.99L208.05 103.99Q207.49 100.96 207.49 91.72L207.49 91.72L207.49 63.00L199.49 63.00L199.49 49.11L207.49 49.11L207.49 36.03L224.98 25.86L224.98 49.11ZM267.70 114.97L249.35 114.97L249.35 24.06L267.70 24.06L267.70 64.43L304.79 24.06L329.47 24.06L295.24 59.47L331.33 114.97L307.58 114.97L282.59 72.31L267.70 87.50L267.70 114.97ZM378.83 94.01L378.83 94.01L396.19 96.92Q392.84 106.47 385.62 111.47Q378.40 116.46 367.54 116.46L367.54 116.46Q350.37 116.46 342.12 105.23L342.12 105.23Q335.61 96.24 335.61 82.54L335.61 82.54Q335.61 66.17 344.17 56.90Q352.72 47.63 365.81 47.63L365.81 47.63Q380.50 47.63 389.00 57.33Q397.50 67.03 397.12 87.06L397.12 87.06L353.47 87.06Q353.65 94.82 357.68 99.13Q361.71 103.44 367.73 103.44L367.73 103.44Q371.82 103.44 374.61 101.20Q377.40 98.97 378.83 94.01ZM353.78 76.40L379.82 76.40Q379.64 68.83 375.92 64.90Q372.19 60.96 366.86 60.96L366.86 60.96Q361.16 60.96 357.44 65.11L357.44 65.11Q353.71 69.27 353.78 76.40L353.78 76.40ZM428.13 115.16L403.08 49.11L421.62 49.11L437.37 95.87L452.75 49.11L470.79 49.11L447.54 112.49L443.38 123.96Q441.09 129.73 439.01 132.77Q436.93 135.81 434.24 137.70Q431.54 139.59 427.60 140.64Q423.66 141.70 418.70 141.70L418.70 141.70Q413.68 141.70 408.84 140.64L408.84 140.64L407.29 127Q411.39 127.81 414.67 127.81L414.67 127.81Q420.75 127.81 423.66 124.24Q426.58 120.67 428.13 115.16L428.13 115.16ZM475.82 96.18L475.82 96.18L493.30 93.51Q494.42 98.60 497.83 101.23Q501.24 103.87 507.38 103.87L507.38 103.87Q514.14 103.87 517.55 101.39L517.55 101.39Q519.84 99.65 519.84 96.74L519.84 96.74Q519.84 94.75 518.60 93.45L518.60 93.45Q517.30 92.21 512.77 91.16L512.77 91.16Q491.69 86.51 486.05 82.66L486.05 82.66Q478.23 77.33 478.23 67.84L478.23 67.84Q478.23 59.28 484.99 53.45Q491.75 47.63 505.95 47.63L505.95 47.63Q519.47 47.63 526.05 52.03Q532.62 56.43 535.10 65.05L535.10 65.05L518.67 68.09Q517.61 64.24 514.67 62.20Q511.72 60.15 506.26 60.15L506.26 60.15Q499.38 60.15 496.40 62.07L496.40 62.07Q494.42 63.44 494.42 65.61L494.42 65.61Q494.42 67.47 496.16 68.77L496.16 68.77Q498.51 70.51 512.43 73.67Q526.36 76.83 531.87 81.42L531.87 81.42Q537.33 86.07 537.33 94.38L537.33 94.38Q537.33 103.44 529.77 109.95Q522.20 116.46 507.38 116.46L507.38 116.46Q493.92 116.46 486.08 111.00Q478.23 105.54 475.82 96.18Z";
@@ -37,11 +49,49 @@ const markSymbol = `
     <path d="M177.2 173.7c0-2.5 2-4.4 4.4-4.4h70.1c3.2 0 5.8 2.6 5.8 5.8v19.4c0 3.2-2.6 5.8-5.8 5.8h-54.3v30.7h37.5v31.2h-37.5v2.8c0 3-1.6 5.7-4.2 7.2l-7.5 4.4c-3.8 2.2-8.5-.5-8.5-4.9v-98Z"/>
   </g>`;
 
-function logoSvg() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PlotKeys logo mark">
-  <g transform="translate(75 61) scale(1.409)">
-${markSymbol}
-  </g>
+function pngDataUri(buffer) {
+  return `data:image/png;base64,${buffer.toString("base64")}`;
+}
+
+function logoIconBadgeSvg() {
+  return `<g aria-hidden="true">
+    <rect x="340" y="58" width="104" height="52" rx="26" fill="${devAmber}"/>
+    <path d="M377 77 363 91l14 14" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M407 77 421 91l-14 14" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>`;
+}
+
+function appIconBadgeSvg() {
+  return `<g aria-hidden="true">
+    <rect x="332" y="64" width="116" height="58" rx="29" fill="#111827"/>
+    <circle cx="361" cy="93" r="9" fill="#22C55E"/>
+    <path d="M394 79 379 94l15 15" fill="none" stroke="${offWhite}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M414 79 429 94l-15 15" fill="none" stroke="${offWhite}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>`;
+}
+
+function rasterLogoSvg({ buffer, label, badge = "" }) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="${label}">
+  <image href="${pngDataUri(buffer)}" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
+  ${badge}
+</svg>
+`;
+}
+
+function rasterAppIconSvg({
+  accent,
+  background,
+  badge = "",
+  label,
+  markBuffer,
+  ring,
+}) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PlotKeys ${label} app icon">
+  <rect width="512" height="512" rx="104" fill="${background}"/>
+  <rect x="28" y="28" width="456" height="456" rx="86" fill="none" stroke="${ring}" stroke-width="16"/>
+  <circle cx="418" cy="110" r="52" fill="${accent}" opacity="0.18"/>
+  <image href="${pngDataUri(markBuffer)}" x="86" y="74" width="340" height="365" preserveAspectRatio="xMidYMid meet"/>
+  ${badge}
 </svg>
 `;
 }
@@ -101,6 +151,46 @@ async function renderPng(svgRelativePath, pngRelativePath, width, height) {
     .toFile(target);
 }
 
+async function renderPngFromSvg(svg, pngRelativePath, width, height) {
+  const target = path.join(root, pngRelativePath);
+  await mkdir(path.dirname(target), { recursive: true });
+  await sharp(Buffer.from(svg))
+    .resize(width, height, {
+      fit: "cover",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toFile(target);
+}
+
+async function renderSourceLogoBuffer({ width, height, foreground = null }) {
+  const resizedSource = sharp(logoIconSourcePath)
+    .ensureAlpha()
+    .resize(width, height, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      kernel: sharp.kernel.lanczos3,
+    });
+
+  if (!foreground) {
+    return resizedSource.png().toBuffer();
+  }
+
+  const alpha = await resizedSource.clone().extractChannel("alpha").toBuffer();
+
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 3,
+      background: foreground,
+    },
+  })
+    .joinChannel(alpha)
+    .png()
+    .toBuffer();
+}
+
 async function renderFavicon(svgRelativePath, icoRelativePath) {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "plotkeys-logo-"));
   const sizes = [16, 32, 48, 64, 128, 256];
@@ -127,20 +217,174 @@ async function renderFavicon(svgRelativePath, icoRelativePath) {
   }
 }
 
+async function renderFaviconFromSvg(svg, icoRelativePath) {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "plotkeys-icon-"));
+  const sizes = [16, 32, 48, 64, 128, 256];
+
+  try {
+    const pngPaths = [];
+
+    for (const size of sizes) {
+      const pngPath = path.join(tempDir, `favicon-${size}.png`);
+      await sharp(Buffer.from(svg))
+        .resize(size, size, {
+          fit: "cover",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toFile(pngPath);
+      pngPaths.push(pngPath);
+    }
+
+    const ico = await pngToIco(pngPaths);
+    await write(icoRelativePath, ico);
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+}
+
+async function renderAppIconSet(targetDir) {
+  const sourceMark = await renderSourceLogoBuffer({
+    foreground: brandBlue,
+    height: 365,
+    width: 340,
+  });
+  const darkMark = await renderSourceLogoBuffer({
+    foreground: offWhite,
+    height: 365,
+    width: 340,
+  });
+  const themes = {
+    light: rasterAppIconSvg({
+      accent: brandAccent,
+      background: appSurface,
+      label: "light",
+      markBuffer: sourceMark,
+      ring: appRing,
+    }),
+    dark: rasterAppIconSvg({
+      accent: brandAccent,
+      background: midnight,
+      label: "dark",
+      markBuffer: darkMark,
+      ring: "#263A52",
+    }),
+    dev: rasterAppIconSvg({
+      accent: "#111827",
+      background: devAmber,
+      badge: appIconBadgeSvg(),
+      label: "dev",
+      markBuffer: sourceMark,
+      ring: brandAccent,
+    }),
+  };
+
+  await write(path.join(targetDir, "icon-light.svg"), themes.light);
+  await write(path.join(targetDir, "icon-dark.svg"), themes.dark);
+  await write(path.join(targetDir, "icon-dev.svg"), themes.dev);
+
+  await renderPngFromSvg(
+    themes.light,
+    path.join(targetDir, "icon.png"),
+    512,
+    512,
+  );
+  await renderPngFromSvg(
+    themes.light,
+    path.join(targetDir, "apple-icon.png"),
+    512,
+    512,
+  );
+  await renderFaviconFromSvg(themes.light, path.join(targetDir, "favicon.ico"));
+
+  for (const [themeName, svg] of Object.entries(themes)) {
+    await renderPngFromSvg(
+      svg,
+      path.join(targetDir, `icon-${themeName}.png`),
+      512,
+      512,
+    );
+    await renderPngFromSvg(
+      svg,
+      path.join(targetDir, `apple-icon-${themeName}.png`),
+      512,
+      512,
+    );
+    await renderFaviconFromSvg(
+      svg,
+      path.join(targetDir, `favicon-${themeName}.ico`),
+    );
+  }
+}
+
+async function renderLogoIconSet(targetDir) {
+  const sourceLogo = await renderSourceLogoBuffer({
+    foreground: brandBlue,
+    height: 512,
+    width: 512,
+  });
+  const darkLogo = await renderSourceLogoBuffer({
+    foreground: offWhite,
+    height: 512,
+    width: 512,
+  });
+  const icons = {
+    light: rasterLogoSvg({
+      buffer: sourceLogo,
+      label: "PlotKeys light logo icon",
+    }),
+    dark: rasterLogoSvg({
+      buffer: darkLogo,
+      label: "PlotKeys dark logo icon",
+    }),
+    dev: rasterLogoSvg({
+      badge: logoIconBadgeSvg(),
+      buffer: sourceLogo,
+      label: "PlotKeys dev logo icon",
+    }),
+  };
+
+  await write(path.join(targetDir, "logo-icon-light.svg"), icons.light);
+  await write(path.join(targetDir, "logo-icon-dark.svg"), icons.dark);
+  await write(path.join(targetDir, "logo-icon-dev.svg"), icons.dev);
+
+  for (const [themeName, svg] of Object.entries(icons)) {
+    await renderPngFromSvg(
+      svg,
+      path.join(targetDir, `logo-icon-${themeName}.png`),
+      512,
+      512,
+    );
+  }
+}
+
 async function main() {
   await ensureDir(packageAssetsDir);
-  await write(path.join(packageAssetsDir, "logo.svg"), logoSvg());
+  const canonicalLogo = await renderSourceLogoBuffer({
+    foreground: brandBlue,
+    height: 512,
+    width: 512,
+  });
+  await write(
+    path.join(packageAssetsDir, "logo.svg"),
+    rasterLogoSvg({ buffer: canonicalLogo, label: "PlotKeys logo mark" }),
+  );
   await write(
     path.join(packageAssetsDir, "logo-horizontal.svg"),
     horizontalSvg(),
   );
   await write(path.join(packageAssetsDir, "logo-vertical.svg"), verticalSvg());
+  await renderLogoIconSet(packageAssetsDir);
+  await renderAppIconSet(packageAssetsDir);
 
   for (const publicDir of appPublicDirs) {
     await ensureDir(publicDir);
     await copyFileFromCanonical("logo.svg", publicDir);
     await copyFileFromCanonical("logo-horizontal.svg", publicDir);
     await copyFileFromCanonical("logo-vertical.svg", publicDir);
+    await copyFileFromCanonical("logo-icon-light.svg", publicDir);
+    await copyFileFromCanonical("logo-icon-dark.svg", publicDir);
+    await copyFileFromCanonical("logo-icon-dev.svg", publicDir);
     await renderPng(
       path.join(packageAssetsDir, "logo.svg"),
       path.join(publicDir, "logo.png"),
@@ -163,6 +407,8 @@ async function main() {
       path.join(packageAssetsDir, "logo.svg"),
       path.join(publicDir, "favicon.ico"),
     );
+    await renderLogoIconSet(publicDir);
+    await renderAppIconSet(publicDir);
   }
 
   await renderPng(
@@ -185,26 +431,11 @@ async function main() {
   );
 
   for (const iconDir of appIconDirs) {
-    await renderPng(
-      path.join(packageAssetsDir, "logo.svg"),
-      path.join(iconDir, "icon.png"),
-      512,
-      512,
-    );
-    await renderPng(
-      path.join(packageAssetsDir, "logo.svg"),
-      path.join(iconDir, "apple-icon.png"),
-      512,
-      512,
-    );
-    await renderFavicon(
-      path.join(packageAssetsDir, "logo.svg"),
-      path.join(iconDir, "favicon.ico"),
-    );
+    await renderAppIconSet(iconDir);
   }
 
   console.log(
-    "Generated PlotKeys logo SVG, PNG, app icon, and favicon assets.",
+    "Generated PlotKeys logo SVG, PNG, light/dark/dev logo icon, app icon, and favicon assets.",
   );
 }
 

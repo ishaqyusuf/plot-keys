@@ -15,9 +15,10 @@ import {
   getTemplateManifest,
   normalizeTemplateContentFieldUpdate,
   normalizeTemplateThemeFieldUpdate,
+  templateCatalog,
 } from "@plotkeys/section-registry";
 import { TRPCError } from "@trpc/server";
-import { authenticatedProcedure, createTRPCRouter } from "../lib.trpc";
+import { createTRPCRouter, publicProcedure } from "../lib.trpc";
 import {
   createTemplateSandboxProfileInputSchema,
   templateSandboxProfileIdInputSchema,
@@ -41,6 +42,28 @@ function getDb(): Db {
   return requireDb(createPrismaClient().db);
 }
 
+const publicTemplateSandboxOwnerId = "template-sandbox-public";
+
+async function ensurePublicTemplateSandboxOwner(db: Db) {
+  await db.$executeRaw`
+    INSERT INTO users (
+      id,
+      email,
+      email_verified,
+      name,
+      updated_at
+    )
+    VALUES (
+      ${publicTemplateSandboxOwnerId},
+      'template-sandbox@plotkeys.local',
+      true,
+      'Template Sandbox',
+      NOW()
+    )
+    ON CONFLICT (id) DO NOTHING
+  `;
+}
+
 function asStringRecord(value: unknown): Record<string, string> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
 
@@ -50,6 +73,58 @@ function asStringRecord(value: unknown): Record<string, string> {
       typeof item === "string" ? item : String(item ?? ""),
     ]),
   );
+}
+
+function asObjectRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function resolveDefaultTemplateKey() {
+  return (
+    templateCatalog.find((template) => template.key === "riwaq-starter")?.key ??
+    templateCatalog.find((template) => template.tier === "starter")?.key ??
+    templateCatalog[0]?.key
+  );
+}
+
+async function createDefaultSandboxProfile(db: Db) {
+  const templateKey = resolveDefaultTemplateKey();
+  if (!templateKey) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "No registered templates are available for the sandbox.",
+    });
+  }
+
+  const template = getTemplateDefinition(templateKey);
+  const companyName = "Sandbox Estates";
+  const market = "Lagos";
+  const subdomainLabel = "sandbox-estates";
+  const initial = createInitialSiteConfigurationInput({
+    companyName,
+    market,
+    subdomain: subdomainLabel,
+    templateKey: template.key,
+  });
+  const placeholderData = getRegisterPlaceholderData(template.key);
+
+  return createTemplateSandboxProfile(db, {
+    companyName,
+    contentJson: initial.contentJson,
+    market,
+    name: `${template.name} Sandbox`,
+    ownerUserId: publicTemplateSandboxOwnerId,
+    planTier: "starter",
+    profileJson: {
+      defaultProfile: true,
+    },
+    sampleDataJson: placeholderData as unknown as Record<string, unknown>,
+    subdomainLabel,
+    templateKey: template.key,
+    themeJson: initial.themeJson,
+  });
 }
 
 function normalizeContentFieldUpdateOrThrow(input: {
@@ -134,12 +209,12 @@ async function getOwnedProfileOrThrow(
 }
 
 export const templateSandboxRouter = createTRPCRouter({
-  archive: authenticatedProcedure
+  archive: publicProcedure
     .input(templateSandboxProfileIdInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       const profile = await archiveTemplateSandboxProfile(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
       if (!profile) {
@@ -152,12 +227,26 @@ export const templateSandboxRouter = createTRPCRouter({
       return { archived: true, profileId: profile.id };
     }),
 
-  clone: authenticatedProcedure
+  catalog: publicProcedure.query(() =>
+    templateCatalog.map((template) => ({
+      description: template.description,
+      key: template.key,
+      marketingTagline: template.marketingTagline,
+      name: template.name,
+      previewImageUrl: template.previewImageUrl ?? null,
+      purchasable: template.purchasable,
+      tier: template.tier,
+      usageCount: 0,
+    })),
+  ),
+
+  clone: publicProcedure
     .input(templateSandboxProfileIdInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
+      await ensurePublicTemplateSandboxOwner(db);
       const profile = await cloneTemplateSandboxProfile(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
       if (!profile) {
@@ -170,10 +259,11 @@ export const templateSandboxRouter = createTRPCRouter({
       return serializeProfile(profile);
     }),
 
-  create: authenticatedProcedure
+  create: publicProcedure
     .input(createTemplateSandboxProfileInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
+      await ensurePublicTemplateSandboxOwner(db);
       const template = getTemplateDefinition(input.templateKey);
       const market = input.market || input.companyName;
       const subdomainLabel =
@@ -196,7 +286,7 @@ export const templateSandboxRouter = createTRPCRouter({
         contentJson: initial.contentJson,
         market,
         name: input.name || `${template.name} Sandbox`,
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         planTier: input.planTier,
         profileJson: input.profileJson ?? {},
         sampleDataJson:
@@ -210,34 +300,78 @@ export const templateSandboxRouter = createTRPCRouter({
       return serializeProfile(profile);
     }),
 
-  get: authenticatedProcedure
+  get: publicProcedure
     .input(templateSandboxProfileIdInputSchema)
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const db = getDb();
       const profile = await getOwnedProfileOrThrow(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
 
       return serializeProfile(profile);
     }),
 
-  list: authenticatedProcedure.query(async ({ ctx }) => {
+  generateLiveWebsite: publicProcedure
+    .input(templateSandboxProfileIdInputSchema)
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      const profile = await getOwnedProfileOrThrow(db, {
+        ownerUserId: publicTemplateSandboxOwnerId,
+        profileId: input.profileId,
+      });
+      const profileJson = asObjectRecord(profile.profileJson);
+      const updated = await updateTemplateSandboxProfile(db, {
+        ownerUserId: publicTemplateSandboxOwnerId,
+        profileId: profile.id,
+        profileJson: {
+          ...profileJson,
+          live: {
+            companyName: profile.companyName,
+            contentJson: profile.contentJson,
+            generatedAt: new Date().toISOString(),
+            market: profile.market,
+            name: profile.name,
+            planTier: profile.planTier,
+            sampleDataJson: profile.sampleDataJson,
+            subdomainLabel: profile.subdomainLabel,
+            templateKey: profile.templateKey,
+            themeJson: profile.themeJson,
+            version: 1,
+          },
+        },
+      });
+
+      return serializeProfile(updated ?? profile);
+    }),
+
+  getOrCreateDefault: publicProcedure.query(async () => {
+    const db = getDb();
+    await ensurePublicTemplateSandboxOwner(db);
+    const [latestProfile] = await listTemplateSandboxProfiles(
+      db,
+      publicTemplateSandboxOwnerId,
+    );
+
+    return serializeProfile(latestProfile ?? (await createDefaultSandboxProfile(db)));
+  }),
+
+  list: publicProcedure.query(async () => {
     const db = getDb();
     const profiles = await listTemplateSandboxProfiles(
       db,
-      ctx.auth.session.user.id,
+      publicTemplateSandboxOwnerId,
     );
 
     return profiles.map(serializeProfile);
   }),
 
-  update: authenticatedProcedure
+  update: publicProcedure
     .input(updateTemplateSandboxProfileInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       const existing = await getOwnedProfileOrThrow(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
       const nextTemplateKey = input.templateKey ?? existing.templateKey;
@@ -271,7 +405,7 @@ export const templateSandboxRouter = createTRPCRouter({
               themeJson: nextInitial.themeJson,
             }
           : {}),
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
       });
       if (!profile) {
         throw new TRPCError({
@@ -283,12 +417,12 @@ export const templateSandboxRouter = createTRPCRouter({
       return serializeProfile(profile);
     }),
 
-  updateContentField: authenticatedProcedure
+  updateContentField: publicProcedure
     .input(updateTemplateSandboxContentFieldInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       const profile = await getOwnedProfileOrThrow(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
       const normalizedContent = normalizeContentFieldUpdateOrThrow({
@@ -299,19 +433,19 @@ export const templateSandboxRouter = createTRPCRouter({
       });
       const updated = await updateTemplateSandboxProfile(db, {
         contentJson: normalizedContent,
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: profile.id,
       });
 
       return serializeProfile(updated ?? profile);
     }),
 
-  updateThemeField: authenticatedProcedure
+  updateThemeField: publicProcedure
     .input(updateTemplateSandboxThemeFieldInputSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const db = getDb();
       const profile = await getOwnedProfileOrThrow(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: input.profileId,
       });
       const normalizedTheme = normalizeThemeFieldUpdateOrThrow({
@@ -321,7 +455,7 @@ export const templateSandboxRouter = createTRPCRouter({
         value: input.value,
       });
       const updated = await updateTemplateSandboxProfile(db, {
-        ownerUserId: ctx.auth.session.user.id,
+        ownerUserId: publicTemplateSandboxOwnerId,
         profileId: profile.id,
         themeJson: normalizedTheme,
       });

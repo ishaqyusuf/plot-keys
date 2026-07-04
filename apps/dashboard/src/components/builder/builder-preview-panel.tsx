@@ -45,6 +45,7 @@ type BuilderPreviewPanelProps = {
   pageKey: string;
   pageLabel: string;
   pageSlug: string;
+  presentation?: "canvas" | "framed";
   readOnly?: boolean;
   readOnlyMessage?: string;
   sections: SerializableSectionData[];
@@ -311,6 +312,7 @@ export function BuilderPreviewPanel({
   pageKey,
   pageLabel,
   pageSlug,
+  presentation = "framed",
   readOnly = false,
   readOnlyMessage,
   sections,
@@ -376,9 +378,24 @@ export function BuilderPreviewPanel({
     [configId, onSmartFill],
   );
 
+  const isCanvas = presentation === "canvas";
+  const previewBodyClassName = isCanvas
+    ? "min-h-full bg-background"
+    : "overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96";
+  const previewBodyStyle = {
+    backgroundColor: "var(--background)",
+    fontFamily: "Satoshi, sans-serif",
+  };
+
   return (
-    <div className="mx-auto overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/86 shadow-[var(--shadow-card)] backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-background/72 px-4 py-3">
+    <div
+      className={
+        isCanvas
+          ? "flex h-full min-h-0 flex-col overflow-hidden bg-background"
+          : "mx-auto overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/86 shadow-[var(--shadow-card)] backdrop-blur-sm"
+      }
+    >
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/88 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <span className="size-2.5 rounded-full bg-foreground/18" />
           <span className="size-2.5 rounded-full bg-foreground/18" />
@@ -432,7 +449,11 @@ export function BuilderPreviewPanel({
       ) : null}
 
       <div
-        className="max-h-[78vh] overflow-auto bg-muted/12 p-3 md:p-4"
+        className={
+          isCanvas
+            ? "min-h-0 flex-1 overflow-auto bg-background"
+            : "max-h-[78vh] overflow-auto bg-muted/12 p-3 md:p-4"
+        }
         role="presentation"
       >
         <WebsiteRuntimeProvider renderMode="draft">
@@ -440,11 +461,8 @@ export function BuilderPreviewPanel({
           {readOnly ? (
             <ClickGuardProvider>
               <div
-                className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
-                style={{
-                  backgroundColor: "var(--background)",
-                  fontFamily: "Satoshi, sans-serif",
-                }}
+                className={previewBodyClassName}
+                style={previewBodyStyle}
               >
                 {filteredSections.map((section) => (
                   <PreviewSection
@@ -469,11 +487,8 @@ export function BuilderPreviewPanel({
             <SmartFillProvider onSmartFill={handleInlineSmartFill}>
               <ClickGuardProvider>
                 <div
-                  className="overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/96"
-                  style={{
-                    backgroundColor: "var(--background)",
-                    fontFamily: "Satoshi, sans-serif",
-                  }}
+                  className={previewBodyClassName}
+                  style={previewBodyStyle}
                 >
                   {filteredSections.map((section) => (
                     <PreviewSection

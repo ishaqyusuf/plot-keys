@@ -37,6 +37,7 @@ const PUBLIC_PREFIXES = [
   authRoutes.signIn,
   authRoutes.signUp,
   authRoutes.verifyEmail,
+  "/template-sandbox",
   "/api/",
   "/_next/",
   "/favicon",

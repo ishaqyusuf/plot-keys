@@ -26,6 +26,16 @@ export type SandboxProfileRenderData = {
   theme: TenantThemeRecord;
 };
 
+type SandboxLiveSnapshot = {
+  companyName?: unknown;
+  contentJson?: unknown;
+  market?: unknown;
+  sampleDataJson?: unknown;
+  subdomainLabel?: unknown;
+  templateKey?: unknown;
+  themeJson?: unknown;
+};
+
 function toStringRecord(value: unknown): Record<string, string> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
 
@@ -54,6 +64,13 @@ function toArray(value: unknown): Record<string, unknown>[] {
 
 function asText(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function getLiveSnapshot(profileJson: unknown): SandboxLiveSnapshot | null {
+  const json = toObjectRecord(profileJson);
+  const live = json.live;
+  if (!live || typeof live !== "object" || Array.isArray(live)) return null;
+  return live as SandboxLiveSnapshot;
 }
 
 function mapListings(sampleData: Record<string, unknown>): LiveListingItem[] {
@@ -94,6 +111,7 @@ function mapBlogPosts(sampleData: Record<string, unknown>): LiveBlogPostItem[] {
 export async function resolveSandboxProfileRenderData(
   shareId: string,
   routeSlug?: string | null,
+  options: { useLiveSnapshot?: boolean } = {},
 ): Promise<SandboxProfileRenderData | null> {
   const prisma = createPrismaClient().db;
   if (!prisma) return null;
@@ -101,25 +119,37 @@ export async function resolveSandboxProfileRenderData(
   const profile = await getTemplateSandboxProfileByShareId(prisma, shareId);
   if (!profile) return null;
 
-  const sampleData = toObjectRecord(profile.sampleDataJson);
+  const liveSnapshot = options.useLiveSnapshot
+    ? getLiveSnapshot(profile.profileJson)
+    : null;
+  const sampleData = toObjectRecord(
+    liveSnapshot?.sampleDataJson ?? profile.sampleDataJson,
+  );
   const liveBlogPosts = mapBlogPosts(sampleData);
   const currentBlogPost = routeSlug
     ? (liveBlogPosts.find((post) => post.slug === routeSlug) ?? null)
     : null;
+  const companyName = asText(liveSnapshot?.companyName, profile.companyName);
+  const market = asText(liveSnapshot?.market, profile.market ?? companyName);
+  const subdomain = asText(
+    liveSnapshot?.subdomainLabel,
+    profile.subdomainLabel ?? "sandbox",
+  );
+  const templateKey = asText(liveSnapshot?.templateKey, profile.templateKey);
 
   return {
-    companyName: profile.companyName,
-    content: toStringRecord(profile.contentJson),
+    companyName,
+    content: toStringRecord(liveSnapshot?.contentJson ?? profile.contentJson),
     currentBlogPost,
     liveAgents: mapAgents(sampleData),
     liveBlogPosts,
     liveListings: mapListings(sampleData),
-    market: profile.market ?? profile.companyName,
+    market,
     profileId: profile.id,
     sampleData,
     shareId: profile.shareId,
-    subdomain: profile.subdomainLabel ?? "sandbox",
-    templateKey: profile.templateKey,
-    theme: toStringRecord(profile.themeJson),
+    subdomain,
+    templateKey,
+    theme: toStringRecord(liveSnapshot?.themeJson ?? profile.themeJson),
   };
 }

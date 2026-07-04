@@ -23,7 +23,6 @@ import {
   createTemplateSandboxProfileAction,
 } from "../../app/actions";
 import {
-  DashboardPageActions,
   DashboardPageDescription,
   DashboardPageEyebrow,
   DashboardPageHeader,
@@ -51,7 +50,7 @@ export function TemplateSandboxIndex({
     trpc.templateSandbox.list.queryOptions(),
   );
   const { data: catalog } = useSuspenseQuery(
-    trpc.workspace.getTemplateCatalog.queryOptions(),
+    trpc.templateSandbox.catalog.queryOptions(),
   );
 
   return (
@@ -66,11 +65,6 @@ export function TemplateSandboxIndex({
               and open stable preview URLs without publishing anything.
             </DashboardPageDescription>
           </DashboardPageIntro>
-          <DashboardPageActions>
-            <Button asChild variant="outline">
-              <Link href="/builder">Open tenant builder</Link>
-            </Button>
-          </DashboardPageActions>
         </DashboardPageHeaderRow>
       </DashboardPageHeader>
 

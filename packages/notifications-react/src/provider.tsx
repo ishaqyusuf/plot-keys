@@ -9,7 +9,7 @@ import {
   type NotificationStore,
   type NotificationVariant,
   plotKeysNotificationTypes,
-} from "@plotkeys/notifications";
+} from "@plotkeys/notifications/react-client";
 import {
   createContext,
   type ReactNode,

@@ -1,4 +1,3 @@
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { TemplateSandboxWorkbench } from "@/components/template-sandbox/template-sandbox-workbench";
 import { getBaseUrl } from "@/lib/get-base-url";
 import { getServerTrpcClient } from "@/trpc/server";
@@ -30,14 +29,14 @@ export default async function TemplateSandboxDetailPage({
     const profile = await trpc.templateSandbox.get.query({ profileId });
 
     return (
-      <DashboardPage>
+      <main className="min-h-[calc(100svh-4rem)] overflow-hidden bg-background">
         <TemplateSandboxWorkbench
           currentOrigin={currentOrigin}
           pageKey={query.page}
           previewPath={query.path}
           profile={profile}
         />
-      </DashboardPage>
+      </main>
     );
   } catch {
     notFound();

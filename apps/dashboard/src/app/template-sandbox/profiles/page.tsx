@@ -9,15 +9,15 @@ import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Template Sandbox | Plot Keys",
+  title: "Template Sandbox Profiles | Plot Keys",
 };
 
-export default async function TemplateSandboxPage() {
+export default async function TemplateSandboxProfilesPage() {
   const currentOrigin = await getBaseUrl();
 
   batchPrefetch([
     trpc.templateSandbox.list.queryOptions(),
-    trpc.workspace.getTemplateCatalog.queryOptions(),
+    trpc.templateSandbox.catalog.queryOptions(),
   ]);
 
   return (

@@ -225,7 +225,8 @@ export async function createTemplateSandboxProfile(
       theme_json,
       content_json,
       sample_data_json,
-      profile_json
+      profile_json,
+      updated_at
     )
     VALUES (
       ${shareId},
@@ -239,7 +240,8 @@ export async function createTemplateSandboxProfile(
       ${JSON.stringify(input.themeJson)}::jsonb,
       ${JSON.stringify(input.contentJson)}::jsonb,
       ${JSON.stringify(input.sampleDataJson ?? {})}::jsonb,
-      ${JSON.stringify(input.profileJson ?? {})}::jsonb
+      ${JSON.stringify(input.profileJson ?? {})}::jsonb,
+      NOW()
     )
     RETURNING
       id::text AS id,

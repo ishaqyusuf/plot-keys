@@ -25,12 +25,13 @@ type RegisterNavProps = {
   companyName: string;
   currentPath?: string;
   hrefPrefix?: string;
+  hrefQuery?: string;
   logoUrl?: string | null;
   templateKey: string;
   tier: TemplateTier;
 };
 
-function scopedHref(href: string, hrefPrefix?: string) {
+function scopedHref(href: string, hrefPrefix?: string, hrefQuery?: string) {
   if (
     !hrefPrefix ||
     href.startsWith("http://") ||
@@ -40,13 +41,17 @@ function scopedHref(href: string, hrefPrefix?: string) {
     return href;
   }
 
-  return href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+  const scoped = href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+  if (!hrefQuery) return scoped;
+
+  return `${scoped}${scoped.includes("?") ? "&" : "?"}${hrefQuery}`;
 }
 
 export function RegisterNav({
   companyName,
   currentPath = "/",
   hrefPrefix,
+  hrefQuery,
   logoUrl,
   templateKey,
   tier,
@@ -59,7 +64,7 @@ export function RegisterNav({
         {/* Logo / brand */}
         <Link
           className="flex shrink-0 items-center gap-2.5 text-sm font-semibold text-[color:var(--pk-foreground,#0f172a)]"
-          href={scopedHref("/", hrefPrefix)}
+          href={scopedHref("/", hrefPrefix, hrefQuery)}
         >
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -72,8 +77,8 @@ export function RegisterNav({
         {/* Desktop nav */}
         <nav aria-label="Primary navigation" className="hidden items-center gap-1 md:flex">
           {nav.primary.map((link) => {
-            const href = scopedHref(link.href, hrefPrefix);
-            const isActive = currentPath === href;
+            const href = scopedHref(link.href, hrefPrefix, hrefQuery);
+            const isActive = currentPath === href.split("?")[0];
             return (
               <Link
                 key={link.href}
@@ -97,7 +102,7 @@ export function RegisterNav({
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <Link
             className="rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            href={scopedHref(nav.ctaHref, hrefPrefix)}
+            href={scopedHref(nav.ctaHref, hrefPrefix, hrefQuery)}
           >
             {nav.ctaLabel}
           </Link>
@@ -134,8 +139,8 @@ export function RegisterNav({
           {/* Mobile dropdown */}
           <div className="absolute right-0 top-full mt-1 w-64 rounded-xl border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)] p-2 shadow-lg">
             {nav.mobile.map((link) => {
-              const href = scopedHref(link.href, hrefPrefix);
-              const isActive = currentPath === href;
+              const href = scopedHref(link.href, hrefPrefix, hrefQuery);
+              const isActive = currentPath === href.split("?")[0];
               return (
                 <Link
                   key={link.href}
@@ -156,7 +161,7 @@ export function RegisterNav({
             <div className="mt-2 border-t border-[color:var(--pk-border,#e2e8f0)] pt-2">
               <Link
                 className="block rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-3 py-2 text-center text-sm font-medium text-white"
-                href={scopedHref(nav.ctaHref, hrefPrefix)}
+                href={scopedHref(nav.ctaHref, hrefPrefix, hrefQuery)}
               >
                 {nav.ctaLabel}
               </Link>

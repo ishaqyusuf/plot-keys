@@ -17,10 +17,11 @@ import Link from "next/link";
 type RegisterFooterProps = {
   companyName: string;
   hrefPrefix?: string;
+  hrefQuery?: string;
   templateKey: string;
 };
 
-function scopedHref(href: string, hrefPrefix?: string) {
+function scopedHref(href: string, hrefPrefix?: string, hrefQuery?: string) {
   if (
     !hrefPrefix ||
     href.startsWith("http://") ||
@@ -30,12 +31,16 @@ function scopedHref(href: string, hrefPrefix?: string) {
     return href;
   }
 
-  return href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+  const scoped = href === "/" ? hrefPrefix : `${hrefPrefix}${href}`;
+  if (!hrefQuery) return scoped;
+
+  return `${scoped}${scoped.includes("?") ? "&" : "?"}${hrefQuery}`;
 }
 
 export function RegisterFooter({
   companyName,
   hrefPrefix,
+  hrefQuery,
   templateKey,
 }: RegisterFooterProps) {
   const footer = getRegisterFooterConfig(templateKey);
@@ -57,7 +62,7 @@ export function RegisterFooter({
                     <li key={link.href}>
                       <Link
                         className="text-sm text-[color:var(--pk-muted-foreground,#64748b)] transition-colors hover:text-[color:var(--pk-foreground,#0f172a)]"
-                        href={scopedHref(link.href, hrefPrefix)}
+                        href={scopedHref(link.href, hrefPrefix, hrefQuery)}
                       >
                         {link.label}
                       </Link>
