@@ -12,11 +12,7 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 const createEstateFormSchema = z.object({
@@ -52,7 +48,6 @@ export function CreateEstateForm() {
   const form = useZodForm(createEstateFormSchema, {
     defaultValues,
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: CreateEstateFormValues) {
     setPending(true);
@@ -170,7 +165,10 @@ export function CreateEstateForm() {
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.newEstate()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-estate"
+        />
         <Button disabled={pending} type="submit">
           {pending ? "Creating..." : "Create launch"}
         </Button>

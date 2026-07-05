@@ -7,11 +7,7 @@ import Link from "next/link";
 import { useMemo, useRef } from "react";
 
 import { completeInviteProfileAction } from "@/app/actions";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 
 type InviteProfileCompletionValues = {
   bio?: string;
@@ -46,62 +42,53 @@ export function InviteProfileCompletionForm({
   const bioRef = useRef<HTMLInputElement>(null);
   const imageUrlRef = useRef<HTMLInputElement>(null);
 
-  const quickFill = useMemo(() => {
-    return new QuickFill(
-      createQuickFillAdapter<InviteProfileCompletionValues>({
-        getValues: () => ({
-          bio: bioRef.current?.value ?? "",
-          imageUrl: imageUrlRef.current?.value ?? "",
-          name: nameRef.current?.value ?? "",
-          phone: phoneRef.current?.value ?? "",
-        }),
-        reset: (values) => {
-          if (nameRef.current && typeof values.name === "string") {
-            nameRef.current.value = values.name;
-          }
-
-          if (phoneRef.current && typeof values.phone === "string") {
-            phoneRef.current.value = values.phone;
-          }
-
-          if (bioRef.current && typeof values.bio === "string") {
-            bioRef.current.value = values.bio;
-          }
-
-          if (
-            imageUrlRef.current &&
-            typeof values.imageUrl === "string"
-          ) {
-            imageUrlRef.current.value = values.imageUrl;
-          }
-        },
-        setValue: (name, value) => {
-          if (name === "name" && nameRef.current && typeof value === "string") {
-            nameRef.current.value = value;
-          }
-
-          if (
-            name === "phone" &&
-            phoneRef.current &&
-            typeof value === "string"
-          ) {
-            phoneRef.current.value = value;
-          }
-
-          if (name === "bio" && bioRef.current && typeof value === "string") {
-            bioRef.current.value = value;
-          }
-
-          if (
-            name === "imageUrl" &&
-            imageUrlRef.current &&
-            typeof value === "string"
-          ) {
-            imageUrlRef.current.value = value;
-          }
-        },
+  const quickFillAdapter = useMemo(() => {
+    return createQuickFillAdapter<InviteProfileCompletionValues>({
+      getValues: () => ({
+        bio: bioRef.current?.value ?? "",
+        imageUrl: imageUrlRef.current?.value ?? "",
+        name: nameRef.current?.value ?? "",
+        phone: phoneRef.current?.value ?? "",
       }),
-    );
+      reset: (values) => {
+        if (nameRef.current && typeof values.name === "string") {
+          nameRef.current.value = values.name;
+        }
+
+        if (phoneRef.current && typeof values.phone === "string") {
+          phoneRef.current.value = values.phone;
+        }
+
+        if (bioRef.current && typeof values.bio === "string") {
+          bioRef.current.value = values.bio;
+        }
+
+        if (imageUrlRef.current && typeof values.imageUrl === "string") {
+          imageUrlRef.current.value = values.imageUrl;
+        }
+      },
+      setValue: (name, value) => {
+        if (name === "name" && nameRef.current && typeof value === "string") {
+          nameRef.current.value = value;
+        }
+
+        if (name === "phone" && phoneRef.current && typeof value === "string") {
+          phoneRef.current.value = value;
+        }
+
+        if (name === "bio" && bioRef.current && typeof value === "string") {
+          bioRef.current.value = value;
+        }
+
+        if (
+          name === "imageUrl" &&
+          imageUrlRef.current &&
+          typeof value === "string"
+        ) {
+          imageUrlRef.current.value = value;
+        }
+      },
+    });
   }, []);
 
   return (
@@ -109,8 +96,9 @@ export function InviteProfileCompletionForm({
       <input name="token" type="hidden" value={token} />
 
       <div className="flex justify-end">
-        <DevFormQuickFillButton
-          onFill={() => quickFill.fill("invite-profile-complete")}
+        <QuickFill
+          args={{ form: quickFillAdapter }}
+          name="invite-profile-complete"
         />
       </div>
 

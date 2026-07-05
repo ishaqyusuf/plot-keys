@@ -8,15 +8,17 @@ import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { buildLocalSitefrontHostname, buildTenantDashboardUrl } from "@plotkeys/utils";
+import {
+  buildLocalSitefrontHostname,
+  buildTenantDashboardUrl,
+} from "@plotkeys/utils";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { useZodForm } from "../../hooks/use-zod-form";
 import { useTRPC } from "../../trpc/client";
-import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
-import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "../quick-fill";
 import { SubdomainField } from "../subdomain-field";
 import { AuthFormError } from "./auth-form-error";
 
@@ -55,7 +57,6 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       subdomain: "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
   const signUpMutation = useMutation(
     trpc.auth.signUp.mutationOptions({
       onError(error) {
@@ -110,7 +111,10 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="flex justify-end">
-        <DevFormQuickFillButton onFill={() => quickFill.fill("auth-sign-up")} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="auth-sign-up"
+        />
       </div>
 
       <FieldGroup>

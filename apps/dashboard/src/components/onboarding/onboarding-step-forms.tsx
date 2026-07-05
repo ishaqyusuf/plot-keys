@@ -18,7 +18,7 @@ import {
 } from "@plotkeys/ui/select";
 import { Textarea } from "@plotkeys/ui/textarea";
 import Link from "next/link";
-import { useTransition } from "react";
+import { type ReactNode, useTransition } from "react";
 import { Controller } from "react-hook-form";
 import { z } from "zod";
 
@@ -27,8 +27,7 @@ import {
   saveOnboardingStepAction,
 } from "../../app/actions";
 import { useZodForm } from "../../hooks/use-zod-form";
-import { DevOnboardingQuickFillButton } from "../dev/dev-onboarding-quick-fill-button";
-import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "../quick-fill";
 import { TagInput } from "../tag-input";
 
 type StepId =
@@ -168,12 +167,12 @@ function StepActions({
 }: {
   backPath: string | null;
   pending: boolean;
-  quickFill: () => void | Promise<void>;
+  quickFill: ReactNode;
   submitLabel?: string;
 }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <DevOnboardingQuickFillButton onFill={quickFill} />
+      {quickFill}
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button disabled={pending} type="submit">
           {pending ? "Saving..." : submitLabel}
@@ -239,8 +238,6 @@ export function BusinessIdentityStepForm({
       tagline: saved?.tagline ?? "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
   async function onSubmit(values: BusinessIdentityValues) {
     startTransition(async () => {
       await saveStep("business-identity", nextStep, {
@@ -333,7 +330,12 @@ export function BusinessIdentityStepForm({
       <StepActions
         backPath={backPath}
         pending={pending}
-        quickFill={() => quickFill.onboardingBusinessIdentity()}
+        quickFill={
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="onboarding-business-identity"
+          />
+        }
       />
     </form>
   );
@@ -357,8 +359,6 @@ export function MarketFocusStepForm({
       targetAudience: saved?.targetAudience ?? [],
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
   async function onSubmit(values: MarketFocusValues) {
     startTransition(async () => {
       await saveStep("market-focus", nextStep, {
@@ -457,7 +457,12 @@ export function MarketFocusStepForm({
       <StepActions
         backPath={backPath}
         pending={pending}
-        quickFill={() => quickFill.onboardingMarketFocus()}
+        quickFill={
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="onboarding-market-focus"
+          />
+        }
       />
     </form>
   );
@@ -480,8 +485,6 @@ export function BrandStyleStepForm({
       tone: saved?.tone ?? "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
   async function onSubmit(values: BrandStyleValues) {
     startTransition(async () => {
       await saveStep("brand-style", nextStep, {
@@ -568,7 +571,12 @@ export function BrandStyleStepForm({
       <StepActions
         backPath={backPath}
         pending={pending}
-        quickFill={() => quickFill.onboardingBrandStyle()}
+        quickFill={
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="onboarding-brand-style"
+          />
+        }
       />
     </form>
   );
@@ -592,8 +600,6 @@ export function ContactOperationsStepForm({
       whatsapp: saved?.whatsapp ?? "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
   async function onSubmit(values: ContactOperationsValues) {
     startTransition(async () => {
       await saveStep("contact-operations", nextStep, {
@@ -653,7 +659,12 @@ export function ContactOperationsStepForm({
       <StepActions
         backPath={backPath}
         pending={pending}
-        quickFill={() => quickFill.onboardingContactOperations()}
+        quickFill={
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="onboarding-contact-operations"
+          />
+        }
       />
     </form>
   );
@@ -682,8 +693,6 @@ export function ContentReadinessStepForm({
       hasTestimonials: Boolean(saved?.hasTestimonials),
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
   async function onSubmit(values: ContentReadinessValues) {
     startTransition(async () => {
       const formData = new FormData();
@@ -739,7 +748,12 @@ export function ContentReadinessStepForm({
       <StepActions
         backPath={backPath}
         pending={pending}
-        quickFill={() => quickFill.onboardingContentReadiness()}
+        quickFill={
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="onboarding-content-readiness"
+          />
+        }
         submitLabel="Open builder"
       />
     </form>

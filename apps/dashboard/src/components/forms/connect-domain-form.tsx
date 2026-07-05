@@ -12,11 +12,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 import { connectCustomDomainAction } from "@/app/actions";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 const connectDomainFormSchema = z.object({
@@ -46,7 +42,6 @@ export function ConnectDomainForm({ disabled }: ConnectDomainFormProps) {
       hostname: "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: ConnectDomainFormValues) {
     setPending(true);
@@ -85,8 +80,9 @@ export function ConnectDomainForm({ disabled }: ConnectDomainFormProps) {
       </FieldGroup>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <DevFormQuickFillButton
-          onFill={() => quickFill.fill("connect-domain")}
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="connect-domain"
         />
         <div className="flex flex-wrap items-center justify-end gap-3">
           <Button disabled={disabled || pending} type="submit">

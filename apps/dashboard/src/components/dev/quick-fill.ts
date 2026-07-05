@@ -1,597 +1,106 @@
 "use client";
 
-import { TAG_INPUT_SYSTEM_SUGGESTIONS } from "../tag-input";
+import {
+  createQuickFillAdapter,
+  fillQuickFillProfile,
+  type QuickFillArgs,
+  type QuickFillFormAdapter,
+  type QuickFillProfile,
+  runQuickFill,
+} from "@/lib/quick-fill";
 
-export type QuickFillProfile =
-  | "auth-sign-up"
-  | "connect-domain"
-  | "generic"
-  | "invite-profile-complete"
-  | "invite-sign-up"
-  | "invite-employee"
-  | "invite-member"
-  | "new-agent"
-  | "new-estate"
-  | "new-project"
-  | "new-property"
-  | "onboarding-brand-style"
-  | "onboarding-business-identity"
-  | "onboarding-contact-operations"
-  | "onboarding-content-readiness"
-  | "onboarding-launch"
-  | "onboarding-market-focus"
-  | "publish-configuration";
-
-type QuickFillPayloads = {
-  bioVariants: string[];
-  businessTypes: string[];
-  colors: string[];
-  companyPrefixes: string[];
-  companySuffixes: string[];
-  companyTypes: string[];
-  contentReadinessFlags: string[][];
-  employeeRoles: string[];
-  inviteRoles: string[];
-  locations: string[];
-  primaryGoals: string[];
-  projectTypes: string[];
-  propertyStatuses: string[];
-  propertySubTypes: string[];
-  propertyTypes: string[];
-  propertyTypeSets: string[][];
-  stylePreferences: string[];
-  taglines: string[];
-  targetAudienceSets: string[][];
-  tones: string[];
+export {
+  createQuickFillAdapter,
+  type QuickFillArgs,
+  type QuickFillFormAdapter,
+  type QuickFillProfile,
+  runQuickFill,
 };
 
 type QuickFillValues = Record<string, unknown>;
-
-export type QuickFillFormAdapter<
-  TValues extends QuickFillValues = QuickFillValues,
-> = {
-  getValues: () => TValues;
-  reset: (values: TValues | QuickFillValues) => void;
-  setValue: (
-    name: string,
-    value: unknown,
-    options?: {
-      shouldDirty?: boolean;
-      shouldTouch?: boolean;
-      shouldValidate?: boolean;
-    },
-  ) => void;
-};
-
-const DEFAULT_PAYLOADS: QuickFillPayloads = {
-  bioVariants: [
-    "Trusted real-estate professional serving families, operators, and investors.",
-    "Experienced property advisor focused on smooth transactions and reliable follow-up.",
-    "Hands-on real-estate consultant helping clients move quickly with clarity.",
-  ],
-  businessTypes: [
-    "residential-sales",
-    "residential-rentals",
-    "commercial",
-    "luxury",
-    "mixed",
-  ],
-  colors: ["Deep navy", "Forest green", "Warm sand", "Charcoal and gold"],
-  companyPrefixes: [
-    "Aster",
-    "Atlas",
-    "Blue",
-    "Cedar",
-    "Crown",
-    "Emerald",
-    "Golden",
-    "Grand",
-    "Harbor",
-    "Key",
-    "Maple",
-    "Oak",
-    "Prime",
-    "Royal",
-    "Silver",
-    "Skyline",
-    "Sterling",
-    "Summit",
-    "Urban",
-    "Victory",
-  ],
-  companySuffixes: [
-    "Bay",
-    "Bridge",
-    "Crest",
-    "Court",
-    "Edge",
-    "Field",
-    "Garden",
-    "Gate",
-    "Grove",
-    "Heights",
-    "Haven",
-    "Hill",
-    "View",
-    "Park",
-    "Place",
-    "Point",
-    "Square",
-    "Stone",
-    "Terrace",
-    "Vale",
-  ],
-  companyTypes: [
-    "Advisory",
-    "Assets",
-    "Estates",
-    "Homes",
-    "Holdings",
-    "Living",
-    "Properties",
-    "Realty",
-    "Residences",
-    "Spaces",
-  ],
-  contentReadinessFlags: [
-    ["hasLogo", "hasListings", "hasTestimonials"],
-    ["hasLogo", "hasAgents", "hasExistingContent"],
-    ["hasListings", "hasProjects", "hasBlogContent"],
-  ],
-  employeeRoles: ["operations", "sales_agent", "marketing", "finance"],
-  inviteRoles: ["admin", "agent", "staff"],
-  locations: [
-    "Lekki, Lagos",
-    "Victoria Island, Lagos",
-    "Ikoyi, Lagos",
-    "Maitama, Abuja",
-    "Wuse 2, Abuja",
-  ],
-  primaryGoals: [
-    "generate-leads",
-    "showcase-listings",
-    "build-brand",
-    "all-of-above",
-  ],
-  projectTypes: [
-    "building",
-    "estate",
-    "fit_out",
-    "infrastructure",
-    "renovation",
-  ],
-  propertyStatuses: ["active", "sold", "rented", "off_market"],
-  propertySubTypes: [
-    "Detached Duplex",
-    "Serviced Apartment",
-    "Residential Plot",
-    "Commercial Plot",
-  ],
-  propertyTypes: ["residential", "land"],
-  propertyTypeSets: [
-    ["apartments", "houses"],
-    ["luxury", "apartments"],
-    ["commercial", "land"],
-  ],
-  stylePreferences: ["minimal", "bold", "classic", "modern"],
-  taglines: [
-    "Real estate, made effortless.",
-    "Trusted guidance for every move.",
-    "Find the right space with confidence.",
-    "Premium property service without the noise.",
-  ],
-  targetAudienceSets: [
-    [TAG_INPUT_SYSTEM_SUGGESTIONS[0]!, TAG_INPUT_SYSTEM_SUGGESTIONS[6]!],
-    [TAG_INPUT_SYSTEM_SUGGESTIONS[1]!, TAG_INPUT_SYSTEM_SUGGESTIONS[2]!],
-    [TAG_INPUT_SYSTEM_SUGGESTIONS[3]!, TAG_INPUT_SYSTEM_SUGGESTIONS[9]!],
-    [TAG_INPUT_SYSTEM_SUGGESTIONS[5]!, TAG_INPUT_SYSTEM_SUGGESTIONS[8]!],
-  ],
-  tones: ["professional", "friendly", "luxury", "modern"],
-};
-
-function pickRandom<T>(items: readonly T[]) {
-  const item = items[Math.floor(Math.random() * items.length)];
-  if (item !== undefined) {
-    return item;
-  }
-
-  const [firstItem] = items;
-  if (firstItem === undefined) {
-    throw new Error(
-      "Expected at least one item when generating quick-fill data.",
-    );
-  }
-
-  return firstItem;
-}
-
-function randomId() {
-  return Math.random().toString(36).slice(2, 7);
-}
-
-function formatDateInput(value: Date) {
-  return value.toISOString().slice(0, 10);
-}
-
-function toSlugPart(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "")
-    .trim();
-}
-
-type QuickFillSeed = ReturnType<typeof createQuickFillSeed>;
-
-function createQuickFillSeed(payloads: QuickFillPayloads) {
-  const suffix = randomId();
-  const company = `${pickRandom(payloads.companyPrefixes)} ${pickRandom(
-    payloads.companySuffixes,
-  )} ${pickRandom(payloads.companyTypes)}`;
-  const safeCompanySlug = company
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-  const companyParts = company.split(/\s+/);
-  const brandSlug =
-    companyParts.slice(0, 2).map(toSlugPart).filter(Boolean).join("") ||
-    safeCompanySlug.replace(/-/g, "");
-  const firstName = pickRandom([
-    "Amira",
-    "Layla",
-    "Noor",
-    "Yasmin",
-    "Mariam",
-    "Omar",
-    "Khalid",
-    "Zayd",
-    "Tariq",
-    "Samir",
-  ]);
-  const lastName = pickRandom([
-    "Haddad",
-    "Khalil",
-    "Nasser",
-    "Farouk",
-    "Rahman",
-    "Malik",
-    "Saleh",
-    "Karim",
-    "Hamdan",
-    "Mansour",
-  ]);
-  const fullName = `${firstName} ${lastName}`;
-  const location = pickRandom(payloads.locations);
-  const projectType = pickRandom(payloads.projectTypes);
-  const projectName = `${company} ${pickRandom([
-    "Residences",
-    "Gardens",
-    "Heights",
-    "Court",
-    "Terraces",
-  ])} Phase ${Math.floor(Math.random() * 4) + 1}`;
-
-  return {
-    bio: pickRandom(payloads.bioVariants),
-    company,
-    description:
-      "A polished sample record generated for focused local testing and QA flows.",
-    email: `${toSlugPart(firstName)}+${suffix}@${brandSlug}.test`,
-    fullName,
-    location,
-    market: location,
-    officeAddress: `${Math.floor(Math.random() * 40) + 5} Marina Road, ${location}`,
-    phone: `+23480${Math.floor(Math.random() * 90000000 + 10000000)}`,
-    price: `₦${(Math.floor(Math.random() * 7) + 3) * 25000000}`,
-    projectCode: `${projectType.slice(0, 3).toUpperCase()}-${suffix.toUpperCase()}`,
-    projectName,
-    projectType,
-    signUpEmail: `hello@${brandSlug}.test`,
-    signUpPassword: `Plotkeys-${suffix}`,
-    signUpSubdomain: brandSlug,
-    slug: `${brandSlug}-${suffix}`,
-    tagline: pickRandom(payloads.taglines),
-    title: `${pickRandom(["Sample", "Demo", "Premium"])} Listing ${suffix.toUpperCase()}`,
-    whatsapp: `+23481${Math.floor(Math.random() * 90000000 + 10000000)}`,
-  };
-}
 
 export class QuickFill<
   TValues extends QuickFillValues = QuickFillValues,
   TProfile extends QuickFillProfile = QuickFillProfile,
 > {
-  private readonly seed: QuickFillSeed;
-
-  constructor(
-    private readonly form: QuickFillFormAdapter<TValues>,
-    private readonly payloads: QuickFillPayloads = DEFAULT_PAYLOADS,
-  ) {
-    this.seed = createQuickFillSeed(payloads);
-  }
+  constructor(private readonly form: QuickFillFormAdapter<TValues>) {}
 
   fill(profile: TProfile) {
-    switch (profile) {
-      case "auth-sign-up":
-        return this.authSignUp();
-      case "connect-domain":
-        return this.connectDomain();
-      case "onboarding-business-identity":
-        return this.onboardingBusinessIdentity();
-      case "onboarding-market-focus":
-        return this.onboardingMarketFocus();
-      case "onboarding-brand-style":
-        return this.onboardingBrandStyle();
-      case "onboarding-contact-operations":
-        return this.onboardingContactOperations();
-      case "onboarding-content-readiness":
-        return this.onboardingContentReadiness();
-      case "onboarding-launch":
-        return this.onboardingLaunch();
-      case "new-agent":
-        return this.newAgent();
-      case "new-estate":
-        return this.newEstate();
-      case "new-project":
-        return this.newProject();
-      case "new-property":
-        return this.newProperty();
-      case "invite-member":
-        return this.inviteMember();
-      case "invite-sign-up":
-        return this.inviteSignUp();
-      case "invite-profile-complete":
-        return this.inviteProfileComplete();
-      case "invite-employee":
-        return this.inviteEmployee();
-      case "publish-configuration":
-        return this.publishConfiguration();
-      default:
-        return this.generic();
-    }
+    return fillQuickFillProfile({
+      args: { form: this.form } as QuickFillArgs[TProfile],
+      name: profile,
+    });
   }
 
   onboardingBusinessIdentity() {
-    this.merge({
-      businessType: pickRandom(this.payloads.businessTypes),
-      primaryGoal: pickRandom(this.payloads.primaryGoals),
-      tagline: this.seed.tagline,
-    });
+    return this.fill("onboarding-business-identity" as TProfile);
   }
 
   authSignUp() {
-    this.merge({
-      company: this.seed.company,
-      email: this.seed.signUpEmail,
-      name: this.seed.fullName,
-      password: this.seed.signUpPassword,
-      phoneNumber: this.seed.phone,
-      subdomain: this.seed.signUpSubdomain,
-    });
+    return this.fill("auth-sign-up" as TProfile);
   }
 
   connectDomain() {
-    this.merge({
-      hostname: `${this.seed.slug}.com.ng`,
-    });
+    return this.fill("connect-domain" as TProfile);
   }
 
   onboardingMarketFocus() {
-    this.merge({
-      locations: [this.seed.location, pickRandom(this.payloads.locations)].join(
-        ", ",
-      ),
-      market: this.seed.market,
-      propertyTypes: pickRandom(this.payloads.propertyTypeSets),
-      targetAudience: pickRandom(this.payloads.targetAudienceSets),
-    });
+    return this.fill("onboarding-market-focus" as TProfile);
   }
 
   onboardingBrandStyle() {
-    this.merge({
-      preferredColorHint: pickRandom(this.payloads.colors),
-      stylePreference: pickRandom(this.payloads.stylePreferences),
-      tone: pickRandom(this.payloads.tones),
-    });
+    return this.fill("onboarding-brand-style" as TProfile);
   }
 
   onboardingContactOperations() {
-    this.merge({
-      contactEmail: this.seed.email,
-      officeAddress: this.seed.officeAddress,
-      phone: this.seed.phone,
-      whatsapp: this.seed.whatsapp,
-    });
+    return this.fill("onboarding-contact-operations" as TProfile);
   }
 
   onboardingContentReadiness() {
-    const selected = new Set(pickRandom(this.payloads.contentReadinessFlags));
-
-    this.merge({
-      hasAgents: selected.has("hasAgents"),
-      hasBlogContent: selected.has("hasBlogContent"),
-      hasExistingContent: selected.has("hasExistingContent"),
-      hasListings: selected.has("hasListings"),
-      hasLogo: selected.has("hasLogo"),
-      hasProjects: selected.has("hasProjects"),
-      hasTestimonials: selected.has("hasTestimonials"),
-    });
+    return this.fill("onboarding-content-readiness" as TProfile);
   }
 
   onboardingLaunch() {
-    this.merge({
-      templateKey: "template-1",
-    });
+    return this.fill("onboarding-launch" as TProfile);
   }
 
   newAgent() {
-    this.merge({
-      bio: this.seed.bio,
-      displayOrder: "1",
-      email: this.seed.email,
-      featured: "true",
-      imageUrl: `https://images.example.com/agents/${this.seed.slug}.jpg`,
-      name: this.seed.fullName,
-      phone: this.seed.phone,
-      title: "Senior Property Advisor",
-    });
-  }
-
-  newProperty() {
-    const type = pickRandom(this.payloads.propertyTypes);
-    const isLand = type === "land";
-
-    this.merge({
-      bathrooms: isLand ? "" : "3",
-      bedrooms: isLand ? "" : "4",
-      description: `${this.seed.description} Contact ${this.seed.fullName} for follow-up.`,
-      featured: "true",
-      imageUrl: `https://images.example.com/properties/${this.seed.slug}.jpg`,
-      location: this.seed.location,
-      paymentPlanAmount: "45000000",
-      paymentPlanInitialDepositPercent: "20",
-      paymentPlanMonths: "12",
-      price: this.seed.price,
-      quantityAvailable: isLand ? "12" : "1",
-      specs: isLand
-        ? "500sqm · dry land · C of O · good road access"
-        : "4 bed · 3 bath · pool · 24/7 power",
-      status: pickRandom(this.payloads.propertyStatuses),
-      subType: pickRandom(this.payloads.propertySubTypes),
-      title: this.seed.title,
-      type,
-    });
+    return this.fill("new-agent" as TProfile);
   }
 
   newEstate() {
-    const title = `${this.seed.company} ${pickRandom([
-      "Gardens",
-      "Heights",
-      "Court",
-      "Terraces",
-    ])} Phase ${Math.floor(Math.random() * 4) + 1}`;
-
-    this.merge({
-      amenities:
-        "Golf course, artificial lake, clubhouse, medical centre, sports centre, swimming pool, green areas, solar streetlights, underground wiring",
-      approvals: "FCDA approved · C of O in progress",
-      brochureUrl: `https://images.example.com/estates/${this.seed.slug}-brochure.pdf`,
-      description: [
-        `${title} is a land presale launch in ${this.seed.location}.`,
-        "Early buyers get introductory pricing, flexible payment terms, and priority allocation before the public release.",
-        "Ideal for residential buyers and investors looking for titled, accessible land in a growing corridor.",
-      ].join(" "),
-      heroImageUrl: `https://images.example.com/estates/${this.seed.slug}.jpg`,
-      landmarks: "Airport Road, Centenary City, major filling station",
-      location: this.seed.location,
-      phaseLabel: "Phase 1 presale",
-      specialPurposeUses: "Schools, clinics, worship centres, gas stations",
-      title,
-    });
+    return this.fill("new-estate" as TProfile);
   }
 
   newProject() {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 7);
+    return this.fill("new-project" as TProfile);
+  }
 
-    const targetCompletionDate = new Date(startDate);
-    targetCompletionDate.setMonth(targetCompletionDate.getMonth() + 14);
-
-    this.merge({
-      code: this.seed.projectCode,
-      description: `${this.seed.description} Site mobilization and planning are already underway.`,
-      location: this.seed.location,
-      name: this.seed.projectName,
-      startDate: formatDateInput(startDate),
-      targetCompletionDate: formatDateInput(targetCompletionDate),
-      type: this.seed.projectType,
-    });
+  newProperty() {
+    return this.fill("new-property" as TProfile);
   }
 
   inviteMember() {
-    this.merge({
-      email: `team-${this.seed.slug}@plotkeys.test`,
-      role: pickRandom(this.payloads.inviteRoles),
-    });
+    return this.fill("invite-member" as TProfile);
   }
 
   inviteSignUp() {
-    this.merge({
-      name: this.seed.fullName,
-      password: this.seed.signUpPassword,
-    });
+    return this.fill("invite-sign-up" as TProfile);
   }
 
   inviteProfileComplete() {
-    this.merge({
-      bio: this.seed.bio,
-      imageUrl: `https://images.example.com/agents/${this.seed.slug}.jpg`,
-      name: this.seed.fullName,
-      phone: this.seed.phone,
-    });
+    return this.fill("invite-profile-complete" as TProfile);
   }
 
   inviteEmployee() {
-    this.merge({
-      email: `employee-${this.seed.slug}@plotkeys.test`,
-      workRole: pickRandom(this.payloads.employeeRoles),
-    });
+    return this.fill("invite-employee" as TProfile);
   }
 
   publishConfiguration() {
-    this.merge({
-      nextName: `Launch ${this.seed.company}`,
-    });
+    return this.fill("publish-configuration" as TProfile);
   }
 
   generic() {
-    const values = this.form.getValues();
-    const firstStringField = Object.entries(values).find(([, value]) => {
-      return typeof value === "string";
-    })?.[0];
-
-    if (!firstStringField) {
-      return;
-    }
-
-    this.set(firstStringField, this.seed.company);
+    return this.fill("generic" as TProfile);
   }
-
-  private merge(values: QuickFillValues) {
-    this.form.reset({
-      ...(this.form.getValues() as QuickFillValues),
-      ...values,
-    });
-  }
-
-  private set(name: string, value: unknown) {
-    this.form.setValue(name, value, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-  }
-}
-
-export function createQuickFillAdapter<
-  TValues extends QuickFillValues = QuickFillValues,
->(form: {
-  getValues: () => TValues;
-  reset: (values: TValues | QuickFillValues) => void;
-  setValue: (name: any, value: any, options?: any) => void;
-}): QuickFillFormAdapter<TValues> {
-  return {
-    getValues: () => form.getValues(),
-    reset: (values) => form.reset(values as TValues),
-    setValue: (name, value, options) =>
-      form.setValue(name as never, value as never, options),
-  };
-}
-
-export function runQuickFill<
-  TValues extends QuickFillValues = QuickFillValues,
-  TProfile extends QuickFillProfile = QuickFillProfile,
->(
-  form: QuickFillFormAdapter<TValues>,
-  profile: TProfile = "generic" as TProfile,
-) {
-  return new QuickFill<TValues, TProfile>(form).fill(profile);
 }

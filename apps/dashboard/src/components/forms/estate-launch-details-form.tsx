@@ -6,19 +6,15 @@ import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import { Textarea } from "@plotkeys/ui/textarea";
-import type { inferRouterOutputs } from "@trpc/server";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import { z } from "zod";
 import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 
@@ -132,7 +128,6 @@ export function EstateLaunchDetailsForm({
       },
     }),
   );
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleFileUpload(
     file: File | null,
@@ -297,7 +292,10 @@ export function EstateLaunchDetailsForm({
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.newEstate()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-estate"
+        />
         <Button disabled={updateEstateMutation.isPending} type="submit">
           {updateEstateMutation.isPending ? "Saving..." : "Save launch"}
         </Button>

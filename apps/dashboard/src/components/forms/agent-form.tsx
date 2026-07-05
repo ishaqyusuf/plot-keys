@@ -14,11 +14,7 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -58,7 +54,6 @@ export function AgentForm(props: AgentFormProps) {
       title: agent?.title ?? "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: AgentFormValues) {
     setPending(true);
@@ -153,10 +148,7 @@ export function AgentForm(props: AgentFormProps) {
             </Field>
             <Field>
               <FieldLabel>Featured</FieldLabel>
-              <NativeSelect
-                className="min-w-28"
-                {...form.register("featured")}
-              >
+              <NativeSelect className="min-w-28" {...form.register("featured")}>
                 <NativeSelectOption value="false">No</NativeSelectOption>
                 <NativeSelectOption value="true">Yes</NativeSelectOption>
               </NativeSelect>
@@ -166,7 +158,10 @@ export function AgentForm(props: AgentFormProps) {
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.newAgent()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-agent"
+        />
         <div className="flex justify-end gap-3">
           <Button onClick={props.onCancel} type="button" variant="ghost">
             Cancel

@@ -16,11 +16,7 @@ import { Input } from "@plotkeys/ui/input";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 type PublishConfirmationDialogProps = {
@@ -71,8 +67,6 @@ export function PublishConfirmationDialog({
       setPending(false);
     }
   }
-
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   if (disabled) {
     return (
@@ -151,8 +145,9 @@ export function PublishConfirmationDialog({
             </Field>
           </FieldGroup>
           <DialogFooter className="mt-4 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <DevFormQuickFillButton
-              onFill={() => quickFill.publishConfiguration()}
+            <QuickFill
+              args={{ form: createQuickFillAdapter(form) }}
+              name="publish-configuration"
             />
             <div className="flex justify-end gap-2">
               <DialogClose asChild>

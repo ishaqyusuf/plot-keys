@@ -11,11 +11,7 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 const roleOptions = [
@@ -47,7 +43,6 @@ export function InviteMemberForm({ onCancel }: InviteMemberFormProps) {
       role: "staff",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: InviteMemberFormValues) {
     setPending(true);
@@ -89,7 +84,10 @@ export function InviteMemberForm({ onCancel }: InviteMemberFormProps) {
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.inviteMember()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="invite-member"
+        />
         <div className="flex justify-end gap-3">
           <Button onClick={onCancel} type="button" variant="ghost">
             Cancel

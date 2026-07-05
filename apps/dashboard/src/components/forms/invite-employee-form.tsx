@@ -12,11 +12,7 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 const employeeWorkRoleOptions = EMPLOYEE_WORK_ROLE_VALUES.map((value) => ({
@@ -47,7 +43,6 @@ export function InviteEmployeeForm({ onCancel }: InviteEmployeeFormProps) {
       workRole: "operations",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: InviteEmployeeFormValues) {
     setPending(true);
@@ -90,7 +85,10 @@ export function InviteEmployeeForm({ onCancel }: InviteEmployeeFormProps) {
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.inviteEmployee()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="invite-employee"
+        />
         <div className="flex justify-end gap-3">
           <Button onClick={onCancel} type="button" variant="ghost">
             Cancel

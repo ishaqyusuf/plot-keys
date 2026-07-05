@@ -8,8 +8,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { createProjectAction } from "../../app/actions";
 import { useZodForm } from "../../hooks/use-zod-form";
-import { DevFormQuickFillButton } from "../dev/dev-form-quick-fill-button";
-import { createQuickFillAdapter, QuickFill } from "../dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "../quick-fill";
 
 const createProjectFormSchema = z.object({
   code: z.string().optional(),
@@ -46,7 +45,6 @@ export function CreateProjectForm() {
   const form = useZodForm(createProjectFormSchema, {
     defaultValues,
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: CreateProjectFormValues) {
     setError(null);
@@ -132,7 +130,10 @@ export function CreateProjectForm() {
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.newProject()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-project"
+        />
         <div className="flex justify-end gap-3">
           <Button disabled={pending} type="submit">
             {pending ? "Creating…" : "Create Project"}

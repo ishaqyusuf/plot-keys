@@ -11,11 +11,7 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 const projectFormSchema = z.object({
@@ -54,7 +50,6 @@ export function ProjectForm({ onCancel }: ProjectFormProps) {
       type: "",
     },
   });
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
 
   async function handleSubmit(values: ProjectFormValues) {
     setPending(true);
@@ -142,7 +137,10 @@ export function ProjectForm({ onCancel }: ProjectFormProps) {
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={() => quickFill.newProject()} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-project"
+        />
         <div className="flex justify-end gap-3">
           <Button onClick={onCancel} type="button" variant="ghost">
             Cancel

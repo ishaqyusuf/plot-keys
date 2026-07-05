@@ -2,11 +2,7 @@
 
 import { Button } from "@plotkeys/ui/button";
 import { CurrencyInput } from "@plotkeys/ui/currency-input";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@plotkeys/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import {
   InputGroup,
@@ -22,11 +18,6 @@ import {
   DashboardFormBody,
   DashboardFormFooter,
 } from "@/components/forms/form-layout";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
 import {
   createPricingPlanDraft,
   getInitialPricingPlans,
@@ -34,6 +25,7 @@ import {
   type PricingPlanDraft,
   PropertyPricingPlanFields,
 } from "@/components/forms/property-pricing-plan-fields";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 
 type ListingTypeValue =
@@ -209,10 +201,7 @@ export function PropertyForm(props: PropertyFormProps) {
     }
   }
 
-  const quickFill = new QuickFill(createQuickFillAdapter(form));
-
-  function handleQuickFill() {
-    quickFill.newProperty();
+  function handlePropertyQuickFilled() {
     setPricingPlans([
       createPricingPlanDraft({
         amount: "45000000",
@@ -263,189 +252,216 @@ export function PropertyForm(props: PropertyFormProps) {
     );
   }
 
+  function pricingPlanHasValue(plan: PricingPlanDraft) {
+    return Boolean(
+      plan.amount.trim() ||
+        plan.initialDepositPercent.trim() ||
+        plan.months.trim(),
+    );
+  }
+
+  function sortPricingPlans(first: PricingPlanDraft, second: PricingPlanDraft) {
+    return Number(first.months || 0) - Number(second.months || 0);
+  }
+
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
       <DashboardFormBody>
         <FieldGroup>
-              <Field>
-                <FieldLabel>Listing type</FieldLabel>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  {...form.register("type")}
-                >
-                  <option value="">Select type...</option>
-                  <option value="residential">Home</option>
-                  <option value="land">Land</option>
-                  <option value="commercial">Commercial (legacy)</option>
-                  <option value="industrial">Industrial (legacy)</option>
-                  <option value="mixed_use">Mixed use (legacy)</option>
-                </select>
-              </Field>
+          <Field>
+            <FieldLabel>Listing type</FieldLabel>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              {...form.register("type")}
+            >
+              <option value="">Select type...</option>
+              <option value="residential">Home</option>
+              <option value="land">Land</option>
+              <option value="commercial">Commercial (legacy)</option>
+              <option value="industrial">Industrial (legacy)</option>
+              <option value="mixed_use">Mixed use (legacy)</option>
+            </select>
+          </Field>
 
-              <Field>
-                <FieldLabel>Title *</FieldLabel>
-                <Input
-                  placeholder={
-                    isLandListing
-                      ? "e.g. 500sqm Plot, Oakfield Estate"
-                      : "e.g. 3-Bedroom Detached, Lekki Phase 1"
-                  }
-                  required
-                  {...form.register("title")}
-                />
-              </Field>
+          <Field>
+            <FieldLabel>Title *</FieldLabel>
+            <Input
+              placeholder={
+                isLandListing
+                  ? "e.g. 500sqm Plot, Oakfield Estate"
+                  : "e.g. 3-Bedroom Detached, Lekki Phase 1"
+              }
+              required
+              {...form.register("title")}
+            />
+          </Field>
 
-              <Field>
-                <FieldLabel>Price</FieldLabel>
-                <CurrencyInput
-                  allowLeadingZeros={false}
-                  placeholder="e.g. ₦45,000,000"
-                  value={form.watch("price")}
-                  onValueChange={(values) => {
-                    form.setValue("price", values.value, {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-              </Field>
+          <Field>
+            <FieldLabel>Price</FieldLabel>
+            <CurrencyInput
+              allowLeadingZeros={false}
+              placeholder="e.g. ₦45,000,000"
+              value={form.watch("price")}
+              onValueChange={(values) => {
+                form.setValue("price", values.value, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+              }}
+            />
+          </Field>
 
-              <PropertyPricingPlanFields
-                onAdd={addPricingPlan}
-                onRemove={removePricingPlan}
-                onUpdate={updatePricingPlan}
-                pricingPlans={pricingPlans}
+          <PropertyPricingPlanFields
+            onAdd={addPricingPlan}
+            onRemove={removePricingPlan}
+            onUpdate={updatePricingPlan}
+            pricingPlans={pricingPlans}
+            quickFill={
+              <QuickFill
+                args={{
+                  createRow: createPricingPlanDraft,
+                  hasValue: pricingPlanHasValue,
+                  rows: pricingPlans,
+                  setRows: (updater) =>
+                    setPricingPlans((plans) => updater(plans)),
+                  sortRows: sortPricingPlans,
+                }}
+                name="pricing-plans"
               />
+            }
+          />
 
-              <Field>
-                <FieldLabel>Qty available</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput
-                    min={0}
-                    placeholder={isLandListing ? "24" : "1"}
-                    type="number"
-                    {...form.register("quantityAvailable")}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupText>units</InputGroupText>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
+          <Field>
+            <FieldLabel>Qty available</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                min={0}
+                placeholder={isLandListing ? "24" : "1"}
+                type="number"
+                {...form.register("quantityAvailable")}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>units</InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
 
+          <Field>
+            <FieldLabel>Location</FieldLabel>
+            <Input
+              placeholder={
+                isLandListing
+                  ? "e.g. Ibeju-Lekki, Lagos"
+                  : "e.g. Lekki Phase 1, Lagos"
+              }
+              {...form.register("location")}
+            />
+          </Field>
+
+          {isLandListing ? null : (
+            <div className="grid grid-cols-2 gap-3">
               <Field>
-                <FieldLabel>Location</FieldLabel>
+                <FieldLabel>Bedrooms</FieldLabel>
                 <Input
-                  placeholder={
-                    isLandListing
-                      ? "e.g. Ibeju-Lekki, Lagos"
-                      : "e.g. Lekki Phase 1, Lagos"
-                  }
-                  {...form.register("location")}
+                  min={0}
+                  placeholder="3"
+                  type="number"
+                  {...form.register("bedrooms")}
                 />
               </Field>
-
-              {isLandListing ? null : (
-                <div className="grid grid-cols-2 gap-3">
-                  <Field>
-                    <FieldLabel>Bedrooms</FieldLabel>
-                    <Input
-                      min={0}
-                      placeholder="3"
-                      type="number"
-                      {...form.register("bedrooms")}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Bathrooms</FieldLabel>
-                    <Input
-                      min={0}
-                      placeholder="2"
-                      type="number"
-                      {...form.register("bathrooms")}
-                    />
-                  </Field>
-                </div>
-              )}
-
               <Field>
-                <FieldLabel>
-                  {isLandListing ? "Land size" : "Specs / highlights"}
-                </FieldLabel>
+                <FieldLabel>Bathrooms</FieldLabel>
                 <Input
-                  placeholder={
-                    isLandListing
-                      ? "e.g. 500sqm"
-                      : "e.g. 3 bed · 2 bath · 200sqm"
-                  }
-                  {...form.register("specs")}
+                  min={0}
+                  placeholder="2"
+                  type="number"
+                  {...form.register("bathrooms")}
                 />
               </Field>
+            </div>
+          )}
 
-              <Field>
-                <FieldLabel>Description</FieldLabel>
-                <Textarea
-                  placeholder={
-                    isLandListing
-                      ? "Describe the land, title, access, estate context, and presale deal..."
-                      : "Short listing description..."
-                  }
-                  rows={4}
-                  {...form.register("description")}
-                />
-              </Field>
+          <Field>
+            <FieldLabel>
+              {isLandListing ? "Land size" : "Specs / highlights"}
+            </FieldLabel>
+            <Input
+              placeholder={
+                isLandListing ? "e.g. 500sqm" : "e.g. 3 bed · 2 bath · 200sqm"
+              }
+              {...form.register("specs")}
+            />
+          </Field>
 
-              <Field>
-                <FieldLabel>Image URL</FieldLabel>
-                <Input
-                  placeholder="https://…"
-                  type="url"
-                  {...form.register("imageUrl")}
-                />
-              </Field>
+          <Field>
+            <FieldLabel>Description</FieldLabel>
+            <Textarea
+              placeholder={
+                isLandListing
+                  ? "Describe the land, title, access, estate context, and presale deal..."
+                  : "Short listing description..."
+              }
+              rows={4}
+              {...form.register("description")}
+            />
+          </Field>
 
-              <Field>
-                <FieldLabel>
-                  {isLandListing ? "Land category" : "Home category"}
-                </FieldLabel>
-                <Input
-                  placeholder={
-                    isLandListing
-                      ? "e.g. Residential plot, commercial plot, mixed-use plot"
-                      : "e.g. Detached, bungalow, flat, terrace"
-                  }
-                  {...form.register("subType")}
-                />
-              </Field>
+          <Field>
+            <FieldLabel>Image URL</FieldLabel>
+            <Input
+              placeholder="https://…"
+              type="url"
+              {...form.register("imageUrl")}
+            />
+          </Field>
 
-              <Field>
-                <FieldLabel>Status</FieldLabel>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  {...form.register("status")}
-                >
-                  <option value="active">Active</option>
-                  <option value="sold">Sold</option>
-                  <option value="rented">Rented</option>
-                  <option value="off_market">Off market</option>
-                </select>
-              </Field>
+          <Field>
+            <FieldLabel>
+              {isLandListing ? "Land category" : "Home category"}
+            </FieldLabel>
+            <Input
+              placeholder={
+                isLandListing
+                  ? "e.g. Residential plot, commercial plot, mixed-use plot"
+                  : "e.g. Detached, bungalow, flat, terrace"
+              }
+              {...form.register("subType")}
+            />
+          </Field>
 
-              <Field>
-                <FieldLabel>Featured</FieldLabel>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  {...form.register("featured")}
-                >
-                  <option value="false">No</option>
-                  <option value="true">Yes — show on homepage</option>
-                </select>
-              </Field>
+          <Field>
+            <FieldLabel>Status</FieldLabel>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              {...form.register("status")}
+            >
+              <option value="active">Active</option>
+              <option value="sold">Sold</option>
+              <option value="rented">Rented</option>
+              <option value="off_market">Off market</option>
+            </select>
+          </Field>
+
+          <Field>
+            <FieldLabel>Featured</FieldLabel>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              {...form.register("featured")}
+            >
+              <option value="false">No</option>
+              <option value="true">Yes — show on homepage</option>
+            </select>
+          </Field>
         </FieldGroup>
       </DashboardFormBody>
 
       <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <DevFormQuickFillButton onFill={handleQuickFill} />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="new-property"
+          onFilled={handlePropertyQuickFilled}
+        />
         <div className="flex justify-end gap-3">
           <Button onClick={props.onCancel} type="button" variant="ghost">
             Cancel

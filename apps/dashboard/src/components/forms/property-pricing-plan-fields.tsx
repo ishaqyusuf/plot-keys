@@ -2,11 +2,7 @@
 
 import { Button } from "@plotkeys/ui/button";
 import { CurrencyInput } from "@plotkeys/ui/currency-input";
-import {
-  FieldDescription,
-  FieldLegend,
-  FieldSet,
-} from "@plotkeys/ui/field";
+import { FieldDescription, FieldLegend, FieldSet } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
 import {
   InputGroup,
@@ -23,6 +19,7 @@ import {
   TableRow,
 } from "@plotkeys/ui/table";
 import { PlusIcon, Trash2Icon } from "lucide-react";
+import type { ReactNode } from "react";
 
 export type PricingPlanDraft = {
   id: string;
@@ -45,6 +42,7 @@ type PropertyPricingPlanFieldsProps = {
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: PricingPlanField, value: string) => void;
   pricingPlans: PricingPlanDraft[];
+  quickFill?: ReactNode;
 };
 
 function parseCurrencyValue(value?: string | null) {
@@ -130,6 +128,7 @@ export function PropertyPricingPlanFields({
   onRemove,
   onUpdate,
   pricingPlans,
+  quickFill,
 }: PropertyPricingPlanFieldsProps) {
   return (
     <FieldSet>
@@ -143,9 +142,7 @@ export function PropertyPricingPlanFields({
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-24 px-0 pr-3">Months</TableHead>
               <TableHead className="w-36 px-0 pr-3">Amount</TableHead>
-              <TableHead className="w-56 px-0 pr-3">
-                Initial Deposit
-              </TableHead>
+              <TableHead className="w-56 px-0 pr-3">Initial Deposit</TableHead>
               <TableHead className="w-36 px-0 pr-3">Monthly</TableHead>
               <TableHead className="w-12 px-0 text-right">
                 <span className="sr-only">Actions</span>
@@ -238,16 +235,19 @@ export function PropertyPricingPlanFields({
           </TableBody>
         </Table>
       </div>
-      <Button
-        className="w-fit"
-        onClick={onAdd}
-        size="sm"
-        type="button"
-        variant="outline"
-      >
-        <PlusIcon data-icon="inline-start" />
-        Add pricing
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        {quickFill}
+        <Button
+          className="w-fit"
+          onClick={onAdd}
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          <PlusIcon data-icon="inline-start" />
+          Add pricing
+        </Button>
+      </div>
     </FieldSet>
   );
 }

@@ -6,11 +6,7 @@ import { Input } from "@plotkeys/ui/input";
 import { useMemo, useRef } from "react";
 
 import { signUpForInviteAction } from "@/app/actions";
-import { DevFormQuickFillButton } from "@/components/dev/dev-form-quick-fill-button";
-import {
-  createQuickFillAdapter,
-  QuickFill,
-} from "@/components/dev/quick-fill";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useDevToolsStore } from "@/stores/dev-tools";
 
 type InviteSignUpValues = {
@@ -35,37 +31,35 @@ export function InviteSignUpForm({
   const passwordRef = useRef<HTMLInputElement>(null);
   const addAccount = useDevToolsStore((state) => state.addAccount);
 
-  const quickFill = useMemo(() => {
-    return new QuickFill(
-      createQuickFillAdapter<InviteSignUpValues>({
-        getValues: () => ({
-          name: nameRef.current?.value ?? "",
-          password: passwordRef.current?.value ?? "",
-        }),
-        reset: (values) => {
-          if (nameRef.current && typeof values.name === "string") {
-            nameRef.current.value = values.name;
-          }
-
-          if (passwordRef.current && typeof values.password === "string") {
-            passwordRef.current.value = values.password;
-          }
-        },
-        setValue: (name, value) => {
-          if (name === "name" && nameRef.current && typeof value === "string") {
-            nameRef.current.value = value;
-          }
-
-          if (
-            name === "password" &&
-            passwordRef.current &&
-            typeof value === "string"
-          ) {
-            passwordRef.current.value = value;
-          }
-        },
+  const quickFillAdapter = useMemo(() => {
+    return createQuickFillAdapter<InviteSignUpValues>({
+      getValues: () => ({
+        name: nameRef.current?.value ?? "",
+        password: passwordRef.current?.value ?? "",
       }),
-    );
+      reset: (values) => {
+        if (nameRef.current && typeof values.name === "string") {
+          nameRef.current.value = values.name;
+        }
+
+        if (passwordRef.current && typeof values.password === "string") {
+          passwordRef.current.value = values.password;
+        }
+      },
+      setValue: (name, value) => {
+        if (name === "name" && nameRef.current && typeof value === "string") {
+          nameRef.current.value = value;
+        }
+
+        if (
+          name === "password" &&
+          passwordRef.current &&
+          typeof value === "string"
+        ) {
+          passwordRef.current.value = value;
+        }
+      },
+    });
   }, []);
 
   return (
@@ -89,15 +83,14 @@ export function InviteSignUpForm({
           email,
           name,
           password,
+          role: "Invitee",
           subdomain: companySlug,
         });
       }}
     >
       <input name="token" type="hidden" value={token} />
       <div className="flex justify-end">
-        <DevFormQuickFillButton
-          onFill={() => quickFill.fill("invite-sign-up")}
-        />
+        <QuickFill args={{ form: quickFillAdapter }} name="invite-sign-up" />
       </div>
       <FieldGroup>
         <Field>
