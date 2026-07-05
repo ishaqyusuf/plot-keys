@@ -29,6 +29,7 @@ const addAccountIfDev =
           email: values.email,
           name: values.name,
           password: values.password,
+          role: "Admin",
           subdomain: values.subdomain,
         });
       }
@@ -61,7 +62,7 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
         setFormError(error.message);
       },
       async onSuccess(result) {
-        // Save the new account to the dev store so DevLoginFab can use it.
+        // Save the new account to the dev store so the dev login picker can use it.
         if (addAccountIfDev && lastSubmittedValues.current) {
           await addAccountIfDev(lastSubmittedValues.current);
         }

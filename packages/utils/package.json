@@ -10,6 +10,7 @@
     "./phone": "./src/phone.ts",
     "./query-response": "./src/query-response.ts",
     "./runtime-url": "./src/runtime-url.ts",
+    "./tenant-url": "./src/tenant-url.ts",
     "./tenant-domains": "./src/tenant-domains.ts",
     "./template-sandbox-url": "./src/template-sandbox-url.ts",
     "./vercel-domains": "./src/vercel-domains.ts"

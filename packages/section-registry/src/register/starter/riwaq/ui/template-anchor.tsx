@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
-import { useRegistryLinkComponent } from "../../../../runtime-context";
+import { Link } from "../../../../components/Link";
 
 export type RiwaqPageKey = "blog" | "contact" | "home" | "roadmap";
 
@@ -23,11 +23,9 @@ export function RiwaqTemplateAnchor({
   page,
   ...props
 }: RiwaqTemplateAnchorProps) {
-  const LinkComponent = useRegistryLinkComponent();
-
   return (
-    <LinkComponent href={riwaqRoutes[page]} {...props}>
+    <Link href={riwaqRoutes[page]} page={page} {...props}>
       {children}
-    </LinkComponent>
+    </Link>
   );
 }

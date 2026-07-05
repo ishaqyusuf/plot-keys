@@ -20,9 +20,22 @@ import type { TemplateTier } from "@plotkeys/section-registry";
 import {
   deserializeTemplateConfig,
   getRegisterTemplate,
+  getTemplateDefinition,
 } from "@plotkeys/section-registry";
 import { extractTenantHostname } from "@plotkeys/utils";
 import { headers } from "next/headers";
+
+function resolveTenantTemplateConfig(
+  templateKey: string,
+  themeJson: Record<string, string>,
+) {
+  const template = getTemplateDefinition(templateKey);
+
+  return deserializeTemplateConfig({
+    ...template.defaultTheme,
+    ...themeJson,
+  });
+}
 
 export type TenantContext = {
   company: {
@@ -138,7 +151,10 @@ export async function resolveTenantContext(searchParams?: {
   };
 
   const registerVariant = getRegisterTemplate(publishedConfig.templateKey);
-  const templateConfig = deserializeTemplateConfig(publishedConfig.themeJson);
+  const templateConfig = resolveTenantTemplateConfig(
+    publishedConfig.templateKey,
+    publishedConfig.themeJson,
+  );
 
   const [featuredProperties, agentsPage, blogPosts] = await Promise.all([
     listFeaturedProperties(prisma, company.id),
@@ -194,6 +210,7 @@ export type TenantShell = {
     logoUrl: string | null;
     market: string | null;
   };
+  content: Record<string, string>;
   templateKey: string;
   registerTemplateKey: string | undefined;
   tier: TemplateTier | undefined;
@@ -202,7 +219,7 @@ export type TenantShell = {
 
 /**
  * Lightweight tenant resolver for the layout shell.
- * Fetches only company + published theme — no live listings or agents.
+ * Fetches company + published theme/content — no live listings or agents.
  * Used by the root layout to provide nav, footer, and WebsiteRuntimeProvider.
  */
 export async function resolveTenantShell(): Promise<TenantShell | null> {
@@ -247,12 +264,14 @@ export async function resolveTenantShell(): Promise<TenantShell | null> {
   if (!publishedRaw) return null;
 
   const registerVariant = getRegisterTemplate(publishedRaw.templateKey);
-  const templateConfig = deserializeTemplateConfig(
+  const templateConfig = resolveTenantTemplateConfig(
+    publishedRaw.templateKey,
     publishedRaw.themeJson as Record<string, string>,
   );
 
   return {
     company,
+    content: publishedRaw.contentJson as Record<string, string>,
     templateKey: publishedRaw.templateKey,
     registerTemplateKey: registerVariant?.key,
     tier: registerVariant?.tier,

@@ -40,12 +40,17 @@ export type TenantContentRecord = Record<string, string>;
 export type TemplateThemeRecord = {
   accentColor: string;
   backgroundColor: string;
+  chartColor?: string;
   colorSystem?: string;
   fontFamily: string;
   headingFontFamily: string;
+  iconLibrary?: string;
   logo: string;
   logoUrl?: string;
   market: string;
+  menuAccent?: string;
+  menuStyle?: string;
+  radius?: string;
   stylePreset?: string;
   supportLine: string;
 };

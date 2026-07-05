@@ -1,7 +1,9 @@
 import { TemplateSandboxWorkbench } from "@/components/template-sandbox/template-sandbox-workbench";
-import { getBaseUrl } from "@/lib/get-base-url";
 import { getServerTrpcClient } from "@/trpc/server";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type TemplateSandboxDetailPageProps = {
   params?: Promise<{ profileId: string }>;
@@ -15,11 +17,10 @@ export default async function TemplateSandboxDetailPage({
   params,
   searchParams,
 }: TemplateSandboxDetailPageProps) {
-  const [resolvedParams, resolvedSearchParams, currentOrigin, trpc] =
+  const [resolvedParams, resolvedSearchParams, trpc] =
     await Promise.all([
       params ?? Promise.resolve({ profileId: "" }),
       searchParams ?? Promise.resolve({ page: undefined, path: undefined }),
-      getBaseUrl(),
       getServerTrpcClient(),
     ]);
   const query: { page?: string; path?: string } = resolvedSearchParams;
@@ -29,9 +30,8 @@ export default async function TemplateSandboxDetailPage({
     const profile = await trpc.templateSandbox.get.query({ profileId });
 
     return (
-      <main className="min-h-[calc(100svh-4rem)] overflow-hidden bg-background">
+      <main className="h-svh overflow-hidden bg-background">
         <TemplateSandboxWorkbench
-          currentOrigin={currentOrigin}
           pageKey={query.page}
           previewPath={query.path}
           profile={profile}

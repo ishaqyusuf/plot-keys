@@ -14,6 +14,7 @@ import {
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTenantSignInUrlForSubdomain } from "./tenant-dashboard-url";
+import { tenantRedirect } from "./tenant-url-server";
 
 function resolveSessionCookieScope(host?: string | null) {
   return resolveDashboardSessionScope(host) ?? platformSessionScope;
@@ -80,7 +81,7 @@ export async function requireAuthenticatedSession() {
   const session = await getCurrentAppSession();
 
   if (!session) {
-    redirect(authRoutes.signIn);
+    return await tenantRedirect(authRoutes.signIn);
   }
 
   return session;
@@ -92,12 +93,12 @@ export async function requireOnboardedSession() {
 
   if (!session.activeMembership) {
     if (tenantSlug) {
-      redirect(
+      return await tenantRedirect(
         `${authRoutes.signIn}?error=${encodeURIComponent("This account does not belong to the current company dashboard.")}`,
       );
     }
 
-    redirect(authRoutes.onboarding);
+    return await tenantRedirect(authRoutes.onboarding);
   }
 
   if (!tenantSlug) {

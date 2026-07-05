@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-
 import { getCompanyAppsContext } from "./company-apps";
+import { tenantRedirect } from "./tenant-url-server";
 
 /**
  * Redirects to `/app-store?locked=<id>` if the given app is not in the
@@ -10,6 +9,6 @@ import { getCompanyAppsContext } from "./company-apps";
 export async function assertAppEnabledById(appId: string): Promise<void> {
   const { enabledApps } = await getCompanyAppsContext();
   if (!enabledApps.some((app) => app.id === appId)) {
-    redirect(`/app-store?locked=${encodeURIComponent(appId)}`);
+    await tenantRedirect(`/app-store?locked=${encodeURIComponent(appId)}`);
   }
 }

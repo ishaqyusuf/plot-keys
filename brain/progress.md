@@ -70,6 +70,143 @@
 | Builder locked-template upgrade flow | ✅ Done |
 | Pricing strategy refresh | ✅ Done |
 
+## 2026-07-04 — Riwaaq Landing + shadcn Create-Style Sandbox Direction
+
+**What changed:**
+- Adopted the Dribbble `Rubbait - Discover Your Ideal Property` shot as the primary visual reference for Riwaq's starter landing page direction.
+- Reworked the Riwaq landing page toward an image-led real-estate hero with editorial copy, property visual, floating detail card, metrics strip, and project-history teaser.
+- Added a Rubbait-inspired discovery/search card to the Riwaq hero image with editable location, property type, budget, and CTA copy.
+- Added lightweight visual markers to the Riwaq hero discovery rows so the card reads more like a polished property search surface without adding a new icon dependency.
+- Increased the Riwaq hero media height and narrowed the discovery card at medium sizes to preserve the airy Rubbait-style composition and reduce overlap risk with the bottom detail card.
+- Added registry content exposure through `RegistryProvider` so template-owned page components can read configured sandbox content instead of hardcoded copy.
+- Updated template UI helpers to resolve through tenant `--pk-*` CSS variables, keeping public template UI shadcn-style while avoiding dashboard token leakage.
+- Reworked the template sandbox workbench toward a full-screen viewer with a compact shadcn Create-style side config panel using standard `@plotkeys/ui` primitives.
+- Expanded style preset support toward the shadcn Create-style set: Vega, Nova, Maia, Lyra, Mira, Luma, Sera, and Rhea, while retaining legacy `myra` resolution.
+
+## 2026-07-05 — Floating Sandbox Config Rail + Inline Editable Riwaq Copy
+
+**What changed:**
+- Replaced the sandbox's right metadata drawer with a floating left config rail inspired by shadcn Create.
+- The rail is expanded at rest, shrinks to icon-only after website preview scrolling, expands on hover/focus, and ignores its own scroll/dropdown interactions when deciding whether to collapse.
+- Tightened the rail header toward the shadcn Create reference: a single rounded Menu control that collapses to the menu icon and expands to the full label.
+- Made the floating rail Menu header a semantic focusable button with an accessible label and visible focus state, while preserving the same shadcn Create-style collapsed/expanded layout.
+- Wired the floating rail Menu button into real panel state so it can pin the rail expanded or manually collapse it while preserving the auto scroll, hover/focus, and open-select expansion behavior.
+- Updated the floating rail Menu control to cycle through automatic, pinned-expanded, and manually-collapsed states, with action-specific labels so users can return to the original scroll-responsive behavior.
+- Tightened the rail footer commands so preset/action controls collapse to centered icons and expand to full rounded command buttons without hidden text taking space.
+- Added a collapsed preset badge to the floating rail footer so icon-only mode still shows a compact `--` preset/code signal, with the full `--preset ...` value shown on hover/focus/expanded state and tooltip.
+- Made the floating rail preset badge focusable and screen-reader labeled so keyboard users can reveal the full preset tooltip without treating the badge as a command.
+- Tightened the rail body collapse so group headings and dividers are removed from layout in icon-only mode, with uniform icon spacing restored until hover/focus expansion.
+- Added aria labels plus shadcn tooltip primitives to collapsed rail select triggers and footer icon commands so the icon-only state remains understandable to assistive tech and hover/focus users without duplicate native tooltips.
+- Added semantic labeling and expanded/collapsed state to the floating template configuration rail itself.
+- Removed template name, company, market, subdomain, and plan tier from the visual configuration surface.
+- Kept style controls focused on Style, Base Color, Theme, Chart Color, Heading, Font, Radius, Menu, and Menu Accent.
+- Changed the floating rail controls to direct autosave selects, removing the extra per-row save/check button for a cleaner shadcn Create-like feel.
+- Synced floating rail select state back to the server-refreshed theme value after autosave so the controls stay aligned with persisted configuration.
+- Kept the floating rail expanded while portaled shadcn/Radix select menus are open, so choosing style options does not collapse the config panel after preview scrolling.
+- Tightened the floating rail select-open marker so only the select field that actually opens a portaled menu sets and clears the global rail expansion attribute.
+- Added per-select ownership to the floating rail open-marker attribute so a closing dropdown cannot accidentally clear a newer open dropdown's rail expansion state.
+- Styled floating rail select menus with the same dark panel surface, subtle white border, and focused row state as the shadcn Create-inspired rail.
+- Added checked-state styling to floating rail select menu rows so the current style/theme option remains visible in the dark dropdown even when it is not keyboard-focused.
+- Split the floating rail style controls into shadcn Create-like groups: style/color controls, typography controls, then system/menu controls before the section visibility list.
+- Reworked floating rail rows toward the shadcn Create layout: label/value text on the left, swatch/icon on the right, and icon-only cards when the rail is collapsed.
+- Added swatch coverage for all registry base color systems in the floating rail so collapsed Base Color controls visually reflect neutral, stone, zinc, mauve, olive, mist, taupe, and slate.
+- Made floating rail color swatches resolve named theme tokens, CSS color strings, and raw HSL token triples instead of falling back to gray when stored configs are not named options.
+- Replaced the floating rail's hardcoded preset chip with a deterministic sandbox preset signature derived from the current template/style config, and wired Open Preset to the current draft sandbox URL.
+- Wired the floating rail Shuffle command to a sandbox server action that uses existing `templateSandbox.updateThemeField` tRPC calls to randomize style, base color, theme/chart color, fonts, radius, and menu treatment.
+- Wired the floating rail Get Code command to download a sandbox preset JSON export containing the current preset signature, template key, page, theme config, and rendered section types.
+- Added stateful show/hide icons to floating rail section visibility controls so the collapsed rail distinguishes visible and hidden sections without requiring expanded labels.
+- Replaced section visibility dropdowns with autosaving shadcn-style switch rows, keeping collapsed eye/hidden icons while giving expanded rail users a direct binary toggle.
+- Expanded collapsed section-toggle hit targets by overlaying the hidden switch on the eye icon, so icon-only rail rows remain directly clickable before the panel fully expands.
+- Kept section visibility switches keyboard-focusable while the rail is collapsed so tabbing into a section row expands the floating rail and reveals the shadcn-style toggle instead of requiring hover.
+- Made the floating rail Heading and Font collapsed `Aa` previews render using the selected font family instead of a fixed generic serif face.
+- Removed non-zero letter-spacing utility classes from the Riwaq template pages and sandbox rail headings so the template follows the current frontend typography rule while preserving hierarchy through size, weight, and spacing.
+- Added section visibility controls to the rail through `sectionVisible.<sectionType>` theme updates and wired Riwaq page components to consume the saved visibility map.
+- Established the page-config rule: route/shell/backend/tRPC resolves draft, sandbox live, tenant live, or dummy/dev data; template pages render normalized registry context.
+- Added registry content commit plumbing so template-owned page components can save inline text edits through the sandbox/builder action path.
+- Updated Riwaq page static copy to use `EditableText` for direct inline editing on the website surface across landing, blog, contact, roadmap, and the roadmap timeline section.
+- Tuned editable text affordances so draft text reliably shows an edit cursor, strong hover border/ring, and stronger active editing focus state.
+- Made the editable text hover border state explicit in the shared primitive so inline-editable copy shows a visible border and text cursor consistently across template pages.
+- Strengthened the draft-mode editable text chrome with a clearer contrast stroke, hover ring, active edit ring, cloned line-box decoration, and forced text cursor so page copy visibly advertises inline editing.
+- Added focusable draft-mode editable text with Enter/Space-to-edit behavior so the same border and edit cursor affordance works for keyboard users.
+- Replaced the Riwaq hero discovery card's currency-specific budget glyph with a neutral stacked-bar marker so the template remains tenant- and market-agnostic.
+- Extended Riwaq defaults toward the shadcn Create reference: Lyra, Taupe, Orange, Raleway, Lucide, and Radius None.
+- Tuned the Riwaq landing defaults toward the Rubbait real-estate reference: search-led hero copy, warm near-black/off-white fallback palette, brown-tinted hero image overlay, and CTA routing that sends search to contact while keeping project history on the roadmap page.
+- Aligned Riwaq's manifest default background and landing fallback to the Rubbait reference off-white `#ececec` while keeping near-black `#08090a` text and the brown-tinted hero image overlay.
+- Added an editable Rent/Buy/Short-let mode selector to the Riwaq hero search card and declared all search-card content keys on the hero slot inventory so the registry metadata matches the rendered page.
+- Tightened the Riwaq hero search filter rows with crisper white cards, larger icon pills, stacked uppercase labels/values, and CSS chevron markers so the card reads more like a real property discovery control.
+- Replaced the Riwaq hero search card's handcrafted marker shapes with lucide `MapPin`, `Building2`, and `BarChart3` icons so the property discovery controls use standard icon primitives.
+- Replaced the Riwaq hero search row's CSS-drawn chevron marker with lucide `ChevronRight` so the full search-card control surface uses the standard icon system.
+- Added an editable floating hero status badge to the Riwaq image composition, with registered content fields and hero slot metadata so the Rubbait-inspired property surface has a stronger layered product feel.
+- Added a compact bottom-right numbered page switcher to the template sandbox viewer, matching the shadcn Create preview pager pattern while keeping the floating rail focused on style and section controls.
+- Added visual previews to the floating rail dropdown options so color, typography, radius, menu, and section choices carry the same shadcn Create-style swatch/icon language inside the open select menu.
+- Fixed the floating rail style-control save loop by moving Style, Base Color, Theme, Chart Color, Heading, Font, Radius, Menu, Menu Accent, and section visibility updates onto the client tRPC `templateSandbox.updateThemeField` mutation with route refresh on success.
+- Fixed the floating rail style-select interaction by raising the rail/dropdown stack above preview chrome and letting unsaved default options remain selectable while still showing the fallback shadcn Create-style label/icon.
+- Removed the tooltip wrapper around floating rail select triggers so Radix Select owns pointer/focus behavior directly, while retaining accessible labels/titles for collapsed style controls.
+- Added visible error feedback to floating rail style controls so rejected theme updates show a red rail row state and expanded error text instead of failing silently.
+- Marked the public template sandbox entry and profile routes as dynamic with `revalidate = 0` so route refreshes after style/config mutations always re-read the latest sandbox profile data.
+- Moved floating rail select dropdowns to Radix popper positioning beside the rail and simplified option text rendering so style/config rows are easier to select reliably while the rail floats over the preview.
+- Added runtime CSS variables and data attributes for chart color, radius, menu style, menu accent, and style preset so registry templates can consume the sandbox style configuration directly.
+- Expanded the Riwaq landing page's style-config consumption: preset spacing drives section/grid rhythm, radius controls hero/search/card rounding, menu style/accent controls hero pills, and chart color drives stat/timeline emphasis.
+- Extracted Riwaq-local style helpers so plan-owned template pages share the same preset spacing, radius, and menu treatment logic instead of duplicating hardcoded classes.
+- Updated Riwaq blog, contact, roadmap, and roadmap timeline rendering to consume the template UI resolver, so Style, Radius, Base Color, Theme, Chart Color, Heading, and Font changes carry beyond the landing page.
+- Wired tenant-site `RegisterNav` to the resolved template config so Menu, Menu Accent, and Radius affect the actual public/sandbox navigation shell, not only decorative hero pills.
+- Restored rich floating rail dropdown option rows with Radix `textValue` and added missing registered base color swatches for Ocean and Forest.
+- Kept floating rail style selects interactive while autosave is pending and guarded optimistic state against stale mutation responses, so quick Style/Base Color/Theme/Font changes do not feel locked or get reset by an older save.
+- Added a dashboard-local register preview shell to the builder/sandbox preview panel so template-owned nav/footer render around page components in the workbench, making Menu, Menu Accent, Radius, Base Color, and Theme changes visible before opening the public sandbox URL.
+- Mirrored the register preview shell's desktop and native mobile nav behavior from tenant-site, including config-aware active links, CTA treatment, footer groups, and internal workbench page navigation.
+- Normalized dashboard workbench preview config through the registry presentation resolver so Riwaq's default Lyra, Taupe, Orange, Raleway, menu, radius, and chart settings appear in the rail/preview before any sandbox overrides are saved.
+- Normalized tenant-site shell config through template defaults before deserializing published theme JSON, keeping live register nav/provider style defaults aligned with sandbox and public sandbox rendering.
+- Aligned Riwaq's default Theme and Chart Color with the Dribbble Rubbait palette by using `#522C1F` and `#907762`, and exposed both as named floating-rail options so sandbox users can select the reference colors directly.
+- Added a first-class `rubbait` base color system from the Dribbble palette and made Riwaq default to it, with the explicit background override removed so the Base Color rail control can visibly change the page foundation.
+- Added a safe read-time upgrade for untouched legacy default Riwaq sandbox profiles still on `taupe`/`orange`, so existing default sandbox URLs can pick up the new Rubbait palette without overwriting customized profiles.
+- Normalized exact legacy Riwaq sandbox theme snapshots in tenant-site rendering, keeping draft and live `/sandbox/[shareId]` URLs aligned with the new Rubbait Base Color/Theme/Chart defaults even when older snapshots stored `taupe`/`orange`.
+- Broadened the legacy Riwaq sandbox cleanup to clear only the stale `#ececec` background override on default profiles/snapshots, so Base Color changes are not masked after a profile has already moved away from the old Taupe/Orange defaults.
+- Updated the section-registry manifest tests so Riwaq's contract now asserts the Rubbait base color system, brown/taupe accent defaults, and unmasked background behavior instead of the old Slate expectation.
+- Hid the builder/browser chrome only in canvas-mode sandbox previews so `/template-sandbox/[profileId]` opens directly into the website surface with the floating config rail, while framed builder previews keep their existing header.
+- Promoted `/template-sandbox/[profileId]` and its workbench root to a full `100svh` viewer so the sandbox matches the shadcn Create-style full-screen canvas instead of reserving old dashboard chrome space.
+- Removed the one-option Icon Library row from the floating config rail so the visible shadcn Create-style controls stay focused on actionable style, typography, menu, radius, color, and section visibility settings.
+- Tightened the floating rail select controls so Style/Base Color/Theme/Chart/Heading/Font keep a canonical fallback value, hold the rail open synchronously while a dropdown is open, use Radix highlighted option states, and derive Style options from the registry `stylePresets` source of truth.
+- Updated the floating rail Base Color selector to render registry color-system swatches from each system's actual light background plus primary accent dot, making Rubbait Base Color visually distinct from Theme and Chart Color selections.
+- Added a registry-level commit fallback to `EditableText`, so future template-owned pages can save inline text edits through the active `RegistryProvider` even when the template component does not pass an explicit `onCommit` prop.
+- Strengthened the registry-local template UI primitives with shadcn-style button/input interaction states: cursor/select behavior, icon pointer guards, focus ring offsets, disabled cursor handling, and a focused contract test to keep those primitives aligned without adding a cross-package UI dependency.
+- Hardened `WebsiteRuntimeProvider` so stale or unknown `colorSystem` keys fall back to Slate instead of producing an empty CSS variable set, preserving font/color/radius rendering even when a saved sandbox profile contains an invalid base color key.
+- Confirmed Style, Base Color, Theme, Chart Color, Heading, Font, Radius, Menu, Menu Accent, and section visibility remain first-class sandbox controls, and wired them into an optimistic draft-theme bridge so selecting a value updates the registry preview immediately while still persisting through `templateSandbox.updateThemeField`.
+- Replaced leftover inline editing glyph buttons with lucide `Pencil`, `Sparkles`, and `X` icons across the editable text/image affordances and runtime overview, keeping the sandbox personalization UI aligned with the standard shadcn/lucide control language.
+- Hardened floating rail optimistic rollback semantics so style selects and section visibility toggles ignore stale mutation results and restore the last persisted value if the latest `templateSandbox.updateThemeField` save fails.
+- Tightened floating rail select display so triggers render a clean current-value label beside the row icon instead of delegating display to Radix `SelectValue`, and added a checked-option left accent in dropdown menus to better match the shadcn Create rail.
+- Kept floating rail style selects Radix-safe by letting dropdown pointer/keyboard events reach option rows while stopping trigger click bubbling and raising the dropdown layer above the website viewer.
+- Completed the Riwaq contact page interaction surface by adding a template-UI submit button with editable copy, draft/live feedback messaging, matching content schema defaults, and contact-slot metadata for every rendered editable contact field.
+- Hardened draft-mode inline editing so `EditableText` captures click events before they bubble into parent links or submit buttons, preventing accidental navigation/submission while personalizing template text.
+- Aligned the Riwaq landing page with its manifest-declared home sections by rendering a compact template-UI contact/CTA band with editable copy, email/phone actions, and a contact CTA; the home sandbox rail now exposes `contact_section` and `cta_band` toggles for the page-component preview.
+- Added a reusable Riwaq CTA band and rendered it on Blog, Contact, and Roadmap when `cta_band` is enabled, then exposed `cta_band` in each inner-page sandbox section list so the floating rail matches the manifest-declared page sections.
+- Corrected the Riwaq landing story block to save inline edits into `story.heading`, `story.body`, and `story.ctaLabel` instead of reusing roadmap content keys, keeping rendered fields aligned with the manifest.
+- Split Riwaq inner-page manifest header slots so Blog, Contact, and Roadmap declare the exact `blog.*`, `contact.*`, and `roadmap.*` copy fields their page components render, with a focused manifest contract test.
+- Added a shadcn Select viewport slot and used it in the floating sandbox rail so popper dropdowns are no longer constrained to the trigger height, making Style, Base Color, Theme, Chart Color, Heading, Font, Radius, Menu, and Menu Accent choices easier to open and select.
+- Added concise descriptions to floating rail style/base-color/color/font/radius/menu option rows so the expanded dropdown reads like the shadcn Create side config rather than a plain raw-value picker.
+- Tokenized the Riwaq landing hero image overlay through `--pk-primary` with the Rubbait brown fallback, making Theme changes visible in the first-viewport image treatment while preserving the Dribbble reference palette by default.
+- Replaced the floating rail Menu Accent generic sliders icon with a compact accent-pills preview so collapsed and dropdown rows distinguish `none`, `subtle`, and `strong` treatments visually.
+- Fixed the sandbox blank-page root cause by declaring `lucide-react` as a direct `@plotkeys/section-registry` dependency, matching the registry-owned Riwaq pages and inline editing primitives that import lucide icons.
+- Expanded the legacy Riwaq default sandbox migration so older default Slate/Blue/Inter profiles are upgraded to the current Rubbait base color, Rubbait Brown theme, Rubbait Taupe chart color, Raleway typography, and current Riwaq content defaults.
+- Hardened the floating sandbox config rail scroll-state sync with direct preview-scroller attachment, mutation recovery, wheel/scroll sampling, and explicit state data attributes so collapse behavior can be verified against actual preview scroll position.
+- Restored the floating rail to the requested expanded-at-rest behavior, then collapse-after-scroll behavior, with hover/focus expansion still available for icon-only mode.
+- Removed the temporary canvas safe-inset behavior after review because it made the config panel read as docked; the sandbox rail remains a true floating overlay on the website surface.
+- Changed the sandbox config rail from container-absolute positioning to viewport-fixed positioning so it remains visually floating over the website rather than reading as part of the workbench layout.
+- Consolidated the floating rail's expanded-width and expanded-content class contracts so future rail edits preserve the shadcn Create-style overlay behavior without reintroducing layout docking.
+- Tightened the floating rail's auto-collapse threshold so the panel shrinks almost immediately once the website preview starts scrolling, while keeping hover/focus expansion for configuration.
+- Added a shared floating-rail row class contract for select and section-toggle controls so collapsed icon targets and expanded label/value rows keep the same shadcn Create-style geometry.
+- Switched Riwaq blog-post cards to the registry link component so inner template links stay routed through the sandbox/tenant preview shell instead of bypassing template-aware navigation.
+- Removed CSS-only hover/focus expansion paths from the floating config rail and added scroll-time hover suppression so website preview scrolling collapses the rail authoritatively; it now re-expands through rail state after pointer re-entry, focus, a pinned-open preference, or an open dropdown.
+- Restored scrolling for the sandbox config controls by giving the floating rail body an explicit scrollable viewport and making the portaled config select viewport own option-list overflow.
+- Removed the floating rail `--preset` badge and Open Preset action, leaving the footer focused on Shuffle style, Live Website, and Get Code; the sandbox detail route no longer resolves a base URL for the removed preset action.
+- Compacted the floating config rail from a wide 17rem panel to a tighter 14.5rem panel with 56px collapsed width, 48px control rows, smaller icon frames, tighter spacing, and 36px footer actions.
+- Replaced the floating rail body Radix ScrollArea with a native `overflow-y-auto` container and wheel propagation guard so the Style and Sections control list scrolls reliably inside the fixed overlay.
+- Added a registry-owned template `Link` primitive with optional page metadata, routed sandbox/config links through `?page=...&path=...`, removed the floating page-number nav, and updated Riwaq links to reuse the shared registry component.
+- Routed the dashboard preview shell nav/footer links through the same sandbox page-query href resolver, so Home, Roadmap, Blog, Contact, CTA, and footer links expose `?page=...&path=...` in template configuration mode.
+
+**Verification note:**
+- Scoped stale-reference search passed for the sandbox workbench.
+- Scoped `git diff --check` passed for touched source and Brain files.
+
 ## 2026-07-03 — Midday Table Structure + Notification Dispatch Alignment
 
 **What changed:**

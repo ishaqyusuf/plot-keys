@@ -2,13 +2,9 @@
 
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@plotkeys/ui/popover";
 import { Icon } from "@plotkeys/ui/icons";
-import Link from "next/link";
+import { Popover, PopoverContent, PopoverTrigger } from "@plotkeys/ui/popover";
+import { TenantLink as Link } from "./tenant-link";
 
 type NotificationItem = {
   id: string;

@@ -262,6 +262,7 @@
     "packages/section-registry": {
       "name": "@plotkeys/section-registry",
       "dependencies": {
+        "lucide-react": "^0.577.0",
         "react": "^19.0.0",
       },
       "devDependencies": {

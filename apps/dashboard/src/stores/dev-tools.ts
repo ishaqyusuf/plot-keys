@@ -22,6 +22,8 @@ export type DevAccount = {
   name: string;
   /** Plaintext password used at signup */
   password: string;
+  /** Workspace role label for dev login display */
+  role: string;
   /** Company subdomain */
   subdomain: string;
 };
@@ -50,6 +52,7 @@ const BUILT_IN_ACCOUNTS: DevAccount[] = [
     email: "amara@astergrove.com",
     name: "Amara Okafor",
     password: "lorem-ipsum",
+    role: "Admin",
     subdomain: "aster-grove",
   },
   {
@@ -57,6 +60,7 @@ const BUILT_IN_ACCOUNTS: DevAccount[] = [
     email: "james@sunrise.com",
     name: "James Adeyemi",
     password: "lorem-ipsum",
+    role: "Admin",
     subdomain: "sunrise-props",
   },
 ];
@@ -102,7 +106,7 @@ export const useDevToolsStore = create<DevToolsState>()(
         const mergedAccounts = [...BUILT_IN_ACCOUNTS];
         for (const saved of p.accounts ?? []) {
           if (!mergedAccounts.some((a) => a.email === saved.email)) {
-            mergedAccounts.push(saved);
+            mergedAccounts.push({ ...saved, role: saved.role ?? "Admin" });
           }
         }
         return {

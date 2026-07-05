@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === "production") {
  * instance with all 6 fields pre-populated.
  *
  * The parent is responsible for calling `addAccount` after a successful
- * sign-up mutation so future sessions can log in via DevLoginFab.
+ * sign-up mutation so future sessions can log in via the dev login picker.
  */
 
 import { DevFabShell } from "./dev-fab-shell";

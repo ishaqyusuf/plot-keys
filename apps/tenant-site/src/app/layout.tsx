@@ -148,6 +148,7 @@ export default async function RootLayout({
           <NotificationsProvider>
             <TenantInteractionShell
               colorSystemKey={shell?.templateConfig.colorSystem}
+              content={shell?.content}
               pageInfo={pageInfo}
               templateConfig={shell?.templateConfig ?? {}}
               templateKey={shell?.templateKey}
@@ -167,6 +168,7 @@ export default async function RootLayout({
                 <RegisterNav
                   companyName={shell.company.name}
                   logoUrl={shell.company.logoUrl}
+                  templateConfig={shell.templateConfig}
                   templateKey={shell.registerTemplateKey}
                   tier={shell.tier}
                 />

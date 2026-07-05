@@ -5,6 +5,7 @@ import {
   createTemplateSandboxProfile,
   getTemplateSandboxProfileForOwner,
   listTemplateSandboxProfiles,
+  type TemplateSandboxProfileRecord,
   updateTemplateSandboxProfile,
   type Db,
 } from "@plotkeys/db";
@@ -173,7 +174,89 @@ function normalizeThemeFieldUpdateOrThrow(input: {
   }
 }
 
-function serializeProfile(profile: Awaited<ReturnType<typeof createTemplateSandboxProfile>>) {
+async function upgradeLegacyRiwaqDefaultProfile(
+  db: Db,
+  profile: TemplateSandboxProfileRecord,
+) {
+  const profileJson = asObjectRecord(profile.profileJson);
+  const contentJson = asStringRecord(profile.contentJson);
+  const themeJson = asStringRecord(profile.themeJson);
+  const isRiwaqDefaultProfile =
+    profile.templateKey === "riwaq-starter" &&
+    profileJson.defaultProfile === true;
+  const normalizedAccentColor = (themeJson.accentColor ?? "").toLowerCase();
+  const normalizedChartColor = (themeJson.chartColor ?? "").toLowerCase();
+  const hasLegacyBackgroundOverride =
+    (themeJson.backgroundColor ?? "").toLowerCase() === "#ececec" ||
+    (themeJson.backgroundColor ?? "").toLowerCase() === "#f8fafc";
+  const isUntouchedTaupeOrangeDefault =
+    isRiwaqDefaultProfile &&
+    themeJson.colorSystem === "taupe" &&
+    themeJson.accentColor === "orange" &&
+    (!themeJson.chartColor || themeJson.chartColor === "orange") &&
+    (!themeJson.backgroundColor || hasLegacyBackgroundOverride);
+  const isUntouchedSlateBlueDefault =
+    isRiwaqDefaultProfile &&
+    (!themeJson.colorSystem || themeJson.colorSystem === "slate") &&
+    (!themeJson.accentColor ||
+      normalizedAccentColor === "#2563eb" ||
+      normalizedAccentColor === "blue") &&
+    (!themeJson.chartColor ||
+      normalizedChartColor === "#2563eb" ||
+      normalizedChartColor === "blue") &&
+    (!themeJson.backgroundColor || hasLegacyBackgroundOverride);
+  const shouldUpgradeLegacyDefault =
+    isUntouchedTaupeOrangeDefault || isUntouchedSlateBlueDefault;
+  const isLegacyDefaultContent =
+    isRiwaqDefaultProfile &&
+    contentJson["hero.eyebrow"] === "Built from proven delivery" &&
+    contentJson["hero.title"] === "Find your next signature property in Lagos." &&
+    contentJson["hero.ctaText"] === "Browse listings";
+  const themeJsonPatch: Record<string, string> = {};
+  const contentJsonPatch = shouldUpgradeLegacyDefault
+    ? isLegacyDefaultContent
+      ? getTemplateDefinition(profile.templateKey).defaultContent
+      : {
+          ...getTemplateDefinition(profile.templateKey).defaultContent,
+          ...contentJson,
+        }
+    : undefined;
+
+  if (shouldUpgradeLegacyDefault) {
+    themeJsonPatch.accentColor = "#522C1F";
+    themeJsonPatch.chartColor = "#907762";
+    themeJsonPatch.colorSystem = "rubbait";
+    themeJsonPatch.fontFamily = "Raleway";
+    themeJsonPatch.headingFontFamily = "Raleway";
+  }
+
+  if (isRiwaqDefaultProfile && hasLegacyBackgroundOverride) {
+    themeJsonPatch.backgroundColor = "";
+  }
+
+  if (Object.keys(themeJsonPatch).length === 0 && !contentJsonPatch) {
+    return profile;
+  }
+
+  const updated = await updateTemplateSandboxProfile(db, {
+    contentJson: contentJsonPatch,
+    ownerUserId: publicTemplateSandboxOwnerId,
+    profileId: profile.id,
+    themeJson:
+      Object.keys(themeJsonPatch).length > 0
+        ? {
+            ...themeJson,
+            ...themeJsonPatch,
+          }
+        : undefined,
+  });
+
+  return updated ?? profile;
+}
+
+function serializeProfile(
+  profile: Awaited<ReturnType<typeof createTemplateSandboxProfile>>,
+) {
   return {
     archivedAt: profile.archivedAt,
     companyName: profile.companyName,
@@ -309,7 +392,9 @@ export const templateSandboxRouter = createTRPCRouter({
         profileId: input.profileId,
       });
 
-      return serializeProfile(profile);
+      return serializeProfile(
+        await upgradeLegacyRiwaqDefaultProfile(db, profile),
+      );
     }),
 
   generateLiveWebsite: publicProcedure
@@ -353,7 +438,11 @@ export const templateSandboxRouter = createTRPCRouter({
       publicTemplateSandboxOwnerId,
     );
 
-    return serializeProfile(latestProfile ?? (await createDefaultSandboxProfile(db)));
+    const profile = latestProfile ?? (await createDefaultSandboxProfile(db));
+
+    return serializeProfile(
+      await upgradeLegacyRiwaqDefaultProfile(db, profile),
+    );
   }),
 
   list: publicProcedure.query(async () => {

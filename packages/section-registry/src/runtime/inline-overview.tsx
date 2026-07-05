@@ -21,6 +21,7 @@
  */
 
 import { useEffect, type ReactNode } from "react";
+import { X } from "lucide-react";
 import { useClickGuard, type ClickGuardItem } from "./click-guard";
 import { useRenderMode } from "../runtime-context";
 
@@ -208,7 +209,7 @@ function Panel({ children, onClose }: { children: ReactNode; onClose: () => void
           onClick={onClose}
           type="button"
         >
-          ✕
+          <X className="size-4" />
         </button>
         {children}
       </div>

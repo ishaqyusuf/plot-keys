@@ -60,7 +60,13 @@ import {
   type TemplateManifest,
   templateManifestToDefinition,
 } from "./template-manifest";
-import { createTemplatePageRegistry } from "./template-pages";
+import type { RegistryPageInfo } from "./runtime-context";
+import {
+  createTemplatePageRegistry,
+  type TemplatePageContext,
+  type TemplatePageHandle,
+  type TemplatePageRegistryOptions,
+} from "./template-pages";
 import type {
   EditableFieldDefinition,
   RenderMode,
@@ -1200,11 +1206,22 @@ function registerVariantToManifest(
     defaultTheme: {
       accentColor: variant.defaultAccentColor,
       backgroundColor: variant.defaultBackgroundColor,
+      ...(variant.defaultChartColor
+        ? { chartColor: variant.defaultChartColor }
+        : {}),
       colorSystem: variant.defaultColorSystem,
       fontFamily: variant.defaultFontFamily,
       headingFontFamily: variant.defaultHeadingFontFamily,
+      ...(variant.defaultIconLibrary
+        ? { iconLibrary: variant.defaultIconLibrary }
+        : {}),
       logo: variant.name,
       market: "Nigeria",
+      ...(variant.defaultMenuAccent
+        ? { menuAccent: variant.defaultMenuAccent }
+        : {}),
+      ...(variant.defaultMenuStyle ? { menuStyle: variant.defaultMenuStyle } : {}),
+      ...(variant.defaultRadius ? { radius: variant.defaultRadius } : {}),
       stylePreset: variant.defaultStylePreset,
       supportLine: "hello@plotkeys.com",
     },
@@ -1445,15 +1462,19 @@ export function resolveTemplateRoute(
   );
 }
 
-export const templatePages = createTemplatePageRegistry({
-  registrations: {
-    "riwaq-starter": {
-      blog: { Page: RiwaqBlogPage },
-      contact: { Page: RiwaqContactPage },
-      home: { Page: RiwaqLandingPage },
-      roadmap: { Page: RiwaqRoadmapPage },
-    },
+const templatePageRegistrations: NonNullable<
+  TemplatePageRegistryOptions["registrations"]
+> = {
+  "riwaq-starter": {
+    blog: { Page: RiwaqBlogPage },
+    contact: { Page: RiwaqContactPage },
+    home: { Page: RiwaqLandingPage },
+    roadmap: { Page: RiwaqRoadmapPage },
   },
+};
+
+export const templatePages = createTemplatePageRegistry({
+  registrations: templatePageRegistrations,
   resolveTemplatePage(templateKey, pageKey) {
     const manifest = getTemplateManifest(templateKey);
     const page = manifest.pages.find(
@@ -1472,6 +1493,86 @@ export const templatePages = createTemplatePageRegistry({
 });
 
 export const templates = templatePages;
+
+type AnyTemplatePageHandle = TemplatePageHandle<
+  Record<string, never> | { slug: string }
+>;
+type AnyTemplatePageSlot = {
+  resolve(ctx: TemplatePageContext): AnyTemplatePageHandle;
+};
+
+const templatePageSlotByPageKey: Record<string, AnyTemplatePageSlot> = {
+  about: templatePages.aboutPage as unknown as AnyTemplatePageSlot,
+  agents: templatePages.agentsPage as unknown as AnyTemplatePageSlot,
+  areas: templatePages.areasPage as unknown as AnyTemplatePageSlot,
+  blog: templatePages.blogPage as unknown as AnyTemplatePageSlot,
+  "blog-post": templatePages.blogContentPage as unknown as AnyTemplatePageSlot,
+  careers: templatePages.careersPage as unknown as AnyTemplatePageSlot,
+  contact: templatePages.contactPage as unknown as AnyTemplatePageSlot,
+  events: templatePages.eventsPage as unknown as AnyTemplatePageSlot,
+  faq: templatePages.faqPage as unknown as AnyTemplatePageSlot,
+  gallery: templatePages.galleryPage as unknown as AnyTemplatePageSlot,
+  "how-it-works":
+    templatePages.howItWorksPage as unknown as AnyTemplatePageSlot,
+  home: templatePages.homePage as unknown as AnyTemplatePageSlot,
+  inquire: templatePages.inquirePage as unknown as AnyTemplatePageSlot,
+  insights: templatePages.insightsPage as unknown as AnyTemplatePageSlot,
+  investors: templatePages.investorsPage as unknown as AnyTemplatePageSlot,
+  landlords: templatePages.landlordsPage as unknown as AnyTemplatePageSlot,
+  "listing-detail":
+    templatePages.listingDetailPage as unknown as AnyTemplatePageSlot,
+  listings: templatePages.listingsPage as unknown as AnyTemplatePageSlot,
+  "portfolio-detail":
+    templatePages.portfolioDetailPage as unknown as AnyTemplatePageSlot,
+  portfolio: templatePages.portfolioPage as unknown as AnyTemplatePageSlot,
+  press: templatePages.pressPage as unknown as AnyTemplatePageSlot,
+  "private-sales":
+    templatePages.privateSalesPage as unknown as AnyTemplatePageSlot,
+  "project-detail":
+    templatePages.projectDetailPage as unknown as AnyTemplatePageSlot,
+  projects: templatePages.projectsPage as unknown as AnyTemplatePageSlot,
+  properties: templatePages.propertiesPage as unknown as AnyTemplatePageSlot,
+  "property-detail":
+    templatePages.propertyDetailPage as unknown as AnyTemplatePageSlot,
+  rentals: templatePages.rentalsPage as unknown as AnyTemplatePageSlot,
+  "rental-detail":
+    templatePages.rentalDetailPage as unknown as AnyTemplatePageSlot,
+  resources: templatePages.resourcesPage as unknown as AnyTemplatePageSlot,
+  roadmap: templatePages.roadmapPage as unknown as AnyTemplatePageSlot,
+  services: templatePages.servicesPage as unknown as AnyTemplatePageSlot,
+  "tenant-resources":
+    templatePages.tenantResourcesPage as unknown as AnyTemplatePageSlot,
+  tenants: templatePages.tenantsPage as unknown as AnyTemplatePageSlot,
+  terms: templatePages.termsPage as unknown as AnyTemplatePageSlot,
+  testimonials: templatePages.testimonialsPage as unknown as AnyTemplatePageSlot,
+  privacy: templatePages.privacyPage as unknown as AnyTemplatePageSlot,
+};
+
+export function resolveTemplatePageHandle<Props = Record<string, never>>({
+  pageInfo,
+  pageKey,
+  templateKey,
+}: {
+  pageInfo?: Partial<RegistryPageInfo>;
+  pageKey: string;
+  templateKey: string;
+}): TemplatePageHandle<Props> | undefined {
+  if (!templatePageRegistrations[templateKey]?.[pageKey]) return undefined;
+
+  const slot = templatePageSlotByPageKey[pageKey];
+  if (!slot) return undefined;
+
+  return slot.resolve({
+    page: {
+      pageDisabled: false,
+      pageKey,
+      pageNotSupported: false,
+      routeSlug: null,
+      ...pageInfo,
+    },
+    templateKey,
+  }) as TemplatePageHandle<Props>;
+}
 
 export function createInitialSiteConfigurationInput({
   companyName,
@@ -1821,6 +1922,8 @@ export {
   deriveSectionVisibility,
   scoreTemplates,
 } from "./recommendation";
+export type { RegistryTemplateLinkProps } from "./components/Link";
+export { Link } from "./components/Link";
 export type {
   ClickGuardItem,
   ClickGuardItemType,

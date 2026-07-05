@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["**.app-plotkeys.localhost"],
+  allowedDevOrigins: ["**.app-plotkeys.localhost", "*.plotkeys.localhost"],
   transpilePackages: [
     "@plotkeys/auth",
     "@plotkeys/ui",

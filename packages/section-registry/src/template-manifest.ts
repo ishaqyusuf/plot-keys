@@ -22,12 +22,17 @@ export type TemplateManifest = TemplateDefinition & {
 const baseThemeKeys = new Set([
   "accentColor",
   "backgroundColor",
+  "chartColor",
   "colorSystem",
   "fontFamily",
   "headingFontFamily",
+  "iconLibrary",
   "logo",
   "logoUrl",
   "market",
+  "menuAccent",
+  "menuStyle",
+  "radius",
   "stylePreset",
   "supportLine",
 ]);

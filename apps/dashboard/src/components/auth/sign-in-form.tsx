@@ -5,24 +5,133 @@ import {
   signInInputSchema,
 } from "@plotkeys/api/schemas/auth";
 import { authRoutes } from "@plotkeys/auth/shared";
+import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@plotkeys/ui/command";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@plotkeys/ui/popover";
 import { useMutation } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { ChevronsUpDownIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 
+import {
+  TenantLink as Link,
+  useTenantRouter,
+} from "@/components/nav/tenant-link";
 import { useZodForm } from "../../hooks/use-zod-form";
+import { type DevAccount, useDevToolsStore } from "../../stores/dev-tools";
 import { useTRPC } from "../../trpc/client";
 import { AuthFormError } from "./auth-form-error";
 import { persistSession } from "./session-bridge";
 
-const DevLoginFab =
-  process.env.NODE_ENV === "development"
-    ? dynamic(() => import("../dev/dev-login-fab").then((m) => m.DevLoginFab))
-    : null;
+function DevEmailCombobox({
+  accounts,
+  onSelect,
+  value,
+}: {
+  accounts: DevAccount[];
+  onSelect: (account: DevAccount) => void;
+  value: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const selectedAccount =
+    accounts.find((account) => account.email === value) ?? null;
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredAccounts = useMemo(() => {
+    if (!normalizedQuery) {
+      return accounts.slice(0, 30);
+    }
+
+    return accounts
+      .filter((account) =>
+        [account.name, account.email, account.company, account.subdomain]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery),
+      )
+      .slice(0, 30);
+  }, [accounts, normalizedQuery]);
+
+  function selectAccount(account: DevAccount) {
+    onSelect(account);
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <Field>
+      <FieldLabel htmlFor="sign-in-email">Email address</FieldLabel>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            aria-expanded={open}
+            id="sign-in-email"
+            className="h-11 w-full justify-between px-3 text-left font-normal"
+            type="button"
+            variant="outline"
+          >
+            <span className="min-w-0 truncate">
+              {selectedAccount?.email ?? "Search email"}
+            </span>
+            <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="w-96 max-w-[calc(100vw-2rem)] p-1"
+        >
+          <Command shouldFilter={false}>
+            <CommandInput
+              onValueChange={setQuery}
+              placeholder="Search email"
+              value={query}
+            />
+            <CommandList>
+              {filteredAccounts.length > 0 ? (
+                <CommandGroup>
+                  {filteredAccounts.map((account) => (
+                    <CommandItem
+                      key={account.email}
+                      onSelect={() => selectAccount(account)}
+                      value={account.email}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {account.name} - {account.role}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {account.email}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {account.company}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0">
+                        {account.role}
+                      </Badge>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ) : (
+                <CommandEmpty>No emails found.</CommandEmpty>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </Field>
+  );
+}
 
 export function SignInForm({
   initialError,
@@ -31,7 +140,7 @@ export function SignInForm({
   initialError?: string;
   showCreateAccount?: boolean;
 }) {
-  const router = useRouter();
+  const router = useTenantRouter();
   const searchParams = useSearchParams();
   const trpc = useTRPC();
   const redirectTo = searchParams.get("redirect");
@@ -44,6 +153,8 @@ export function SignInForm({
       password: "",
     },
   });
+  const devAccounts = useDevToolsStore((s) => s.accounts);
+  const showDevEmailPicker = process.env.NODE_ENV === "development";
   const signInMutation = useMutation(
     trpc.auth.signIn.mutationOptions({
       onError(error) {
@@ -68,23 +179,43 @@ export function SignInForm({
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
-      {DevLoginFab && <DevLoginFab onFill={(values) => form.reset(values)} />}
-
       <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm leading-7 text-muted-foreground">
         Sign-in is scoped to the current tenant host. Dev account autofill only
         shows saved accounts that match this workspace.
       </div>
 
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="sign-in-email">Email address</FieldLabel>
-          <Input
-            id="sign-in-email"
-            placeholder="founder@astergrove.com"
-            type="email"
-            {...form.register("email")}
-          />
-        </Field>
+        {showDevEmailPicker ? (
+          <>
+            <input type="hidden" {...form.register("email")} />
+            <DevEmailCombobox
+              accounts={devAccounts}
+              onSelect={(account) => {
+                form.setValue("email", account.email, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+                form.setValue("password", account.password, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+              }}
+              value={form.watch("email")}
+            />
+          </>
+        ) : (
+          <Field>
+            <FieldLabel htmlFor="sign-in-email">Email address</FieldLabel>
+            <Input
+              id="sign-in-email"
+              placeholder="founder@astergrove.com"
+              type="email"
+              {...form.register("email")}
+            />
+          </Field>
+        )}
         <Field>
           <FieldLabel htmlFor="sign-in-password">Password</FieldLabel>
           <Input

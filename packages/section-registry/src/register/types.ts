@@ -143,10 +143,15 @@ export type TemplatePlanVariant = {
   businessType?: string;
   defaultAccentColor: string;
   defaultBackgroundColor: string;
+  defaultChartColor?: string;
   defaultColorSystem: string;
   defaultContent: Record<string, string>;
   defaultFontFamily: string;
   defaultHeadingFontFamily: string;
+  defaultIconLibrary?: string;
+  defaultMenuAccent?: string;
+  defaultMenuStyle?: string;
+  defaultRadius?: string;
   defaultStylePreset: string;
   description: string;
   editableFields: ContentFieldDef[];

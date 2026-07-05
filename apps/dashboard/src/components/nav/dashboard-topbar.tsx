@@ -8,7 +8,6 @@ import { resolveActiveApp } from "@plotkeys/app-store/registry";
 import { SiteNav } from "@plotkeys/site-nav";
 import { Badge } from "@plotkeys/ui/badge";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
@@ -18,6 +17,7 @@ import {
   getVisibleDashboardNav,
 } from "../../features/navigation/lib";
 import { NotificationBell } from "./notification-bell";
+import { TenantLink as Link } from "./tenant-link";
 
 type DashboardTopbarProps = {
   companyName: string;

@@ -11,7 +11,13 @@ Users can configure:
 
 - font
 - color system
+- accent/theme color
+- chart color
 - style preset
+- icon library
+- radius
+- menu style
+- menu accent
 - named template images
 
 ## Font Selection
@@ -87,10 +93,55 @@ Supported presets:
 - Vega
 - Nova
 - Maia
-- Myra
 - Lyra
+- Mira
+- Luma
+- Sera
+- Rhea
+
+Legacy note:
+- `myra` may exist in older stored configs and should continue resolving as a backward-compatible alias, but new configure UI should present `Mira`.
 
 These presets are similar to style systems in modern code-generated design tooling.
+
+## shadcn Create-Style Configure Surface
+
+Template sandbox configure mode should mirror the clean side-panel structure of `ui.shadcn.com/create`:
+
+- full-screen website viewer as the primary surface
+- compact floating left side config panel
+- expanded state at rest, icon-only collapsed state after the website surface scrolls, and hover/focus expansion while collapsed
+- row-based controls for Style, Base Color, Theme, Chart Color, Heading, Font, Icon Library, Radius, Menu, and Menu Accent
+- section visibility controls after the style group
+- direct select-and-save behavior for row controls, without a separate save button per row
+- action buttons for preview/live surfaces without treating tenant profile metadata as configuration
+- preset-like command display for quick visual state sharing
+
+The side panel should use standard shadcn/ui primitives from `@plotkeys/ui` for dashboard/editor chrome.
+
+Public template-rendered UI should not import platform dashboard components directly. Template pages should use template-local shadcn-style primitives or registry helpers that resolve through tenant-owned `--pk-*` tokens.
+
+The sandbox config rail should not expose template name, company, market, subdomain, or plan tier as normal style configuration. Those belong to profile/admin flows, not the visual template tuning surface.
+
+## Page Configuration Loading Contract
+
+Each concrete page route should load page configuration through the backend/tRPC layer. The backend decides which source to resolve:
+
+- live tenant site: published tenant website/site snapshot
+- sandbox live mode: saved sandbox live snapshot
+- sandbox draft mode: latest editable sandbox profile/page config
+- dev/dummy mode: valid mock or seed data returned by the same backend contract
+
+Template-owned page components must not fetch raw database state directly. They render from normalized registry context:
+
+- `ctx.content`
+- `ctx.theme`
+- `ctx.mode`
+- `ctx.page`
+- `ctx.tenant`
+- registry-scoped query/mutation helpers where a page-specific data query is needed
+
+Edits from sandbox/builder mode should save through the owning dashboard/tRPC action, then reload through the same page configuration contract.
 
 ## Template Images
 
@@ -128,6 +179,10 @@ Section config includes:
 - editable content
 - section variants
 - data bindings
+
+Static marketing copy should be edited inline on the rendered website surface, not through a separate sidebar form. Listing/property/agent data that comes from the database is not inline editable as content, but the surrounding section heading, intro text, labels, and CTA copy should use editable content keys.
+
+For template-owned page components, section visibility controls must be consumed by the page component itself. Saving `sectionVisible.<sectionType>` is not enough if the page bypasses the section-list renderer.
 
 ## Preview Navigation Behavior
 
@@ -179,7 +234,7 @@ Implemented registry helpers:
 - `templateSurfaceVariants()`
 - `createTemplateUiResolver()`
 
-These helpers translate Vega/Nova/Maia/Myra/Lyra radius settings into reusable button, input, and surface classes for future template-local `ui/*` components.
+These helpers translate the active style preset radius settings into reusable button, input, and surface classes for future template-local `ui/*` components.
 
 ## Recommended Internal Layers
 - user-facing template config
@@ -202,9 +257,12 @@ Design
 - font
 - color system
 - style preset
+- radius
+- icon/menu controls
 
-Images
-- named image slots with upload and preview
+Sections
+- show/hide section controls
+- future section ordering controls
 
 This keeps the experience simple for non-technical users.
 

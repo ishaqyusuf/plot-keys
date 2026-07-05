@@ -66,6 +66,36 @@ function asText(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
 
+function normalizeLegacyRiwaqTheme(
+  templateKey: string,
+  theme: TenantThemeRecord,
+): TenantThemeRecord {
+  if (templateKey !== "riwaq-starter") return theme;
+
+  const hasLegacyBackgroundOverride =
+    theme.backgroundColor?.toLowerCase() === "#ececec";
+  const isLegacyDefault =
+    theme.colorSystem === "taupe" &&
+    theme.accentColor === "orange" &&
+    (!theme.chartColor || theme.chartColor === "orange") &&
+    (!theme.backgroundColor || hasLegacyBackgroundOverride);
+  const themePatch: TenantThemeRecord = {};
+
+  if (isLegacyDefault) {
+    themePatch.accentColor = "#522C1F";
+    themePatch.chartColor = "#907762";
+    themePatch.colorSystem = "rubbait";
+  }
+
+  if (hasLegacyBackgroundOverride) {
+    themePatch.backgroundColor = "";
+  }
+
+  return Object.keys(themePatch).length > 0
+    ? { ...theme, ...themePatch }
+    : theme;
+}
+
 function getLiveSnapshot(profileJson: unknown): SandboxLiveSnapshot | null {
   const json = toObjectRecord(profileJson);
   const live = json.live;
@@ -136,6 +166,10 @@ export async function resolveSandboxProfileRenderData(
     profile.subdomainLabel ?? "sandbox",
   );
   const templateKey = asText(liveSnapshot?.templateKey, profile.templateKey);
+  const theme = normalizeLegacyRiwaqTheme(
+    templateKey,
+    toStringRecord(liveSnapshot?.themeJson ?? profile.themeJson),
+  );
 
   return {
     companyName,
@@ -150,6 +184,6 @@ export async function resolveSandboxProfileRenderData(
     shareId: profile.shareId,
     subdomain,
     templateKey,
-    theme: toStringRecord(liveSnapshot?.themeJson ?? profile.themeJson),
+    theme,
   };
 }

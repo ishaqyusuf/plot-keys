@@ -5,11 +5,9 @@ import { redirect } from "next/navigation";
 
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import { FlowShell } from "@/components/flow-shell";
-import {
-  getCurrentAppSession,
-  getTenantSlugFromHost,
-} from "@/lib/session";
+import { getCurrentAppSession, getTenantSlugFromHost } from "@/lib/session";
 import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
+import { tenantRedirect } from "@/lib/tenant-url-server";
 
 const signUpBenefits = [
   "Reserve your PlotKeys website and dashboard links early",
@@ -27,7 +25,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const tenantSlug = await getTenantSlugFromHost();
 
   if (tenantSlug) {
-    redirect(authRoutes.signIn);
+    await tenantRedirect(authRoutes.signIn);
   }
 
   const session = await getCurrentAppSession();

@@ -28,8 +28,15 @@ import {
   extractDashboardTenantSlug,
   isTenantDashboardHost,
   resolveDashboardSessionScope,
+  resolveTenantSiteHostContext,
 } from "@plotkeys/utils";
+import {
+  buildTenantHref,
+  getTenantUrlHeaderNames,
+  resolveTenantUrlContext,
+} from "@plotkeys/utils/tenant-url";
 import { type NextRequest, NextResponse } from "next/server";
+import { getDashboardTenantUrlConfig } from "./lib/tenant-url-config";
 
 /** Routes that do NOT require an authenticated session. */
 const PUBLIC_PREFIXES = [
@@ -57,9 +64,7 @@ function isOnboardingPath(pathname: string): boolean {
 }
 
 function hasSessionCookie(request: NextRequest): boolean {
-  const sessionScope = resolveDashboardSessionScope(
-    getRequestHost(request),
-  );
+  const sessionScope = resolveDashboardSessionScope(getRequestHost(request));
   const cookieName = getScopedAuthSessionCookieName(
     sessionScope ?? platformSessionScope,
   );
@@ -73,9 +78,7 @@ function hasSessionCookie(request: NextRequest): boolean {
 
 function getRequestHost(request: NextRequest): string {
   return (
-    request.headers.get("x-forwarded-host") ??
-    request.headers.get("host") ??
-    ""
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? ""
   );
 }
 
@@ -88,32 +91,70 @@ async function isTenantAlreadyOnboarded(input: {
 }
 
 export async function proxy(request: NextRequest) {
+  const tenantUrlConfig = getDashboardTenantUrlConfig();
+  const headerNames = getTenantUrlHeaderNames(tenantUrlConfig);
   const { pathname } = request.nextUrl;
   const host = getRequestHost(request);
-  const tenantHostname = extractDashboardHostname(host);
-  const tenantSlug = extractDashboardTenantSlug(host);
-  const isTenantMode = isTenantDashboardHost(host);
+  const tenantUrlContext = resolveTenantUrlContext(
+    {
+      host,
+      pathname,
+      protocol:
+        request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol,
+    },
+    tenantUrlConfig,
+  );
+  const productPath = tenantUrlContext.productPath;
+  const tenantHostContext = resolveTenantSiteHostContext(host);
+  const tenantHostname =
+    tenantUrlContext.customDomainLookupHost ??
+    tenantHostContext.tenantHostname ??
+    extractDashboardHostname(host);
+  const tenantSlug =
+    tenantUrlContext.tenantSlug ??
+    tenantHostContext.tenantSubdomain ??
+    extractDashboardTenantSlug(host);
+  const isTenantMode = isTenantDashboardHost(host) || Boolean(tenantSlug);
   const requestHeaders = new Headers(request.headers);
+
+  requestHeaders.delete("x-tenant-hostname");
+  requestHeaders.delete("x-tenant-subdomain");
+  requestHeaders.delete(headerNames.domain);
+  requestHeaders.delete(headerNames.pathname);
+  requestHeaders.delete(headerNames.urlStyle);
+  requestHeaders.delete(headerNames.externalBasePath);
+  requestHeaders.delete(headerNames.externalPath);
 
   if (tenantHostname) {
     requestHeaders.set("x-tenant-hostname", tenantHostname);
   }
   if (tenantSlug) {
     requestHeaders.set("x-tenant-subdomain", tenantSlug);
+    requestHeaders.set(headerNames.domain, tenantSlug);
   }
-  requestHeaders.set("x-pathname", pathname);
+  requestHeaders.set("x-pathname", productPath);
+  requestHeaders.set(headerNames.pathname, productPath);
+  requestHeaders.set(headerNames.urlStyle, tenantUrlContext.style);
+  requestHeaders.set(
+    headerNames.externalBasePath,
+    tenantUrlContext.externalBasePath,
+  );
+  requestHeaders.set(headerNames.externalPath, tenantUrlContext.externalPath);
 
   if (
     isTenantMode &&
-    PLATFORM_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    PLATFORM_ONLY_PREFIXES.some((prefix) => productPath.startsWith(prefix))
   ) {
-    const signInUrl = new URL(authRoutes.signIn, request.url);
+    const signInUrl = new URL(
+      buildTenantHref(tenantUrlContext, authRoutes.signIn, tenantUrlConfig),
+      request.url,
+    );
     return NextResponse.redirect(signInUrl);
   }
 
   if (
     isTenantMode &&
-    isOnboardingPath(pathname) &&
+    isOnboardingPath(productPath) &&
     !hasSessionCookie(request)
   ) {
     const tenantAlreadyOnboarded = await isTenantAlreadyOnboarded({
@@ -122,7 +163,10 @@ export async function proxy(request: NextRequest) {
     });
 
     if (tenantAlreadyOnboarded) {
-      const signInUrl = new URL(authRoutes.signIn, request.url);
+      const signInUrl = new URL(
+        buildTenantHref(tenantUrlContext, authRoutes.signIn, tenantUrlConfig),
+        request.url,
+      );
       return NextResponse.redirect(signInUrl);
     }
 
@@ -131,13 +175,24 @@ export async function proxy(request: NextRequest) {
 
   // Gate non-public routes behind the session cookie check.
   // Full session validation happens inside server components.
-  if (!isPublicPath(pathname) && !hasSessionCookie(request)) {
-    const signInUrl = new URL(authRoutes.signIn, request.url);
+  if (!isPublicPath(productPath) && !hasSessionCookie(request)) {
+    const signInUrl = new URL(
+      buildTenantHref(tenantUrlContext, authRoutes.signIn, tenantUrlConfig),
+      request.url,
+    );
     signInUrl.searchParams.set(
       "redirect",
-      `${pathname}${request.nextUrl.search}`,
+      `${productPath}${request.nextUrl.search}`,
     );
     return NextResponse.redirect(signInUrl);
+  }
+
+  if (tenantUrlContext.style === "path" && productPath !== pathname) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = productPath;
+    return NextResponse.rewrite(rewriteUrl, {
+      request: { headers: requestHeaders },
+    });
   }
 
   return NextResponse.next({ request: { headers: requestHeaders } });

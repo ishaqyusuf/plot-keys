@@ -40,7 +40,47 @@ const hero = slot("hero", "Hero", "HeroBannerSection", 10, [
   "hero.title",
   "hero.subtitle",
   "hero.ctaText",
+  "hero.secondaryCtaText",
+  "hero.searchEyebrow",
+  "hero.searchTitle",
+  "hero.searchMode1",
+  "hero.searchMode2",
+  "hero.searchMode3",
+  "hero.searchLocationLabel",
+  "hero.searchLocationValue",
+  "hero.searchTypeLabel",
+  "hero.searchTypeValue",
+  "hero.searchBudgetLabel",
+  "hero.searchBudgetValue",
+  "hero.searchButton",
+  "hero.badgeEyebrow",
+  "hero.badgeTitle",
+  "hero.badgeMeta",
+  "media.heroImage",
+  "media.detailImage",
 ]);
+
+const blogHero = slot("blog-hero", "Blog Header", "HeroBannerSection", 10, [
+  "blog.eyebrow",
+  "blog.title",
+  "blog.subtitle",
+]);
+
+const contactHero = slot(
+  "contact-hero",
+  "Contact Header",
+  "HeroBannerSection",
+  10,
+  ["contact.eyebrow", "contact.title", "contact.subtitle"],
+);
+
+const roadmapHero = slot(
+  "roadmap-hero",
+  "Roadmap Header",
+  "HeroBannerSection",
+  10,
+  ["roadmap.eyebrow", "roadmap.title", "roadmap.subtitle"],
+);
 
 const marketStats = slot("market-stats", "Market Stats", "MarketStatsSection", 20, [
   "marketStats.stat1Label",
@@ -53,6 +93,7 @@ const marketStats = slot("market-stats", "Market Stats", "MarketStatsSection", 2
 
 const story = slot("story", "Story", "StoryGridSection", 30, [
   "story.eyebrow",
+  "story.cardEyebrow",
   "story.heading",
   "story.body",
   "story.ctaLabel",
@@ -88,6 +129,14 @@ const contact = slot("contact", "Contact", "ContactSection", 50, [
   "contact.phone",
   "contact.address",
   "contact.whatsapp",
+  "contact.eyebrow",
+  "contact.title",
+  "contact.subtitle",
+  "contact.form.emailLabel",
+  "contact.form.emailPlaceholder",
+  "contact.form.messageLabel",
+  "contact.form.messagePlaceholder",
+  "contact.form.submitLabel",
 ]);
 
 const cta = slot("cta", "CTA", "CtaBandSection", 60, [
@@ -106,19 +155,19 @@ const pages: RegisterPageDefinition[] = [
   {
     label: "Blog",
     pageKey: "blog",
-    sections: [hero, blogList, cta],
+    sections: [blogHero, blogList, cta],
     slug: "/blog",
   },
   {
     label: "Contact",
     pageKey: "contact",
-    sections: [hero, contact, cta],
+    sections: [contactHero, contact, cta],
     slug: "/contact",
   },
   {
     label: "Roadmap",
     pageKey: "roadmap",
-    sections: [hero, roadmap, cta],
+    sections: [roadmapHero, roadmap, cta],
     slug: "/roadmap",
   },
   {
@@ -137,12 +186,17 @@ const pages: RegisterPageDefinition[] = [
 
 export const riwaqStarterTemplate: TemplatePlanVariant = {
   businessType: "agency",
-  defaultAccentColor: "#2563eb",
-  defaultBackgroundColor: "#f8fafc",
-  defaultColorSystem: "slate",
+  defaultAccentColor: "#522C1F",
+  defaultBackgroundColor: "",
+  defaultChartColor: "#907762",
+  defaultColorSystem: "rubbait",
   defaultContent: riwaqDefaultContent,
-  defaultFontFamily: "Inter, Satoshi, sans-serif",
-  defaultHeadingFontFamily: "'Space Grotesk', Inter, sans-serif",
+  defaultFontFamily: "Raleway",
+  defaultHeadingFontFamily: "Raleway",
+  defaultIconLibrary: "lucide",
+  defaultMenuAccent: "subtle",
+  defaultMenuStyle: "default-translucent",
+  defaultRadius: "none",
   defaultStylePreset: "lyra",
   description:
     "A starter real-estate template focused on trust, publishing, contact capture, and project-history visibility.",

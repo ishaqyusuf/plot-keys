@@ -4,7 +4,7 @@
  * Inline editing primitives for the builder CMS layer.
  *
  * These components render their content normally in live/preview mode and
- * expose editing affordances (border highlight, overlay button) in draft mode.
+ * expose editing affordances (hover border, text cursor, overlay button) in draft mode.
  *
  * Usage in section components:
  *   <EditableText contentKey="hero.title" value={content["hero.title"]} />
@@ -12,8 +12,9 @@
  */
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { Pencil, Sparkles, X } from "lucide-react";
 import { isContentKeyAiEnabled } from "../register/content-field-lookup";
-import { useIsDraftMode } from "../runtime-context";
+import { useIsDraftMode, useRegistry } from "../runtime-context";
 import { useSmartFill } from "../runtime/smart-fill-context";
 
 // ---------------------------------------------------------------------------
@@ -57,10 +58,11 @@ function focusEditableElement(element: HTMLElement | null) {
 }
 
 /**
- * Renders a text node in live mode. In draft mode, the element becomes
- * contentEditable with a visible amber outline. When a SmartFillProvider is
- * present in the tree, a hover action bar appears with Edit (✏) and AI (✦)
- * buttons so users can trigger AI generation directly on the text.
+ * Renders a text node in live mode. In draft mode, the element shows a
+ * visible hover border and becomes contentEditable on click. When a
+ * SmartFillProvider is present in the tree, a hover action bar appears with
+ * Edit and AI icon buttons so users can trigger AI generation directly on the
+ * text.
  */
 export function EditableText({
   as,
@@ -74,6 +76,8 @@ export function EditableText({
   value,
 }: EditableTextProps) {
   const isDraft = useIsDraftMode();
+  const registry = useRegistry();
+  const commitContent = onCommit ?? registry.commitContent;
   const aiAvailable =
     canUseAi && (aiEnabled ?? isContentKeyAiEnabled(contentKey));
   const triggerSmartFill = useSmartFill();
@@ -101,7 +105,9 @@ export function EditableText({
     );
   }
 
-  function handleClick() {
+  function handleClick(event: React.MouseEvent<HTMLElement>) {
+    event.preventDefault();
+    event.stopPropagation();
     if (editing || isPending) return;
     setEditing(true);
     requestAnimationFrame(() => focusEditableElement(ref.current));
@@ -115,7 +121,7 @@ export function EditableText({
     if (!editing) return;
     setEditing(false);
     if (localValue !== value) {
-      void onCommit?.(contentKey, localValue);
+      void commitContent?.(contentKey, localValue);
     }
   }
 
@@ -139,28 +145,74 @@ export function EditableText({
   }
 
   const showActionBar = isHovered && !editing && !isPending;
+  const baseShadow =
+    typeof style?.boxShadow === "string" && style.boxShadow.length > 0
+      ? `${style.boxShadow}, `
+      : "";
+  const hoverBorder =
+    "color-mix(in srgb, var(--pk-primary, #2563eb) 72%, transparent)";
+  const hoverBackground =
+    "color-mix(in srgb, var(--pk-primary, #2563eb) 10%, transparent)";
+  const activeBackground =
+    "color-mix(in srgb, var(--pk-primary, #2563eb) 12%, transparent)";
+  const contrastStroke = "color-mix(in srgb, white 78%, transparent)";
+  const interactionBorder = isHovered || editing || isPending;
+  const draftStyle: React.CSSProperties = {
+    ...style,
+    backgroundColor:
+      isPending || editing
+        ? activeBackground
+        : isHovered
+          ? hoverBackground
+          : style?.backgroundColor,
+    boxShadow: isPending
+      ? `${baseShadow}0 0 0 1px ${contrastStroke}, 0 0 0 3px ${hoverBorder}, 0 12px 30px rgb(15 23 42 / 0.12)`
+      : editing
+        ? `${baseShadow}0 0 0 1px ${contrastStroke}, 0 0 0 3px ${hoverBorder}, 0 14px 32px rgb(15 23 42 / 0.16)`
+        : isHovered
+          ? `${baseShadow}0 0 0 1px ${contrastStroke}, 0 0 0 2px ${hoverBorder}, 0 10px 24px rgb(15 23 42 / 0.12)`
+          : style?.boxShadow,
+    borderRadius: style?.borderRadius ?? "0.45rem",
+    boxDecorationBreak: "clone",
+    WebkitBoxDecorationBreak: "clone",
+    outline: interactionBorder ? `1px solid ${hoverBorder}` : style?.outline,
+    outlineOffset: interactionBorder ? "3px" : style?.outlineOffset,
+    cursor: "text",
+    WebkitUserSelect: editing ? "text" : style?.WebkitUserSelect,
+    userSelect: editing ? "text" : style?.userSelect,
+  };
 
   return (
     <Tag
       ref={ref as React.RefObject<HTMLDivElement & HTMLSpanElement>}
-      style={style}
+      style={draftStyle}
       className={[
         className,
-        "relative cursor-text outline-none",
+        "relative !cursor-text rounded-[0.45rem] caret-[color:var(--pk-primary,#2563eb)] outline-none transition-[background-color,box-shadow,outline-color]",
+        "focus-visible:ring-2 focus-visible:ring-[color:var(--pk-primary,#2563eb)]/70 focus-visible:ring-offset-2",
         isPending
-          ? "animate-pulse rounded ring-2 ring-primary/40"
+          ? "animate-pulse"
           : editing
-            ? "rounded ring-2 ring-primary/60"
-            : "rounded ring-1 ring-amber-400/60 hover:ring-amber-500/80",
+            ? "shadow-lg shadow-slate-900/10"
+            : "hover:shadow-lg hover:shadow-slate-900/10",
       ]
         .filter(Boolean)
         .join(" ")}
       contentEditable={editing}
       suppressContentEditableWarning
+      tabIndex={0}
+      title="Click to edit text"
       onBlur={handleBlur}
       onClick={handleClick}
       onInput={handleInput}
       onKeyDown={(event) => {
+        if (!editing && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          setEditing(true);
+          requestAnimationFrame(() => focusEditableElement(ref.current));
+          return;
+        }
+
         if (event.key !== "Escape") return;
         event.preventDefault();
         setEditing(false);
@@ -182,21 +234,23 @@ export function EditableText({
           onMouseEnter={() => setIsHovered(true)}
         >
           <button
+            aria-label="Edit text"
             type="button"
             title="Edit text"
-            className="flex size-5 items-center justify-center rounded text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="flex size-5 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
             onMouseDown={handleEditClick}
           >
-            ✏
+            <Pencil className="size-3.5" />
           </button>
           {triggerSmartFill ? (
             <button
+              aria-label="Generate with AI"
               type="button"
-            title="Generate with AI"
-            className="flex size-5 items-center justify-center rounded text-[11px] text-primary hover:bg-primary/10"
-            onMouseDown={handleAiGenerate}
-          >
-            ✦
+              title="Generate with AI"
+              className="flex size-5 items-center justify-center rounded text-primary hover:bg-primary/10"
+              onMouseDown={handleAiGenerate}
+            >
+              <Sparkles className="size-3.5" />
             </button>
           ) : null}
         </span>
@@ -297,11 +351,12 @@ export function EditableImage({
                 Set
               </button>
               <button
+                aria-label="Cancel image replacement"
                 className="rounded border border-border/60 bg-background/90 px-2 py-1 text-xs text-muted-foreground"
                 type="button"
                 onClick={() => setReplacing(false)}
               >
-                ✕
+                <X className="size-3.5" />
               </button>
             </div>
           )}

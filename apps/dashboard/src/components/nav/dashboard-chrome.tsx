@@ -5,12 +5,12 @@ import type {
   GlobalNavSection,
 } from "@plotkeys/app-store/registry";
 import { SiteNav, useCreateSiteNavContext } from "@plotkeys/site-nav";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { getVisibleDashboardNav } from "../../features/navigation/lib";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { DashboardTopbar } from "./dashboard-topbar";
+import { TenantLink } from "./tenant-link";
 
 type DashboardChromeProps = {
   children: ReactNode;
@@ -52,7 +52,7 @@ export function DashboardChrome({
     platformGroup,
   });
   const siteNav = useCreateSiteNavContext({
-    Link,
+    Link: TenantLink,
     linkModules: modules,
     pathName: pathname,
   });

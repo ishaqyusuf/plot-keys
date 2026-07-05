@@ -1,10 +1,11 @@
 import { buildDashboardUrl } from "./app-urls";
+import { buildTenantAppUrl, normalizeHost } from "./tenant-url";
 
 export const plotkeysRootDomain = "plotkeys.com";
 export const localPlotkeysRootDomain = "plotkeys.localhost";
 export const localTenantRootDomain = "tenant-plotkeys.localhost";
 export const dashboardSubdomainLabel = "dashboard";
-export const localDashboardRootDomain = "app-plotkeys.localhost";
+export const localDashboardRootDomain = localPlotkeysRootDomain;
 export const platformAppHostname = `app.${plotkeysRootDomain}`;
 const reservedTenantLabels = new Set([
   "api",
@@ -48,7 +49,7 @@ export function buildDashboardHostname(subdomain: string) {
 export function buildLocalDashboardHostname(subdomain: string) {
   const normalizedSubdomain = normalizeSubdomainLabel(subdomain);
   return normalizedSubdomain
-    ? `${dashboardSubdomainLabel}.${normalizedSubdomain}.${localDashboardRootDomain}`
+    ? `${normalizedSubdomain}.${localDashboardRootDomain}`
     : "";
 }
 
@@ -108,6 +109,10 @@ function isLocalhostHostname(hostname: string | null | undefined) {
 function isVercelPreviewHostname(hostname: string | null | undefined) {
   const normalizedHostname = hostname ? stripPortFromHostname(hostname) : "";
   return normalizedHostname.endsWith(".vercel.app");
+}
+
+function resolveOriginHost(parsedOrigin: URL | null) {
+  return normalizeHost(parsedOrigin?.host);
 }
 
 function resolveProtocol(
@@ -234,7 +239,7 @@ export function buildTenantDashboardUrl(
       ? pathname
       : `/${pathname}`
     : "";
-  const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
+  const currentHost = resolveOriginHost(parsedOrigin);
 
   if (
     isAnyLocalPlotkeysHostname(parsedOrigin?.hostname) ||
@@ -245,10 +250,28 @@ export function buildTenantDashboardUrl(
       : "";
 
     if (localTenantDashboardHostname) {
-      return `${protocol}://${localTenantDashboardHostname}${port}${normalizedPathname}`;
+      return buildTenantAppUrl({
+        currentHost,
+        currentProtocol: protocol,
+        defaultProtocol: "http",
+        enablePathStyleHosts: false,
+        path: normalizedPathname,
+        targetPort: parsedOrigin?.port,
+        targetRootDomain: localTenantDashboardHostname,
+        tenantSlug: "",
+      });
     }
 
-    return `${protocol}://${buildLocalDashboardHostname(normalizedSubdomain)}${port}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "http",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetPort: parsedOrigin?.port,
+      targetRootDomain: localDashboardRootDomain,
+      tenantSlug: normalizedSubdomain,
+    });
   }
 
   const tenantDashboardHostname = options?.tenantHostname
@@ -256,14 +279,38 @@ export function buildTenantDashboardUrl(
     : "";
 
   if (tenantDashboardHostname) {
-    return `${protocol}://${tenantDashboardHostname}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "https",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetRootDomain: tenantDashboardHostname,
+      tenantSlug: "",
+    });
   }
 
   if (isVercelPreviewHostname(parsedOrigin?.hostname)) {
-    return `${protocol}://${dashboardSubdomainLabel}.${normalizedSubdomain}.${parsedOrigin?.hostname}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "https",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetRootDomain: `${normalizedSubdomain}.${parsedOrigin?.hostname}`,
+      tenantSlug: dashboardSubdomainLabel,
+    });
   }
 
-  return `${protocol}://${buildDashboardHostname(normalizedSubdomain)}${normalizedPathname}`;
+  return buildTenantAppUrl({
+    currentHost,
+    currentProtocol: protocol,
+    defaultProtocol: "https",
+    enablePathStyleHosts: false,
+    path: normalizedPathname,
+    targetRootDomain: `${normalizedSubdomain}.${plotkeysRootDomain}`,
+    tenantSlug: dashboardSubdomainLabel,
+  });
 }
 
 export function buildTenantSiteUrl(
@@ -291,26 +338,59 @@ export function buildTenantSiteUrl(
       ? pathname
       : `/${pathname}`
     : "";
-  const port = parsedOrigin?.port ? `:${parsedOrigin.port}` : "";
+  const currentHost = resolveOriginHost(parsedOrigin);
 
   if (
     isAnyLocalPlotkeysHostname(parsedOrigin?.hostname) ||
     isLocalhostHostname(parsedOrigin?.hostname)
   ) {
-    return `${protocol}://${buildLocalSitefrontHostname(normalizedSubdomain)}${port}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "http",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetPort: parsedOrigin?.port,
+      targetRootDomain: localTenantRootDomain,
+      tenantSlug: normalizedSubdomain,
+    });
   }
 
   const tenantHostname = extractTenantHostname(options?.tenantHostname);
 
   if (tenantHostname) {
-    return `${protocol}://${tenantHostname}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "https",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetRootDomain: tenantHostname,
+      tenantSlug: "",
+    });
   }
 
   if (isVercelPreviewHostname(parsedOrigin?.hostname)) {
-    return `${protocol}://${normalizedSubdomain}.${parsedOrigin?.hostname}${normalizedPathname}`;
+    return buildTenantAppUrl({
+      currentHost,
+      currentProtocol: protocol,
+      defaultProtocol: "https",
+      enablePathStyleHosts: false,
+      path: normalizedPathname,
+      targetRootDomain: parsedOrigin?.hostname ?? "",
+      tenantSlug: normalizedSubdomain,
+    });
   }
 
-  return `${protocol}://${buildSitefrontHostname(normalizedSubdomain)}${normalizedPathname}`;
+  return buildTenantAppUrl({
+    currentHost,
+    currentProtocol: protocol,
+    defaultProtocol: "https",
+    enablePathStyleHosts: false,
+    path: normalizedPathname,
+    targetRootDomain: plotkeysRootDomain,
+    tenantSlug: normalizedSubdomain,
+  });
 }
 
 export function buildPlatformAppUrl(options?: {
@@ -357,6 +437,10 @@ export function extractDashboardHostname(host: string) {
     );
     const parts = withoutRoot.split(".");
 
+    if (parts.length === 1 && parts[0] && !reservedTenantLabels.has(parts[0])) {
+      return hostname;
+    }
+
     return parts.length === 2 &&
       parts[0] === dashboardSubdomainLabel &&
       Boolean(parts[1])
@@ -391,6 +475,11 @@ export function extractDashboardTenantSlug(host: string) {
       -(localDashboardRootDomain.length + 1),
     );
     const parts = withoutRoot.split(".");
+
+    if (parts.length === 1 && parts[0] && !reservedTenantLabels.has(parts[0])) {
+      return parts[0];
+    }
+
     return parts.length === 2 && parts[0] === dashboardSubdomainLabel
       ? (parts[1] ?? null)
       : null;
@@ -452,6 +541,7 @@ export function resolveTenantSiteHostContext(host: string): {
     hostname === localTenantRootDomain ||
     hostname === localDashboardRootDomain ||
     hostname === platformAppHostname ||
+    extractDashboardHostname(hostname) !== null ||
     hostname.startsWith(`${dashboardSubdomainLabel}.`)
   ) {
     return { tenantHostname: null, tenantSubdomain: null };

@@ -42,6 +42,14 @@ There is no shared family folder layer. The previous `noor`, `bana`, `wafi`, `fa
 
 `Riwaq` follows the project naming convention by using a MENA/architectural name. It is a focused starter real-estate template for trust, publishing, contact capture, and visible project-history storytelling.
 
+Current visual direction:
+- Primary inspiration: Dribbble `Rubbait - Discover Your Ideal Property` by One Week Wonders.
+- Landing page should feel bespoke, real-estate focused, image-led, warm, and editorial.
+- The first viewport should show a large property image, direct project/trust messaging, clear CTAs, visible stats, and a hint of project-history storytelling.
+- Template-rendered UI should use Riwaq-local shadcn-style primitives backed by registry `--pk-*` tenant tokens, not dashboard-owned shadcn tokens.
+- Default style direction aligns with the shadcn Create reference: Style `Lyra`, Base Color `Taupe`, Theme `Orange`, Chart Color `Orange`, Heading `Raleway`, Font `Raleway`, Icon Library `Lucide`, Radius `None`, translucent default menu.
+- Static page copy should be rendered with inline editable content keys via the shared `EditableText` primitive. Database-owned data such as listings remains data-bound, but section titles, descriptions, labels, and CTAs remain inline editable.
+
 Pages:
 - Landing: `/`
 - Blog: `/blog`
@@ -111,6 +119,14 @@ Data hooks should use the registry-scoped query/mutation helpers:
 - non-live modes call dev/mock resolvers
 - mutations are blocked outside live mode unless explicitly mocked
 
+Page configuration loading should be backend/tRPC-owned. The page route or shell asks the backend for the valid configuration for the current mode:
+- live tenant site uses the published tenant data/snapshot
+- sandbox live mode uses the saved sandbox live snapshot
+- sandbox draft mode uses the editable sandbox profile/page config
+- dev/dummy mode may return valid mock data through the same contract
+
+Template page components receive normalized config through registry context and should not branch directly on database tables.
+
 ## Definition Of Done For New Templates
 
 Every new template must:
@@ -120,5 +136,6 @@ Every new template must:
 - define its own content schema
 - define its own nav/footer config
 - define its own placeholder data
+- render static copy through inline editable content keys
 - expose any template-specific sections through `resolveRegisterSectionComponents(templateKey)`
 - avoid importing from another template folder

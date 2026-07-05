@@ -10,8 +10,8 @@ import {
   TooltipTrigger,
 } from "@plotkeys/ui/tooltip";
 import { Store } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TenantLink as Link } from "./tenant-link";
 
 type AppRailProps = {
   enabledApps: readonly AppDefinition[];

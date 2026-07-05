@@ -18,7 +18,7 @@
  */
 
 import { getRegisterNavConfig } from "@plotkeys/section-registry";
-import type { TemplateTier } from "@plotkeys/section-registry";
+import type { TemplateConfig, TemplateTier } from "@plotkeys/section-registry";
 import Link from "next/link";
 
 type RegisterNavProps = {
@@ -27,6 +27,10 @@ type RegisterNavProps = {
   hrefPrefix?: string;
   hrefQuery?: string;
   logoUrl?: string | null;
+  templateConfig?: Pick<
+    TemplateConfig,
+    "menuAccent" | "menuStyle" | "radius"
+  >;
   templateKey: string;
   tier: TemplateTier;
 };
@@ -47,19 +51,113 @@ function scopedHref(href: string, hrefPrefix?: string, hrefQuery?: string) {
   return `${scoped}${scoped.includes("?") ? "&" : "?"}${hrefQuery}`;
 }
 
+function joinClasses(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function resolveNavRadiusClass(radius?: string) {
+  if (radius === "none") return "rounded-none";
+  if (radius === "sm") return "rounded-sm";
+  if (radius === "md") return "rounded-md";
+  if (radius === "lg") return "rounded-lg";
+  if (radius === "xl") return "rounded-xl";
+  if (radius === "full") return "rounded-full";
+
+  return "rounded-md";
+}
+
+function resolveHeaderClass(config?: RegisterNavProps["templateConfig"]) {
+  const base = "sticky top-0 z-30";
+
+  if (config?.menuStyle === "minimal") {
+    return joinClasses(base, "bg-transparent");
+  }
+
+  if (config?.menuStyle === "bordered") {
+    return joinClasses(
+      base,
+      "border-b border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-card,#fff)]",
+    );
+  }
+
+  if (config?.menuStyle === "default-solid") {
+    return joinClasses(
+      base,
+      "border-b border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)]",
+    );
+  }
+
+  return joinClasses(
+    base,
+    "border-b border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)]/95 backdrop-blur",
+  );
+}
+
+function resolveNavLinkClass(
+  isActive: boolean,
+  config?: RegisterNavProps["templateConfig"],
+) {
+  const radius = resolveNavRadiusClass(config?.radius);
+  const base = joinClasses("px-3 py-1.5 text-sm transition-colors", radius);
+
+  if (!isActive) {
+    return joinClasses(
+      base,
+      "text-[color:var(--pk-muted-foreground,#64748b)] hover:bg-[color:var(--pk-muted,#f1f5f9)] hover:text-[color:var(--pk-foreground,#0f172a)]",
+    );
+  }
+
+  if (config?.menuAccent === "strong") {
+    return joinClasses(
+      base,
+      "bg-[color:var(--pk-primary,#0f172a)] font-medium text-[color:var(--pk-primary-foreground,#fff)]",
+    );
+  }
+
+  if (config?.menuAccent === "none") {
+    return joinClasses(
+      base,
+      "font-medium text-[color:var(--pk-foreground,#0f172a)] underline decoration-[color:var(--pk-primary,#0f172a)] decoration-2 underline-offset-8",
+    );
+  }
+
+  return joinClasses(
+    base,
+    "bg-[color:var(--pk-primary,#0f172a)]/8 font-medium text-[color:var(--pk-primary,#0f172a)]",
+  );
+}
+
+function resolveNavCtaClass(config?: RegisterNavProps["templateConfig"]) {
+  const radius = resolveNavRadiusClass(config?.radius);
+
+  if (config?.menuAccent === "none" || config?.menuStyle === "minimal") {
+    return joinClasses(
+      "border border-[color:var(--pk-border,#e2e8f0)] bg-transparent px-4 py-2 text-sm font-medium text-[color:var(--pk-foreground,#0f172a)] transition-colors hover:bg-[color:var(--pk-muted,#f1f5f9)]",
+      radius,
+    );
+  }
+
+  return joinClasses(
+    "bg-[color:var(--pk-primary,#0f172a)] px-4 py-2 text-sm font-medium text-[color:var(--pk-primary-foreground,#fff)] transition-opacity hover:opacity-90",
+    config?.menuAccent === "strong" && "shadow-md shadow-black/10",
+    radius,
+  );
+}
+
 export function RegisterNav({
   companyName,
   currentPath = "/",
   hrefPrefix,
   hrefQuery,
   logoUrl,
+  templateConfig,
   templateKey,
   tier,
 }: RegisterNavProps) {
   const nav = getRegisterNavConfig(templateKey, tier);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)]/95 backdrop-blur">
+    <header className={resolveHeaderClass(templateConfig)}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4">
         {/* Logo / brand */}
         <Link
@@ -82,14 +180,7 @@ export function RegisterNav({
             return (
               <Link
                 key={link.href}
-                className={[
-                  "rounded-md px-3 py-1.5 text-sm transition-colors",
-                  isActive
-                    ? "bg-[color:var(--pk-primary,#0f172a)]/8 font-medium text-[color:var(--pk-primary,#0f172a)]"
-                    : "text-[color:var(--pk-muted-foreground,#64748b)] hover:bg-[color:var(--pk-muted,#f1f5f9)] hover:text-[color:var(--pk-foreground,#0f172a)]",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+                className={resolveNavLinkClass(isActive, templateConfig)}
                 href={href}
               >
                 {link.label}
@@ -101,7 +192,7 @@ export function RegisterNav({
         {/* Desktop CTA */}
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <Link
-            className="rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className={resolveNavCtaClass(templateConfig)}
             href={scopedHref(nav.ctaHref, hrefPrefix, hrefQuery)}
           >
             {nav.ctaLabel}
@@ -110,7 +201,12 @@ export function RegisterNav({
 
         {/* Mobile hamburger — native details/summary, no JS required */}
         <details className="group relative md:hidden">
-          <summary className="flex cursor-pointer list-none items-center justify-center rounded-lg border border-[color:var(--pk-border,#e2e8f0)] p-2 text-[color:var(--pk-foreground,#0f172a)]">
+          <summary
+            className={joinClasses(
+              "flex cursor-pointer list-none items-center justify-center border border-[color:var(--pk-border,#e2e8f0)] p-2 text-[color:var(--pk-foreground,#0f172a)]",
+              resolveNavRadiusClass(templateConfig?.radius),
+            )}
+          >
             {/* Hamburger icon */}
             <svg
               aria-hidden="true"
@@ -137,21 +233,22 @@ export function RegisterNav({
           </summary>
 
           {/* Mobile dropdown */}
-          <div className="absolute right-0 top-full mt-1 w-64 rounded-xl border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)] p-2 shadow-lg">
+          <div
+            className={joinClasses(
+              "absolute right-0 top-full mt-1 w-64 border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-background,#fff)] p-2 shadow-lg",
+              resolveNavRadiusClass(templateConfig?.radius),
+            )}
+          >
             {nav.mobile.map((link) => {
               const href = scopedHref(link.href, hrefPrefix, hrefQuery);
               const isActive = currentPath === href.split("?")[0];
               return (
                 <Link
                   key={link.href}
-                  className={[
-                    "block rounded-lg px-3 py-2 text-sm transition-colors",
-                    isActive
-                      ? "bg-[color:var(--pk-primary,#0f172a)]/8 font-medium text-[color:var(--pk-primary,#0f172a)]"
-                      : "text-[color:var(--pk-foreground,#0f172a)] hover:bg-[color:var(--pk-muted,#f1f5f9)]",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+                  className={joinClasses(
+                    "block py-2",
+                    resolveNavLinkClass(isActive, templateConfig),
+                  )}
                   href={href}
                 >
                   {link.label}
@@ -160,7 +257,10 @@ export function RegisterNav({
             })}
             <div className="mt-2 border-t border-[color:var(--pk-border,#e2e8f0)] pt-2">
               <Link
-                className="block rounded-lg bg-[color:var(--pk-primary,#0f172a)] px-3 py-2 text-center text-sm font-medium text-white"
+                className={joinClasses(
+                  "block px-3 py-2 text-center",
+                  resolveNavCtaClass(templateConfig),
+                )}
                 href={scopedHref(nav.ctaHref, hrefPrefix, hrefQuery)}
               >
                 {nav.ctaLabel}

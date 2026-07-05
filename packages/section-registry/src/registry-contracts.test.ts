@@ -12,7 +12,9 @@ import {
 import type { RegistryContextValue } from "./runtime-context";
 
 const liveCtx: RegistryContextValue = {
+  content: {},
   isDevMode: false,
+  linkComponent: (() => null) as RegistryContextValue["linkComponent"],
   mode: "live",
   page: {
     pageDisabled: false,
@@ -21,6 +23,7 @@ const liveCtx: RegistryContextValue = {
     routeSlug: null,
   },
   renderMode: "live",
+  sections: [],
   templateConfig: { stylePreset: "lyra" },
   templateKey: "riwaq-starter",
   tenant: {
@@ -136,5 +139,11 @@ describe("template UI variant primitives", () => {
     expect(ui.preset.key).toBe("lyra");
     expect(ui.button({ size: "lg" })).toContain("h-11");
     expect(ui.surface()).toContain("rounded-xl");
+  });
+
+  test("keeps template primitives aligned with shadcn-style interaction states", () => {
+    expect(templateButtonVariants()).toContain("cursor-pointer");
+    expect(templateButtonVariants()).toContain("[&_svg]:pointer-events-none");
+    expect(templateInputVariants()).toContain("focus-visible:ring-offset-2");
   });
 });

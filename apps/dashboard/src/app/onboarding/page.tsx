@@ -24,6 +24,7 @@ import { OnboardingSignupNotification } from "@/components/onboarding-signup-not
 import { getCurrentAppSession, getTenantSlugFromHost } from "@/lib/session";
 import { readPendingOnboardingCookie } from "@/lib/session-cookie";
 import { getTenantSignInUrlForSubdomain } from "@/lib/tenant-dashboard-url";
+import { tenantRedirect } from "@/lib/tenant-url-server";
 
 // ---------------------------------------------------------------------------
 // Step definitions
@@ -182,20 +183,24 @@ export default async function OnboardingPage({
     }
 
     if (tenantSlug) {
-      redirect(authRoutes.signIn);
+      await tenantRedirect(authRoutes.signIn);
     }
 
     redirect(authRoutes.signUp);
   }
 
   if (session.activeMembership) {
+    if (tenantSlug) {
+      await tenantRedirect(
+        resolveDashboardLandingRoute(session.activeMembership.workRole),
+      );
+    }
+
     redirect(
-      tenantSlug
-        ? resolveDashboardLandingRoute(session.activeMembership.workRole)
-        : await getTenantSignInUrlForSubdomain(
-            session.activeMembership.companySlug,
-            resolveDashboardLandingRoute(session.activeMembership.workRole),
-          ),
+      await getTenantSignInUrlForSubdomain(
+        session.activeMembership.companySlug,
+        resolveDashboardLandingRoute(session.activeMembership.workRole),
+      ),
     );
   }
 
@@ -229,7 +234,7 @@ export default async function OnboardingPage({
   }
 
   if (tenantSlug && tenantSlug !== subdomain) {
-    redirect(
+    await tenantRedirect(
       `${authRoutes.signIn}?error=${encodeURIComponent("This website setup belongs to a different company dashboard.")}`,
     );
   }

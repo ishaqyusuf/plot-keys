@@ -17,8 +17,17 @@ import type { DerivedDesignConfig } from "./recommendation";
 // Style preset
 // ---------------------------------------------------------------------------
 
-/** Named style presets aligned with the Template Config Mode brain doc. */
-export type StylePreset = "vega" | "nova" | "maia" | "myra" | "lyra";
+/** Named style presets aligned with the shadcn Create-style template controls. */
+export type StylePreset =
+  | "vega"
+  | "nova"
+  | "maia"
+  | "myra"
+  | "lyra"
+  | "mira"
+  | "luma"
+  | "sera"
+  | "rhea";
 
 export type StylePresetDefinition = {
   key: StylePreset;
@@ -95,7 +104,7 @@ export const stylePresets: Record<StylePreset, StylePresetDefinition> = {
     },
     density: "airy",
   },
-  /** Minimal neutral — versatile for any market segment. */
+  /** Minimal neutral — legacy alias retained for existing stored configs. */
   myra: {
     key: "myra",
     name: "Myra",
@@ -128,6 +137,78 @@ export const stylePresets: Record<StylePreset, StylePresetDefinition> = {
       button: "rounded-lg",
       input: "rounded-lg",
       modal: "rounded-2xl",
+    },
+    density: "balanced",
+  },
+  /** Minimal neutral — versatile for any market segment. */
+  mira: {
+    key: "mira",
+    name: "Mira",
+    spacing: {
+      sectionY: "py-16",
+      sectionGap: "gap-8",
+      containerX: "px-4 md:px-5",
+      gridGap: "gap-4",
+    },
+    radius: {
+      card: "rounded-lg",
+      button: "rounded-full",
+      input: "rounded-full",
+      modal: "rounded-xl",
+    },
+    density: "compact",
+  },
+  /** Soft spacious surfaces for warm property brands. */
+  luma: {
+    key: "luma",
+    name: "Luma",
+    spacing: {
+      sectionY: "py-24",
+      sectionGap: "gap-12",
+      containerX: "px-5 md:px-8",
+      gridGap: "gap-7",
+    },
+    radius: {
+      card: "rounded-2xl",
+      button: "rounded-xl",
+      input: "rounded-xl",
+      modal: "rounded-3xl",
+    },
+    density: "airy",
+  },
+  /** Quiet operational style for dense but polished pages. */
+  sera: {
+    key: "sera",
+    name: "Sera",
+    spacing: {
+      sectionY: "py-20",
+      sectionGap: "gap-9",
+      containerX: "px-4 md:px-6",
+      gridGap: "gap-5",
+    },
+    radius: {
+      card: "rounded-xl",
+      button: "rounded-md",
+      input: "rounded-md",
+      modal: "rounded-2xl",
+    },
+    density: "balanced",
+  },
+  /** Crisp low-radius style for editorial/project-history templates. */
+  rhea: {
+    key: "rhea",
+    name: "Rhea",
+    spacing: {
+      sectionY: "py-20",
+      sectionGap: "gap-10",
+      containerX: "px-4 md:px-7",
+      gridGap: "gap-6",
+    },
+    radius: {
+      card: "rounded-md",
+      button: "rounded-sm",
+      input: "rounded-sm",
+      modal: "rounded-lg",
     },
     density: "balanced",
   },
@@ -165,7 +246,111 @@ export type ColorSystem = {
   name: string;
 };
 
+function createBaseColorSystem(
+  name: string,
+  hue: number,
+  saturation: number,
+): ColorSystem {
+  return {
+    name,
+    light: {
+      accent: `${hue} ${saturation}% 94%`,
+      accentForeground: `${hue} ${Math.max(saturation, 10)}% 16%`,
+      background: `${hue} ${Math.max(saturation - 4, 0)}% 98%`,
+      border: `${hue} ${Math.max(saturation, 6)}% 88%`,
+      card: "0 0% 100%",
+      cardForeground: `${hue} ${Math.max(saturation, 8)}% 8%`,
+      destructive: "0 84.2% 60.2%",
+      destructiveForeground: "0 0% 98%",
+      foreground: `${hue} ${Math.max(saturation, 8)}% 8%`,
+      input: `${hue} ${Math.max(saturation, 6)}% 88%`,
+      muted: `${hue} ${Math.max(saturation - 2, 0)}% 94%`,
+      mutedForeground: `${hue} ${Math.max(saturation, 6)}% 42%`,
+      popover: "0 0% 100%",
+      popoverForeground: `${hue} ${Math.max(saturation, 8)}% 8%`,
+      primary: `${hue} ${Math.max(saturation + 8, 12)}% 24%`,
+      primaryForeground: "0 0% 100%",
+      ring: `${hue} ${Math.max(saturation + 8, 12)}% 24%`,
+      secondary: `${hue} ${Math.max(saturation - 1, 0)}% 92%`,
+      secondaryForeground: `${hue} ${Math.max(saturation, 8)}% 14%`,
+    },
+    dark: {
+      accent: `${hue} ${Math.max(saturation, 6)}% 18%`,
+      accentForeground: `${hue} ${Math.max(saturation, 6)}% 84%`,
+      background: `${hue} ${Math.max(saturation, 6)}% 6%`,
+      border: `${hue} ${Math.max(saturation, 6)}% 16%`,
+      card: `${hue} ${Math.max(saturation, 6)}% 8%`,
+      cardForeground: `${hue} ${Math.max(saturation, 6)}% 96%`,
+      destructive: "0 62.8% 30.6%",
+      destructiveForeground: "0 0% 98%",
+      foreground: `${hue} ${Math.max(saturation, 6)}% 96%`,
+      input: `${hue} ${Math.max(saturation, 6)}% 16%`,
+      muted: `${hue} ${Math.max(saturation, 6)}% 14%`,
+      mutedForeground: `${hue} ${Math.max(saturation, 6)}% 62%`,
+      popover: `${hue} ${Math.max(saturation, 6)}% 8%`,
+      popoverForeground: `${hue} ${Math.max(saturation, 6)}% 96%`,
+      primary: `${hue} ${Math.max(saturation, 8)}% 82%`,
+      primaryForeground: `${hue} ${Math.max(saturation, 8)}% 10%`,
+      ring: `${hue} ${Math.max(saturation, 8)}% 82%`,
+      secondary: `${hue} ${Math.max(saturation, 6)}% 14%`,
+      secondaryForeground: `${hue} ${Math.max(saturation, 6)}% 96%`,
+    },
+  };
+}
+
 export const colorSystems: Record<string, ColorSystem> = {
+  rubbait: {
+    name: "Rubbait",
+    light: {
+      accent: "#ded8d2",
+      accentForeground: "#08090A",
+      background: "#ECECEC",
+      border: "#cfc8c1",
+      card: "#ffffff",
+      cardForeground: "#08090A",
+      destructive: "0 84.2% 60.2%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "#08090A",
+      input: "#cfc8c1",
+      muted: "#ded8d2",
+      mutedForeground: "#6C6E6E",
+      popover: "#ffffff",
+      popoverForeground: "#08090A",
+      primary: "#522C1F",
+      primaryForeground: "#ECECEC",
+      ring: "#522C1F",
+      secondary: "#e4dfda",
+      secondaryForeground: "#454241",
+    },
+    dark: {
+      accent: "#454241",
+      accentForeground: "#ECECEC",
+      background: "#08090A",
+      border: "#454241",
+      card: "#111111",
+      cardForeground: "#ECECEC",
+      destructive: "0 62.8% 30.6%",
+      destructiveForeground: "0 0% 98%",
+      foreground: "#ECECEC",
+      input: "#454241",
+      muted: "#1a1817",
+      mutedForeground: "#9C9C9C",
+      popover: "#111111",
+      popoverForeground: "#ECECEC",
+      primary: "#907762",
+      primaryForeground: "#08090A",
+      ring: "#907762",
+      secondary: "#1f1c1a",
+      secondaryForeground: "#ECECEC",
+    },
+  },
+  neutral: createBaseColorSystem("Neutral", 0, 0),
+  stone: createBaseColorSystem("Stone", 30, 8),
+  zinc: createBaseColorSystem("Zinc", 240, 6),
+  mauve: createBaseColorSystem("Mauve", 282, 10),
+  olive: createBaseColorSystem("Olive", 78, 12),
+  mist: createBaseColorSystem("Mist", 200, 12),
+  taupe: createBaseColorSystem("Taupe", 30, 10),
   slate: {
     name: "Slate",
     light: {
@@ -322,21 +507,31 @@ export type TemplateConfig = {
   accentColor?: string;
   /** The chosen background color. */
   backgroundColor?: string;
+  /** Chart palette selection used by analytics/chart sections. */
+  chartColor?: string;
   /** Active color system key (e.g. "slate", "ocean", "forest"). */
   colorSystem?: string;
   /** Body font family name (resolved via `resolveFontStack`). */
   fontFamily?: string;
   /** Heading font family name (resolved via `resolveHeadingFontStack`). */
   headingFontFamily?: string;
+  /** Icon library selection for template-local icons. */
+  iconLibrary?: "lucide" | string;
   /** Company logo text or URL for the site header. */
   logo?: string;
   /** The primary market label shown in the hero and metadata. */
   market?: string;
+  /** Menu accent treatment for template-owned navigation. */
+  menuAccent?: string;
+  /** Menu visual treatment for template-owned navigation. */
+  menuStyle?: string;
   /**
    * Named image assignments for sections (e.g. hero background, story photo).
    * Keys are section slot IDs; values are image URLs or Cloudinary public IDs.
    */
   namedImages?: Record<string, string>;
+  /** Radius selection shown in configure mode. */
+  radius?: string;
   /** The active style preset key. */
   stylePreset?: StylePreset;
   /** Support tagline or contact line shown in the footer/header. */
@@ -370,12 +565,17 @@ export function serializeTemplateConfig(
 
   if (config.accentColor) output.accentColor = config.accentColor;
   if (config.backgroundColor) output.backgroundColor = config.backgroundColor;
+  if (config.chartColor) output.chartColor = config.chartColor;
   if (config.colorSystem) output.colorSystem = config.colorSystem;
   if (config.fontFamily) output.fontFamily = config.fontFamily;
   if (config.headingFontFamily)
     output.headingFontFamily = config.headingFontFamily;
+  if (config.iconLibrary) output.iconLibrary = config.iconLibrary;
   if (config.logo) output.logo = config.logo;
   if (config.market) output.market = config.market;
+  if (config.menuAccent) output.menuAccent = config.menuAccent;
+  if (config.menuStyle) output.menuStyle = config.menuStyle;
+  if (config.radius) output.radius = config.radius;
   if (config.stylePreset) output.stylePreset = config.stylePreset;
   if (config.supportLine) output.supportLine = config.supportLine;
 
@@ -432,12 +632,17 @@ export function deserializeTemplateConfig(
   return {
     accentColor: raw.accentColor,
     backgroundColor: raw.backgroundColor,
+    chartColor: raw.chartColor,
     colorSystem: raw.colorSystem,
     fontFamily: raw.fontFamily,
     headingFontFamily: raw.headingFontFamily,
+    iconLibrary: raw.iconLibrary,
     logo: raw.logo,
     market: raw.market,
+    menuAccent: raw.menuAccent,
+    menuStyle: raw.menuStyle,
     namedImages: Object.keys(namedImages).length > 0 ? namedImages : undefined,
+    radius: raw.radius,
     seo: Object.keys(seo).length > 0 ? seo : undefined,
     stylePreset: raw.stylePreset as StylePreset | undefined,
     supportLine: raw.supportLine,

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  colorSystems,
   getTemplateDefinition,
   getTemplateManifest,
   getTemplatePageInventoryStrict,
@@ -29,10 +30,21 @@ describe("template manifest registry", () => {
   test("preserves register template styling and scoring metadata", () => {
     const manifest = getTemplateManifest("riwaq-starter");
 
-    expect(manifest.defaultTheme.colorSystem).toBe("slate");
+    expect(manifest.defaultTheme.accentColor).toBe("#522C1F");
+    expect(manifest.defaultTheme.backgroundColor).toBe("");
+    expect(manifest.defaultTheme.chartColor).toBe("#907762");
+    expect(manifest.defaultTheme.colorSystem).toBe("rubbait");
     expect(manifest.defaultTheme.stylePreset).toBe("lyra");
     expect(manifest.tags).toContain("register-template");
     expect(manifest.tags).toContain("project-history");
+  });
+
+  test("registers the Rubbait base color system used by Riwaq", () => {
+    expect(colorSystems.rubbait?.name).toBe("Rubbait");
+    expect(colorSystems.rubbait?.light.background).toBe("#ECECEC");
+    expect(colorSystems.rubbait?.light.foreground).toBe("#08090A");
+    expect(colorSystems.rubbait?.light.primary).toBe("#522C1F");
+    expect(colorSystems.rubbait?.dark.primary).toBe("#907762");
   });
 
   test("keeps register variants owned by plan tier", () => {
@@ -79,6 +91,31 @@ describe("template manifest registry", () => {
       "roadmap",
       "privacy",
       "terms",
+    ]);
+  });
+
+  test("declares page-specific Riwaq header content keys", () => {
+    const inventory = getTemplatePageInventoryStrict("riwaq-starter");
+    const contentKeysForPage = (pageKey: string) =>
+      inventory.pages
+        .find((page) => page.pageKey === pageKey)
+        ?.sections.find((section) => section.sectionType === "HeroBannerSection")
+        ?.contentKeys;
+
+    expect(contentKeysForPage("blog")).toEqual([
+      "blog.eyebrow",
+      "blog.title",
+      "blog.subtitle",
+    ]);
+    expect(contentKeysForPage("contact")).toEqual([
+      "contact.eyebrow",
+      "contact.title",
+      "contact.subtitle",
+    ]);
+    expect(contentKeysForPage("roadmap")).toEqual([
+      "roadmap.eyebrow",
+      "roadmap.title",
+      "roadmap.subtitle",
     ]);
   });
 

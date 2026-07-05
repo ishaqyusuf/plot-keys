@@ -62,8 +62,17 @@ export type DerivedDesignConfig = {
   colorSystem: string;
   fontFamily: string;
   headingFontFamily: string;
-  /** Maps to the 5 brain-defined named style presets. */
-  stylePreset: "vega" | "nova" | "maia" | "myra" | "lyra";
+  /** Maps to the named style presets used by template config mode. */
+  stylePreset:
+    | "vega"
+    | "nova"
+    | "maia"
+    | "myra"
+    | "lyra"
+    | "mira"
+    | "luma"
+    | "sera"
+    | "rhea";
 };
 
 /** Which page sections to render and in what logical order. */

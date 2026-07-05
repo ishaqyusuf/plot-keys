@@ -568,6 +568,98 @@ export async function updateTemplateSandboxThemeFieldAction(
   revalidatePath(`/template-sandbox/${profileId}`);
 }
 
+const templateSandboxShuffleOptions = {
+  accentColor: [
+    "#522C1F",
+    "#907762",
+    "orange",
+    "taupe",
+    "amber",
+    "blue",
+    "emerald",
+    "indigo",
+    "rose",
+    "teal",
+  ],
+  colorSystem: [
+    "rubbait",
+    "neutral",
+    "stone",
+    "zinc",
+    "mauve",
+    "olive",
+    "mist",
+    "taupe",
+    "slate",
+  ],
+  fontFamily: ["Inter", "Geist", "Raleway", "DM Sans", "Manrope", "Outfit"],
+  headingFontFamily: [
+    "Raleway",
+    "Geist",
+    "Outfit",
+    "Space Grotesk",
+    "Montserrat",
+  ],
+  menuAccent: ["subtle", "strong", "none"],
+  menuStyle: [
+    "default-translucent",
+    "default-solid",
+    "minimal",
+    "bordered",
+  ],
+  radius: ["none", "sm", "md", "lg", "xl"],
+  stylePreset: ["vega", "nova", "maia", "lyra", "mira", "luma", "sera", "rhea"],
+} as const;
+
+function pickTemplateSandboxShuffleValue<const T extends readonly string[]>(
+  values: T,
+) {
+  return values[Math.floor(Math.random() * values.length)] ?? values[0];
+}
+
+export async function shuffleTemplateSandboxStyleAction(formData: FormData) {
+  const profileId = String(
+    formData.get("profileId") ?? formData.get("configId") ?? "",
+  );
+  const caller = await createServerCaller();
+  const accentColor = pickTemplateSandboxShuffleValue(
+    templateSandboxShuffleOptions.accentColor,
+  );
+  const updates = {
+    accentColor,
+    chartColor: accentColor,
+    colorSystem: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.colorSystem,
+    ),
+    fontFamily: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.fontFamily,
+    ),
+    headingFontFamily: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.headingFontFamily,
+    ),
+    menuAccent: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.menuAccent,
+    ),
+    menuStyle: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.menuStyle,
+    ),
+    radius: pickTemplateSandboxShuffleValue(templateSandboxShuffleOptions.radius),
+    stylePreset: pickTemplateSandboxShuffleValue(
+      templateSandboxShuffleOptions.stylePreset,
+    ),
+  };
+
+  for (const [themeKey, value] of Object.entries(updates)) {
+    await caller.templateSandbox.updateThemeField({
+      profileId,
+      themeKey,
+      value,
+    });
+  }
+
+  revalidatePath(`/template-sandbox/${profileId}`);
+}
+
 export async function smartFillTemplateSandboxFieldAction(formData: FormData) {
   const profileId = String(
     formData.get("profileId") ?? formData.get("configId") ?? "",

@@ -3,6 +3,7 @@ import {
   getRegisterTemplate,
   getTemplatePageInventoryStrict,
   resolvePage,
+  resolveTemplatePageHandle,
   type HomeSectionDefinition,
   type RenderMode,
 } from "@plotkeys/section-registry";
@@ -124,17 +125,32 @@ export async function renderSandboxPage({
     pageKey,
     routeSlug,
   );
+  const pageInfo = {
+    canonicalPath,
+    pageDisabled: false,
+    pageKey,
+    pageNotSupported: false,
+    routeSlug: routeSlug ?? null,
+  };
+  const templatePageHandle = resolveTemplatePageHandle<
+    Record<string, never> | { slug: string }
+  >({
+    pageInfo,
+    pageKey,
+    templateKey: sandbox.templateKey,
+  });
+  const TemplatePage = templatePageHandle?.Page as
+    | ((props: { slug?: string }) => JSX.Element | null)
+    | undefined;
+  const templatePageProps = routeSlug ? { slug: routeSlug } : {};
 
   return (
     <TenantInteractionShell
       colorSystemKey={templateConfig.colorSystem}
-      pageInfo={{
-        canonicalPath,
-        pageDisabled: false,
-        pageKey,
-        pageNotSupported: false,
-        routeSlug: routeSlug ?? null,
-      }}
+      content={sandbox.content}
+      pageInfo={templatePageHandle?.info ?? pageInfo}
+      registryHrefPrefix={hrefPrefix}
+      registryHrefQuery={hrefQuery}
       renderMode={renderMode}
       templateConfig={templateConfig}
       templateKey={sandbox.templateKey}
@@ -151,15 +167,20 @@ export async function renderSandboxPage({
             currentPath={canonicalPath}
             hrefPrefix={hrefPrefix}
             hrefQuery={hrefQuery}
+            templateConfig={templateConfig}
             templateKey={registerTemplate.key}
             tier={registerTemplate.tier}
           />
         ) : null}
-        <main>
-          {resolved.sections.map((section) =>
-            renderSection(section, resolved.theme),
-          )}
-        </main>
+        {TemplatePage ? (
+          <TemplatePage {...templatePageProps} />
+        ) : (
+          <main>
+            {resolved.sections.map((section) =>
+              renderSection(section, resolved.theme),
+            )}
+          </main>
+        )}
         {registerTemplate ? (
           <RegisterFooter
             companyName={sandbox.companyName}

@@ -28,14 +28,15 @@ export type EditableContentNode = {
 - safe persistence into section config
 
 ## Configure Mode Behavior
-1. hover text block and show outline
-2. show top-right action bar
-3. click text to edit inline
-4. show AI action when the content node is AI-enabled
-5. lock or upsell AI access for non-Pro users instead of silently hiding it
-6. send structured AI payload with tenant, page, section, and content metadata
-7. preview or accept generated content
-8. write accepted content back into draft config only
+1. hover text block and show the editable border/outline
+2. show an edit cursor on editable text
+3. show top-right action bar
+4. click text to edit inline
+5. show AI action when the content node is AI-enabled
+6. lock or upsell AI access for non-Pro users instead of silently hiding it
+7. send structured AI payload with tenant, page, section, and content metadata
+8. preview or accept generated content
+9. write accepted content back into draft config only
 
 ## AI Request Payload
 - `tenantId`
@@ -57,6 +58,9 @@ export type EditableContentNode = {
 ## Persistence Rule
 - Editable content metadata should live inside section config rather than in ad hoc editor-only state.
 - Draft edits should never mutate the live site directly.
+- Template-owned page components should receive an optional content commit callback from registry context. In live mode this callback is absent; in sandbox/builder mode it persists through the owning tRPC/action layer.
+- Do not build separate copy-edit forms for static marketing text. The rendered page is the editor surface.
+- Data-bound entities such as listings, projects, agents, and blog posts are edited through their own database flows, but their surrounding section copy remains inline editable.
 
 ## Recommended UI Primitives
 - `EditableText`
