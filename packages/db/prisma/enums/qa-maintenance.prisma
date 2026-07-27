@@ -1,0 +1,13 @@
+enum QaDataClassification {
+  live
+  qa
+}
+
+enum QaPurgeRunStatus {
+  queued
+  running
+  completed
+  partially_completed
+  failed
+  blocked
+}

@@ -46,6 +46,7 @@ export * from "./queries/payroll";
 export * from "./queries/project";
 export * from "./queries/project-customer";
 export * from "./queries/project-finance";
+export * from "./queries/qa-maintenance";
 export * from "./queries/property";
 export * from "./queries/property-media";
 export * from "./queries/reports";

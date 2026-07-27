@@ -85,6 +85,15 @@ export function isVercelDomainProvisioningConfigured() {
   );
 }
 
+export function getVercelDomainCleanupCredentialBlocker() {
+  const projectsConfigured = Boolean(
+    getProjectIdOrName("sitefront") || getProjectIdOrName("dashboard"),
+  );
+  return projectsConfigured && !getVercelToken()
+    ? "vercel_api_credentials_unavailable"
+    : null;
+}
+
 function resolveProjectKey(kind: TenantDomainKindValue) {
   return kind === "dashboard_subdomain" || kind === "dashboard_custom_domain"
     ? "dashboard"
@@ -116,6 +125,28 @@ async function vercelRequest<TResponse>(
   }
 
   return (await response.json()) as TResponse;
+}
+
+export async function removeTenantDomainFromVercel(
+  domain: Pick<TenantDomainRecord, "hostname" | "kind">,
+) {
+  const projectKey = resolveProjectKey(domain.kind);
+  const projectIdOrName = getProjectIdOrName(projectKey);
+  if (!projectIdOrName) return;
+  const token = getVercelToken();
+  if (!token) throw new Error("VERCEL_API_TOKEN is not configured.");
+  const response = await fetch(
+    `https://api.vercel.com/v9/projects/${projectIdOrName}/domains/${encodeURIComponent(domain.hostname)}${getTeamQuery()}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      method: "DELETE",
+    },
+  );
+  if (!response.ok && response.status !== 404) {
+    throw new Error(
+      `Vercel domain cleanup failed with HTTP ${response.status}.`,
+    );
+  }
 }
 
 async function getProjectDomain(

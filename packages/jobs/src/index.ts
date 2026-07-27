@@ -1,4 +1,5 @@
 export const jobIds = {
+  qaPurge: "platform.qa.purge",
   domainConnectionSync: "domains.connection.sync",
   emailSmokeTest: "email-smoke-test",
   notification: "notification",
@@ -39,4 +40,5 @@ export type { NotificationTaskPayload } from "@plotkeys/notifications";
 export { planSyncHandler } from "./handlers/plan-sync";
 export type { PlanSyncPayload } from "./handlers/plan-sync";
 export { siteContentGenerationHandler } from "./handlers/site-content-generation";
+export { qaPurgeHandler } from "./handlers/qa-purge";
 export type { SiteContentGenerationPayload } from "./handlers/site-content-generation";

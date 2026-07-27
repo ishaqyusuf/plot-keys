@@ -37,18 +37,54 @@ export const membershipProcedure = t.procedure.use(({ ctx, next }) => {
       message: "An active membership is required for this action.",
     });
   }
+  const activeMembership = ctx.auth.activeMembership;
+  const session = ctx.auth.session;
 
-  return next({
-    ctx: {
-      ...ctx,
-      auth: {
-        ...ctx.auth,
-        activeMembership: ctx.auth.activeMembership,
-        session: ctx.auth.session,
-      },
-    },
-  });
+  const db = ctx.db.db;
+  if (!db) {
+    throw new TRPCError({
+      code: "SERVICE_UNAVAILABLE",
+      message: "Database is unavailable.",
+    });
+  }
+
+  return db.company
+    .findUnique({
+      where: { id: activeMembership.companyId },
+      select: { qaPurgeStartedAt: true },
+    })
+    .then((company) => {
+      if (company?.qaPurgeStartedAt) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "This QA company is being permanently purged.",
+        });
+      }
+
+      return next({
+        ctx: {
+          ...ctx,
+          auth: {
+            ...ctx.auth,
+            activeMembership,
+            session,
+          },
+        },
+      });
+    });
 });
+
+export const platformAdminProcedure = membershipProcedure.use(
+  ({ ctx, next }) => {
+    if (ctx.auth.activeMembership.role !== "platform_admin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Platform administrator access is required.",
+      });
+    }
+    return next({ ctx });
+  },
+);
 
 // Role hierarchy — higher rank means more privileged
 const roleRank: Record<MembershipRole, number> = {
@@ -89,4 +125,3 @@ export function minRoleProcedure(required: MembershipRole) {
     return next({ ctx });
   });
 }
-

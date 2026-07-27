@@ -20,6 +20,7 @@ type ResendEmailPayload = {
   reply_to?: string;
   subject: string;
   to: string[];
+  headers?: Record<string, string>;
 };
 
 export type EmailInput = {
@@ -36,6 +37,7 @@ export type EmailSendResult = {
   error?: unknown;
   originalRecipients: string[];
   providerId?: string;
+  reason?: string;
   recipients: string[];
   status: "sent" | "failed" | "skipped";
   wasRecipientOverridden: boolean;
@@ -320,10 +322,30 @@ export class EmailService {
   async send(email: EmailInput): Promise<EmailSendResult> {
     const recipients = resolveEmailRecipients(email.to);
     const from = email.from ?? getEmailFrom();
+    const configuredMode = readNonEmptyEnv(
+      "EMAIL_DELIVERY_MODE",
+    )?.toLowerCase();
+    const live =
+      configuredMode === "live" ||
+      (configuredMode !== "console" && process.env.NODE_ENV === "production");
 
-    if (!getResendApiKey() || !from || recipients.recipients.length === 0) {
+    if (recipients.recipients.length === 0) {
       return {
         originalRecipients: recipients.originalRecipients,
+        reason: "no-email-recipients",
+        recipients: recipients.recipients,
+        status: "skipped",
+        wasRecipientOverridden: recipients.isOverridden,
+      };
+    }
+    if (
+      live &&
+      recipients.routes.every((route) => !route.qaRouted) &&
+      (!getResendApiKey() || !from)
+    ) {
+      return {
+        originalRecipients: recipients.originalRecipients,
+        reason: "missing-email-provider-configuration",
         recipients: recipients.recipients,
         status: "skipped",
         wasRecipientOverridden: recipients.isOverridden,
@@ -331,17 +353,38 @@ export class EmailService {
     }
 
     try {
-      const result = await sendEmail({
-        from,
-        html: htmlFromEmailInput(email),
-        reply_to: email.replyTo ?? getEmailReplyTo(),
-        subject: email.subject,
-        to: recipients.recipients,
-      });
+      let providerId: string | undefined;
+      for (const route of recipients.routes) {
+        if (!route.qaRouted && !live) {
+          console.info("[email:console]", {
+            subject: email.subject,
+            to: route.originalRecipient,
+          });
+          continue;
+        }
+        if (!getResendApiKey() || !from) {
+          throw new Error("Email provider configuration is required.");
+        }
+        const result = await sendEmail({
+          from,
+          headers: route.qaRouted
+            ? { "X-QA-Original-Recipient": route.originalRecipient }
+            : undefined,
+          html: route.qaRouted
+            ? `<div style="border:1px solid #d4d4d8;padding:12px;margin-bottom:16px"><strong>QA delivery</strong><br />Original recipient: ${escapeHtml(route.originalRecipient)}</div>${htmlFromEmailInput(email)}`
+            : htmlFromEmailInput(email),
+          reply_to: email.replyTo ?? getEmailReplyTo(),
+          subject: route.qaRouted
+            ? `[QA: ${route.originalRecipient}] ${email.subject}`
+            : email.subject,
+          to: [route.recipient],
+        });
+        providerId = result?.id ?? providerId;
+      }
 
       return {
         originalRecipients: recipients.originalRecipients,
-        providerId: result?.id,
+        providerId,
         recipients: recipients.recipients,
         status: "sent",
         wasRecipientOverridden: recipients.isOverridden,

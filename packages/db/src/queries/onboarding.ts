@@ -1,4 +1,5 @@
 import { createPrismaClient, type Db } from "../prisma";
+import { configuredQaDomainForEmail } from "./qa-maintenance";
 
 export type OnboardingStepProgressInput = {
   userId: string;
@@ -297,14 +298,23 @@ export async function createCompanyOnboardingBundle(
   },
 ) {
   return db.$transaction(async (tx) => {
+    const creator = await tx.user.findUnique({
+      where: { id: input.createdById },
+      select: { email: true },
+    });
+    if (!creator) throw new Error("Workspace owner not found.");
+    const qaSourceDomain = configuredQaDomainForEmail(creator.email);
     const company = await tx.company.create({
       data: {
         ...(input.logoUrl ? { logoUrl: input.logoUrl } : {}),
+        dataClassification: qaSourceDomain ? "qa" : "live",
         market: input.market,
         name: input.companyName,
         planStartedAt: new Date(),
         planStatus: "active",
         planTier: "starter",
+        qaMarkedAt: qaSourceDomain ? new Date() : null,
+        qaSourceDomain,
         slug: input.subdomain,
       },
     });

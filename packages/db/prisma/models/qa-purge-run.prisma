@@ -1,0 +1,16 @@
+model QaPurgeRun {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestedByUserId String           @map("requested_by_user_id")
+  status            QaPurgeRunStatus @default(queued)
+  activeKey         String?          @unique @map("active_key")
+  deletedCounts     Json?            @map("deleted_counts")
+  errorCategory     String?          @map("error_category")
+  startedAt         DateTime?        @map("started_at") @db.Timestamptz(6)
+  completedAt       DateTime?        @map("completed_at") @db.Timestamptz(6)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status], map: "qa_purge_runs_status_idx")
+  @@index([createdAt], map: "qa_purge_runs_created_at_idx")
+  @@map("qa_purge_runs")
+}
