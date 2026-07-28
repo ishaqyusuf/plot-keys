@@ -3,11 +3,11 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-type PortalProps = {
+type Props = {
   children: ReactNode;
 };
 
-export function Portal({ children }: PortalProps) {
+export function Portal({ children }: Props) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

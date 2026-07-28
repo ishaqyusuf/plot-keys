@@ -1,22 +1,24 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@plotkeys/ui/sheet";
-import { DashboardSheetHeader } from "@/components/sheets/dashboard-sheet-layout";
+import { Sheet, SheetContent } from "@plotkeys/ui/sheet";
 import { CreateEstateForm } from "@/components/forms/estate-form";
+import { StackedSheetHeader } from "@/components/stacked-sheet-header";
+import { useEstateParams } from "@/hooks/use-estate-params";
 
 export function EstateCreateSheet() {
+  const { createEstate, setParams } = useEstateParams();
+  const isOpen = Boolean(createEstate);
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button size="sm">Create estate launch</Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-xl">
-        <DashboardSheetHeader
+    <Sheet open={isOpen} onOpenChange={(open) => !open && setParams(null)}>
+      <SheetContent stack>
+        <StackedSheetHeader
           description="Group land listings into a presale campaign with launch copy, plan import, and purchase pipeline support."
+          onClose={() => setParams(null)}
           title="Create estate launch"
         />
-        <CreateEstateForm />
+
+        <CreateEstateForm onSuccess={() => setParams(null)} />
       </SheetContent>
     </Sheet>
   );

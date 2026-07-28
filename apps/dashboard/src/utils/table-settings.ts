@@ -5,6 +5,9 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 
+/**
+ * Table identifiers for all supported tables
+ */
 export type TableId =
   | "agents"
   | "blog"
@@ -12,7 +15,6 @@ export type TableId =
   | "customers"
   | "departments"
   | "employees"
-  | "estates"
   | "leads"
   | "leave-requests"
   | "notifications"
@@ -21,18 +23,30 @@ export type TableId =
   | "properties"
   | "team";
 
+/**
+ * Settings for a single table
+ */
 export interface TableSettings {
   columns: VisibilityState;
   sizing: ColumnSizingState;
   order: ColumnOrderState;
 }
 
+/**
+ * Settings for all tables stored in a single cookie
+ */
 export type AllTableSettings = {
   [K in TableId]?: Partial<TableSettings>;
 };
 
+/**
+ * Cookie key for unified table settings
+ */
 export const TABLE_SETTINGS_COOKIE = "table-settings";
 
+/**
+ * Default hidden columns for each table
+ */
 export const defaultHiddenColumns: Record<TableId, string[]> = {
   agents: [],
   blog: [],
@@ -40,7 +54,6 @@ export const defaultHiddenColumns: Record<TableId, string[]> = {
   customers: [],
   departments: [],
   employees: [],
-  estates: [],
   leads: [],
   "leave-requests": [],
   notifications: [],
@@ -50,52 +63,66 @@ export const defaultHiddenColumns: Record<TableId, string[]> = {
   team: [],
 };
 
+/**
+ * Get default column visibility for a table
+ */
 export function getDefaultColumnVisibility(tableId: TableId): VisibilityState {
   const columnsToHide = defaultHiddenColumns[tableId];
-
   return columnsToHide.reduce(
-    (acc, column) => {
-      acc[column] = false;
+    (acc, col) => {
+      acc[col] = false;
       return acc;
     },
     {} as Record<string, boolean>,
   );
 }
 
+/**
+ * Get default settings for a table
+ */
 export function getDefaultTableSettings(tableId: TableId): TableSettings {
   return {
     columns: getDefaultColumnVisibility(tableId),
-    order: [],
     sizing: {},
+    order: [],
   };
 }
 
+/**
+ * Merge saved settings with defaults, ensuring all required fields exist
+ */
 export function mergeWithDefaults(
   saved: Partial<TableSettings> | undefined,
   tableId: TableId,
 ): TableSettings {
   const defaults = getDefaultTableSettings(tableId);
-
   return {
     columns: saved?.columns ?? defaults.columns,
-    order: saved?.order ?? defaults.order,
     sizing: saved?.sizing ?? defaults.sizing,
+    order: saved?.order ?? defaults.order,
   };
 }
 
-export function getColumnIds<TData>(
-  columns: ColumnDef<TData>[],
-): ColumnOrderState {
+/**
+ * Extract column IDs from column definitions in definition order.
+ */
+export function getColumnIds<TData>(columns: ColumnDef<TData>[]): string[] {
   return columns
     .map(
-      (column) =>
-        column.id ??
-        (column as ColumnDef<TData> & { accessorKey?: string }).accessorKey ??
+      (col) =>
+        col.id ??
+        (col as ColumnDef<TData> & { accessorKey?: string }).accessorKey ??
         "",
     )
     .filter(Boolean);
 }
 
+/**
+ * Normalize a saved column order against the current column definitions.
+ * - Removes columns that no longer exist in definitions
+ * - Inserts new columns between "select" and "actions"
+ * - Ensures "select" is first and "actions" is last
+ */
 export function normalizeColumnOrder(
   savedOrder: ColumnOrderState,
   allColumnIds: string[],
@@ -106,13 +133,17 @@ export function normalizeColumnOrder(
 
   const definedIds = new Set(allColumnIds);
   const savedIds = new Set(savedOrder);
-  const orderWithoutActions = savedOrder.filter(
-    (id) => id !== "actions" && definedIds.has(id),
+  const orderWithoutPinnedColumns = savedOrder.filter(
+    (id) => id !== "select" && id !== "actions" && definedIds.has(id),
   );
   const newColumns = allColumnIds.filter(
-    (id) => id !== "actions" && !savedIds.has(id),
+    (id) => id !== "select" && id !== "actions" && !savedIds.has(id),
   );
-  const result = [...orderWithoutActions, ...newColumns];
+  const result = [...orderWithoutPinnedColumns, ...newColumns];
+
+  if (definedIds.has("select")) {
+    result.unshift("select");
+  }
 
   if (definedIds.has("actions")) {
     result.push("actions");

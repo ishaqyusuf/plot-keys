@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import {
   Field,
   FieldDescription,
@@ -8,12 +7,15 @@ import {
   FieldLabel,
 } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
-import { connectCustomDomainAction } from "@/app/actions";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const connectDomainFormSchema = z.object({
   hostname: z
@@ -31,28 +33,43 @@ const connectDomainFormSchema = z.object({
 
 type ConnectDomainFormValues = z.infer<typeof connectDomainFormSchema>;
 
-type ConnectDomainFormProps = {
+type Props = {
   disabled?: boolean;
 };
 
-export function ConnectDomainForm({ disabled }: ConnectDomainFormProps) {
-  const [pending, setPending] = useState(false);
+export function ConnectDomainForm({ disabled }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(connectDomainFormSchema, {
     defaultValues: {
       hostname: "",
     },
   });
+  const connectDomainMutation = useMutation(
+    trpc.domains.connect.mutationOptions({
+      onError(error) {
+        setError(error.message || "Failed to connect domain.");
+      },
+      async onSuccess() {
+        setError(null);
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.domains.status.queryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.domains.dnsInstructions.queryKey(),
+          }),
+        ]);
+        router.push("/domains");
+      },
+    }),
+  );
 
-  async function handleSubmit(values: ConnectDomainFormValues) {
-    setPending(true);
-
-    try {
-      const formData = new FormData();
-      formData.set("hostname", values.hostname.trim());
-      await connectCustomDomainAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: ConnectDomainFormValues) {
+    setError(null);
+    connectDomainMutation.mutate({ hostname: values.hostname.trim() });
   }
 
   return (
@@ -76,6 +93,7 @@ export function ConnectDomainForm({ disabled }: ConnectDomainFormProps) {
               {form.formState.errors.hostname.message}
             </p>
           ) : null}
+          {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </Field>
       </FieldGroup>
 
@@ -85,9 +103,12 @@ export function ConnectDomainForm({ disabled }: ConnectDomainFormProps) {
           name="connect-domain"
         />
         <div className="flex flex-wrap items-center justify-end gap-3">
-          <Button disabled={disabled || pending} type="submit">
-            {pending ? "Connecting..." : "Connect domain"}
-          </Button>
+          <SubmitButton
+            disabled={disabled}
+            isSubmitting={connectDomainMutation.isPending}
+          >
+            Connect domain
+          </SubmitButton>
           {disabled ? (
             <p className="text-xs text-muted-foreground">
               Vercel integration must be configured before domain provisioning

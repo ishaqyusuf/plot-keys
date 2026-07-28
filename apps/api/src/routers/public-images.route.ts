@@ -1,4 +1,8 @@
-import { addPropertyMedia } from "@plotkeys/db";
+import {
+  addPropertyMedia,
+  getPropertyForCompany,
+  syncPropertyCoverImageUrl,
+} from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -12,14 +16,11 @@ async function getCompanyPropertyOrThrow(
   db: NonNullable<Parameters<typeof addPropertyMedia>[0]>,
   input: { companyId: string; propertyId: string },
 ) {
-  const property = await db.property.findFirst({
-    select: { id: true },
-    where: {
-      companyId: input.companyId,
-      deletedAt: null,
-      id: input.propertyId,
-    },
-  });
+  const property = await getPropertyForCompany(
+    db,
+    input.propertyId,
+    input.companyId,
+  );
 
   if (!property) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Property not found." });
@@ -107,13 +108,9 @@ export const publicImagesRouter = createTRPCRouter({
       });
 
       if (input.isCover) {
-        await db.property.update({
-          data: { imageUrl: asset.publicUrl },
-          where: {
-            companyId,
-            deletedAt: null,
-            id: input.propertyId,
-          },
+        await syncPropertyCoverImageUrl(db, {
+          companyId,
+          propertyId: input.propertyId,
         });
       }
 

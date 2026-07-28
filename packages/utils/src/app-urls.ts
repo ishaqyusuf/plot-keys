@@ -7,19 +7,27 @@ import {
 export const siteRootDomain = "plotkeys.com";
 export const dashboardRootDomain = "app.plotkeys.com";
 export const apiRootDomain = "api.plotkeys.com";
+export const sandboxRootDomain = "sandbox.plotkeys.com";
 export const tenantSiteRootDomain = siteRootDomain;
 
 export const sitePortlessRootDomain = "plotkeys.localhost";
 export const dashboardPortlessRootDomain = "app-plotkeys.localhost";
 export const apiPortlessRootDomain = "api-plotkeys.localhost";
+export const sandboxPortlessRootDomain = "sandbox-plotkeys.localhost";
 export const tenantSitePortlessRootDomain = "tenant-plotkeys.localhost";
 
 export const sitePort = 3900;
 export const dashboardPort = 3901;
 export const apiPort = 3902;
 export const tenantSitePort = 3903;
+export const sandboxPort = 3909;
 
-export type AppUrlKind = "site" | "dashboard" | "api" | "tenant-site";
+export type AppUrlKind =
+  | "site"
+  | "dashboard"
+  | "api"
+  | "tenant-site"
+  | "sandbox";
 
 function resolveAppPort(kind: AppUrlKind) {
   switch (kind) {
@@ -33,6 +41,8 @@ function resolveAppPort(kind: AppUrlKind) {
       return Number(process.env.API_PORT ?? process.env.PORT ?? apiPort);
     case "tenant-site":
       return Number(process.env.TENANT_SITE_PORT ?? tenantSitePort);
+    case "sandbox":
+      return Number(process.env.SANDBOX_PORT ?? sandboxPort);
   }
 }
 
@@ -52,6 +62,10 @@ function resolveAppPortlessRootDomain(kind: AppUrlKind) {
         process.env.TENANT_SITE_PORTLESS_ROOT_DOMAIN ??
         tenantSitePortlessRootDomain
       );
+    case "sandbox":
+      return (
+        process.env.SANDBOX_PORTLESS_ROOT_DOMAIN ?? sandboxPortlessRootDomain
+      );
   }
 }
 
@@ -65,6 +79,8 @@ function resolveAppProductionRootDomain(kind: AppUrlKind) {
       return process.env.API_ROOT_DOMAIN ?? apiRootDomain;
     case "tenant-site":
       return process.env.TENANT_SITE_ROOT_DOMAIN ?? tenantSiteRootDomain;
+    case "sandbox":
+      return process.env.SANDBOX_ROOT_DOMAIN ?? sandboxRootDomain;
   }
 }
 
@@ -87,6 +103,10 @@ function resolveAppPublicUrl(kind: AppUrlKind) {
         process.env.NEXT_PUBLIC_TENANT_SITE_URL ??
         process.env.TENANT_SITE_PUBLIC_URL ??
         process.env.TENANT_SITE_URL
+      );
+    case "sandbox":
+      return (
+        process.env.NEXT_PUBLIC_SANDBOX_URL ?? process.env.SANDBOX_PUBLIC_URL
       );
   }
 }
@@ -194,6 +214,7 @@ function getAllPortlessRootDomains() {
     resolveAppPortlessRootDomain("dashboard"),
     resolveAppPortlessRootDomain("api"),
     resolveAppPortlessRootDomain("tenant-site"),
+    resolveAppPortlessRootDomain("sandbox"),
   ];
 }
 
@@ -203,6 +224,7 @@ function getAllProductionRootDomains() {
     resolveAppProductionRootDomain("dashboard"),
     resolveAppProductionRootDomain("api"),
     resolveAppProductionRootDomain("tenant-site"),
+    resolveAppProductionRootDomain("sandbox"),
   ];
 }
 
@@ -289,6 +311,10 @@ export function buildTenantSiteRootUrl(options: BuildAppUrlOptions = {}) {
   return buildAppUrl("tenant-site", options);
 }
 
+export function buildSandboxUrl(options: BuildAppUrlOptions = {}) {
+  return buildAppUrl("sandbox", options);
+}
+
 export function getDevAppUrls() {
   if (isProductionMode()) {
     return {
@@ -299,6 +325,7 @@ export function getDevAppUrls() {
             process.env.NEXT_PUBLIC_DASHBOARD_APP_URL,
         ) || "",
       site: normalizeRuntimeHost(process.env.NEXT_PUBLIC_SITE_URL) || "",
+      sandbox: normalizeRuntimeHost(process.env.NEXT_PUBLIC_SANDBOX_URL) || "",
       tenantSite:
         normalizeRuntimeHost(process.env.NEXT_PUBLIC_TENANT_SITE_URL) || "",
     };
@@ -318,6 +345,10 @@ export function getDevAppUrls() {
       process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
         `http://localhost:${resolveAppPort("site")}`,
     ),
+    sandbox: normalizeRuntimeHost(
+      process.env.NEXT_PUBLIC_SANDBOX_URL?.trim() ||
+        `http://localhost:${resolveAppPort("sandbox")}`,
+    ),
     tenantSite: normalizeRuntimeHost(
       process.env.NEXT_PUBLIC_TENANT_SITE_URL?.trim() ||
         `http://localhost:${resolveAppPort("tenant-site")}`,
@@ -330,6 +361,7 @@ export function getDevAppUrlStrings() {
     return {
       api: buildApiUrl(),
       dashboard: buildDashboardUrl(),
+      sandbox: buildSandboxUrl(),
       site: buildSiteUrl(),
       tenantSite: buildTenantSiteRootUrl(),
     };
@@ -350,6 +382,10 @@ export function getDevAppUrlStrings() {
     site:
       normalizeBaseUrl(process.env.NEXT_PUBLIC_SITE_URL) ??
       `http://localhost:${resolveAppPort("site")}`,
+    sandbox:
+      normalizeBaseUrl(
+        process.env.NEXT_PUBLIC_SANDBOX_URL ?? process.env.SANDBOX_PUBLIC_URL,
+      ) ?? `http://localhost:${resolveAppPort("sandbox")}`,
     tenantSite:
       normalizeBaseUrl(process.env.NEXT_PUBLIC_TENANT_SITE_URL) ??
       `http://localhost:${resolveAppPort("tenant-site")}`,

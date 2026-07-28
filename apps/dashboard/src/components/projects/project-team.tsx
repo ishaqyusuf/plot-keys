@@ -1,12 +1,20 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Label } from "@plotkeys/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,6 +28,8 @@ const roleLabels: Record<string, string> = {
   site_supervisor: "Site Supervisor",
   viewer: "Viewer",
 };
+
+const emptyMembershipValue = "none";
 
 type Assignment = {
   id: string;
@@ -39,17 +49,13 @@ type TeamMember = {
 // Team list
 // ---------------------------------------------------------------------------
 
-export function TeamList({
-  assignments,
-}: {
-  assignments: Assignment[];
-}) {
+export function TeamList({ assignments }: { assignments: Assignment[] }) {
   return (
     <div className="mb-4 space-y-2">
       {assignments.map((assignment) => (
         <div
           key={assignment.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between border p-3"
         >
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
@@ -87,6 +93,7 @@ export function AssignMemberForm({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const [membershipId, setMembershipId] = useState(emptyMembershipValue);
 
   const available = teamMembers.filter((m) => !assignedMemberIds.has(m.id));
   if (available.length === 0) return null;
@@ -94,12 +101,13 @@ export function AssignMemberForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const membershipId = String(fd.get("membershipId") ?? "").trim();
-    if (!membershipId) return;
+    const selectedMembershipId =
+      membershipId === emptyMembershipValue ? "" : membershipId;
+    if (!selectedMembershipId) return;
 
     await assignMutation.mutateAsync({
       projectId,
-      membershipId,
+      membershipId: selectedMembershipId,
       projectRole:
         (String(fd.get("projectRole") ?? "").trim() as
           | "project_owner"
@@ -109,44 +117,53 @@ export function AssignMemberForm({
           | "site_supervisor"
           | "viewer") || "viewer",
     });
+    setMembershipId(emptyMembershipValue);
   }
 
   return (
     <form onSubmit={onSubmit} className="flex items-end gap-2">
       <div className="flex-1">
         <Label htmlFor="membershipId">Assign Member</Label>
-        <select
-          id="membershipId"
+        <Select
           name="membershipId"
-          required
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+          onValueChange={setMembershipId}
+          value={membershipId}
         >
-          <option value="">Select member</option>
-          {available.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.user.name ?? m.user.email}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="membershipId" className="w-full">
+            <SelectValue placeholder="Select member" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={emptyMembershipValue}>Select member</SelectItem>
+            {available.map((m) => (
+              <SelectItem key={m.id} value={m.id}>
+                {m.user.name ?? m.user.email}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="w-48">
         <Label htmlFor="projectRole">Role</Label>
-        <select
-          id="projectRole"
-          name="projectRole"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="viewer">Viewer</option>
-          <option value="site_supervisor">Site Supervisor</option>
-          <option value="project_manager">Project Manager</option>
-          <option value="project_owner">Project Owner</option>
-          <option value="qs_manager">QS Manager</option>
-          <option value="finance_reviewer">Finance Reviewer</option>
-        </select>
+        <Select defaultValue="viewer" name="projectRole">
+          <SelectTrigger id="projectRole" className="w-full">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="viewer">Viewer</SelectItem>
+            <SelectItem value="site_supervisor">Site Supervisor</SelectItem>
+            <SelectItem value="project_manager">Project Manager</SelectItem>
+            <SelectItem value="project_owner">Project Owner</SelectItem>
+            <SelectItem value="qs_manager">QS Manager</SelectItem>
+            <SelectItem value="finance_reviewer">Finance Reviewer</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <Button disabled={assignMutation.isPending} type="submit">
-        {assignMutation.isPending ? "…" : "Assign"}
-      </Button>
+      <SubmitButton
+        isSubmitting={assignMutation.isPending}
+        disabled={membershipId === emptyMembershipValue}
+      >
+        Assign
+      </SubmitButton>
     </form>
   );
 }

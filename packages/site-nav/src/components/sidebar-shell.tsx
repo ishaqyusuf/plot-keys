@@ -14,7 +14,7 @@ export function SidebarShell({
   const { linkModules } = useSiteNav();
 
   return (
-    <div className={cn(className, !linkModules.noSidebar && "md:ml-[84px]")}>
+    <div className={cn(className, !linkModules.noSidebar && "md:ml-[70px]")}>
       {children}
     </div>
   );

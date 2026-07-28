@@ -1,15 +1,15 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
+import { cn } from "@plotkeys/ui/cn";
 import { Icon } from "@plotkeys/ui/icons";
-import { cn } from "@plotkeys/utils";
 
-type HorizontalPaginationProps = {
+type Props = {
   canScrollLeft: boolean;
   canScrollRight: boolean;
+  className?: string;
   onScrollLeft: () => void;
   onScrollRight: () => void;
-  className?: string;
 };
 
 export function HorizontalPagination({
@@ -18,26 +18,26 @@ export function HorizontalPagination({
   onScrollLeft,
   onScrollRight,
   className,
-}: HorizontalPaginationProps) {
+}: Props) {
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <Button
-        className="size-6 p-0"
-        disabled={!canScrollLeft}
-        onClick={onScrollLeft}
-        size="sm"
         variant="outline"
+        size="sm"
+        disabled={!canScrollLeft}
+        className="size-6 p-0"
+        onClick={onScrollLeft}
       >
         <Icon.ArrowBack
           className={cn("size-3.5", canScrollLeft && "text-primary")}
         />
       </Button>
       <Button
-        className="size-6 p-0"
-        disabled={!canScrollRight}
-        onClick={onScrollRight}
-        size="sm"
         variant="outline"
+        size="sm"
+        disabled={!canScrollRight}
+        className="size-6 p-0"
+        onClick={onScrollRight}
       >
         <Icon.ArrowForward
           className={cn("size-3.5", canScrollRight && "text-primary")}

@@ -223,6 +223,19 @@ p {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s linear infinite;
+}
+
 .animate-float {
   animation: float 8s ease-in-out infinite;
 }

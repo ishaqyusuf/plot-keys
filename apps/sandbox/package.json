@@ -1,0 +1,40 @@
+{
+  "name": "@plotkeys/sandbox",
+  "private": true,
+  "scripts": {
+    "build": "bun next build --turbopack",
+    "clean": "git clean -xdf .next .turbo node_modules",
+    "dev": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys -- PORTLESS_WILDCARD=1 portless sandbox-plotkeys next dev --turbopack",
+    "dev:prod": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next dev --turbopack -p ${SANDBOX_PORT:-3909}",
+    "lint": "biome check .",
+    "start": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next start -p ${SANDBOX_PORT:-3909}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plotkeys/api": "workspace:*",
+    "@plotkeys/auth": "workspace:*",
+    "@plotkeys/section-registry": "workspace:*",
+    "@plotkeys/ui": "workspace:*",
+    "@plotkeys/utils": "workspace:*",
+    "@plotkeys/website-builder": "workspace:*",
+    "@tanstack/react-query": "^5.90.2",
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0",
+    "@trpc/tanstack-react-query": "^11.0.0",
+    "next": "^16.1.5",
+    "nuqs": "^2.8.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.2",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@plotkeys/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.4.0"
+  }
+}

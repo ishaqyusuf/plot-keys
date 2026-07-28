@@ -4,7 +4,7 @@ import { Button } from "@plotkeys/ui/button";
 import { Textarea } from "@plotkeys/ui/textarea";
 import { useRef, useState } from "react";
 
-type BlogRichTextEditorProps = {
+type Props = {
   defaultValue?: string;
   name: string;
   onChange?: (value: string) => void;
@@ -49,7 +49,7 @@ export function BlogRichTextEditor({
   name,
   onChange,
   value,
-}: BlogRichTextEditorProps) {
+}: Props) {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editorValue = value ?? internalValue;
@@ -92,9 +92,9 @@ export function BlogRichTextEditor({
         {tools.map((tool) => (
           <Button
             key={tool.label}
+            variant="outline"
             size="sm"
             type="button"
-            variant="outline"
             onClick={() =>
               insertSnippet(tool.prefix, tool.suffix, tool.placeholder)
             }

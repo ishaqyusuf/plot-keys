@@ -1,6 +1,6 @@
 import {
-  createTenantAssetFromUpload,
   type AssetUploadScope,
+  createTenantAssetFromUpload,
 } from "@plotkeys/api/asset-service";
 import { NextResponse } from "next/server";
 

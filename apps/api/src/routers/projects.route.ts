@@ -43,7 +43,7 @@ import {
   updateProjectPhase,
   updateProjectWorker,
   upsertProjectBudget,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -135,9 +135,11 @@ export const projectsRouter = createTRPCRouter({
     .input(
       z.object({
         cursor: z.union([z.string(), z.number()]).optional().nullable(),
+        end: z.string().optional().nullable(),
         q: z.string().optional().nullable(),
         size: z.union([z.string(), z.number()]).optional().nullable(),
         sort: z.array(z.string()).optional().nullable(),
+        start: z.string().optional().nullable(),
         status: projectStatusEnum.optional(),
       }),
     )
@@ -152,9 +154,11 @@ export const projectsRouter = createTRPCRouter({
 
       return listProjectsForCompany(db, ctx.auth.activeMembership.companyId, {
         cursor: input.cursor,
+        end: input.end,
         q: input.q,
         size: input.size,
         sort: input.sort,
+        start: input.start,
         status: input.status,
       });
     }),

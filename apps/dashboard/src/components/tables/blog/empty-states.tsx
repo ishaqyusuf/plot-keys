@@ -1,29 +1,30 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
-import { FileText, SearchX } from "lucide-react";
-import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
-import { CreateBlogPostButton } from "./create-button";
-import { blogPostStatusConfig, type BlogPostStatus } from "@/components/blog/blog-utils";
+import {
+  type BlogPostStatus,
+  blogPostStatusConfig,
+} from "@/components/blog/blog-utils";
+import { CreateBlogPostButton } from "@/components/blog-create-button";
+import {
+  EmptyState as CoreEmptyState,
+  NoResults as CoreNoResults,
+} from "@/components/tables/core";
+import { useBlogFilterParams } from "@/hooks/use-blog-filter-params";
 
-type BlogEmptyStateProps = {
+type Props = {
   activeStatus?: BlogPostStatus;
 };
 
-type BlogNoResultsProps = {
-  onClear: () => void;
-};
-
-export function BlogEmptyState({ activeStatus }: BlogEmptyStateProps) {
+export function EmptyState({ activeStatus }: Props) {
   const statusLabel = activeStatus
     ? blogPostStatusConfig[activeStatus].label.toLowerCase()
     : null;
 
   return (
-    <DashboardEmptyState
-      actions={
+    <CoreEmptyState
+      action={
         activeStatus ? null : (
-          <CreateBlogPostButton size="default">
+          <CreateBlogPostButton variant="outline" size="default">
             Create first post
           </CreateBlogPostButton>
         )
@@ -33,33 +34,13 @@ export function BlogEmptyState({ activeStatus }: BlogEmptyStateProps) {
           ? `No ${statusLabel} posts found.`
           : "Start with a draft and publish it when the article is ready."
       }
-      icon={<FileText className="size-5" />}
       title={activeStatus ? "No posts in this view" : "No blog posts yet"}
     />
   );
 }
 
-export function BlogNoResults({ onClear }: BlogNoResultsProps) {
-  return (
-    <div className="flex min-h-72 items-center justify-center px-5 py-10">
-      <div className="flex max-w-sm flex-col items-center text-center">
-        <div className="mb-4 flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <SearchX className="size-5" />
-        </div>
-        <h3 className="font-medium text-foreground">No posts found</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Try another search term or clear the current blog search.
-        </p>
-        <Button
-          className="mt-4"
-          onClick={onClear}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          Clear search
-        </Button>
-      </div>
-    </div>
-  );
+export function NoResults() {
+  const { setFilter } = useBlogFilterParams();
+
+  return <CoreNoResults onClear={() => setFilter(null)} />;
 }

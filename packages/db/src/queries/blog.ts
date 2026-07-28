@@ -1,5 +1,10 @@
 import type { Prisma } from "../generated/prisma/client";
 import type { Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type BlogPostStatusValue = "draft" | "published" | "archived";
 
@@ -79,10 +84,16 @@ export async function updateBlogPost(
     title?: string;
   },
 ) {
-  return db.blogPost.update({
+  const result = await db.blogPost.updateMany({
     data,
     where: { id: blogPostId, companyId, deletedAt: null },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getBlogPostForCompany(db, blogPostId, companyId);
 }
 
 export async function setBlogPostStatus(
@@ -91,7 +102,7 @@ export async function setBlogPostStatus(
   companyId: string,
   status: BlogPostStatusValue,
 ) {
-  return db.blogPost.update({
+  return db.blogPost.updateMany({
     data: {
       publishedAt: status === "published" ? new Date() : null,
       status,
@@ -105,7 +116,7 @@ export async function deleteBlogPost(
   blogPostId: string,
   companyId: string,
 ) {
-  return db.blogPost.update({
+  return db.blogPost.updateMany({
     data: { deletedAt: new Date() },
     where: { id: blogPostId, companyId, deletedAt: null },
   });
@@ -126,19 +137,31 @@ export async function listBlogPostsForCompany(
   companyId: string,
   options: {
     cursor?: string | number | null;
+    end?: string | null;
     limit?: number;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: BlogPostStatusValue;
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size ?? options.limit);
-  const offset = normalizeCursor(options.cursor);
+  const endDate = parseDateBoundary(options.end, "end");
+  const size = normalizeListPageSize(options.size ?? options.limit);
+  const offset = normalizeListOffsetCursor(options.cursor);
+  const startDate = parseDateBoundary(options.start, "start");
+  const publishedAtFilter: Prisma.DateTimeNullableFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
   const where: Prisma.BlogPostWhereInput = {
     companyId,
     deletedAt: null,
+    ...(publishedAtFilter ? { publishedAt: publishedAtFilter } : {}),
     ...(query ? { OR: getBlogPostSearchFilters(query) } : {}),
     ...(options.status ? { status: options.status } : {}),
   };
@@ -152,37 +175,21 @@ export async function listBlogPostsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getBlogPostSearchFilters(query: string): Prisma.BlogPostWhereInput[] {

@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Button } from "@plotkeys/ui/button";
 import {
   Form,
   FormControl,
@@ -11,6 +10,7 @@ import {
   FormMessage,
 } from "@plotkeys/ui/form";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -22,19 +22,14 @@ const projectPayrollRunFormSchema = z.object({
   periodStart: z.string().trim().min(1, "Period start is required."),
 });
 
-type ProjectPayrollRunFormValues = z.infer<
-  typeof projectPayrollRunFormSchema
->;
+type ProjectPayrollRunFormValues = z.infer<typeof projectPayrollRunFormSchema>;
 
-type CreatePayrollRunFormProps = {
+type Props = {
   onSuccess?: () => void;
   projectId: string;
 };
 
-export function CreatePayrollRunForm({
-  onSuccess,
-  projectId,
-}: CreatePayrollRunFormProps) {
+export function CreatePayrollRunForm({ onSuccess, projectId }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -116,9 +111,9 @@ export function CreatePayrollRunForm({
         ) : null}
 
         <div className="flex justify-end">
-          <Button disabled={createMutation.isPending} type="submit">
-            {createMutation.isPending ? "Creating..." : "Create payroll run"}
-          </Button>
+          <SubmitButton isSubmitting={createMutation.isPending}>
+            Create payroll run
+          </SubmitButton>
         </div>
       </form>
     </Form>

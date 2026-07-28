@@ -1,31 +1,28 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTRPC } from "@/trpc/client";
 
-type EstatePlanUploadFormProps = {
+type Props = {
   estateId: string;
   estateSlug: string;
 };
 
-export function EstatePlanUploadForm({
-  estateId,
-  estateSlug,
-}: EstatePlanUploadFormProps) {
+export function EstatePlanUploadForm({ estateId, estateSlug }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [sourceUrl, setSourceUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const createLayoutMutation = useMutation(
-    trpc.workspace.createEstateLayout.mutationOptions({
+    trpc.estates.createLayout.mutationOptions({
       async onSuccess() {
         setSourceUrl("");
         await queryClient.invalidateQueries({
-          queryKey: trpc.workspace.getEstateDetail.queryKey({
+          queryKey: trpc.estates.get.queryKey({
             slug: estateSlug,
           }),
         });
@@ -103,15 +100,13 @@ export function EstatePlanUploadForm({
           {error ?? createLayoutMutation.error?.message}
         </p>
       ) : null}
-      <Button
-        disabled={!sourceUrl || uploading || createLayoutMutation.isPending}
+      <SubmitButton
+        isSubmitting={uploading || createLayoutMutation.isPending}
+        disabled={!sourceUrl}
         size="sm"
-        type="submit"
       >
-        {uploading || createLayoutMutation.isPending
-          ? "Uploading..."
-          : "Save estate plan"}
-      </Button>
+        Save estate plan
+      </SubmitButton>
     </form>
   );
 }

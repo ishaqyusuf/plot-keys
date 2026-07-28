@@ -156,7 +156,7 @@ export function getPlanPricing(tier: SubscriptionTier): PlanPricing {
  * DOWNGRADE (e.g. Scale → Growth, Growth → Launch):
  *   - Effective at the end of the current billing period (no refund).
  *   - Access to higher-tier templates retained until period end.
- *   - After period end: `changePlan` job runs, revokes higher-tier
+ *   - After period end: the plan-sync job revokes higher-tier
  *     plan_included licenses, and records the new tier.
  *   - Purchased template licenses are NOT revoked on downgrade (user
  *     paid for them individually).

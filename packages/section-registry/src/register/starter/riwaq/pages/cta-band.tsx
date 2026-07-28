@@ -1,18 +1,16 @@
 "use client";
 
+import { cn } from "@plotkeys/utils";
 import { ChevronRight } from "lucide-react";
 import { EditableText } from "../../../../sections/editing-primitives";
 import { useRiwaqPage } from "../hooks/use-riwaq-page";
-import { joinClasses } from "../ui/style";
 import { RiwaqTemplateAnchor } from "../ui/template-anchor";
 
 export function RiwaqCtaBand() {
   const ctx = useRiwaqPage();
 
   return (
-    <section
-      className={joinClasses(ctx.ui.preset.spacing.containerX, "pb-16 md:pb-20")}
-    >
+    <section className={cn(ctx.ui.preset.spacing.containerX, "pb-16 md:pb-20")}>
       <div
         className={ctx.ui.surface({
           className:

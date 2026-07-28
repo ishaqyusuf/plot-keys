@@ -5,42 +5,26 @@ import {
   isAppAvailable,
 } from "@plotkeys/app-store/registry";
 import { RegistryIcon } from "@plotkeys/app-store/registry/icon-map";
-import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@plotkeys/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
+import { Icon } from "@plotkeys/ui/icons";
 import { tierLabels } from "@plotkeys/utils";
-import { Lock } from "lucide-react";
 import Link from "next/link";
 
 import type { CompanyAppsContext } from "@/lib/company-apps";
-import {
-  DashboardPageActions,
-  DashboardPageDescription,
-  DashboardPageEyebrow,
-  DashboardPageHeader,
-  DashboardPageHeaderRow,
-  DashboardPageIntro,
-  DashboardPageTitle,
-  DashboardPageToolbar,
-  DashboardSection,
-  DashboardSectionDescription,
-  DashboardSectionHeader,
-  DashboardSectionTitle,
-  DashboardToolbarGroup,
-} from "../dashboard/dashboard-page";
 import { AppToggle } from "./app-toggle";
 
 type AppStatus = "enabled" | "available" | "locked";
+type AppStoreTab = "all" | "installed";
 
-type AppStoreViewProps = {
+type Props = {
   context: CompanyAppsContext;
-  locked?: string;
+  q?: string;
+  tab?: string;
+};
+
+type AppLogoInput = {
+  app: AppDefinition;
 };
 
 function getStatus(
@@ -53,131 +37,130 @@ function getStatus(
   return "available";
 }
 
-export function AppStoreView({ context, locked }: AppStoreViewProps) {
-  const { availableApps, enabledApps, planTier } = context;
-  const enabledIds = new Set(enabledApps.map((app) => app.id));
-  const byCategory = new Map<string, AppDefinition[]>();
+function resolveTab(value: string | undefined): AppStoreTab {
+  return value === "installed" ? "installed" : "all";
+}
 
-  for (const app of APP_REGISTRY) {
-    const list = byCategory.get(app.category) ?? [];
-    list.push(app);
-    byCategory.set(app.category, list);
-  }
+function matchesSearch(app: AppDefinition, query: string) {
+  const normalized = query.trim().toLowerCase();
 
-  const lockedApp = locked
-    ? APP_REGISTRY.find((app) => app.id === locked)
-    : undefined;
+  if (!normalized) return true;
 
-  return (
-    <>
-      <DashboardPageHeader>
-        <DashboardPageHeaderRow>
-          <DashboardPageIntro>
-            <DashboardPageEyebrow>Platform workspace</DashboardPageEyebrow>
-            <DashboardPageTitle>App Store</DashboardPageTitle>
-            <DashboardPageDescription>
-              Enable the feature modules your team needs. Your current plan is{" "}
-              <strong>{tierLabels[planTier]}</strong> with {enabledApps.length}{" "}
-              of {availableApps.length} available apps enabled.
-            </DashboardPageDescription>
-          </DashboardPageIntro>
-          <DashboardPageActions>
-            <Badge variant="secondary">{tierLabels[planTier]} plan</Badge>
-          </DashboardPageActions>
-        </DashboardPageHeaderRow>
-        <DashboardPageToolbar>
-          <DashboardToolbarGroup className="text-sm text-muted-foreground">
-            {enabledApps.length} enabled of {availableApps.length} available
-            apps
-          </DashboardToolbarGroup>
-        </DashboardPageToolbar>
-      </DashboardPageHeader>
-
-      {lockedApp ? (
-        <div className="mt-4 rounded-md border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-          <strong>{lockedApp.label}</strong> isn&rsquo;t enabled for your
-          workspace. Enable it below
-          {isAppAvailable(lockedApp, planTier)
-            ? "."
-            : ` or upgrade to ${tierLabels[lockedApp.planGate]} to unlock it.`}
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-10">
-        {Array.from(byCategory.entries()).map(([category, apps]) => (
-          <DashboardSection key={category}>
-            <DashboardSectionHeader>
-              <div>
-                <DashboardSectionTitle>{category}</DashboardSectionTitle>
-                <DashboardSectionDescription>
-                  Turn on the modules that match this operational area.
-                </DashboardSectionDescription>
-              </div>
-            </DashboardSectionHeader>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {apps.map((app) => {
-                const status = getStatus(app, planTier, enabledIds);
-
-                return (
-                  <Card key={app.id} className="border-border/70 bg-card/82">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <RegistryIcon name={app.icon} className="size-5" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-base">
-                              {app.label}
-                            </CardTitle>
-                            <p className="text-xs text-muted-foreground">
-                              {app.category}
-                            </p>
-                          </div>
-                        </div>
-                        <StatusBadge status={status} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="mb-4 min-h-[3rem]">
-                        {app.description}
-                      </CardDescription>
-                      {status === "locked" ? (
-                        <Button asChild size="sm" variant="outline">
-                          <Link href="/billing">
-                            <Lock className="mr-1.5 size-3.5" />
-                            Upgrade to {tierLabels[app.planGate]}
-                          </Link>
-                        </Button>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            {status === "enabled" ? "Enabled" : "Disabled"}
-                          </span>
-                          <AppToggle
-                            appId={app.id}
-                            enabled={status === "enabled"}
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </DashboardSection>
-        ))}
-      </div>
-    </>
+  return [
+    app.category,
+    app.description,
+    app.icon,
+    app.id,
+    app.label,
+    app.planGate,
+  ].some((value) =>
+    String(value ?? "")
+      .toLowerCase()
+      .includes(normalized),
   );
 }
 
-function StatusBadge({ status }: { status: AppStatus }) {
-  if (status === "enabled") {
-    return <Badge variant="default">Enabled</Badge>;
-  }
-  if (status === "locked") {
-    return <Badge variant="outline">Locked</Badge>;
-  }
-  return <Badge variant="secondary">Available</Badge>;
+export function AppStoreView({ context, q, tab }: Props) {
+  const { enabledApps, planTier } = context;
+  const enabledIds = new Set(enabledApps.map((app) => app.id));
+  const currentTab = resolveTab(tab);
+  const search = q?.trim() ?? "";
+  const visibleApps = APP_REGISTRY.filter((app) => {
+    const status = getStatus(app, planTier, enabledIds);
+
+    return (
+      (currentTab !== "installed" || status === "enabled") &&
+      matchesSearch(app, search)
+    );
+  });
+
+  return (
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
+      {visibleApps.map((app) => {
+        const status = getStatus(app, planTier, enabledIds);
+
+        return (
+          <Card key={app.id} className="w-full flex flex-col">
+            <div className="pt-6 px-6 h-16 flex items-center justify-between">
+              <AppLogo app={app} />
+
+              <div className="flex items-center gap-2">
+                {status === "enabled" ? (
+                  <div className="rounded-full bg-success/10 px-3 py-1 font-mono text-[10px] text-success">
+                    Installed
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <CardHeader className="pb-0">
+              <div className="flex items-center space-x-2 pb-4">
+                <CardTitle className="text-md font-medium leading-none p-0 m-0">
+                  {app.label}
+                </CardTitle>
+              </div>
+            </CardHeader>
+
+            <CardContent className="text-xs text-muted-foreground pb-4">
+              <p>{app.description}</p>
+            </CardContent>
+
+            <div className="px-6 pb-6 flex gap-2 mt-auto">
+              {status === "locked" ? (
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/billing">
+                    <Icon.Lock className="mr-1.5 size-3.5" />
+                    Upgrade to {tierLabels[app.planGate]}
+                  </Link>
+                </Button>
+              ) : (
+                <div className="flex w-full items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {status === "enabled" ? "Enabled" : "Disabled"}
+                  </span>
+                  <AppToggle appId={app.id} enabled={status === "enabled"} />
+                </div>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+
+      {!search && !visibleApps.length && (
+        <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
+          <h3 className="text-lg font-semibold text-foreground">
+            No apps installed
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground text-center max-w-md">
+            You haven't installed any apps yet. Go to the 'All Apps' tab to
+            browse available apps.
+          </p>
+        </div>
+      )}
+
+      {search && !visibleApps.length && (
+        <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
+          <h3 className="text-lg font-semibold text-foreground">
+            No apps found
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground text-center max-w-md">
+            No apps found for your search, let us know if you want to see a
+            specific app in the app store.
+          </p>
+
+          <Button variant="outline" className="mt-4" asChild>
+            <Link href="/app-store">Clear search</Link>
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppLogo({ app }: AppLogoInput) {
+  return (
+    <div className="flex size-8 items-center justify-center text-primary">
+      <RegistryIcon className="size-6" name={app.icon} />
+    </div>
+  );
 }

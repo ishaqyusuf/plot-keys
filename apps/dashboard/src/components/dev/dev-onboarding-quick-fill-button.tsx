@@ -8,12 +8,10 @@ if (process.env.NODE_ENV === "production") {
 
 import { DevFormQuickFillButton } from "./dev-form-quick-fill-button";
 
-type DevOnboardingQuickFillButtonProps = {
+type Props = {
   onFill: () => void | Promise<void>;
 };
 
-export function DevOnboardingQuickFillButton({
-  onFill,
-}: DevOnboardingQuickFillButtonProps) {
+export function DevOnboardingQuickFillButton({ onFill }: Props) {
   return <DevFormQuickFillButton onFill={onFill} />;
 }

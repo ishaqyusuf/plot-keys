@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 export function UpdateProjectStatusButton({
   projectId,
@@ -27,14 +27,15 @@ export function UpdateProjectStatusButton({
   );
 
   return (
-    <Button
-      size="sm"
+    <SubmitButton
       variant={variant}
-      disabled={mutation.isPending}
+      size="sm"
+      isSubmitting={mutation.isPending}
       onClick={() => mutation.mutate({ projectId, status })}
+      type="button"
     >
-      {mutation.isPending ? "…" : label}
-    </Button>
+      {label}
+    </SubmitButton>
   );
 }
 
@@ -49,13 +50,14 @@ export function DeleteProjectButton({ projectId }: { projectId: string }) {
   );
 
   return (
-    <Button
-      size="sm"
+    <SubmitButton
       variant="destructive"
-      disabled={mutation.isPending}
+      size="sm"
+      isSubmitting={mutation.isPending}
       onClick={() => mutation.mutate({ projectId })}
+      type="button"
     >
-      {mutation.isPending ? "…" : "Delete"}
-    </Button>
+      Delete
+    </SubmitButton>
   );
 }

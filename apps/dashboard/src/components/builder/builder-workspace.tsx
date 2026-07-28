@@ -1,148 +1,71 @@
-import { getBuilderWorkspaceData } from "@plotkeys/db/queries";
-import {
-  createInitialSiteConfigurationInput,
-  deserializeTemplateConfig,
-  getTemplateDefinition,
-  getTemplatePageInventoryStrict,
-  resolveWebsitePresentation,
-  templateCatalog,
-} from "@plotkeys/section-registry";
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { Card, CardContent } from "@plotkeys/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@plotkeys/ui/empty";
-import { Separator } from "@plotkeys/ui/separator";
-import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
-import {
-  buildTenantSiteUrl,
-  describeTemplateAccess,
-  type SubscriptionTier,
-  tierLabels,
-} from "@plotkeys/utils";
-import Link from "next/link";
-import { PublishConfirmationDialog } from "@/components/modals/publish-confirmation-dialog";
-import { RecommendTemplatePanel } from "@/components/modals/recommend-template-panel-modal";
-import { BuilderSidebarDrawer } from "@/components/sheets/builder-sidebar-drawer";
+import "server-only";
 
-import {
-  createTemplateDraftSilentAction,
-  publishSiteConfigurationAction,
-  smartFillFieldAction,
-  updateSiteFieldAction,
-  updateSiteThemeFieldAction,
-  updateSiteThemeFieldSilentAction,
-} from "../../app/actions";
-import { getBaseUrl } from "../../lib/get-base-url";
+import type { SubscriptionTier } from "@plotkeys/utils";
+import { getBaseUrl } from "@/lib/get-base-url";
+import { getQueryClient, trpc } from "@/trpc/server";
 import { BuilderPreviewPanel } from "./builder-preview-panel";
-import { BuilderSidebarControls } from "./builder-sidebar-controls";
+import { BuilderWorkspaceLayout } from "./builder-workspace-layout";
 import {
-  AiContentBootstrapButton,
-  GeneratePageContentButton,
-} from "./onboarding-tools";
+  type BuilderWorkspaceNoticeState,
+  BuilderWorkspaceNotices,
+} from "./builder-workspace-notices";
+import { resolveBuilderWorkspacePreviewData } from "./builder-workspace-preview-data";
+import { BuilderWorkspaceSidebar } from "./builder-workspace-sidebar";
+import {
+  countChangedBuilderContentFields,
+  resolveBuilderWorkspaceTemplateAccess,
+} from "./builder-workspace-state";
+import { BuilderWorkspaceToolbar } from "./builder-workspace-toolbar";
+import { BuilderWorkspaceUnavailable } from "./builder-workspace-unavailable";
 
-type PageNavItem = {
-  label: string;
-  pageKey: string;
-  slug: string;
-};
-
-type BuilderWorkspaceProps = {
-  companyId: string;
+type Props = {
   companyName: string;
   companySlug: string;
   mode?: "dashboard" | "page";
-  notices?: {
-    error?: string;
-    generated?: string;
-    onboarding?: string;
-    published?: string;
-    saved?: string;
-  };
+  notices?: BuilderWorkspaceNoticeState;
   pageKey?: string;
   /** Active page path from ?path= query param (e.g. "/about", "/listings"). */
   previewPath?: string;
-  userId: string;
 };
 
 export async function BuilderWorkspace({
-  companyId,
   companyName,
   companySlug,
   mode = "page",
   notices,
   pageKey,
   previewPath,
-  userId,
-}: BuilderWorkspaceProps) {
+}: Props) {
   const currentOrigin = await getBaseUrl();
-  const starterTemplate = getTemplateDefinition("template-1");
-  const fallbackDraft = createInitialSiteConfigurationInput({
-    companyName,
-    market: companyName,
-    subdomain: companySlug,
-    templateKey: starterTemplate.key,
-  });
-  const builderData = await getBuilderWorkspaceData({
-    companyId,
-    companySlug,
-    fallbackDraft,
-    userId,
-  });
+  const queryClient = getQueryClient();
+  const builderData = await queryClient
+    .fetchQuery(trpc.website.builder.queryOptions())
+    .catch(() => null);
 
-  if (builderData.status === "database-unavailable") {
+  if (!builderData) {
     return (
-      <Card className="mx-auto max-w-3xl">
-        <CardContent className="p-8">
-          <Empty className="border">
-            <EmptyHeader>
-              <EmptyTitle>Builder is unavailable</EmptyTitle>
-              <EmptyDescription>
-                `DATABASE_URL` is not configured for the builder flow.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </CardContent>
-      </Card>
+      <BuilderWorkspaceUnavailable
+        description="We could not load this workspace right now."
+        title="Builder is unavailable"
+      />
     );
   }
 
   if (builderData.status === "company-not-found") {
     return (
-      <Card className="mx-auto max-w-3xl">
-        <CardContent className="p-8">
-          <Empty className="border">
-            <EmptyHeader>
-              <EmptyTitle>Builder is unavailable</EmptyTitle>
-              <EmptyDescription>
-                We could not find this workspace right now.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </CardContent>
-      </Card>
+      <BuilderWorkspaceUnavailable
+        description="We could not find this workspace right now."
+        title="Builder is unavailable"
+      />
     );
   }
 
   if (builderData.status === "draft-not-found") {
     return (
-      <Card className="mx-auto max-w-3xl">
-        <CardContent className="p-8">
-          <Empty className="border">
-            <EmptyHeader>
-              <EmptyTitle>No template configuration yet</EmptyTitle>
-              <EmptyDescription>
-                No template configuration exists for this tenant yet.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </CardContent>
-      </Card>
+      <BuilderWorkspaceUnavailable
+        description="No template configuration exists for this tenant yet."
+        title="No template configuration yet"
+      />
     );
   }
 
@@ -158,371 +81,128 @@ export async function BuilderWorkspace({
   } = builderData;
 
   const configId = resolvedActiveDraft.id;
-  const changedFieldCount = (() => {
-    if (!publishedVersion) return undefined;
-    const draftContent = resolvedActiveDraft.contentJson;
-    const liveContent = publishedVersion.contentJson;
-    const allKeys = new Set([
-      ...Object.keys(draftContent),
-      ...Object.keys(liveContent),
-    ]);
-    let count = 0;
-    for (const key of allKeys) {
-      if ((draftContent[key] ?? "") !== (liveContent[key] ?? "")) count++;
-    }
-    return count;
-  })();
-
-  const activeTemplateLabel =
-    templateCatalog.find((t) => t.key === resolvedActiveDraft.templateKey)
-      ?.name ?? resolvedActiveDraft.templateKey;
-  const activeTemplate = getTemplateDefinition(resolvedActiveDraft.templateKey);
-  const templateAccess = describeTemplateAccess(
-    company.planTier as SubscriptionTier,
-    activeTemplate.tier,
-  );
-  const currentTemplateLicensed = licensedTemplateKeys.has(
-    resolvedActiveDraft.templateKey,
-  );
-  const isTemplateLocked = !currentTemplateLicensed && !templateAccess.allowed;
-  const requiredPlanLabel = tierLabels[templateAccess.requiredTier];
-  const lockedTemplateMessage = `${templateAccess.message} Upgrade to the ${requiredPlanLabel} plan before editing or publishing this template.`;
-  const liveSiteUrl = buildTenantSiteUrl(companySlug, {
-    currentOrigin,
+  const planTier = company.planTier as SubscriptionTier;
+  const changedFieldCount = countChangedBuilderContentFields({
+    draftContent: resolvedActiveDraft.contentJson,
+    liveContent: publishedVersion?.contentJson,
   });
-  const pageInventory = getTemplatePageInventoryStrict(
-    resolvedActiveDraft.templateKey,
-  );
-  const availablePages: PageNavItem[] = pageInventory.pages.map((page) => ({
-    label: page.label,
-    pageKey: page.pageKey,
-    slug: page.slug,
-  }));
-  const resolvedPageKey =
-    pageKey ??
-    (() => {
-      if (!previewPath || previewPath === "/") return "home";
-      const matched = pageInventory.pages.find(
-        (page) => page.slug === previewPath,
-      );
-      return matched?.pageKey ?? "home";
-    })();
-  const selectedPage =
-    availablePages.find((page) => page.pageKey === resolvedPageKey) ??
-    availablePages[0];
-  const selectedPageKey = selectedPage?.pageKey ?? "home";
-  const selectedPageLabel = selectedPage?.label ?? "Home";
-  const selectedPageSlug = selectedPage?.slug ?? "/";
-  const currentPageLiveSiteUrl = selectedPageSlug.includes("[")
-    ? liveSiteUrl
-    : buildTenantSiteUrl(companySlug, {
-        currentOrigin,
-        pathname: selectedPageSlug,
-      });
-
-  const preview = resolveWebsitePresentation({
+  const {
+    activeTemplateLabel,
+    isTemplateLocked,
+    lockedTemplateMessage,
+    requiredPlan,
+  } = resolveBuilderWorkspaceTemplateAccess({
+    licensedTemplateKeys,
+    planTier,
+    templateKey: resolvedActiveDraft.templateKey,
+  });
+  const {
+    availablePages,
+    currentPageLiveSiteUrl,
+    liveSiteUrl,
+    preview,
+    sectionTypes,
+    selectedPageKey,
+    selectedPageLabel,
+    selectedPageSlug,
+    templateConfig,
+  } = resolveBuilderWorkspacePreviewData({
+    agents,
+    blogPosts,
     companyName,
+    companySlug,
     content: resolvedActiveDraft.contentJson,
-    liveAgents: agents.map((a) => ({
-      bio: a.bio,
-      id: a.id,
-      imageUrl: a.imageUrl,
-      name: a.name,
-      title: a.title,
-    })),
-    liveBlogPosts: blogPosts.map((post) => ({
-      content: post.content,
-      excerpt: post.excerpt,
-      featuredImageUrl: post.featuredImage,
-      id: post.id,
-      publishedAt: post.publishedAt?.toISOString() ?? null,
-      slug: post.slug,
-      title: post.title,
-    })),
-    liveListings: featuredProperties.map((p) => ({
-      id: p.id,
-      imageUrl: p.imageUrl,
-      location: p.location,
-      price: p.price,
-      specs: p.specs,
-      title: p.title,
-    })),
-    market: companyName,
-    pageKey: selectedPageKey,
-    renderMode: "draft",
-    subdomain: companySlug,
+    currentOrigin,
+    featuredProperties,
+    pageKey,
+    previewPath,
     templateKey: resolvedActiveDraft.templateKey,
     theme: resolvedActiveDraft.themeJson,
   });
-
-  const templateConfig = deserializeTemplateConfig(
-    resolvedActiveDraft.themeJson,
-  );
-  const sectionTypes = Array.from(
-    new Set(
-      preview.page.sections.map(
-        ({ component: _component, ...rest }) => rest.type,
-      ),
-    ),
-  );
   const isEmbedded = mode === "dashboard";
 
   return (
-    <div className={isEmbedded ? "space-y-3.5" : "grid gap-2.5"}>
-      {notices?.error ? (
-        <Alert className="border-destructive/30 bg-destructive/10 text-foreground">
-          <AlertDescription>{notices.error}</AlertDescription>
-        </Alert>
-      ) : null}
+    <BuilderWorkspaceLayout
+      isEmbedded={isEmbedded}
+      notices={
+        <BuilderWorkspaceNotices
+          activeTemplateLabel={activeTemplateLabel}
+          isTemplateLocked={isTemplateLocked}
+          lockedTemplateMessage={lockedTemplateMessage}
+          notices={notices}
+        />
+      }
+      sidebar={
+        <BuilderWorkspaceSidebar
+          activeConfigName={resolvedActiveDraft.name}
+          activePageKey={selectedPageKey}
+          configId={configId}
+          configStatus={resolvedActiveDraft.status}
+          currentPageKey={selectedPageKey}
+          currentTemplateKey={resolvedActiveDraft.templateKey}
+          editableFieldCount={preview.editableFields.length}
+          isEmbedded={isEmbedded}
+          licensedTemplateKeys={licensedTemplateKeys}
+          onboarding={onboarding}
+          planTier={planTier}
+          readOnly={isTemplateLocked}
+          readOnlyMessage={lockedTemplateMessage}
+          requiredPlan={requiredPlan}
+          sectionCount={preview.page.sections.length}
+          sectionTypes={sectionTypes}
+          templateConfig={templateConfig}
+          versionNumber={resolvedActiveDraft.versionNumber}
+        />
+      }
+    >
+      <BuilderWorkspaceToolbar
+        activeConfigName={resolvedActiveDraft.name}
+        activePageKey={selectedPageKey}
+        changedFieldCount={changedFieldCount}
+        configId={configId}
+        configStatus={resolvedActiveDraft.status}
+        currentName={resolvedActiveDraft.name}
+        currentPageKey={selectedPageKey}
+        currentPageLiveSiteUrl={currentPageLiveSiteUrl}
+        currentTemplateKey={resolvedActiveDraft.templateKey}
+        disabled={isTemplateLocked}
+        disabledReason={lockedTemplateMessage}
+        editableFieldCount={preview.editableFields.length}
+        isEmbedded={isEmbedded}
+        isOnboardingStep={Boolean(notices?.onboarding)}
+        licensedTemplateKeys={licensedTemplateKeys}
+        liveSiteUrl={liveSiteUrl}
+        planTier={planTier}
+        requiredPlan={requiredPlan}
+        sectionCount={preview.page.sections.length}
+        sectionTypes={sectionTypes}
+        selectedPageLabel={selectedPageLabel}
+        templateConfig={templateConfig}
+        templateLabel={activeTemplateLabel}
+        totalConfigurations={resolvedActiveDraft.versionNumber ?? 1}
+      />
 
-      {isTemplateLocked ? (
-        <Alert className="border-amber-500/30 bg-amber-500/10 text-foreground">
-          <AlertDescription className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <span>
-              <strong className="font-medium text-foreground">
-                {activeTemplateLabel} is locked on your current plan.
-              </strong>{" "}
-              {lockedTemplateMessage}
-            </span>
-            <Button asChild size="sm">
-              <Link href="/billing">Upgrade plan</Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {(notices?.saved ||
-        notices?.generated ||
-        notices?.published ||
-        notices?.onboarding) && (
-        <Alert className="border-primary/20 bg-primary/10 text-foreground">
-          <AlertDescription>
-            {notices?.onboarding
-              ? "Step 06 continues here. Configure your website look and text, then use Publish current configuration when you are ready to launch the live site."
-              : notices?.published
-                ? "The selected template is now published."
-                : notices?.generated
-                  ? "A smart-fill suggestion was applied to the field."
-                  : "Your field update was saved."}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div
-        className={[
-          "grid gap-3",
-          isEmbedded
-            ? "xl:grid-cols-[15rem_minmax(0,1fr)]"
-            : "max-w-464 xl:grid-cols-[14rem_minmax(0,1fr)]",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        <aside
-          className={[
-            "hidden xl:block",
-            isEmbedded ? "" : "xl:sticky xl:top-3 xl:h-[calc(100svh-1.5rem)]",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <div className="flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/86 shadow-[var(--shadow-card)] backdrop-blur-sm">
-            <div className="border-b border-border/60 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_8%,transparent),transparent)] px-4 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-[0.34em] text-muted-foreground">
-                  Website config
-                </p>
-                <Badge variant="outline">Studio</Badge>
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-              <section className="flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-2 rounded-[1rem] border border-border/65 bg-background/70 p-3.5">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                      Active configuration
-                    </p>
-                    <p className="mt-1.5 text-sm font-semibold text-foreground">
-                      {resolvedActiveDraft.name}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Version {resolvedActiveDraft.versionNumber ?? 1}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={
-                      resolvedActiveDraft.status === "published"
-                        ? "default"
-                        : "outline"
-                    }
-                  >
-                    {resolvedActiveDraft.status}
-                  </Badge>
-                </div>
-
-                <BuilderSidebarControls
-                  activePageKey={selectedPageKey}
-                  configId={configId}
-                  currentTemplateKey={resolvedActiveDraft.templateKey}
-                  licensedTemplateKeys={licensedTemplateKeys}
-                  planTier={company.planTier as SubscriptionTier}
-                  currentPageKey={selectedPageKey}
-                  readOnly={isTemplateLocked}
-                  readOnlyMessage={lockedTemplateMessage}
-                  requiredPlan={templateAccess.requiredTier}
-                  sectionTypes={sectionTypes}
-                  templateConfig={templateConfig}
-                  onCreateDraft={createTemplateDraftSilentAction}
-                  onUpdateTheme={updateSiteThemeFieldAction}
-                  onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
-                />
-              </section>
-
-              <Separator />
-
-              <section className="flex flex-col gap-1.5">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Editable fields
-                </p>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Click any section in the preview to reveal its inline field
-                  editor. Changes are saved per field.
-                </p>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <Badge variant="outline">
-                    {preview.editableFields.length} fields
-                  </Badge>
-                  <Badge variant="outline">
-                    {preview.page.sections.length} sections
-                  </Badge>
-                </div>
-              </section>
-
-              <Separator />
-
-              <section className="flex flex-col gap-2">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  AI content
-                </p>
-                <GeneratePageContentButton
-                  disabled={isTemplateLocked}
-                  pageKey={selectedPageKey}
-                />
-              </section>
-
-              <Separator />
-
-              <section className="flex flex-col gap-2">
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Onboarding tools
-                </p>
-                <AiContentBootstrapButton disabled={isTemplateLocked} />
-                <RecommendTemplatePanel
-                  currentBusinessType={onboarding?.businessType}
-                  currentPrimaryGoal={onboarding?.primaryGoal}
-                  currentStylePreference={onboarding?.stylePreference}
-                  currentTone={onboarding?.tone}
-                />
-              </section>
-            </div>
-          </div>
-        </aside>
-
-        <section className="flex flex-col gap-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-[1.15rem] border border-border/60 bg-card/72 px-3 py-2 shadow-[var(--shadow-soft)]">
-            <div className="flex flex-wrap items-center gap-2">
-              <BuilderSidebarDrawer
-                activeConfigName={resolvedActiveDraft.name}
-                activePageKey={selectedPageKey}
-                activeTemplateLabel={activeTemplateLabel}
-                configId={configId}
-                configStatus={resolvedActiveDraft.status}
-                currentTemplateKey={resolvedActiveDraft.templateKey}
-                editableFieldCount={preview.editableFields.length}
-                licensedTemplateKeys={licensedTemplateKeys}
-                planTier={company.planTier as SubscriptionTier}
-                currentPageKey={selectedPageKey}
-                readOnly={isTemplateLocked}
-                readOnlyMessage={lockedTemplateMessage}
-                requiredPlan={templateAccess.requiredTier}
-                sectionCount={preview.page.sections.length}
-                sectionTypes={sectionTypes}
-                templateConfig={templateConfig}
-                totalConfigurations={resolvedActiveDraft.versionNumber}
-                onCreateDraft={createTemplateDraftSilentAction}
-                onUpdateTheme={updateSiteThemeFieldAction}
-                onUpdateThemeSilent={updateSiteThemeFieldSilentAction}
-              />
-              <Badge variant="outline">{selectedPageLabel}</Badge>
-              {isEmbedded ? (
-                <Badge variant="outline">Website builder</Badge>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <ThemeToggle />
-              <PublishConfirmationDialog
-                changedFieldCount={changedFieldCount}
-                configId={configId}
-                currentName={resolvedActiveDraft.name}
-                disabled={isTemplateLocked}
-                disabledReason={lockedTemplateMessage}
-                onPublish={publishSiteConfigurationAction}
-                templateLabel={activeTemplateLabel}
-              />
-              {notices?.onboarding ? (
-                <Badge
-                  className="border-primary/30 bg-primary/10 text-primary"
-                  variant="outline"
-                >
-                  Final onboarding step
-                </Badge>
-              ) : null}
-              {isEmbedded ? (
-                <Button asChild variant="secondary">
-                  <Link href="/builder">Open full builder</Link>
-                </Button>
-              ) : (
-                <Button asChild variant="secondary">
-                  <Link href="/">Back to dashboard</Link>
-                </Button>
-              )}
-              <Button asChild>
-                <Link
-                  href={currentPageLiveSiteUrl || liveSiteUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Open live site
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          <BuilderPreviewPanel
-            activePageKey={selectedPageKey}
-            availablePages={availablePages}
-            companySlug={companySlug}
-            configId={configId}
-            defaultContent={preview.template.defaultContent}
-            editableFields={preview.editableFields}
-            readOnly={isTemplateLocked}
-            readOnlyMessage={lockedTemplateMessage}
-            pageKey={selectedPageKey}
-            pageLabel={selectedPageLabel}
-            pageSlug={selectedPageSlug}
-            sections={preview.page.sections.map(
-              ({ component: _component, ...rest }) => rest,
-            )}
-            templateKey={resolvedActiveDraft.templateKey}
-            theme={resolvedActiveDraft.themeJson}
-            visibleSections={templateConfig.visibleSections}
-            onSmartFill={smartFillFieldAction}
-            onUpdateField={updateSiteFieldAction}
-          />
-        </section>
-      </div>
-    </div>
+      <BuilderPreviewPanel
+        activePageKey={selectedPageKey}
+        availablePages={availablePages}
+        companyName={companyName}
+        companySlug={companySlug}
+        configId={configId}
+        defaultContent={preview.template.defaultContent}
+        editableFields={preview.editableFields}
+        readOnly={isTemplateLocked}
+        readOnlyMessage={lockedTemplateMessage}
+        pageKey={selectedPageKey}
+        pageLabel={selectedPageLabel}
+        pageSlug={selectedPageSlug}
+        sections={preview.page.sections.map(
+          ({ component: _component, ...rest }) => rest,
+        )}
+        templateConfig={templateConfig}
+        templateKey={resolvedActiveDraft.templateKey}
+        theme={resolvedActiveDraft.themeJson}
+        visibleSections={templateConfig.visibleSections}
+      />
+    </BuilderWorkspaceLayout>
   );
 }

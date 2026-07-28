@@ -1,15 +1,17 @@
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
-import { isLeaveRequestStatus } from "@/components/leave-requests/leave-request-utils";
-import { LeaveRequestsTable } from "@/components/tables/leave-requests";
+import { LeaveRequestsHeader } from "@/components/leave-requests-header";
+import { ScrollableContent } from "@/components/scrollable-content";
+import { DataTable } from "@/components/tables/leave-requests/data-table";
 import { LeaveRequestsSkeleton } from "@/components/tables/leave-requests/skeleton";
+import {
+  loadLeaveRequestsFilterParams,
+  resolveLeaveRequestsListInput,
+} from "@/hooks/use-leave-requests-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { loadLeaveRequestsFilterParams } from "@/lib/leave-requests-filter-params";
 import { requireOnboardedSession } from "@/lib/session";
 import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
@@ -18,60 +20,42 @@ export const metadata: Metadata = {
   title: "Leave Requests | Plot Keys",
 };
 
-type LeavePageProps = {
-  searchParams?: Promise<
-    SearchParams & {
-      created?: string;
-      error?: string;
-      q?: string;
-      sort?: string | string[];
-      status?: string;
-    }
-  >;
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-export default async function LeavePage({ searchParams }: LeavePageProps) {
+export default async function LeavePage({ searchParams }: Props) {
   await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
+  const params = await searchParams;
   const filters = loadLeaveRequestsFilterParams(params);
   const { sort } = loadSortParams(params);
-  const statusParam = filters.status ?? undefined;
-  const status = isLeaveRequestStatus(statusParam) ? statusParam : undefined;
-  const listInput = { q: filters.q, sort, status };
+  const listInput = resolveLeaveRequestsListInput(filters, sort);
   const initialSettings = await getInitialTableSettings("leave-requests");
 
   batchPrefetch([
-    trpc.workspace.getLeaveRequestStats.queryOptions(),
-    trpc.workspace.listLeaveRequests.infiniteQueryOptions(listInput, {
+    trpc.leaveRequests.stats.queryOptions(),
+    trpc.leaveRequests.list.infiniteQueryOptions(listInput, {
       getNextPageParam: ({ meta }) => meta?.cursor,
     }),
-    trpc.workspace.listEmployees.queryOptions({
+    trpc.employees.list.queryOptions({
       size: 200,
       status: "active",
     }),
   ]);
 
   return (
-    <DashboardPage>
-      {params.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{params.error}</AlertDescription>
-        </Alert>
-      ) : null}
+    <HydrateClient>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <LeaveRequestsHeader />
 
-      {params.created ? (
-        <Alert>
-          <AlertDescription>Leave request submitted.</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<LeaveRequestsSkeleton />}>
-            <LeaveRequestsTable initialSettings={initialSettings} />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<LeaveRequestsSkeleton />}>
+              <DataTable initialSettings={initialSettings} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

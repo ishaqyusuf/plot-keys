@@ -8,6 +8,7 @@ import { authRoutes } from "@plotkeys/auth/shared";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import {
   buildLocalSitefrontHostname,
   buildTenantDashboardUrl,
@@ -16,16 +17,16 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
-import { useZodForm } from "../../hooks/use-zod-form";
-import { useTRPC } from "../../trpc/client";
-import { createQuickFillAdapter, QuickFill } from "../quick-fill";
-import { SubdomainField } from "../subdomain-field";
+import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
+import { SubdomainField } from "@/components/subdomain-field";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { AuthFormError } from "./auth-form-error";
 
 const addAccountIfDev =
   process.env.NODE_ENV === "development"
     ? async (values: SignUpInput) => {
-        const { useDevToolsStore } = await import("../../stores/dev-tools");
+        const { useDevToolsStore } = await import("@/stores/dev-tools");
         useDevToolsStore.getState().addAccount({
           company: values.company,
           email: values.email,
@@ -185,12 +186,10 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       />
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button disabled={signUpMutation.isPending} type="submit">
-          {signUpMutation.isPending
-            ? "Creating account..."
-            : "Create account and continue"}
-        </Button>
-        <Button asChild variant="secondary">
+        <SubmitButton isSubmitting={signUpMutation.isPending}>
+          Create account and continue
+        </SubmitButton>
+        <Button variant="secondary" asChild>
           <Link
             href={
               redirectTo

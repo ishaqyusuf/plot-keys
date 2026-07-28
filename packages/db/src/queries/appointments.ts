@@ -4,6 +4,11 @@ import {
   type AppointmentStatus as AppointmentStatusValue,
 } from "../generated/prisma/enums";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export async function createAppointment(
   db: Db,
@@ -43,21 +48,34 @@ export async function listAppointmentsForCompany(
   companyId: string,
   options?: {
     cursor?: string | number | null;
+    end?: string | null;
     limit?: number;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: AppointmentStatusValue;
     upcoming?: boolean;
   },
 ) {
   const query = options?.q?.trim();
-  const size = normalizePageSize(options?.size ?? options?.limit);
-  const offset = normalizeCursor(options?.cursor);
+  const endDate = parseDateBoundary(options?.end, "end");
+  const size = normalizeListPageSize(options?.size ?? options?.limit);
+  const offset = normalizeListOffsetCursor(options?.cursor);
+  const startDate = parseDateBoundary(options?.start, "start");
+  const upcomingDate = options?.upcoming ? new Date() : null;
+  const lowerScheduledAtBound = latestDate(startDate, upcomingDate);
+  const scheduledAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate || upcomingDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(lowerScheduledAtBound ? { gte: lowerScheduledAtBound } : {}),
+        }
+      : undefined;
   const where: Prisma.AppointmentWhereInput = {
     companyId,
+    ...(scheduledAtFilter ? { scheduledAt: scheduledAtFilter } : {}),
     ...(options?.status ? { status: options.status } : {}),
-    ...(options?.upcoming ? { scheduledAt: { gte: new Date() } } : {}),
     ...(query ? { OR: getAppointmentSearchFilters(query) } : {}),
   };
 
@@ -75,37 +93,35 @@ export async function listAppointmentsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
+function latestDate(...dates: Array<Date | null>) {
+  return dates.reduce<Date | undefined>((latest, date) => {
+    if (!date) {
+      return latest;
+    }
 
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
+    if (!latest || date > latest) {
+      return date;
+    }
 
-  return Math.max(Math.trunc(value), 0);
+    return latest;
+  }, undefined);
 }
 
 function getAppointmentSearchFilters(
@@ -200,21 +216,33 @@ export async function updateAppointmentStatus(
   db: Db,
   data: {
     appointmentId: string;
+    companyId: string;
     notes?: string;
     status: "pending" | "confirmed" | "completed" | "cancelled";
   },
 ) {
-  return db.appointment.update({
+  return db.appointment.updateMany({
     data: {
       notes: data.notes,
       status: data.status,
     },
-    where: { id: data.appointmentId },
+    where: {
+      companyId: data.companyId,
+      id: data.appointmentId,
+    },
   });
 }
 
-export async function deleteAppointment(db: Db, appointmentId: string) {
-  return db.appointment.delete({ where: { id: appointmentId } });
+export async function deleteAppointment(
+  db: Db,
+  input: { appointmentId: string; companyId: string },
+) {
+  return db.appointment.deleteMany({
+    where: {
+      companyId: input.companyId,
+      id: input.appointmentId,
+    },
+  });
 }
 
 export async function countAppointmentsByStatus(db: Db, companyId: string) {

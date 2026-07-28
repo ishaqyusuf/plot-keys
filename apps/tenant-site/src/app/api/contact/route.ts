@@ -1,8 +1,6 @@
-import { createLead, createPrismaClient } from "@plotkeys/db";
-import {
-  notificationDispatchHandler,
-  triggerJob,
-} from "@plotkeys/jobs";
+import { createPrismaClient } from "@plotkeys/db";
+import { createLead, findCompanyBySlug } from "@plotkeys/db/queries";
+import { notificationDispatchHandler, triggerJob } from "@plotkeys/jobs";
 import { notificationDispatchTask } from "@plotkeys/jobs/tasks";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -22,8 +20,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         {
-          error:
-            parsed.error.issues[0]?.message ?? "Invalid contact request.",
+          error: parsed.error.issues[0]?.message ?? "Invalid contact request.",
         },
         { status: 400 },
       );
@@ -39,10 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const company = await prisma.company.findFirst({
-      select: { id: true },
-      where: { deletedAt: null, slug: subdomain },
-    });
+    const company = await findCompanyBySlug(prisma, subdomain);
 
     if (!company) {
       return NextResponse.json(
@@ -60,21 +54,17 @@ export async function POST(request: Request) {
       source: "contact_form",
     });
 
-    triggerJob(
-      notificationDispatchTask,
-      notificationDispatchHandler,
-      {
-        kind: "contact_form" as const,
-        data: {
-          companyId: company.id,
-          email,
-          leadId: lead.id,
-          message,
-          name,
-          phone: phone || undefined,
-        },
+    triggerJob(notificationDispatchTask, notificationDispatchHandler, {
+      kind: "contact_form" as const,
+      data: {
+        companyId: company.id,
+        email,
+        leadId: lead.id,
+        message,
+        name,
+        phone: phone || undefined,
       },
-    ).catch(() => {
+    }).catch(() => {
       // Notification delivery failures are non-blocking.
     });
 

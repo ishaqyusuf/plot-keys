@@ -1,6 +1,7 @@
-import { createPrismaClient, recordAnalyticsEvent } from "@plotkeys/db";
-import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { createPrismaClient } from "@plotkeys/db";
+import { findCompanyBySlug, recordAnalyticsEvent } from "@plotkeys/db/queries";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
@@ -28,10 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const company = await prisma.company.findFirst({
-      select: { id: true },
-      where: { deletedAt: null, slug: subdomain },
-    });
+    const company = await findCompanyBySlug(prisma, subdomain);
 
     if (!company) {
       return NextResponse.json(

@@ -1,14 +1,10 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { BuilderAiToolControl } from "@/components/builder/builder-ai-tool-control";
 import { useTRPC } from "@/trpc/client";
-
-// ---------------------------------------------------------------------------
-// AI Content Bootstrap — generates hero/intro/CTA copy from onboarding data.
-// ---------------------------------------------------------------------------
 
 export function AiContentBootstrapButton({
   disabled = false,
@@ -23,7 +19,7 @@ export function AiContentBootstrapButton({
   } | null>(null);
 
   const mutation = useMutation(
-    trpc.workspace.bootstrapAiContent.mutationOptions({
+    trpc.website.bootstrapAiContent.mutationOptions({
       onSuccess(data) {
         setResult(data);
         router.refresh();
@@ -31,37 +27,22 @@ export function AiContentBootstrapButton({
     }),
   );
 
+  const resultMessage = result
+    ? `Updated ${result.fieldsUpdated.length} fields: ${result.fieldsUpdated.join(", ")}`
+    : undefined;
+
   return (
-    <div className="flex flex-col gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        disabled={disabled || mutation.isPending}
-        onClick={() => mutation.mutate()}
-      >
-        {mutation.isPending ? "Generating…" : "✨ AI-generate hero & CTA copy"}
-      </Button>
-
-      {mutation.isError && (
-        <p className="text-xs text-destructive">
-          {mutation.error?.message ?? "AI generation failed."}
-        </p>
-      )}
-
-      {result && (
-        <p className="text-xs text-muted-foreground">
-          ✅ Updated {result.fieldsUpdated.length} fields:{" "}
-          {result.fieldsUpdated.join(", ")}
-        </p>
-      )}
-    </div>
+    <BuilderAiToolControl
+      disabled={disabled}
+      errorMessage={mutation.error?.message}
+      idleLabel="Generate hero and CTA copy"
+      isError={mutation.isError}
+      isPending={mutation.isPending}
+      onRun={() => mutation.mutate()}
+      resultMessage={resultMessage}
+    />
   );
 }
-
-// ---------------------------------------------------------------------------
-// AI Page Content — generates all editable content for a specific page.
-// ---------------------------------------------------------------------------
 
 export function GeneratePageContentButton({
   disabled = false,
@@ -78,7 +59,7 @@ export function GeneratePageContentButton({
   } | null>(null);
 
   const mutation = useMutation(
-    trpc.workspace.generatePageContent.mutationOptions({
+    trpc.website.generatePageContent.mutationOptions({
       onSuccess(data) {
         setResult(data);
         router.refresh();
@@ -91,34 +72,20 @@ export function GeneratePageContentButton({
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
+  const resultMessage = result
+    ? `Updated ${result.fieldsUpdated.length} fields`
+    : undefined;
+
   return (
-    <div className="flex flex-col gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        disabled={disabled || mutation.isPending}
-        onClick={() => mutation.mutate({ pageKey })}
-      >
-        {mutation.isPending
-          ? "Generating…"
-          : `✨ Generate ${pageLabel} page content`}
-      </Button>
-      <p className="text-[11px] text-muted-foreground">
-        Fills all editable fields on this page using AI (10 credits).
-      </p>
-
-      {mutation.isError && (
-        <p className="text-xs text-destructive">
-          {mutation.error?.message ?? "AI generation failed."}
-        </p>
-      )}
-
-      {result && (
-        <p className="text-xs text-muted-foreground">
-          ✅ Updated {result.fieldsUpdated.length} fields
-        </p>
-      )}
-    </div>
+    <BuilderAiToolControl
+      description="Fills all editable fields on this page using AI (10 credits)."
+      disabled={disabled}
+      errorMessage={mutation.error?.message}
+      idleLabel={`Generate ${pageLabel} page content`}
+      isError={mutation.isError}
+      isPending={mutation.isPending}
+      onRun={() => mutation.mutate({ pageKey })}
+      resultMessage={resultMessage}
+    />
   );
 }

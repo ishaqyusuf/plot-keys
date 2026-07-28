@@ -1,5 +1,10 @@
 import type { Prisma } from "../generated/prisma/client";
 import type { Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export async function createAgent(
   db: Db,
@@ -58,14 +63,20 @@ export async function updateAgent(
     updateData.displayOrder = data.displayOrder ?? 0;
   }
 
-  return db.agent.update({
+  const result = await db.agent.updateMany({
     data: updateData,
     where: { id: agentId, companyId, deletedAt: null },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getAgentForCompany(db, agentId, companyId);
 }
 
 export async function deleteAgent(db: Db, agentId: string, companyId: string) {
-  return db.agent.update({
+  return db.agent.updateMany({
     data: { deletedAt: new Date() },
     where: { id: agentId, companyId, deletedAt: null },
   });
@@ -83,9 +94,23 @@ export async function toggleAgentFeatured(
 
   if (!agent) return null;
 
-  return db.agent.update({
+  const result = await db.agent.updateMany({
     data: { featured: !agent.featured },
-    where: { id: agentId, companyId },
+    where: { id: agentId, companyId, deletedAt: null },
+  });
+
+  return result.count > 0
+    ? { featured: !agent.featured, id: agentId }
+    : null;
+}
+
+export async function getAgentForCompany(
+  db: Db,
+  agentId: string,
+  companyId: string,
+) {
+  return db.agent.findFirst({
+    where: { companyId, deletedAt: null, id: agentId },
   });
 }
 
@@ -102,8 +127,8 @@ export async function listAgentsForCompany(
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size ?? options.limit);
-  const offset = normalizeCursor(options.cursor);
+  const size = normalizeListPageSize(options.size ?? options.limit);
+  const offset = normalizeListOffsetCursor(options.cursor);
   const where: Prisma.AgentWhereInput = {
     companyId,
     deletedAt: null,
@@ -120,37 +145,7 @@ export async function listAgentsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
-}
-
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
-  }
-
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
 function getAgentSearchFilters(query: string): Prisma.AgentWhereInput[] {

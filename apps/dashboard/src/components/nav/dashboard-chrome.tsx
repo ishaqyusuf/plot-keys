@@ -5,29 +5,24 @@ import type {
   GlobalNavSection,
 } from "@plotkeys/app-store/registry";
 import { SiteNav, useCreateSiteNavContext } from "@plotkeys/site-nav";
+import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
+import { buildSandboxUrl } from "@plotkeys/utils/app-urls";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { getVisibleDashboardNav } from "../../features/navigation/lib";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { OpenSearchButton } from "@/components/search/open-search-button";
+import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
+import { getVisibleDashboardNav } from "@/features/navigation/lib";
 import { DashboardSidebar } from "./dashboard-sidebar";
-import { DashboardTopbar } from "./dashboard-topbar";
+import { DashboardUserMenu } from "./dashboard-user-menu";
+import { NotificationBell } from "./notification-bell";
 import { TenantLink } from "./tenant-link";
 
-type DashboardChromeProps = {
+type Props = {
   children: ReactNode;
   companyName: string;
   enabledApps: readonly AppDefinition[];
   globalTop: GlobalNavSection;
   platformGroup: GlobalNavSection;
-  recentNotifications: Array<{
-    body: string | null;
-    createdAt: string;
-    id: string;
-    isRead: boolean;
-    link: string | null;
-    title: string;
-    type: string;
-  }>;
-  unreadCount: number;
   userName: string;
   workRoleLabel: string;
 };
@@ -38,17 +33,28 @@ export function DashboardChrome({
   enabledApps,
   globalTop,
   platformGroup,
-  recentNotifications,
-  unreadCount,
   userName,
   workRoleLabel,
-}: DashboardChromeProps) {
+}: Props) {
   const pathname = usePathname() ?? "/";
+  const [sandboxUrl, setSandboxUrl] = useState(() => buildSandboxUrl());
+  useEffect(() => {
+    setSandboxUrl(buildSandboxUrl({ currentUrl: window.location.href }));
+  }, []);
+  const resolvedGlobalTop = useMemo(
+    () => ({
+      ...globalTop,
+      items: globalTop.items.map((item) =>
+        item.externalApp === "sandbox" ? { ...item, href: sandboxUrl } : item,
+      ),
+    }),
+    [globalTop, sandboxUrl],
+  );
   const isBuilderRoute =
     pathname === "/builder" || pathname.startsWith("/builder/");
   const modules = getVisibleDashboardNav({
     enabledApps,
-    globalTop,
+    globalTop: resolvedGlobalTop,
     platformGroup,
   });
   const siteNav = useCreateSiteNavContext({
@@ -67,21 +73,25 @@ export function DashboardChrome({
 
   return (
     <SiteNav.Provider value={siteNav}>
-      <DashboardSidebar enabledApps={enabledApps} />
-      <div className="relative flex min-h-svh flex-1 flex-col md:ml-[84px]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(15,107,97,0.04),transparent_26%),radial-gradient(circle_at_right_14%_top_8%,rgba(184,138,68,0.045),transparent_22%)]" />
-        <DashboardTopbar
-          companyName={companyName}
-          enabledApps={enabledApps}
-          globalTop={globalTop}
-          platformGroup={platformGroup}
-          recentNotifications={recentNotifications}
-          unreadCount={unreadCount}
-          userName={userName}
-          workRoleLabel={workRoleLabel}
+      <DashboardSidebar />
+      <div className="pb-4 md:ml-[70px]">
+        <SiteNav.Header
+          left={<OpenSearchButton />}
+          right={
+            <div className="flex space-x-2 ml-auto">
+              <NotificationBell />
+              <ThemeToggle />
+              <DashboardUserMenu
+                companyName={companyName}
+                userName={userName}
+                workRoleLabel={workRoleLabel}
+              />
+            </div>
+          }
         />
-        <div className="relative">{children}</div>
+        <div className="px-4 md:px-8">{children}</div>
       </div>
+      <GlobalSheetsProvider />
     </SiteNav.Provider>
   );
 }

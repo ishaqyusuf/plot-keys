@@ -2,19 +2,19 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import {
   blogPostStatusConfig,
   formatBlogDate,
 } from "@/components/blog/blog-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type BlogPostTableRow =
-  RouterOutputs["workspace"]["listBlogPosts"]["data"][number];
+export type BlogPostTableRow = RouterOutputs["blog"]["list"]["data"][number];
 
 function PostCell({ post }: { post: BlogPostTableRow }) {
   return (
@@ -48,13 +48,15 @@ function DateCell({ post }: { post: BlogPostTableRow }) {
 }
 
 export const columns: ColumnDef<BlogPostTableRow>[] = [
+  createSelectColumn<BlogPostTableRow>(),
   {
     accessorFn: (row) => row.title,
     cell: ({ row }) => <PostCell post={row.original} />,
     header: "Post",
     id: "post",
     meta: {
-      className: "min-w-[300px] md:sticky md:left-0 md:z-20 md:bg-background",
+      className:
+        "min-w-[300px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Post",
       skeleton: { type: "text", width: "w-52" },
       sticky: true,
@@ -89,25 +91,16 @@ export const columns: ColumnDef<BlogPostTableRow>[] = [
     size: 260,
   },
   {
-    cell: ({ row }) => (
-      <div
-        className="flex justify-end"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <Button asChild size="sm" variant="outline">
-          <Link href={`/blog/${row.original.id}`}>Edit</Link>
-        </Button>
-      </div>
-    ),
-    header: "",
+    cell: ({ row }) => <ActionsMenu row={row.original} />,
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[120px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-20" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 140,
+    size: 80,
   },
 ];

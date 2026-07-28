@@ -2,19 +2,19 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
-import { markPayrollPaidAction } from "@/app/actions";
+import type { inferRouterOutputs } from "@trpc/server";
 import {
   formatCurrency,
   payrollStatusConfig,
 } from "@/components/payroll/payroll-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type PayrollEntryTableRow =
-  RouterOutputs["workspace"]["listPayrollEntries"]["data"][number];
+  RouterOutputs["payroll"]["list"]["data"][number];
 
 function EmployeeCell({ entry }: { entry: PayrollEntryTableRow }) {
   return (
@@ -56,24 +56,11 @@ function NotesCell({ entry }: { entry: PayrollEntryTableRow }) {
 }
 
 function ActionsCell({ entry }: { entry: PayrollEntryTableRow }) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {entry.status === "pending" ? (
-        <form action={markPayrollPaidAction}>
-          <input name="payrollEntryId" type="hidden" value={entry.id} />
-          <Button size="sm" type="submit">
-            Mark paid
-          </Button>
-        </form>
-      ) : null}
-    </div>
-  );
+  return <ActionsMenu row={entry} />;
 }
 
 export const columns: ColumnDef<PayrollEntryTableRow>[] = [
+  createSelectColumn<PayrollEntryTableRow>(),
   {
     accessorFn: (row) => row.employee.name,
     cell: ({ row }) => <EmployeeCell entry={row.original} />,
@@ -81,7 +68,7 @@ export const columns: ColumnDef<PayrollEntryTableRow>[] = [
     id: "entry",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Employee",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -112,15 +99,15 @@ export const columns: ColumnDef<PayrollEntryTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell entry={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[180px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-24" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 220,
+    size: 80,
   },
 ];

@@ -237,6 +237,7 @@ export type CustomerWhereInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
   projectAccess?: Prisma.ProjectCustomerAccessListRelationFilter
   projectNotices?: Prisma.ProjectCustomerNoticeListRelationFilter
+  notificationMessageLogs?: Prisma.NotificationMessageLogListRelationFilter
 }
 
 export type CustomerOrderByWithRelationInput = {
@@ -258,6 +259,7 @@ export type CustomerOrderByWithRelationInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryOrderByRelationAggregateInput
   projectAccess?: Prisma.ProjectCustomerAccessOrderByRelationAggregateInput
   projectNotices?: Prisma.ProjectCustomerNoticeOrderByRelationAggregateInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogOrderByRelationAggregateInput
 }
 
 export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -282,6 +284,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
   projectAccess?: Prisma.ProjectCustomerAccessListRelationFilter
   projectNotices?: Prisma.ProjectCustomerNoticeListRelationFilter
+  notificationMessageLogs?: Prisma.NotificationMessageLogListRelationFilter
 }, "id">
 
 export type CustomerOrderByWithAggregationInput = {
@@ -336,6 +339,7 @@ export type CustomerCreateInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateInput = {
@@ -356,6 +360,7 @@ export type CustomerUncheckedCreateInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUpdateInput = {
@@ -376,6 +381,7 @@ export type CustomerUpdateInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateInput = {
@@ -396,6 +402,7 @@ export type CustomerUncheckedUpdateInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateManyInput = {
@@ -575,6 +582,22 @@ export type CustomerUpdateOneRequiredWithoutOffersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutOffersInput, Prisma.CustomerUpdateWithoutOffersInput>, Prisma.CustomerUncheckedUpdateWithoutOffersInput>
 }
 
+export type CustomerCreateNestedOneWithoutNotificationMessageLogsInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedCreateWithoutNotificationMessageLogsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutNotificationMessageLogsInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutNotificationMessageLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedCreateWithoutNotificationMessageLogsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutNotificationMessageLogsInput
+  upsert?: Prisma.CustomerUpsertWithoutNotificationMessageLogsInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutNotificationMessageLogsInput, Prisma.CustomerUpdateWithoutNotificationMessageLogsInput>, Prisma.CustomerUncheckedUpdateWithoutNotificationMessageLogsInput>
+}
+
 export type CustomerCreateNestedOneWithoutPlotReservationsInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutPlotReservationsInput, Prisma.CustomerUncheckedCreateWithoutPlotReservationsInput>
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutPlotReservationsInput
@@ -650,6 +673,7 @@ export type CustomerCreateWithoutCompanyInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutCompanyInput = {
@@ -669,6 +693,7 @@ export type CustomerUncheckedCreateWithoutCompanyInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutCompanyInput = {
@@ -731,6 +756,7 @@ export type CustomerCreateWithoutSavedListingsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutSavedListingsInput = {
@@ -750,6 +776,7 @@ export type CustomerUncheckedCreateWithoutSavedListingsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutSavedListingsInput = {
@@ -785,6 +812,7 @@ export type CustomerUpdateWithoutSavedListingsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutSavedListingsInput = {
@@ -804,6 +832,7 @@ export type CustomerUncheckedUpdateWithoutSavedListingsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutOffersInput = {
@@ -823,6 +852,7 @@ export type CustomerCreateWithoutOffersInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutOffersInput = {
@@ -842,6 +872,7 @@ export type CustomerUncheckedCreateWithoutOffersInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutOffersInput = {
@@ -877,6 +908,7 @@ export type CustomerUpdateWithoutOffersInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutOffersInput = {
@@ -892,6 +924,103 @@ export type CustomerUncheckedUpdateWithoutOffersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutNotificationMessageLogsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutCustomersInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutNotificationMessageLogsInput = {
+  id?: string
+  companyId: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  notes?: string | null
+  status?: $Enums.CustomerStatus
+  sourceLeadId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCustomerInput
+  offers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCustomerInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
+  projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutNotificationMessageLogsInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedCreateWithoutNotificationMessageLogsInput>
+}
+
+export type CustomerUpsertWithoutNotificationMessageLogsInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedUpdateWithoutNotificationMessageLogsInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedCreateWithoutNotificationMessageLogsInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutNotificationMessageLogsInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutNotificationMessageLogsInput, Prisma.CustomerUncheckedUpdateWithoutNotificationMessageLogsInput>
+}
+
+export type CustomerUpdateWithoutNotificationMessageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutCustomersNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUpdateManyWithoutCustomerNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
+  projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
+  projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutNotificationMessageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  sourceLeadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCustomerNestedInput
+  offers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCustomerNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
@@ -915,6 +1044,7 @@ export type CustomerCreateWithoutPlotReservationsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutPlotReservationsInput = {
@@ -934,6 +1064,7 @@ export type CustomerUncheckedCreateWithoutPlotReservationsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutPlotReservationsInput = {
@@ -969,6 +1100,7 @@ export type CustomerUpdateWithoutPlotReservationsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutPlotReservationsInput = {
@@ -988,6 +1120,7 @@ export type CustomerUncheckedUpdateWithoutPlotReservationsInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutPlotStatusHistoryInput = {
@@ -1007,6 +1140,7 @@ export type CustomerCreateWithoutPlotStatusHistoryInput = {
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutPlotStatusHistoryInput = {
@@ -1026,6 +1160,7 @@ export type CustomerUncheckedCreateWithoutPlotStatusHistoryInput = {
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutPlotStatusHistoryInput = {
@@ -1061,6 +1196,7 @@ export type CustomerUpdateWithoutPlotStatusHistoryInput = {
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutPlotStatusHistoryInput = {
@@ -1080,6 +1216,7 @@ export type CustomerUncheckedUpdateWithoutPlotStatusHistoryInput = {
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutProjectAccessInput = {
@@ -1099,6 +1236,7 @@ export type CustomerCreateWithoutProjectAccessInput = {
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutProjectAccessInput = {
@@ -1118,6 +1256,7 @@ export type CustomerUncheckedCreateWithoutProjectAccessInput = {
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutProjectAccessInput = {
@@ -1153,6 +1292,7 @@ export type CustomerUpdateWithoutProjectAccessInput = {
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutProjectAccessInput = {
@@ -1172,6 +1312,7 @@ export type CustomerUncheckedUpdateWithoutProjectAccessInput = {
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutProjectNoticesInput = {
@@ -1191,6 +1332,7 @@ export type CustomerCreateWithoutProjectNoticesInput = {
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCustomerInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutProjectNoticesInput = {
@@ -1210,6 +1352,7 @@ export type CustomerUncheckedCreateWithoutProjectNoticesInput = {
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCustomerInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorCustomerInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedCreateNestedManyWithoutCustomerInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutProjectNoticesInput = {
@@ -1245,6 +1388,7 @@ export type CustomerUpdateWithoutProjectNoticesInput = {
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCustomerNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutProjectNoticesInput = {
@@ -1264,6 +1408,7 @@ export type CustomerUncheckedUpdateWithoutProjectNoticesInput = {
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCustomerNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateManyCompanyInput = {
@@ -1296,6 +1441,7 @@ export type CustomerUpdateWithoutCompanyInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutCompanyInput = {
@@ -1315,6 +1461,7 @@ export type CustomerUncheckedUpdateWithoutCompanyInput = {
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorCustomerNestedInput
   projectAccess?: Prisma.ProjectCustomerAccessUncheckedUpdateManyWithoutCustomerNestedInput
   projectNotices?: Prisma.ProjectCustomerNoticeUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateManyWithoutCompanyInput = {
@@ -1342,6 +1489,7 @@ export type CustomerCountOutputType = {
   plotStatusHistory: number
   projectAccess: number
   projectNotices: number
+  notificationMessageLogs: number
 }
 
 export type CustomerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1351,6 +1499,7 @@ export type CustomerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   plotStatusHistory?: boolean | CustomerCountOutputTypeCountPlotStatusHistoryArgs
   projectAccess?: boolean | CustomerCountOutputTypeCountProjectAccessArgs
   projectNotices?: boolean | CustomerCountOutputTypeCountProjectNoticesArgs
+  notificationMessageLogs?: boolean | CustomerCountOutputTypeCountNotificationMessageLogsArgs
 }
 
 /**
@@ -1405,6 +1554,13 @@ export type CustomerCountOutputTypeCountProjectNoticesArgs<ExtArgs extends runti
   where?: Prisma.ProjectCustomerNoticeWhereInput
 }
 
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountNotificationMessageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationMessageLogWhereInput
+}
+
 
 export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1425,6 +1581,7 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   plotStatusHistory?: boolean | Prisma.Customer$plotStatusHistoryArgs<ExtArgs>
   projectAccess?: boolean | Prisma.Customer$projectAccessArgs<ExtArgs>
   projectNotices?: boolean | Prisma.Customer$projectNoticesArgs<ExtArgs>
+  notificationMessageLogs?: boolean | Prisma.Customer$notificationMessageLogsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
 
@@ -1481,6 +1638,7 @@ export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   plotStatusHistory?: boolean | Prisma.Customer$plotStatusHistoryArgs<ExtArgs>
   projectAccess?: boolean | Prisma.Customer$projectAccessArgs<ExtArgs>
   projectNotices?: boolean | Prisma.Customer$projectNoticesArgs<ExtArgs>
+  notificationMessageLogs?: boolean | Prisma.Customer$notificationMessageLogsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CustomerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1500,6 +1658,7 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     plotStatusHistory: Prisma.$PlotStatusHistoryPayload<ExtArgs>[]
     projectAccess: Prisma.$ProjectCustomerAccessPayload<ExtArgs>[]
     projectNotices: Prisma.$ProjectCustomerNoticePayload<ExtArgs>[]
+    notificationMessageLogs: Prisma.$NotificationMessageLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1914,6 +2073,7 @@ export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime
   plotStatusHistory<T extends Prisma.Customer$plotStatusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$plotStatusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projectAccess<T extends Prisma.Customer$projectAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$projectAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectCustomerAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projectNotices<T extends Prisma.Customer$projectNoticesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$projectNoticesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectCustomerNoticePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notificationMessageLogs<T extends Prisma.Customer$notificationMessageLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$notificationMessageLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationMessageLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2496,6 +2656,30 @@ export type Customer$projectNoticesArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.ProjectCustomerNoticeScalarFieldEnum | Prisma.ProjectCustomerNoticeScalarFieldEnum[]
+}
+
+/**
+ * Customer.notificationMessageLogs
+ */
+export type Customer$notificationMessageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotificationMessageLog
+   */
+  select?: Prisma.NotificationMessageLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NotificationMessageLog
+   */
+  omit?: Prisma.NotificationMessageLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationMessageLogInclude<ExtArgs> | null
+  where?: Prisma.NotificationMessageLogWhereInput
+  orderBy?: Prisma.NotificationMessageLogOrderByWithRelationInput | Prisma.NotificationMessageLogOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationMessageLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationMessageLogScalarFieldEnum | Prisma.NotificationMessageLogScalarFieldEnum[]
 }
 
 /**

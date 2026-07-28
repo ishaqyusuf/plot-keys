@@ -8,5 +8,6 @@ export {
   createNotificationFromType,
   plotKeysNotificationTypes,
 } from "./notification-types";
+export { makeUserRecipients } from "./payload-utils";
 export { NotificationService } from "./services/triggers";
 export type { NotificationStore } from "./store";

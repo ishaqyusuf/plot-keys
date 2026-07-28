@@ -3,6 +3,7 @@
 import { Button } from "@plotkeys/ui/button";
 import { CurrencyInput } from "@plotkeys/ui/currency-input";
 import { FieldDescription, FieldLegend, FieldSet } from "@plotkeys/ui/field";
+import { Icon } from "@plotkeys/ui/icons";
 import { Input } from "@plotkeys/ui/input";
 import {
   InputGroup,
@@ -18,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@plotkeys/ui/table";
-import { PlusIcon, Trash2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export type PricingPlanDraft = {
@@ -37,7 +37,7 @@ type PricingPlanSource = {
 
 type PricingPlanField = keyof Omit<PricingPlanDraft, "id">;
 
-type PropertyPricingPlanFieldsProps = {
+type Props = {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: PricingPlanField, value: string) => void;
@@ -129,7 +129,7 @@ export function PropertyPricingPlanFields({
   onUpdate,
   pricingPlans,
   quickFill,
-}: PropertyPricingPlanFieldsProps) {
+}: Props) {
   return (
     <FieldSet>
       <FieldLegend>Pricing plan</FieldLegend>
@@ -171,12 +171,15 @@ export function PropertyPricingPlanFields({
                   <TableCell className="w-36 px-0 pr-3">
                     <CurrencyInput
                       allowLeadingZeros={false}
+                      allowNegative={false}
                       aria-label="Payment plan amount"
                       className="w-full"
+                      decimalScale={0}
                       onValueChange={(values) =>
                         onUpdate(plan.id, "amount", values.value)
                       }
                       placeholder="₦45,000,000"
+                      prefix="₦"
                       value={plan.amount}
                     />
                   </TableCell>
@@ -220,13 +223,13 @@ export function PropertyPricingPlanFields({
                   <TableCell className="w-12 px-0 text-right">
                     <Button
                       aria-label="Remove pricing plan"
+                      className="h-8 w-8 p-0"
                       disabled={pricingPlans.length <= 1}
                       onClick={() => onRemove(plan.id)}
-                      size="icon-sm"
                       type="button"
                       variant="ghost"
                     >
-                      <Trash2Icon />
+                      <Icon.Delete />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -238,13 +241,13 @@ export function PropertyPricingPlanFields({
       <div className="flex flex-wrap items-center gap-2">
         {quickFill}
         <Button
-          className="w-fit"
-          onClick={onAdd}
-          size="sm"
-          type="button"
           variant="outline"
+          size="sm"
+          onClick={onAdd}
+          type="button"
+          className="w-fit"
         >
-          <PlusIcon data-icon="inline-start" />
+          <Icon.Plus data-icon="inline-start" />
           Add pricing
         </Button>
       </div>

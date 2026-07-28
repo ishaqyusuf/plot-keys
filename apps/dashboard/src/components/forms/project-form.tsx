@@ -3,16 +3,22 @@
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
-import { useState } from "react";
-import { z } from "zod";
-import { createProjectAction } from "@/app/actions";
 import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Controller } from "react-hook-form";
+import { z } from "zod";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const projectFormSchema = z.object({
   code: z.string().optional(),
@@ -33,12 +39,17 @@ const projectFormSchema = z.object({
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
-type ProjectFormProps = {
+const emptyProjectTypeValue = "none";
+
+type Props = {
   onCancel?: () => void;
+  onSuccess?: () => void;
 };
 
-export function ProjectForm({ onCancel }: ProjectFormProps) {
-  const [pending, setPending] = useState(false);
+export function ProjectForm({ onCancel, onSuccess }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(projectFormSchema, {
     defaultValues: {
       code: "",
@@ -50,31 +61,43 @@ export function ProjectForm({ onCancel }: ProjectFormProps) {
       type: "",
     },
   });
+  const createProjectMutation = useMutation(
+    trpc.projects.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to create project.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset();
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.projects.list.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.projects.stats.queryKey(),
+          }),
+        ]);
+        onSuccess?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: ProjectFormValues) {
-    setPending(true);
-
-    try {
-      const formData = new FormData();
-      formData.set("name", values.name.trim());
-      formData.set("code", values.code?.trim() ?? "");
-      formData.set("description", values.description?.trim() ?? "");
-      formData.set("location", values.location?.trim() ?? "");
-      formData.set("startDate", values.startDate?.trim() ?? "");
-      formData.set(
-        "targetCompletionDate",
-        values.targetCompletionDate?.trim() ?? "",
-      );
-      formData.set("type", values.type);
-      await createProjectAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: ProjectFormValues) {
+    setError(null);
+    createProjectMutation.mutate({
+      code: values.code?.trim() || null,
+      description: values.description?.trim() || null,
+      location: values.location?.trim() || null,
+      name: values.name.trim(),
+      startDate: values.startDate?.trim() || null,
+      targetCompletionDate: values.targetCompletionDate?.trim() || null,
+      type: values.type || null,
+    });
   }
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Project name *</FieldLabel>
@@ -92,18 +115,34 @@ export function ProjectForm({ onCancel }: ProjectFormProps) {
 
           <Field>
             <FieldLabel>Type</FieldLabel>
-            <NativeSelect {...form.register("type")}>
-              <NativeSelectOption value="">Select type</NativeSelectOption>
-              <NativeSelectOption value="building">Building</NativeSelectOption>
-              <NativeSelectOption value="estate">Estate</NativeSelectOption>
-              <NativeSelectOption value="fit_out">Fit-out</NativeSelectOption>
-              <NativeSelectOption value="infrastructure">
-                Infrastructure
-              </NativeSelectOption>
-              <NativeSelectOption value="renovation">
-                Renovation
-              </NativeSelectOption>
-            </NativeSelect>
+            <Controller
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === emptyProjectTypeValue ? "" : value)
+                  }
+                  value={field.value || emptyProjectTypeValue}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={emptyProjectTypeValue}>
+                      Select type
+                    </SelectItem>
+                    <SelectItem value="building">Building</SelectItem>
+                    <SelectItem value="estate">Estate</SelectItem>
+                    <SelectItem value="fit_out">Fit-out</SelectItem>
+                    <SelectItem value="infrastructure">
+                      Infrastructure
+                    </SelectItem>
+                    <SelectItem value="renovation">Renovation</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
 
           <Field>
@@ -134,22 +173,25 @@ export function ProjectForm({ onCancel }: ProjectFormProps) {
             />
           </Field>
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <QuickFill
-          args={{ form: createQuickFillAdapter(form) }}
-          name="new-project"
-        />
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="new-project"
+          />
+          {error ? <p className="text-xs text-destructive">{error}</p> : null}
+        </div>
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel} type="button" variant="ghost">
+          <Button variant="ghost" onClick={onCancel} type="button">
             Cancel
           </Button>
-          <Button disabled={pending} type="submit">
-            {pending ? "Creating..." : "Create project"}
-          </Button>
+          <SubmitButton isSubmitting={createProjectMutation.isPending}>
+            Create project
+          </SubmitButton>
         </div>
-      </DashboardFormFooter>
+      </FormFooter>
     </form>
   );
 }

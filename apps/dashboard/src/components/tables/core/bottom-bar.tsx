@@ -6,18 +6,11 @@ import type { ReactNode } from "react";
 import { Portal } from "@/components/portal";
 
 interface BottomBarProps {
-  /** Number of selected items */
   selectedCount: number;
-  /** Callback to deselect all items */
   onDeselect: () => void;
-  /** Action buttons to render on the right side */
   children: ReactNode;
 }
 
-/**
- * Generic bottom bar for table multi-select actions
- * Appears at the bottom of the screen when items are selected
- */
 export function BottomBar({
   selectedCount,
   onDeselect,

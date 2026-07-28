@@ -1,14 +1,19 @@
 import type { Agent, Employee, Prisma } from "../generated/prisma/client";
 import {
-  MembershipRole as MembershipRoleEnum,
-  MembershipStatus as MembershipStatusEnum,
-  WorkRole as WorkRoleEnum,
   type MembershipRole,
+  MembershipRole as MembershipRoleEnum,
   type MembershipStatus,
+  MembershipStatus as MembershipStatusEnum,
   type WorkRole,
+  WorkRole as WorkRoleEnum,
 } from "../generated/prisma/enums";
-import { createPrismaClient, type Db } from "../prisma";
-import { findUserByEmail } from "./auth";
+import type { Db } from "../prisma";
+import { assertQaCompanyIdentity } from "./qa-maintenance";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 const INVITE_TTL_HOURS = 72;
 
@@ -36,16 +41,28 @@ export async function listMembershipsForCompany(
   companyId: string,
   options: {
     cursor?: string | number | null;
+    end?: string | null;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
   } = {},
 ) {
+  const endDate = parseDateBoundary(options.end, "end");
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size);
-  const offset = normalizeCursor(options.cursor);
+  const size = normalizeListPageSize(options.size);
+  const offset = normalizeListOffsetCursor(options.cursor);
+  const startDate = parseDateBoundary(options.start, "start");
+  const createdAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
   const where: Prisma.MembershipWhereInput = {
     companyId,
+    ...(createdAtFilter ? { createdAt: createdAtFilter } : {}),
     deletedAt: null,
     ...(query ? { OR: getMembershipSearchFilters(query) } : {}),
   };
@@ -69,37 +86,19 @@ export async function listMembershipsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) return null;
 
-  if (!Number.isFinite(value)) {
-    return 50;
-  }
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getMembershipSearchFilters(
@@ -183,6 +182,10 @@ export async function createTeamInvite(
 ) {
   const token = generateInviteToken();
   const expiresAt = new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000);
+  await assertQaCompanyIdentity(db, {
+    companyId: input.companyId,
+    email: input.email,
+  });
 
   // Revoke any existing pending invites for this email + company combo
   await db.teamInvite.updateMany({
@@ -226,36 +229,10 @@ export async function findTeamInviteByToken(db: Db, token: string) {
   });
 }
 
-export type TeamInviteJoinPageDataResult =
-  | { ok: false; reason: "database-unavailable" | "invite-not-found" }
-  | {
-      invite: NonNullable<Awaited<ReturnType<typeof findTeamInviteByToken>>>;
-      ok: true;
-    };
-
-export async function getTeamInviteJoinPageData(
-  token: string,
-): Promise<TeamInviteJoinPageDataResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  const invite = await findTeamInviteByToken(db, token);
-
-  if (!invite) {
-    return { ok: false, reason: "invite-not-found" };
-  }
-
-  return { invite, ok: true };
-}
-
 export type TeamInviteProfileCompletionDataResult =
   | {
       ok: false;
       reason:
-        | "database-unavailable"
         | "email-mismatch"
         | "invite-not-accepted"
         | "invite-not-found"
@@ -272,7 +249,6 @@ export type CompleteTeamInviteProfileResult =
   | {
       ok: false;
       reason:
-        | "database-unavailable"
         | "email-mismatch"
         | "invite-not-accepted"
         | "invite-not-found"
@@ -280,37 +256,13 @@ export type CompleteTeamInviteProfileResult =
     }
   | { ok: true; profileKind: "agent" | "staff" };
 
-export type TeamInviteSignupDataResult =
-  | {
-      ok: false;
-      reason:
-        | "database-unavailable"
-        | "invite-accepted"
-        | "invite-expired"
-        | "invite-not-found"
-        | "invite-revoked"
-        | "user-exists";
-    }
-  | {
-      email: string;
-      invite: NonNullable<Awaited<ReturnType<typeof findTeamInviteByToken>>>;
-      ok: true;
-    };
-
-export type AcceptTeamInviteResult =
-  | { ok: true }
-  | { ok: false; reason: "database-unavailable" };
-
-export async function getTeamInviteProfileCompletionData(input: {
-  token: string;
-  userEmail: string;
-}): Promise<TeamInviteProfileCompletionDataResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+export async function getTeamInviteProfileCompletionData(
+  db: Db,
+  input: {
+    token: string;
+    userEmail: string;
+  },
+): Promise<TeamInviteProfileCompletionDataResult> {
   const invite = await findTeamInviteByToken(db, input.token);
 
   if (!invite) {
@@ -359,21 +311,18 @@ export async function getTeamInviteProfileCompletionData(input: {
   };
 }
 
-export async function completeTeamInviteProfile(input: {
-  bio?: string | null;
-  imageUrl?: string | null;
-  name: string;
-  phone?: string | null;
-  title: string;
-  token: string;
-  userEmail: string;
-}): Promise<CompleteTeamInviteProfileResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+export async function completeTeamInviteProfile(
+  db: Db,
+  input: {
+    bio?: string | null;
+    imageUrl?: string | null;
+    name: string;
+    phone?: string | null;
+    title: string;
+    token: string;
+    userEmail: string;
+  },
+): Promise<CompleteTeamInviteProfileResult> {
   const invite = await findTeamInviteByToken(db, input.token);
 
   if (!invite) {
@@ -460,47 +409,6 @@ export async function completeTeamInviteProfile(input: {
   return { ok: false, reason: "unsupported-role" };
 }
 
-export async function getTeamInviteSignupData(
-  token: string,
-): Promise<TeamInviteSignupDataResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  const invite = await findTeamInviteByToken(db, token);
-
-  if (!invite) {
-    return { ok: false, reason: "invite-not-found" };
-  }
-
-  if (invite.acceptedAt) {
-    return { ok: false, reason: "invite-accepted" };
-  }
-
-  if (invite.revokedAt) {
-    return { ok: false, reason: "invite-revoked" };
-  }
-
-  if (invite.expiresAt < new Date()) {
-    return { ok: false, reason: "invite-expired" };
-  }
-
-  const email = invite.email.trim().toLowerCase();
-  const existingUser = await findUserByEmail(db, email);
-
-  if (existingUser) {
-    return { ok: false, reason: "user-exists" };
-  }
-
-  return {
-    email,
-    invite,
-    ok: true,
-  };
-}
-
 export async function acceptTeamInvite(
   db: Db,
   input: {
@@ -566,19 +474,41 @@ export async function acceptTeamInvite(
   return membership;
 }
 
-export async function acceptTeamInviteForUser(input: {
-  token: string;
-  userId: string;
-}): Promise<AcceptTeamInviteResult> {
-  const db = createPrismaClient().db;
+export async function findMembershipForUser(
+  db: Db,
+  input: { companyId: string; userId: string },
+) {
+  return db.membership.findFirst({
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      userId: input.userId,
+    },
+  });
+}
 
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
+export async function findMembershipById(db: Db, membershipId: string) {
+  return db.membership.findUnique({
+    where: { id: membershipId },
+  });
+}
 
-  await acceptTeamInvite(db, input);
-
-  return { ok: true };
+export async function listMembershipRemovalTargets(
+  db: Db,
+  input: { companyId: string; membershipIds: string[] },
+) {
+  return db.membership.findMany({
+    select: {
+      id: true,
+      role: true,
+      userId: true,
+    },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: { in: input.membershipIds },
+    },
+  });
 }
 
 export async function updateMemberRole(

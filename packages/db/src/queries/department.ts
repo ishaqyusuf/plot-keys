@@ -1,5 +1,10 @@
 import type { Prisma } from "../generated/prisma/client";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type DepartmentMutationResult =
   | { ok: true }
@@ -53,8 +58,8 @@ export async function listDepartmentsForCompany(
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size);
-  const offset = normalizeCursor(options.cursor);
+  const size = normalizeListPageSize(options.size);
+  const offset = normalizeListOffsetCursor(options.cursor);
   const where: Prisma.DepartmentWhereInput = {
     companyId,
     deletedAt: null,
@@ -80,37 +85,7 @@ export async function listDepartmentsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
-}
-
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
-  }
-
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
 function getDepartmentOrderBy(
@@ -184,8 +159,8 @@ export async function softDeleteDepartment(
   departmentId: string,
   companyId: string,
 ) {
-  return db.department.update({
-    where: { id: departmentId, companyId },
+  return db.department.updateMany({
+    where: { id: departmentId, companyId, deletedAt: null },
     data: { deletedAt: new Date() },
   });
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import {
-  makeUserRecipients,
-} from "@plotkeys/notifications";
+import { makeUserRecipients } from "@plotkeys/notifications/react-client";
 import { useNotifications } from "@plotkeys/notifications-react";
 import { useEffect, useRef } from "react";
 
-type OnboardingSignupNotificationProps = {
+type Props = {
   companyName: string;
   dashboardHostname: string;
   email: string;
@@ -24,7 +22,7 @@ export function OnboardingSignupNotification({
   show,
   siteHostname,
   subdomain,
-}: OnboardingSignupNotificationProps) {
+}: Props) {
   const { service } = useNotifications();
   const hasNotified = useRef(false);
 

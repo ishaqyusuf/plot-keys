@@ -244,6 +244,7 @@ export type UserWhereInput = {
   notificationPreferences?: Prisma.NotificationPreferenceListRelationFilter
   blogPosts?: Prisma.BlogPostListRelationFilter
   plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -272,6 +273,7 @@ export type UserOrderByWithRelationInput = {
   notificationPreferences?: Prisma.NotificationPreferenceOrderByRelationAggregateInput
   blogPosts?: Prisma.BlogPostOrderByRelationAggregateInput
   plotStatusHistory?: Prisma.PlotStatusHistoryOrderByRelationAggregateInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notificationPreferences?: Prisma.NotificationPreferenceListRelationFilter
   blogPosts?: Prisma.BlogPostListRelationFilter
   plotStatusHistory?: Prisma.PlotStatusHistoryListRelationFilter
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileListRelationFilter
 }, "id">
 
 export type UserOrderByWithAggregationInput = {
@@ -365,6 +368,7 @@ export type UserCreateInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -393,6 +397,7 @@ export type UserUncheckedCreateInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
@@ -421,6 +426,7 @@ export type UserUpdateInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -449,6 +455,7 @@ export type UserUncheckedUpdateInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -709,6 +716,20 @@ export type UserUpdateOneWithoutSentTeamInvitesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentTeamInvitesInput, Prisma.UserUpdateWithoutSentTeamInvitesInput>, Prisma.UserUncheckedUpdateWithoutSentTeamInvitesInput>
 }
 
+export type UserCreateNestedOneWithoutTemplateSandboxProfilesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedCreateWithoutTemplateSandboxProfilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTemplateSandboxProfilesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTemplateSandboxProfilesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedCreateWithoutTemplateSandboxProfilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTemplateSandboxProfilesInput
+  upsert?: Prisma.UserUpsertWithoutTemplateSandboxProfilesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTemplateSandboxProfilesInput, Prisma.UserUpdateWithoutTemplateSandboxProfilesInput>, Prisma.UserUncheckedUpdateWithoutTemplateSandboxProfilesInput>
+}
+
 export type UserCreateNestedOneWithoutTenantOnboardingInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutTenantOnboardingInput, Prisma.UserUncheckedCreateWithoutTenantOnboardingInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutTenantOnboardingInput
@@ -780,6 +801,7 @@ export type UserCreateWithoutAiUsageLogsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutAiUsageLogsInput = {
@@ -807,6 +829,7 @@ export type UserUncheckedCreateWithoutAiUsageLogsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutAiUsageLogsInput = {
@@ -850,6 +873,7 @@ export type UserUpdateWithoutAiUsageLogsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
@@ -877,6 +901,7 @@ export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -904,6 +929,7 @@ export type UserCreateWithoutSessionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -931,6 +957,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -974,6 +1001,7 @@ export type UserUpdateWithoutSessionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1001,6 +1029,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -1028,6 +1057,7 @@ export type UserCreateWithoutAccountsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -1055,6 +1085,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -1098,6 +1129,7 @@ export type UserUpdateWithoutAccountsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -1125,6 +1157,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutBlogPostsInput = {
@@ -1152,6 +1185,7 @@ export type UserCreateWithoutBlogPostsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutBlogPostsInput = {
@@ -1179,6 +1213,7 @@ export type UserUncheckedCreateWithoutBlogPostsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutBlogPostsInput = {
@@ -1222,6 +1257,7 @@ export type UserUpdateWithoutBlogPostsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlogPostsInput = {
@@ -1249,6 +1285,7 @@ export type UserUncheckedUpdateWithoutBlogPostsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -1276,6 +1313,7 @@ export type UserCreateWithoutMembershipsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1303,6 +1341,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1346,6 +1385,7 @@ export type UserUpdateWithoutMembershipsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1373,6 +1413,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutNotificationPreferencesInput = {
@@ -1400,6 +1441,7 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
@@ -1427,6 +1469,7 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationPreferencesInput = {
@@ -1470,6 +1513,7 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
@@ -1497,6 +1541,7 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1524,6 +1569,7 @@ export type UserCreateWithoutNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1551,6 +1597,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1594,6 +1641,7 @@ export type UserUpdateWithoutNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1621,6 +1669,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutPlotStatusHistoryInput = {
@@ -1648,6 +1697,7 @@ export type UserCreateWithoutPlotStatusHistoryInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutPlotStatusHistoryInput = {
@@ -1675,6 +1725,7 @@ export type UserUncheckedCreateWithoutPlotStatusHistoryInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutPlotStatusHistoryInput = {
@@ -1718,6 +1769,7 @@ export type UserUpdateWithoutPlotStatusHistoryInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlotStatusHistoryInput = {
@@ -1745,6 +1797,7 @@ export type UserUncheckedUpdateWithoutPlotStatusHistoryInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutCreatedSiteConfigurationsInput = {
@@ -1772,6 +1825,7 @@ export type UserCreateWithoutCreatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
@@ -1799,6 +1853,7 @@ export type UserUncheckedCreateWithoutCreatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSiteConfigurationsInput = {
@@ -1831,6 +1886,7 @@ export type UserCreateWithoutUpdatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
@@ -1858,6 +1914,7 @@ export type UserUncheckedCreateWithoutUpdatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutUpdatedSiteConfigurationsInput = {
@@ -1901,6 +1958,7 @@ export type UserUpdateWithoutCreatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
@@ -1928,6 +1986,7 @@ export type UserUncheckedUpdateWithoutCreatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUpsertWithoutUpdatedSiteConfigurationsInput = {
@@ -1966,6 +2025,7 @@ export type UserUpdateWithoutUpdatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
@@ -1993,6 +2053,7 @@ export type UserUncheckedUpdateWithoutUpdatedSiteConfigurationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutSentTeamInvitesInput = {
@@ -2020,6 +2081,7 @@ export type UserCreateWithoutSentTeamInvitesInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutSentTeamInvitesInput = {
@@ -2047,6 +2109,7 @@ export type UserUncheckedCreateWithoutSentTeamInvitesInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutSentTeamInvitesInput = {
@@ -2090,6 +2153,7 @@ export type UserUpdateWithoutSentTeamInvitesInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentTeamInvitesInput = {
@@ -2113,6 +2177,135 @@ export type UserUncheckedUpdateWithoutSentTeamInvitesInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
   aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserCreateWithoutTemplateSandboxProfilesInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutUserInput
+  sentTeamInvites?: Prisma.TeamInviteCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
+  blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+}
+
+export type UserUncheckedCreateWithoutTemplateSandboxProfilesInput = {
+  id: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash?: string | null
+  emailVerified?: boolean
+  name?: string | null
+  globalRole?: $Enums.MembershipRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  image?: string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutUserInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedCreateNestedOneWithoutUserInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutUserInput
+  sentTeamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+}
+
+export type UserCreateOrConnectWithoutTemplateSandboxProfilesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedCreateWithoutTemplateSandboxProfilesInput>
+}
+
+export type UserUpsertWithoutTemplateSandboxProfilesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedUpdateWithoutTemplateSandboxProfilesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedCreateWithoutTemplateSandboxProfilesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTemplateSandboxProfilesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTemplateSandboxProfilesInput, Prisma.UserUncheckedUpdateWithoutTemplateSandboxProfilesInput>
+}
+
+export type UserUpdateWithoutTemplateSandboxProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutUserNestedInput
+  sentTeamInvites?: Prisma.TeamInviteUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
+  blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
+  plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTemplateSandboxProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalRole?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedSiteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  updatedWebsiteVersions?: Prisma.WebsiteVersionUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  tenantOnboarding?: Prisma.TenantOnboardingUncheckedUpdateOneWithoutUserNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutUserNestedInput
+  sentTeamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2144,6 +2337,7 @@ export type UserCreateWithoutTenantOnboardingInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutTenantOnboardingInput = {
@@ -2171,6 +2365,7 @@ export type UserUncheckedCreateWithoutTenantOnboardingInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutTenantOnboardingInput = {
@@ -2214,6 +2409,7 @@ export type UserUpdateWithoutTenantOnboardingInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantOnboardingInput = {
@@ -2241,6 +2437,7 @@ export type UserUncheckedUpdateWithoutTenantOnboardingInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutCreatedWebsiteVersionsInput = {
@@ -2268,6 +2465,7 @@ export type UserCreateWithoutCreatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutCreatedWebsiteVersionsInput = {
@@ -2295,6 +2493,7 @@ export type UserUncheckedCreateWithoutCreatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutCreatedWebsiteVersionsInput = {
@@ -2327,6 +2526,7 @@ export type UserCreateWithoutUpdatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput = {
@@ -2354,6 +2554,7 @@ export type UserUncheckedCreateWithoutUpdatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutAuthorInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedCreateNestedManyWithoutActorUserInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutUpdatedWebsiteVersionsInput = {
@@ -2397,6 +2598,7 @@ export type UserUpdateWithoutCreatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput = {
@@ -2424,6 +2626,7 @@ export type UserUncheckedUpdateWithoutCreatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUpsertWithoutUpdatedWebsiteVersionsInput = {
@@ -2462,6 +2665,7 @@ export type UserUpdateWithoutUpdatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput = {
@@ -2489,6 +2693,7 @@ export type UserUncheckedUpdateWithoutUpdatedWebsiteVersionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutAuthorNestedInput
   plotStatusHistory?: Prisma.PlotStatusHistoryUncheckedUpdateManyWithoutActorUserNestedInput
+  templateSandboxProfiles?: Prisma.TemplateSandboxProfileUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 
@@ -2510,6 +2715,7 @@ export type UserCountOutputType = {
   notificationPreferences: number
   blogPosts: number
   plotStatusHistory: number
+  templateSandboxProfiles: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2526,6 +2732,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notificationPreferences?: boolean | UserCountOutputTypeCountNotificationPreferencesArgs
   blogPosts?: boolean | UserCountOutputTypeCountBlogPostsArgs
   plotStatusHistory?: boolean | UserCountOutputTypeCountPlotStatusHistoryArgs
+  templateSandboxProfiles?: boolean | UserCountOutputTypeCountTemplateSandboxProfilesArgs
 }
 
 /**
@@ -2629,6 +2836,13 @@ export type UserCountOutputTypeCountPlotStatusHistoryArgs<ExtArgs extends runtim
   where?: Prisma.PlotStatusHistoryWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTemplateSandboxProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TemplateSandboxProfileWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2656,6 +2870,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notificationPreferences?: boolean | Prisma.User$notificationPreferencesArgs<ExtArgs>
   blogPosts?: boolean | Prisma.User$blogPostsArgs<ExtArgs>
   plotStatusHistory?: boolean | Prisma.User$plotStatusHistoryArgs<ExtArgs>
+  templateSandboxProfiles?: boolean | Prisma.User$templateSandboxProfilesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2717,6 +2932,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notificationPreferences?: boolean | Prisma.User$notificationPreferencesArgs<ExtArgs>
   blogPosts?: boolean | Prisma.User$blogPostsArgs<ExtArgs>
   plotStatusHistory?: boolean | Prisma.User$plotStatusHistoryArgs<ExtArgs>
+  templateSandboxProfiles?: boolean | Prisma.User$templateSandboxProfilesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2739,6 +2955,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notificationPreferences: Prisma.$NotificationPreferencePayload<ExtArgs>[]
     blogPosts: Prisma.$BlogPostPayload<ExtArgs>[]
     plotStatusHistory: Prisma.$PlotStatusHistoryPayload<ExtArgs>[]
+    templateSandboxProfiles: Prisma.$TemplateSandboxProfilePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3160,6 +3377,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notificationPreferences<T extends Prisma.User$notificationPreferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationPreferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   blogPosts<T extends Prisma.User$blogPostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$blogPostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlogPostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plotStatusHistory<T extends Prisma.User$plotStatusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$plotStatusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  templateSandboxProfiles<T extends Prisma.User$templateSandboxProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$templateSandboxProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemplateSandboxProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3921,6 +4139,30 @@ export type User$plotStatusHistoryArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PlotStatusHistoryScalarFieldEnum | Prisma.PlotStatusHistoryScalarFieldEnum[]
+}
+
+/**
+ * User.templateSandboxProfiles
+ */
+export type User$templateSandboxProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TemplateSandboxProfile
+   */
+  select?: Prisma.TemplateSandboxProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TemplateSandboxProfile
+   */
+  omit?: Prisma.TemplateSandboxProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TemplateSandboxProfileInclude<ExtArgs> | null
+  where?: Prisma.TemplateSandboxProfileWhereInput
+  orderBy?: Prisma.TemplateSandboxProfileOrderByWithRelationInput | Prisma.TemplateSandboxProfileOrderByWithRelationInput[]
+  cursor?: Prisma.TemplateSandboxProfileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TemplateSandboxProfileScalarFieldEnum | Prisma.TemplateSandboxProfileScalarFieldEnum[]
 }
 
 /**

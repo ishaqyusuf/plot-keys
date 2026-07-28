@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@plotkeys/utils";
+import { cn } from "@plotkeys/ui/cn";
 import type { Header } from "@tanstack/react-table";
 
 interface ResizeHandleProps<TData> {
@@ -17,8 +17,16 @@ export function ResizeHandle<TData>({
   }
 
   return (
-    <div
+    <button
+      type="button"
+      aria-label={`Resize ${header.column.id} column`}
       onDoubleClick={() => header.column.resetSize()}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          header.column.resetSize();
+        }
+      }}
       onMouseDown={(e) => {
         e.stopPropagation(); // Prevent drag from triggering
         header.getResizeHandler()(e);

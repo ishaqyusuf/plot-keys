@@ -1,8 +1,4 @@
-export type EmployeeStatus =
-  | "active"
-  | "on_leave"
-  | "suspended"
-  | "terminated";
+export type EmployeeStatus = "active" | "on_leave" | "suspended" | "terminated";
 
 export type EmploymentType = "contract" | "full_time" | "intern" | "part_time";
 

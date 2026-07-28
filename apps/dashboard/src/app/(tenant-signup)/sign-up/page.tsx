@@ -1,7 +1,9 @@
 import { authRoutes } from "@plotkeys/auth/shared";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import { resolveDashboardLandingRoute } from "@plotkeys/utils";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import type { SearchParams } from "nuqs";
 
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import { FlowShell } from "@/components/flow-shell";
@@ -15,13 +17,19 @@ const signUpBenefits = [
   "Carry your chosen hostnames into onboarding without re-entering them",
 ];
 
-type SignUpPageProps = {
-  searchParams?: Promise<{
-    error?: string;
-  }>;
+export const metadata: Metadata = {
+  title: "Sign Up | Plot Keys",
 };
 
-export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+function firstSearchParam(value: SearchParams[string]) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function SignUpPage({ searchParams }: Props) {
   const tenantSlug = await getTenantSlugFromHost();
 
   if (tenantSlug) {
@@ -43,7 +51,10 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     redirect(authRoutes.onboarding);
   }
 
-  const params = (await searchParams) ?? {};
+  const rawParams = await searchParams;
+  const params = {
+    error: firstSearchParam(rawParams.error),
+  };
 
   return (
     <FlowShell
@@ -52,14 +63,14 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
       headerAction={<ThemeToggle />}
       sidePanel={
         <>
-          <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
+          <p className="text-sm font-medium text-primary-foreground/80">
             What this step guarantees
           </p>
-          <ul className="mt-6 grid gap-3">
+          <ul className="mt-6">
             {signUpBenefits.map((item) => (
               <li
                 key={item}
-                className="rounded-[calc(var(--radius-md)-0.1rem)] border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-4 text-sm leading-7 text-primary-foreground/85"
+                className="border-primary-foreground/15 border-t py-4 text-primary-foreground/85 text-sm leading-7 first:border-t-0"
               >
                 {item}
               </li>

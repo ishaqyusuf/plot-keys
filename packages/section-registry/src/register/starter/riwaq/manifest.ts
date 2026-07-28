@@ -82,14 +82,20 @@ const roadmapHero = slot(
   ["roadmap.eyebrow", "roadmap.title", "roadmap.subtitle"],
 );
 
-const marketStats = slot("market-stats", "Market Stats", "MarketStatsSection", 20, [
-  "marketStats.stat1Label",
-  "marketStats.stat1Value",
-  "marketStats.stat2Label",
-  "marketStats.stat2Value",
-  "marketStats.stat3Label",
-  "marketStats.stat3Value",
-]);
+const marketStats = slot(
+  "market-stats",
+  "Market Stats",
+  "MarketStatsSection",
+  20,
+  [
+    "marketStats.stat1Label",
+    "marketStats.stat1Value",
+    "marketStats.stat2Label",
+    "marketStats.stat2Value",
+    "marketStats.stat3Label",
+    "marketStats.stat3Value",
+  ],
+);
 
 const story = slot("story", "Story", "StoryGridSection", 30, [
   "story.eyebrow",
@@ -157,6 +163,12 @@ const pages: RegisterPageDefinition[] = [
     pageKey: "blog",
     sections: [blogHero, blogList, cta],
     slug: "/blog",
+  },
+  {
+    label: "Blog post",
+    pageKey: "blog-post",
+    sections: [],
+    slug: "/blog/[slug]",
   },
   {
     label: "Contact",

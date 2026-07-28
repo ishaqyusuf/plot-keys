@@ -304,6 +304,26 @@ export const PropertyType = {
 export type PropertyType = (typeof PropertyType)[keyof typeof PropertyType]
 
 
+export const QaDataClassification = {
+  live: 'live',
+  qa: 'qa'
+} as const
+
+export type QaDataClassification = (typeof QaDataClassification)[keyof typeof QaDataClassification]
+
+
+export const QaPurgeRunStatus = {
+  queued: 'queued',
+  running: 'running',
+  completed: 'completed',
+  partially_completed: 'partially_completed',
+  failed: 'failed',
+  blocked: 'blocked'
+} as const
+
+export type QaPurgeRunStatus = (typeof QaPurgeRunStatus)[keyof typeof QaPurgeRunStatus]
+
+
 export const SiteConfigurationStatus = {
   draft: 'draft',
   published: 'published',

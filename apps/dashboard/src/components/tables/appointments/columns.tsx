@@ -2,26 +2,16 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { inferRouterOutputs } from "@trpc/server";
-import { updateAppointmentStatusAction } from "@/app/actions";
-import {
-  appointmentStatusConfig,
-  type AppointmentStatus,
-} from "@/components/appointments/appointment-utils";
+import { appointmentStatusConfig } from "@/components/appointments/appointment-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type AppointmentTableRow =
-  RouterOutputs["workspace"]["listAppointments"]["data"][number];
-
-const statusFlow: Partial<
-  Record<AppointmentStatus, { label: string; next: AppointmentStatus }>
-> = {
-  confirmed: { label: "Mark completed", next: "completed" },
-  pending: { label: "Confirm", next: "confirmed" },
-};
+  RouterOutputs["appointments"]["list"]["data"][number];
 
 function formatDateTime(date: Date) {
   return new Intl.DateTimeFormat("en-NG", {
@@ -67,11 +57,7 @@ function DetailCell({ appointment }: { appointment: AppointmentTableRow }) {
   );
 }
 
-function AssignmentCell({
-  appointment,
-}: {
-  appointment: AppointmentTableRow;
-}) {
+function AssignmentCell({ appointment }: { appointment: AppointmentTableRow }) {
   return (
     <div className="space-y-0.5 text-sm">
       <p className="text-foreground">
@@ -88,47 +74,12 @@ function AssignmentCell({
   );
 }
 
-function ActionsCell({
-  appointment,
-}: {
-  appointment: AppointmentTableRow;
-}) {
-  const flow = statusFlow[appointment.status];
-
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {flow ? (
-        <form action={updateAppointmentStatusAction}>
-          <input name="appointmentId" type="hidden" value={appointment.id} />
-          <input name="status" type="hidden" value={flow.next} />
-          <Button size="sm" type="submit" variant="outline">
-            {flow.label}
-          </Button>
-        </form>
-      ) : null}
-
-      {appointment.status !== "cancelled" ? (
-        <form action={updateAppointmentStatusAction}>
-          <input name="appointmentId" type="hidden" value={appointment.id} />
-          <input name="status" type="hidden" value="cancelled" />
-          <Button
-            className="text-destructive hover:text-destructive"
-            size="sm"
-            type="submit"
-            variant="ghost"
-          >
-            Cancel
-          </Button>
-        </form>
-      ) : null}
-    </div>
-  );
+function ActionsCell({ appointment }: { appointment: AppointmentTableRow }) {
+  return <ActionsMenu row={appointment} />;
 }
 
 export const columns: ColumnDef<AppointmentTableRow>[] = [
+  createSelectColumn<AppointmentTableRow>(),
   {
     accessorFn: (row) => row.name,
     cell: ({ row }) => <AppointmentCell appointment={row.original} />,
@@ -136,7 +87,7 @@ export const columns: ColumnDef<AppointmentTableRow>[] = [
     id: "appointment",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Visitor",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -182,15 +133,15 @@ export const columns: ColumnDef<AppointmentTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell appointment={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[240px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 280,
+    size: 80,
   },
 ];

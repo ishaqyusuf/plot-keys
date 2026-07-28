@@ -7,9 +7,8 @@
  *   2. Syncing plan-included template licenses (grant/revoke as needed)
  *   3. Recording the billing line item for the subscription change
  *
- * The workspace `changePlan` tRPC mutation mirrors this logic for manual
- * admin overrides. When Trigger.dev is integrated, billing webhooks should
- * enqueue this job instead of calling changePlan directly.
+ * Billing webhooks and scheduled subscription checks enqueue this job after
+ * provider-verified plan changes.
  */
 
 export type PlanSyncPayload = {

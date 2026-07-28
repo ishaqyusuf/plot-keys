@@ -1,12 +1,19 @@
+import { buildRequestContext } from "@plotkeys/api/context";
+import { appRouter } from "@plotkeys/api/router";
 import {
   buildTenantStoragePath,
   createSupabaseAdminClient,
   readSupabaseEnv,
   storageBuckets,
 } from "@plotkeys/platform-integrations";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { requireAuthenticatedSession } from "@/lib/session";
+import {
+  readPendingOnboardingCookie,
+  setPendingOnboardingCookie,
+} from "@/lib/session-cookie";
 
 /**
  * POST /api/upload
@@ -98,6 +105,27 @@ export async function POST(request: Request) {
     const {
       data: { publicUrl },
     } = supabase.storage.from(storageBuckets.logos).getPublicUrl(path);
+
+    if (!session.activeMembership && folder === "logo") {
+      const cookieStore = await cookies();
+      const pendingOnboarding = readPendingOnboardingCookie(cookieStore);
+      const caller = appRouter.createCaller(
+        await buildRequestContext(request.headers),
+      );
+      const savedOnboarding = await caller.onboarding.get().catch(() => null);
+      const company =
+        pendingOnboarding?.company ?? savedOnboarding?.companyName ?? null;
+      const subdomain =
+        pendingOnboarding?.subdomain ?? savedOnboarding?.subdomain ?? null;
+
+      if (company && subdomain) {
+        setPendingOnboardingCookie(cookieStore, {
+          company,
+          logoUrl: publicUrl,
+          subdomain,
+        });
+      }
+    }
 
     return NextResponse.json({ publicUrl });
   } catch (err) {

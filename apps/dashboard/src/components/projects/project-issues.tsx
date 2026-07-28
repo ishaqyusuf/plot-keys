@@ -1,13 +1,20 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Status config
@@ -15,7 +22,10 @@ import { useTRPC } from "../../trpc/client";
 
 const issueStatusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   closed: { label: "Closed", variant: "outline" },
   in_progress: { label: "In Progress", variant: "secondary" },
@@ -25,7 +35,10 @@ const issueStatusConfig: Record<
 
 const severityConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   critical: { label: "Critical", variant: "destructive" },
   high: { label: "High", variant: "destructive" },
@@ -64,13 +77,16 @@ export function IssueList({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const updatingIssueId = updateMutation.isPending
+    ? updateMutation.variables?.issueId
+    : null;
 
   return (
     <div className="mb-4 space-y-2">
       {issues.map((issue) => (
         <div
           key={issue.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between border p-3"
         >
           <div>
             <div className="flex items-center gap-2">
@@ -94,9 +110,10 @@ export function IssueList({
           </div>
           <div className="flex items-center gap-2">
             {issue.status === "open" && (
-              <Button
-                size="sm"
+              <SubmitButton
                 variant="outline"
+                size="sm"
+                isSubmitting={updatingIssueId === issue.id}
                 disabled={updateMutation.isPending}
                 onClick={() =>
                   updateMutation.mutate({
@@ -107,7 +124,7 @@ export function IssueList({
                 }
               >
                 Resolve
-              </Button>
+              </SubmitButton>
             )}
           </div>
         </div>
@@ -152,10 +169,7 @@ export function CreateIssueForm({ projectId }: { projectId: string }) {
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
         <Label htmlFor="issueTitle">Title *</Label>
         <Input
@@ -167,16 +181,17 @@ export function CreateIssueForm({ projectId }: { projectId: string }) {
       </div>
       <div>
         <Label htmlFor="issueSeverity">Severity</Label>
-        <select
-          id="issueSeverity"
-          name="severity"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
-        </select>
+        <Select defaultValue="low" name="severity">
+          <SelectTrigger id="issueSeverity" className="w-full">
+            <SelectValue placeholder="Select severity" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="sm:col-span-2">
         <Label htmlFor="issueDesc">Description</Label>
@@ -187,9 +202,9 @@ export function CreateIssueForm({ projectId }: { projectId: string }) {
         />
       </div>
       <div className="sm:col-span-2">
-        <Button disabled={createMutation.isPending} type="submit">
-          {createMutation.isPending ? "Reporting…" : "Report Issue"}
-        </Button>
+        <SubmitButton isSubmitting={createMutation.isPending}>
+          Report Issue
+        </SubmitButton>
       </div>
     </form>
   );

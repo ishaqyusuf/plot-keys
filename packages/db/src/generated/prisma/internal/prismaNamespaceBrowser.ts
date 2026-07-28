@@ -77,6 +77,7 @@ export const ModelName = {
   Membership: 'Membership',
   NotificationPreference: 'NotificationPreference',
   Notification: 'Notification',
+  NotificationMessageLog: 'NotificationMessageLog',
   PayrollEntry: 'PayrollEntry',
   Plot: 'Plot',
   PlotReservation: 'PlotReservation',
@@ -99,9 +100,11 @@ export const ModelName = {
   Project: 'Project',
   PropertyMedia: 'PropertyMedia',
   Property: 'Property',
+  QaPurgeRun: 'QaPurgeRun',
   SiteConfiguration: 'SiteConfiguration',
   TenantStockImageLicense: 'TenantStockImageLicense',
   TeamInvite: 'TeamInvite',
+  TemplateSandboxProfile: 'TemplateSandboxProfile',
   TenantDomain: 'TenantDomain',
   TenantOnboarding: 'TenantOnboarding',
   TenantTemplateLicense: 'TenantTemplateLicense',
@@ -353,6 +356,10 @@ export const CompanyScalarFieldEnum = {
   planEndsAt: 'planEndsAt',
   enabledApps: 'enabledApps',
   isActive: 'isActive',
+  dataClassification: 'dataClassification',
+  qaSourceDomain: 'qaSourceDomain',
+  qaMarkedAt: 'qaMarkedAt',
+  qaPurgeStartedAt: 'qaPurgeStartedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -559,6 +566,26 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const NotificationMessageLogScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  customerId: 'customerId',
+  leadId: 'leadId',
+  channel: 'channel',
+  recipient: 'recipient',
+  subject: 'subject',
+  body: 'body',
+  provider: 'provider',
+  providerId: 'providerId',
+  errorDetails: 'errorDetails',
+  status: 'status',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationMessageLogScalarFieldEnum = (typeof NotificationMessageLogScalarFieldEnum)[keyof typeof NotificationMessageLogScalarFieldEnum]
 
 
 export const PayrollEntryScalarFieldEnum = {
@@ -934,6 +961,22 @@ export const PropertyScalarFieldEnum = {
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
 
 
+export const QaPurgeRunScalarFieldEnum = {
+  id: 'id',
+  requestedByUserId: 'requestedByUserId',
+  status: 'status',
+  activeKey: 'activeKey',
+  deletedCounts: 'deletedCounts',
+  errorCategory: 'errorCategory',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QaPurgeRunScalarFieldEnum = (typeof QaPurgeRunScalarFieldEnum)[keyof typeof QaPurgeRunScalarFieldEnum]
+
+
 export const SiteConfigurationScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -982,6 +1025,28 @@ export const TeamInviteScalarFieldEnum = {
 } as const
 
 export type TeamInviteScalarFieldEnum = (typeof TeamInviteScalarFieldEnum)[keyof typeof TeamInviteScalarFieldEnum]
+
+
+export const TemplateSandboxProfileScalarFieldEnum = {
+  id: 'id',
+  shareId: 'shareId',
+  ownerUserId: 'ownerUserId',
+  name: 'name',
+  templateKey: 'templateKey',
+  planTier: 'planTier',
+  companyName: 'companyName',
+  market: 'market',
+  subdomainLabel: 'subdomainLabel',
+  themeJson: 'themeJson',
+  contentJson: 'contentJson',
+  sampleDataJson: 'sampleDataJson',
+  profileJson: 'profileJson',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TemplateSandboxProfileScalarFieldEnum = (typeof TemplateSandboxProfileScalarFieldEnum)[keyof typeof TemplateSandboxProfileScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {

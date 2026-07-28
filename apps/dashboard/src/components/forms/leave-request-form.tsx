@@ -4,26 +4,32 @@ import type { AppRouter } from "@plotkeys/api/router";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
-import { createLeaveRequestAction } from "@/app/actions";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { leaveTypeLabels } from "@/components/leave-requests/leave-request-utils";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-type EmployeeOption =
-  RouterOutputs["workspace"]["listEmployees"]["data"][number];
+type EmployeeOption = RouterOutputs["employees"]["list"]["data"][number];
 
-type LeaveRequestFormProps = {
+type Props = {
   employees: EmployeeOption[];
   onCancel?: () => void;
+  onSuccess?: () => void;
 };
 
 const leaveTypeValues = [
@@ -45,11 +51,12 @@ const leaveRequestFormSchema = z.object({
 
 type LeaveRequestFormValues = z.infer<typeof leaveRequestFormSchema>;
 
-export function LeaveRequestForm({
-  employees,
-  onCancel,
-}: LeaveRequestFormProps) {
-  const [pending, setPending] = useState(false);
+const emptyEmployeeValue = "none";
+
+export function LeaveRequestForm({ employees, onCancel, onSuccess }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(leaveRequestFormSchema, {
     defaultValues: {
       employeeId: "",
@@ -59,48 +66,92 @@ export function LeaveRequestForm({
       startDate: "",
     },
   });
+  const createLeaveRequestMutation = useMutation(
+    trpc.leaveRequests.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to submit leave request.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset();
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.leaveRequests.list.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.leaveRequests.stats.queryKey(),
+          }),
+        ]);
+        onSuccess?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: LeaveRequestFormValues) {
-    setPending(true);
-
-    try {
-      const formData = new FormData();
-      formData.set("employeeId", values.employeeId);
-      formData.set("leaveType", values.leaveType);
-      formData.set("startDate", values.startDate);
-      formData.set("endDate", values.endDate);
-      formData.set("reason", values.reason?.trim() ?? "");
-      await createLeaveRequestAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: LeaveRequestFormValues) {
+    setError(null);
+    createLeaveRequestMutation.mutate({
+      employeeId: values.employeeId,
+      endDate: values.endDate,
+      leaveType: values.leaveType,
+      reason: values.reason?.trim() || null,
+      startDate: values.startDate,
+    });
   }
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Employee *</FieldLabel>
-            <NativeSelect required {...form.register("employeeId")}>
-              <NativeSelectOption value="">Select employee</NativeSelectOption>
-              {employees.map((employee) => (
-                <NativeSelectOption key={employee.id} value={employee.id}>
-                  {employee.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+            <Controller
+              control={form.control}
+              name="employeeId"
+              render={({ field }) => (
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === emptyEmployeeValue ? "" : value)
+                  }
+                  value={field.value || emptyEmployeeValue}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={emptyEmployeeValue}>
+                      Select employee
+                    </SelectItem>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
 
           <Field>
             <FieldLabel>Leave type *</FieldLabel>
-            <NativeSelect required {...form.register("leaveType")}>
-              {leaveTypeValues.map((value) => (
-                <NativeSelectOption key={value} value={value}>
-                  {leaveTypeLabels[value]}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+            <Controller
+              control={form.control}
+              name="leaveType"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select leave type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {leaveTypeValues.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {leaveTypeLabels[value]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
@@ -122,18 +173,22 @@ export function LeaveRequestForm({
             />
           </Field>
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter>
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
+        {error ? <p className="text-xs text-destructive">{error}</p> : <span />}
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel} type="button" variant="ghost">
+          <Button variant="ghost" onClick={onCancel} type="button">
             Cancel
           </Button>
-          <Button disabled={pending || !employees.length} type="submit">
-            {pending ? "Submitting..." : "Submit request"}
-          </Button>
+          <SubmitButton
+            isSubmitting={createLeaveRequestMutation.isPending}
+            disabled={!employees.length}
+          >
+            Submit request
+          </SubmitButton>
         </div>
-      </DashboardFormFooter>
+      </FormFooter>
     </form>
   );
 }

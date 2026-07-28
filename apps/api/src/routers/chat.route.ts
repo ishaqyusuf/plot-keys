@@ -7,11 +7,8 @@
  */
 
 import { type ChatBotMessage, getChatCompletion } from "@plotkeys/chat-bot";
-import {
-  createPrismaClient,
-  listAgentsForCompany,
-  listFeaturedProperties,
-} from "@plotkeys/db";
+import { createPrismaClient } from "@plotkeys/db";
+import { getTenantChatContext } from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -52,43 +49,16 @@ export const chatRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      const company = await db.company.findFirst({
-        select: {
-          id: true,
-          name: true,
-          market: true,
-        },
-        where: { deletedAt: null, slug: input.subdomain },
+      const context = await getTenantChatContext(db, {
+        subdomain: input.subdomain,
       });
 
-      if (!company) {
+      if (!context) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: `No workspace found for subdomain "${input.subdomain}".`,
         });
       }
-
-      // Fetch tenant context for the system prompt
-      const [properties, agentsPage] = await Promise.all([
-        listFeaturedProperties(db, company.id).catch(() => []),
-        listAgentsForCompany(db, company.id, { limit: 10 }).catch(() => ({
-          data: [],
-        })),
-      ]);
-
-      // Fetch onboarding business summary if available
-      const onboarding = await db.tenantOnboarding
-        .findFirst({
-          select: { businessSummary: true },
-          where: {
-            user: {
-              memberships: {
-                some: { companyId: company.id },
-              },
-            },
-          },
-        })
-        .catch(() => null);
 
       const conversationMessages: ChatBotMessage[] = input.messages.map(
         (m) => ({
@@ -99,16 +69,16 @@ export const chatRouter = createTRPCRouter({
 
       const result = await getChatCompletion(
         {
-          companyName: company.name,
-          market: company.market,
-          businessSummary: onboarding?.businessSummary,
-          properties: properties.map((p) => ({
+          companyName: context.company.name,
+          market: context.company.market,
+          businessSummary: context.businessSummary,
+          properties: context.properties.map((p) => ({
             title: p.title,
             location: p.location,
             price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
             specs: p.specs,
           })),
-          agents: agentsPage.data.map((a) => ({
+          agents: context.agents.map((a) => ({
             name: a.name,
             title: a.title,
             bio: a.bio,

@@ -8,7 +8,7 @@ import {
   setPropertyCover,
   syncPropertyCoverImageUrl,
   updatePropertyPublishState,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 

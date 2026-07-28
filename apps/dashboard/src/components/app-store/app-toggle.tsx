@@ -1,31 +1,39 @@
 "use client";
 
 import { Switch } from "@plotkeys/ui/switch";
-import { useTransition } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
-import { setAppEnabled } from "@/app/(app)/app-store/actions";
+import { useTRPC } from "@/trpc/client";
 
-type AppToggleProps = {
+type Props = {
   appId: string;
   disabled?: boolean;
   enabled: boolean;
 };
 
-export function AppToggle({ appId, disabled, enabled }: AppToggleProps) {
-  const [isPending, startTransition] = useTransition();
+export function AppToggle({ appId, disabled, enabled }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const setAppEnabledMutation = useMutation(
+    trpc.apps.setEnabled.mutationOptions({
+      async onSuccess() {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.apps.get.queryKey(),
+        });
+        router.refresh();
+      },
+    }),
+  );
 
   return (
     <Switch
       aria-label={enabled ? "Disable app" : "Enable app"}
       checked={enabled}
-      disabled={disabled || isPending}
+      disabled={disabled || setAppEnabledMutation.isPending}
       onCheckedChange={(next) => {
-        startTransition(async () => {
-          const result = await setAppEnabled(appId, next);
-          if (!result.ok) {
-            console.error(result.error);
-          }
-        });
+        setAppEnabledMutation.mutate({ appId, enabled: next });
       }}
     />
   );

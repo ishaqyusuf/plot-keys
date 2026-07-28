@@ -1,38 +1,36 @@
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
-import { ProjectDetailTable } from "@/components/tables/projects/detail";
-import { ProjectDetailSkeleton } from "@/components/tables/projects/detail-skeleton";
+import { ProjectDetailContent } from "@/components/projects/project-detail-content";
+import { ProjectDetailSkeleton } from "@/components/projects/project-detail-skeleton";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { requireOnboardedSession } from "@/lib/session";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Project details | Plot Keys",
 };
 
-type ProjectDetailPageProps = {
+type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ProjectDetailPage({
-  params,
-}: ProjectDetailPageProps) {
+export default async function ProjectDetailPage({ params }: Props) {
   await requireOnboardedSession();
   const { id: projectId } = await params;
 
-  batchPrefetch([trpc.projects.getOverviewDetail.queryOptions({ projectId })]);
+  prefetch(trpc.projects.getOverviewDetail.queryOptions({ projectId }));
 
   return (
-    <DashboardPage>
-      <HydrateClient>
+    <HydrateClient>
+      <ScrollableContent>
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<ProjectDetailSkeleton />}>
-            <ProjectDetailTable projectId={projectId} />
+            <ProjectDetailContent projectId={projectId} />
           </Suspense>
         </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

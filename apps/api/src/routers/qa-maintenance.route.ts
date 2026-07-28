@@ -5,7 +5,7 @@ import {
   discoverQaCompanyCandidates,
   getQaPurgeRun,
   previewQaPurge,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import { qaPurgeHandler, triggerJob } from "@plotkeys/jobs";
 import { qaPurgeTask } from "@plotkeys/jobs/tasks";
 import { TRPCError } from "@trpc/server";

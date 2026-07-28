@@ -2,29 +2,50 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { Textarea } from "@plotkeys/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type EstateLaunchDetailsFormRecord = NonNullable<
-  RouterOutputs["workspace"]["getEstateDetail"]
+type EstateLaunchDetailsQueryRecord = NonNullable<
+  RouterOutputs["estates"]["get"]
+>;
+export type EstateLaunchDetailsFormRecord = Pick<
+  EstateLaunchDetailsQueryRecord,
+  | "amenities"
+  | "approvals"
+  | "brochureUrl"
+  | "description"
+  | "heroImageUrl"
+  | "id"
+  | "landmarks"
+  | "location"
+  | "phaseLabel"
+  | "publishState"
+  | "slug"
+  | "specialPurposeUses"
+  | "title"
 >;
 
-type EstateLaunchDetailsFormProps = {
+type Props = {
   estate: EstateLaunchDetailsFormRecord;
   onSuccess?: () => void;
 };
@@ -84,10 +105,7 @@ function getFormDefaults(
   };
 }
 
-export function EstateLaunchDetailsForm({
-  estate,
-  onSuccess,
-}: EstateLaunchDetailsFormProps) {
+export function EstateLaunchDetailsForm({ estate, onSuccess }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [uploadingField, setUploadingField] = useState<
@@ -98,30 +116,17 @@ export function EstateLaunchDetailsForm({
     defaultValues: getFormDefaults(estate),
   });
   const updateEstateMutation = useMutation(
-    trpc.workspace.updateEstate.mutationOptions({
+    trpc.estates.update.mutationOptions({
       async onSuccess(updatedEstate) {
-        form.reset({
-          ...getFormDefaults(estate),
-          amenities: updatedEstate.amenities ?? "",
-          approvals: updatedEstate.approvals ?? "",
-          brochureUrl: updatedEstate.brochureUrl ?? "",
-          description: updatedEstate.description ?? "",
-          heroImageUrl: updatedEstate.heroImageUrl ?? "",
-          landmarks: updatedEstate.landmarks ?? "",
-          location: updatedEstate.location ?? "",
-          phaseLabel: updatedEstate.phaseLabel ?? "",
-          publishState: updatedEstate.publishState,
-          specialPurposeUses: updatedEstate.specialPurposeUses ?? "",
-          title: updatedEstate.title,
-        });
+        form.reset(getFormDefaults(updatedEstate));
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: trpc.workspace.getEstateDetail.queryKey({
+            queryKey: trpc.estates.get.queryKey({
               slug: estate.slug,
             }),
           }),
           queryClient.invalidateQueries({
-            queryKey: trpc.workspace.listEstates.queryKey(),
+            queryKey: trpc.estates.list.queryKey(),
           }),
         ]);
         onSuccess?.();
@@ -173,7 +178,7 @@ export function EstateLaunchDetailsForm({
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Estate name *</FieldLabel>
@@ -271,14 +276,22 @@ export function EstateLaunchDetailsForm({
 
           <Field>
             <FieldLabel>Publish state</FieldLabel>
-            <select
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              {...form.register("publishState")}
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
+            <Controller
+              control={form.control}
+              name="publishState"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select publish state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
 
           {updateEstateMutation.error ? (
@@ -289,17 +302,17 @@ export function EstateLaunchDetailsForm({
             </Alert>
           ) : null}
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
         <QuickFill
           args={{ form: createQuickFillAdapter(form) }}
           name="new-estate"
         />
-        <Button disabled={updateEstateMutation.isPending} type="submit">
-          {updateEstateMutation.isPending ? "Saving..." : "Save launch"}
-        </Button>
-      </DashboardFormFooter>
+        <SubmitButton isSubmitting={updateEstateMutation.isPending}>
+          Save launch
+        </SubmitButton>
+      </FormFooter>
     </form>
   );
 }

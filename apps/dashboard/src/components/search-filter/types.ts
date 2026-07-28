@@ -4,6 +4,7 @@ export type PageFilterOption = {
 };
 
 export type PageFilterData = {
+  endValue?: string;
   label: string;
   options?: PageFilterOption[];
   type: "input" | "checkbox" | "select" | "date" | "date-range" | "boolean";

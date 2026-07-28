@@ -1,13 +1,13 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Phase status config
@@ -15,7 +15,10 @@ import { useTRPC } from "../../trpc/client";
 
 const phaseStatusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   completed: { label: "Completed", variant: "default" },
   in_progress: { label: "In Progress", variant: "secondary" },
@@ -49,25 +52,31 @@ export function PhaseList({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const updatingPhaseId = updateMutation.isPending
+    ? updateMutation.variables?.phaseId
+    : null;
 
   return (
     <div className="mb-4 space-y-2">
       {phases.map((phase) => (
         <div
           key={phase.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between border p-3"
         >
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{phase.name}</span>
-            <Badge variant={phaseStatusConfig[phase.status]?.variant ?? "outline"}>
+            <Badge
+              variant={phaseStatusConfig[phase.status]?.variant ?? "outline"}
+            >
               {phaseStatusConfig[phase.status]?.label ?? phase.status}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
             {phase.status === "not_started" && (
-              <Button
-                size="sm"
+              <SubmitButton
                 variant="outline"
+                size="sm"
+                isSubmitting={updatingPhaseId === phase.id}
                 disabled={updateMutation.isPending}
                 onClick={() =>
                   updateMutation.mutate({
@@ -78,12 +87,13 @@ export function PhaseList({
                 }
               >
                 Start
-              </Button>
+              </SubmitButton>
             )}
             {phase.status === "in_progress" && (
-              <Button
-                size="sm"
+              <SubmitButton
                 variant="outline"
+                size="sm"
+                isSubmitting={updatingPhaseId === phase.id}
                 disabled={updateMutation.isPending}
                 onClick={() =>
                   updateMutation.mutate({
@@ -94,7 +104,7 @@ export function PhaseList({
                 }
               >
                 Complete
-              </Button>
+              </SubmitButton>
             )}
           </div>
         </div>
@@ -145,7 +155,12 @@ export function CreatePhaseForm({
     <form onSubmit={onSubmit} className="flex items-end gap-2">
       <div className="flex-1">
         <Label htmlFor="phaseName">Add Phase</Label>
-        <Input id="phaseName" name="name" required placeholder="e.g. Foundation" />
+        <Input
+          id="phaseName"
+          name="name"
+          required
+          placeholder="e.g. Foundation"
+        />
       </div>
       <div className="w-20">
         <Label htmlFor="phaseOrder">Order</Label>
@@ -156,9 +171,7 @@ export function CreatePhaseForm({
           defaultValue={nextOrder}
         />
       </div>
-      <Button disabled={createMutation.isPending} type="submit">
-        {createMutation.isPending ? "…" : "Add"}
-      </Button>
+      <SubmitButton isSubmitting={createMutation.isPending}>Add</SubmitButton>
     </form>
   );
 }

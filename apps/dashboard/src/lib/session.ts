@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   type AppSession,
   authRoutes,
@@ -6,13 +8,13 @@ import {
   getScopedAuthSessionCookieName,
   platformSessionScope,
 } from "@plotkeys/auth";
-import { resolveDashboardTenantSlugByHostname } from "@plotkeys/db/queries";
 import {
   resolveDashboardLandingRoute,
   resolveDashboardSessionScope,
 } from "@plotkeys/utils";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getDashboardTenantState } from "./dashboard-tenant-api";
 import { getTenantSignInUrlForSubdomain } from "./tenant-dashboard-url";
 import { tenantRedirect } from "./tenant-url-server";
 
@@ -138,6 +140,9 @@ export async function getTenantSlugFromHost(): Promise<string | null> {
     return null;
   }
 
-  const result = await resolveDashboardTenantSlugByHostname(tenantHostname);
-  return result.ok ? result.tenantSlug : null;
+  const state = await getDashboardTenantState({
+    tenantHostname,
+    tenantSlug: null,
+  });
+  return state?.tenantSlug ?? null;
 }

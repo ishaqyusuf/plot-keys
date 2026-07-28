@@ -1,11 +1,12 @@
 import {
   countCustomersByStatus,
   createCustomer,
+  getCustomerById,
   getCustomers,
   listCustomersForCompany,
   softDeleteCustomer,
   updateCustomer,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -13,14 +14,16 @@ import { createTRPCRouter, membershipProcedure } from "../lib.trpc";
 
 export const paginationSchema = z.object({
   bin: z.boolean().optional().nullable(),
-  cursor: z.string().optional().nullable(),
+  cursor: z.union([z.string(), z.number()]).optional().nullable(),
   q: z.string().optional().nullable(),
   size: z.number().or(z.string()).optional().nullable(),
   sort: z.array(z.string()).optional().nullable(),
 });
 
 export const getCustomersSchema = paginationSchema.extend({
+  end: z.string().optional().nullable(),
   filter: z.string().optional().nullable(),
+  start: z.string().optional().nullable(),
 });
 
 export const customersRouter = createTRPCRouter({
@@ -29,10 +32,26 @@ export const customersRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const db = ctx.db.db;
       if (!db) {
-        return { data: [], meta: { count: 0, cursor: null, size: 20 } };
+        return {
+          data: [],
+          meta: { count: 0, cursor: null, hasNextPage: false, size: 20 },
+        };
       }
 
       return getCustomers(db, ctx.auth.activeMembership.companyId, input);
+    }),
+
+  getById: membershipProcedure
+    .input(z.object({ customerId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const db = ctx.db.db;
+      if (!db) return null;
+
+      return getCustomerById(
+        db,
+        input.customerId,
+        ctx.auth.activeMembership.companyId,
+      );
     }),
 
   /** List all customers for the company. */

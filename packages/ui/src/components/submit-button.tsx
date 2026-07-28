@@ -1,51 +1,29 @@
-"use client";
-
-import { useFormStatus } from "react-dom";
-
-import { cn } from "../lib/utils";
-import { Button } from "./button";
+import { cn } from "../utils";
+import { Button, type ButtonProps } from "./button";
 import { Spinner } from "./spinner";
 
-type SubmitButtonProps = Omit<React.ComponentProps<typeof Button>, "type"> & {
-  loadingLabel?: string;
-};
-
-/**
- * A Button that automatically disables and shows a loading spinner while a
- * parent React server action form is pending.  Uses `useFormStatus` so it
- * must be rendered inside a `<form>` element.
- *
- * @example
- * ```tsx
- * <form action={someServerAction}>
- *   <SubmitButton>Save changes</SubmitButton>
- * </form>
- * ```
- */
-function SubmitButton({
+export function SubmitButton({
   children,
-  className,
+  isSubmitting,
   disabled,
-  loadingLabel,
   ...props
-}: SubmitButtonProps) {
-  const { pending } = useFormStatus();
-  const isDisabled = disabled || pending;
-
+}: {
+  children: React.ReactNode;
+  isSubmitting: boolean;
+  disabled?: boolean;
+} & ButtonProps) {
   return (
     <Button
-      className={cn("relative", className)}
-      disabled={isDisabled}
-      type="submit"
+      disabled={isSubmitting || disabled}
       {...props}
+      className={cn("relative", props.className)}
     >
-      {pending && (
-        <Spinner aria-hidden="true" className="mr-1 size-4 shrink-0" />
+      <span className={cn(isSubmitting && "invisible")}>{children}</span>
+      {isSubmitting && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Spinner />
+        </div>
       )}
-      {pending && loadingLabel ? loadingLabel : children}
     </Button>
   );
 }
-
-export type { SubmitButtonProps };
-export { SubmitButton };

@@ -1,8 +1,9 @@
 export type PageDataMeta = {
-  count?: number;
-  cursor?: string | null;
+  count: number;
+  cursor: string | null;
+  hasNextPage: boolean;
   page?: number;
-  size?: number;
+  size: number;
 };
 
 export type PaginationQuery = {
@@ -27,7 +28,13 @@ export async function queryResponse<TData>(
   data: TData,
   options: QueryResponseOptions,
 ) {
-  const meta: PageDataMeta = {};
+  const defaultSize = Number(options.query?.size || 20);
+  const meta: PageDataMeta = {
+    count: Array.isArray(data) ? data.length : 0,
+    cursor: null,
+    hasNextPage: false,
+    size: Number.isFinite(defaultSize) ? defaultSize : 20,
+  };
   const { model, query, where } = options;
 
   if (where && !query?.bin) {
@@ -42,6 +49,7 @@ export async function queryResponse<TData>(
     meta.count = count;
     meta.size = size;
     meta.cursor = cursor < count ? String(cursor) : null;
+    meta.hasNextPage = meta.cursor !== null;
   }
 
   return { data, meta };

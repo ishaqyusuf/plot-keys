@@ -16,10 +16,11 @@ import {
   CommandList,
 } from "@plotkeys/ui/command";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
+import { Icon } from "@plotkeys/ui/icons";
 import { Input } from "@plotkeys/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@plotkeys/ui/popover";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronsUpDownIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -27,9 +28,9 @@ import {
   TenantLink as Link,
   useTenantRouter,
 } from "@/components/nav/tenant-link";
-import { useZodForm } from "../../hooks/use-zod-form";
-import { type DevAccount, useDevToolsStore } from "../../stores/dev-tools";
-import { useTRPC } from "../../trpc/client";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { type DevAccount, useDevToolsStore } from "@/stores/dev-tools";
+import { useTRPC } from "@/trpc/client";
 import { AuthFormError } from "./auth-form-error";
 import { persistSession } from "./session-bridge";
 
@@ -76,14 +77,14 @@ function DevEmailCombobox({
           <Button
             aria-expanded={open}
             id="sign-in-email"
+            variant="outline"
             className="h-11 w-full justify-between px-3 text-left font-normal"
             type="button"
-            variant="outline"
           >
             <span className="min-w-0 truncate">
               {selectedAccount?.email ?? "Search email"}
             </span>
-            <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
+            <Icon.ChevronsUpDown className="size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -179,7 +180,7 @@ export function SignInForm({
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
-      <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm leading-7 text-muted-foreground">
+      <div className="border border-border bg-card px-4 py-3 text-sm leading-7 text-muted-foreground">
         Sign-in is scoped to the current tenant host. Dev account autofill only
         shows saved accounts that match this workspace.
       </div>
@@ -236,15 +237,14 @@ export function SignInForm({
       />
 
       <div className="flex flex-col gap-3">
-        <Button
+        <SubmitButton
           className="h-11 w-full"
-          disabled={signInMutation.isPending}
-          type="submit"
+          isSubmitting={signInMutation.isPending}
         >
-          {signInMutation.isPending ? "Signing in..." : "Sign in"}
-        </Button>
+          Sign in
+        </SubmitButton>
         {showCreateAccount ? (
-          <Button asChild className="w-full" variant="secondary">
+          <Button variant="secondary" className="w-full" asChild>
             <Link
               href={
                 redirectTo

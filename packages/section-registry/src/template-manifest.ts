@@ -1,5 +1,7 @@
 import type { PageDefinition, TemplatePageInventory } from "./page-inventory";
+import { pageAliasFields } from "./register/inner-page-defaults";
 import type {
+  EditableFieldDefinition,
   TemplateDefinition,
   TemplateTier,
   TenantResource,
@@ -36,6 +38,7 @@ const baseThemeKeys = new Set([
   "stylePreset",
   "supportLine",
 ]);
+const pageAliasContentKeys = new Set<string>(pageAliasFields);
 
 function assertNonEmptyString(value: string, label: string) {
   if (!value.trim()) {
@@ -86,7 +89,36 @@ export function defineTemplateManifest(
   assertNonEmptyString(manifest.description, "description");
 
   if (!manifest.pages.length) {
-    throw new Error(`Template "${manifest.key}" must declare at least one page.`);
+    throw new Error(
+      `Template "${manifest.key}" must declare at least one page.`,
+    );
+  }
+
+  const editableContentKeys = new Set<string>();
+  for (const field of manifest.editableFields) {
+    assertNonEmptyString(
+      field.contentKey,
+      `editable field key for "${manifest.key}"`,
+    );
+    assertNonEmptyString(
+      field.label,
+      `editable field label for "${manifest.key}:${field.contentKey}"`,
+    );
+    assertNonEmptyString(
+      field.shortDetail,
+      `editable field short detail for "${manifest.key}:${field.contentKey}"`,
+    );
+    assertNonEmptyString(
+      field.longDetail,
+      `editable field long detail for "${manifest.key}:${field.contentKey}"`,
+    );
+
+    if (editableContentKeys.has(field.contentKey)) {
+      throw new Error(
+        `Template "${manifest.key}" has duplicate editable field "${field.contentKey}".`,
+      );
+    }
+    editableContentKeys.add(field.contentKey);
   }
 
   const pageKeys = new Set<string>();
@@ -109,6 +141,35 @@ export function defineTemplateManifest(
       );
     }
     pageSlugs.add(page.slug);
+
+    const sectionIds = new Set<string>();
+    for (const section of page.sections) {
+      assertNonEmptyString(
+        section.id,
+        `section id for "${manifest.key}:${page.pageKey}"`,
+      );
+      assertNonEmptyString(
+        section.label,
+        `section label for "${manifest.key}:${page.pageKey}:${section.id}"`,
+      );
+      assertNonEmptyString(
+        section.sectionType,
+        `section type for "${manifest.key}:${page.pageKey}:${section.id}"`,
+      );
+
+      if (sectionIds.has(section.id)) {
+        throw new Error(
+          `Template "${manifest.key}" page "${page.pageKey}" has duplicate section "${section.id}".`,
+        );
+      }
+      sectionIds.add(section.id);
+
+      if (section.dataSource && section.contentKeys.length > 0) {
+        throw new Error(
+          `Template "${manifest.key}" section "${section.id}" uses data source "${section.dataSource}" and must not declare editable content keys.`,
+        );
+      }
+    }
   }
 
   const home = manifest.pages.find((page) => page.pageKey === "home");
@@ -183,37 +244,109 @@ export function manifestToPageInventory(
   };
 }
 
+function editableFieldMap(manifest: TemplateManifest) {
+  return new Map(
+    manifest.editableFields.map((field) => [field.contentKey, field]),
+  );
+}
+
+function addEditableField(
+  fields: Map<string, EditableFieldDefinition>,
+  field: EditableFieldDefinition,
+  contentKey: string,
+  page?: PageDefinition,
+) {
+  if (fields.has(contentKey)) return;
+
+  fields.set(
+    contentKey,
+    contentKey === field.contentKey
+      ? field
+      : {
+          ...field,
+          contentKey,
+          label: page ? `${page.label} ${field.label}` : field.label,
+        },
+  );
+}
+
+function getEditableContentFieldsForPages(
+  manifest: TemplateManifest,
+  pages: PageDefinition[],
+): Map<string, EditableFieldDefinition> {
+  const declaredFields = editableFieldMap(manifest);
+  const fields = new Map<string, EditableFieldDefinition>();
+
+  for (const page of pages) {
+    for (const section of page.sections) {
+      for (const contentKey of section.contentKeys) {
+        const declaredField = declaredFields.get(contentKey);
+        if (declaredField) {
+          addEditableField(fields, declaredField, contentKey);
+        }
+
+        if (page.pageKey === "home" || !pageAliasContentKeys.has(contentKey)) {
+          continue;
+        }
+
+        const aliasedField = declaredFields.get(contentKey);
+        if (!aliasedField) continue;
+
+        addEditableField(
+          fields,
+          aliasedField,
+          `${page.pageKey}.${contentKey}`,
+          page,
+        );
+      }
+    }
+  }
+
+  return fields;
+}
+
+export function getTemplateEditableContentFields(
+  manifest: TemplateManifest,
+): Map<string, EditableFieldDefinition> {
+  return getEditableContentFieldsForPages(manifest, manifest.pages);
+}
+
+export function getTemplateEditableFieldsForPage(
+  manifest: TemplateManifest,
+  pageKey: string,
+): EditableFieldDefinition[] {
+  const page = manifest.pages.find((item) => item.pageKey === pageKey);
+  if (!page) return [];
+
+  return [...getEditableContentFieldsForPages(manifest, [page]).values()];
+}
+
+export function getTemplateEditableContentField(
+  manifest: TemplateManifest,
+  contentKey: string,
+): EditableFieldDefinition | undefined {
+  return getTemplateEditableContentFields(manifest).get(contentKey);
+}
+
+export function getTemplateAiContentField(
+  manifest: TemplateManifest,
+  contentKey: string,
+): EditableFieldDefinition | undefined {
+  const field = getTemplateEditableContentField(manifest, contentKey);
+  return field?.aiEnabled ? field : undefined;
+}
+
 export function getTemplateAllowedContentKeys(
   manifest: TemplateManifest,
 ): Set<string> {
-  const keys = new Set<string>();
-
-  for (const field of manifest.editableFields) {
-    keys.add(field.contentKey);
-  }
-
-  for (const page of manifest.pages) {
-    for (const section of page.sections) {
-      for (const key of section.contentKeys) {
-        keys.add(key);
-      }
-    }
-
-    if (page.pageKey !== "home") {
-      for (const field of manifest.editableFields) {
-        keys.add(`${page.pageKey}.${field.contentKey}`);
-      }
-    }
-  }
-
-  return keys;
+  return new Set(getTemplateEditableContentFields(manifest).keys());
 }
 
 export function isTemplateContentKeyAllowed(
   manifest: TemplateManifest,
   contentKey: string,
 ): boolean {
-  return getTemplateAllowedContentKeys(manifest).has(contentKey);
+  return Boolean(getTemplateEditableContentField(manifest, contentKey));
 }
 
 export function normalizeTemplateContentFieldUpdate(

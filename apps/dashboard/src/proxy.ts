@@ -11,7 +11,7 @@
  *
  * Host patterns handled:
  *   dashboard.{slug}.plotkeys.com      -> tenant slug = {slug}
- *   dashboard.{slug}.app-plotkeys.localhost:1355 -> tenant slug = {slug}
+ *   dashboard.{slug}.app-plotkeys.localhost -> tenant slug = {slug}
  *   dashboard.{tenantDomain.com}       -> tenant hostname lookup via DB
  *   localhost / 127.x.x.x              -> no tenant slug injected
  */
@@ -22,7 +22,6 @@ import {
   getScopedAuthSessionCookieName,
   platformSessionScope,
 } from "@plotkeys/auth/shared";
-import { isDashboardTenantAlreadyOnboarded } from "@plotkeys/db/queries";
 import {
   extractDashboardHostname,
   extractDashboardTenantSlug,
@@ -36,6 +35,7 @@ import {
   resolveTenantUrlContext,
 } from "@plotkeys/utils/tenant-url";
 import { type NextRequest, NextResponse } from "next/server";
+import { getDashboardTenantState } from "./lib/dashboard-tenant-api";
 import { getDashboardTenantUrlConfig } from "./lib/tenant-url-config";
 
 /** Routes that do NOT require an authenticated session. */
@@ -50,10 +50,14 @@ const PUBLIC_PREFIXES = [
   "/favicon",
 ];
 
+const PUBLIC_ASSET_PATTERN =
+  /^\/(?:apple-icon(?:-[\w-]+)?|icon(?:-[\w-]+)?|logo(?:-[\w-]+)?|favicon(?:-[\w-]+)?)\.(?:ico|png|svg)$/;
+
 const PLATFORM_ONLY_PREFIXES = [authRoutes.signUp];
 
 function isPublicPath(pathname: string): boolean {
   return (
+    PUBLIC_ASSET_PATTERN.test(pathname) ||
     PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
     /^\/join\/[^/]+$/.test(pathname)
   );
@@ -86,8 +90,8 @@ async function isTenantAlreadyOnboarded(input: {
   tenantHostname: string | null;
   tenantSlug: string | null;
 }) {
-  const result = await isDashboardTenantAlreadyOnboarded(input);
-  return result.ok ? result.onboarded : false;
+  const state = await getDashboardTenantState(input);
+  return state?.onboarded ?? false;
 }
 
 export async function proxy(request: NextRequest) {

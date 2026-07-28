@@ -12,7 +12,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
 
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils";
 import { createContextFactory } from "../../../utils/context-factory";
 import {
   Table as BaseTable,

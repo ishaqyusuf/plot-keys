@@ -1,0 +1,16 @@
+"use client";
+
+import { create } from "zustand";
+
+type SearchState = {
+  isOpen: boolean;
+  setOpen: (open?: boolean) => void;
+};
+
+export const useSearchStore = create<SearchState>()((set) => ({
+  isOpen: false,
+  setOpen: (open) =>
+    set((state) => ({
+      isOpen: typeof open === "boolean" ? open : !state.isOpen,
+    })),
+}));

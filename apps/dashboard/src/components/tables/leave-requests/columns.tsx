@@ -2,24 +2,20 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  approveLeaveRequestAction,
-  cancelLeaveRequestAction,
-  rejectLeaveRequestAction,
-} from "@/app/actions";
+import type { inferRouterOutputs } from "@trpc/server";
 import {
   formatLeaveDate,
   leaveRequestStatusConfig,
   leaveTypeLabels,
 } from "@/components/leave-requests/leave-request-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type LeaveRequestTableRow =
-  RouterOutputs["workspace"]["listLeaveRequests"]["data"][number];
+  RouterOutputs["leaveRequests"]["list"]["data"][number];
 
 function EmployeeCell({ request }: { request: LeaveRequestTableRow }) {
   return (
@@ -62,46 +58,11 @@ function ReasonCell({ request }: { request: LeaveRequestTableRow }) {
 }
 
 function ActionsCell({ request }: { request: LeaveRequestTableRow }) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {request.status === "pending" ? (
-        <>
-          <form action={approveLeaveRequestAction}>
-            <input name="leaveRequestId" type="hidden" value={request.id} />
-            <Button size="sm" type="submit">
-              Approve
-            </Button>
-          </form>
-          <form action={rejectLeaveRequestAction}>
-            <input name="leaveRequestId" type="hidden" value={request.id} />
-            <Button
-              className="text-destructive hover:text-destructive"
-              size="sm"
-              type="submit"
-              variant="ghost"
-            >
-              Reject
-            </Button>
-          </form>
-        </>
-      ) : null}
-
-      {request.status === "pending" || request.status === "approved" ? (
-        <form action={cancelLeaveRequestAction}>
-          <input name="leaveRequestId" type="hidden" value={request.id} />
-          <Button size="sm" type="submit" variant="outline">
-            Cancel
-          </Button>
-        </form>
-      ) : null}
-    </div>
-  );
+  return <ActionsMenu row={request} />;
 }
 
 export const columns: ColumnDef<LeaveRequestTableRow>[] = [
+  createSelectColumn<LeaveRequestTableRow>(),
   {
     accessorFn: (row) => row.employee.name,
     cell: ({ row }) => <EmployeeCell request={row.original} />,
@@ -109,7 +70,7 @@ export const columns: ColumnDef<LeaveRequestTableRow>[] = [
     id: "request",
     meta: {
       className:
-        "min-w-[280px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[280px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Employee",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -140,15 +101,15 @@ export const columns: ColumnDef<LeaveRequestTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell request={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[260px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 300,
+    size: 80,
   },
 ];

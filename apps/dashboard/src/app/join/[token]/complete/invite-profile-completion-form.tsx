@@ -3,11 +3,15 @@
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useMemo, useRef } from "react";
 
-import { completeInviteProfileAction } from "@/app/actions";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
+import { useTRPC } from "@/trpc/client";
 
 type InviteProfileCompletionValues = {
   bio?: string;
@@ -16,7 +20,7 @@ type InviteProfileCompletionValues = {
   phone?: string;
 };
 
-type InviteProfileCompletionFormProps = {
+type Props = {
   assignedRoleLabel: string;
   defaultBio?: string | null;
   defaultImageUrl?: string | null;
@@ -36,11 +40,30 @@ export function InviteProfileCompletionForm({
   email,
   isAgentInvite,
   token,
-}: InviteProfileCompletionFormProps) {
+}: Props) {
+  const router = useRouter();
+  const trpc = useTRPC();
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLInputElement>(null);
   const imageUrlRef = useRef<HTMLInputElement>(null);
+  const completeProfileMutation = useMutation(
+    trpc.team.completeInviteProfile.mutationOptions({
+      onError(error) {
+        const searchParams = new URLSearchParams({ error: error.message });
+        router.replace(
+          error.message.includes("Accept the invite") ||
+            error.message.includes("different email")
+            ? `/join/${token}?${searchParams.toString()}`
+            : `/join/${token}/complete?${searchParams.toString()}`,
+        );
+      },
+      onSuccess() {
+        router.push("/?inviteProfileCompleted=1");
+        router.refresh();
+      },
+    }),
+  );
 
   const quickFillAdapter = useMemo(() => {
     return createQuickFillAdapter<InviteProfileCompletionValues>({
@@ -91,10 +114,22 @@ export function InviteProfileCompletionForm({
     });
   }, []);
 
-  return (
-    <form action={completeInviteProfileAction} className="space-y-6">
-      <input name="token" type="hidden" value={token} />
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
+    completeProfileMutation.mutate({
+      bio: isAgentInvite ? bioRef.current?.value.trim() || null : null,
+      imageUrl: isAgentInvite
+        ? imageUrlRef.current?.value.trim() || null
+        : null,
+      name: nameRef.current?.value.trim() ?? "",
+      phone: phoneRef.current?.value.trim() || null,
+      token,
+    });
+  }
+
+  return (
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="flex justify-end">
         <QuickFill
           args={{ form: quickFillAdapter }}
@@ -162,10 +197,12 @@ export function InviteProfileCompletionForm({
       </FieldGroup>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button asChild type="button" variant="ghost">
+        <Button variant="ghost" type="button" asChild>
           <Link href="/">Skip for now</Link>
         </Button>
-        <Button type="submit">Save and continue</Button>
+        <SubmitButton isSubmitting={completeProfileMutation.isPending}>
+          Save and continue
+        </SubmitButton>
       </div>
     </form>
   );

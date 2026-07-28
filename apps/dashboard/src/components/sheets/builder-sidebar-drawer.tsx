@@ -1,25 +1,16 @@
 "use client";
 
 import type { TemplateConfig } from "@plotkeys/section-registry";
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { Icon } from "@plotkeys/ui/icons";
-import { Separator } from "@plotkeys/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@plotkeys/ui/sheet";
+import { Sheet, SheetContent, SheetHeader } from "@plotkeys/ui/sheet";
 import type { SubscriptionTier } from "@plotkeys/utils";
 
-import { BuilderSidebarControls } from "@/components/builder/builder-sidebar-controls";
+import { BuilderSidebarDrawerContent } from "@/components/builder/builder-sidebar-drawer-content";
+import { BuilderSidebarDrawerTrigger } from "@/components/builder/builder-sidebar-drawer-trigger";
+import { useBuilderParams } from "@/hooks/use-builder-params";
 
-type BuilderSidebarDrawerProps = {
+type Props = {
   activeConfigName: string;
   activePageKey?: string;
-  activeTemplateLabel: string;
   configId: string;
   configStatus: string;
   currentPageKey: string;
@@ -34,9 +25,6 @@ type BuilderSidebarDrawerProps = {
   sectionTypes?: string[];
   templateConfig: TemplateConfig;
   totalConfigurations: number;
-  onCreateDraft: (formData: FormData) => Promise<{ configId: string }>;
-  onUpdateTheme: (formData: FormData) => Promise<void>;
-  onUpdateThemeSilent?: (formData: FormData) => Promise<void>;
 };
 
 export function BuilderSidebarDrawer({
@@ -56,91 +44,44 @@ export function BuilderSidebarDrawer({
   sectionTypes,
   templateConfig,
   totalConfigurations,
-  onCreateDraft,
-  onUpdateTheme,
-  onUpdateThemeSilent,
-}: BuilderSidebarDrawerProps) {
+}: Props) {
+  const { builderSettings, setParams } = useBuilderParams();
+  const isOpen = Boolean(builderSettings);
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button
-          className="xl:hidden"
-          size="sm"
-          variant="outline"
-          aria-label="Open builder settings"
+    <>
+      <BuilderSidebarDrawerTrigger
+        onOpen={() => setParams({ builderSettings: true })}
+      />
+      <Sheet open={isOpen} onOpenChange={(open) => !open && setParams(null)}>
+        <SheetContent
+          side="left"
+          className="w-72 overflow-y-auto border-border bg-background p-0 sm:w-80"
         >
-          <Icon.Settings2 className="size-4" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-72 overflow-y-auto border-border/70 bg-card/96 p-0 backdrop-blur sm:w-80"
-      >
-        <SheetHeader className="border-b border-border/70 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),transparent)] px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <SheetTitle className="text-xs uppercase tracking-[0.34em] text-muted-foreground font-normal">
-              Builder setup
-            </SheetTitle>
-            <Badge variant="outline">Studio</Badge>
-          </div>
-        </SheetHeader>
+          <SheetHeader className="border-b border-border bg-background px-4 py-4">
+            <h2 className="text-sm font-medium">Builder setup</h2>
+          </SheetHeader>
 
-        <div className="flex flex-col gap-4 p-4">
-          <section className="flex flex-col gap-3">
-            <div className="flex items-start justify-between gap-2 rounded-lg border border-border/70 bg-muted/30 p-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Active configuration
-                </p>
-                <p className="mt-1.5 text-sm font-semibold text-foreground">
-                  {activeConfigName}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {totalConfigurations} saved configurations
-                </p>
-              </div>
-              <Badge
-                variant={configStatus === "published" ? "default" : "outline"}
-              >
-                {configStatus}
-              </Badge>
-            </div>
-
-            <BuilderSidebarControls
-              activePageKey={activePageKey}
-              configId={configId}
-              currentPageKey={currentPageKey}
-              currentTemplateKey={currentTemplateKey}
-              licensedTemplateKeys={licensedTemplateKeys}
-              planTier={planTier}
-              readOnly={readOnly}
-              readOnlyMessage={readOnlyMessage}
-              requiredPlan={requiredPlan}
-              sectionTypes={sectionTypes}
-              templateConfig={templateConfig}
-              onCreateDraft={onCreateDraft}
-              onUpdateTheme={onUpdateTheme}
-              onUpdateThemeSilent={onUpdateThemeSilent}
-            />
-          </section>
-
-          <Separator />
-
-          <section className="flex flex-col gap-1.5">
-            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-              Editable fields
-            </p>
-            <p className="text-xs text-muted-foreground leading-5">
-              Click any section in the preview to reveal its inline field
-              editor. Changes are saved per field.
-            </p>
-            <div className="mt-1 flex items-center gap-1.5">
-              <Badge variant="outline">{editableFieldCount} fields</Badge>
-              <Badge variant="outline">{sectionCount} sections</Badge>
-            </div>
-          </section>
-        </div>
-      </SheetContent>
-    </Sheet>
+          <BuilderSidebarDrawerContent
+            activeConfigName={activeConfigName}
+            activePageKey={activePageKey}
+            configId={configId}
+            configStatus={configStatus}
+            currentPageKey={currentPageKey}
+            currentTemplateKey={currentTemplateKey}
+            editableFieldCount={editableFieldCount}
+            licensedTemplateKeys={licensedTemplateKeys}
+            planTier={planTier}
+            readOnly={readOnly}
+            readOnlyMessage={readOnlyMessage}
+            requiredPlan={requiredPlan}
+            sectionCount={sectionCount}
+            sectionTypes={sectionTypes}
+            templateConfig={templateConfig}
+            totalConfigurations={totalConfigurations}
+          />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

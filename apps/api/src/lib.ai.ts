@@ -120,9 +120,7 @@ export async function generateOnboardingContent(
     ctx.primaryGoal ? `Primary goal: ${ctx.primaryGoal}` : null,
     ctx.tone ? `Tone: ${ctx.tone}` : null,
     `Market: ${market}`,
-    ctx.businessSummary
-      ? `Business profile: ${ctx.businessSummary}`
-      : null,
+    ctx.businessSummary ? `Business profile: ${ctx.businessSummary}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -359,7 +357,9 @@ export async function generateProjectSummary(
     ctx.projectType ? `Type: ${ctx.projectType}` : null,
     ctx.location ? `Location: ${ctx.location}` : null,
     ctx.startDate ? `Start: ${ctx.startDate}` : null,
-    ctx.targetCompletionDate ? `Target completion: ${ctx.targetCompletionDate}` : null,
+    ctx.targetCompletionDate
+      ? `Target completion: ${ctx.targetCompletionDate}`
+      : null,
     "",
     `Phases:\n${phaseLines || "  None"}`,
     `Milestones:\n${milestoneLines || "  None"}`,
@@ -425,7 +425,9 @@ export async function generateProjectRiskFlags(
 
   const userMessage = [
     `Project: ${ctx.projectName} (${ctx.projectStatus})`,
-    ctx.targetCompletionDate ? `Target completion: ${ctx.targetCompletionDate}` : null,
+    ctx.targetCompletionDate
+      ? `Target completion: ${ctx.targetCompletionDate}`
+      : null,
     "",
     `Milestones:\n${milestoneLines || "  None"}`,
     `Open Issues:\n${issueLines || "  None"}`,
@@ -496,7 +498,10 @@ export async function generateCustomerUpdateDraft(
     .join("\n");
   const updateLines = ctx.recentUpdates
     .slice(0, 5)
-    .map((u) => `  - ${u.summary}${u.progressPercent != null ? ` (${u.progressPercent}% progress)` : ""}`)
+    .map(
+      (u) =>
+        `  - ${u.summary}${u.progressPercent != null ? ` (${u.progressPercent}% progress)` : ""}`,
+    )
     .join("\n");
   const phaseLines = ctx.phases
     .map((p) => `  - ${p.name}: ${p.status}`)

@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === "production") {
  * sign-up mutation so future sessions can log in via the dev login picker.
  */
 
+import { Button } from "@plotkeys/ui/button";
 import { DevFabShell } from "./dev-fab-shell";
 
 export type SignUpPresetValues = {
@@ -82,39 +83,41 @@ function makeRandomPreset(): SignUpPresetValues {
 export function DevSignupFab({ onFill }: Props) {
   return (
     <DevFabShell label="Quick fill">
-      <div className="divide-y divide-amber-100 dark:divide-amber-900/50">
+      <div className="divide-y divide-border">
         {STATIC_PRESETS.map((preset) => (
-          <button
+          <Button
+            variant="ghost"
             key={preset.label}
             type="button"
             onClick={() => onFill(preset.values)}
-            className="w-full px-4 py-2.5 text-left transition hover:bg-amber-50 active:bg-amber-100 dark:hover:bg-amber-950/30"
+            className="h-auto w-full flex-col items-start rounded-none px-4 py-2.5 text-left hover:bg-muted active:bg-muted"
           >
-            <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-100">
+            <p className="font-mono text-xs font-semibold text-foreground">
               {preset.label}
             </p>
-            <p className="font-mono text-[10px] text-amber-700 dark:text-amber-400">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {preset.values.email}
             </p>
-            <p className="font-mono text-[10px] text-slate-400">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {preset.values.subdomain}
             </p>
-          </button>
+          </Button>
         ))}
 
         {/* Random unique user */}
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => onFill(makeRandomPreset())}
-          className="w-full px-4 py-2.5 text-left transition hover:bg-amber-50 active:bg-amber-100 dark:hover:bg-amber-950/30"
+          className="h-auto w-full flex-col items-start rounded-none px-4 py-2.5 text-left hover:bg-muted active:bg-muted"
         >
-          <p className="font-mono text-xs font-semibold text-amber-700 dark:text-amber-400">
-            ✦ Random new user
+          <p className="font-mono text-xs font-semibold text-foreground">
+            Random new user
           </p>
-          <p className="font-mono text-[10px] text-slate-400">
+          <p className="font-mono text-[10px] text-muted-foreground">
             Generates a unique email + subdomain
           </p>
-        </button>
+        </Button>
       </div>
     </DevFabShell>
   );

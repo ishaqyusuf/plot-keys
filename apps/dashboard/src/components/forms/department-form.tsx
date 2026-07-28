@@ -3,14 +3,13 @@
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
-import { createDepartmentAction } from "@/app/actions";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const departmentFormSchema = z.object({
   description: z.string().optional(),
@@ -19,35 +18,48 @@ const departmentFormSchema = z.object({
 
 type DepartmentFormValues = z.infer<typeof departmentFormSchema>;
 
-type DepartmentFormProps = {
+type Props = {
   onCancel?: () => void;
+  onSuccess?: () => void;
 };
 
-export function DepartmentForm({ onCancel }: DepartmentFormProps) {
-  const [pending, setPending] = useState(false);
+export function DepartmentForm({ onCancel, onSuccess }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(departmentFormSchema, {
     defaultValues: {
       description: "",
       name: "",
     },
   });
+  const createDepartmentMutation = useMutation(
+    trpc.departments.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to add department.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset();
+        await queryClient.invalidateQueries({
+          queryKey: trpc.departments.list.infiniteQueryKey(),
+        });
+        onSuccess?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: DepartmentFormValues) {
-    setPending(true);
-
-    try {
-      const formData = new FormData();
-      formData.set("name", values.name.trim());
-      formData.set("description", values.description?.trim() ?? "");
-      await createDepartmentAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: DepartmentFormValues) {
+    setError(null);
+    createDepartmentMutation.mutate({
+      description: values.description?.trim() || null,
+      name: values.name.trim(),
+    });
   }
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Department name *</FieldLabel>
@@ -66,18 +78,19 @@ export function DepartmentForm({ onCancel }: DepartmentFormProps) {
             />
           </Field>
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter>
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
+        {error ? <p className="text-xs text-destructive">{error}</p> : <span />}
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel} type="button" variant="ghost">
+          <Button variant="ghost" onClick={onCancel} type="button">
             Cancel
           </Button>
-          <Button disabled={pending} type="submit">
-            {pending ? "Adding..." : "Add department"}
-          </Button>
+          <SubmitButton isSubmitting={createDepartmentMutation.isPending}>
+            Add department
+          </SubmitButton>
         </div>
-      </DashboardFormFooter>
+      </FormFooter>
     </form>
   );
 }

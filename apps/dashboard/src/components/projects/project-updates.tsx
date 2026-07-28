@@ -1,13 +1,20 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -71,11 +78,14 @@ export function UpdatesList({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const updatingVisibilityUpdateId = visibilityMutation.isPending
+    ? visibilityMutation.variables?.updateId
+    : null;
 
   return (
     <div className="mb-4 space-y-3">
       {updates.map((update) => (
-        <div key={update.id} className="rounded-md border p-3">
+        <div key={update.id} className="border p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge variant="outline">
@@ -91,9 +101,10 @@ export function UpdatesList({
                 <Badge variant="secondary">Customer Visible</Badge>
               )}
             </div>
-            <Button
-              size="sm"
+            <SubmitButton
               variant="ghost"
+              size="sm"
+              isSubmitting={updatingVisibilityUpdateId === update.id}
               disabled={visibilityMutation.isPending}
               onClick={() =>
                 visibilityMutation.mutate({
@@ -104,7 +115,7 @@ export function UpdatesList({
               }
             >
               {update.customerVisible ? "Hide" : "Share"}
-            </Button>
+            </SubmitButton>
           </div>
           <p className="mt-1 text-sm font-medium">{update.summary}</p>
           {update.details && (
@@ -164,10 +175,7 @@ export function CreateUpdateForm({ projectId }: { projectId: string }) {
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
         <Label htmlFor="updateSummary">Summary *</Label>
         <Input
@@ -179,16 +187,17 @@ export function CreateUpdateForm({ projectId }: { projectId: string }) {
       </div>
       <div>
         <Label htmlFor="updateKind">Type</Label>
-        <select
-          id="updateKind"
-          name="kind"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="general">General</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="milestone">Milestone</option>
-        </select>
+        <Select defaultValue="general" name="kind">
+          <SelectTrigger id="updateKind" className="w-full">
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">General</SelectItem>
+            <SelectItem value="daily">Daily</SelectItem>
+            <SelectItem value="weekly">Weekly</SelectItem>
+            <SelectItem value="milestone">Milestone</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label htmlFor="updateDetails">Details</Label>
@@ -210,9 +219,9 @@ export function CreateUpdateForm({ projectId }: { projectId: string }) {
         />
       </div>
       <div className="sm:col-span-2">
-        <Button disabled={createMutation.isPending} type="submit">
-          {createMutation.isPending ? "Posting…" : "Post Update"}
-        </Button>
+        <SubmitButton isSubmitting={createMutation.isPending}>
+          Post Update
+        </SubmitButton>
       </div>
     </form>
   );

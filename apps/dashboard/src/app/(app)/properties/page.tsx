@@ -1,76 +1,57 @@
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { buildTenantSiteUrl } from "@plotkeys/utils";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
-import { PropertiesTable } from "@/components/tables/properties";
+import { PropertiesHeader } from "@/components/properties-header";
+import { ScrollableContent } from "@/components/scrollable-content";
+import { DataTable } from "@/components/tables/properties/data-table";
 import { PropertiesSkeleton } from "@/components/tables/properties/skeleton";
+import {
+  loadPropertyFilterParams,
+  resolvePropertyListInput,
+} from "@/hooks/use-property-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { getBaseUrl } from "@/lib/get-base-url";
-import { loadPropertiesFilterParams } from "@/lib/properties-filter-params";
 import { requireOnboardedSession } from "@/lib/session";
 import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
 
-type PropertiesPageProps = {
-  searchParams?: Promise<
-    SearchParams & {
-      error?: string;
-      q?: string;
-      sort?: string | string[];
-      type?: string;
-    }
-  >;
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
 export const metadata: Metadata = {
   title: "Listings | Plot Keys",
 };
 
-export default async function PropertiesPage({
-  searchParams,
-}: PropertiesPageProps) {
-  const session = await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
-  const filters = loadPropertiesFilterParams(params);
+export default async function PropertiesPage({ searchParams }: Props) {
+  await requireOnboardedSession();
+  const params = await searchParams;
+  const filters = loadPropertyFilterParams(params);
   const { sort } = loadSortParams(params);
+  const listInput = resolvePropertyListInput(filters, sort);
   const initialSettings = await getInitialTableSettings("properties");
-  const currentOrigin = await getBaseUrl();
-  const siteUrl = buildTenantSiteUrl(session.activeMembership.companySlug, {
-    currentOrigin,
-  });
 
   batchPrefetch([
     trpc.filters.properties.queryOptions(),
-    trpc.workspace.listProperties.infiniteQueryOptions(
-      { ...filters, sort },
-      {
-        getNextPageParam: ({ meta }) => meta?.cursor,
-      },
-    ),
+    trpc.properties.list.infiniteQueryOptions(listInput, {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    }),
   ]);
 
   return (
-    <DashboardPage>
-      {params.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{params.error}</AlertDescription>
-        </Alert>
-      ) : null}
+    <HydrateClient>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <PropertiesHeader />
 
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<PropertiesSkeleton />}>
-            <PropertiesTable
-              initialSettings={initialSettings}
-              siteUrl={siteUrl}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<PropertiesSkeleton />}>
+              <DataTable initialSettings={initialSettings} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

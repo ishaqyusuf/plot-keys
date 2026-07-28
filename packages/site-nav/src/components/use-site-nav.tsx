@@ -29,7 +29,7 @@ export type SiteNavContextValue = {
     | null;
   isExpanded: boolean;
   linkModules: ReturnType<typeof getLinkModules>;
-  mainMenuRef: RefObject<HTMLElement | null>;
+  mainMenuRef: RefObject<HTMLDivElement | null>;
   modules: Array<
     ReturnType<typeof getLinkModules>["modules"][number] & {
       href?: string;
@@ -53,7 +53,7 @@ export const SiteNavContext = createContext<SiteNavContextValue | undefined>(
 export function useCreateSiteNavContext(
   props: SiteNavContextValue["props"],
 ): SiteNavContextValue {
-  const mainMenuRef = useRef<HTMLElement>(null);
+  const mainMenuRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { activeLink, currentModule, linkModules, modules } = useMemo(() => {

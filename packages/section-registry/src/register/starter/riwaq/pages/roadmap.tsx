@@ -1,5 +1,6 @@
 "use client";
 
+import type { ThemeConfig } from "../../../../sections/home-page";
 import { EditableText } from "../../../../sections/editing-primitives";
 import { useRiwaqPage } from "../hooks/use-riwaq-page";
 import { riwaqSectionClassName } from "../ui/style";
@@ -11,6 +12,17 @@ export function RiwaqRoadmapPage() {
   const showHeader = ctx.sectionVisible("hero_banner");
   const showRoadmap = ctx.sectionVisible("riwaq_roadmap_timeline");
   const showCta = ctx.sectionVisible("cta_band");
+  const roadmapTheme = {
+    accentColor: ctx.theme.accentColor ?? "#2563eb",
+    backgroundColor: ctx.theme.backgroundColor ?? "#ffffff",
+    fontFamily: ctx.theme.fontFamily ?? "Inter",
+    headingFontFamily:
+      ctx.theme.headingFontFamily ?? ctx.theme.fontFamily ?? "Inter",
+    logo: ctx.tenant?.companyName ?? "Riwaq",
+    logoUrl: ctx.tenant?.logoUrl ?? undefined,
+    market: ctx.tenant?.market ?? "Nigeria",
+    supportLine: ctx.content("contact.phone", "+234 803 000 1204"),
+  } satisfies ThemeConfig;
   const roadmapItems = [
     {
       body: ctx.content(
@@ -90,7 +102,7 @@ export function RiwaqRoadmapPage() {
             title: ctx.content("roadmap.title", "A visible record of delivery."),
           }}
           showIntro={false}
-          theme={ctx.theme}
+          theme={roadmapTheme}
         />
       ) : null}
       {showCta ? <RiwaqCtaBand /> : null}

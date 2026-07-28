@@ -1,9 +1,6 @@
 import { type ChatBotMessage, getChatCompletion } from "@plotkeys/chat-bot";
-import {
-  createPrismaClient,
-  listAgentsForCompany,
-  listFeaturedProperties,
-} from "@plotkeys/db";
+import { createPrismaClient } from "@plotkeys/db";
+import { getTenantChatContext } from "@plotkeys/db/queries";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -57,51 +54,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const company = await prisma.company.findFirst({
-      select: { id: true, name: true, market: true },
-      where: { deletedAt: null, slug: subdomain },
-    });
+    const context = await getTenantChatContext(prisma, { subdomain });
 
-    if (!company) {
+    if (!context) {
       return NextResponse.json(
         { error: "Unknown workspace." },
         { status: 404 },
       );
     }
 
-    // Build context from company data
-    const [properties, agentsPage] = await Promise.all([
-      listFeaturedProperties(prisma, company.id).catch(() => []),
-      listAgentsForCompany(prisma, company.id, { limit: 10 }).catch(() => ({
-        data: [],
-      })),
-    ]);
-
-    const onboarding = await prisma.tenantOnboarding
-      .findFirst({
-        select: { businessSummary: true },
-        where: {
-          user: {
-            memberships: {
-              some: { companyId: company.id },
-            },
-          },
-        },
-      })
-      .catch(() => null);
-
     const result = await getChatCompletion(
       {
-        companyName: company.name,
-        market: company.market,
-        businessSummary: onboarding?.businessSummary,
-        properties: properties.map((p) => ({
+        companyName: context.company.name,
+        market: context.company.market,
+        businessSummary: context.businessSummary,
+        properties: context.properties.map((p) => ({
           title: p.title,
           location: p.location,
           price: p.price ? Number(p.price.replace(/[^\d.-]/g, "")) : null,
           specs: p.specs,
         })),
-        agents: agentsPage.data.map((a) => ({
+        agents: context.agents.map((a) => ({
           name: a.name,
           title: a.title,
           bio: a.bio,

@@ -3,6 +3,7 @@ export type CompanyPlanTier = "starter" | "plus" | "pro";
 export type IconName = string;
 
 export type AppNavItem = {
+  externalApp?: "sandbox";
   href: string;
   icon: IconName;
   label: string;

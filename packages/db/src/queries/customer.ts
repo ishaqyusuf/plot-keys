@@ -1,3 +1,4 @@
+import type { Prisma } from "../generated/prisma/client";
 import { createPrismaClient, type Db } from "../prisma";
 import {
   composeQuery,
@@ -19,6 +20,18 @@ function normalizeCustomerStatus(
   return customerStatusValues.includes(value as CustomerStatusValue)
     ? (value as CustomerStatusValue)
     : undefined;
+}
+
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) return null;
+
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export type SavedListingOverview = {
@@ -130,13 +143,17 @@ export async function getCustomerExportRows(
 }
 
 export type CustomerListFilters = {
+  end?: string | null;
   filter?: string | null;
   q?: string | null;
+  start?: string | null;
   take?: number;
 };
 
 export type CustomerListQuery = PaginationQuery & {
+  end?: string | null;
   filter?: string | null;
+  start?: string | null;
 };
 
 export type CustomerRowDto = {
@@ -162,11 +179,21 @@ function customerDto(customer: CustomerRowDto): CustomerRowDto {
 }
 
 export function whereCustomers(query: CustomerListQuery, companyId: string) {
+  const endDate = parseDateBoundary(query.end, "end");
   const search = query.q?.trim();
+  const startDate = parseDateBoundary(query.start, "start");
   const status = normalizeCustomerStatus(query.filter);
+  const createdAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
 
   return composeQuery([
     { companyId },
+    createdAtFilter ? { createdAt: createdAtFilter } : null,
     status ? { status } : null,
     search
       ? {
@@ -212,8 +239,17 @@ export async function listFilteredCustomersForCompany(
   companyId: string,
   filters: CustomerListFilters = {},
 ) {
+  const endDate = parseDateBoundary(filters.end, "end");
   const query = filters.q?.trim() ?? "";
+  const startDate = parseDateBoundary(filters.start, "start");
   const status = normalizeCustomerStatus(filters.filter);
+  const createdAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
 
   return db.customer.findMany({
     orderBy: { createdAt: "desc" },
@@ -221,6 +257,7 @@ export async function listFilteredCustomersForCompany(
     where: {
       companyId,
       deletedAt: null,
+      ...(createdAtFilter ? { createdAt: createdAtFilter } : {}),
       ...(status ? { status } : {}),
       ...(query
         ? {

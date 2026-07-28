@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
-import { cn } from "@plotkeys/utils";
+import { cn } from "@plotkeys/ui/cn";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 
@@ -32,15 +32,15 @@ export function SignOutButton({
   }
 
   return (
-    <Button
+    <SubmitButton
+      variant="ghost"
       className={cn("gap-2", className)}
-      disabled={isPending}
+      isSubmitting={isPending}
       onClick={handleSignOut}
       type="button"
-      variant="ghost"
     >
       {icon}
-      {showLabel ? (isPending ? "Signing out..." : "Sign out") : null}
-    </Button>
+      {showLabel ? "Sign out" : null}
+    </SubmitButton>
   );
 }

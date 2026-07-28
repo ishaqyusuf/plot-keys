@@ -474,6 +474,13 @@ export type EnumCompanyPlanStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel> | $Enums.CompanyPlanStatus
 }
 
+export type EnumQaDataClassificationFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaDataClassification | Prisma.EnumQaDataClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel> | $Enums.QaDataClassification
+}
+
 export type EnumCompanyPlanTierWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.CompanyPlanTier | Prisma.EnumCompanyPlanTierFieldRefInput<$PrismaModel>
   in?: $Enums.CompanyPlanTier[] | Prisma.ListEnumCompanyPlanTierFieldRefInput<$PrismaModel>
@@ -492,6 +499,16 @@ export type EnumCompanyPlanStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel>
+}
+
+export type EnumQaDataClassificationWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaDataClassification | Prisma.EnumQaDataClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaDataClassificationWithAggregatesFilter<$PrismaModel> | $Enums.QaDataClassification
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel>
 }
 
 export type EnumCustomerStatusFilter<$PrismaModel = never> = {
@@ -1201,6 +1218,23 @@ export type EnumPropertyPublishStateWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumPropertyPublishStateFilter<$PrismaModel>
 }
 
+export type EnumQaPurgeRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaPurgeRunStatus | Prisma.EnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel> | $Enums.QaPurgeRunStatus
+}
+
+export type EnumQaPurgeRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaPurgeRunStatus | Prisma.EnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaPurgeRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.QaPurgeRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel>
+}
+
 export type EnumSiteConfigurationStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.SiteConfigurationStatus | Prisma.EnumSiteConfigurationStatusFieldRefInput<$PrismaModel>
   in?: $Enums.SiteConfigurationStatus[] | Prisma.ListEnumSiteConfigurationStatusFieldRefInput<$PrismaModel>
@@ -1718,6 +1752,13 @@ export type NestedEnumCompanyPlanStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel> | $Enums.CompanyPlanStatus
 }
 
+export type NestedEnumQaDataClassificationFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaDataClassification | Prisma.EnumQaDataClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel> | $Enums.QaDataClassification
+}
+
 export type NestedEnumCompanyPlanTierWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.CompanyPlanTier | Prisma.EnumCompanyPlanTierFieldRefInput<$PrismaModel>
   in?: $Enums.CompanyPlanTier[] | Prisma.ListEnumCompanyPlanTierFieldRefInput<$PrismaModel>
@@ -1736,6 +1777,16 @@ export type NestedEnumCompanyPlanStatusWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCompanyPlanStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumQaDataClassificationWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaDataClassification | Prisma.EnumQaDataClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaDataClassification[] | Prisma.ListEnumQaDataClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaDataClassificationWithAggregatesFilter<$PrismaModel> | $Enums.QaDataClassification
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQaDataClassificationFilter<$PrismaModel>
 }
 
 export type NestedEnumCustomerStatusFilter<$PrismaModel = never> = {
@@ -2432,6 +2483,23 @@ export type NestedEnumPropertyPublishStateWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPropertyPublishStateFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPropertyPublishStateFilter<$PrismaModel>
+}
+
+export type NestedEnumQaPurgeRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaPurgeRunStatus | Prisma.EnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel> | $Enums.QaPurgeRunStatus
+}
+
+export type NestedEnumQaPurgeRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QaPurgeRunStatus | Prisma.EnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QaPurgeRunStatus[] | Prisma.ListEnumQaPurgeRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQaPurgeRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.QaPurgeRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQaPurgeRunStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumSiteConfigurationStatusFilter<$PrismaModel = never> = {

@@ -4,21 +4,15 @@ import { Button } from "@plotkeys/ui/button";
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {
-  /** Title to display */
   title: string;
-  /** Description text (can include line breaks with <br />) */
   description: ReactNode;
-  /** Label for the action button */
-  actionLabel: string;
-  /** Callback when action button is clicked */
-  onAction: () => void;
+  action?: ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
-/**
- * Generic empty state component for tables
- * Used when there is no data to display
- */
 export function EmptyState({
+  action,
   title,
   description,
   actionLabel,
@@ -29,26 +23,24 @@ export function EmptyState({
       <div className="flex flex-col items-center mt-40">
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">{title}</h2>
-          <p className="text-[#606060] text-sm">{description}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
 
-        <Button variant="outline" onClick={onAction}>
-          {actionLabel}
-        </Button>
+        {action ??
+          (actionLabel && onAction ? (
+            <Button variant="outline" onClick={onAction}>
+              {actionLabel}
+            </Button>
+          ) : null)}
       </div>
     </div>
   );
 }
 
 interface NoResultsProps {
-  /** Callback to clear filters */
   onClear: () => void;
 }
 
-/**
- * No results state for filtered tables
- * Used when filters return no matches
- */
 export function NoResults({ onClear }: NoResultsProps) {
   return (
     <EmptyState

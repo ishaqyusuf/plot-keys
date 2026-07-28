@@ -1,48 +1,43 @@
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { buildDashboardUrl } from "@plotkeys/utils";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
-import { TeamsTable } from "@/components/tables/teams";
+import { ScrollableContent } from "@/components/scrollable-content";
+import { DataTable } from "@/components/tables/teams/data-table";
 import { TeamsSkeleton } from "@/components/tables/teams/skeleton";
+import {
+  canManageWorkspaceMembers,
+  getWorkspaceInviteContext,
+} from "@/components/team/team-access";
+import { TeamHeader } from "@/components/team-header";
+import { PendingInvites } from "@/components/team-pending-invites";
 import { loadSortParams } from "@/hooks/use-sort-params";
+import {
+  loadTeamFilterParams,
+  resolveTeamListInput,
+} from "@/hooks/use-team-filter-params";
 import { requireOnboardedSession } from "@/lib/session";
-import { loadTeamFilterParams } from "@/lib/team-filter-params";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { batchPrefetch, HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
 
 export const metadata: Metadata = {
   title: "Team | Plot Keys",
 };
 
-type TeamPageProps = {
-  searchParams?: Promise<
-    SearchParams & {
-      error?: string;
-      invited?: string;
-      q?: string;
-      sort?: string | string[];
-    }
-  >;
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-export default async function TeamPage({ searchParams }: TeamPageProps) {
+export default async function TeamPage({ searchParams }: Props) {
   const session = await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
+  const params = await searchParams;
   const currentUserId = session.user.id;
-  const currentUserRole = session.activeMembership.role;
-  const canInvite =
-    currentUserRole === "owner" ||
-    currentUserRole === "admin" ||
-    currentUserRole === "platform_admin";
-  const isDevMode = process.env.NODE_ENV === "development";
-  const appBaseUrl = buildDashboardUrl();
+  const canInvite = canManageWorkspaceMembers(session.activeMembership.role);
+  const inviteContext = getWorkspaceInviteContext();
   const filters = loadTeamFilterParams(params);
   const { sort } = loadSortParams(params);
-  const listInput = { q: filters.q, sort };
+  const listInput = resolveTeamListInput(filters, sort);
   const initialSettings = await getInitialTableSettings("team");
 
   batchPrefetch([
@@ -50,38 +45,31 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
     trpc.team.listMembers.infiniteQueryOptions(listInput, {
       getNextPageParam: ({ meta }) => meta?.cursor,
     }),
-    ...(canInvite ? [trpc.team.listInvites.queryOptions()] : []),
   ]);
 
+  if (canInvite) {
+    prefetch(trpc.team.listInvites.queryOptions());
+  }
+
   return (
-    <DashboardPage>
-      {params.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{params.error}</AlertDescription>
-        </Alert>
-      ) : null}
+    <HydrateClient>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <TeamHeader canInvite={canInvite} />
 
-      {params.invited ? (
-        <Alert>
-          <AlertDescription>
-            Invite sent! The recipient will receive a link to join.
-          </AlertDescription>
-        </Alert>
-      ) : null}
+          {canInvite ? <PendingInvites {...inviteContext} /> : null}
 
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<TeamsSkeleton />}>
-            <TeamsTable
-              appBaseUrl={appBaseUrl}
-              canInvite={canInvite}
-              currentUserId={currentUserId}
-              initialSettings={initialSettings}
-              isDevMode={isDevMode}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<TeamsSkeleton />}>
+              <DataTable
+                canManage={canInvite}
+                currentUserId={currentUserId}
+                initialSettings={initialSettings}
+              />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

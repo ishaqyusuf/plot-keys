@@ -1,14 +1,24 @@
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
+import { ActiveCustomers } from "@/components/active-customers";
+import { CollapsibleSummary } from "@/components/collapsible-summary";
+import { CustomerSummarySkeleton } from "@/components/customer-summary-skeleton";
+import { CustomersHeader } from "@/components/customers-header";
 import { ErrorFallback } from "@/components/error-fallback";
-import { CustomersTable } from "@/components/tables/customers";
+import { InactiveCustomers } from "@/components/inactive-customers";
+import { ScrollableContent } from "@/components/scrollable-content";
+import { DataTable } from "@/components/tables/customers/data-table";
 import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
+import { TotalCustomers } from "@/components/total-customers";
+import { VipCustomers } from "@/components/vip-customers";
+import { canManageCustomerRecords } from "@/components/workspace/workspace-access";
+import {
+  loadCustomerFilterParams,
+  resolveCustomerListInput,
+} from "@/hooks/use-customer-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { loadCustomersFilterParams } from "@/lib/customers-filter-params";
 import { requireOnboardedSession } from "@/lib/session";
 import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
@@ -17,67 +27,59 @@ export const metadata: Metadata = {
   title: "Customers | Plot Keys",
 };
 
-type CustomersSearchParams = SearchParams & {
-  createCustomer?: string;
-  created?: string;
-  error?: string;
-  filter?: string;
-  q?: string;
-  sort?: string | string[];
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-type CustomersPageProps = {
-  searchParams?: Promise<CustomersSearchParams>;
-};
-
-export default async function CustomersPage({
-  searchParams,
-}: CustomersPageProps) {
+export default async function Page(props: Props) {
   const session = await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
-  const filters = loadCustomersFilterParams(params);
+  const params = await props.searchParams;
+  const filter = loadCustomerFilterParams(params);
   const { sort } = loadSortParams(params);
+  const listInput = resolveCustomerListInput(filter, sort);
   const initialSettings = await getInitialTableSettings("customers");
-  const canManage =
-    session.activeMembership.role === "owner" ||
-    session.activeMembership.role === "admin" ||
-    session.activeMembership.role === "agent";
+  const canManage = canManageCustomerRecords(session.activeMembership.role);
 
   batchPrefetch([
     trpc.customers.stats.queryOptions(),
-    trpc.filters.customers.queryOptions(),
-    trpc.customers.get.infiniteQueryOptions(
-      { ...filters, sort },
-      {
-        getNextPageParam: ({ meta }) => meta?.cursor,
-      },
-    ),
+    trpc.customers.get.infiniteQueryOptions(listInput, {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    }),
   ]);
 
   return (
-    <DashboardPage>
-      {params.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{params.error}</AlertDescription>
-        </Alert>
-      ) : null}
+    <HydrateClient>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <CollapsibleSummary>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <TotalCustomers />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <ActiveCustomers />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <VipCustomers />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <InactiveCustomers />
+              </Suspense>
+            </div>
+          </CollapsibleSummary>
 
-      {params.created ? (
-        <Alert className="border-primary/20 bg-primary/10 text-foreground">
-          <AlertDescription>Customer added successfully.</AlertDescription>
-        </Alert>
-      ) : null}
+          <CustomersHeader canManage={canManage} />
 
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<CustomersSkeleton />}>
-            <CustomersTable
-              canManage={canManage}
-              initialSettings={initialSettings}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<CustomersSkeleton />}>
+              <DataTable
+                canManage={canManage}
+                initialSettings={initialSettings}
+              />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

@@ -4,27 +4,42 @@ import type { AppRouter } from "@plotkeys/api/router";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { Textarea } from "@plotkeys/ui/textarea";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
-import { createAgentAction, updateAgentAction } from "@/app/actions";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type AgentFormRecord =
-  RouterOutputs["workspace"]["listAgents"]["data"][number];
+export type AgentFormRecord = RouterOutputs["agents"]["list"]["data"][number];
 
-type AgentFormProps =
-  | { mode: "create"; agent?: never; onCancel?: () => void }
-  | { mode: "edit"; agent: AgentFormRecord; onCancel?: () => void };
+type Props =
+  | {
+      mode: "create";
+      agent?: never;
+      onCancel?: () => void;
+      onSuccess?: () => void;
+    }
+  | {
+      mode: "edit";
+      agent: AgentFormRecord;
+      onCancel?: () => void;
+      onSuccess?: () => void;
+    };
 
 const agentFormSchema = z.object({
   bio: z.string().optional(),
@@ -39,8 +54,10 @@ const agentFormSchema = z.object({
 
 type AgentFormValues = z.infer<typeof agentFormSchema>;
 
-export function AgentForm(props: AgentFormProps) {
-  const [pending, setPending] = useState(false);
+export function AgentForm(props: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const agent = props.mode === "edit" ? props.agent : null;
   const form = useZodForm(agentFormSchema, {
     defaultValues: {
@@ -54,35 +71,75 @@ export function AgentForm(props: AgentFormProps) {
       title: agent?.title ?? "",
     },
   });
+  const createAgentMutation = useMutation(
+    trpc.agents.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to create agent.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset();
+        await queryClient.invalidateQueries({
+          queryKey: trpc.agents.list.infiniteQueryKey(),
+        });
+        props.onSuccess?.();
+      },
+    }),
+  );
+  const updateAgentMutation = useMutation(
+    trpc.agents.update.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to update agent.");
+      },
+      async onSuccess(_, input) {
+        setError(null);
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.agents.list.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.agents.get.queryKey({
+              agentId: input.agentId,
+            }),
+          }),
+        ]);
+        props.onSuccess?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: AgentFormValues) {
-    setPending(true);
+  function handleSubmit(values: AgentFormValues) {
+    setError(null);
+    const payload = {
+      bio: values.bio?.trim() || null,
+      displayOrder: values.displayOrder
+        ? Number.parseInt(values.displayOrder, 10)
+        : null,
+      email: values.email.trim() || null,
+      featured: values.featured === "true",
+      imageUrl: values.imageUrl.trim() || null,
+      name: values.name.trim(),
+      phone: values.phone?.trim() || null,
+      title: values.title?.trim() || null,
+    };
 
-    try {
-      const formData = new FormData();
-      formData.set("name", values.name.trim());
-      formData.set("title", values.title?.trim() ?? "");
-      formData.set("bio", values.bio?.trim() ?? "");
-      formData.set("email", values.email.trim());
-      formData.set("phone", values.phone?.trim() ?? "");
-      formData.set("imageUrl", values.imageUrl.trim());
-      formData.set("featured", values.featured);
-      formData.set("displayOrder", values.displayOrder?.trim() ?? "");
-
-      if (props.mode === "edit") {
-        formData.set("agentId", props.agent.id);
-        await updateAgentAction(formData);
-      } else {
-        await createAgentAction(formData);
-      }
-    } finally {
-      setPending(false);
+    if (props.mode === "edit") {
+      updateAgentMutation.mutate({
+        agentId: props.agent.id,
+        ...payload,
+      });
+      return;
     }
+
+    createAgentMutation.mutate(payload);
   }
+
+  const isPending =
+    createAgentMutation.isPending || updateAgentMutation.isPending;
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Name *</FieldLabel>
@@ -148,35 +205,43 @@ export function AgentForm(props: AgentFormProps) {
             </Field>
             <Field>
               <FieldLabel>Featured</FieldLabel>
-              <NativeSelect className="min-w-28" {...form.register("featured")}>
-                <NativeSelectOption value="false">No</NativeSelectOption>
-                <NativeSelectOption value="true">Yes</NativeSelectOption>
-              </NativeSelect>
+              <Controller
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="min-w-28">
+                      <SelectValue placeholder="Featured" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="false">No</SelectItem>
+                      <SelectItem value="true">Yes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
           </div>
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <QuickFill
-          args={{ form: createQuickFillAdapter(form) }}
-          name="new-agent"
-        />
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="new-agent"
+          />
+          {error ? <p className="text-xs text-destructive">{error}</p> : null}
+        </div>
         <div className="flex justify-end gap-3">
-          <Button onClick={props.onCancel} type="button" variant="ghost">
+          <Button variant="ghost" onClick={props.onCancel} type="button">
             Cancel
           </Button>
-          <Button disabled={pending} type="submit">
-            {pending
-              ? props.mode === "create"
-                ? "Adding..."
-                : "Saving..."
-              : props.mode === "create"
-                ? "Add agent"
-                : "Save changes"}
-          </Button>
+          <SubmitButton isSubmitting={isPending}>
+            {props.mode === "create" ? "Add agent" : "Save changes"}
+          </SubmitButton>
         </div>
-      </DashboardFormFooter>
+      </FormFooter>
     </form>
   );
 }

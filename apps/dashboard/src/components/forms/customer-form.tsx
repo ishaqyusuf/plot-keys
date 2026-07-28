@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
+import { Button } from "@plotkeys/ui/button";
 import {
   Form,
   FormControl,
@@ -11,55 +11,46 @@ import {
   FormMessage,
 } from "@plotkeys/ui/form";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { Textarea } from "@plotkeys/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
-import { useZodForm } from "@/hooks/use-zod-form";
+import { useFormContext } from "react-hook-form";
+import type { CustomerFormValues } from "@/components/customer/form-context";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { useTRPC } from "@/trpc/client";
 
-const customerFormSchema = z.object({
-  email: z.string().email("Enter a valid email.").or(z.literal("")),
-  name: z.string().trim().min(1, "Name is required."),
-  notes: z.string().optional(),
-  phone: z.string().optional(),
-  status: z.enum(["active", "vip", "inactive"]),
-});
-
-type CustomerFormValues = z.infer<typeof customerFormSchema>;
-
-type CustomerFormProps = {
+type Props = {
+  customerId?: string;
   onCancel?: () => void;
   onSuccess?: () => void;
   sourceLeadId?: string | null;
 };
 
 export function CustomerForm({
+  customerId,
   onCancel,
   onSuccess,
   sourceLeadId,
-}: CustomerFormProps) {
+}: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const form = useZodForm(customerFormSchema, {
-    defaultValues: {
-      email: "",
-      name: "",
-      notes: "",
-      phone: "",
-      status: "active",
-    },
-  });
+  const form = useFormContext<CustomerFormValues>();
   const createCustomerMutation = useMutation(
     trpc.customers.create.mutationOptions({
       async onSuccess() {
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: trpc.customers.get.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.customers.getById.queryKey(),
           }),
           queryClient.invalidateQueries({
             queryKey: trpc.customers.stats.queryKey(),
@@ -73,22 +64,58 @@ export function CustomerForm({
       },
     }),
   );
+  const updateCustomerMutation = useMutation(
+    trpc.customers.update.mutationOptions({
+      async onSuccess() {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.customers.get.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.customers.getById.queryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.customers.stats.queryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.filters.customers.queryKey(),
+          }),
+        ]);
+        onSuccess?.();
+      },
+    }),
+  );
+  const activeMutation = customerId
+    ? updateCustomerMutation
+    : createCustomerMutation;
 
   async function handleSubmit(values: CustomerFormValues) {
-    await createCustomerMutation.mutateAsync({
+    const payload = {
       email: values.email.trim() || null,
       name: values.name.trim(),
       notes: values.notes?.trim() || null,
       phone: values.phone?.trim() || null,
-      sourceLeadId: sourceLeadId ?? null,
       status: values.status,
+    };
+
+    if (customerId) {
+      await updateCustomerMutation.mutateAsync({
+        customerId,
+        ...payload,
+      });
+      return;
+    }
+
+    await createCustomerMutation.mutateAsync({
+      ...payload,
+      sourceLeadId: sourceLeadId ?? null,
     });
   }
 
   return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-        <DashboardFormBody>
+        <FormBody>
           <div className="grid gap-4">
             <FormField
               control={form.control}
@@ -152,17 +179,18 @@ export function CustomerForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <FormControl>
-                    <NativeSelect {...field}>
-                      <NativeSelectOption value="active">
-                        Active
-                      </NativeSelectOption>
-                      <NativeSelectOption value="vip">VIP</NativeSelectOption>
-                      <NativeSelectOption value="inactive">
-                        Inactive
-                      </NativeSelectOption>
-                    </NativeSelect>
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -187,27 +215,25 @@ export function CustomerForm({
             />
           </div>
 
-          {createCustomerMutation.error ? (
+          {activeMutation.error ? (
             <Alert variant="destructive">
               <AlertDescription>
-                {createCustomerMutation.error.message}
+                {activeMutation.error.message}
               </AlertDescription>
             </Alert>
           ) : null}
-        </DashboardFormBody>
+        </FormBody>
 
-        <DashboardFormFooter>
+        <FormFooter>
           <div className="flex justify-end gap-3">
-            <Button onClick={onCancel} type="button" variant="ghost">
+            <Button variant="ghost" onClick={onCancel} type="button">
               Cancel
             </Button>
-            <Button disabled={createCustomerMutation.isPending} type="submit">
-              {createCustomerMutation.isPending
-                ? "Adding..."
-                : "Add customer"}
-            </Button>
+            <SubmitButton isSubmitting={activeMutation.isPending}>
+              {customerId ? "Save customer" : "Add customer"}
+            </SubmitButton>
           </div>
-        </DashboardFormFooter>
+        </FormFooter>
       </form>
     </Form>
   );

@@ -1,4 +1,4 @@
-import { createPrismaClient, type Db } from "../prisma";
+import type { Db } from "../prisma";
 
 type CompanyPlanTier = "starter" | "plus" | "pro";
 
@@ -6,14 +6,6 @@ export type CompanyAppsState = {
   enabledIds: string[];
   planTier: CompanyPlanTier;
 };
-
-export type CompanyAppsStateResult =
-  | { data: CompanyAppsState; ok: true }
-  | { ok: false; reason: "company-not-found" | "database-unavailable" };
-
-export type CompanyAppMutationResult =
-  | { ok: true }
-  | { ok: false; reason: "database-unavailable" };
 
 export async function getInstalledAppKeys(
   db: Db,
@@ -27,14 +19,9 @@ export async function getInstalledAppKeys(
 }
 
 export async function getCompanyAppsState(
+  db: Db,
   companyId: string,
-): Promise<CompanyAppsStateResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+): Promise<CompanyAppsState | null> {
   const company = await db.company.findFirst({
     select: {
       enabledApps: true,
@@ -47,36 +34,28 @@ export async function getCompanyAppsState(
   });
 
   if (!company) {
-    return { ok: false, reason: "company-not-found" };
+    return null;
   }
 
   return {
-    data: {
-      enabledIds: company.enabledApps ?? [],
-      planTier: company.planTier ?? "starter",
-    },
-    ok: true,
+    enabledIds: company.enabledApps ?? [],
+    planTier: company.planTier ?? "starter",
   };
 }
 
-export async function setCompanyEnabledAppIds(input: {
-  companyId: string;
-  enabledIds: readonly string[];
-}): Promise<{ ok: true } | { ok: false; reason: "database-unavailable" }> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+export async function setCompanyEnabledAppIds(
+  db: Db,
+  input: {
+    companyId: string;
+    enabledIds: readonly string[];
+  },
+) {
   await db.company.update({
     data: {
       enabledApps: Array.from(input.enabledIds),
     },
     where: { id: input.companyId },
   });
-
-  return { ok: true };
 }
 
 export async function installApp(
@@ -93,21 +72,6 @@ export async function installApp(
   });
 }
 
-export async function installCompanyApp(input: {
-  appKey: string;
-  companyId: string;
-}): Promise<CompanyAppMutationResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  await installApp(db, input.companyId, input.appKey);
-
-  return { ok: true };
-}
-
 export async function uninstallApp(
   db: Db,
   companyId: string,
@@ -116,19 +80,4 @@ export async function uninstallApp(
   await db.companyApp.deleteMany({
     where: { companyId, appKey },
   });
-}
-
-export async function uninstallCompanyApp(input: {
-  appKey: string;
-  companyId: string;
-}): Promise<CompanyAppMutationResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  await uninstallApp(db, input.companyId, input.appKey);
-
-  return { ok: true };
 }

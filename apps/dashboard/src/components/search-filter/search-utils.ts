@@ -15,6 +15,7 @@ export const searchIcons: Record<string, IconName> = {
   period: "Calendar",
   publishState: "Globe",
   role: "UserSettings",
+  start: "Calendar",
   status: "CheckCircle",
   type: "Building",
   view: "Calendar",

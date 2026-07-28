@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
-import { IntegrationsTable } from "@/components/tables/integrations";
-import { IntegrationsSkeleton } from "@/components/tables/integrations/skeleton";
+import { IntegrationsContent } from "@/components/integrations/integrations-content";
+import { IntegrationsSkeleton } from "@/components/integrations/integrations-skeleton";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { requireOnboardedSession } from "@/lib/session";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Integrations | Plot Keys",
@@ -16,17 +16,17 @@ export const metadata: Metadata = {
 export default async function IntegrationsPage() {
   await requireOnboardedSession();
 
-  batchPrefetch([trpc.workspace.getCompanyIntegration.queryOptions()]);
+  prefetch(trpc.integrations.get.queryOptions());
 
   return (
-    <DashboardPage>
-      <HydrateClient>
+    <HydrateClient>
+      <ScrollableContent>
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<IntegrationsSkeleton />}>
-            <IntegrationsTable />
+            <IntegrationsContent />
           </Suspense>
         </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

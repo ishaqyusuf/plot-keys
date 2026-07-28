@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { cn } from "@plotkeys/utils";
 import {
   BarChart3,
   Building2,
@@ -9,13 +9,10 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { EditableText } from "../../../../sections/editing-primitives";
 import { useRiwaqPage } from "../hooks/use-riwaq-page";
-import {
-  joinClasses,
-  resolveMenuPillClass,
-  resolveRiwaqRadiusClass,
-} from "../ui/style";
+import { resolveMenuPillClass, resolveRiwaqRadiusClass } from "../ui/style";
 import { RiwaqTemplateAnchor } from "../ui/template-anchor";
 
 const fallbackHeroImage =
@@ -36,30 +33,28 @@ export function RiwaqLandingPage() {
   const showRoadmap = ctx.sectionVisible("riwaq_roadmap_timeline");
   const showContact = ctx.sectionVisible("contact_section");
   const showCta = ctx.sectionVisible("cta_band");
-  const storyRoadmapGridClassName = joinClasses(
+  const storyRoadmapGridClassName = cn(
     "mx-auto grid max-w-7xl",
     preset.spacing.sectionGap,
-    showStory &&
-      showRoadmap &&
-      "lg:grid-cols-[0.88fr_1.12fr] lg:items-end",
+    showStory && showRoadmap && "lg:grid-cols-[0.88fr_1.12fr] lg:items-end",
   );
-  const heroFrameClassName = joinClasses(
+  const heroFrameClassName = cn(
     "relative min-h-[44rem] overflow-hidden border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-card,#fff)] shadow-2xl shadow-black/10",
     resolveRiwaqRadiusClass(ctx.theme.radius, "hero"),
   );
-  const overlayPanelClassName = joinClasses(
+  const overlayPanelClassName = cn(
     "border border-white/50 bg-white/[0.92] shadow-2xl shadow-black/[0.15] backdrop-blur",
     resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
   );
-  const compactPanelClassName = joinClasses(
+  const compactPanelClassName = cn(
     "bg-white/90 text-slate-950 shadow-xl backdrop-blur",
     resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
   );
-  const searchModeClassName = joinClasses(
+  const searchModeClassName = cn(
     "mt-4 grid grid-cols-3 gap-1 border border-slate-200/80 bg-slate-100/80 p-1 text-center text-xs font-semibold text-slate-500",
     resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
   );
-  const filterRowClassName = joinClasses(
+  const filterRowClassName = cn(
     "flex items-center gap-3 border border-slate-200/90 bg-white/[0.92] px-3 py-3 shadow-sm shadow-slate-950/[0.04]",
     resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
   );
@@ -96,9 +91,9 @@ export function RiwaqLandingPage() {
       data-page-key={ctx.page.pageKey ?? "home"}
     >
       {showHero ? (
-        <section className={joinClasses(preset.spacing.containerX, "py-6")}>
+        <section className={cn(preset.spacing.containerX, "py-6")}>
           <div
-            className={joinClasses(
+            className={cn(
               "mx-auto grid min-h-[82svh] max-w-7xl lg:grid-cols-[minmax(0,0.92fr)_minmax(28rem,1.08fr)]",
               preset.spacing.gridGap,
             )}
@@ -199,7 +194,7 @@ export function RiwaqLandingPage() {
                 </div>
               </div>
               <div
-                className={joinClasses(
+                className={cn(
                   "absolute right-5 top-24 hidden max-w-[12rem] border border-white/35 bg-slate-950/[0.72] p-3 text-white shadow-2xl shadow-black/[0.24] backdrop-blur-xl xl:block",
                   resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
                 )}
@@ -236,7 +231,7 @@ export function RiwaqLandingPage() {
                 />
               </div>
               <div
-                className={joinClasses(
+                className={cn(
                   "absolute left-5 right-5 top-20 p-4 text-slate-950 md:right-auto md:w-[22rem] xl:w-[24rem]",
                   overlayPanelClassName,
                 )}
@@ -260,19 +255,21 @@ export function RiwaqLandingPage() {
                   )}
                 />
                 <div className={searchModeClassName}>
-                  {[
-                    ["hero.searchMode1", "Rent"],
-                    ["hero.searchMode2", "Buy"],
-                    ["hero.searchMode3", "Short let"],
-                  ].map(([modeKey, modeFallback], index) => (
+                  {(
+                    [
+                      ["hero.searchMode1", "Rent"],
+                      ["hero.searchMode2", "Buy"],
+                      ["hero.searchMode3", "Short let"],
+                    ] as const
+                  ).map(([modeKey, modeFallback], index) => (
                     <span
                       className={
                         index === 0
-                          ? joinClasses(
+                          ? cn(
                               "bg-[color:var(--pk-primary,#0f172a)] px-2 py-2 text-[color:var(--pk-primary-foreground,#fff)] shadow-sm",
                               resolveRiwaqRadiusClass(ctx.theme.radius, "pill"),
                             )
-                          : joinClasses(
+                          : cn(
                               "px-2 py-2",
                               resolveRiwaqRadiusClass(ctx.theme.radius, "pill"),
                             )
@@ -288,29 +285,31 @@ export function RiwaqLandingPage() {
                   ))}
                 </div>
                 <div className="mt-4 grid gap-2">
-                  {[
+                  {(
                     [
-                      "location",
-                      "hero.searchLocationLabel",
-                      "Location",
-                      "hero.searchLocationValue",
-                      market,
-                    ],
-                    [
-                      "home",
-                      "hero.searchTypeLabel",
-                      "Property type",
-                      "hero.searchTypeValue",
-                      "Apartment",
-                    ],
-                    [
-                      "budget",
-                      "hero.searchBudgetLabel",
-                      "Budget",
-                      "hero.searchBudgetValue",
-                      "Flexible",
-                    ],
-                  ].map(
+                      [
+                        "location",
+                        "hero.searchLocationLabel",
+                        "Location",
+                        "hero.searchLocationValue",
+                        market,
+                      ],
+                      [
+                        "home",
+                        "hero.searchTypeLabel",
+                        "Property type",
+                        "hero.searchTypeValue",
+                        "Apartment",
+                      ],
+                      [
+                        "budget",
+                        "hero.searchBudgetLabel",
+                        "Budget",
+                        "hero.searchBudgetValue",
+                        "Flexible",
+                      ],
+                    ] as const
+                  ).map(
                     ([
                       iconType,
                       labelKey,
@@ -326,10 +325,7 @@ export function RiwaqLandingPage() {
                             : BarChart3;
 
                       return (
-                        <div
-                          className={filterRowClassName}
-                          key={labelKey}
-                        >
+                        <div className={filterRowClassName} key={labelKey}>
                           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 shadow-inner shadow-white/70">
                             <SearchIcon aria-hidden="true" className="size-4" />
                           </span>
@@ -374,7 +370,7 @@ export function RiwaqLandingPage() {
                 </RiwaqTemplateAnchor>
               </div>
               <div className="absolute bottom-5 left-5 right-5 grid gap-3 md:grid-cols-[1fr_auto]">
-                <div className={joinClasses("p-4", compactPanelClassName)}>
+                <div className={cn("p-4", compactPanelClassName)}>
                   <p className="text-xs font-medium text-slate-500">
                     <EditableText
                       contentKey="story.cardEyebrow"
@@ -410,7 +406,7 @@ export function RiwaqLandingPage() {
                 </div>
                 <div
                   aria-label={`${companyName} interior detail`}
-                  className={joinClasses(
+                  className={cn(
                     "hidden size-32 bg-cover bg-center shadow-xl md:block",
                     resolveRiwaqRadiusClass(ctx.theme.radius, "panel"),
                   )}
@@ -424,9 +420,9 @@ export function RiwaqLandingPage() {
       ) : null}
 
       {showMetrics ? (
-        <section className={joinClasses(preset.spacing.containerX, "pb-8")}>
+        <section className={cn(preset.spacing.containerX, "pb-8")}>
           <div
-            className={joinClasses(
+            className={cn(
               "mx-auto grid max-w-7xl md:grid-cols-3",
               preset.spacing.gridGap,
             )}
@@ -465,10 +461,7 @@ export function RiwaqLandingPage() {
 
       {showStory || showRoadmap ? (
         <section
-          className={joinClasses(
-            preset.spacing.containerX,
-            preset.spacing.sectionY,
-          )}
+          className={cn(preset.spacing.containerX, preset.spacing.sectionY)}
         >
           <div className={storyRoadmapGridClassName}>
             {showStory ? (
@@ -521,11 +514,13 @@ export function RiwaqLandingPage() {
             ) : null}
             {showRoadmap ? (
               <div className="grid gap-3 md:grid-cols-3">
-                {[
-                  ["roadmap.item1.year", "roadmap.item1.title"],
-                  ["roadmap.item2.year", "roadmap.item2.title"],
-                  ["roadmap.item3.year", "roadmap.item3.title"],
-                ].map(([yearKey, titleKey]) => (
+                {(
+                  [
+                    ["roadmap.item1.year", "roadmap.item1.title"],
+                    ["roadmap.item2.year", "roadmap.item2.title"],
+                    ["roadmap.item3.year", "roadmap.item3.title"],
+                  ] as const
+                ).map(([yearKey, titleKey]) => (
                   <div
                     className={ctx.ui.surface({
                       className: "p-4",
@@ -561,12 +556,7 @@ export function RiwaqLandingPage() {
       ) : null}
 
       {showContact || showCta ? (
-        <section
-          className={joinClasses(
-            preset.spacing.containerX,
-            "pb-20 md:pb-24",
-          )}
-        >
+        <section className={cn(preset.spacing.containerX, "pb-20 md:pb-24")}>
           <div
             className={ctx.ui.surface({
               className:

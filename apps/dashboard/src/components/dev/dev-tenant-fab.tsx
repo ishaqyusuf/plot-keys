@@ -4,12 +4,16 @@ if (process.env.NODE_ENV === "production") {
   throw new Error("DevTenantFab must not be imported in production.");
 }
 
+import { Button } from "@plotkeys/ui/button";
+import { Skeleton } from "@plotkeys/ui/skeleton";
 import { buildTenantSiteUrl } from "@plotkeys/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 import { DevFabShell } from "./dev-fab-shell";
+
+const loadingRows = ["primary", "secondary", "tertiary"] as const;
 
 export function DevTenantFab() {
   const trpc = useTRPC();
@@ -31,39 +35,50 @@ export function DevTenantFab() {
 
   return (
     <DevFabShell label="Tenants">
-      <div className="divide-y divide-amber-100 dark:divide-amber-900/50">
+      <div className="divide-y divide-border">
         {isLoading && (
-          <p className="px-4 py-3 font-mono text-xs text-amber-600 dark:text-amber-400">
-            Loading tenants…
-          </p>
+          <div
+            className="space-y-3 px-4 py-3"
+            aria-label="Loading tenants"
+            role="status"
+          >
+            {loadingRows.map((row) => (
+              <div className="space-y-1.5" key={row}>
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-2.5 w-full" />
+                <Skeleton className="h-2.5 w-14" />
+              </div>
+            ))}
+          </div>
         )}
         {isError && (
-          <p className="px-4 py-3 font-mono text-xs text-red-500">
+          <p className="px-4 py-3 font-mono text-xs text-destructive">
             Failed to load tenants.
           </p>
         )}
         {!isLoading && !isError && tenantLinks.length === 0 && (
-          <p className="px-4 py-3 font-mono text-xs text-amber-600 dark:text-amber-400">
+          <p className="px-4 py-3 font-mono text-xs text-muted-foreground">
             No active tenants found.
           </p>
         )}
         {tenantLinks.map((tenant) => (
-          <button
+          <Button
+            variant="ghost"
             key={tenant.id}
             type="button"
             onClick={() => window.open(tenant.url, "_blank")}
-            className="w-full px-4 py-2.5 text-left transition hover:bg-amber-50 active:bg-amber-100 dark:hover:bg-amber-950/30"
+            className="h-auto w-full flex-col items-start rounded-none px-4 py-2.5 text-left hover:bg-muted active:bg-muted"
           >
-            <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-100">
+            <p className="font-mono text-xs font-semibold text-foreground">
               {tenant.name}
             </p>
-            <p className="font-mono text-[10px] text-amber-700 dark:text-amber-400">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {tenant.url.replace(/^https?:\/\//, "")}
             </p>
-            <p className="font-mono text-[10px] capitalize text-slate-400">
+            <p className="font-mono text-[10px] capitalize text-muted-foreground">
               {tenant.planTier}
             </p>
-          </button>
+          </Button>
         ))}
       </div>
     </DevFabShell>

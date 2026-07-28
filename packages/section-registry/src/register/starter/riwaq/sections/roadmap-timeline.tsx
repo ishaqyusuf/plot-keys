@@ -1,9 +1,10 @@
 "use client";
 
-import type { ThemeConfig } from "../../../../sections/home-page";
+import { cn } from "@plotkeys/utils";
 import { EditableText } from "../../../../sections/editing-primitives";
+import type { ThemeConfig } from "../../../../sections/home-page";
 import { useRiwaqPage } from "../hooks/use-riwaq-page";
-import { joinClasses, riwaqSectionClassName } from "../ui/style";
+import { riwaqSectionClassName } from "../ui/style";
 
 export type RiwaqRoadmapTimelineItem = {
   body: string;
@@ -31,7 +32,7 @@ export function RiwaqRoadmapTimelineSection({
   return (
     <section className={riwaqSectionClassName(ctx.ui.preset)}>
       <div
-        className={joinClasses(
+        className={cn(
           "mx-auto grid",
           showIntro ? "max-w-6xl lg:grid-cols-[0.8fr_1.2fr]" : "max-w-4xl",
           ctx.ui.preset.spacing.sectionGap,

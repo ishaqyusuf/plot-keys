@@ -1,11 +1,12 @@
-import { buildTenantSiteRootUrl } from "./app-urls";
+import { buildSandboxUrl, sandboxRootDomain } from "./app-urls";
 import { normalizeRuntimeHost } from "./runtime-url";
-import { plotkeysRootDomain } from "./tenant-domains";
 
 export type TemplateSandboxUrlOptions = {
   currentOrigin?: string | null;
   pathname?: string;
   protocol?: "http" | "https";
+  sandboxOrigin?: string | null;
+  /** @deprecated Use sandboxOrigin. Retained while legacy callers migrate. */
   tenantSiteOrigin?: string | null;
 };
 
@@ -14,13 +15,10 @@ function normalizePathname(pathname?: string) {
   return pathname.startsWith("/") ? pathname : `/${pathname}`;
 }
 
-export function buildTemplateSandboxPath(
-  shareId: string,
-  pathname?: string,
-) {
+export function buildTemplateSandboxPath(shareId: string, pathname?: string) {
   const normalizedShareId = shareId.trim();
   if (!normalizedShareId) return "";
-  return `/sandbox/${encodeURIComponent(normalizedShareId)}${normalizePathname(pathname)}`;
+  return `/preview/${encodeURIComponent(normalizedShareId)}${normalizePathname(pathname)}`;
 }
 
 export function buildTemplateSandboxUrl(
@@ -31,13 +29,15 @@ export function buildTemplateSandboxUrl(
   if (!path) return "";
 
   const explicitOrigin =
-    options.tenantSiteOrigin !== undefined
-      ? options.tenantSiteOrigin
-      : options.currentOrigin
-        ? null
-        : (process.env.NEXT_PUBLIC_TENANT_SITE_URL ??
-          process.env.TENANT_SITE_URL ??
-          null);
+    options.sandboxOrigin !== undefined
+      ? options.sandboxOrigin
+      : options.tenantSiteOrigin !== undefined
+        ? options.tenantSiteOrigin
+        : options.currentOrigin
+          ? null
+          : (process.env.NEXT_PUBLIC_SANDBOX_URL ??
+            process.env.SANDBOX_PUBLIC_URL ??
+            null);
 
   if (explicitOrigin) {
     try {
@@ -54,7 +54,7 @@ export function buildTemplateSandboxUrl(
     }
   }
 
-  return buildTenantSiteRootUrl({
+  return buildSandboxUrl({
     currentUrl: options.currentOrigin,
     path,
   });
@@ -67,9 +67,50 @@ export function buildTemplateSandboxProductionUrl(
   return buildTemplateSandboxUrl(shareId, {
     pathname,
     protocol: "https",
-    tenantSiteOrigin:
-      process.env.NEXT_PUBLIC_TENANT_SITE_URL ??
-      process.env.TENANT_SITE_URL ??
-      `https://${plotkeysRootDomain}`,
+    sandboxOrigin:
+      process.env.NEXT_PUBLIC_SANDBOX_URL ??
+      process.env.SANDBOX_PUBLIC_URL ??
+      `https://${sandboxRootDomain}`,
   });
+}
+
+export function buildLegacyTemplateSandboxPreviewRedirectUrl(
+  shareId: string,
+  options: {
+    currentOrigin?: string | null;
+    mode?: "draft" | "live";
+    pathname?: string;
+  } = {},
+) {
+  const target = buildTemplateSandboxUrl(shareId, {
+    currentOrigin: options.currentOrigin,
+    pathname: options.pathname,
+  });
+  if (!target) return "";
+
+  const url = new URL(target);
+  url.searchParams.set("mode", options.mode ?? "draft");
+  return url.toString();
+}
+
+export function buildLegacyTemplateSandboxProfileRedirectUrl(
+  profileId: string,
+  options: {
+    currentOrigin?: string | null;
+    page?: string | null;
+    path?: string | null;
+  } = {},
+) {
+  const normalizedProfileId = profileId.trim();
+  if (!normalizedProfileId) return "";
+
+  const url = new URL(
+    buildSandboxUrl({
+      currentUrl: options.currentOrigin,
+      path: `/profiles/${encodeURIComponent(normalizedProfileId)}`,
+    }),
+  );
+  if (options.page) url.searchParams.set("page", options.page);
+  if (options.path) url.searchParams.set("path", options.path);
+  return url.toString();
 }

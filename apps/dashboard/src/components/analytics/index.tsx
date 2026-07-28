@@ -1,13 +1,9 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ChartNoAxesCombined } from "lucide-react";
-import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
-import { DashboardStatGrid } from "@/components/dashboard/dashboard-page";
 import { useTRPC } from "@/trpc/client";
 import {
   AgentPerformanceSection,
-  AnalyticsHeader,
   DemandSignalsSection,
   EventTypeSection,
   MetricCard,
@@ -16,11 +12,9 @@ import {
   RecentEventsSection,
 } from "./sections";
 
-export function AnalyticsDashboard() {
+export function AnalyticsContent() {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(
-    trpc.workspace.getAnalytics.queryOptions(),
-  );
+  const { data } = useSuspenseQuery(trpc.analytics.get.queryOptions());
   const pageViews =
     data.byType.find((type) => type.eventType === "page_view")?.count ?? 0;
   const leadsCaptured =
@@ -37,14 +31,12 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AnalyticsHeader />
-
-      <DashboardStatGrid>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Total events" value={data.totalEvents} />
         <MetricCard label="Unique visitors" value={data.uniqueVisitors} />
         <MetricCard label="Page views" value={pageViews} />
         <MetricCard label="Leads captured" value={leadsCaptured} />
-      </DashboardStatGrid>
+      </div>
 
       {hasAnyData ? (
         <>
@@ -62,11 +54,17 @@ export function AnalyticsDashboard() {
           <RecentEventsSection events={data.recentEvents} />
         </>
       ) : (
-        <DashboardEmptyState
-          description="Analytics will appear once visitors start interacting with the website."
-          icon={<ChartNoAxesCombined className="size-5" />}
-          title="No analytics data yet"
-        />
+        <div className="flex min-h-72 items-center justify-center px-5 py-10">
+          <div className="flex max-w-sm flex-col items-center text-center">
+            <h3 className="font-medium text-foreground">
+              No analytics data yet
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Analytics will appear once visitors start interacting with the
+              website.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

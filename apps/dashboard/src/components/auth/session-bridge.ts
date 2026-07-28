@@ -22,9 +22,9 @@ export async function persistSession(
   });
 
   if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
     throw new Error(payload?.error ?? "Unable to persist session.");
   }
@@ -38,5 +38,16 @@ export async function clearSession() {
 
   if (!response.ok) {
     throw new Error("Unable to clear session.");
+  }
+}
+
+export async function clearPendingOnboarding() {
+  const response = await fetch("/api/session/onboarding", {
+    credentials: "include",
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to clear onboarding session.");
   }
 }

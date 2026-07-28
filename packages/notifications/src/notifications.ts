@@ -23,9 +23,7 @@ import {
   createNotificationDispatchFromType,
   plotKeysNotificationTypes,
 } from "./notification-types";
-import type {
-  PlotKeysNotificationType,
-} from "./payload-utils";
+import type { PlotKeysNotificationType } from "./payload-utils";
 import type { NotificationTypes } from "./schemas";
 import {
   EmailService,
@@ -100,6 +98,21 @@ function providerChannelSkipReason(
   channel: NotificationChannel,
 ) {
   return `${notificationType} does not support ${channel} delivery.`;
+}
+
+function skippedRecipientForChannel(channel: NotificationChannel) {
+  switch (channel) {
+    case "email":
+      return "no-email-recipient";
+    case "whatsapp":
+    case "sms":
+    case "phone":
+      return "no-phone-recipient";
+    case "in_app":
+      return "no-user-recipient";
+    default:
+      return "unavailable-recipient";
+  }
 }
 
 export class Notifications {
@@ -243,7 +256,7 @@ export class Notifications {
             to: email.to,
           })
         : undefined;
-      const finalStatus = result?.status ?? "sent";
+      const finalStatus = result?.status ?? "planned";
       const payload = recordFromPayload(dispatch.payload);
       const recipient =
         result?.recipients.join(", ") ||
@@ -257,6 +270,8 @@ export class Notifications {
         customerId: stringField(payload, "customerId"),
         errorDetails: result?.error
           ? { error: errorMessage(result.error) }
+          : result?.reason
+            ? { reason: result.reason }
           : result?.wasRecipientOverridden
             ? {
                 originalRecipients: result.originalRecipients,
@@ -285,6 +300,31 @@ export class Notifications {
       failed,
       sent,
       skipped,
+    };
+  }
+
+  async #persistSkippedChannels(
+    companyId: string,
+    notificationType: string,
+    skippedChannels: NotificationSkippedChannel[],
+  ): Promise<DeliverySummary> {
+    for (const skipped of skippedChannels) {
+      await createNotificationMessageLog(this.#db, {
+        body: skipped.reason,
+        channel: skipped.channel,
+        companyId,
+        errorDetails: { reason: skipped.reason },
+        provider: null,
+        recipient: skippedRecipientForChannel(skipped.channel),
+        status: "skipped",
+        subject: notificationType,
+      });
+    }
+
+    return {
+      failed: 0,
+      sent: 0,
+      skipped: skippedChannels.length,
     };
   }
 
@@ -439,6 +479,10 @@ export class Notifications {
       ...notification,
       channels: supportedChannels,
     });
+    const skippedChannels = [
+      ...skippedProviderChannels,
+      ...plan.skippedChannels,
+    ];
     const [email, phone, sms, whatsapp, inApp] = await Promise.all([
       this.#sendEmailDispatches(
         companyId,
@@ -449,6 +493,11 @@ export class Notifications {
       this.#sendSmsDispatches(companyId, plan.dispatches),
       this.#sendWhatsAppDispatches(companyId, plan.dispatches),
       this.#persistInAppNotifications(companyId, plan.dispatches),
+      this.#persistSkippedChannels(
+        companyId,
+        notification.notificationType,
+        skippedChannels,
+      ),
     ]);
 
     return {
@@ -460,7 +509,7 @@ export class Notifications {
         sms,
         whatsapp,
       },
-      skippedChannels: [...skippedProviderChannels, ...plan.skippedChannels],
+      skippedChannels,
       type,
     };
   }

@@ -1,15 +1,10 @@
 import type { Prisma } from "../generated/prisma/client";
-import { createPrismaClient, type Db } from "../prisma";
-
-export type NotificationBellDataResult =
-  | {
-      data: {
-        recent: Awaited<ReturnType<typeof listNotificationsForUser>>["data"];
-        unreadCount: number;
-      };
-      ok: true;
-    }
-  | { ok: false; reason: "database-unavailable" };
+import type { Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export async function createNotification(
   db: Db,
@@ -39,19 +34,31 @@ export async function listNotificationsForUser(
   input: {
     companyId: string;
     cursor?: string | number | null;
+    end?: string | null;
     userId: string;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     take?: number;
     onlyUnread?: boolean;
   },
 ) {
+  const endDate = parseDateBoundary(input.end, "end");
   const query = input.q?.trim();
-  const size = normalizePageSize(input.size ?? input.take);
-  const offset = normalizeCursor(input.cursor);
+  const size = normalizeListPageSize(input.size ?? input.take);
+  const offset = normalizeListOffsetCursor(input.cursor);
+  const startDate = parseDateBoundary(input.start, "start");
+  const createdAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
   const where: Prisma.NotificationWhereInput = {
     companyId: input.companyId,
+    ...(createdAtFilter ? { createdAt: createdAtFilter } : {}),
     userId: input.userId,
     ...(input.onlyUnread ? { isRead: false } : {}),
     ...(query ? { OR: getNotificationSearchFilters(query) } : {}),
@@ -66,37 +73,19 @@ export async function listNotificationsForUser(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) return null;
 
-  if (!Number.isFinite(value)) {
-    return 50;
-  }
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getNotificationSearchFilters(
@@ -147,17 +136,14 @@ export async function countUnreadNotifications(
   });
 }
 
-export async function getNotificationBellDataForUser(input: {
-  companyId: string;
-  userId: string;
-  take?: number;
-}): Promise<NotificationBellDataResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+export async function getNotificationBellDataForUser(
+  db: Db,
+  input: {
+    companyId: string;
+    userId: string;
+    take?: number;
+  },
+) {
   const [unreadCount, recentPage] = await Promise.all([
     countUnreadNotifications(db, input),
     listNotificationsForUser(db, {
@@ -168,11 +154,8 @@ export async function getNotificationBellDataForUser(input: {
   ]);
 
   return {
-    data: {
-      recent: recentPage.data,
-      unreadCount,
-    },
-    ok: true,
+    recent: recentPage.data,
+    unreadCount,
   };
 }
 

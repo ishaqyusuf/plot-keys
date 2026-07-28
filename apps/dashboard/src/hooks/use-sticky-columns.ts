@@ -1,7 +1,8 @@
-import { cn } from "@plotkeys/utils";
+import { cn } from "@plotkeys/ui/cn";
 import type { VisibilityState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
 import type { StickyColumnConfig } from "@/components/tables/core";
+import { STICKY_COLUMNS } from "@/utils/table-configs";
 
 interface TableColumn {
   id: string;
@@ -16,7 +17,7 @@ interface UseStickyColumnsProps {
   columnVisibility?: VisibilityState;
   table?: TableInterface;
   loading?: boolean;
-  /** Sticky column configuration */
+  /** Sticky column configuration - defaults to customers columns */
   stickyColumns?: StickyColumnConfig[];
 }
 
@@ -24,7 +25,7 @@ export function useStickyColumns({
   columnVisibility,
   table,
   loading,
-  stickyColumns = [],
+  stickyColumns = STICKY_COLUMNS.customers,
 }: UseStickyColumnsProps) {
   // Memoize isVisible to prevent breaking downstream useMemo dependencies
   const isVisible = useCallback(

@@ -1,0 +1,29 @@
+import { sessionBridgeInputSchema } from "@plotkeys/auth/shared";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
+import {
+  clearSandboxSessionCookie,
+  setSandboxSessionCookie,
+} from "@/lib/session-cookie";
+
+export async function POST(request: Request) {
+  try {
+    const body = sessionBridgeInputSchema.parse(await request.json());
+    setSandboxSessionCookie(await cookies(), body.sessionToken);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Unable to persist session.",
+      },
+      { status: 400 },
+    );
+  }
+}
+
+export async function DELETE() {
+  clearSandboxSessionCookie(await cookies());
+  return NextResponse.json({ ok: true });
+}

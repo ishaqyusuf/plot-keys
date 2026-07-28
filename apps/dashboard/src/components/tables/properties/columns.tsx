@@ -1,14 +1,9 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { PropertySheet } from "@/components/sheets/property-sheet";
-import {
-  deletePropertyAction,
-  togglePropertyFeaturedAction,
-} from "@/app/actions";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 export type PropertyTableRow = {
   id: string;
@@ -66,13 +61,7 @@ function PropertyCell({ property }: { property: PropertyTableRow }) {
   return (
     <div className="min-w-0 space-y-1">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <Link
-          className="truncate font-medium text-foreground underline-offset-2 hover:underline"
-          href={`/properties/${property.id}`}
-          onClick={(event) => event.stopPropagation()}
-        >
-          {property.title}
-        </Link>
+        <p className="truncate font-medium text-foreground">{property.title}</p>
         {property.featured ? <Badge variant="secondary">Featured</Badge> : null}
       </div>
       <p className="truncate text-sm text-muted-foreground">
@@ -87,46 +76,17 @@ function PropertyCell({ property }: { property: PropertyTableRow }) {
   );
 }
 
-function ActionsCell({ property }: { property: PropertyTableRow }) {
-  return (
-    <div
-      className="flex justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Button asChild size="sm" variant="ghost">
-        <Link href={`/properties/${property.id}`}>View</Link>
-      </Button>
-      <form action={togglePropertyFeaturedAction}>
-        <input name="propertyId" type="hidden" value={property.id} />
-        <Button size="sm" type="submit" variant="outline">
-          {property.featured ? "Unfeature" : "Feature"}
-        </Button>
-      </form>
-      <PropertySheet mode="edit" property={property} />
-      <form action={deletePropertyAction}>
-        <input name="propertyId" type="hidden" value={property.id} />
-        <Button
-          className="text-destructive hover:bg-destructive/5 hover:text-destructive"
-          size="sm"
-          type="submit"
-          variant="ghost"
-        >
-          Delete
-        </Button>
-      </form>
-    </div>
-  );
-}
-
 export const columns = (
   options: PropertyTableColumnOptions,
 ): ColumnDef<PropertyTableRow>[] => [
+  createSelectColumn<PropertyTableRow>(),
   {
     cell: ({ row }) => <PropertyCell property={row.original} />,
     header: "Listing",
     id: "property",
     meta: {
-      className: "min-w-[280px] md:sticky md:left-0 md:z-20 md:bg-background",
+      className:
+        "min-w-[280px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Listing",
       skeleton: { type: "text", width: "w-48" },
       sticky: true,
@@ -136,7 +96,7 @@ export const columns = (
   {
     cell: ({ row }) => (
       <div className="space-y-1">
-        <Badge className="capitalize" variant="outline">
+        <Badge variant="outline" className="capitalize">
           {row.original.type
             ? (options.typeLabels[row.original.type] ?? row.original.type)
             : "Unassigned"}
@@ -159,11 +119,15 @@ export const columns = (
   {
     cell: ({ row }) => (
       <div className="flex flex-col items-start gap-1.5">
-        <Badge variant={options.statusVariant[row.original.status] ?? "outline"}>
+        <Badge
+          variant={options.statusVariant[row.original.status] ?? "outline"}
+        >
           {row.original.status.replace("_", " ")}
         </Badge>
         <Badge
-          variant={options.publishVariant[row.original.publishState] ?? "outline"}
+          variant={
+            options.publishVariant[row.original.publishState] ?? "outline"
+          }
         >
           {row.original.publishState}
         </Badge>
@@ -205,16 +169,16 @@ export const columns = (
     size: 300,
   },
   {
-    cell: ({ row }) => <ActionsCell property={row.original} />,
-    header: "",
+    cell: ({ row }) => <ActionsMenu row={row.original} />,
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[360px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "w-[80px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-32" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 380,
+    size: 80,
   },
 ];

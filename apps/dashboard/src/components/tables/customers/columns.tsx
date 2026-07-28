@@ -1,20 +1,46 @@
 "use client";
 
-import type { AppRouter } from "@plotkeys/api/router";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@plotkeys/ui/alert-dialog";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@plotkeys/ui/dropdown-menu";
+import { Icon } from "@plotkeys/ui/icons";
+import { Spinner } from "@plotkeys/ui/spinner";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { inferRouterOutputs } from "@trpc/server";
-import { useState } from "react";
-import { useTRPC } from "@/trpc/client";
+import { memo, useCallback, useState } from "react";
+import type {
+  CustomerStatus,
+  CustomerTableRow,
+} from "@/components/customer/types";
+import { createSelectColumn } from "@/components/tables/core";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
-
-export type CustomerTableRow =
-  RouterOutputs["customers"]["get"]["data"][number];
-type CustomerStatus = "active" | "inactive" | "vip";
+export type CustomersTableMeta = {
+  deleteCustomer?: (customerId: string) => void;
+  isDeletingCustomer?: boolean;
+  isUpdatingCustomer?: boolean;
+  updateCustomerStatus?: (customerId: string, status: CustomerStatus) => void;
+};
 
 export const customerStatusVariant: Record<
   string,
@@ -23,6 +49,12 @@ export const customerStatusVariant: Record<
   active: "default",
   inactive: "outline",
   vip: "secondary",
+};
+
+const customerStatusLabels: Record<CustomerStatus, string> = {
+  active: "Active",
+  inactive: "Inactive",
+  vip: "VIP",
 };
 
 function formatDate(date: Date) {
@@ -51,16 +83,155 @@ function CustomerCell({ customer }: { customer: CustomerTableRow }) {
   );
 }
 
+const ActionsCell = memo(
+  ({
+    isDeleting,
+    isUpdating,
+    onDelete,
+    onStatusChange,
+    row,
+  }: {
+    isDeleting?: boolean;
+    isUpdating?: boolean;
+    onDelete?: (customerId: string) => void;
+    onStatusChange?: (customerId: string, status: CustomerStatus) => void;
+    row: CustomerTableRow;
+  }) => {
+    const { setParams } = useCustomerParams();
+    const [deleteOpen, setDeleteOpen] = useState(false);
+
+    const handleEdit = useCallback(() => {
+      setParams({ customerId: row.id, details: null });
+    }, [row.id, setParams]);
+
+    const handleViewDetails = useCallback(() => {
+      setParams({ customerId: row.id, details: true });
+    }, [row.id, setParams]);
+
+    const handleDelete = useCallback(() => {
+      onDelete?.(row.id);
+      setDeleteOpen(false);
+    }, [onDelete, row.id]);
+
+    const handleStatusChange = useCallback(
+      (status: string) => {
+        onStatusChange?.(row.id, status as CustomerStatus);
+      },
+      [onStatusChange, row.id],
+    );
+
+    return (
+      <div className="flex items-center justify-center w-full">
+        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="relative">
+              <Button
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Icon.MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <DropdownMenuItem onClick={handleEdit}>
+                Edit customer
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleViewDetails}>
+                View details
+              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    onValueChange={handleStatusChange}
+                    value={row.status}
+                  >
+                    {Object.entries(customerStatusLabels).map(
+                      ([value, label]) => (
+                        <DropdownMenuRadioItem
+                          disabled={isUpdating}
+                          key={value}
+                          value={value}
+                        >
+                          {label}
+                        </DropdownMenuRadioItem>
+                      ),
+                    )}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onSelect={(event) => {
+                  event.preventDefault();
+                  setDeleteOpen(true);
+                }}
+              >
+                Delete customer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialogContent onClick={(event) => event.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete customer?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes {row.name} from your customer records. This action
+                cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="relative"
+                disabled={isDeleting}
+                onClick={handleDelete}
+              >
+                <span className={isDeleting ? "invisible" : undefined}>
+                  Delete
+                </span>
+                {isDeleting ? (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Spinner className="h-4 w-4" />
+                  </span>
+                ) : null}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  },
+);
+
+ActionsCell.displayName = "ActionsCell";
+
 export const columns = (canManage: boolean): ColumnDef<CustomerTableRow>[] => [
+  createSelectColumn<CustomerTableRow>(),
   {
+    accessorKey: "name",
     cell: ({ row }) => <CustomerCell customer={row.original} />,
-    header: "Customer",
-    id: "customer",
+    enableResizing: true,
+    header: "Name",
+    id: "name",
+    maxSize: 500,
     meta: {
-      className: "min-w-[240px] md:sticky md:left-0 md:z-20 md:bg-background",
+      className:
+        "w-[320px] min-w-[240px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
+      headerLabel: "Name",
+      skeleton: { type: "avatar-text", width: "w-40" },
       sticky: true,
     },
-    size: 260,
+    minSize: 240,
+    size: 320,
   },
   {
     cell: ({ row }) => (
@@ -73,19 +244,27 @@ export const columns = (canManage: boolean): ColumnDef<CustomerTableRow>[] => [
     ),
     header: "Contact",
     id: "contact",
+    meta: {
+      headerLabel: "Contact",
+      skeleton: { type: "text", width: "w-36" },
+    },
     size: 260,
   },
   {
     cell: ({ row }) => (
       <Badge
-        className="capitalize"
         variant={customerStatusVariant[row.original.status] ?? "outline"}
+        className="capitalize"
       >
         {row.original.status}
       </Badge>
     ),
     header: "Status",
     id: "status",
+    meta: {
+      headerLabel: "Status",
+      skeleton: { type: "badge", width: "w-16" },
+    },
     size: 120,
   },
   {
@@ -96,6 +275,11 @@ export const columns = (canManage: boolean): ColumnDef<CustomerTableRow>[] => [
       </span>
     ),
     header: "Added",
+    id: "createdAt",
+    meta: {
+      headerLabel: "Added",
+      skeleton: { type: "text", width: "w-20" },
+    },
     size: 140,
   },
   {
@@ -106,91 +290,35 @@ export const columns = (canManage: boolean): ColumnDef<CustomerTableRow>[] => [
     ),
     header: "Notes",
     id: "notes",
+    meta: {
+      headerLabel: "Notes",
+      skeleton: { type: "text", width: "w-48" },
+    },
     size: 320,
   },
   {
-    cell: ({ row }) =>
-      canManage ? <CustomerActionsCell customer={row.original} /> : null,
-    header: "",
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as CustomersTableMeta | undefined;
+
+      return canManage ? (
+        <ActionsCell
+          isDeleting={meta?.isDeletingCustomer}
+          isUpdating={meta?.isUpdatingCustomer}
+          onDelete={meta?.deleteCustomer}
+          onStatusChange={meta?.updateCustomerStatus}
+          row={row.original}
+        />
+      ) : null;
+    },
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[250px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "w-[80px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 260,
+    size: 80,
   },
 ];
-
-function CustomerActionsCell({ customer }: { customer: CustomerTableRow }) {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const [status, setStatus] = useState(customer.status as CustomerStatus);
-  const invalidateCustomers = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: trpc.customers.get.infiniteQueryKey(),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: trpc.customers.stats.queryKey(),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: trpc.filters.customers.queryKey(),
-      }),
-    ]);
-  };
-  const updateCustomerMutation = useMutation(
-    trpc.customers.update.mutationOptions({
-      onSuccess: invalidateCustomers,
-    }),
-  );
-  const deleteCustomerMutation = useMutation(
-    trpc.customers.delete.mutationOptions({
-      onSuccess: invalidateCustomers,
-    }),
-  );
-
-  return (
-    <div
-      className="flex justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <NativeSelect
-        className="h-8 min-w-28 text-xs"
-        onChange={(event) => setStatus(event.target.value as CustomerStatus)}
-        value={status}
-      >
-        <NativeSelectOption value="active">Active</NativeSelectOption>
-        <NativeSelectOption value="vip">VIP</NativeSelectOption>
-        <NativeSelectOption value="inactive">Inactive</NativeSelectOption>
-      </NativeSelect>
-      <Button
-        disabled={updateCustomerMutation.isPending}
-        onClick={() =>
-          updateCustomerMutation.mutate({
-            customerId: customer.id,
-            status,
-          })
-        }
-        size="sm"
-        type="button"
-        variant="outline"
-      >
-        {updateCustomerMutation.isPending ? "Saving..." : "Save"}
-      </Button>
-      <Button
-        className="text-destructive hover:text-destructive"
-        disabled={deleteCustomerMutation.isPending}
-        onClick={() =>
-          deleteCustomerMutation.mutate({ customerId: customer.id })
-        }
-        size="sm"
-        type="button"
-        variant="ghost"
-      >
-        {deleteCustomerMutation.isPending ? "Removing..." : "Remove"}
-      </Button>
-    </div>
-  );
-}

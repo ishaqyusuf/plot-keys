@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { AnalyticsDashboard } from "@/components/analytics";
+import { AnalyticsContent } from "@/components/analytics";
 import { AnalyticsSkeleton } from "@/components/analytics/skeleton";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { ErrorFallback } from "@/components/error-fallback";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { requireOnboardedSession } from "@/lib/session";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Analytics | Plot Keys",
@@ -15,17 +15,17 @@ export const metadata: Metadata = {
 export default async function AnalyticsPage() {
   await requireOnboardedSession();
 
-  batchPrefetch([trpc.workspace.getAnalytics.queryOptions()]);
+  prefetch(trpc.analytics.get.queryOptions());
 
   return (
-    <DashboardPage>
-      <HydrateClient>
+    <HydrateClient>
+      <ScrollableContent>
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<AnalyticsSkeleton />}>
-            <AnalyticsDashboard />
+            <AnalyticsContent />
           </Suspense>
         </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

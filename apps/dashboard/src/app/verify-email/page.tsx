@@ -2,26 +2,35 @@ import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
 import { buildDashboardUrl, buildTenantDashboardUrl } from "@plotkeys/utils";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { SearchParams } from "nuqs";
 import { VerifyEmailForm } from "@/components/auth/verify-email-form";
 import { FlowShell } from "@/components/flow-shell";
 
-type VerifyEmailPageProps = {
-  searchParams?: Promise<{
-    company?: string;
-    email?: string;
-    error?: string;
-    subdomain?: string;
-    token?: string;
-  }>;
+export const metadata: Metadata = {
+  title: "Verify Email | Plot Keys",
 };
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: VerifyEmailPageProps) {
-  const params = (await searchParams) ?? {};
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+function firstSearchParam(value: SearchParams[string]) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function VerifyEmailPage({ searchParams }: Props) {
+  const rawParams = await searchParams;
+  const params = {
+    company: firstSearchParam(rawParams.company),
+    email: firstSearchParam(rawParams.email),
+    error: firstSearchParam(rawParams.error),
+    subdomain: firstSearchParam(rawParams.subdomain),
+    token: firstSearchParam(rawParams.token),
+  };
   const headerStore = await headers();
   const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
   const protocol =
@@ -84,10 +93,10 @@ export default async function VerifyEmailPage({
       description="Signup now pauses here until the account owner confirms the email address. Verification completes the auth handoff, restores the reserved onboarding payload, and then continues into workspace setup."
       sidePanel={
         <>
-          <p className="text-sm uppercase tracking-[0.32em] text-primary-foreground/80">
+          <p className="text-sm font-medium text-primary-foreground/80">
             Handoff contract
           </p>
-          <div className="mt-6 grid gap-3">
+          <div className="mt-6">
             {[
               "Verification proves the email owner is real.",
               "Verified users without onboarding completion go to /onboarding.",
@@ -95,7 +104,7 @@ export default async function VerifyEmailPage({
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-[calc(var(--radius-md)-0.1rem)] border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-4 text-sm leading-7 text-primary-foreground/85"
+                className="border-primary-foreground/15 border-t py-4 text-primary-foreground/85 text-sm leading-7 first:border-t-0"
               >
                 {item}
               </div>
@@ -114,7 +123,7 @@ export default async function VerifyEmailPage({
         </p>
 
         {process.env.NODE_ENV === "development" ? (
-          <Alert className="border-primary/20 bg-primary/5">
+          <Alert>
             <AlertDescription className="flex flex-col gap-3">
               <span>
                 Dev shortcut: use the same verification link from the email for
@@ -124,7 +133,7 @@ export default async function VerifyEmailPage({
                 {verificationLink.toString()}
               </span>
               <div>
-                <Button asChild size="sm" variant="secondary">
+                <Button variant="secondary" size="sm" asChild>
                   <Link href={verificationLink.toString()}>
                     Open verification link
                   </Link>

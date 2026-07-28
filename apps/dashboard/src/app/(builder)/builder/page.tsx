@@ -1,33 +1,42 @@
+import type { Metadata } from "next";
+import type { SearchParams } from "nuqs";
+
 import { BuilderWorkspace } from "@/components/builder/builder-workspace";
+import { ensureBuilderConfigurationExists } from "@/components/dashboard/home/builder-configuration";
 import { requireOnboardedSession } from "@/lib/session";
 
-type BuilderPageProps = {
-  searchParams?: Promise<{
-    error?: string;
-    configId?: string;
-    generated?: string;
-    onboarding?: string;
-    page?: string;
-    path?: string;
-    published?: string;
-    saved?: string;
-  }>;
+export const metadata: Metadata = {
+  title: "Builder | Plot Keys",
 };
 
-export default async function BuilderPage({ searchParams }: BuilderPageProps) {
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+function firstSearchParam(value: SearchParams[string]) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function BuilderPage({ searchParams }: Props) {
   const session = await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
+  const params = await searchParams;
+  const error = firstSearchParam(params.error);
+  const generated = firstSearchParam(params.generated);
+  const onboarding = firstSearchParam(params.onboarding);
+  const page = firstSearchParam(params.page);
+  const path = firstSearchParam(params.path);
+  const saved = firstSearchParam(params.saved);
+
+  await ensureBuilderConfigurationExists();
 
   return (
     <main className="min-h-screen bg-background">
       <BuilderWorkspace
-        companyId={session.activeMembership.companyId}
         companyName={session.activeMembership.companyName}
         companySlug={session.activeMembership.companySlug}
-        notices={params}
-        pageKey={params.page}
-        previewPath={params.path}
-        userId={session.user.id}
+        notices={{ error, generated, onboarding, saved }}
+        pageKey={page}
+        previewPath={path}
       />
     </main>
   );

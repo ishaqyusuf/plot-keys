@@ -25,16 +25,12 @@ export function Sidebar({ children }: { children?: ReactNode }) {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 z-50 hidden h-screen flex-shrink-0 flex-col justify-between overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
-        isExpanded ? "w-[272px]" : "w-[84px]",
+        "h-screen flex-shrink-0 flex-col desktop:overflow-hidden desktop:rounded-tl-[10px] desktop:rounded-bl-[10px] justify-between fixed top-0 pb-4 items-center hidden md:flex z-50 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        "bg-background border-r border-border",
+        isExpanded ? "w-[240px]" : "w-[70px]",
       )}
     >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-6 top-[70px] h-px bg-sidebar-border" />
-        <div className="absolute inset-y-0 right-0 w-px bg-sidebar-border/70" />
-      </div>
-      <nav
-        aria-label="Primary navigation"
+      <div
         ref={mainMenuRef}
         onMouseEnter={() => {
           if (expandTimeoutRef.current) {
@@ -52,10 +48,10 @@ export function Sidebar({ children }: { children?: ReactNode }) {
           }
           setIsExpanded(false);
         }}
-        className="relative flex min-h-0 w-full flex-1 flex-col overflow-y-auto pb-[124px] pt-[70px]"
+        className="flex flex-col w-full pt-[70px] flex-1 border-b border-border mb-3"
       >
         <NavsList />
-      </nav>
+      </div>
       {children}
     </aside>
   );

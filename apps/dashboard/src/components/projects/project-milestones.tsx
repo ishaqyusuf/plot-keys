@@ -1,13 +1,21 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Status config
@@ -15,7 +23,10 @@ import { useTRPC } from "../../trpc/client";
 
 const milestoneStatusConfig: Record<
   string,
-  { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "outline" | "secondary" | "destructive";
+  }
 > = {
   completed: { label: "Completed", variant: "default" },
   in_progress: { label: "In Progress", variant: "secondary" },
@@ -37,6 +48,8 @@ type Milestone = {
 };
 
 type Phase = { id: string; name: string };
+
+const noPhaseValue = "no-phase";
 
 // ---------------------------------------------------------------------------
 // Milestone list
@@ -72,13 +85,19 @@ export function MilestoneList({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const updatingMilestoneId = updateMutation.isPending
+    ? updateMutation.variables?.milestoneId
+    : null;
+  const updatingVisibilityMilestoneId = visibilityMutation.isPending
+    ? visibilityMutation.variables?.milestoneId
+    : null;
 
   return (
     <div className="mb-4 space-y-2">
       {milestones.map((milestone) => (
         <div
           key={milestone.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between border p-3"
         >
           <div>
             <div className="flex items-center gap-2">
@@ -105,9 +124,10 @@ export function MilestoneList({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
+            <SubmitButton
               variant="ghost"
+              size="sm"
+              isSubmitting={updatingVisibilityMilestoneId === milestone.id}
               disabled={visibilityMutation.isPending}
               onClick={() =>
                 visibilityMutation.mutate({
@@ -118,11 +138,12 @@ export function MilestoneList({
               }
             >
               {milestone.customerVisible ? "Hide" : "Share"}
-            </Button>
+            </SubmitButton>
             {milestone.status === "pending" && (
-              <Button
-                size="sm"
+              <SubmitButton
                 variant="outline"
+                size="sm"
+                isSubmitting={updatingMilestoneId === milestone.id}
                 disabled={updateMutation.isPending}
                 onClick={() =>
                   updateMutation.mutate({
@@ -133,7 +154,7 @@ export function MilestoneList({
                 }
               >
                 Complete
-              </Button>
+              </SubmitButton>
             )}
           </div>
         </div>
@@ -155,6 +176,7 @@ export function CreateMilestoneForm({
 }) {
   const trpc = useTRPC();
   const invalidateProjectCache = useProjectCacheInvalidation(projectId);
+  const [phaseId, setPhaseId] = useState(noPhaseValue);
 
   const createMutation = useMutation(
     trpc.projects.createMilestone.mutationOptions({
@@ -166,23 +188,23 @@ export function CreateMilestoneForm({
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") ?? "").trim();
+    const selectedPhaseId = String(fd.get("phaseId") ?? "").trim();
     if (!name) return;
 
     await createMutation.mutateAsync({
       projectId,
       name,
-      phaseId: String(fd.get("phaseId") ?? "").trim() || null,
+      phaseId:
+        selectedPhaseId === noPhaseValue ? null : selectedPhaseId || null,
       dueDate: String(fd.get("dueDate") ?? "").trim() || null,
     });
 
     e.currentTarget.reset();
+    setPhaseId(noPhaseValue);
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div>
         <Label htmlFor="milestoneName">Add Milestone</Label>
         <Input
@@ -198,23 +220,24 @@ export function CreateMilestoneForm({
       </div>
       <div>
         <Label htmlFor="milestonePhase">Phase</Label>
-        <select
-          id="milestonePhase"
-          name="phaseId"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="">No phase</option>
-          {phases.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+        <Select name="phaseId" onValueChange={setPhaseId} value={phaseId}>
+          <SelectTrigger id="milestonePhase" className="w-full">
+            <SelectValue placeholder="No phase" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={noPhaseValue}>No phase</SelectItem>
+            {phases.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="sm:col-span-3">
-        <Button disabled={createMutation.isPending} type="submit">
-          {createMutation.isPending ? "Adding…" : "Add Milestone"}
-        </Button>
+        <SubmitButton isSubmitting={createMutation.isPending}>
+          Add Milestone
+        </SubmitButton>
       </div>
     </form>
   );

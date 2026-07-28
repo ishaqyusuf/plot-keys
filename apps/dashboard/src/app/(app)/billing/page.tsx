@@ -1,65 +1,45 @@
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import type { BillingInterval } from "@plotkeys/utils";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
+import { BillingContent } from "@/components/billing/billing-content";
+import { BillingSkeleton } from "@/components/billing/billing-skeleton";
+import { resolveBillingInterval } from "@/components/billing/billing-utils";
 import { ErrorFallback } from "@/components/error-fallback";
-import { BillingTable } from "@/components/tables/billing";
-import { BillingSkeleton } from "@/components/tables/billing/skeleton";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { requireOnboardedSession } from "@/lib/session";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Billing & Plans | Plot Keys",
 };
 
-type BillingPageProps = {
-  searchParams?: Promise<{
-    interval?: string;
-    payment?: string;
-    success?: string;
-  }>;
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-function resolveBillingInterval(interval?: string): BillingInterval {
-  return interval === "annual" ? "annual" : "monthly";
+function firstSearchParam(value: SearchParams[string]) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function BillingPage({ searchParams }: BillingPageProps) {
+export default async function BillingPage({ searchParams }: Props) {
   await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
-  const selectedInterval = resolveBillingInterval(params.interval);
+  const params = await searchParams;
+  const selectedInterval = resolveBillingInterval(
+    firstSearchParam(params.interval),
+  );
 
-  batchPrefetch([trpc.workspace.getBillingInfo.queryOptions()]);
+  prefetch(trpc.billing.getInfo.queryOptions());
 
   return (
-    <DashboardPage>
-      {params.success === "1" ? (
-        <Alert className="border-primary/20 bg-primary/10 text-foreground">
-          <AlertDescription>
-            Payment successful. Your plan has been updated.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {params.payment ? (
-        <Alert className="border-amber-300/60 bg-amber-50/35 text-amber-950 dark:border-amber-900/70 dark:bg-amber-950/15 dark:text-amber-100">
-          <AlertDescription>
-            We could not confirm that payment yet. Please retry or contact
-            support with your Paystack reference.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      <HydrateClient>
+    <HydrateClient>
+      <ScrollableContent>
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<BillingSkeleton />}>
-            <BillingTable selectedInterval={selectedInterval} />
+            <BillingContent selectedInterval={selectedInterval} />
           </Suspense>
         </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

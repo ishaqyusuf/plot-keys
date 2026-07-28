@@ -20,6 +20,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@plotkeys/ui/input-group";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useState } from "react";
 import {
   createQuickFillAdapter,
@@ -32,7 +33,7 @@ import {
 
 export { createQuickFillAdapter };
 
-type QuickFillProps<Name extends QuickFillName> = {
+type QuickFillInput<Name extends QuickFillName> = {
   args: QuickFillArgs[Name];
   label?: string;
   name: Name;
@@ -54,7 +55,7 @@ function fillInstant<Name extends QuickFillName>({
   name,
   onFilled,
   showError,
-}: QuickFillProps<Name> & {
+}: QuickFillInput<Name> & {
   showError: ReturnType<typeof useNotifications>["showError"];
 }) {
   try {
@@ -72,7 +73,7 @@ function PricingPlansQuickFill({
   args,
   label,
   onFilled,
-}: QuickFillProps<"pricing-plans">) {
+}: QuickFillInput<"pricing-plans">) {
   const { showError } = useNotifications();
   const quickFill = quickFillers["pricing-plans"];
   const [open, setOpen] = useState(false);
@@ -108,90 +109,95 @@ function PricingPlansQuickFill({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={disabled} size="sm" type="button" variant="ghost">
+        <Button variant="ghost" size="sm" disabled={disabled} type="button">
           {label ?? "Quick fill"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{quickFill.title}</DialogTitle>
-          <DialogDescription>
-            Generate pricing rows inside the current form, then review before
-            saving.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field>
-            <FieldLabel>Base amount *</FieldLabel>
-            <CurrencyInput
-              allowLeadingZeros={false}
-              onValueChange={(values) =>
-                updateTemplate({ amount: values.value })
-              }
-              placeholder="45000000"
-              value={template.amount}
-            />
-          </Field>
-          <Field>
-            <FieldLabel>Rows</FieldLabel>
-            <Input
-              max={12}
-              min={1}
-              onChange={(event) =>
-                updateTemplate({ count: event.target.value })
-              }
-              placeholder="3"
-              type="number"
-              value={template.count}
-            />
-          </Field>
-          <Field>
-            <FieldLabel>Base months *</FieldLabel>
-            <Input
-              min={1}
-              onChange={(event) =>
-                updateTemplate({ months: event.target.value })
-              }
-              placeholder="6"
-              type="number"
-              value={template.months}
-            />
-          </Field>
-          <Field>
-            <FieldLabel>Initial deposit</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                className="text-right"
-                max={100}
-                min={0}
-                onChange={(event) =>
-                  updateTemplate({
-                    initialDepositPercent: event.target.value,
-                  })
+      <DialogContent className="max-w-[455px]">
+        <div className="p-4 space-y-4">
+          <DialogHeader>
+            <DialogTitle>{quickFill.title}</DialogTitle>
+            <DialogDescription>
+              Generate pricing rows inside the current form, then review before
+              saving.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field>
+              <FieldLabel>Base amount *</FieldLabel>
+              <CurrencyInput
+                allowLeadingZeros={false}
+                allowNegative={false}
+                decimalScale={0}
+                onValueChange={(values) =>
+                  updateTemplate({ amount: values.value })
                 }
-                placeholder="20"
-                step="0.1"
-                type="number"
-                value={template.initialDepositPercent}
+                placeholder="45000000"
+                prefix="₦"
+                value={template.amount}
               />
-              <InputGroupAddon align="inline-end">
-                <InputGroupText>%</InputGroupText>
-              </InputGroupAddon>
-            </InputGroup>
-          </Field>
+            </Field>
+            <Field>
+              <FieldLabel>Rows</FieldLabel>
+              <Input
+                max={12}
+                min={1}
+                onChange={(event) =>
+                  updateTemplate({ count: event.target.value })
+                }
+                placeholder="3"
+                type="number"
+                value={template.count}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Base months *</FieldLabel>
+              <Input
+                min={1}
+                onChange={(event) =>
+                  updateTemplate({ months: event.target.value })
+                }
+                placeholder="6"
+                type="number"
+                value={template.months}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Initial deposit</FieldLabel>
+              <InputGroup>
+                <InputGroupInput
+                  className="text-right"
+                  max={100}
+                  min={0}
+                  onChange={(event) =>
+                    updateTemplate({
+                      initialDepositPercent: event.target.value,
+                    })
+                  }
+                  placeholder="20"
+                  step="0.1"
+                  type="number"
+                  value={template.initialDepositPercent}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>%</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
+          </div>
+          <DialogFooter>
+            <Button disabled={disabled} onClick={fillRows} type="button">
+              Fill rows
+            </Button>
+          </DialogFooter>
         </div>
-        <DialogFooter>
-          <Button disabled={disabled} onClick={fillRows} type="button">
-            Fill rows
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
 export function QuickFill<Name extends QuickFillName>(
-  props: QuickFillProps<Name>,
+  props: QuickFillInput<Name>,
 ) {
   const { showError } = useNotifications();
   const [busy, setBusy] = useState(false);
@@ -224,7 +230,8 @@ export function QuickFill<Name extends QuickFillName>(
   }
 
   return (
-    <Button
+    <SubmitButton
+      isSubmitting={busy}
       disabled={disabled || busy}
       onClick={async () => {
         setBusy(true);
@@ -244,7 +251,7 @@ export function QuickFill<Name extends QuickFillName>(
       type="button"
       variant="outline"
     >
-      {busy ? "Filling..." : (props.label ?? "Quick fill")}
-    </Button>
+      {props.label ?? "Quick fill"}
+    </SubmitButton>
   );
 }

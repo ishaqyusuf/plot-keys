@@ -1,15 +1,13 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useState } from "react";
 
-type DevFormQuickFillButtonProps = {
+type Props = {
   onFill: () => void | Promise<void>;
 };
 
-export function DevFormQuickFillButton({
-  onFill,
-}: DevFormQuickFillButtonProps) {
+export function DevFormQuickFillButton({ onFill }: Props) {
   const [busy, setBusy] = useState(false);
 
   if (process.env.NODE_ENV !== "development") {
@@ -17,7 +15,8 @@ export function DevFormQuickFillButton({
   }
 
   return (
-    <Button
+    <SubmitButton
+      isSubmitting={busy}
       type="button"
       variant="outline"
       size="sm"
@@ -31,7 +30,7 @@ export function DevFormQuickFillButton({
         }
       }}
     >
-      {busy ? "Filling..." : "Quick fill"}
-    </Button>
+      Quick fill
+    </SubmitButton>
   );
 }

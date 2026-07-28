@@ -1,7 +1,7 @@
 "use client";
 
 import type { AppRouter } from "@plotkeys/api/router";
-import { QueryClientProvider, isServer } from "@tanstack/react-query";
+import { isServer, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { useState } from "react";
@@ -25,7 +25,9 @@ function getQueryClient() {
   return browserQueryClient;
 }
 
-export function TRPCReactProvider(props: Readonly<{ children: React.ReactNode }>) {
+export function TRPCReactProvider(
+  props: Readonly<{ children: React.ReactNode }>,
+) {
   const queryClient = getQueryClient();
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({

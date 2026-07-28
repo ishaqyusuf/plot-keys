@@ -7,14 +7,17 @@ import {
   signUpUser,
   verifyUserEmail,
 } from "@plotkeys/auth";
+import { createPrismaClient } from "@plotkeys/db";
 import {
-  createPrismaClient,
+  acceptTeamInvite,
   findCompanyBySlug,
+  findTeamInviteByToken,
   findTenantOnboardingByUserId,
+  findUserByEmail,
   getSessionUserByTokenUserId,
   resolveTenantByHostname,
   upsertTenantOnboarding,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import {
   buildSitefrontHostname,
   buildTenantDashboardUrl,
@@ -29,6 +32,7 @@ import {
 } from "../lib/auth-notifications";
 import { createTRPCRouter, publicProcedure } from "../lib.trpc";
 import {
+  inviteSignUpInputSchema,
   signInInputSchema,
   signUpInputSchema,
   verifyEmailInputSchema,
@@ -179,37 +183,39 @@ async function assertTenantScopedAuthAccess(input: {
   }
 }
 
-export const authRouter = createTRPCRouter({
-  signIn: publicProcedure
-    .input(signInInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const db = requireDb();
-      const requestedTenantSlug = await getRequestedTenantSlug(db, ctx.headers);
+export const signInProcedure = publicProcedure
+  .input(signInInputSchema)
+  .mutation(async ({ ctx, input }) => {
+    const db = requireDb();
+    const requestedTenantSlug = await getRequestedTenantSlug(db, ctx.headers);
 
-      try {
-        const user = await signInUser(input);
-        if (requestedTenantSlug) {
-          await assertTenantScopedAuthAccess({
-            db,
-            requestedTenantSlug,
-            userId: user.id,
-          });
-        }
-
-        return resolvePostAuthRedirect(user.id, {
-          currentOrigin: getCurrentOrigin(ctx.headers),
-          tenantSlug: requestedTenantSlug,
-        });
-      } catch (error) {
-        throw new TRPCError({
-          code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Unable to sign in right now.",
+    try {
+      const user = await signInUser(input);
+      if (requestedTenantSlug) {
+        await assertTenantScopedAuthAccess({
+          db,
+          requestedTenantSlug,
+          userId: user.id,
         });
       }
-    }),
+
+      return resolvePostAuthRedirect(user.id, {
+        currentOrigin: getCurrentOrigin(ctx.headers),
+        tenantSlug: requestedTenantSlug,
+      });
+    } catch (error) {
+      throw new TRPCError({
+        code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to sign in right now.",
+      });
+    }
+  });
+
+export const authRouter = createTRPCRouter({
+  signIn: signInProcedure,
   signUp: publicProcedure
     .input(signUpInputSchema)
     .mutation(async ({ input }) => {
@@ -269,6 +275,87 @@ export const authRouter = createTRPCRouter({
             error instanceof Error
               ? error.message
               : "Unable to create account.",
+        });
+      }
+    }),
+  signUpForInvite: publicProcedure
+    .input(inviteSignUpInputSchema)
+    .mutation(async ({ input }) => {
+      const db = requireDb();
+
+      try {
+        const invite = await findTeamInviteByToken(db, input.token);
+
+        if (!invite) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Invite not found.",
+          });
+        }
+
+        if (invite.acceptedAt) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invite already accepted.",
+          });
+        }
+
+        if (invite.revokedAt) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invite has been revoked.",
+          });
+        }
+
+        if (invite.expiresAt < new Date()) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invite has expired.",
+          });
+        }
+
+        const email = invite.email.trim().toLowerCase();
+        const existingUser = await findUserByEmail(db, email);
+
+        if (existingUser) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: [
+              "An account already exists for this email.",
+              "Sign in to accept the invite.",
+            ].join(" "),
+          });
+        }
+
+        const { user } = await signUpUser({
+          db,
+          email,
+          emailVerified: true,
+          name: input.name,
+          password: input.password,
+        });
+
+        await acceptTeamInvite(db, {
+          token: input.token,
+          userId: user.id,
+        });
+
+        const { signedSessionToken } = await createBetterAuthSession(user.id);
+
+        return {
+          redirectTo:
+            invite.role === "agent" || invite.role === "staff"
+              ? `/join/${input.token}/complete`
+              : "/",
+          sessionToken: signedSessionToken,
+        };
+      } catch (error) {
+        throw new TRPCError({
+          code: error instanceof TRPCError ? error.code : "BAD_REQUEST",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Unable to create invite account.",
         });
       }
     }),

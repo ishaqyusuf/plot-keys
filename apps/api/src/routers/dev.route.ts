@@ -4,6 +4,7 @@
  * Every procedure throws in production to prevent accidental exposure.
  */
 
+import { listActiveCompaniesForDevLauncher } from "@plotkeys/db/queries";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, publicProcedure } from "../lib.trpc";
@@ -27,16 +28,7 @@ export const devRouter = createTRPCRouter({
     const db = ctx.db.db;
     if (!db) return [];
 
-    const companies = await db.company.findMany({
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true,
-        name: true,
-        planTier: true,
-        slug: true,
-      },
-      where: { deletedAt: null, isActive: true },
-    });
+    const companies = await listActiveCompaniesForDevLauncher(db);
 
     return companies.map((c) => ({
       id: c.id,

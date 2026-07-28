@@ -2,29 +2,21 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { WORK_ROLE_LABELS } from "@plotkeys/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { inferRouterOutputs } from "@trpc/server";
-import { deleteEmployeeAction, updateEmployeeAction } from "@/app/actions";
 import {
   employeeStatusConfig,
   employmentTypeLabels,
   formatEmployeeDate,
-  type EmployeeStatus,
 } from "@/components/employees/employee-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type EmployeeTableRow =
-  RouterOutputs["workspace"]["listEmployees"]["data"][number];
-
-const statusFlow: Partial<
-  Record<EmployeeStatus, { label: string; next: EmployeeStatus }>
-> = {
-  active: { label: "Set on leave", next: "on_leave" },
-  on_leave: { label: "Reactivate", next: "active" },
-};
+  RouterOutputs["employees"]["list"]["data"][number];
 
 function EmployeeCell({ employee }: { employee: EmployeeTableRow }) {
   return (
@@ -87,43 +79,11 @@ function DepartmentCell({ employee }: { employee: EmployeeTableRow }) {
 }
 
 function ActionsCell({ employee }: { employee: EmployeeTableRow }) {
-  const flow = statusFlow[employee.status];
-
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {flow ? (
-        <form action={updateEmployeeAction}>
-          <input name="employeeId" type="hidden" value={employee.id} />
-          <input name="name" type="hidden" value={employee.name} />
-          {employee.workRole ? (
-            <input name="workRole" type="hidden" value={employee.workRole} />
-          ) : null}
-          <input name="status" type="hidden" value={flow.next} />
-          <Button size="sm" type="submit" variant="outline">
-            {flow.label}
-          </Button>
-        </form>
-      ) : null}
-
-      <form action={deleteEmployeeAction}>
-        <input name="employeeId" type="hidden" value={employee.id} />
-        <Button
-          className="text-destructive hover:text-destructive"
-          size="sm"
-          type="submit"
-          variant="ghost"
-        >
-          Remove
-        </Button>
-      </form>
-    </div>
-  );
+  return <ActionsMenu row={employee} />;
 }
 
 export const columns: ColumnDef<EmployeeTableRow>[] = [
+  createSelectColumn<EmployeeTableRow>(),
   {
     accessorFn: (row) => row.name,
     cell: ({ row }) => <EmployeeCell employee={row.original} />,
@@ -131,7 +91,7 @@ export const columns: ColumnDef<EmployeeTableRow>[] = [
     id: "employee",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Employee",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -173,15 +133,15 @@ export const columns: ColumnDef<EmployeeTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell employee={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[240px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 280,
+    size: 80,
   },
 ];

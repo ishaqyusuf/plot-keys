@@ -1,57 +1,75 @@
 "use client";
 
-import { closestCenter, DndContext } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@plotkeys/ui/table";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import {
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { VirtualRow } from "@/components/tables/core";
-import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-import { useStickyColumns } from "@/hooks/use-sticky-columns";
-import { useTableDnd } from "@/hooks/use-table-dnd";
-import { useTableScroll } from "@/hooks/use-table-scroll";
-import { useTableSettings } from "@/hooks/use-table-settings";
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
+import { useCallback, useDeferredValue, useMemo, useRef } from "react";
+import {
+  BulkClientDeleteAction,
+  CoreDataTableContent,
+  CoreDataTableShell,
+  useDashboardTable,
+  useDashboardTableRuntime,
+  useDashboardTableSettings,
+} from "@/components/tables/core";
+import {
+  resolvePropertyListInput,
+  usePropertyFilterParams,
+} from "@/hooks/use-property-filter-params";
+import { usePropertyParams } from "@/hooks/use-property-params";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
+import { useSortParams } from "@/hooks/use-sort-params";
 import { usePropertiesStore } from "@/store/properties";
-import { ROW_HEIGHTS, STICKY_COLUMNS } from "@/utils/table-configs";
-import { getColumnIds, type TableSettings } from "@/utils/table-settings";
-import { columns, type PropertyTableRow } from "./columns";
+import { useTRPC } from "@/trpc/client";
+import { getDashboardInfiniteListState } from "@/utils/dashboard-list-contract";
+import type { TableSettings } from "@/utils/table-settings";
 import type { PropertyTableColumnOptions } from "./columns";
-import { DataTableHeader } from "./data-table-header";
+import { columns, type PropertyTableRow } from "./columns";
+import { EmptyState, NoResults } from "./empty-states";
+import { DataTableHeader } from "./table-header";
 
-const NON_CLICKABLE_COLUMNS = new Set(["actions"]);
-
-type PropertiesDataTableProps = PropertyTableColumnOptions & {
-  fetchNextPage: () => void;
-  hasNextPage: boolean;
-  initialSettings?: Partial<TableSettings>;
-  isFetchingNextPage: boolean;
-  properties: PropertyTableRow[];
+const statusVariant: PropertyTableColumnOptions["statusVariant"] = {
+  active: "default",
+  off_market: "outline",
+  rented: "secondary",
+  sold: "outline",
 };
 
-export function PropertiesDataTable({
-  fetchNextPage,
-  hasNextPage,
-  initialSettings,
-  isFetchingNextPage,
-  properties,
-  publishVariant,
-  statusVariant,
-  typeLabels,
-}: PropertiesDataTableProps) {
+const publishVariant: PropertyTableColumnOptions["publishVariant"] = {
+  archived: "secondary",
+  draft: "outline",
+  published: "default",
+};
+
+const typeLabels: PropertyTableColumnOptions["typeLabels"] = {
+  commercial: "Commercial",
+  industrial: "Industrial",
+  land: "Land",
+  mixed_use: "Mixed use",
+  residential: "Home",
+};
+
+type Props = {
+  initialSettings?: Partial<TableSettings>;
+};
+
+export function DataTable({ initialSettings }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const parentRef = useRef<HTMLDivElement>(null);
-  const { setColumns } = usePropertiesStore();
+  useScrollHeader(parentRef);
+  const { setParams: setPropertyParams } = usePropertyParams();
+  const { rowSelection, setColumns, setRowSelection } = usePropertiesStore();
+  const { filter, hasFilters } = usePropertyFilterParams();
+  const { params } = useSortParams();
+  const deferredSearch = useDeferredValue(filter.q);
   const columnOptions = useMemo(
     () => ({ publishVariant, statusVariant, typeLabels }),
-    [publishVariant, statusVariant, typeLabels],
+    [],
   );
   const tableColumns = useMemo(() => columns(columnOptions), [columnOptions]);
-  const columnIds = useMemo(() => getColumnIds(tableColumns), [tableColumns]);
   const {
     columnVisibility,
     setColumnVisibility,
@@ -59,141 +77,103 @@ export function PropertiesDataTable({
     setColumnSizing,
     columnOrder,
     setColumnOrder,
-  } = useTableSettings({
-    columnIds,
+  } = useDashboardTableSettings({
+    columns: tableColumns,
     initialSettings,
     tableId: "properties",
   });
-  const table = useReactTable({
-    columnResizeMode: "onChange",
-    columns: tableColumns,
-    data: properties,
-    enableColumnResizing: true,
-    getCoreRowModel: getCoreRowModel(),
-    getRowId: (row) => row.id,
-    onColumnOrderChange: setColumnOrder,
-    onColumnSizingChange: setColumnSizing,
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      columnOrder,
-      columnSizing,
-      columnVisibility,
+  const listInput = resolvePropertyListInput(filter, params.sort, {
+    q: deferredSearch,
+  });
+  const infiniteQueryOptions = trpc.properties.list.infiniteQueryOptions(
+    listInput,
+    {
+      getNextPageParam: ({ meta }) => meta?.cursor,
     },
-  });
-  useEffect(() => {
-    setColumns(table.getAllLeafColumns());
-  }, [table, setColumns, columnVisibility]);
-
-  const { sensors, handleDragEnd } = useTableDnd(table);
-  const { getStickyStyle, getStickyClassName } = useStickyColumns({
-    columnVisibility,
-    stickyColumns: STICKY_COLUMNS.properties,
-    table,
-  });
-  const tableScroll = useTableScroll({
-    startFromColumn: STICKY_COLUMNS.properties.length,
-    useColumnWidths: true,
-  });
-  const rows = table.getRowModel().rows;
-  const rowHeight = ROW_HEIGHTS.properties;
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => rowHeight,
-    getScrollElement: () => parentRef.current,
-    overscan: 10,
-  });
-  const loadMore = useCallback(() => {
-    fetchNextPage();
-  }, [fetchNextPage]);
-  const setScrollContainerRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      parentRef.current = element;
-      (
-        tableScroll.containerRef as MutableRefObject<HTMLDivElement | null>
-      ).current = element;
-    },
-    [tableScroll.containerRef],
   );
-
-  useInfiniteScroll<HTMLDivElement>({
-    fetchNextPage: loadMore,
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(infiniteQueryOptions);
+  const { items: tableData } = useMemo(
+    () => getDashboardInfiniteListState<PropertyTableRow>(data.pages),
+    [data.pages],
+  );
+  const invalidateProperties = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      queryKey: trpc.properties.list.infiniteQueryKey(),
+    });
+  }, [queryClient, trpc]);
+  const deletePropertiesMutation = useMutation(
+    trpc.properties.deleteMany.mutationOptions({
+      onSuccess: invalidateProperties,
+    }),
+  );
+  const table = useDashboardTable({
+    columnOrder,
+    columns: tableColumns,
+    columnSizing,
+    columnVisibility,
+    data: tableData,
+    rowSelection,
+    setColumnOrder,
+    setColumnSizing,
+    setColumnVisibility,
+    setRowSelection,
+  });
+  const {
+    clearSelection,
+    contentRuntime,
+    selectedCount,
+    selectedIds,
+    shellRuntime,
+  } = useDashboardTableRuntime({
+    columnVisibility,
+    fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    rowCount: rows.length,
-    rowVirtualizer,
-    scrollRef: parentRef,
-    threshold: 20,
+    parentRef,
+    rowSelection,
+    setColumns,
+    setRowSelection,
+    table,
+    tableId: "properties",
   });
+  const handleCellClick = useCallback(
+    (rowId: string) => {
+      setPropertyParams({ details: true, propertyId: rowId });
+    },
+    [setPropertyParams],
+  );
+  const handleBulkDeleteProperties = useCallback(() => {
+    deletePropertiesMutation.mutate({ propertyIds: selectedIds });
+    clearSelection();
+  }, [deletePropertiesMutation, selectedIds, clearSelection]);
 
-  const virtualItems = rowVirtualizer.getVirtualItems();
+  if (hasFilters && !tableData.length) {
+    return <NoResults />;
+  }
+
+  if (!tableData.length) {
+    return <EmptyState />;
+  }
 
   return (
-    <div className="relative">
-      <div className="w-full">
-        <div
-          className="overflow-auto overscroll-contain border-border border-x border-b scrollbar-hide"
-          ref={setScrollContainerRef}
-          style={{
-            height: "calc(100vh - 350px + var(--header-offset, 0px))",
-          }}
-        >
-          <DndContext
-            collisionDetection={closestCenter}
-            id="properties-table-dnd"
-            onDragEnd={handleDragEnd}
-            sensors={sensors}
-          >
-            <Table className="min-w-full">
-              <DataTableHeader table={table} tableScroll={tableScroll} />
-              <TableBody
-                className="block border-x-0"
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  position: "relative",
-                }}
-              >
-                {virtualItems.length > 0 ? (
-                  virtualItems.map((virtualRow: VirtualItem) => {
-                    const row = rows[virtualRow.index];
-
-                    if (!row) {
-                      return null;
-                    }
-
-                    return (
-                      <VirtualRow
-                        columnOrder={columnOrder}
-                        columnSizing={columnSizing}
-                        columnVisibility={columnVisibility}
-                        getStickyClassName={getStickyClassName}
-                        getStickyStyle={getStickyStyle}
-                        key={row.id}
-                        nonClickableColumns={NON_CLICKABLE_COLUMNS}
-                        row={row}
-                        rowHeight={rowHeight}
-                        virtualStart={virtualRow.start}
-                      />
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      className="h-24 text-center"
-                      colSpan={tableColumns.length}
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </DndContext>
-          <div
-            aria-hidden
-            style={{ flexShrink: 0, height: "var(--header-offset, 0px)" }}
-          />
-        </div>
-      </div>
-    </div>
+    <CoreDataTableShell
+      bottomBar={
+        <BulkClientDeleteAction
+          count={selectedCount}
+          disabled={deletePropertiesMutation.isPending}
+          label="properties"
+          onConfirm={handleBulkDeleteProperties}
+        />
+      }
+      runtime={shellRuntime}
+    >
+      <CoreDataTableContent
+        table={table}
+        header={DataTableHeader}
+        onCellClick={handleCellClick}
+        runtime={contentRuntime}
+      />
+    </CoreDataTableShell>
   );
 }

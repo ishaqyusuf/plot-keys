@@ -1,5 +1,10 @@
 import { Prisma } from "../generated/prisma/client";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type PropertyTypeValue =
   | "residential"
@@ -102,13 +107,11 @@ export async function updateProperty(
     featured?: boolean;
   },
 ) {
-  const updateData: Prisma.PropertyUpdateInput = {};
+  const updateData: Prisma.PropertyUncheckedUpdateManyInput = {};
 
   if (data.title !== undefined) updateData.title = data.title;
   if (data.estateId !== undefined) {
-    updateData.estate = data.estateId
-      ? { connect: { id: data.estateId } }
-      : { disconnect: true };
+    updateData.estateId = data.estateId;
   }
   if (data.description !== undefined) updateData.description = data.description;
   if (data.price !== undefined) updateData.price = data.price;
@@ -141,10 +144,16 @@ export async function updateProperty(
   if (data.status !== undefined) updateData.status = data.status;
   if (data.featured !== undefined) updateData.featured = data.featured;
 
-  return db.property.update({
+  const result = await db.property.updateMany({
     data: updateData,
     where: { id: propertyId, companyId, deletedAt: null },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getPropertyForCompany(db, propertyId, companyId);
 }
 
 export async function deleteProperty(
@@ -152,7 +161,7 @@ export async function deleteProperty(
   propertyId: string,
   companyId: string,
 ) {
-  return db.property.update({
+  return db.property.updateMany({
     data: { deletedAt: new Date() },
     where: { id: propertyId, companyId, deletedAt: null },
   });
@@ -180,10 +189,14 @@ export async function togglePropertyFeatured(
 
   if (!property) return null;
 
-  return db.property.update({
+  const result = await db.property.updateMany({
     data: { featured: !property.featured },
-    where: { id: propertyId, companyId },
+    where: { id: propertyId, companyId, deletedAt: null },
   });
+
+  return result.count > 0
+    ? { featured: !property.featured, id: propertyId }
+    : null;
 }
 
 export async function listFeaturedProperties(
@@ -267,26 +280,6 @@ export type PropertyListFilters = {
   type?: string | null;
 };
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 20);
-
-  if (!Number.isFinite(value)) {
-    return 20;
-  }
-
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
-}
-
 function getPropertyOrderBy(
   sort: string[] | null | undefined,
 ): Prisma.PropertyOrderByWithRelationInput[] {
@@ -318,8 +311,8 @@ export async function listFilteredPropertiesForCompany(
 ) {
   const query = filters.q?.trim() ?? "";
   const type = normalizePropertyType(filters.type);
-  const size = normalizePageSize(filters.size);
-  const offset = normalizeCursor(filters.cursor);
+  const size = normalizeListPageSize(filters.size, { defaultSize: 20 });
+  const offset = normalizeListOffsetCursor(filters.cursor);
   const where: Prisma.PropertyWhereInput = {
     companyId,
     deletedAt: null,
@@ -344,15 +337,5 @@ export async function listFilteredPropertiesForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }

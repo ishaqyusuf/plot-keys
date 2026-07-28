@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import { Icon } from "@plotkeys/ui/icons";
-import { useState, useTransition } from "react";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useTransition } from "react";
 
-type ExportCsvButtonProps = {
-  exportAction: () => Promise<string>;
+type Props = {
+  exportAction: () => Promise<string> | string;
   filename: string;
   label?: string;
 };
@@ -14,7 +14,7 @@ export function ExportCsvButton({
   exportAction,
   filename,
   label = "Export CSV",
-}: ExportCsvButtonProps) {
+}: Props) {
   const [isPending, startTransition] = useTransition();
 
   function handleExport() {
@@ -33,14 +33,15 @@ export function ExportCsvButton({
   }
 
   return (
-    <Button
-      size="sm"
+    <SubmitButton
       variant="outline"
+      size="sm"
+      isSubmitting={isPending}
       onClick={handleExport}
-      disabled={isPending}
+      type="button"
     >
       <Icon.Download className="mr-1.5 size-3.5" />
-      {isPending ? "Exporting…" : label}
-    </Button>
+      {label}
+    </SubmitButton>
   );
 }

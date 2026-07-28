@@ -5,6 +5,7 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 ## Apps
 - `apps/api`: Hono + tRPC API
 - `apps/dashboard`: authenticated dashboard
+- `apps/sandbox`: dedicated template testing and public share previews
 - `apps/website`: platform marketing website
 - `apps/tenant-site`: tenant website renderer
 
@@ -19,6 +20,7 @@ Multi-tenant real-estate SaaS scaffold built as a Bun + Turbo monorepo for PlotK
 - `packages/tsconfig`
 - `packages/ui`
 - `packages/utils`
+- `packages/website-builder`: reusable template preview/rendering runtime
 
 ## Local Infrastructure
 
@@ -47,17 +49,18 @@ PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for 
 
 1. Install the CLI once with `npm install -g portless`
 2. Start the full workspace with `bun run dev`
-3. Or start a single app with `bun run dev -f dashboard`, `bun run dev -f website`, `bun run dev -f tenant-site`, or `bun run dev -f api`
+3. Or start a single app with `bun run dev -f dashboard`, `bun run dev -f sandbox`, `bun run dev -f website`, `bun run dev -f tenant-site`, or `bun run dev -f api`
 4. Use `bun run dev --remote` for hosted development services, or the explicit `bun run dev --prod` profile when production-profile validation is intended.
 
 Default routes:
-- `http://plotkeys.localhost:1355` for the marketing site
-- `http://app-plotkeys.localhost:1355` for shared signup and onboarding
-- `http://api-plotkeys.localhost:1355` for the API
-- `http://tenant-plotkeys.localhost:1355` for the tenant site
+- `https://plotkeys.localhost` for the marketing site
+- `https://app-plotkeys.localhost` for shared signup and onboarding
+- `https://api-plotkeys.localhost` for the API
+- `https://tenant-plotkeys.localhost` for the tenant site
+- `https://sandbox-plotkeys.localhost` for the dedicated Sandbox app
 
-Tenant subdomains also work through the tenant-site route, so a host like `http://acme.tenant-plotkeys.localhost:1355` maps to the tenant-site app.
-Tenant dashboard hosts use `http://dashboard.<tenant>.app-plotkeys.localhost:1355`, for example `http://dashboard.acme.app-plotkeys.localhost:1355`.
+Tenant subdomains also work through the tenant-site route, so a host like `https://acme.tenant-plotkeys.localhost` maps to the tenant-site app.
+Tenant dashboard hosts use `https://dashboard.<tenant>.app-plotkeys.localhost`, for example `https://dashboard.acme.app-plotkeys.localhost`.
 
 If you use Portless locally, update root env vars that still point at hardcoded `localhost:<port>` URLs to the matching named host above.
 

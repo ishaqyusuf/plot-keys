@@ -1,52 +1,35 @@
-import type { Metadata } from "next";
-import { Alert, AlertDescription } from "@plotkeys/ui/alert";
 import { buildTenantSiteUrl } from "@plotkeys/utils";
+import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { ensureBuilderConfigurationExists } from "@/app/actions";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { DashboardHome } from "@/components/dashboard/home";
+import { ensureDashboardHomeBuilderConfiguration } from "@/components/dashboard/home/builder-configuration";
 import { DashboardHomeSkeleton } from "@/components/dashboard/home/skeleton";
 import { DevTenantFabLoader } from "@/components/dev/dev-tenant-fab-loader";
 import { ErrorFallback } from "@/components/error-fallback";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { getBaseUrl } from "@/lib/get-base-url";
 import { requireOnboardedSession } from "@/lib/session";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Dashboard | Plot Keys",
 };
 
-type DashboardHomePageProps = {
-  searchParams?: Promise<{
-    domains?: string;
-    error?: string;
-  }>;
-};
-
-export default async function DashboardHomePage({
-  searchParams,
-}: DashboardHomePageProps) {
+export default async function DashboardHomePage() {
   const session = await requireOnboardedSession();
-  const params = (await searchParams) ?? {};
   const currentOrigin = await getBaseUrl();
   const liveSiteUrl = buildTenantSiteUrl(session.activeMembership.companySlug, {
     currentOrigin,
   });
 
-  await ensureBuilderConfigurationExists();
-  batchPrefetch([trpc.workspace.getDashboardOverview.queryOptions()]);
+  await ensureDashboardHomeBuilderConfiguration();
+  prefetch(trpc.overview.summary.queryOptions());
 
   return (
     <>
-      <DashboardPage>
-        {params.error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{params.error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <HydrateClient>
+      <HydrateClient>
+        <ScrollableContent>
           <ErrorBoundary errorComponent={ErrorFallback}>
             <Suspense fallback={<DashboardHomeSkeleton />}>
               <DashboardHome
@@ -55,8 +38,8 @@ export default async function DashboardHomePage({
               />
             </Suspense>
           </ErrorBoundary>
-        </HydrateClient>
-      </DashboardPage>
+        </ScrollableContent>
+      </HydrateClient>
       <DevTenantFabLoader />
     </>
   );

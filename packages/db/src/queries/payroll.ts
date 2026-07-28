@@ -4,6 +4,11 @@ import {
   type PayrollStatus as PayrollStatusValue,
 } from "../generated/prisma/enums";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type PayrollMutationResult =
   | { ok: true }
@@ -77,6 +82,34 @@ export async function createCompanyPayrollEntry(input: {
   return { ok: true };
 }
 
+export async function createPayrollEntryForCompany(
+  db: Db,
+  input: {
+    companyId: string;
+    employeeId: string;
+    grossAmount: number;
+    netAmount: number;
+    notes?: string | null;
+    periodMonth: number;
+    periodYear: number;
+  },
+) {
+  const employee = await db.employee.findFirst({
+    select: { id: true },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.employeeId,
+    },
+  });
+
+  if (!employee) {
+    return null;
+  }
+
+  return createPayrollEntry(db, input);
+}
+
 export async function listPayrollForPeriod(
   db: Db,
   companyId: string,
@@ -90,8 +123,8 @@ export async function listPayrollForPeriod(
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size);
-  const offset = normalizeCursor(options.cursor);
+  const size = normalizeListPageSize(options.size);
+  const offset = normalizeListOffsetCursor(options.cursor);
   const where: Prisma.PayrollEntryWhereInput = {
     companyId,
     periodYear,
@@ -113,37 +146,7 @@ export async function listPayrollForPeriod(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
-}
-
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
-  }
-
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
-
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
 function getPayrollSearchFilters(
@@ -194,9 +197,7 @@ function getPayrollOrderBy(
 }
 
 function isPayrollStatusValue(value: string): value is PayrollStatusValue {
-  return Object.values(PayrollStatusEnum).includes(
-    value as PayrollStatusValue,
-  );
+  return Object.values(PayrollStatusEnum).includes(value as PayrollStatusValue);
 }
 
 export async function markPayrollPaid(
@@ -204,7 +205,7 @@ export async function markPayrollPaid(
   payrollEntryId: string,
   companyId: string,
 ) {
-  return db.payrollEntry.update({
+  return db.payrollEntry.updateMany({
     where: { id: payrollEntryId, companyId },
     data: { status: "paid", paidAt: new Date() },
   });
@@ -257,10 +258,7 @@ export async function getPayrollSummaryForPeriod(
   };
 }
 
-export async function getAvailablePayrollPeriods(
-  db: Db,
-  companyId: string,
-) {
+export async function getAvailablePayrollPeriods(db: Db, companyId: string) {
   const rows = await db.payrollEntry.findMany({
     where: { companyId },
     select: { periodYear: true, periodMonth: true },

@@ -31,10 +31,7 @@ export function formatCurrency(amount: number, currency = "NGN") {
   }).format(amount);
 }
 
-export function getPayrollPeriod(params: {
-  month?: string;
-  year?: string;
-}) {
+export function getPayrollPeriod(params: { month?: string; year?: string }) {
   const now = new Date();
   const parsedYear = params.year
     ? Number.parseInt(params.year, 10)

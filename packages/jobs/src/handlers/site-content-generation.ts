@@ -8,7 +8,7 @@
  *   3. Persisting the generated content into the latest draft SiteConfiguration
  *
  * This is the async counterpart to the synchronous `generateFieldContent()`
- * call in `workspace.route.ts`. The job is enqueued after `completeOnboarding`
+ * call in `website.route.ts`. The job is enqueued after `onboarding.complete`
  * so the first draft is available immediately (with template defaults), and
  * the AI-improved version is swapped in asynchronously.
  */

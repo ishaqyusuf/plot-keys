@@ -1,11 +1,16 @@
 import type { Prisma } from "../generated/prisma/client";
 import {
   LeaveRequestStatus as LeaveRequestStatusEnum,
-  LeaveType as LeaveTypeEnum,
   type LeaveRequestStatus as LeaveRequestStatusValue,
+  LeaveType as LeaveTypeEnum,
   type LeaveType as LeaveTypeValue,
 } from "../generated/prisma/enums";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type CreateCompanyLeaveRequestResult =
   | { ok: true }
@@ -78,24 +83,66 @@ export async function createCompanyLeaveRequest(input: {
   return { ok: true };
 }
 
+export async function createLeaveRequestForCompany(
+  db: Db,
+  input: {
+    companyId: string;
+    employeeId: string;
+    endDate: Date;
+    leaveType: LeaveTypeValue;
+    reason?: string | null;
+    startDate: Date;
+  },
+) {
+  const employee = await db.employee.findFirst({
+    select: { id: true },
+    where: {
+      companyId: input.companyId,
+      deletedAt: null,
+      id: input.employeeId,
+    },
+  });
+
+  if (!employee) {
+    return null;
+  }
+
+  return createLeaveRequest(db, {
+    employeeId: input.employeeId,
+    endDate: input.endDate,
+    leaveType: input.leaveType,
+    reason: input.reason,
+    startDate: input.startDate,
+  });
+}
+
 export async function listLeaveRequestsForCompany(
   db: Db,
   companyId: string,
   options: {
     cursor?: string | number | null;
     employeeId?: string;
+    end?: string | null;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: LeaveRequestStatusValue;
     take?: number;
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size ?? options.take);
-  const offset = normalizeCursor(options.cursor);
+  const endDate = parseDateBoundary(options.end, "end");
+  const size = normalizeListPageSize(options.size ?? options.take);
+  const offset = normalizeListOffsetCursor(options.cursor);
+  const startDate = parseDateBoundary(options.start, "start");
+  const dateFilters: Prisma.LeaveRequestWhereInput[] = [
+    ...(endDate ? [{ startDate: { lte: endDate } }] : []),
+    ...(startDate ? [{ endDate: { gte: startDate } }] : []),
+  ];
   const where: Prisma.LeaveRequestWhereInput = {
     employee: { companyId, deletedAt: null },
+    ...(dateFilters.length > 0 ? { AND: dateFilters } : {}),
     ...(options.status ? { status: options.status } : {}),
     ...(options.employeeId ? { employeeId: options.employeeId } : {}),
     ...(query ? { OR: getLeaveRequestSearchFilters(query) } : {}),
@@ -113,37 +160,21 @@ export async function listLeaveRequestsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getLeaveRequestSearchFilters(
@@ -227,20 +258,14 @@ export async function approveLeaveRequest(
   });
 }
 
-export async function rejectLeaveRequest(
-  db: Db,
-  leaveRequestId: string,
-) {
+export async function rejectLeaveRequest(db: Db, leaveRequestId: string) {
   return db.leaveRequest.update({
     where: { id: leaveRequestId },
     data: { status: "rejected" },
   });
 }
 
-export async function cancelLeaveRequest(
-  db: Db,
-  leaveRequestId: string,
-) {
+export async function cancelLeaveRequest(db: Db, leaveRequestId: string) {
   return db.leaveRequest.update({
     where: { id: leaveRequestId },
     data: { status: "cancelled" },
@@ -259,6 +284,67 @@ export type CompanyLeaveRequestStatusInput =
       leaveRequestId: string;
       status: "cancelled" | "rejected";
     };
+
+export type CompanyLeaveRequestsStatusInput =
+  | {
+      approvedById: string;
+      companyId: string;
+      leaveRequestIds: string[];
+      status: "approved";
+    }
+  | {
+      companyId: string;
+      leaveRequestIds: string[];
+      status: "cancelled" | "rejected";
+    };
+
+function getLeaveRequestStatusData(
+  input: Pick<CompanyLeaveRequestStatusInput, "status"> & {
+    approvedById?: string;
+  },
+) {
+  if (input.status === "approved") {
+    return {
+      approvedAt: new Date(),
+      approvedById: input.approvedById,
+      status: input.status,
+    };
+  }
+
+  return { status: input.status };
+}
+
+export async function setLeaveRequestStatusForCompany(
+  db: Db,
+  input: CompanyLeaveRequestStatusInput,
+) {
+  return db.leaveRequest.updateMany({
+    data: getLeaveRequestStatusData(input),
+    where: {
+      employee: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+      id: input.leaveRequestId,
+    },
+  });
+}
+
+export async function setLeaveRequestsStatusForCompany(
+  db: Db,
+  input: CompanyLeaveRequestsStatusInput,
+) {
+  return db.leaveRequest.updateMany({
+    data: getLeaveRequestStatusData(input),
+    where: {
+      employee: {
+        companyId: input.companyId,
+        deletedAt: null,
+      },
+      id: { in: input.leaveRequestIds },
+    },
+  });
+}
 
 export async function setCompanyLeaveRequestStatus(
   input: CompanyLeaveRequestStatusInput,
@@ -292,10 +378,7 @@ export async function setCompanyLeaveRequestStatus(
   return { ok: true };
 }
 
-export async function countLeaveRequestsByStatus(
-  db: Db,
-  companyId: string,
-) {
+export async function countLeaveRequestsByStatus(db: Db, companyId: string) {
   const rows = await db.leaveRequest.groupBy({
     by: ["status"],
     _count: true,

@@ -11,11 +11,12 @@
  *   <EditableImage slot="heroImage" src={imageUrl} alt="Hero" />
  */
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { cn } from "@plotkeys/utils";
 import { Pencil, Sparkles, X } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { isContentKeyAiEnabled } from "../register/content-field-lookup";
-import { useIsDraftMode, useRegistry } from "../runtime-context";
 import { useSmartFill } from "../runtime/smart-fill-context";
+import { useIsDraftMode, useRegistry } from "../runtime-context";
 
 // ---------------------------------------------------------------------------
 // EditableText
@@ -186,7 +187,7 @@ export function EditableText({
     <Tag
       ref={ref as React.RefObject<HTMLDivElement & HTMLSpanElement>}
       style={draftStyle}
-      className={[
+      className={cn(
         className,
         "relative !cursor-text rounded-[0.45rem] caret-[color:var(--pk-primary,#2563eb)] outline-none transition-[background-color,box-shadow,outline-color]",
         "focus-visible:ring-2 focus-visible:ring-[color:var(--pk-primary,#2563eb)]/70 focus-visible:ring-offset-2",
@@ -195,9 +196,7 @@ export function EditableText({
           : editing
             ? "shadow-lg shadow-slate-900/10"
             : "hover:shadow-lg hover:shadow-slate-900/10",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      )}
       contentEditable={editing}
       suppressContentEditableWarning
       tabIndex={0}
@@ -231,7 +230,6 @@ export function EditableText({
         <span
           className="absolute -top-7 right-0 z-20 flex items-center gap-0.5 rounded border border-border/60 bg-background/95 px-1 py-0.5 shadow-sm"
           contentEditable={false}
-          onMouseEnter={() => setIsHovered(true)}
         >
           <button
             aria-label="Edit text"
@@ -294,8 +292,15 @@ export function EditableImage({
   const isDraft = useIsDraftMode();
   const [replacing, setReplacing] = useState(false);
   const [urlInput, setUrlInput] = useState("");
+  const replacementInputRef = useRef<HTMLInputElement>(null);
 
   const placeholderBg = "hsl(210 15% 88%)";
+
+  useEffect(() => {
+    if (replacing) {
+      replacementInputRef.current?.focus();
+    }
+  }, [replacing]);
 
   function handleReplace() {
     setReplacing(true);
@@ -310,12 +315,13 @@ export function EditableImage({
   }
 
   return (
-    <div className={["relative", className].filter(Boolean).join(" ")}>
+    <div className={cn("relative", className)}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img alt={alt} className="h-full w-full object-cover" src={src} />
       ) : (
         <div
+          role="img"
           className="h-full w-full"
           style={{ backgroundColor: placeholderBg }}
           aria-label={`${slot} placeholder`}
@@ -335,7 +341,7 @@ export function EditableImage({
           ) : (
             <div className="pointer-events-auto absolute inset-x-2 top-2 flex gap-1.5">
               <input
-                autoFocus
+                ref={replacementInputRef}
                 className="flex-1 rounded border border-border px-2 py-1 text-xs"
                 placeholder="Paste image URL…"
                 type="url"
@@ -376,6 +382,19 @@ export type EditableRepeaterProps<T> = {
   onReorder?: (items: T[]) => void;
 };
 
+function getEditableRepeaterItemKey<T>(item: T, index: number) {
+  if (item && typeof item === "object") {
+    const keyedItem = item as { id?: unknown; key?: unknown };
+    const stableKey = keyedItem.id ?? keyedItem.key;
+
+    if (typeof stableKey === "string" || typeof stableKey === "number") {
+      return stableKey;
+    }
+  }
+
+  return `${String(item)}-${index}`;
+}
+
 /**
  * Renders a list of items and, in draft mode, shows drag handles for
  * reordering. Reordering logic is a no-op until the DnD library is wired.
@@ -389,7 +408,10 @@ export function EditableRepeater<T>({
   return (
     <div className={isDraft ? "group/repeater relative" : undefined}>
       {items.map((item, i) => (
-        <div key={i} className={isDraft ? "group/item relative" : undefined}>
+        <div
+          key={getEditableRepeaterItemKey(item, i)}
+          className={isDraft ? "group/item relative" : undefined}
+        >
           {isDraft && (
             <div className="pointer-events-none absolute left-0 top-1/2 z-10 -translate-x-6 -translate-y-1/2 opacity-0 transition-opacity group-hover/item:opacity-100">
               <span

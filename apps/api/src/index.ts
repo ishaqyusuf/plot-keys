@@ -1,10 +1,12 @@
 import { serve } from "@hono/node-server";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { auth, getTrustedOrigins } from "@plotkeys/auth";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { buildRequestContext, createTRPCContext } from "./context";
+import { handleDashboardTenantState } from "./rest/dashboard-tenant-state";
+import { handlePaystackWebhook } from "./rest/paystack-webhook";
 import { appRouter } from "./routers/_app";
 
 const app = new Hono();
@@ -13,14 +15,11 @@ const corsOptions = {
   allowHeaders: ["Content-Type", "Authorization"],
   allowMethods: ["GET", "POST", "OPTIONS"],
   credentials: true,
-  origin: (origin) =>
+  origin: (origin: string) =>
     trustedOrigins.includes(origin) ? origin : trustedOrigins[0],
 };
 
-app.use(
-  "/trpc/*",
-  cors(corsOptions),
-);
+app.use("/trpc/*", cors(corsOptions));
 app.use("/api/*", cors(corsOptions));
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => {
@@ -44,6 +43,26 @@ app.get("/health", async (c) => {
     database: context.db.status,
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get("/api/dashboard-tenants/state", async (c) => {
+  const context = await buildRequestContext(c.req.raw.headers);
+
+  if (!context.db.db) {
+    return c.json({ error: "Database unavailable" }, 503);
+  }
+
+  return handleDashboardTenantState(c.req.raw, context.db.db);
+});
+
+app.post("/api/webhooks/paystack", async (c) => {
+  const context = await buildRequestContext(c.req.raw.headers);
+
+  if (!context.db.db) {
+    return c.json({ error: "Database unavailable" }, 503);
+  }
+
+  return handlePaystackWebhook(c.req.raw, context.db.db);
 });
 
 app.all("/trpc/*", async (c) => {

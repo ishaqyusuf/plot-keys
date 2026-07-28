@@ -1,22 +1,10 @@
 "use client";
 
 import type { AppRouter } from "@plotkeys/api/router";
-import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  DashboardPageDescription,
-  DashboardPageEyebrow,
-  DashboardPageHeader,
-  DashboardPageHeaderRow,
-  DashboardPageIntro,
-  DashboardPageTitle,
-  DashboardSection,
-  DashboardSectionDescription,
-  DashboardSectionHeader,
-  DashboardSectionTitle,
-} from "@/components/dashboard/dashboard-page";
+import { AnalyticsSection } from "@/components/analytics/analytics-section";
 import {
   formatAnalyticsDateTime,
   formatAnalyticsLabel,
@@ -24,47 +12,33 @@ import {
 } from "./utils";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
-export type AnalyticsData = RouterOutputs["workspace"]["getAnalytics"];
+export type AnalyticsData = RouterOutputs["analytics"]["get"];
 type AnalyticsEvent = AnalyticsData["byType"][number];
 type PageViewPoint = AnalyticsData["pageViewsByDay"][number];
 type TrafficSource = AnalyticsData["trafficSources"][number];
 type LeadSource = AnalyticsData["leadSources"][number];
 
-export function MetricCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
+export function MetricCard({ label, value }: { label: string; value: number }) {
   return (
-    <Card className="border-border/65 bg-card/78">
-      <CardContent className="px-5 py-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-          {label}
-        </p>
-        <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">
-          {value.toLocaleString()}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="border border-border bg-card p-5 transition-all duration-300">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-3 text-xl font-medium">{value.toLocaleString()}</p>
+    </div>
   );
 }
 
-export function AnalyticsHeader() {
+function AnalyticsPanel({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
   return (
-    <DashboardPageHeader>
-      <DashboardPageHeaderRow>
-        <DashboardPageIntro>
-          <DashboardPageEyebrow>Performance workspace</DashboardPageEyebrow>
-          <DashboardPageTitle>Analytics</DashboardPageTitle>
-          <DashboardPageDescription>
-            Track website activity, visitor behavior, and agent performance
-            over the last 30 days.
-          </DashboardPageDescription>
-        </DashboardPageIntro>
-      </DashboardPageHeaderRow>
-    </DashboardPageHeader>
+    <div className="border border-border bg-card p-5 transition-all duration-300">
+      <h3 className="text-sm font-medium text-foreground">{title}</h3>
+      <div className="mt-5">{children}</div>
+    </div>
   );
 }
 
@@ -72,30 +46,25 @@ export function PageViewsChart({ points }: { points: PageViewPoint[] }) {
   const maxViews = Math.max(...points.map((day) => day.count), 1);
 
   return (
-    <Card className="border-border/65 bg-card/78">
-      <CardHeader>
-        <CardTitle>Page views (30 days)</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex h-40 items-end gap-[2px]">
-          {points.map((day) => (
-            <div
-              className="flex-1 rounded-t bg-primary"
-              key={day.date}
-              style={{
-                height: `${(day.count / maxViews) * 100}%`,
-                minHeight: day.count > 0 ? "4px" : "1px",
-              }}
-              title={`${day.date}: ${day.count} views`}
-            />
-          ))}
-        </div>
-        <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-          <span>{points[0]?.date}</span>
-          <span>{points[points.length - 1]?.date}</span>
-        </div>
-      </CardContent>
-    </Card>
+    <AnalyticsPanel title="Page views (30 days)">
+      <div className="flex h-40 items-end gap-[2px]">
+        {points.map((day) => (
+          <div
+            className="flex-1 rounded-t bg-primary"
+            key={day.date}
+            style={{
+              height: `${(day.count / maxViews) * 100}%`,
+              minHeight: day.count > 0 ? "4px" : "1px",
+            }}
+            title={`${day.date}: ${day.count} views`}
+          />
+        ))}
+      </div>
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+        <span>{points[0]?.date}</span>
+        <span>{points[points.length - 1]?.date}</span>
+      </div>
+    </AnalyticsPanel>
   );
 }
 
@@ -105,17 +74,12 @@ export function PageViewsSection({ points }: { points: PageViewPoint[] }) {
   }
 
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
-        <div>
-          <DashboardSectionTitle>Page views</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            A 30-day traffic trend for recent site activity.
-          </DashboardSectionDescription>
-        </div>
-      </DashboardSectionHeader>
+    <AnalyticsSection
+      description="A 30-day traffic trend for recent site activity."
+      title="Page views"
+    >
       <PageViewsChart points={points} />
-    </DashboardSection>
+    </AnalyticsSection>
   );
 }
 
@@ -125,40 +89,30 @@ export function EventTypeSection({ events }: { events: AnalyticsEvent[] }) {
   }
 
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
-        <div>
-          <DashboardSectionTitle>Events by type</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            High-level activity mix across the captured analytics stream.
-          </DashboardSectionDescription>
+    <AnalyticsSection
+      description="High-level activity mix across the captured analytics stream."
+      title="Events by type"
+    >
+      <AnalyticsPanel title="Events by type">
+        <div className="space-y-3">
+          {[...events]
+            .sort((a, b) => b.count - a.count)
+            .map((event) => (
+              <div
+                className="flex items-center justify-between"
+                key={event.eventType}
+              >
+                <span className="text-sm font-medium">
+                  {formatAnalyticsLabel(event.eventType)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {event.count.toLocaleString()}
+                </span>
+              </div>
+            ))}
         </div>
-      </DashboardSectionHeader>
-      <Card className="border-border/65 bg-card/78">
-        <CardHeader>
-          <CardTitle>Events by type</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[...events]
-              .sort((a, b) => b.count - a.count)
-              .map((event) => (
-                <div
-                  className="flex items-center justify-between"
-                  key={event.eventType}
-                >
-                  <span className="text-sm font-medium">
-                    {formatAnalyticsLabel(event.eventType)}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {event.count.toLocaleString()}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
-    </DashboardSection>
+      </AnalyticsPanel>
+    </AnalyticsSection>
   );
 }
 
@@ -176,27 +130,22 @@ function RankedListCard<T>({
   title: string;
 }) {
   return (
-    <Card className="border-border/65 bg-card/78">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{empty}</p>
-        ) : (
-          <div className="space-y-2.5">
-            {items.map((item, index) => (
-              <div
-                className="flex items-center justify-between rounded-[1rem] border border-border/55 bg-background/45 px-3 py-2.5"
-                key={getKey(item)}
-              >
-                {renderItem(item, index)}
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <AnalyticsPanel title={title}>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <div>
+          {items.map((item, index) => (
+            <div
+              className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0"
+              key={getKey(item)}
+            >
+              {renderItem(item, index)}
+            </div>
+          ))}
+        </div>
+      )}
+    </AnalyticsPanel>
   );
 }
 
@@ -216,42 +165,37 @@ function ShareCard<T extends { count: number }>({
   const total = items.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <Card className="border-border/65 bg-card/78">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{empty}</p>
-        ) : (
-          <div className="space-y-2.5">
-            {items.map((item) => {
-              const pct = getShare(item.count, total);
+    <AnalyticsPanel title={title}>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <div>
+          {items.map((item) => {
+            const pct = getShare(item.count, total);
 
-              return (
-                <div
-                  className="rounded-[1rem] border border-border/55 bg-background/45 px-3 py-2.5"
-                  key={getKey(item)}
-                >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{getLabel(item)}</span>
-                    <span className="text-muted-foreground">
-                      {item.count.toLocaleString()} ({pct}%)
-                    </span>
-                  </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+            return (
+              <div
+                className="border-b border-border py-2.5 last:border-b-0"
+                key={getKey(item)}
+              >
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">{getLabel(item)}</span>
+                  <span className="text-muted-foreground">
+                    {item.count.toLocaleString()} ({pct}%)
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </AnalyticsPanel>
   );
 }
 
@@ -263,16 +207,10 @@ export function PageAndTrafficSection({
   trafficSources: TrafficSource[];
 }) {
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
-        <div>
-          <DashboardSectionTitle>Page and traffic mix</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            Understand which pages and traffic sources are driving the most
-            activity.
-          </DashboardSectionDescription>
-        </div>
-      </DashboardSectionHeader>
+    <AnalyticsSection
+      description="Understand which pages and traffic sources are driving the most activity."
+      title="Page and traffic mix"
+    >
       <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <RankedListCard
           empty="No page view data yet."
@@ -303,7 +241,7 @@ export function PageAndTrafficSection({
           title="Traffic sources"
         />
       </div>
-    </DashboardSection>
+    </AnalyticsSection>
   );
 }
 
@@ -315,16 +253,10 @@ export function DemandSignalsSection({
   propertyViews: AnalyticsData["propertyViews"];
 }) {
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
-        <div>
-          <DashboardSectionTitle>Demand signals</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            Compare property attention with lead-source quality to spot what is
-            working.
-          </DashboardSectionDescription>
-        </div>
-      </DashboardSectionHeader>
+    <AnalyticsSection
+      description="Compare property attention with lead-source quality to spot what is working."
+      title="Demand signals"
+    >
       <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <RankedListCard
           empty="No property view data yet."
@@ -338,7 +270,7 @@ export function DemandSignalsSection({
                 </span>
                 <Link
                   className="max-w-48 truncate font-mono text-sm font-medium hover:underline"
-                  href={`/properties/${property.propertyId}`}
+                  href={`/properties?propertyId=${property.propertyId}&details=true`}
                   title={property.propertyId}
                 >
                   {property.propertyId.slice(0, 8)}...
@@ -359,7 +291,7 @@ export function DemandSignalsSection({
           title="Lead sources"
         />
       </div>
-    </DashboardSection>
+    </AnalyticsSection>
   );
 }
 
@@ -373,51 +305,41 @@ export function AgentPerformanceSection({
   }
 
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
+    <AnalyticsSection
+      description="Review workload and completion cadence across the active team."
+      title="Agent performance"
+    >
+      <AnalyticsPanel title="Agent performance">
         <div>
-          <DashboardSectionTitle>Agent performance</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            Review workload and completion cadence across the active team.
-          </DashboardSectionDescription>
-        </div>
-      </DashboardSectionHeader>
-      <Card className="border-border/65 bg-card/78">
-        <CardHeader>
-          <CardTitle>Agent performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2.5">
-            {agents.map((agent) => (
-              <div
-                className="flex items-center justify-between rounded-[1rem] border border-border/55 bg-background/45 px-3 py-2.5"
-                key={agent.id}
-              >
-                <div className="min-w-0">
-                  <span className="truncate text-sm font-medium">
-                    {agent.name}
+          {agents.map((agent) => (
+            <div
+              className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0"
+              key={agent.id}
+            >
+              <div className="min-w-0">
+                <span className="truncate text-sm font-medium">
+                  {agent.name}
+                </span>
+                {agent.title ? (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {agent.title}
                   </span>
-                  {agent.title ? (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {agent.title}
-                    </span>
-                  ) : null}
-                </div>
-                <div className="flex shrink-0 items-center gap-4 text-sm">
-                  <span className="text-muted-foreground">
-                    {agent.totalAppointments} appt
-                    {agent.totalAppointments !== 1 ? "s" : ""}
-                  </span>
-                  <span className="font-medium text-green-600">
-                    {agent.completedAppointments} completed
-                  </span>
-                </div>
+                ) : null}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </DashboardSection>
+              <div className="flex shrink-0 items-center gap-4 text-sm">
+                <span className="text-muted-foreground">
+                  {agent.totalAppointments} appt
+                  {agent.totalAppointments !== 1 ? "s" : ""}
+                </span>
+                <span className="font-medium text-success">
+                  {agent.completedAppointments} completed
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </AnalyticsPanel>
+    </AnalyticsSection>
   );
 }
 
@@ -427,51 +349,41 @@ export function RecentEventsSection({
   events: AnalyticsData["recentEvents"];
 }) {
   return (
-    <DashboardSection>
-      <DashboardSectionHeader>
-        <div>
-          <DashboardSectionTitle>Recent events</DashboardSectionTitle>
-          <DashboardSectionDescription>
-            The most recent site interactions captured by the analytics stream.
-          </DashboardSectionDescription>
-        </div>
-      </DashboardSectionHeader>
-      <Card className="border-border/65 bg-card/78">
-        <CardHeader>
-          <CardTitle>Recent events</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {events.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No events yet. Events will appear once visitors interact with
-              your website.
-            </p>
-          ) : (
-            <div className="space-y-2.5">
-              {events.map((event) => (
-                <div
-                  className="flex items-center justify-between rounded-[1rem] border border-border/55 bg-background/45 px-3 py-2.5"
-                  key={event.id}
-                >
-                  <div className="min-w-0">
-                    <span className="text-sm font-medium">
-                      {formatAnalyticsLabel(event.eventType)}
-                    </span>
-                    {event.path ? (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {event.path}
-                      </span>
-                    ) : null}
-                  </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {formatAnalyticsDateTime(event.createdAt)}
+    <AnalyticsSection
+      description="The most recent site interactions captured by the analytics stream."
+      title="Recent events"
+    >
+      <AnalyticsPanel title="Recent events">
+        {events.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No events yet. Events will appear once visitors interact with your
+            website.
+          </p>
+        ) : (
+          <div>
+            {events.map((event) => (
+              <div
+                className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0"
+                key={event.id}
+              >
+                <div className="min-w-0">
+                  <span className="text-sm font-medium">
+                    {formatAnalyticsLabel(event.eventType)}
                   </span>
+                  {event.path ? (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {event.path}
+                    </span>
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </DashboardSection>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {formatAnalyticsDateTime(event.createdAt)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </AnalyticsPanel>
+    </AnalyticsSection>
   );
 }

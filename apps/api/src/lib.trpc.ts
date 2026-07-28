@@ -69,6 +69,10 @@ export const membershipProcedure = t.procedure.use(({ ctx, next }) => {
             activeMembership,
             session,
           },
+          db: {
+            ...ctx.db,
+            db,
+          },
         },
       });
     });
@@ -98,7 +102,10 @@ const roleRank: Record<MembershipRole, number> = {
 /**
  * Returns true when `actual` meets or exceeds `required` in the role hierarchy.
  */
-export function isRoleAtLeast(actual: MembershipRole, required: MembershipRole): boolean {
+export function isRoleAtLeast(
+  actual: MembershipRole,
+  required: MembershipRole,
+): boolean {
   return roleRank[actual] >= roleRank[required];
 }
 
@@ -106,7 +113,10 @@ export function isRoleAtLeast(actual: MembershipRole, required: MembershipRole):
  * Throws FORBIDDEN if the caller's role is below the required minimum.
  * Must be called inside a membershipProcedure context.
  */
-export function assertMinRole(actual: MembershipRole, required: MembershipRole): void {
+export function assertMinRole(
+  actual: MembershipRole,
+  required: MembershipRole,
+): void {
   if (!isRoleAtLeast(actual, required)) {
     throw new TRPCError({
       code: "FORBIDDEN",

@@ -2,9 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@plotkeys/ui/cn";
+import { Icon } from "@plotkeys/ui/icons";
 import { TableHead } from "@plotkeys/ui/table";
-import { cn } from "@plotkeys/utils";
-import { GripVertical } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 interface DraggableHeaderProps {
@@ -54,7 +54,7 @@ export function DraggableHeader({
     >
       <div className="flex-1 min-w-0 overflow-hidden">{children}</div>
       {!disabled && (
-        <GripVertical
+        <Icon.GripVertical
           size={14}
           className="ml-1 text-muted-foreground opacity-0 group-hover/header:opacity-100 flex-shrink-0 cursor-grab active:cursor-grabbing"
           {...attributes}

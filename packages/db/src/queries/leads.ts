@@ -1,5 +1,11 @@
 import type { Prisma } from "../generated/prisma/client";
 import { createPrismaClient, type Db } from "../prisma";
+import { createCustomer } from "./customer";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export async function createLead(
   db: Db,
@@ -29,18 +35,30 @@ export async function listLeadsForCompany(
   companyId: string,
   options?: {
     cursor?: string | number | null;
+    end?: string | null;
     limit?: number;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: "new" | "contacted" | "qualified" | "closed";
   },
 ) {
   const query = options?.q?.trim();
-  const size = normalizePageSize(options?.size ?? options?.limit);
-  const offset = normalizeCursor(options?.cursor);
+  const endDate = parseDateBoundary(options?.end, "end");
+  const size = normalizeListPageSize(options?.size ?? options?.limit);
+  const offset = normalizeListOffsetCursor(options?.cursor);
+  const startDate = parseDateBoundary(options?.start, "start");
+  const createdAtFilter: Prisma.DateTimeFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
   const where: Prisma.LeadWhereInput = {
     companyId,
+    ...(createdAtFilter ? { createdAt: createdAtFilter } : {}),
     ...(options?.status ? { status: options.status } : {}),
     ...(query
       ? {
@@ -64,37 +82,21 @@ export async function listLeadsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getLeadOrderBy(
@@ -162,21 +164,105 @@ export async function countLeadsByStatus(db: Db, companyId: string) {
   };
 }
 
-export async function updateLeadStatus(
+export async function updateLeadStatusForCompany(
   db: Db,
   input: {
+    companyId: string;
     leadId: string;
     notes?: string;
     status: "new" | "contacted" | "qualified" | "closed";
   },
 ) {
-  return db.lead.update({
+  const result = await db.lead.updateMany({
     data: {
       notes: input.notes,
       status: input.status,
     },
-    where: { id: input.leadId },
+    where: {
+      companyId: input.companyId,
+      id: input.leadId,
+    },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return { id: input.leadId, status: input.status };
+}
+
+export async function updateLeadsStatusForCompany(
+  db: Db,
+  input: {
+    companyId: string;
+    leadIds: string[];
+    status: "new" | "contacted" | "qualified" | "closed";
+  },
+) {
+  const uniqueLeadIds = Array.from(new Set(input.leadIds));
+  const leads = await db.lead.findMany({
+    select: { id: true },
+    where: {
+      companyId: input.companyId,
+      id: { in: uniqueLeadIds },
+    },
+  });
+
+  if (leads.length !== uniqueLeadIds.length) {
+    return null;
+  }
+
+  await db.lead.updateMany({
+    data: {
+      status: input.status,
+    },
+    where: {
+      companyId: input.companyId,
+      id: { in: uniqueLeadIds },
+    },
+  });
+
+  return { leadIds: uniqueLeadIds, status: input.status };
+}
+
+export async function convertLeadToCustomerForCompany(
+  db: Db,
+  input: { companyId: string; leadId: string },
+) {
+  const lead = await db.lead.findFirst({
+    where: {
+      companyId: input.companyId,
+      id: input.leadId,
+    },
+  });
+
+  if (!lead) {
+    return null;
+  }
+
+  const customer = await createCustomer(db, {
+    companyId: input.companyId,
+    email: lead.email,
+    name: lead.name,
+    phone: lead.phone,
+    sourceLeadId: lead.id,
+    status: "active",
+  });
+  const updatedLead = await updateLeadStatusForCompany(db, {
+    companyId: input.companyId,
+    leadId: lead.id,
+    status: "qualified",
+  });
+
+  if (!updatedLead) {
+    return null;
+  }
+
+  return {
+    customerId: customer.id,
+    leadId: updatedLead.id,
+    status: updatedLead.status,
+  };
 }
 
 export async function findLeadById(db: Db, leadId: string) {

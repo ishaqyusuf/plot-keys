@@ -22,7 +22,7 @@ export function Header({
   return (
     <header
       className={cn(
-        "top-0 z-50 flex h-[70px] items-center justify-between gap-4 bg-background/70 px-6 backdrop-blur-xl transition-transform md:border-b md:backdrop-blur-none",
+        "md:m-0 z-50 px-6 md:border-b h-[70px] flex justify-between items-center top-0 backdrop-filter backdrop-blur-xl md:backdrop-filter md:backdrop-blur-none bg-background bg-opacity-70 desktop:rounded-t-[10px] transition-transform",
         className,
       )}
       style={{

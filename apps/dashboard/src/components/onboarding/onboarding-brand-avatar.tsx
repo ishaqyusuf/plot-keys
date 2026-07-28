@@ -1,11 +1,11 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { cn } from "@plotkeys/ui/cn";
+import { Icon } from "@plotkeys/ui/icons";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { setPendingOnboardingLogoAction } from "../../app/actions";
-import { cn } from "@plotkeys/utils";
 
 function getBrandInitials(brandName: string) {
   const parts = brandName.trim().split(/\s+/).filter(Boolean).slice(0, 2);
@@ -17,7 +17,7 @@ function getBrandInitials(brandName: string) {
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
 }
 
-type OnboardingBrandAvatarProps = {
+type Props = {
   brandName: string;
   editable?: boolean;
   logoUrl?: string | null;
@@ -27,7 +27,7 @@ export function OnboardingBrandAvatar({
   brandName,
   editable = false,
   logoUrl: initialLogoUrl = null,
-}: OnboardingBrandAvatarProps) {
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
@@ -71,7 +71,6 @@ export function OnboardingBrandAvatar({
         }
 
         setLogoUrl(payload.publicUrl);
-        await setPendingOnboardingLogoAction(payload.publicUrl);
         router.refresh();
       } catch {
         setError("Upload failed. Please try again.");
@@ -85,17 +84,18 @@ export function OnboardingBrandAvatar({
 
   return (
     <div className="flex flex-col gap-2">
-      <button
+      <SubmitButton
         aria-label={
           editable ? `Upload logo for ${brandName}` : `${brandName} avatar`
         }
         className={cn(
-          "group relative flex size-12 items-center justify-center overflow-hidden rounded-full border border-border/80 bg-[linear-gradient(135deg,var(--primary)_0%,color-mix(in_srgb,var(--primary)_70%,white)_100%)] text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition",
+          "group relative flex size-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary text-primary-foreground text-xs font-semibold transition",
           editable
             ? "cursor-pointer hover:scale-[1.02] hover:border-primary/70"
             : "cursor-default",
         )}
         disabled={!editable || isPending}
+        isSubmitting={isPending}
         onClick={openPicker}
         type="button"
       >
@@ -113,15 +113,15 @@ export function OnboardingBrandAvatar({
         {editable ? (
           <>
             <span className="absolute inset-0 bg-foreground/0 transition group-hover:bg-foreground/20" />
-            <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-foreground/75 px-2 py-1 text-[9px] font-medium tracking-[0.18em] text-primary-foreground transition group-hover:translate-y-0">
-              {isPending ? "UPLOADING" : "UPLOAD LOGO"}
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-foreground/75 px-2 py-1 text-[9px] font-medium text-primary-foreground transition group-hover:translate-y-0">
+              Upload logo
             </span>
-            <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full border border-background bg-background text-foreground shadow-sm">
-              <Pencil className="size-3" />
+            <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full border border-background bg-background text-foreground">
+              <Icon.Edit className="size-3" />
             </span>
           </>
         ) : null}
-      </button>
+      </SubmitButton>
 
       <input
         accept="image/jpeg,image/png,image/webp,image/svg+xml"

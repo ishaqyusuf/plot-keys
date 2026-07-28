@@ -1,7 +1,7 @@
 import { PexelsPublicImageProvider } from "./pexels";
 import { PixabayPublicImageProvider } from "./pixabay";
-import { UnsplashPublicImageProvider } from "./unsplash";
 import type { PublicImageProvider, PublicImageProviderName } from "./types";
+import { UnsplashPublicImageProvider } from "./unsplash";
 
 export * from "./types";
 

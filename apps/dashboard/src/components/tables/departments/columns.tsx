@@ -1,22 +1,17 @@
 "use client";
 
 import type { AppRouter } from "@plotkeys/api/router";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { deleteDepartmentAction } from "@/app/actions";
+import type { inferRouterOutputs } from "@trpc/server";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type DepartmentTableRow =
-  RouterOutputs["workspace"]["listDepartments"]["data"][number];
+  RouterOutputs["departments"]["list"]["data"][number];
 
-function DepartmentCell({
-  department,
-}: {
-  department: DepartmentTableRow;
-}) {
+function DepartmentCell({ department }: { department: DepartmentTableRow }) {
   const employeeCount = department._count.employees;
 
   return (
@@ -31,11 +26,7 @@ function DepartmentCell({
   );
 }
 
-function DescriptionCell({
-  department,
-}: {
-  department: DepartmentTableRow;
-}) {
+function DescriptionCell({ department }: { department: DepartmentTableRow }) {
   return (
     <p className="line-clamp-2 max-w-[360px] text-sm text-muted-foreground">
       {department.description ?? "No description"}
@@ -44,32 +35,11 @@ function DescriptionCell({
 }
 
 function ActionsCell({ department }: { department: DepartmentTableRow }) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Button asChild size="sm" variant="outline">
-        <Link href={`/hr/employees?department=${department.id}`}>
-          View employees
-        </Link>
-      </Button>
-      <form action={deleteDepartmentAction}>
-        <input name="departmentId" type="hidden" value={department.id} />
-        <Button
-          className="text-destructive hover:text-destructive"
-          size="sm"
-          type="submit"
-          variant="ghost"
-        >
-          Delete
-        </Button>
-      </form>
-    </div>
-  );
+  return <ActionsMenu row={department} />;
 }
 
 export const columns: ColumnDef<DepartmentTableRow>[] = [
+  createSelectColumn<DepartmentTableRow>(),
   {
     accessorFn: (row) => row.name,
     cell: ({ row }) => <DepartmentCell department={row.original} />,
@@ -77,7 +47,7 @@ export const columns: ColumnDef<DepartmentTableRow>[] = [
     id: "department",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Department",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -97,15 +67,15 @@ export const columns: ColumnDef<DepartmentTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell department={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[260px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 300,
+    size: 80,
   },
 ];

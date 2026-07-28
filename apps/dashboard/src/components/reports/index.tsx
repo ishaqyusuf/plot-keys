@@ -1,20 +1,17 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ReportsEmptyState } from "@/components/tables/reports";
+import { ReportsEmptyState } from "@/components/reports/report-empty-states";
 import { useTRPC } from "@/trpc/client";
 import {
   AgentPerformanceSection,
   BusinessSummarySection,
   ListingsPerformanceSection,
-  ReportsHeader,
   type ReportsData,
 } from "./sections";
-import type { ReportPeriod } from "./utils";
 
-type ReportsViewProps = {
+type Props = {
   month: number;
-  periods: ReportPeriod[];
   year: number;
 };
 
@@ -32,10 +29,10 @@ function hasReportSummaryData(data: ReportsData["summary"]) {
   );
 }
 
-export function ReportsView({ month, periods, year }: ReportsViewProps) {
+export function ReportsView({ month, year }: Props) {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
-    trpc.workspace.getReports.queryOptions({ month, year }),
+    trpc.reports.get.queryOptions({ month, year }),
   );
   const hasNoReportData =
     !hasReportSummaryData(data.summary) &&
@@ -44,7 +41,6 @@ export function ReportsView({ month, periods, year }: ReportsViewProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <ReportsHeader month={month} periods={periods} year={year} />
       {hasNoReportData ? (
         <ReportsEmptyState />
       ) : (

@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Button } from "@plotkeys/ui/button";
 import {
   Form,
   FormControl,
@@ -11,6 +10,7 @@ import {
   FormMessage,
 } from "@plotkeys/ui/form";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -28,15 +28,12 @@ type ProjectBudgetSummaryFormValues = z.infer<
   typeof projectBudgetSummaryFormSchema
 >;
 
-type ProjectBudgetSummaryFormProps = {
+type Props = {
   onSuccess?: () => void;
   projectId: string;
 };
 
-export function ProjectBudgetSummaryForm({
-  onSuccess,
-  projectId,
-}: ProjectBudgetSummaryFormProps) {
+export function ProjectBudgetSummaryForm({ onSuccess, projectId }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -148,9 +145,9 @@ export function ProjectBudgetSummaryForm({
           </Alert>
         ) : null}
 
-        <Button disabled={upsertMutation.isPending} type="submit">
-          {upsertMutation.isPending ? "Creating..." : "Create budget"}
-        </Button>
+        <SubmitButton isSubmitting={upsertMutation.isPending}>
+          Create budget
+        </SubmitButton>
       </form>
     </Form>
   );

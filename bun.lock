@@ -26,6 +26,7 @@
         "@plotkeys/platform-integrations": "workspace:*",
         "@plotkeys/section-registry": "workspace:*",
         "@plotkeys/utils": "workspace:*",
+        "@plotkeys/website-builder": "workspace:*",
         "@trpc/server": "^11.0.0",
         "hono": "^4.0.0",
         "superjson": "^2.2.2",
@@ -33,6 +34,7 @@
       },
       "devDependencies": {
         "@plotkeys/tsconfig": "workspace:*",
+        "@types/bun": "^1.3.14",
         "@types/node": "^22.0.0",
       },
     },
@@ -55,6 +57,7 @@
         "@plotkeys/site-nav": "workspace:*",
         "@plotkeys/ui": "workspace:*",
         "@plotkeys/utils": "workspace:*",
+        "@plotkeys/website-builder": "workspace:*",
         "@tanstack/react-query": "^5.90.2",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.23",
@@ -80,6 +83,36 @@
         "@plotkeys/tsconfig": "workspace:*",
         "@tailwindcss/postcss": "^4.1.0",
         "@types/bun": "^1.3.14",
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "postcss": "^8.4.0",
+      },
+    },
+    "apps/sandbox": {
+      "name": "@plotkeys/sandbox",
+      "dependencies": {
+        "@plotkeys/api": "workspace:*",
+        "@plotkeys/auth": "workspace:*",
+        "@plotkeys/section-registry": "workspace:*",
+        "@plotkeys/ui": "workspace:*",
+        "@plotkeys/utils": "workspace:*",
+        "@plotkeys/website-builder": "workspace:*",
+        "@tanstack/react-query": "^5.90.2",
+        "@trpc/client": "^11.0.0",
+        "@trpc/server": "^11.0.0",
+        "@trpc/tanstack-react-query": "^11.0.0",
+        "next": "^16.1.5",
+        "nuqs": "^2.8.9",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "server-only": "^0.0.1",
+        "superjson": "^2.2.2",
+        "zod": "^3.23.0",
+      },
+      "devDependencies": {
+        "@plotkeys/tsconfig": "workspace:*",
+        "@tailwindcss/postcss": "^4.1.0",
         "@types/node": "^22.0.0",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
@@ -361,6 +394,22 @@
       "devDependencies": {
         "@plotkeys/tsconfig": "workspace:*",
         "@types/node": "^22.0.0",
+      },
+    },
+    "packages/website-builder": {
+      "name": "@plotkeys/website-builder",
+      "dependencies": {
+        "@plotkeys/section-registry": "workspace:*",
+        "@plotkeys/ui": "workspace:*",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@plotkeys/tsconfig": "workspace:*",
+        "@types/bun": "^1.3.14",
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
       },
     },
     "packages/whatsapp": {
@@ -692,6 +741,8 @@
 
     "@plotkeys/plot-renderer": ["@plotkeys/plot-renderer@workspace:packages/plot-renderer"],
 
+    "@plotkeys/sandbox": ["@plotkeys/sandbox@workspace:apps/sandbox"],
+
     "@plotkeys/section-registry": ["@plotkeys/section-registry@workspace:packages/section-registry"],
 
     "@plotkeys/site-nav": ["@plotkeys/site-nav@workspace:packages/site-nav"],
@@ -705,6 +756,8 @@
     "@plotkeys/utils": ["@plotkeys/utils@workspace:packages/utils"],
 
     "@plotkeys/website": ["@plotkeys/website@workspace:apps/website"],
+
+    "@plotkeys/website-builder": ["@plotkeys/website-builder@workspace:packages/website-builder"],
 
     "@plotkeys/whatsapp": ["@plotkeys/whatsapp@workspace:packages/whatsapp"],
 

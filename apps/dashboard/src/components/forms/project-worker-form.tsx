@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Button } from "@plotkeys/ui/button";
 import {
   Form,
   FormControl,
@@ -11,7 +10,14 @@ import {
   FormMessage,
 } from "@plotkeys/ui/form";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -32,15 +38,12 @@ const projectWorkerFormSchema = z.object({
 
 type ProjectWorkerFormValues = z.infer<typeof projectWorkerFormSchema>;
 
-type CreateWorkerFormProps = {
+type Props = {
   onSuccess?: () => void;
   projectId: string;
 };
 
-export function CreateWorkerForm({
-  onSuccess,
-  projectId,
-}: CreateWorkerFormProps) {
+export function CreateWorkerForm({ onSuccess, projectId }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -127,15 +130,20 @@ export function CreateWorkerForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Pay basis</FormLabel>
-                <FormControl>
-                  <NativeSelect {...field}>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pay basis" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
                     {workerPayBasis.map((basis) => (
-                      <NativeSelectOption key={basis} value={basis}>
+                      <SelectItem key={basis} value={basis}>
                         {workerPayBasisLabels[basis]}
-                      </NativeSelectOption>
+                      </SelectItem>
                     ))}
-                  </NativeSelect>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -169,9 +177,9 @@ export function CreateWorkerForm({
         ) : null}
 
         <div className="flex justify-end">
-          <Button disabled={createMutation.isPending} type="submit">
-            {createMutation.isPending ? "Adding..." : "Add worker"}
-          </Button>
+          <SubmitButton isSubmitting={createMutation.isPending}>
+            Add worker
+          </SubmitButton>
         </div>
       </form>
     </Form>

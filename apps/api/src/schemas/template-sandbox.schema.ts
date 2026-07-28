@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-export const templateSandboxPlanTierSchema = z.enum([
-  "starter",
-  "plus",
-  "pro",
-]);
+export const templateSandboxPlanTierSchema = z.enum(["starter", "plus", "pro"]);
 
 export const templateSandboxJsonSchema = z
   .record(z.string(), z.unknown())
@@ -12,6 +8,16 @@ export const templateSandboxJsonSchema = z
 
 export const templateSandboxProfileIdInputSchema = z.object({
   profileId: z.string().uuid("Invalid sandbox profile id."),
+});
+
+export const templateSandboxPreviewInputSchema = z.object({
+  mode: z.enum(["draft", "live"]).default("draft"),
+  pathname: z
+    .string()
+    .trim()
+    .default("/")
+    .transform((value) => value || "/"),
+  shareId: z.string().trim().min(1, "Sandbox share id is required."),
 });
 
 export const createTemplateSandboxProfileInputSchema = z.object({
@@ -56,4 +62,7 @@ export type CreateTemplateSandboxProfileInput = z.infer<
 >;
 export type UpdateTemplateSandboxProfileInput = z.infer<
   typeof updateTemplateSandboxProfileInputSchema
+>;
+export type TemplateSandboxPreviewInput = z.infer<
+  typeof templateSandboxPreviewInputSchema
 >;

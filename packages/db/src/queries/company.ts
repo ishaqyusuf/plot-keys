@@ -22,6 +22,19 @@ export async function findCompanyById(db: Db, id: string) {
   });
 }
 
+export async function listActiveCompaniesForDevLauncher(db: Db) {
+  return db.company.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      planTier: true,
+      slug: true,
+    },
+    where: { deletedAt: null, isActive: true },
+  });
+}
+
 export async function getCompanyDisplayName(
   companyId: string,
 ): Promise<CompanyDisplayNameResult> {

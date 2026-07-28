@@ -2,10 +2,15 @@ import type { Prisma } from "../generated/prisma/client";
 import {
   EmployeeStatus as EmployeeStatusEnum,
   EmploymentType as EmploymentTypeEnum,
-  WorkRole as WorkRoleEnum,
   type WorkRole,
+  WorkRole as WorkRoleEnum,
 } from "../generated/prisma/enums";
 import { createPrismaClient, type Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 export type EmployeeEmploymentTypeValue =
   | "full_time"
@@ -93,21 +98,35 @@ export async function listEmployeesForCompany(
   options: {
     cursor?: string | number | null;
     departmentId?: string;
+    end?: string | null;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: EmployeeStatusValue;
     take?: number;
   } = {},
 ) {
   const query = options.q?.trim();
+  const endDate = parseDateBoundary(options.end, "end");
   const searchFilters = query ? getEmployeeSearchFilters(query) : [];
-  const size = normalizePageSize(options.size ?? options.take);
-  const offset = normalizeCursor(options.cursor);
+  const size = normalizeListPageSize(options.size ?? options.take, {
+    maxSize: 200,
+  });
+  const offset = normalizeListOffsetCursor(options.cursor);
+  const startDate = parseDateBoundary(options.start, "start");
+  const startDateFilter: Prisma.DateTimeNullableFilter | undefined =
+    endDate || startDate
+      ? {
+          ...(endDate ? { lte: endDate } : {}),
+          ...(startDate ? { gte: startDate } : {}),
+        }
+      : undefined;
   const where: Prisma.EmployeeWhereInput = {
     companyId,
     deletedAt: null,
     ...(options.departmentId ? { departmentId: options.departmentId } : {}),
+    ...(startDateFilter ? { startDate: startDateFilter } : {}),
     ...(options.status ? { status: options.status } : {}),
     ...(query
       ? {
@@ -128,37 +147,21 @@ export async function listEmployeesForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 200);
-}
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getEmployeeSearchFilters(query: string): Prisma.EmployeeWhereInput[] {
@@ -300,10 +303,22 @@ export async function updateEmployee(
     salaryCurrency?: string | null;
   },
 ) {
-  return db.employee.update({
-    where: { id: employeeId, companyId },
-    data,
+  const { workRole, ...rest } = data;
+  const updateData: Prisma.EmployeeUncheckedUpdateManyInput = {
+    ...rest,
+    ...(workRole ? { workRole } : {}),
+  };
+
+  const result = await db.employee.updateMany({
+    where: { id: employeeId, companyId, deletedAt: null },
+    data: updateData,
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getEmployeeById(db, employeeId, companyId);
 }
 
 export async function updateCompanyEmployee(input: {
@@ -336,8 +351,8 @@ export async function softDeleteEmployee(
   employeeId: string,
   companyId: string,
 ) {
-  return db.employee.update({
-    where: { id: employeeId, companyId },
+  return db.employee.updateMany({
+    where: { id: employeeId, companyId, deletedAt: null },
     data: { deletedAt: new Date() },
   });
 }

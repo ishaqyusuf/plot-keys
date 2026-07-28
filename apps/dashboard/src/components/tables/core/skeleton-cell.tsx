@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@plotkeys/ui/cn";
 import { Skeleton } from "@plotkeys/ui/skeleton";
-import { cn } from "@plotkeys/utils";
 import type { SkeletonType } from "./types";
 
 interface SkeletonCellProps {

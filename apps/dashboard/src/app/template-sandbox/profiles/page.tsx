@@ -1,34 +1,9 @@
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
-import { ErrorFallback } from "@/components/error-fallback";
-import { TemplateSandboxSkeleton } from "@/components/template-sandbox/skeleton";
-import { TemplateSandboxIndex } from "@/components/template-sandbox/template-sandbox-index";
-import { getBaseUrl } from "@/lib/get-base-url";
-import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Template Sandbox Profiles | Plot Keys",
-};
+import { buildLegacySandboxRedirect } from "@/lib/sandbox-redirect";
 
-export default async function TemplateSandboxProfilesPage() {
-  const currentOrigin = await getBaseUrl();
+export const dynamic = "force-dynamic";
 
-  batchPrefetch([
-    trpc.templateSandbox.list.queryOptions(),
-    trpc.templateSandbox.catalog.queryOptions(),
-  ]);
-
-  return (
-    <DashboardPage>
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<TemplateSandboxSkeleton />}>
-            <TemplateSandboxIndex currentOrigin={currentOrigin} />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
-  );
+export default async function LegacyTemplateSandboxProfilesPage() {
+  redirect(await buildLegacySandboxRedirect("/"));
 }

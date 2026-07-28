@@ -5,20 +5,58 @@ import type { TableId } from "./table-settings";
  * Sticky column configurations for each table
  */
 export const STICKY_COLUMNS: Record<TableId, StickyColumnConfig[]> = {
-  agents: [{ id: "agent", width: 260 }],
-  blog: [{ id: "post", width: 300 }],
-  appointments: [{ id: "appointment", width: 260 }],
-  customers: [{ id: "customer", width: 260 }],
-  departments: [{ id: "department", width: 260 }],
-  employees: [{ id: "employee", width: 260 }],
-  estates: [{ id: "estate", width: 280 }],
-  leads: [{ id: "lead", width: 260 }],
-  "leave-requests": [{ id: "request", width: 280 }],
-  notifications: [{ id: "notification", width: 320 }],
-  payroll: [{ id: "entry", width: 260 }],
-  projects: [{ id: "project", width: 280 }],
-  properties: [{ id: "property", width: 320 }],
-  team: [{ id: "member", width: 260 }],
+  agents: [
+    { id: "select", width: 50 },
+    { id: "agent", width: 260 },
+  ],
+  blog: [
+    { id: "select", width: 50 },
+    { id: "post", width: 300 },
+  ],
+  appointments: [
+    { id: "select", width: 50 },
+    { id: "appointment", width: 260 },
+  ],
+  customers: [
+    { id: "select", width: 50 },
+    { id: "name", width: 320 },
+  ],
+  departments: [
+    { id: "select", width: 50 },
+    { id: "department", width: 260 },
+  ],
+  employees: [
+    { id: "select", width: 50 },
+    { id: "employee", width: 260 },
+  ],
+  leads: [
+    { id: "select", width: 50 },
+    { id: "lead", width: 260 },
+  ],
+  "leave-requests": [
+    { id: "select", width: 50 },
+    { id: "request", width: 280 },
+  ],
+  notifications: [
+    { id: "select", width: 50 },
+    { id: "notification", width: 320 },
+  ],
+  payroll: [
+    { id: "select", width: 50 },
+    { id: "entry", width: 260 },
+  ],
+  projects: [
+    { id: "select", width: 50 },
+    { id: "project", width: 280 },
+  ],
+  properties: [
+    { id: "select", width: 50 },
+    { id: "property", width: 320 },
+  ],
+  team: [
+    { id: "select", width: 50 },
+    { id: "member", width: 260 },
+  ],
 };
 
 /**
@@ -47,7 +85,7 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
   customers: {
     contact: "contact",
     createdAt: "created_at",
-    customer: "name",
+    name: "name",
     status: "status",
   },
   departments: {
@@ -60,10 +98,6 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
     department: "department",
     employee: "name",
     role: "workRole",
-    status: "status",
-  },
-  estates: {
-    estate: "name",
     status: "status",
   },
   leads: {
@@ -110,48 +144,45 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
  * Non-reorderable columns for each table (sticky + actions)
  */
 export const NON_REORDERABLE_COLUMNS: Record<TableId, Set<string>> = {
-  agents: new Set(["agent", "actions"]),
-  blog: new Set(["post", "actions"]),
-  appointments: new Set(["appointment", "actions"]),
-  customers: new Set(["customer", "actions"]),
-  departments: new Set(["department", "actions"]),
-  employees: new Set(["employee", "actions"]),
-  estates: new Set(["estate", "actions"]),
-  leads: new Set(["lead", "actions"]),
-  "leave-requests": new Set(["request", "actions"]),
-  notifications: new Set(["notification", "actions"]),
-  payroll: new Set(["entry", "actions"]),
-  projects: new Set(["project", "actions"]),
-  properties: new Set(["property", "actions"]),
-  team: new Set(["member", "actions"]),
+  agents: new Set(["select", "agent", "actions"]),
+  blog: new Set(["select", "post", "actions"]),
+  appointments: new Set(["select", "appointment", "actions"]),
+  customers: new Set(["select", "name", "actions"]),
+  departments: new Set(["select", "department", "actions"]),
+  employees: new Set(["select", "employee", "actions"]),
+  leads: new Set(["select", "lead", "actions"]),
+  "leave-requests": new Set(["select", "request", "actions"]),
+  notifications: new Set(["select", "notification", "actions"]),
+  payroll: new Set(["select", "entry", "actions"]),
+  projects: new Set(["select", "project", "actions"]),
+  properties: new Set(["select", "property", "actions"]),
+  team: new Set(["select", "member", "actions"]),
 };
 
 /**
  * Row heights for each table
  */
 export const ROW_HEIGHTS: Record<TableId, number> = {
-  agents: 56,
-  blog: 64,
-  appointments: 52,
-  customers: 52,
-  departments: 52,
-  employees: 52,
-  estates: 56,
-  leads: 52,
-  "leave-requests": 56,
-  notifications: 64,
-  payroll: 52,
-  projects: 56,
-  properties: 64,
-  team: 52,
+  agents: 45,
+  blog: 45,
+  appointments: 45,
+  customers: 45,
+  departments: 45,
+  employees: 45,
+  leads: 45,
+  "leave-requests": 45,
+  notifications: 45,
+  payroll: 45,
+  projects: 45,
+  properties: 45,
+  team: 45,
 };
 
 /**
  * Summary grid heights for tables with summary sections
  */
 export const SUMMARY_GRID_HEIGHTS: Partial<Record<TableId, number>> = {
-  customers: 128,
-  properties: 128,
+  customers: 180,
 };
 
 /**
@@ -201,13 +232,6 @@ export const TABLE_CONFIGS: Record<TableId, TableConfig> = {
     nonReorderableColumns: NON_REORDERABLE_COLUMNS.employees,
     rowHeight: ROW_HEIGHTS.employees,
   },
-  estates: {
-    tableId: "estates",
-    stickyColumns: STICKY_COLUMNS.estates,
-    sortFieldMap: SORT_FIELD_MAPS.estates,
-    nonReorderableColumns: NON_REORDERABLE_COLUMNS.estates,
-    rowHeight: ROW_HEIGHTS.estates,
-  },
   leads: {
     tableId: "leads",
     stickyColumns: STICKY_COLUMNS.leads,
@@ -249,7 +273,6 @@ export const TABLE_CONFIGS: Record<TableId, TableConfig> = {
     sortFieldMap: SORT_FIELD_MAPS.properties,
     nonReorderableColumns: NON_REORDERABLE_COLUMNS.properties,
     rowHeight: ROW_HEIGHTS.properties,
-    summaryGridHeight: SUMMARY_GRID_HEIGHTS.properties,
   },
   team: {
     tableId: "team",

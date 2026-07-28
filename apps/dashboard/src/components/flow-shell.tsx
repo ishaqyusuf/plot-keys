@@ -1,16 +1,9 @@
 import { Badge } from "@plotkeys/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@plotkeys/ui/card";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { OnboardingBrandAvatar } from "./onboarding/onboarding-brand-avatar";
 
-type FlowShellProps = {
+type Props = {
   badge: string;
   brandEditable?: boolean;
   brandLogoUrl?: string | null;
@@ -34,12 +27,12 @@ export function FlowShell({
   headerAction,
   sidePanel,
   title,
-}: FlowShellProps) {
+}: Props) {
   return (
     <main className="min-h-screen bg-background px-6 py-12 md:px-8 md:py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="inline-flex items-start gap-3 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground">
+          <div className="inline-flex items-start gap-3 text-sm text-foreground">
             <OnboardingBrandAvatar
               brandName={brandName}
               editable={brandEditable}
@@ -47,7 +40,7 @@ export function FlowShell({
             />
             <Link
               aria-label="Go to homepage"
-              className="self-center pr-1 font-medium uppercase tracking-[0.18em] transition hover:text-primary"
+              className="self-center pr-1 font-medium transition hover:text-primary"
               href="/"
             >
               {brandName}
@@ -57,29 +50,25 @@ export function FlowShell({
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <Card className="border-border">
-            <CardHeader className="px-8 pt-8 md:px-10 md:pt-10">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <section className="border bg-background">
+            <div className="px-8 pt-8 md:px-10 md:pt-10">
+              <p className="text-sm font-medium text-muted-foreground">
                 {eyebrow}
               </p>
-              <Badge className="mt-4 w-fit" variant="secondary">
+              <Badge variant="secondary" className="mt-4 w-fit">
                 {badge}
               </Badge>
-              <CardTitle className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
                 {title}
-              </CardTitle>
-              <CardDescription className="mt-3 text-base leading-7">
+              </h1>
+              <p className="mt-3 text-base leading-7 text-muted-foreground">
                 {description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-8 pb-8 md:px-10 md:pb-10">
-              {children}
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+            <div className="px-8 pb-8 md:px-10 md:pb-10">{children}</div>
+          </section>
 
-          <div className="rounded-xl border border-border bg-muted/40 p-8 md:p-10">
-            {sidePanel}
-          </div>
+          <div className="border bg-background p-8 md:p-10">{sidePanel}</div>
         </div>
       </div>
     </main>

@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { isAppointmentStatus } from "@/components/appointments/appointment-utils";
-import { DashboardPage } from "@/components/dashboard/dashboard-page";
+import { AppointmentsHeader } from "@/components/appointments-header";
 import { ErrorFallback } from "@/components/error-fallback";
-import { AppointmentsTable } from "@/components/tables/appointments";
+import { ScrollableContent } from "@/components/scrollable-content";
+import { DataTable } from "@/components/tables/appointments/data-table";
 import { AppointmentsSkeleton } from "@/components/tables/appointments/skeleton";
+import {
+  loadAppointmentFilterParams,
+  resolveAppointmentListInput,
+} from "@/hooks/use-appointment-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { loadAppointmentsFilterParams } from "@/lib/appointments-filter-params";
 import { requireOnboardedSession } from "@/lib/session";
 import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
@@ -17,54 +20,39 @@ export const metadata: Metadata = {
   title: "Appointments | Plot Keys",
 };
 
-type AppointmentsPageProps = {
-  searchParams?: Promise<
-    SearchParams & {
-      q?: string;
-      sort?: string | string[];
-      status?: string;
-      view?: string;
-    }
-  >;
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-export default async function AppointmentsPage({
-  searchParams,
-}: AppointmentsPageProps) {
-  const params = (await searchParams) ?? {};
+export default async function AppointmentsPage({ searchParams }: Props) {
   await requireOnboardedSession();
-  const filters = loadAppointmentsFilterParams(params);
+  const params = await searchParams;
+  const filters = loadAppointmentFilterParams(params);
   const { sort } = loadSortParams(params);
-  const statusParam = filters.status ?? undefined;
-  const status = isAppointmentStatus(statusParam)
-    ? statusParam
-    : undefined;
-  const showUpcoming = filters.view === "upcoming";
-  const listInput = {
-    q: filters.q,
-    sort,
-    status,
-    upcoming: showUpcoming || undefined,
-  };
+  const listInput = resolveAppointmentListInput(filters, sort);
   const initialSettings = await getInitialTableSettings("appointments");
 
   batchPrefetch([
-    trpc.workspace.getAppointmentStats.queryOptions(),
-    trpc.workspace.listAppointments.infiniteQueryOptions(listInput, {
+    trpc.appointments.stats.queryOptions(),
+    trpc.appointments.list.infiniteQueryOptions(listInput, {
       getNextPageParam: ({ meta }) => meta?.cursor,
     }),
-    trpc.workspace.listAgents.queryOptions({ size: 100 }),
+    trpc.agents.list.queryOptions({ size: 100 }),
   ]);
 
   return (
-    <DashboardPage>
-      <HydrateClient>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<AppointmentsSkeleton />}>
-            <AppointmentsTable initialSettings={initialSettings} />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrateClient>
-    </DashboardPage>
+    <HydrateClient>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <AppointmentsHeader />
+
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<AppointmentsSkeleton />}>
+              <DataTable initialSettings={initialSettings} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
+    </HydrateClient>
   );
 }

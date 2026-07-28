@@ -7,7 +7,7 @@ if (process.env.NODE_ENV === "production") {
 /**
  * Base floating action button shell for dev tools.
  *
- * Renders a fixed ⚡ button at the bottom-right of the viewport.
+ * Renders a fixed dev tools button at the bottom-right of the viewport.
  * Click toggles an upward popover panel. Children are rendered inside.
  *
  * Usage:
@@ -16,12 +16,15 @@ if (process.env.NODE_ENV === "production") {
  *   </DevFabShell>
  */
 
+import { Button } from "@plotkeys/ui/button";
+import { cn } from "@plotkeys/ui/cn";
+import { Icon } from "@plotkeys/ui/icons";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-type DevFabShellProps = {
+type Props = {
   /** Items rendered inside the dropdown panel. */
   children: ReactNode;
-  /** Short label shown next to the ⚡ icon. */
+  /** Short label shown next to the tool icon. */
   label: string;
   /** Optional extra classes on the fixed-position wrapper. */
   containerClassName?: string;
@@ -37,7 +40,7 @@ export function DevFabShell({
   defaultOpen = false,
   label,
   triggerClassName = "",
-}: DevFabShellProps) {
+}: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -66,29 +69,29 @@ export function DevFabShell({
   return (
     <div
       ref={ref}
-      className={[
+      className={cn(
         "fixed bottom-5 right-5 z-[9999] flex flex-col items-end gap-2",
         containerClassName,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      )}
     >
       {/* Dropdown panel */}
       {open && (
-        <div className="mb-1 w-72 overflow-hidden rounded-xl border border-amber-500/35 bg-card/95 shadow-2xl backdrop-blur">
+        <div className="mb-1 w-72 overflow-hidden border border-border bg-background">
           {/* Panel header */}
-          <div className="flex items-center justify-between border-b border-amber-500/25 bg-amber-500/10 px-3 py-2">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-              ⚡ DEV — {label}
+          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Dev - {label}
             </span>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded p-0.5 text-amber-600 transition-colors hover:bg-amber-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 dark:text-amber-300"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground"
               aria-label="Close dev panel"
+              onClick={() => setOpen(false)}
+              type="button"
             >
-              ✕
-            </button>
+              <Icon.Close className="size-3.5" />
+            </Button>
           </div>
 
           {/* Panel body */}
@@ -97,19 +100,20 @@ export function DevFabShell({
       )}
 
       {/* FAB trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={[
-          "flex items-center gap-1.5 rounded-full border border-amber-500/60 bg-amber-400 px-3 py-2 font-mono text-xs font-bold text-amber-950 shadow-lg transition-all hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 active:scale-95 dark:border-amber-400 dark:bg-amber-400",
+      <Button
+        variant="outline"
+        size="sm"
+        className={cn(
+          "gap-1.5 bg-background active:scale-95",
           triggerClassName,
-        ]
-          .filter(Boolean)
-          .join(" ")}
+        )}
         aria-label={`Dev tools — ${label}`}
+        onClick={() => setOpen((o) => !o)}
+        type="button"
       >
-        ⚡ {label}
-      </button>
+        <Icon.Wrench className="size-3.5" />
+        {label}
+      </Button>
     </div>
   );
 }

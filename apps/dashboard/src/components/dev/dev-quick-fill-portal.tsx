@@ -5,15 +5,12 @@ import { createPortal } from "react-dom";
 
 export const DEV_QUICK_FILL_SLOT_ID = "dev-quick-fill-slot";
 
-type DevQuickFillPortalProps = {
+type Props = {
   children: ReactNode;
   fallback?: "hidden" | "inline";
 };
 
-export function DevQuickFillPortal({
-  children,
-  fallback = "hidden",
-}: DevQuickFillPortalProps) {
+export function DevQuickFillPortal({ children, fallback = "hidden" }: Props) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
 
   useEffect(() => {

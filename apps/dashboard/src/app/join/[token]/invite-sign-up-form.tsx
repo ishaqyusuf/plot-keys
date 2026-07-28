@@ -1,20 +1,24 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
+import {
+  type InviteSignUpInput,
+  inviteSignUpInputSchema,
+} from "@plotkeys/api/schemas/auth";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { useMemo, useRef } from "react";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
-import { signUpForInviteAction } from "@/app/actions";
+import { AuthFormError } from "@/components/auth/auth-form-error";
+import { persistSession } from "@/components/auth/session-bridge";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useDevToolsStore } from "@/stores/dev-tools";
+import { useTRPC } from "@/trpc/client";
 
-type InviteSignUpValues = {
-  name: string;
-  password: string;
-};
-
-type InviteSignUpFormProps = {
+type Props = {
   companyName: string;
   companySlug: string;
   email: string;
@@ -26,71 +30,59 @@ export function InviteSignUpForm({
   companySlug,
   email,
   token,
-}: InviteSignUpFormProps) {
-  const nameRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+}: Props) {
+  const router = useRouter();
+  const trpc = useTRPC();
   const addAccount = useDevToolsStore((state) => state.addAccount);
-
-  const quickFillAdapter = useMemo(() => {
-    return createQuickFillAdapter<InviteSignUpValues>({
-      getValues: () => ({
-        name: nameRef.current?.value ?? "",
-        password: passwordRef.current?.value ?? "",
-      }),
-      reset: (values) => {
-        if (nameRef.current && typeof values.name === "string") {
-          nameRef.current.value = values.name;
-        }
-
-        if (passwordRef.current && typeof values.password === "string") {
-          passwordRef.current.value = values.password;
-        }
+  const [formError, setFormError] = useState<string | null>(null);
+  const lastSubmittedValues = useRef<InviteSignUpInput | null>(null);
+  const form = useZodForm(inviteSignUpInputSchema, {
+    defaultValues: {
+      name: "",
+      password: "",
+      token,
+    },
+  });
+  const signUpForInviteMutation = useMutation(
+    trpc.auth.signUpForInvite.mutationOptions({
+      onError(error) {
+        setFormError(error.message);
       },
-      setValue: (name, value) => {
-        if (name === "name" && nameRef.current && typeof value === "string") {
-          nameRef.current.value = value;
+      async onSuccess(result) {
+        const values = lastSubmittedValues.current;
+
+        if (process.env.NODE_ENV === "development" && values) {
+          addAccount({
+            company: companyName,
+            email,
+            name: values.name,
+            password: values.password,
+            role: "Invitee",
+            subdomain: companySlug,
+          });
         }
 
-        if (
-          name === "password" &&
-          passwordRef.current &&
-          typeof value === "string"
-        ) {
-          passwordRef.current.value = value;
-        }
+        await persistSession(result.sessionToken);
+        router.push(result.redirectTo);
+        router.refresh();
       },
-    });
-  }, []);
+    }),
+  );
+
+  async function onSubmit(values: InviteSignUpInput) {
+    setFormError(null);
+    lastSubmittedValues.current = values;
+    await signUpForInviteMutation.mutateAsync(values);
+  }
 
   return (
-    <form
-      action={signUpForInviteAction}
-      className="space-y-5"
-      onSubmit={() => {
-        if (process.env.NODE_ENV !== "development") {
-          return;
-        }
-
-        const name = nameRef.current?.value.trim();
-        const password = passwordRef.current?.value;
-
-        if (!name || !password) {
-          return;
-        }
-
-        addAccount({
-          company: companyName,
-          email,
-          name,
-          password,
-          role: "Invitee",
-          subdomain: companySlug,
-        });
-      }}
-    >
-      <input name="token" type="hidden" value={token} />
+    <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <input type="hidden" {...form.register("token")} />
       <div className="flex justify-end">
-        <QuickFill args={{ form: quickFillAdapter }} name="invite-sign-up" />
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="invite-sign-up"
+        />
       </div>
       <FieldGroup>
         <Field>
@@ -102,10 +94,8 @@ export function InviteSignUpForm({
           <Input
             autoComplete="name"
             id="invite-name"
-            name="name"
             placeholder="Enter your full name"
-            ref={nameRef}
-            required
+            {...form.register("name")}
           />
         </Field>
         <Field>
@@ -113,18 +103,28 @@ export function InviteSignUpForm({
           <Input
             autoComplete="new-password"
             id="invite-password"
-            minLength={8}
-            name="password"
             placeholder="Create a password"
-            ref={passwordRef}
-            required
             type="password"
+            {...form.register("password")}
           />
         </Field>
       </FieldGroup>
-      <Button className="w-full" type="submit">
+
+      <AuthFormError
+        message={
+          formError ??
+          form.formState.errors.name?.message ??
+          form.formState.errors.password?.message ??
+          form.formState.errors.token?.message
+        }
+      />
+
+      <SubmitButton
+        isSubmitting={signUpForInviteMutation.isPending}
+        className="w-full"
+      >
         Create account and accept invite
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

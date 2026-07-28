@@ -1,9 +1,7 @@
+import { cn } from "../utils";
+
 const PLOTKEYS_MARK_SRC = "/logo.svg";
 const PLOTKEYS_HORIZONTAL_SRC = "/logo-horizontal.svg";
-
-function cx(...values: Array<string | undefined | false>) {
-  return values.filter(Boolean).join(" ");
-}
 
 type PlotKeysLogoProps = {
   alt?: string;
@@ -21,10 +19,10 @@ export function PlotKeysLogo({
   wordmarkClassName,
 }: PlotKeysLogoProps) {
   return (
-    <span className={cx("inline-flex items-center", className)}>
+    <span className={cn("inline-flex items-center", className)}>
       <img
         alt={alt}
-        className={cx(
+        className={cn(
           "h-8 w-auto shrink-0 object-contain",
           showWordmark ? wordmarkClassName : undefined,
           markClassName,

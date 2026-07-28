@@ -1,7 +1,7 @@
-import { cn } from "@plotkeys/utils";
+import { cn } from "@plotkeys/ui/cn";
 import type { ReactNode } from "react";
 
-export function DashboardFormBody({
+export function FormBody({
   children,
   className,
 }: {
@@ -11,7 +11,7 @@ export function DashboardFormBody({
   return <div className={cn("flex-1 px-6 py-5", className)}>{children}</div>;
 }
 
-export function DashboardFormFooter({
+export function FormFooter({
   children,
   className,
 }: {
@@ -21,7 +21,7 @@ export function DashboardFormFooter({
   return (
     <div
       className={cn(
-        "mt-auto flex flex-col gap-2 border-t border-border/60 bg-background/80 px-6 py-4 backdrop-blur",
+        "mt-auto flex flex-col gap-2 border-t border-border bg-background px-6 py-4",
         className,
       )}
     >

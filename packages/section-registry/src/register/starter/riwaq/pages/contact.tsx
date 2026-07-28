@@ -1,9 +1,10 @@
 "use client";
 
+import { cn } from "@plotkeys/utils";
 import { useState } from "react";
 import { EditableText } from "../../../../sections/editing-primitives";
 import { useRiwaqPage } from "../hooks/use-riwaq-page";
-import { joinClasses, riwaqSectionClassName } from "../ui/style";
+import { riwaqSectionClassName } from "../ui/style";
 import { RiwaqCtaBand } from "./cta-band";
 
 export function RiwaqContactPage() {
@@ -22,7 +23,7 @@ export function RiwaqContactPage() {
       {showHeader || showContact ? (
         <section className={riwaqSectionClassName(ctx.ui.preset)}>
           <div
-            className={joinClasses(
+            className={cn(
               "mx-auto grid max-w-5xl md:grid-cols-[0.9fr_1.1fr]",
               ctx.ui.preset.spacing.sectionGap,
             )}

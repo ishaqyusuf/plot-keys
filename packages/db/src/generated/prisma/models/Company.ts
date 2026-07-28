@@ -35,6 +35,10 @@ export type CompanyMinAggregateOutputType = {
   planStartedAt: Date | null
   planEndsAt: Date | null
   isActive: boolean | null
+  dataClassification: $Enums.QaDataClassification | null
+  qaSourceDomain: string | null
+  qaMarkedAt: Date | null
+  qaPurgeStartedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -51,6 +55,10 @@ export type CompanyMaxAggregateOutputType = {
   planStartedAt: Date | null
   planEndsAt: Date | null
   isActive: boolean | null
+  dataClassification: $Enums.QaDataClassification | null
+  qaSourceDomain: string | null
+  qaMarkedAt: Date | null
+  qaPurgeStartedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -68,6 +76,10 @@ export type CompanyCountAggregateOutputType = {
   planEndsAt: number
   enabledApps: number
   isActive: number
+  dataClassification: number
+  qaSourceDomain: number
+  qaMarkedAt: number
+  qaPurgeStartedAt: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -86,6 +98,10 @@ export type CompanyMinAggregateInputType = {
   planStartedAt?: true
   planEndsAt?: true
   isActive?: true
+  dataClassification?: true
+  qaSourceDomain?: true
+  qaMarkedAt?: true
+  qaPurgeStartedAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -102,6 +118,10 @@ export type CompanyMaxAggregateInputType = {
   planStartedAt?: true
   planEndsAt?: true
   isActive?: true
+  dataClassification?: true
+  qaSourceDomain?: true
+  qaMarkedAt?: true
+  qaPurgeStartedAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -119,6 +139,10 @@ export type CompanyCountAggregateInputType = {
   planEndsAt?: true
   enabledApps?: true
   isActive?: true
+  dataClassification?: true
+  qaSourceDomain?: true
+  qaMarkedAt?: true
+  qaPurgeStartedAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -209,6 +233,10 @@ export type CompanyGroupByOutputType = {
   planEndsAt: Date | null
   enabledApps: string[]
   isActive: boolean
+  dataClassification: $Enums.QaDataClassification
+  qaSourceDomain: string | null
+  qaMarkedAt: Date | null
+  qaPurgeStartedAt: Date | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -247,6 +275,10 @@ export type CompanyWhereInput = {
   planEndsAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
   enabledApps?: Prisma.StringNullableListFilter<"Company">
   isActive?: Prisma.BoolFilter<"Company"> | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFilter<"Company"> | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.StringNullableFilter<"Company"> | string | null
+  qaMarkedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
+  qaPurgeStartedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
@@ -269,6 +301,7 @@ export type CompanyWhereInput = {
   analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
   teamInvites?: Prisma.TeamInviteListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  notificationMessageLogs?: Prisma.NotificationMessageLogListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
   plotReservations?: Prisma.PlotReservationListRelationFilter
   savedListings?: Prisma.SavedListingListRelationFilter
@@ -295,6 +328,10 @@ export type CompanyOrderByWithRelationInput = {
   planEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   enabledApps?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  dataClassification?: Prisma.SortOrder
+  qaSourceDomain?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaMarkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaPurgeStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -317,6 +354,7 @@ export type CompanyOrderByWithRelationInput = {
   analyticsEvents?: Prisma.AnalyticsEventOrderByRelationAggregateInput
   teamInvites?: Prisma.TeamInviteOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogOrderByRelationAggregateInput
   customers?: Prisma.CustomerOrderByRelationAggregateInput
   plotReservations?: Prisma.PlotReservationOrderByRelationAggregateInput
   savedListings?: Prisma.SavedListingOrderByRelationAggregateInput
@@ -346,6 +384,10 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   planEndsAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
   enabledApps?: Prisma.StringNullableListFilter<"Company">
   isActive?: Prisma.BoolFilter<"Company"> | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFilter<"Company"> | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.StringNullableFilter<"Company"> | string | null
+  qaMarkedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
+  qaPurgeStartedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Company"> | Date | string | null
@@ -368,6 +410,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
   teamInvites?: Prisma.TeamInviteListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  notificationMessageLogs?: Prisma.NotificationMessageLogListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
   plotReservations?: Prisma.PlotReservationListRelationFilter
   savedListings?: Prisma.SavedListingListRelationFilter
@@ -394,6 +437,10 @@ export type CompanyOrderByWithAggregationInput = {
   planEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   enabledApps?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  dataClassification?: Prisma.SortOrder
+  qaSourceDomain?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaMarkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaPurgeStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -417,6 +464,10 @@ export type CompanyScalarWhereWithAggregatesInput = {
   planEndsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
   enabledApps?: Prisma.StringNullableListFilter<"Company">
   isActive?: Prisma.BoolWithAggregatesFilter<"Company"> | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationWithAggregatesFilter<"Company"> | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
+  qaMarkedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
+  qaPurgeStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Company"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
@@ -434,6 +485,10 @@ export type CompanyCreateInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -456,6 +511,7 @@ export type CompanyCreateInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -482,6 +538,10 @@ export type CompanyUncheckedCreateInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -504,6 +564,7 @@ export type CompanyUncheckedCreateInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -530,6 +591,10 @@ export type CompanyUpdateInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -552,6 +617,7 @@ export type CompanyUpdateInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -578,6 +644,10 @@ export type CompanyUncheckedUpdateInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -600,6 +670,7 @@ export type CompanyUncheckedUpdateInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -626,6 +697,10 @@ export type CompanyCreateManyInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -643,6 +718,10 @@ export type CompanyUpdateManyMutationInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -660,6 +739,10 @@ export type CompanyUncheckedUpdateManyInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -690,6 +773,10 @@ export type CompanyCountOrderByAggregateInput = {
   planEndsAt?: Prisma.SortOrder
   enabledApps?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  dataClassification?: Prisma.SortOrder
+  qaSourceDomain?: Prisma.SortOrder
+  qaMarkedAt?: Prisma.SortOrder
+  qaPurgeStartedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -706,6 +793,10 @@ export type CompanyMaxOrderByAggregateInput = {
   planStartedAt?: Prisma.SortOrder
   planEndsAt?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  dataClassification?: Prisma.SortOrder
+  qaSourceDomain?: Prisma.SortOrder
+  qaMarkedAt?: Prisma.SortOrder
+  qaPurgeStartedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -722,6 +813,10 @@ export type CompanyMinOrderByAggregateInput = {
   planStartedAt?: Prisma.SortOrder
   planEndsAt?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  dataClassification?: Prisma.SortOrder
+  qaSourceDomain?: Prisma.SortOrder
+  qaMarkedAt?: Prisma.SortOrder
+  qaPurgeStartedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -884,6 +979,10 @@ export type CompanyUpdateenabledAppsInput = {
   push?: string | string[]
 }
 
+export type EnumQaDataClassificationFieldUpdateOperationsInput = {
+  set?: $Enums.QaDataClassification
+}
+
 export type CompanyCreateNestedOneWithoutCustomersInput = {
   create?: Prisma.XOR<Prisma.CompanyCreateWithoutCustomersInput, Prisma.CompanyUncheckedCreateWithoutCustomersInput>
   connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutCustomersInput
@@ -1022,6 +1121,20 @@ export type CompanyUpdateOneRequiredWithoutNotificationsNestedInput = {
   upsert?: Prisma.CompanyUpsertWithoutNotificationsInput
   connect?: Prisma.CompanyWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutNotificationsInput, Prisma.CompanyUpdateWithoutNotificationsInput>, Prisma.CompanyUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type CompanyCreateNestedOneWithoutNotificationMessageLogsInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedCreateWithoutNotificationMessageLogsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutNotificationMessageLogsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+}
+
+export type CompanyUpdateOneRequiredWithoutNotificationMessageLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanyCreateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedCreateWithoutNotificationMessageLogsInput>
+  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutNotificationMessageLogsInput
+  upsert?: Prisma.CompanyUpsertWithoutNotificationMessageLogsInput
+  connect?: Prisma.CompanyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutNotificationMessageLogsInput, Prisma.CompanyUpdateWithoutNotificationMessageLogsInput>, Prisma.CompanyUncheckedUpdateWithoutNotificationMessageLogsInput>
 }
 
 export type CompanyCreateNestedOneWithoutPayrollEntriesInput = {
@@ -1190,6 +1303,10 @@ export type CompanyCreateWithoutAgentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1211,6 +1328,7 @@ export type CompanyCreateWithoutAgentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -1237,6 +1355,10 @@ export type CompanyUncheckedCreateWithoutAgentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1258,6 +1380,7 @@ export type CompanyUncheckedCreateWithoutAgentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -1300,6 +1423,10 @@ export type CompanyUpdateWithoutAgentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1321,6 +1448,7 @@ export type CompanyUpdateWithoutAgentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -1347,6 +1475,10 @@ export type CompanyUncheckedUpdateWithoutAgentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1368,6 +1500,7 @@ export type CompanyUncheckedUpdateWithoutAgentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1394,6 +1527,10 @@ export type CompanyCreateWithoutAiUsageLogsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1415,6 +1552,7 @@ export type CompanyCreateWithoutAiUsageLogsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -1441,6 +1579,10 @@ export type CompanyUncheckedCreateWithoutAiUsageLogsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1462,6 +1604,7 @@ export type CompanyUncheckedCreateWithoutAiUsageLogsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -1504,6 +1647,10 @@ export type CompanyUpdateWithoutAiUsageLogsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1525,6 +1672,7 @@ export type CompanyUpdateWithoutAiUsageLogsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -1551,6 +1699,10 @@ export type CompanyUncheckedUpdateWithoutAiUsageLogsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1572,6 +1724,7 @@ export type CompanyUncheckedUpdateWithoutAiUsageLogsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1598,6 +1751,10 @@ export type CompanyCreateWithoutAiCreditLedgerInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1619,6 +1776,7 @@ export type CompanyCreateWithoutAiCreditLedgerInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -1645,6 +1803,10 @@ export type CompanyUncheckedCreateWithoutAiCreditLedgerInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1666,6 +1828,7 @@ export type CompanyUncheckedCreateWithoutAiCreditLedgerInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -1708,6 +1871,10 @@ export type CompanyUpdateWithoutAiCreditLedgerInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1729,6 +1896,7 @@ export type CompanyUpdateWithoutAiCreditLedgerInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -1755,6 +1923,10 @@ export type CompanyUncheckedUpdateWithoutAiCreditLedgerInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1776,6 +1948,7 @@ export type CompanyUncheckedUpdateWithoutAiCreditLedgerInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -1802,6 +1975,10 @@ export type CompanyCreateWithoutAnalyticsEventsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1823,6 +2000,7 @@ export type CompanyCreateWithoutAnalyticsEventsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -1849,6 +2027,10 @@ export type CompanyUncheckedCreateWithoutAnalyticsEventsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1870,6 +2052,7 @@ export type CompanyUncheckedCreateWithoutAnalyticsEventsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -1912,6 +2095,10 @@ export type CompanyUpdateWithoutAnalyticsEventsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1933,6 +2120,7 @@ export type CompanyUpdateWithoutAnalyticsEventsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -1959,6 +2147,10 @@ export type CompanyUncheckedUpdateWithoutAnalyticsEventsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1980,6 +2172,7 @@ export type CompanyUncheckedUpdateWithoutAnalyticsEventsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2006,6 +2199,10 @@ export type CompanyCreateWithoutAppointmentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2027,6 +2224,7 @@ export type CompanyCreateWithoutAppointmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -2053,6 +2251,10 @@ export type CompanyUncheckedCreateWithoutAppointmentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2074,6 +2276,7 @@ export type CompanyUncheckedCreateWithoutAppointmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -2116,6 +2319,10 @@ export type CompanyUpdateWithoutAppointmentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2137,6 +2344,7 @@ export type CompanyUpdateWithoutAppointmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -2163,6 +2371,10 @@ export type CompanyUncheckedUpdateWithoutAppointmentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2184,6 +2396,7 @@ export type CompanyUncheckedUpdateWithoutAppointmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2210,6 +2423,10 @@ export type CompanyCreateWithoutAssetsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2231,6 +2448,7 @@ export type CompanyCreateWithoutAssetsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -2257,6 +2475,10 @@ export type CompanyUncheckedCreateWithoutAssetsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2278,6 +2500,7 @@ export type CompanyUncheckedCreateWithoutAssetsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -2320,6 +2543,10 @@ export type CompanyUpdateWithoutAssetsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2341,6 +2568,7 @@ export type CompanyUpdateWithoutAssetsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -2367,6 +2595,10 @@ export type CompanyUncheckedUpdateWithoutAssetsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2388,6 +2620,7 @@ export type CompanyUncheckedUpdateWithoutAssetsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2414,6 +2647,10 @@ export type CompanyCreateWithoutBillingLineItemsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2435,6 +2672,7 @@ export type CompanyCreateWithoutBillingLineItemsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -2461,6 +2699,10 @@ export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2482,6 +2724,7 @@ export type CompanyUncheckedCreateWithoutBillingLineItemsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -2524,6 +2767,10 @@ export type CompanyUpdateWithoutBillingLineItemsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2545,6 +2792,7 @@ export type CompanyUpdateWithoutBillingLineItemsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -2571,6 +2819,10 @@ export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2592,6 +2844,7 @@ export type CompanyUncheckedUpdateWithoutBillingLineItemsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2618,6 +2871,10 @@ export type CompanyCreateWithoutBlogPostsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2640,6 +2897,7 @@ export type CompanyCreateWithoutBlogPostsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -2665,6 +2923,10 @@ export type CompanyUncheckedCreateWithoutBlogPostsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2687,6 +2949,7 @@ export type CompanyUncheckedCreateWithoutBlogPostsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -2728,6 +2991,10 @@ export type CompanyUpdateWithoutBlogPostsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2750,6 +3017,7 @@ export type CompanyUpdateWithoutBlogPostsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -2775,6 +3043,10 @@ export type CompanyUncheckedUpdateWithoutBlogPostsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2797,6 +3069,7 @@ export type CompanyUncheckedUpdateWithoutBlogPostsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -2822,6 +3095,10 @@ export type CompanyCreateWithoutInstalledAppsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2844,6 +3121,7 @@ export type CompanyCreateWithoutInstalledAppsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -2869,6 +3147,10 @@ export type CompanyUncheckedCreateWithoutInstalledAppsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2891,6 +3173,7 @@ export type CompanyUncheckedCreateWithoutInstalledAppsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -2932,6 +3215,10 @@ export type CompanyUpdateWithoutInstalledAppsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2954,6 +3241,7 @@ export type CompanyUpdateWithoutInstalledAppsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -2979,6 +3267,10 @@ export type CompanyUncheckedUpdateWithoutInstalledAppsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3001,6 +3293,7 @@ export type CompanyUncheckedUpdateWithoutInstalledAppsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3026,6 +3319,10 @@ export type CompanyCreateWithoutIntegrationInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3048,6 +3345,7 @@ export type CompanyCreateWithoutIntegrationInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -3073,6 +3371,10 @@ export type CompanyUncheckedCreateWithoutIntegrationInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3095,6 +3397,7 @@ export type CompanyUncheckedCreateWithoutIntegrationInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -3136,6 +3439,10 @@ export type CompanyUpdateWithoutIntegrationInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3158,6 +3465,7 @@ export type CompanyUpdateWithoutIntegrationInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -3183,6 +3491,10 @@ export type CompanyUncheckedUpdateWithoutIntegrationInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3205,6 +3517,7 @@ export type CompanyUncheckedUpdateWithoutIntegrationInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3230,6 +3543,10 @@ export type CompanyCreateWithoutCustomersInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3252,6 +3569,7 @@ export type CompanyCreateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferCreateNestedManyWithoutCompanyInput
@@ -3277,6 +3595,10 @@ export type CompanyUncheckedCreateWithoutCustomersInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3299,6 +3621,7 @@ export type CompanyUncheckedCreateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCompanyInput
@@ -3340,6 +3663,10 @@ export type CompanyUpdateWithoutCustomersInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3362,6 +3689,7 @@ export type CompanyUpdateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUpdateManyWithoutCompanyNestedInput
@@ -3387,6 +3715,10 @@ export type CompanyUncheckedUpdateWithoutCustomersInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3409,6 +3741,7 @@ export type CompanyUncheckedUpdateWithoutCustomersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3434,6 +3767,10 @@ export type CompanyCreateWithoutSavedListingsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3456,6 +3793,7 @@ export type CompanyCreateWithoutSavedListingsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferCreateNestedManyWithoutCompanyInput
@@ -3481,6 +3819,10 @@ export type CompanyUncheckedCreateWithoutSavedListingsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3503,6 +3845,7 @@ export type CompanyUncheckedCreateWithoutSavedListingsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCompanyInput
@@ -3544,6 +3887,10 @@ export type CompanyUpdateWithoutSavedListingsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3566,6 +3913,7 @@ export type CompanyUpdateWithoutSavedListingsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUpdateManyWithoutCompanyNestedInput
@@ -3591,6 +3939,10 @@ export type CompanyUncheckedUpdateWithoutSavedListingsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3613,6 +3965,7 @@ export type CompanyUncheckedUpdateWithoutSavedListingsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3638,6 +3991,10 @@ export type CompanyCreateWithoutCustomerOffersInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3660,6 +4017,7 @@ export type CompanyCreateWithoutCustomerOffersInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -3685,6 +4043,10 @@ export type CompanyUncheckedCreateWithoutCustomerOffersInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3707,6 +4069,7 @@ export type CompanyUncheckedCreateWithoutCustomerOffersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -3748,6 +4111,10 @@ export type CompanyUpdateWithoutCustomerOffersInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3770,6 +4137,7 @@ export type CompanyUpdateWithoutCustomerOffersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -3795,6 +4163,10 @@ export type CompanyUncheckedUpdateWithoutCustomerOffersInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3817,6 +4189,7 @@ export type CompanyUncheckedUpdateWithoutCustomerOffersInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -3842,6 +4215,10 @@ export type CompanyCreateWithoutDepartmentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3864,6 +4241,7 @@ export type CompanyCreateWithoutDepartmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -3889,6 +4267,10 @@ export type CompanyUncheckedCreateWithoutDepartmentsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3911,6 +4293,7 @@ export type CompanyUncheckedCreateWithoutDepartmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -3952,6 +4335,10 @@ export type CompanyUpdateWithoutDepartmentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3974,6 +4361,7 @@ export type CompanyUpdateWithoutDepartmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -3999,6 +4387,10 @@ export type CompanyUncheckedUpdateWithoutDepartmentsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4021,6 +4413,7 @@ export type CompanyUncheckedUpdateWithoutDepartmentsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4046,6 +4439,10 @@ export type CompanyCreateWithoutEmployeesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4068,6 +4465,7 @@ export type CompanyCreateWithoutEmployeesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -4093,6 +4491,10 @@ export type CompanyUncheckedCreateWithoutEmployeesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4115,6 +4517,7 @@ export type CompanyUncheckedCreateWithoutEmployeesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -4156,6 +4559,10 @@ export type CompanyUpdateWithoutEmployeesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4178,6 +4585,7 @@ export type CompanyUpdateWithoutEmployeesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -4203,6 +4611,10 @@ export type CompanyUncheckedUpdateWithoutEmployeesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4225,6 +4637,7 @@ export type CompanyUncheckedUpdateWithoutEmployeesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4250,6 +4663,10 @@ export type CompanyCreateWithoutEstatesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4271,6 +4688,7 @@ export type CompanyCreateWithoutEstatesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -4297,6 +4715,10 @@ export type CompanyUncheckedCreateWithoutEstatesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4318,6 +4740,7 @@ export type CompanyUncheckedCreateWithoutEstatesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -4360,6 +4783,10 @@ export type CompanyUpdateWithoutEstatesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4381,6 +4808,7 @@ export type CompanyUpdateWithoutEstatesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -4407,6 +4835,10 @@ export type CompanyUncheckedUpdateWithoutEstatesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4428,6 +4860,7 @@ export type CompanyUncheckedUpdateWithoutEstatesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4454,6 +4887,10 @@ export type CompanyCreateWithoutLeadsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4475,6 +4912,7 @@ export type CompanyCreateWithoutLeadsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -4501,6 +4939,10 @@ export type CompanyUncheckedCreateWithoutLeadsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4522,6 +4964,7 @@ export type CompanyUncheckedCreateWithoutLeadsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -4564,6 +5007,10 @@ export type CompanyUpdateWithoutLeadsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4585,6 +5032,7 @@ export type CompanyUpdateWithoutLeadsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -4611,6 +5059,10 @@ export type CompanyUncheckedUpdateWithoutLeadsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4632,6 +5084,7 @@ export type CompanyUncheckedUpdateWithoutLeadsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4658,6 +5111,10 @@ export type CompanyCreateWithoutMembershipsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4679,6 +5136,7 @@ export type CompanyCreateWithoutMembershipsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -4705,6 +5163,10 @@ export type CompanyUncheckedCreateWithoutMembershipsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4726,6 +5188,7 @@ export type CompanyUncheckedCreateWithoutMembershipsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -4768,6 +5231,10 @@ export type CompanyUpdateWithoutMembershipsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4789,6 +5256,7 @@ export type CompanyUpdateWithoutMembershipsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -4815,6 +5283,10 @@ export type CompanyUncheckedUpdateWithoutMembershipsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4836,6 +5308,7 @@ export type CompanyUncheckedUpdateWithoutMembershipsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -4862,6 +5335,10 @@ export type CompanyCreateWithoutNotificationPreferencesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4884,6 +5361,7 @@ export type CompanyCreateWithoutNotificationPreferencesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -4909,6 +5387,10 @@ export type CompanyUncheckedCreateWithoutNotificationPreferencesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -4931,6 +5413,7 @@ export type CompanyUncheckedCreateWithoutNotificationPreferencesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -4972,6 +5455,10 @@ export type CompanyUpdateWithoutNotificationPreferencesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4994,6 +5481,7 @@ export type CompanyUpdateWithoutNotificationPreferencesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -5019,6 +5507,10 @@ export type CompanyUncheckedUpdateWithoutNotificationPreferencesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5041,6 +5533,7 @@ export type CompanyUncheckedUpdateWithoutNotificationPreferencesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5066,6 +5559,10 @@ export type CompanyCreateWithoutNotificationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5087,6 +5584,7 @@ export type CompanyCreateWithoutNotificationsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -5113,6 +5611,10 @@ export type CompanyUncheckedCreateWithoutNotificationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5134,6 +5636,7 @@ export type CompanyUncheckedCreateWithoutNotificationsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -5176,6 +5679,10 @@ export type CompanyUpdateWithoutNotificationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5197,6 +5704,7 @@ export type CompanyUpdateWithoutNotificationsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -5223,6 +5731,10 @@ export type CompanyUncheckedUpdateWithoutNotificationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5244,6 +5756,7 @@ export type CompanyUncheckedUpdateWithoutNotificationsInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5258,7 +5771,7 @@ export type CompanyUncheckedUpdateWithoutNotificationsInput = {
   installedApps?: Prisma.CompanyAppUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
-export type CompanyCreateWithoutPayrollEntriesInput = {
+export type CompanyCreateWithoutNotificationMessageLogsInput = {
   id?: string
   slug: string
   name: string
@@ -5270,6 +5783,10 @@ export type CompanyCreateWithoutPayrollEntriesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5299,13 +5816,14 @@ export type CompanyCreateWithoutPayrollEntriesInput = {
   blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
   departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
   employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryCreateNestedManyWithoutCompanyInput
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutCompanyInput
   integration?: Prisma.CompanyIntegrationCreateNestedOneWithoutCompanyInput
   projects?: Prisma.ProjectCreateNestedManyWithoutCompanyInput
   installedApps?: Prisma.CompanyAppCreateNestedManyWithoutCompanyInput
 }
 
-export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
+export type CompanyUncheckedCreateWithoutNotificationMessageLogsInput = {
   id?: string
   slug: string
   name: string
@@ -5317,6 +5835,10 @@ export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5339,6 +5861,231 @@ export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
+  plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
+  customerOffers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostUncheckedCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutCompanyInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationUncheckedCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutCompanyInput
+  installedApps?: Prisma.CompanyAppUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyCreateOrConnectWithoutNotificationMessageLogsInput = {
+  where: Prisma.CompanyWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedCreateWithoutNotificationMessageLogsInput>
+}
+
+export type CompanyUpsertWithoutNotificationMessageLogsInput = {
+  update: Prisma.XOR<Prisma.CompanyUpdateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedUpdateWithoutNotificationMessageLogsInput>
+  create: Prisma.XOR<Prisma.CompanyCreateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedCreateWithoutNotificationMessageLogsInput>
+  where?: Prisma.CompanyWhereInput
+}
+
+export type CompanyUpdateToOneWithWhereWithoutNotificationMessageLogsInput = {
+  where?: Prisma.CompanyWhereInput
+  data: Prisma.XOR<Prisma.CompanyUpdateWithoutNotificationMessageLogsInput, Prisma.CompanyUncheckedUpdateWithoutNotificationMessageLogsInput>
+}
+
+export type CompanyUpdateWithoutNotificationMessageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutCompanyNestedInput
+  estates?: Prisma.EstateUpdateManyWithoutCompanyNestedInput
+  plots?: Prisma.PlotUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
+  plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
+  customerOffers?: Prisma.CustomerOfferUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutCompanyNestedInput
+  installedApps?: Prisma.CompanyAppUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyUncheckedUpdateWithoutNotificationMessageLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  planTier?: Prisma.EnumCompanyPlanTierFieldUpdateOperationsInput | $Enums.CompanyPlanTier
+  planStatus?: Prisma.EnumCompanyPlanStatusFieldUpdateOperationsInput | $Enums.CompanyPlanStatus
+  planStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutCompanyNestedInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedUpdateManyWithoutCompanyNestedInput
+  website?: Prisma.WebsiteUncheckedUpdateOneWithoutCompanyNestedInput
+  tenantDomains?: Prisma.TenantDomainUncheckedUpdateManyWithoutCompanyNestedInput
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutCompanyNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutCompanyNestedInput
+  estates?: Prisma.EstateUncheckedUpdateManyWithoutCompanyNestedInput
+  plots?: Prisma.PlotUncheckedUpdateManyWithoutCompanyNestedInput
+  agents?: Prisma.AgentUncheckedUpdateManyWithoutCompanyNestedInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedUpdateManyWithoutCompanyNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCompanyNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCompanyNestedInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedUpdateManyWithoutCompanyNestedInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedUpdateManyWithoutCompanyNestedInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
+  teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
+  plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
+  savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
+  customerOffers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCompanyNestedInput
+  blogPosts?: Prisma.BlogPostUncheckedUpdateManyWithoutCompanyNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutCompanyNestedInput
+  employees?: Prisma.EmployeeUncheckedUpdateManyWithoutCompanyNestedInput
+  payrollEntries?: Prisma.PayrollEntryUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateManyWithoutCompanyNestedInput
+  integration?: Prisma.CompanyIntegrationUncheckedUpdateOneWithoutCompanyNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutCompanyNestedInput
+  installedApps?: Prisma.CompanyAppUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type CompanyCreateWithoutPayrollEntriesInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
+  isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetCreateNestedManyWithoutCompanyInput
+  estates?: Prisma.EstateCreateNestedManyWithoutCompanyInput
+  plots?: Prisma.PlotCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
+  plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
+  savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
+  customerOffers?: Prisma.CustomerOfferCreateNestedManyWithoutCompanyInput
+  blogPosts?: Prisma.BlogPostCreateNestedManyWithoutCompanyInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutCompanyInput
+  employees?: Prisma.EmployeeCreateNestedManyWithoutCompanyInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedManyWithoutCompanyInput
+  integration?: Prisma.CompanyIntegrationCreateNestedOneWithoutCompanyInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutCompanyInput
+  installedApps?: Prisma.CompanyAppCreateNestedManyWithoutCompanyInput
+}
+
+export type CompanyUncheckedCreateWithoutPayrollEntriesInput = {
+  id?: string
+  slug: string
+  name: string
+  market?: string | null
+  logoUrl?: string | null
+  planTier?: $Enums.CompanyPlanTier
+  planStatus?: $Enums.CompanyPlanStatus
+  planStartedAt?: Date | string | null
+  planEndsAt?: Date | string | null
+  enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
+  isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutCompanyInput
+  siteConfigurations?: Prisma.SiteConfigurationUncheckedCreateNestedManyWithoutCompanyInput
+  website?: Prisma.WebsiteUncheckedCreateNestedOneWithoutCompanyInput
+  tenantDomains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutCompanyInput
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutCompanyInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutCompanyInput
+  estates?: Prisma.EstateUncheckedCreateNestedManyWithoutCompanyInput
+  plots?: Prisma.PlotUncheckedCreateNestedManyWithoutCompanyInput
+  agents?: Prisma.AgentUncheckedCreateNestedManyWithoutCompanyInput
+  templateLicenses?: Prisma.TenantTemplateLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  billingLineItems?: Prisma.BillingLineItemUncheckedCreateNestedManyWithoutCompanyInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCompanyInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCompanyInput
+  stockImageLicenses?: Prisma.TenantStockImageLicenseUncheckedCreateNestedManyWithoutCompanyInput
+  aiUsageLogs?: Prisma.AiUsageLogUncheckedCreateNestedManyWithoutCompanyInput
+  aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
+  teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -5380,6 +6127,10 @@ export type CompanyUpdateWithoutPayrollEntriesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5402,6 +6153,7 @@ export type CompanyUpdateWithoutPayrollEntriesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -5427,6 +6179,10 @@ export type CompanyUncheckedUpdateWithoutPayrollEntriesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5449,6 +6205,7 @@ export type CompanyUncheckedUpdateWithoutPayrollEntriesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5474,6 +6231,10 @@ export type CompanyCreateWithoutPlotsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5495,6 +6256,7 @@ export type CompanyCreateWithoutPlotsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -5521,6 +6283,10 @@ export type CompanyUncheckedCreateWithoutPlotsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5542,6 +6308,7 @@ export type CompanyUncheckedCreateWithoutPlotsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -5584,6 +6351,10 @@ export type CompanyUpdateWithoutPlotsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5605,6 +6376,7 @@ export type CompanyUpdateWithoutPlotsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -5631,6 +6403,10 @@ export type CompanyUncheckedUpdateWithoutPlotsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5652,6 +6428,7 @@ export type CompanyUncheckedUpdateWithoutPlotsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5678,6 +6455,10 @@ export type CompanyCreateWithoutPlotReservationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5700,6 +6481,7 @@ export type CompanyCreateWithoutPlotReservationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferCreateNestedManyWithoutCompanyInput
@@ -5725,6 +6507,10 @@ export type CompanyUncheckedCreateWithoutPlotReservationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5747,6 +6533,7 @@ export type CompanyUncheckedCreateWithoutPlotReservationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
   customerOffers?: Prisma.CustomerOfferUncheckedCreateNestedManyWithoutCompanyInput
@@ -5788,6 +6575,10 @@ export type CompanyUpdateWithoutPlotReservationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5810,6 +6601,7 @@ export type CompanyUpdateWithoutPlotReservationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUpdateManyWithoutCompanyNestedInput
@@ -5835,6 +6627,10 @@ export type CompanyUncheckedUpdateWithoutPlotReservationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5857,6 +6653,7 @@ export type CompanyUncheckedUpdateWithoutPlotReservationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
   customerOffers?: Prisma.CustomerOfferUncheckedUpdateManyWithoutCompanyNestedInput
@@ -5882,6 +6679,10 @@ export type CompanyCreateWithoutProjectsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5904,6 +6705,7 @@ export type CompanyCreateWithoutProjectsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -5929,6 +6731,10 @@ export type CompanyUncheckedCreateWithoutProjectsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -5951,6 +6757,7 @@ export type CompanyUncheckedCreateWithoutProjectsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -5992,6 +6799,10 @@ export type CompanyUpdateWithoutProjectsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6014,6 +6825,7 @@ export type CompanyUpdateWithoutProjectsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -6039,6 +6851,10 @@ export type CompanyUncheckedUpdateWithoutProjectsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6061,6 +6877,7 @@ export type CompanyUncheckedUpdateWithoutProjectsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6086,6 +6903,10 @@ export type CompanyCreateWithoutPropertiesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6107,6 +6928,7 @@ export type CompanyCreateWithoutPropertiesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -6133,6 +6955,10 @@ export type CompanyUncheckedCreateWithoutPropertiesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6154,6 +6980,7 @@ export type CompanyUncheckedCreateWithoutPropertiesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -6196,6 +7023,10 @@ export type CompanyUpdateWithoutPropertiesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6217,6 +7048,7 @@ export type CompanyUpdateWithoutPropertiesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -6243,6 +7075,10 @@ export type CompanyUncheckedUpdateWithoutPropertiesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6264,6 +7100,7 @@ export type CompanyUncheckedUpdateWithoutPropertiesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6290,6 +7127,10 @@ export type CompanyCreateWithoutSiteConfigurationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6311,6 +7152,7 @@ export type CompanyCreateWithoutSiteConfigurationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -6337,6 +7179,10 @@ export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6358,6 +7204,7 @@ export type CompanyUncheckedCreateWithoutSiteConfigurationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -6400,6 +7247,10 @@ export type CompanyUpdateWithoutSiteConfigurationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6421,6 +7272,7 @@ export type CompanyUpdateWithoutSiteConfigurationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -6447,6 +7299,10 @@ export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6468,6 +7324,7 @@ export type CompanyUncheckedUpdateWithoutSiteConfigurationsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6494,6 +7351,10 @@ export type CompanyCreateWithoutStockImageLicensesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6515,6 +7376,7 @@ export type CompanyCreateWithoutStockImageLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -6541,6 +7403,10 @@ export type CompanyUncheckedCreateWithoutStockImageLicensesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6562,6 +7428,7 @@ export type CompanyUncheckedCreateWithoutStockImageLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -6604,6 +7471,10 @@ export type CompanyUpdateWithoutStockImageLicensesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6625,6 +7496,7 @@ export type CompanyUpdateWithoutStockImageLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -6651,6 +7523,10 @@ export type CompanyUncheckedUpdateWithoutStockImageLicensesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6672,6 +7548,7 @@ export type CompanyUncheckedUpdateWithoutStockImageLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6698,6 +7575,10 @@ export type CompanyCreateWithoutTeamInvitesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6719,6 +7600,7 @@ export type CompanyCreateWithoutTeamInvitesInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerCreateNestedManyWithoutCompanyInput
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -6745,6 +7627,10 @@ export type CompanyUncheckedCreateWithoutTeamInvitesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6766,6 +7652,7 @@ export type CompanyUncheckedCreateWithoutTeamInvitesInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedCreateNestedManyWithoutCompanyInput
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -6808,6 +7695,10 @@ export type CompanyUpdateWithoutTeamInvitesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6829,6 +7720,7 @@ export type CompanyUpdateWithoutTeamInvitesInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUpdateManyWithoutCompanyNestedInput
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -6855,6 +7747,10 @@ export type CompanyUncheckedUpdateWithoutTeamInvitesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6876,6 +7772,7 @@ export type CompanyUncheckedUpdateWithoutTeamInvitesInput = {
   aiCreditLedger?: Prisma.AiCreditLedgerUncheckedUpdateManyWithoutCompanyNestedInput
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -6902,6 +7799,10 @@ export type CompanyCreateWithoutTenantDomainsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6923,6 +7824,7 @@ export type CompanyCreateWithoutTenantDomainsInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -6949,6 +7851,10 @@ export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -6970,6 +7876,7 @@ export type CompanyUncheckedCreateWithoutTenantDomainsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -7012,6 +7919,10 @@ export type CompanyUpdateWithoutTenantDomainsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7033,6 +7944,7 @@ export type CompanyUpdateWithoutTenantDomainsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -7059,6 +7971,10 @@ export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7080,6 +7996,7 @@ export type CompanyUncheckedUpdateWithoutTenantDomainsInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -7106,6 +8023,10 @@ export type CompanyCreateWithoutTemplateLicensesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -7127,6 +8048,7 @@ export type CompanyCreateWithoutTemplateLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -7153,6 +8075,10 @@ export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -7174,6 +8100,7 @@ export type CompanyUncheckedCreateWithoutTemplateLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -7216,6 +8143,10 @@ export type CompanyUpdateWithoutTemplateLicensesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7237,6 +8168,7 @@ export type CompanyUpdateWithoutTemplateLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -7263,6 +8195,10 @@ export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7284,6 +8220,7 @@ export type CompanyUncheckedUpdateWithoutTemplateLicensesInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -7310,6 +8247,10 @@ export type CompanyCreateWithoutWebsiteInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -7331,6 +8272,7 @@ export type CompanyCreateWithoutWebsiteInput = {
   analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingCreateNestedManyWithoutCompanyInput
@@ -7357,6 +8299,10 @@ export type CompanyUncheckedCreateWithoutWebsiteInput = {
   planEndsAt?: Date | string | null
   enabledApps?: Prisma.CompanyCreateenabledAppsInput | string[]
   isActive?: boolean
+  dataClassification?: $Enums.QaDataClassification
+  qaSourceDomain?: string | null
+  qaMarkedAt?: Date | string | null
+  qaPurgeStartedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -7378,6 +8324,7 @@ export type CompanyUncheckedCreateWithoutWebsiteInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutCompanyInput
   teamInvites?: Prisma.TeamInviteUncheckedCreateNestedManyWithoutCompanyInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutCompanyInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedCreateNestedManyWithoutCompanyInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutCompanyInput
   plotReservations?: Prisma.PlotReservationUncheckedCreateNestedManyWithoutCompanyInput
   savedListings?: Prisma.SavedListingUncheckedCreateNestedManyWithoutCompanyInput
@@ -7420,6 +8367,10 @@ export type CompanyUpdateWithoutWebsiteInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7441,6 +8392,7 @@ export type CompanyUpdateWithoutWebsiteInput = {
   analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUpdateManyWithoutCompanyNestedInput
@@ -7467,6 +8419,10 @@ export type CompanyUncheckedUpdateWithoutWebsiteInput = {
   planEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enabledApps?: Prisma.CompanyUpdateenabledAppsInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataClassification?: Prisma.EnumQaDataClassificationFieldUpdateOperationsInput | $Enums.QaDataClassification
+  qaSourceDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaMarkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  qaPurgeStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7488,6 +8444,7 @@ export type CompanyUncheckedUpdateWithoutWebsiteInput = {
   analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutCompanyNestedInput
   teamInvites?: Prisma.TeamInviteUncheckedUpdateManyWithoutCompanyNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutCompanyNestedInput
+  notificationMessageLogs?: Prisma.NotificationMessageLogUncheckedUpdateManyWithoutCompanyNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutCompanyNestedInput
   plotReservations?: Prisma.PlotReservationUncheckedUpdateManyWithoutCompanyNestedInput
   savedListings?: Prisma.SavedListingUncheckedUpdateManyWithoutCompanyNestedInput
@@ -7526,6 +8483,7 @@ export type CompanyCountOutputType = {
   analyticsEvents: number
   teamInvites: number
   notifications: number
+  notificationMessageLogs: number
   customers: number
   plotReservations: number
   savedListings: number
@@ -7558,6 +8516,7 @@ export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   analyticsEvents?: boolean | CompanyCountOutputTypeCountAnalyticsEventsArgs
   teamInvites?: boolean | CompanyCountOutputTypeCountTeamInvitesArgs
   notifications?: boolean | CompanyCountOutputTypeCountNotificationsArgs
+  notificationMessageLogs?: boolean | CompanyCountOutputTypeCountNotificationMessageLogsArgs
   customers?: boolean | CompanyCountOutputTypeCountCustomersArgs
   plotReservations?: boolean | CompanyCountOutputTypeCountPlotReservationsArgs
   savedListings?: boolean | CompanyCountOutputTypeCountSavedListingsArgs
@@ -7710,6 +8669,13 @@ export type CompanyCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime
 /**
  * CompanyCountOutputType without action
  */
+export type CompanyCountOutputTypeCountNotificationMessageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationMessageLogWhereInput
+}
+
+/**
+ * CompanyCountOutputType without action
+ */
 export type CompanyCountOutputTypeCountCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CustomerWhereInput
 }
@@ -7797,6 +8763,10 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   planEndsAt?: boolean
   enabledApps?: boolean
   isActive?: boolean
+  dataClassification?: boolean
+  qaSourceDomain?: boolean
+  qaMarkedAt?: boolean
+  qaPurgeStartedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -7819,6 +8789,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   analyticsEvents?: boolean | Prisma.Company$analyticsEventsArgs<ExtArgs>
   teamInvites?: boolean | Prisma.Company$teamInvitesArgs<ExtArgs>
   notifications?: boolean | Prisma.Company$notificationsArgs<ExtArgs>
+  notificationMessageLogs?: boolean | Prisma.Company$notificationMessageLogsArgs<ExtArgs>
   customers?: boolean | Prisma.Company$customersArgs<ExtArgs>
   plotReservations?: boolean | Prisma.Company$plotReservationsArgs<ExtArgs>
   savedListings?: boolean | Prisma.Company$savedListingsArgs<ExtArgs>
@@ -7846,6 +8817,10 @@ export type CompanySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   planEndsAt?: boolean
   enabledApps?: boolean
   isActive?: boolean
+  dataClassification?: boolean
+  qaSourceDomain?: boolean
+  qaMarkedAt?: boolean
+  qaPurgeStartedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -7863,6 +8838,10 @@ export type CompanySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   planEndsAt?: boolean
   enabledApps?: boolean
   isActive?: boolean
+  dataClassification?: boolean
+  qaSourceDomain?: boolean
+  qaMarkedAt?: boolean
+  qaPurgeStartedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -7880,12 +8859,16 @@ export type CompanySelectScalar = {
   planEndsAt?: boolean
   enabledApps?: boolean
   isActive?: boolean
+  dataClassification?: boolean
+  qaSourceDomain?: boolean
+  qaMarkedAt?: boolean
+  qaPurgeStartedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "market" | "logoUrl" | "planTier" | "planStatus" | "planStartedAt" | "planEndsAt" | "enabledApps" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["company"]>
+export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "market" | "logoUrl" | "planTier" | "planStatus" | "planStartedAt" | "planEndsAt" | "enabledApps" | "isActive" | "dataClassification" | "qaSourceDomain" | "qaMarkedAt" | "qaPurgeStartedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["company"]>
 export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.Company$membershipsArgs<ExtArgs>
   siteConfigurations?: boolean | Prisma.Company$siteConfigurationsArgs<ExtArgs>
@@ -7906,6 +8889,7 @@ export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   analyticsEvents?: boolean | Prisma.Company$analyticsEventsArgs<ExtArgs>
   teamInvites?: boolean | Prisma.Company$teamInvitesArgs<ExtArgs>
   notifications?: boolean | Prisma.Company$notificationsArgs<ExtArgs>
+  notificationMessageLogs?: boolean | Prisma.Company$notificationMessageLogsArgs<ExtArgs>
   customers?: boolean | Prisma.Company$customersArgs<ExtArgs>
   plotReservations?: boolean | Prisma.Company$plotReservationsArgs<ExtArgs>
   savedListings?: boolean | Prisma.Company$savedListingsArgs<ExtArgs>
@@ -7945,6 +8929,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     analyticsEvents: Prisma.$AnalyticsEventPayload<ExtArgs>[]
     teamInvites: Prisma.$TeamInvitePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    notificationMessageLogs: Prisma.$NotificationMessageLogPayload<ExtArgs>[]
     customers: Prisma.$CustomerPayload<ExtArgs>[]
     plotReservations: Prisma.$PlotReservationPayload<ExtArgs>[]
     savedListings: Prisma.$SavedListingPayload<ExtArgs>[]
@@ -7970,6 +8955,10 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     planEndsAt: Date | null
     enabledApps: string[]
     isActive: boolean
+    dataClassification: $Enums.QaDataClassification
+    qaSourceDomain: string | null
+    qaMarkedAt: Date | null
+    qaPurgeStartedAt: Date | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -8386,6 +9375,7 @@ export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends runtime.
   analyticsEvents<T extends Prisma.Company$analyticsEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$analyticsEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnalyticsEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teamInvites<T extends Prisma.Company$teamInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$teamInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Company$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notificationMessageLogs<T extends Prisma.Company$notificationMessageLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$notificationMessageLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationMessageLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customers<T extends Prisma.Company$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$customersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plotReservations<T extends Prisma.Company$plotReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$plotReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlotReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savedListings<T extends Prisma.Company$savedListingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$savedListingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8438,6 +9428,10 @@ export interface CompanyFieldRefs {
   readonly planEndsAt: Prisma.FieldRef<"Company", 'DateTime'>
   readonly enabledApps: Prisma.FieldRef<"Company", 'String[]'>
   readonly isActive: Prisma.FieldRef<"Company", 'Boolean'>
+  readonly dataClassification: Prisma.FieldRef<"Company", 'QaDataClassification'>
+  readonly qaSourceDomain: Prisma.FieldRef<"Company", 'String'>
+  readonly qaMarkedAt: Prisma.FieldRef<"Company", 'DateTime'>
+  readonly qaPurgeStartedAt: Prisma.FieldRef<"Company", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Company", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Company", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Company", 'DateTime'>
@@ -9282,6 +10276,30 @@ export type Company$notificationsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * Company.notificationMessageLogs
+ */
+export type Company$notificationMessageLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotificationMessageLog
+   */
+  select?: Prisma.NotificationMessageLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NotificationMessageLog
+   */
+  omit?: Prisma.NotificationMessageLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationMessageLogInclude<ExtArgs> | null
+  where?: Prisma.NotificationMessageLogWhereInput
+  orderBy?: Prisma.NotificationMessageLogOrderByWithRelationInput | Prisma.NotificationMessageLogOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationMessageLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationMessageLogScalarFieldEnum | Prisma.NotificationMessageLogScalarFieldEnum[]
 }
 
 /**

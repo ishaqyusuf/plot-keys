@@ -12,9 +12,10 @@
  */
 
 import { getRegisterFooterConfig } from "@plotkeys/section-registry";
+import { cn } from "@plotkeys/utils";
 import Link from "next/link";
 
-type RegisterFooterProps = {
+type Props = {
   companyName: string;
   hrefPrefix?: string;
   hrefQuery?: string;
@@ -42,7 +43,7 @@ export function RegisterFooter({
   hrefPrefix,
   hrefQuery,
   templateKey,
-}: RegisterFooterProps) {
+}: Props) {
   const footer = getRegisterFooterConfig(templateKey);
   const year = new Date().getFullYear();
 
@@ -76,12 +77,11 @@ export function RegisterFooter({
 
         {/* Tagline + copyright */}
         <div
-          className={[
+          className={cn(
             "flex flex-col gap-3 md:flex-row md:items-center md:justify-between",
-            footer.groups.length > 0 && "mt-12 border-t border-[color:var(--pk-border,#e2e8f0)] pt-8",
-          ]
-            .filter(Boolean)
-            .join(" ")}
+            footer.groups.length > 0 &&
+              "mt-12 border-t border-[color:var(--pk-border,#e2e8f0)] pt-8",
+          )}
         >
           <p className="text-sm text-[color:var(--pk-muted-foreground,#64748b)]">
             {footer.tagline}

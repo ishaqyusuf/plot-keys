@@ -1,11 +1,16 @@
 import type { Prisma } from "../generated/prisma/client";
 import {
   ProjectStatus as ProjectStatusEnum,
-  ProjectType as ProjectTypeEnum,
   type ProjectStatus as ProjectStatusValue,
+  ProjectType as ProjectTypeEnum,
   type ProjectType as ProjectTypeValue,
 } from "../generated/prisma/enums";
 import type { Db } from "../prisma";
+import {
+  createPaginatedListResult,
+  normalizeListOffsetCursor,
+  normalizeListPageSize,
+} from "./list-contract";
 
 // ---------------------------------------------------------------------------
 // Project CRUD
@@ -49,19 +54,28 @@ export async function listProjectsForCompany(
   companyId: string,
   options: {
     cursor?: string | number | null;
+    end?: string | null;
     q?: string | null;
     size?: string | number | null;
     sort?: string[] | null;
+    start?: string | null;
     status?: ProjectStatusValue;
     take?: number;
   } = {},
 ) {
   const query = options.q?.trim();
-  const size = normalizePageSize(options.size ?? options.take);
-  const offset = normalizeCursor(options.cursor);
+  const endDate = parseDateBoundary(options.end, "end");
+  const size = normalizeListPageSize(options.size ?? options.take);
+  const offset = normalizeListOffsetCursor(options.cursor);
+  const startDate = parseDateBoundary(options.start, "start");
+  const timelineFilters: Prisma.ProjectWhereInput[] = [
+    ...(endDate ? [{ startDate: { lte: endDate } }] : []),
+    ...(startDate ? [{ targetCompletionDate: { gte: startDate } }] : []),
+  ];
   const where: Prisma.ProjectWhereInput = {
     companyId,
     deletedAt: null,
+    ...(timelineFilters.length > 0 ? { AND: timelineFilters } : {}),
     ...(options.status ? { status: options.status } : {}),
     ...(query ? { OR: getProjectSearchFilters(query) } : {}),
   };
@@ -86,37 +100,21 @@ export async function listProjectsForCompany(
       where,
     }),
   ]);
-  const nextCursor = offset + size < count ? String(offset + size) : null;
-
-  return {
-    data,
-    meta: {
-      count,
-      cursor: nextCursor,
-      hasNextPage: nextCursor !== null,
-      size,
-    },
-  };
+  return createPaginatedListResult(data, { count, offset, size });
 }
 
-function normalizePageSize(size: string | number | null | undefined) {
-  const value = Number(size ?? 50);
-
-  if (!Number.isFinite(value)) {
-    return 50;
+function parseDateBoundary(
+  value: string | null | undefined,
+  boundary: "end" | "start",
+) {
+  if (!value) {
+    return null;
   }
 
-  return Math.min(Math.max(Math.trunc(value), 1), 100);
-}
+  const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+  const date = new Date(`${value}${suffix}`);
 
-function normalizeCursor(cursor: string | number | null | undefined) {
-  const value = Number(cursor ?? 0);
-
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.max(Math.trunc(value), 0);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getProjectSearchFilters(query: string): Prisma.ProjectWhereInput[] {
@@ -356,7 +354,7 @@ export async function countProjectsByStatus(db: Db, companyId: string) {
   };
   for (const row of rows) {
     result[row.status] = row._count.id;
-    result.total += row._count.id;
+    result.total = (result.total ?? 0) + row._count.id;
   }
   return result;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@plotkeys/ui/cn";
 import { Skeleton } from "@plotkeys/ui/skeleton";
 import {
   Table,
@@ -9,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@plotkeys/ui/table";
-import { cn } from "@plotkeys/utils";
 import type {
   ColumnDef,
   ColumnSizingState,

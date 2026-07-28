@@ -1,13 +1,21 @@
 "use client";
 
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { Label } from "@plotkeys/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { useProjectCacheInvalidation } from "@/hooks/use-project-cache-invalidation";
-import { useTRPC } from "../../trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -41,6 +49,8 @@ const accessLevelLabels: Record<string, string> = {
   overview: "Overview",
 };
 
+const emptyCustomerValue = "none";
+
 // ---------------------------------------------------------------------------
 // Customer Access list
 // ---------------------------------------------------------------------------
@@ -66,7 +76,7 @@ export function CustomerAccessList({
       {accessList.map((access) => (
         <div
           key={access.id}
-          className="flex items-center justify-between rounded-md border p-3"
+          className="flex items-center justify-between border p-3"
         >
           <div>
             <div className="flex items-center gap-2">
@@ -82,19 +92,20 @@ export function CustomerAccessList({
               {access.customer.phone ? ` · ${access.customer.phone}` : ""}
             </p>
           </div>
-          <Button
-            size="sm"
+          <SubmitButton
             variant="destructive"
-            disabled={revokeMutation.isPending}
+            size="sm"
+            isSubmitting={revokeMutation.isPending}
             onClick={() =>
               revokeMutation.mutate({
                 projectId,
                 customerId: access.customer.id,
               })
             }
+            type="button"
           >
-            {revokeMutation.isPending ? "…" : "Revoke"}
-          </Button>
+            Revoke
+          </SubmitButton>
         </div>
       ))}
     </div>
@@ -122,6 +133,7 @@ export function GrantCustomerAccessForm({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const [customerId, setCustomerId] = useState(emptyCustomerValue);
 
   const availableCustomers = customers.filter(
     (c) => !grantedCustomerIds.has(c.id),
@@ -140,57 +152,64 @@ export function GrantCustomerAccessForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const customerId = String(fd.get("customerId") ?? "").trim();
-    if (!customerId) return;
+    const selectedCustomerId =
+      customerId === emptyCustomerValue ? "" : customerId;
+    if (!selectedCustomerId) return;
 
     await grantMutation.mutateAsync({
       projectId,
-      customerId,
+      customerId: selectedCustomerId,
       level:
         (String(fd.get("level") ?? "") as "overview" | "detailed") ||
         "overview",
     });
 
+    setCustomerId(emptyCustomerValue);
     e.currentTarget.reset();
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div>
         <Label htmlFor="accessCustomer">Customer</Label>
-        <select
-          id="accessCustomer"
+        <Select
           name="customerId"
-          required
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+          onValueChange={setCustomerId}
+          value={customerId}
         >
-          <option value="">Select customer…</option>
-          {availableCustomers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-              {c.email ? ` (${c.email})` : ""}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="accessCustomer" className="w-full">
+            <SelectValue placeholder="Select customer…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={emptyCustomerValue}>Select customer…</SelectItem>
+            {availableCustomers.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+                {c.email ? ` (${c.email})` : ""}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label htmlFor="accessLevel">Access Level</Label>
-        <select
-          id="accessLevel"
-          name="level"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="overview">Overview</option>
-          <option value="detailed">Detailed</option>
-        </select>
+        <Select defaultValue="overview" name="level">
+          <SelectTrigger id="accessLevel" className="w-full">
+            <SelectValue placeholder="Select access level" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="overview">Overview</SelectItem>
+            <SelectItem value="detailed">Detailed</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex items-end">
-        <Button disabled={grantMutation.isPending} type="submit">
-          {grantMutation.isPending ? "Granting…" : "Grant Access"}
-        </Button>
+        <SubmitButton
+          isSubmitting={grantMutation.isPending}
+          disabled={customerId === emptyCustomerValue}
+        >
+          Grant Access
+        </SubmitButton>
       </div>
     </form>
   );
@@ -215,6 +234,7 @@ export function SendNoticeForm({
       onSuccess: invalidateProjectCache,
     }),
   );
+  const [customerId, setCustomerId] = useState(emptyCustomerValue);
 
   if (accessList.length === 0) {
     return null;
@@ -223,41 +243,44 @@ export function SendNoticeForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const customerId = String(fd.get("customerId") ?? "").trim();
+    const selectedCustomerId =
+      customerId === emptyCustomerValue ? "" : customerId;
     const title = String(fd.get("title") ?? "").trim();
     const body = String(fd.get("body") ?? "").trim();
-    if (!customerId || !title || !body) return;
+    if (!selectedCustomerId || !title || !body) return;
 
     await createMutation.mutateAsync({
       projectId,
-      customerId,
+      customerId: selectedCustomerId,
       title,
       body,
     });
 
+    setCustomerId(emptyCustomerValue);
     e.currentTarget.reset();
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
         <Label htmlFor="noticeCustomer">Send Notice To</Label>
-        <select
-          id="noticeCustomer"
+        <Select
           name="customerId"
-          required
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+          onValueChange={setCustomerId}
+          value={customerId}
         >
-          <option value="">Select customer…</option>
-          {accessList.map((a) => (
-            <option key={a.customer.id} value={a.customer.id}>
-              {a.customer.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="noticeCustomer" className="w-full">
+            <SelectValue placeholder="Select customer…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={emptyCustomerValue}>Select customer…</SelectItem>
+            {accessList.map((a) => (
+              <SelectItem key={a.customer.id} value={a.customer.id}>
+                {a.customer.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label htmlFor="noticeTitle">Title *</Label>
@@ -278,9 +301,12 @@ export function SendNoticeForm({
         />
       </div>
       <div className="sm:col-span-2">
-        <Button disabled={createMutation.isPending} type="submit">
-          {createMutation.isPending ? "Sending…" : "Send Notice"}
-        </Button>
+        <SubmitButton
+          isSubmitting={createMutation.isPending}
+          disabled={customerId === emptyCustomerValue}
+        >
+          Send Notice
+        </SubmitButton>
       </div>
     </form>
   );

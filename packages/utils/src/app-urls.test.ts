@@ -10,6 +10,7 @@ const originalEnv = {
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_DASHBOARD_URL: process.env.NEXT_PUBLIC_DASHBOARD_URL,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_SANDBOX_URL: process.env.NEXT_PUBLIC_SANDBOX_URL,
   NEXT_PUBLIC_TENANT_SITE_URL: process.env.NEXT_PUBLIC_TENANT_SITE_URL,
   PLOTKEYS_ENV_MODE: process.env.PLOTKEYS_ENV_MODE,
 };
@@ -39,11 +40,13 @@ describe("app URL production profile", () => {
     process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
     process.env.NEXT_PUBLIC_DASHBOARD_URL = "https://app.example.com";
     process.env.NEXT_PUBLIC_SITE_URL = "https://example.com";
+    process.env.NEXT_PUBLIC_SANDBOX_URL = "https://sandbox.example.com";
     process.env.NEXT_PUBLIC_TENANT_SITE_URL = "https://tenant.example.com";
 
     expect(getDevAppUrlStrings()).toMatchObject({
       api: "https://api.example.com",
       dashboard: "https://app.example.com",
+      sandbox: "https://sandbox.example.com",
       site: "https://example.com",
       tenantSite: "https://tenant.example.com",
     });
@@ -54,11 +57,13 @@ describe("app URL production profile", () => {
     process.env.NEXT_PUBLIC_API_URL = "";
     process.env.NEXT_PUBLIC_DASHBOARD_URL = "";
     process.env.NEXT_PUBLIC_SITE_URL = "";
+    process.env.NEXT_PUBLIC_SANDBOX_URL = "";
     process.env.NEXT_PUBLIC_TENANT_SITE_URL = "";
 
     expect(getDevAppUrls()).toMatchObject({
       api: "localhost:3902",
       dashboard: "localhost:3901",
+      sandbox: "localhost:3909",
       site: "localhost:3900",
       tenantSite: "localhost:3903",
     });

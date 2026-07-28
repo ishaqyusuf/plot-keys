@@ -28,6 +28,7 @@
   "devDependencies": {
     "@plotkeys/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "^4.1.0",
+    "@types/bun": "^1.3.14",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

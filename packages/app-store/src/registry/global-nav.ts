@@ -10,7 +10,12 @@ export const GLOBAL_TOP_ITEMS: GlobalNavSection = {
   items: [
     { href: "/", icon: "Home", label: "Dashboard" },
     { href: "/builder", icon: "Paintbrush", label: "Builder" },
-    { href: "/template-sandbox", icon: "Paintbrush", label: "Sandbox" },
+    {
+      externalApp: "sandbox",
+      href: "/template-sandbox",
+      icon: "Paintbrush",
+      label: "Sandbox",
+    },
     { href: "/live", icon: "Globe", label: "Live Preview" },
   ],
 };

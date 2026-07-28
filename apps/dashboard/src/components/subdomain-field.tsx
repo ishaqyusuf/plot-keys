@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@plotkeys/ui/card";
 import {
   Field,
   FieldDescription,
@@ -21,7 +20,7 @@ import {
 import type { ComponentProps } from "react";
 import { useEffect, useId, useState } from "react";
 
-type SubdomainFieldProps = {
+type Props = {
   defaultValue?: string;
   description?: string;
   id?: string;
@@ -46,7 +45,7 @@ export function SubdomainField({
   inputProps,
   name = "subdomain",
   value,
-}: SubdomainFieldProps) {
+}: Props) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const [subdomain, setSubdomain] = useState(value ?? defaultValue);
@@ -74,7 +73,7 @@ export function SubdomainField({
             }}
             placeholder="astergrove"
             required
-            value={value}
+            value={subdomain}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupText>.{plotkeysRootDomain}</InputGroupText>
@@ -82,21 +81,17 @@ export function SubdomainField({
         </InputGroup>
         <FieldDescription>{description}</FieldDescription>
       </Field>
-      <Card className="bg-muted/40">
-        <CardHeader className="px-4 pt-4 pb-0">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Hostname preview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-1 px-4 pb-4 text-sm text-muted-foreground">
+      <div className="border border-border bg-card p-4 text-sm">
+        <p className="font-medium text-foreground">Hostname preview</p>
+        <div className="mt-2 flex flex-col gap-1 text-muted-foreground">
           <p>
             Website: <strong>{websiteHostname}</strong>
           </p>
           <p>
             Dashboard: <strong>{dashboardHostname}</strong>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </FieldGroup>
   );
 }

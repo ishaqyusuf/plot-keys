@@ -1,57 +1,59 @@
 "use client";
 
 import { Button } from "@plotkeys/ui/button";
-import { UsersIcon } from "lucide-react";
-import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
+import {
+  EmptyState as CoreEmptyState,
+  NoResults as CoreNoResults,
+} from "@/components/tables/core";
+import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 
-type CustomersEmptyStateProps = {
+type Props = {
   canManage: boolean;
-  statusFilter?: string;
 };
 
-export function CustomersEmptyState({
-  canManage,
-  statusFilter,
-}: CustomersEmptyStateProps) {
+export function EmptyState({ canManage }: Props) {
   const { setParams } = useCustomerParams();
 
   return (
-    <DashboardEmptyState
-      description={
-        statusFilter
-          ? `No ${statusFilter} customers yet.`
-          : "Add customers directly or convert qualified leads to start building the pipeline."
-      }
-      icon={<UsersIcon className="size-5" />}
-      title="No customers here yet"
-      actions={
+    <CoreEmptyState
+      action={
         canManage ? (
           <Button
-            onClick={() => setParams({ createCustomer: true })}
-            size="sm"
-            type="button"
             variant="outline"
+            onClick={() => setParams({ createCustomer: true })}
           >
-            Add customer
+            Create customer
           </Button>
         ) : null
       }
+      description={
+        <>
+          You haven't created any customers yet. <br />
+          Go ahead and create your first one.
+        </>
+      }
+      title="No customers"
     />
   );
 }
 
-export function CustomersNoResults({ onClear }: { onClear: () => void }) {
+export function NoResults() {
+  const { setFilter } = useCustomerFilterParams();
+  const { setParams } = useCustomerParams();
+
   return (
-    <DashboardEmptyState
-      actions={
-        <Button onClick={onClear} size="sm" type="button" variant="outline">
-          Clear filters
-        </Button>
-      }
-      description="Try another search term or remove the active filters."
-      icon={<UsersIcon className="size-5" />}
-      title="No matching customers"
+    <CoreNoResults
+      onClear={() => {
+        setParams(null);
+        void setFilter({
+          end: null,
+          filter: null,
+          q: null,
+          sort: null,
+          start: null,
+        });
+      }}
     />
   );
 }

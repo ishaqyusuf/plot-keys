@@ -10,18 +10,19 @@ export const localAuthOrigins = [
   "http://localhost:3900",
   "http://localhost:3901",
   "http://localhost:3903",
+  "http://localhost:3909",
   "http://127.0.0.1:3900",
   "http://127.0.0.1:3901",
   "http://127.0.0.1:3903",
+  "http://127.0.0.1:3909",
 ] as const;
 
 export const portlessAuthOrigins = [
-  "http://plotkeys.localhost",
-  "http://plotkeys.localhost:1355",
-  "http://app-plotkeys.localhost",
-  "http://app-plotkeys.localhost:1355",
-  "http://tenant-plotkeys.localhost",
-  "http://tenant-plotkeys.localhost:1355",
+  "https://plotkeys.localhost",
+  "https://app-plotkeys.localhost",
+  "https://api-plotkeys.localhost",
+  "https://tenant-plotkeys.localhost",
+  "https://sandbox-plotkeys.localhost",
 ] as const;
 
 export function getTrustedOrigins() {
@@ -31,6 +32,7 @@ export function getTrustedOrigins() {
     [
       urls.site,
       urls.dashboard,
+      urls.sandbox,
       urls.tenantSite,
       ...localAuthOrigins,
       ...portlessAuthOrigins,

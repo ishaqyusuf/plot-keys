@@ -1,19 +1,17 @@
 "use client";
 
-import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { Textarea } from "@plotkeys/ui/textarea";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 
-import { createEstateAction } from "@/app/actions";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const createEstateFormSchema = z.object({
   amenities: z.string().optional(),
@@ -43,38 +41,53 @@ const defaultValues: CreateEstateFormValues = {
   title: "",
 };
 
-export function CreateEstateForm() {
-  const [pending, setPending] = useState(false);
+type Props = {
+  onSuccess?: () => void;
+};
+
+export function CreateEstateForm({ onSuccess }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(createEstateFormSchema, {
     defaultValues,
   });
+  const createEstateMutation = useMutation(
+    trpc.estates.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to create estate launch.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset(defaultValues);
+        await queryClient.invalidateQueries({
+          queryKey: trpc.estates.list.queryKey(),
+        });
+        onSuccess?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: CreateEstateFormValues) {
-    setPending(true);
-    try {
-      const formData = new FormData();
-      formData.set("title", values.title.trim());
-      formData.set("location", values.location?.trim() ?? "");
-      formData.set("phaseLabel", values.phaseLabel?.trim() ?? "");
-      formData.set("heroImageUrl", values.heroImageUrl.trim());
-      formData.set("brochureUrl", values.brochureUrl.trim());
-      formData.set("description", values.description?.trim() ?? "");
-      formData.set("landmarks", values.landmarks?.trim() ?? "");
-      formData.set("amenities", values.amenities?.trim() ?? "");
-      formData.set("approvals", values.approvals?.trim() ?? "");
-      formData.set(
-        "specialPurposeUses",
-        values.specialPurposeUses?.trim() ?? "",
-      );
-      await createEstateAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: CreateEstateFormValues) {
+    setError(null);
+    createEstateMutation.mutate({
+      amenities: values.amenities?.trim() || null,
+      approvals: values.approvals?.trim() || null,
+      brochureUrl: values.brochureUrl.trim() || null,
+      description: values.description?.trim() || null,
+      heroImageUrl: values.heroImageUrl.trim() || null,
+      landmarks: values.landmarks?.trim() || null,
+      location: values.location?.trim() || null,
+      phaseLabel: values.phaseLabel?.trim() || null,
+      publishState: "draft",
+      specialPurposeUses: values.specialPurposeUses?.trim() || null,
+      title: values.title.trim(),
+    });
   }
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Estate name *</FieldLabel>
@@ -162,17 +175,20 @@ export function CreateEstateForm() {
             />
           </Field>
         </FieldGroup>
-      </DashboardFormBody>
+      </FormBody>
 
-      <DashboardFormFooter className="sm:flex-row sm:items-center sm:justify-between">
-        <QuickFill
-          args={{ form: createQuickFillAdapter(form) }}
-          name="new-estate"
-        />
-        <Button disabled={pending} type="submit">
-          {pending ? "Creating..." : "Create launch"}
-        </Button>
-      </DashboardFormFooter>
+      <FormFooter className="sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <QuickFill
+            args={{ form: createQuickFillAdapter(form) }}
+            name="new-estate"
+          />
+          {error ? <p className="text-xs text-destructive">{error}</p> : null}
+        </div>
+        <SubmitButton isSubmitting={createEstateMutation.isPending}>
+          Create launch
+        </SubmitButton>
+      </FormFooter>
     </form>
   );
 }

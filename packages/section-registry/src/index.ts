@@ -159,6 +159,10 @@ export {
   createTemplateManifestRegistry,
   defineTemplateManifest,
   getTemplateAllowedContentKeys,
+  getTemplateAiContentField,
+  getTemplateEditableContentField,
+  getTemplateEditableContentFields,
+  getTemplateEditableFieldsForPage,
   getTemplateManifest as getTemplateManifestFromRegistry,
   isTemplateContentKeyAllowed,
   isTemplateThemeKeyAllowed,
@@ -1586,13 +1590,17 @@ export function createInitialSiteConfigurationInput({
   templateKey: string;
 }) {
   const template = getTemplateDefinition(templateKey);
+  const personalizedContent = createDefaultContent(
+    companyName,
+    market,
+    template.defaultContent["hero.eyebrow"] ?? "Premium homes",
+  );
 
   return {
-    contentJson: createDefaultContent(
-      companyName,
-      market,
-      template.defaultContent["hero.eyebrow"] ?? "Premium homes",
-    ),
+    contentJson: {
+      ...template.defaultContent,
+      ...personalizedContent,
+    },
     name: `${template.name} Draft`,
     subdomain,
     templateKey: template.key,
@@ -1600,6 +1608,41 @@ export function createInitialSiteConfigurationInput({
       ...template.defaultTheme,
       logo: companyName,
       market,
+    },
+  };
+}
+
+export function createCarriedForwardSiteConfigurationInput({
+  companyName,
+  contentJson,
+  market,
+  subdomain,
+  templateKey,
+  themeJson,
+}: {
+  companyName: string;
+  contentJson?: TenantContentRecord;
+  market: string;
+  subdomain: string;
+  templateKey: string;
+  themeJson?: Record<string, string>;
+}) {
+  const initial = createInitialSiteConfigurationInput({
+    companyName,
+    market,
+    subdomain,
+    templateKey,
+  });
+
+  return {
+    ...initial,
+    contentJson: {
+      ...initial.contentJson,
+      ...contentJson,
+    },
+    themeJson: {
+      ...initial.themeJson,
+      ...themeJson,
     },
   };
 }

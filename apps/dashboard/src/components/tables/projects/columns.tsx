@@ -2,19 +2,16 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
-import {
-  DeleteProjectButton,
-  UpdateProjectStatusButton,
-} from "@/components/projects/project-actions";
 import {
   formatProjectDate,
   projectStatusConfig,
   projectTypeLabels,
 } from "@/components/projects/project-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -53,8 +50,8 @@ function ScopeCell({ project }: { project: ProjectTableRow }) {
     <p className="text-sm text-muted-foreground">
       {project._count.phases} phase{project._count.phases !== 1 ? "s" : ""},{" "}
       {project._count.milestones} milestone
-      {project._count.milestones !== 1 ? "s" : ""},{" "}
-      {project._count.issues} issue
+      {project._count.milestones !== 1 ? "s" : ""}, {project._count.issues}{" "}
+      issue
       {project._count.issues !== 1 ? "s" : ""}
     </p>
   );
@@ -70,28 +67,11 @@ function TimelineCell({ project }: { project: ProjectTableRow }) {
 }
 
 function ActionsCell({ project }: { project: ProjectTableRow }) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {project.status === "draft" ? (
-        <UpdateProjectStatusButton
-          label="Activate"
-          projectId={project.id}
-          status="active"
-          variant="outline"
-        />
-      ) : null}
-      <Button asChild size="sm" variant="outline">
-        <Link href={`/projects/${project.id}`}>View</Link>
-      </Button>
-      <DeleteProjectButton projectId={project.id} />
-    </div>
-  );
+  return <ActionsMenu row={project} />;
 }
 
 export const columns: ColumnDef<ProjectTableRow>[] = [
+  createSelectColumn<ProjectTableRow>(),
   {
     accessorFn: (row) => row.name,
     cell: ({ row }) => <ProjectCell project={row.original} />,
@@ -99,7 +79,7 @@ export const columns: ColumnDef<ProjectTableRow>[] = [
     id: "project",
     meta: {
       className:
-        "min-w-[320px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[320px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Project",
       skeleton: { type: "text", width: "w-52" },
       sticky: true,
@@ -130,15 +110,15 @@ export const columns: ColumnDef<ProjectTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell project={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[300px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 320,
+    size: 80,
   },
 ];

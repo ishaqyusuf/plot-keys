@@ -38,6 +38,7 @@ export * from "./queries/employee";
 export * from "./queries/estate";
 export * from "./queries/leads";
 export * from "./queries/leave-request";
+export * from "./queries/list-contract";
 export * from "./queries/notification-preference";
 export * from "./queries/notification-message-log";
 export * from "./queries/notifications";

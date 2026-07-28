@@ -1,5 +1,5 @@
 import { createTRPCContext } from "@plotkeys/api/context";
-import { appRouter, type AppRouter } from "@plotkeys/api/router";
+import { type AppRouter, appRouter } from "@plotkeys/api/router";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 const handler = (request: Request) =>

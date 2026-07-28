@@ -3,21 +3,16 @@
 import type { AppRouter } from "@plotkeys/api/router";
 import { Avatar, AvatarFallback, AvatarImage } from "@plotkeys/ui/avatar";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
 import { WORK_ROLE_LABELS } from "@plotkeys/utils";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  reactivateMemberAction,
-  removeMemberAction,
-  suspendMemberAction,
-  updateMemberRoleAction,
-} from "@/app/actions";
+import type { inferRouterOutputs } from "@trpc/server";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type TeamMemberRow = RouterOutputs["team"]["listMembers"]["data"][number];
+export type TeamMemberRow =
+  RouterOutputs["team"]["listMembers"]["data"][number];
 
 type TeamMemberColumnOptions = {
   canManage: boolean;
@@ -110,73 +105,12 @@ function ActionsCell({
   currentUserId: string;
   member: TeamMemberRow;
 }) {
-  const isCurrentUser = member.userId === currentUserId;
-  const isOwner = member.role === "owner";
-  const canEdit = canManage && !isOwner && !isCurrentUser;
-
-  if (!canEdit) {
-    return (
-      <span className="text-xs text-muted-foreground">
-        {isCurrentUser ? "You" : "Protected"}
-      </span>
-    );
-  }
-
   return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <form action={updateMemberRoleAction} className="flex items-center gap-2">
-        <input name="membershipId" type="hidden" value={member.id} />
-        <NativeSelect
-          className="min-w-28 text-xs"
-          defaultValue={member.role}
-          name="role"
-          size="sm"
-        >
-          <NativeSelectOption value="admin">Admin</NativeSelectOption>
-          <NativeSelectOption value="agent">Agent</NativeSelectOption>
-          <NativeSelectOption value="staff">Staff</NativeSelectOption>
-        </NativeSelect>
-        <Button size="sm" type="submit" variant="outline">
-          Save
-        </Button>
-      </form>
-
-      {member.status === "active" ? (
-        <form action={suspendMemberAction}>
-          <input name="membershipId" type="hidden" value={member.id} />
-          <Button
-            className="text-muted-foreground"
-            size="sm"
-            type="submit"
-            variant="ghost"
-          >
-            Suspend
-          </Button>
-        </form>
-      ) : member.status === "suspended" ? (
-        <form action={reactivateMemberAction}>
-          <input name="membershipId" type="hidden" value={member.id} />
-          <Button size="sm" type="submit" variant="outline">
-            Reactivate
-          </Button>
-        </form>
-      ) : null}
-
-      <form action={removeMemberAction}>
-        <input name="membershipId" type="hidden" value={member.id} />
-        <Button
-          className="text-destructive hover:text-destructive"
-          size="sm"
-          type="submit"
-          variant="ghost"
-        >
-          Remove
-        </Button>
-      </form>
-    </div>
+    <ActionsMenu
+      canManage={canManage}
+      currentUserId={currentUserId}
+      row={member}
+    />
   );
 }
 
@@ -184,6 +118,7 @@ export const columns = ({
   canManage,
   currentUserId,
 }: TeamMemberColumnOptions): ColumnDef<TeamMemberRow>[] => [
+  createSelectColumn<TeamMemberRow>(),
   {
     accessorFn: (row) => row.user.name ?? row.user.email,
     cell: ({ row }) => <TeamMemberCell member={row.original} />,
@@ -191,7 +126,7 @@ export const columns = ({
     id: "member",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Member",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -232,15 +167,15 @@ export const columns = ({
         member={row.original}
       />
     ),
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[360px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-32" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 390,
+    size: 80,
   },
 ];

@@ -4,23 +4,29 @@ import type { AppRouter } from "@plotkeys/api/router";
 import { Button } from "@plotkeys/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@plotkeys/ui/field";
 import { Input } from "@plotkeys/ui/input";
-import { NativeSelect, NativeSelectOption } from "@plotkeys/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@plotkeys/ui/select";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { Textarea } from "@plotkeys/ui/textarea";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
-import { createAppointmentAction } from "@/app/actions";
-import {
-  DashboardFormBody,
-  DashboardFormFooter,
-} from "@/components/forms/form-layout";
+import { FormBody, FormFooter } from "@/components/forms/form-layout";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-type AgentOption = RouterOutputs["workspace"]["listAgents"]["data"][number];
+type AgentOption = RouterOutputs["agents"]["list"]["data"][number];
 
-type AppointmentFormProps = {
+type Props = {
   agents: AgentOption[];
   onCancel?: () => void;
 };
@@ -37,8 +43,12 @@ const appointmentFormSchema = z.object({
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
-export function AppointmentForm({ agents, onCancel }: AppointmentFormProps) {
-  const [pending, setPending] = useState(false);
+const emptyAgentValue = "none";
+
+export function AppointmentForm({ agents, onCancel }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
   const form = useZodForm(appointmentFormSchema, {
     defaultValues: {
       agentId: "",
@@ -50,28 +60,43 @@ export function AppointmentForm({ agents, onCancel }: AppointmentFormProps) {
       scheduledAt: "",
     },
   });
+  const createAppointmentMutation = useMutation(
+    trpc.appointments.create.mutationOptions({
+      onError(error) {
+        setError(error.message || "Unable to schedule appointment.");
+      },
+      async onSuccess() {
+        setError(null);
+        form.reset();
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.appointments.list.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.appointments.stats.queryKey(),
+          }),
+        ]);
+        onCancel?.();
+      },
+    }),
+  );
 
-  async function handleSubmit(values: AppointmentFormValues) {
-    setPending(true);
-
-    try {
-      const formData = new FormData();
-      formData.set("name", values.name.trim());
-      formData.set("email", values.email.trim());
-      formData.set("phone", values.phone?.trim() ?? "");
-      formData.set("scheduledAt", values.scheduledAt);
-      formData.set("location", values.location?.trim() ?? "");
-      formData.set("agentId", values.agentId ?? "");
-      formData.set("notes", values.notes?.trim() ?? "");
-      await createAppointmentAction(formData);
-    } finally {
-      setPending(false);
-    }
+  function handleSubmit(values: AppointmentFormValues) {
+    setError(null);
+    createAppointmentMutation.mutate({
+      agentId: values.agentId || undefined,
+      email: values.email.trim(),
+      location: values.location?.trim() || undefined,
+      name: values.name.trim(),
+      notes: values.notes?.trim() || undefined,
+      phone: values.phone?.trim() || undefined,
+      scheduledAt: new Date(values.scheduledAt).toISOString(),
+    });
   }
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <DashboardFormBody>
+      <FormBody>
         <FieldGroup>
           <Field>
             <FieldLabel>Visitor name *</FieldLabel>
@@ -94,10 +119,7 @@ export function AppointmentForm({ agents, onCancel }: AppointmentFormProps) {
 
           <Field>
             <FieldLabel>Phone</FieldLabel>
-            <Input
-              placeholder="Phone (optional)"
-              {...form.register("phone")}
-            />
+            <Input placeholder="Phone (optional)" {...form.register("phone")} />
           </Field>
 
           <Field>
@@ -120,16 +142,32 @@ export function AppointmentForm({ agents, onCancel }: AppointmentFormProps) {
           {agents.length ? (
             <Field>
               <FieldLabel>Assign agent</FieldLabel>
-              <NativeSelect {...form.register("agentId")}>
-                <NativeSelectOption value="">
-                  Assign agent (optional)
-                </NativeSelectOption>
-                {agents.map((agent) => (
-                  <NativeSelectOption key={agent.id} value={agent.id}>
-                    {agent.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              <Controller
+                control={form.control}
+                name="agentId"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(value) =>
+                      field.onChange(value === emptyAgentValue ? "" : value)
+                    }
+                    value={field.value || emptyAgentValue}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Assign agent (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={emptyAgentValue}>
+                        Assign agent (optional)
+                      </SelectItem>
+                      {agents.map((agent) => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          {agent.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
           ) : null}
 
@@ -142,18 +180,19 @@ export function AppointmentForm({ agents, onCancel }: AppointmentFormProps) {
             />
           </Field>
         </FieldGroup>
-      </DashboardFormBody>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      </FormBody>
 
-      <DashboardFormFooter>
+      <FormFooter>
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel} type="button" variant="ghost">
+          <Button variant="ghost" onClick={onCancel} type="button">
             Cancel
           </Button>
-          <Button disabled={pending} type="submit">
-            {pending ? "Scheduling..." : "Schedule"}
-          </Button>
+          <SubmitButton isSubmitting={createAppointmentMutation.isPending}>
+            Schedule
+          </SubmitButton>
         </div>
-      </DashboardFormFooter>
+      </FormFooter>
     </form>
   );
 }

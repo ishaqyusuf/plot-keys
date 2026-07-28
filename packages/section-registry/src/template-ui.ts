@@ -1,3 +1,4 @@
+import { cn } from "@plotkeys/utils";
 import {
   type StylePreset,
   type StylePresetDefinition,
@@ -79,10 +80,6 @@ const radiusOverrideClasses: Record<
   },
 };
 
-function joinClasses(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 function resolveRadiusClass(
   radius: string | undefined,
   kind: keyof typeof radiusOverrideClasses,
@@ -114,7 +111,7 @@ export function templateButtonVariants({
 }: TemplateUiVariantOptions = {}) {
   const preset = resolveTemplateStylePreset(stylePreset);
 
-  return joinClasses(
+  return cn(
     "inline-flex cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap font-medium shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--pk-ring,#2563eb)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--pk-background,#fff)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     buttonIntentClasses[intent],
     buttonSizeClasses[size],
@@ -131,7 +128,7 @@ export function templateInputVariants({
 }: Omit<TemplateUiVariantOptions, "intent"> = {}) {
   const preset = resolveTemplateStylePreset(stylePreset);
 
-  return joinClasses(
+  return cn(
     "w-full border border-[color:var(--pk-input,#e2e8f0)] bg-[color:var(--pk-background,#fff)] text-[color:var(--pk-foreground,#0f172a)] shadow-xs transition-colors placeholder:text-[color:var(--pk-muted-foreground,#64748b)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--pk-ring,#2563eb)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--pk-background,#fff)] disabled:cursor-not-allowed disabled:opacity-50",
     inputSizeClasses[size],
     resolveRadiusClass(radius, "input", preset.radius.input),
@@ -149,7 +146,7 @@ export function templateSurfaceVariants({
 > = {}) {
   const preset = resolveTemplateStylePreset(stylePreset);
 
-  return joinClasses(
+  return cn(
     "border border-[color:var(--pk-border,#e2e8f0)] bg-[color:var(--pk-card,#fff)] text-[color:var(--pk-card-foreground,#0f172a)] shadow-sm",
     resolveRadiusClass(radius, "surface", preset.radius.card),
     className,

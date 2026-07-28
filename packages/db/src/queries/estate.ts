@@ -1,5 +1,5 @@
-import type { Prisma } from "../generated/prisma/client";
-import { createPrismaClient, type Db } from "../prisma";
+import { Prisma } from "../generated/prisma/client";
+import type { Db } from "../prisma";
 
 export type EstatePublishStateValue = "draft" | "published" | "archived";
 export type PlotStatusValue =
@@ -15,10 +15,6 @@ export type PlotTypeValue =
   | "amenity";
 
 type JsonValue = Prisma.InputJsonValue | typeof Prisma.JsonNull;
-
-export type UniqueEstateSlugResult =
-  | { ok: true; slug: string }
-  | { ok: false; reason: "database-unavailable" };
 
 function normalizeEstateSlug(value: string) {
   return value
@@ -86,6 +82,35 @@ export async function getEstateDetailForCompany(
   });
 }
 
+export async function getEstateByIdForCompany(
+  db: Db,
+  companyId: string,
+  estateId: string,
+) {
+  return db.estate.findFirst({
+    select: { id: true },
+    where: {
+      companyId,
+      deletedAt: null,
+      id: estateId,
+    },
+  });
+}
+
+export async function getEstateForCompany(
+  db: Db,
+  estateId: string,
+  companyId: string,
+) {
+  return db.estate.findFirst({
+    where: {
+      companyId,
+      deletedAt: null,
+      id: estateId,
+    },
+  });
+}
+
 export async function createEstate(
   db: Db,
   data: {
@@ -127,6 +152,7 @@ export async function resolveUniqueEstateSlug(
   db: Db,
   input: {
     companyId: string;
+    excludeEstateId?: string;
     requestedSlug: string;
   },
 ) {
@@ -140,6 +166,9 @@ export async function resolveUniqueEstateSlug(
       where: {
         companyId: input.companyId,
         deletedAt: null,
+        ...(input.excludeEstateId
+          ? { id: { not: input.excludeEstateId } }
+          : {}),
         slug: candidate,
       },
     });
@@ -149,22 +178,6 @@ export async function resolveUniqueEstateSlug(
     candidate = `${baseSlug}-${suffix}`;
     suffix += 1;
   }
-}
-
-export async function getUniqueEstateSlugForCompany(input: {
-  companyId: string;
-  requestedSlug: string;
-}): Promise<UniqueEstateSlugResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  return {
-    ok: true,
-    slug: await resolveUniqueEstateSlug(db, input),
-  };
 }
 
 export async function updateEstate(
@@ -186,7 +199,7 @@ export async function updateEstate(
     publishState?: EstatePublishStateValue;
   },
 ) {
-  const updateData: Record<string, unknown> = {};
+  const updateData: Prisma.EstateUncheckedUpdateManyInput = {};
 
   if (data.title !== undefined) updateData.title = data.title;
   if (data.slug !== undefined) updateData.slug = data.slug;
@@ -207,7 +220,7 @@ export async function updateEstate(
     updateData.publishState = data.publishState;
   }
 
-  return db.estate.update({
+  const result = await db.estate.updateMany({
     data: updateData,
     where: {
       id: estateId,
@@ -215,6 +228,12 @@ export async function updateEstate(
       deletedAt: null,
     },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getEstateForCompany(db, estateId, companyId);
 }
 
 export async function deleteEstate(
@@ -222,7 +241,7 @@ export async function deleteEstate(
   estateId: string,
   companyId: string,
 ) {
-  return db.estate.update({
+  return db.estate.updateMany({
     data: { deletedAt: new Date() },
     where: { id: estateId, companyId, deletedAt: null },
   });
@@ -318,6 +337,20 @@ export async function createPlot(
   });
 }
 
+export async function getPlotForCompany(
+  db: Db,
+  plotId: string,
+  companyId: string,
+) {
+  return db.plot.findFirst({
+    where: {
+      companyId,
+      deletedAt: null,
+      id: plotId,
+    },
+  });
+}
+
 export async function updatePlot(
   db: Db,
   plotId: string,
@@ -338,7 +371,7 @@ export async function updatePlot(
     metadataJson?: JsonValue | null;
   },
 ) {
-  const updateData: Record<string, unknown> = {};
+  const updateData: Prisma.PlotUncheckedUpdateManyInput = {};
 
   if (data.plotCode !== undefined) updateData.plotCode = data.plotCode;
   if (data.block !== undefined) updateData.block = data.block;
@@ -353,14 +386,16 @@ export async function updatePlot(
   }
   if (data.isPremium !== undefined) updateData.isPremium = data.isPremium;
   if (data.coordinatesJson !== undefined) {
-    updateData.coordinatesJson = data.coordinatesJson;
+    updateData.coordinatesJson = data.coordinatesJson ?? Prisma.JsonNull;
   }
-  if (data.tagsJson !== undefined) updateData.tagsJson = data.tagsJson;
+  if (data.tagsJson !== undefined) {
+    updateData.tagsJson = data.tagsJson ?? Prisma.JsonNull;
+  }
   if (data.metadataJson !== undefined) {
-    updateData.metadataJson = data.metadataJson;
+    updateData.metadataJson = data.metadataJson ?? Prisma.JsonNull;
   }
 
-  return db.plot.update({
+  const result = await db.plot.updateMany({
     data: updateData,
     where: {
       id: plotId,
@@ -368,10 +403,16 @@ export async function updatePlot(
       deletedAt: null,
     },
   });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return getPlotForCompany(db, plotId, companyId);
 }
 
 export async function deletePlot(db: Db, plotId: string, companyId: string) {
-  return db.plot.update({
+  return db.plot.updateMany({
     data: { deletedAt: new Date() },
     where: { id: plotId, companyId, deletedAt: null },
   });

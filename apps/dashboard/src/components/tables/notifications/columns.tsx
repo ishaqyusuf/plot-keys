@@ -2,16 +2,15 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
+import { Icon } from "@plotkeys/ui/icons";
 import type { ColumnDef } from "@tanstack/react-table";
-import { BellIcon } from "lucide-react";
-import Link from "next/link";
-import { markNotificationReadAction } from "@/app/actions";
+import type { inferRouterOutputs } from "@trpc/server";
 import {
   formatNotificationDate,
   formatNotificationType,
 } from "@/components/notifications/notification-utils";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -26,7 +25,7 @@ function NotificationCell({
   return (
     <div className="flex min-w-0 items-start gap-3">
       <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-        <BellIcon className="size-4 text-muted-foreground" />
+        <Icon.Bell className="size-4 text-muted-foreground" />
       </div>
       <div className="min-w-0 space-y-1">
         <div className="flex min-w-0 items-start gap-2">
@@ -53,56 +52,25 @@ function NotificationCell({
   );
 }
 
-function MetaCell({
-  notification,
-}: {
-  notification: NotificationTableRow;
-}) {
+function MetaCell({ notification }: { notification: NotificationTableRow }) {
   return (
     <div className="space-y-1 text-sm">
       <p className="text-foreground">
         {formatNotificationDate(notification.createdAt)}
       </p>
-      <Badge className="text-xs capitalize" variant="outline">
+      <Badge variant="outline" className="text-xs capitalize">
         {formatNotificationType(notification.type)}
       </Badge>
     </div>
   );
 }
 
-function ActionsCell({
-  notification,
-}: {
-  notification: NotificationTableRow;
-}) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {notification.link ? (
-        <Button asChild size="sm" variant="outline">
-          <Link href={notification.link}>View</Link>
-        </Button>
-      ) : null}
-
-      {!notification.isRead ? (
-        <form action={markNotificationReadAction}>
-          <input
-            name="notificationId"
-            type="hidden"
-            value={notification.id}
-          />
-          <Button size="sm" type="submit" variant="ghost">
-            Mark read
-          </Button>
-        </form>
-      ) : null}
-    </div>
-  );
+function ActionsCell({ notification }: { notification: NotificationTableRow }) {
+  return <ActionsMenu row={notification} />;
 }
 
 export const columns: ColumnDef<NotificationTableRow>[] = [
+  createSelectColumn<NotificationTableRow>(),
   {
     accessorFn: (row) => row.title,
     cell: ({ row }) => <NotificationCell notification={row.original} />,
@@ -110,7 +78,7 @@ export const columns: ColumnDef<NotificationTableRow>[] = [
     id: "notification",
     meta: {
       className:
-        "min-w-[360px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[360px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Notification",
       skeleton: { type: "text", width: "w-56" },
       sticky: true,
@@ -130,15 +98,15 @@ export const columns: ColumnDef<NotificationTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell notification={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[220px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 260,
+    size: 80,
   },
 ];

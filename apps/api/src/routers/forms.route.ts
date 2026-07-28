@@ -7,10 +7,8 @@
  */
 
 import { createPrismaClient } from "@plotkeys/db";
-import {
-  notificationDispatchHandler,
-  triggerJob,
-} from "@plotkeys/jobs";
+import { findCompanyBySlug } from "@plotkeys/db/queries";
+import { notificationDispatchHandler, triggerJob } from "@plotkeys/jobs";
 import { notificationDispatchTask } from "@plotkeys/jobs/tasks";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -21,7 +19,11 @@ let _client: ReturnType<typeof createPrismaClient> | null = null;
 function getDb() {
   if (!_client) _client = createPrismaClient();
   const { db } = _client;
-  if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DATABASE_URL is not configured." });
+  if (!db)
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "DATABASE_URL is not configured.",
+    });
   return db;
 }
 
@@ -53,10 +55,7 @@ const newsletterInputSchema = z.object({
 
 async function resolveCompanyBySubdomain(subdomain: string) {
   const db = getDb();
-  const company = await db.company.findFirst({
-    select: { id: true, name: true },
-    where: { deletedAt: null, slug: subdomain },
-  });
+  const company = await findCompanyBySlug(db, subdomain);
 
   if (!company) {
     throw new TRPCError({
@@ -78,20 +77,16 @@ export const formsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      triggerJob(
-        notificationDispatchTask,
-        notificationDispatchHandler,
-        {
-          kind: "contact_form" as const,
-          data: {
-            companyId: company.id,
-            email: input.email,
-            message: input.message,
-            name: input.name,
-            phone: input.phone,
-          },
+      triggerJob(notificationDispatchTask, notificationDispatchHandler, {
+        kind: "contact_form" as const,
+        data: {
+          companyId: company.id,
+          email: input.email,
+          message: input.message,
+          name: input.name,
+          phone: input.phone,
         },
-      ).catch(() => {
+      }).catch(() => {
         // Notification delivery failures are non-blocking
       });
 
@@ -110,21 +105,17 @@ export const formsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      triggerJob(
-        notificationDispatchTask,
-        notificationDispatchHandler,
-        {
-          kind: "property_inquiry" as const,
-          data: {
-            companyId: company.id,
-            email: input.email,
-            message: input.message,
-            name: input.name,
-            phone: input.phone,
-            propertyId: input.propertyRef,
-          },
+      triggerJob(notificationDispatchTask, notificationDispatchHandler, {
+        kind: "property_inquiry" as const,
+        data: {
+          companyId: company.id,
+          email: input.email,
+          message: input.message,
+          name: input.name,
+          phone: input.phone,
+          propertyId: input.propertyRef,
         },
-      ).catch(() => {
+      }).catch(() => {
         // Notification delivery failures are non-blocking
       });
 
@@ -143,18 +134,14 @@ export const formsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const company = await resolveCompanyBySubdomain(input.subdomain);
 
-      triggerJob(
-        notificationDispatchTask,
-        notificationDispatchHandler,
-        {
-          kind: "newsletter_signup" as const,
-          data: {
-            companyId: company.id,
-            email: input.email,
-            name: input.name,
-          },
+      triggerJob(notificationDispatchTask, notificationDispatchHandler, {
+        kind: "newsletter_signup" as const,
+        data: {
+          companyId: company.id,
+          email: input.email,
+          name: input.name,
         },
-      ).catch(() => {
+      }).catch(() => {
         // Notification delivery failures are non-blocking
       });
 

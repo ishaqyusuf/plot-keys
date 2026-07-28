@@ -2,7 +2,6 @@
 
 import type { AppRouter } from "@plotkeys/api/router";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Button } from "@plotkeys/ui/button";
 import {
   Form,
   FormControl,
@@ -12,8 +11,9 @@ import {
   FormMessage,
 } from "@plotkeys/ui/form";
 import { Input } from "@plotkeys/ui/input";
-import type { inferRouterOutputs } from "@trpc/server";
+import { SubmitButton } from "@plotkeys/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import { z } from "zod";
 import { BlogRichTextEditor } from "@/components/blog/blog-rich-text-editor";
@@ -22,9 +22,7 @@ import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type BlogPostFormRecord = NonNullable<
-  RouterOutputs["workspace"]["getBlogPost"]
->;
+export type BlogPostFormRecord = NonNullable<RouterOutputs["blog"]["get"]>;
 
 const blogPostFormSchema = z.object({
   content: z.string().optional(),
@@ -36,7 +34,7 @@ const blogPostFormSchema = z.object({
 
 type BlogPostFormValues = z.infer<typeof blogPostFormSchema>;
 
-type BlogPostFormProps = {
+type Props = {
   post: BlogPostFormRecord;
 };
 
@@ -50,7 +48,7 @@ function getBlogPostFormValues(post: BlogPostFormRecord): BlogPostFormValues {
   };
 }
 
-export function BlogPostForm({ post }: BlogPostFormProps) {
+export function BlogPostForm({ post }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
@@ -58,21 +56,21 @@ export function BlogPostForm({ post }: BlogPostFormProps) {
     defaultValues: getBlogPostFormValues(post),
   });
   const updatePostMutation = useMutation(
-    trpc.workspace.updateBlogPost.mutationOptions({
+    trpc.blog.update.mutationOptions({
       async onSuccess(updatedPost) {
         setSaved(true);
         form.reset(getBlogPostFormValues(updatedPost));
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: trpc.workspace.getBlogPost.queryKey({
+            queryKey: trpc.blog.get.queryKey({
               blogPostId: post.id,
             }),
           }),
           queryClient.invalidateQueries({
-            queryKey: trpc.workspace.listBlogPosts.queryKey(),
+            queryKey: trpc.blog.list.queryKey(),
           }),
           queryClient.invalidateQueries({
-            queryKey: trpc.workspace.getBlogPostStats.queryKey(),
+            queryKey: trpc.blog.stats.queryKey(),
           }),
         ]);
       },
@@ -180,15 +178,15 @@ export function BlogPostForm({ post }: BlogPostFormProps) {
         ) : null}
 
         {saved ? (
-          <Alert className="border-primary/20 bg-primary/10 text-foreground">
+          <Alert>
             <AlertDescription>Blog post updated.</AlertDescription>
           </Alert>
         ) : null}
 
         <div className="flex justify-end">
-          <Button disabled={updatePostMutation.isPending} type="submit">
-            {updatePostMutation.isPending ? "Saving..." : "Save changes"}
-          </Button>
+          <SubmitButton isSubmitting={updatePostMutation.isPending}>
+            Save changes
+          </SubmitButton>
         </div>
       </form>
     </Form>

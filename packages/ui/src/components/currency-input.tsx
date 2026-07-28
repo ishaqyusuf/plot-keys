@@ -1,26 +1,15 @@
 import { NumericFormat, type NumericFormatProps } from "react-number-format";
-
 import { Input } from "./input";
 
-type CurrencyInputProps = Omit<NumericFormatProps, "customInput">;
-
-function CurrencyInput({
-  allowNegative = false,
-  decimalScale = 0,
-  prefix = "₦",
+export function CurrencyInput({
   thousandSeparator = true,
   ...props
-}: CurrencyInputProps) {
+}: NumericFormatProps) {
   return (
     <NumericFormat
-      allowNegative={allowNegative}
-      customInput={Input}
-      decimalScale={decimalScale}
-      prefix={prefix}
       thousandSeparator={thousandSeparator}
+      customInput={Input}
       {...props}
     />
   );
 }
-
-export { CurrencyInput };

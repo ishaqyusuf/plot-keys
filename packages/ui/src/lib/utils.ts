@@ -1,1 +1,1 @@
-export { cn } from "@plotkeys/utils/cn";
+export { cn } from "../utils";

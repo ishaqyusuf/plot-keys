@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma/client";
-import { createPrismaClient, type Db } from "../prisma";
+import type { Db } from "../prisma";
 import { updateCompanyPlan } from "./company";
 import { syncPlanIncludedLicenses } from "./template-license";
 
@@ -16,12 +16,6 @@ export type ActivateSubscriptionPaymentInput = {
   reference: string;
   subscriptionCode?: string | null;
 };
-
-export type BillingMutationResult =
-  | { ok: true }
-  | { ok: false; reason: "database-unavailable" };
-
-export type ActivateSubscriptionPaymentResult = BillingMutationResult;
 
 export type ActivateCompanySubscriptionInput = {
   companyId: string;
@@ -120,14 +114,9 @@ export async function upsertPaidSubscriptionBillingLineItem(
 }
 
 export async function activateSubscriptionPayment(
+  db: Db,
   input: ActivateSubscriptionPaymentInput,
-): Promise<ActivateSubscriptionPaymentResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+): Promise<void> {
   await updateCompanyPlan(db, input.companyId, input.planTier, "active");
   await syncPlanIncludedLicenses(
     db,
@@ -144,19 +133,12 @@ export async function activateSubscriptionPayment(
     reference: input.reference,
     subscriptionCode: input.subscriptionCode,
   });
-
-  return { ok: true };
 }
 
 export async function activateCompanySubscription(
+  db: Db,
   input: ActivateCompanySubscriptionInput,
-): Promise<BillingMutationResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+): Promise<void> {
   await db.company
     .update({
       data: {
@@ -165,19 +147,12 @@ export async function activateCompanySubscription(
       where: { id: input.companyId },
     })
     .catch(() => null);
-
-  return { ok: true };
 }
 
 export async function cancelCompanySubscription(
+  db: Db,
   input: CancelCompanySubscriptionInput,
-): Promise<BillingMutationResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+): Promise<void> {
   await updateCompanyPlan(db, input.companyId, "starter", "canceled");
   await syncPlanIncludedLicenses(
     db,
@@ -199,27 +174,18 @@ export async function cancelCompanySubscription(
     providerRef: input.subscriptionCode ?? input.eventId,
     status: "cancelled",
   }).catch(() => null);
-
-  return { ok: true };
 }
 
 export async function markCompanySubscriptionPastDue(
+  db: Db,
   input: MarkCompanySubscriptionPastDueInput,
-): Promise<BillingMutationResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
+): Promise<void> {
   await db.company
     .update({
       data: { planStatus: "past_due" },
       where: { id: input.companyId },
     })
     .catch(() => null);
-
-  return { ok: true };
 }
 
 export async function listBillingLineItemsForCompany(

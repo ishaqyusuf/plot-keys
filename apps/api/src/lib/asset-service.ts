@@ -1,21 +1,20 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+import { createPrismaClient, type Db } from "@plotkeys/db";
 import {
+  type AssetOriginKindValue,
   createAsset,
-  createPrismaClient,
   getAssetForCompany,
   getPropertyForCompany,
   updateAssetStatus,
   updateAssetStorageLocation,
-  type AssetOriginKindValue,
-} from "@plotkeys/db";
+} from "@plotkeys/db/queries";
 import {
+  type AssetStorageScope,
   buildAssetStorageKey,
   extensionFromContentType,
-  type AssetStorageScope,
   type StorageProvider,
 } from "@plotkeys/platform-integrations";
-import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
-import type { Db } from "@plotkeys/db";
 
 import { createStorageProvider } from "./storage-registry";
 

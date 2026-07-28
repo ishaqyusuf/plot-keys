@@ -4,17 +4,25 @@ export type ReportPeriod = {
   year: number;
 };
 
+type ReportPeriodParam = string | string[] | undefined;
+
+function firstParamValue(value: ReportPeriodParam) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export function getReportPeriod(input: {
-  month?: string;
+  month?: ReportPeriodParam;
   now?: Date;
-  year?: string;
+  year?: ReportPeriodParam;
 }) {
   const now = input.now ?? new Date();
-  const parsedYear = input.year
-    ? Number.parseInt(input.year, 10)
+  const yearParam = firstParamValue(input.year);
+  const monthParam = firstParamValue(input.month);
+  const parsedYear = yearParam
+    ? Number.parseInt(yearParam, 10)
     : now.getFullYear();
-  const parsedMonth = input.month
-    ? Number.parseInt(input.month, 10)
+  const parsedMonth = monthParam
+    ? Number.parseInt(monthParam, 10)
     : now.getMonth() + 1;
 
   const year =

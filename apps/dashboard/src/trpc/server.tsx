@@ -12,7 +12,6 @@ import { headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
 
-import { getBaseUrl } from "../lib/get-base-url";
 import { makeQueryClient } from "./query-client";
 
 export const getQueryClient = cache(makeQueryClient);
@@ -40,18 +39,10 @@ function createServerLink(url: string) {
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   client: createTRPCClient<AppRouter>({
-    links: createServerLink(
-      buildDashboardUrl({ path: "/api/trpc" }),
-    ),
+    links: createServerLink(buildDashboardUrl({ path: "/api/trpc" })),
   }),
   queryClient: getQueryClient,
 });
-
-export async function getServerTrpcClient() {
-  return createTRPCClient<AppRouter>({
-    links: createServerLink(`${await getBaseUrl()}/api/trpc`),
-  });
-}
 
 export function HydrateClient(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();

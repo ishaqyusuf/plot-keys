@@ -1,8 +1,5 @@
+import { isNormalizedPhoneNumber, normalizePhoneNumber } from "@plotkeys/utils";
 import { z } from "zod";
-import {
-  isNormalizedPhoneNumber,
-  normalizePhoneNumber,
-} from "@plotkeys/utils";
 
 const optionalNonEmptyTrimmedString = z.preprocess((value) => {
   if (typeof value !== "string") {
@@ -17,9 +14,7 @@ export const signUpInputSchema = z.object({
   company: z.string().trim().min(1, "Company name is required."),
   email: z.string().trim().email("Enter a valid email address."),
   name: z.string().trim().min(1, "Full name is required."),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long."),
+  password: z.string().min(8, "Password must be at least 8 characters long."),
   phoneNumber: z
     .string()
     .trim()
@@ -41,6 +36,12 @@ export const signUpInputSchema = z.object({
 export const signInInputSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
   password: z.string().min(1, "Password is required."),
+});
+
+export const inviteSignUpInputSchema = z.object({
+  name: z.string().trim().min(1, "Full name is required."),
+  password: z.string().min(8, "Password must be at least 8 characters long."),
+  token: z.string().trim().min(1, "Invite token is required."),
 });
 
 export const verifyEmailInputSchema = z.object({
@@ -66,6 +67,7 @@ export const signUpResultSchema = z.object({
 
 export type SignInInput = z.infer<typeof signInInputSchema>;
 export type SignUpInput = z.infer<typeof signUpInputSchema>;
+export type InviteSignUpInput = z.infer<typeof inviteSignUpInputSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailInputSchema>;
 export type AuthSessionResult = z.infer<typeof authSessionResultSchema>;
 export type SignUpResult = z.infer<typeof signUpResultSchema>;

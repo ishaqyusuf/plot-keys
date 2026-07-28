@@ -6,7 +6,7 @@
  * WebsiteVersion during onboarding (Phase 2 dual-write).
  */
 
-import { createPrismaClient, type Db } from "../prisma";
+import type { Db } from "../prisma";
 import { listAgentsForCompany } from "./agent";
 import { listBlogPostsForCompany } from "./blog";
 import { findCompanyById } from "./company";
@@ -15,28 +15,17 @@ import { listFeaturedProperties } from "./property";
 import { findLicensedTemplateKeys } from "./template-license";
 
 export type LivePreviewDataInput = {
-  companySlug: string;
+  companyId: string;
   hostname?: string | null;
   subdomain?: string | null;
 };
 
-export type BuilderWorkspaceFallbackDraft = {
-  contentJson: Record<string, string>;
-  name: string;
-  subdomain?: string | null;
-  templateKey: string;
-  themeJson: Record<string, string>;
-};
-
 export type BuilderWorkspaceDataInput = {
   companyId: string;
-  companySlug: string;
-  fallbackDraft: BuilderWorkspaceFallbackDraft;
   userId: string;
 };
 
 export type LivePreviewData =
-  | { status: "database-unavailable" }
   | { status: "company-not-found" }
   | { status: "configuration-not-found" }
   | {
@@ -56,7 +45,6 @@ export type LivePreviewData =
     };
 
 export type BuilderWorkspaceData =
-  | { status: "database-unavailable" }
   | { status: "company-not-found" }
   | { status: "draft-not-found" }
   | {
@@ -74,13 +62,6 @@ export type BuilderWorkspaceData =
       publishedVersion: Awaited<ReturnType<typeof resolvePublishedForCompany>>;
       status: "ready";
     };
-
-export type ActiveDraftForCompanyResult =
-  | {
-      activeDraft: Awaited<ReturnType<typeof resolveActiveDraftForCompany>>;
-      ok: true;
-    }
-  | { ok: false; reason: "database-unavailable" };
 
 // ---------------------------------------------------------------------------
 // Website
@@ -127,21 +108,6 @@ export async function resolveActiveDraftForCompany(db: Db, companyId: string) {
   };
 }
 
-export async function getActiveDraftForCompany(
-  companyId: string,
-): Promise<ActiveDraftForCompanyResult> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { ok: false, reason: "database-unavailable" };
-  }
-
-  return {
-    activeDraft: await resolveActiveDraftForCompany(db, companyId),
-    ok: true,
-  };
-}
-
 /**
  * Resolves the published configuration for a company from WebsiteVersion.
  * Returns null if no Website or published version exists.
@@ -175,14 +141,9 @@ export async function resolvePublishedForCompany(db: Db, companyId: string) {
 }
 
 export async function getLivePreviewData(
+  db: Db,
   input: LivePreviewDataInput,
 ): Promise<LivePreviewData> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { status: "database-unavailable" };
-  }
-
   const tenantDomain = input.hostname
     ? await db.tenantDomain.findFirst({
         include: {
@@ -197,6 +158,7 @@ export async function getLivePreviewData(
           },
         },
         where: {
+          companyId: input.companyId,
           deletedAt: null,
           hostname: input.hostname,
         },
@@ -216,12 +178,12 @@ export async function getLivePreviewData(
         slug: true,
       },
       where: {
+        id: input.companyId,
         deletedAt: null,
-        slug: input.subdomain ?? input.companySlug,
       },
     }));
 
-  if (!company) {
+  if (!company || (input.subdomain && input.subdomain !== company.slug)) {
     return { status: "company-not-found" };
   }
 
@@ -246,19 +208,16 @@ export async function getLivePreviewData(
     publishedConfiguration,
     status: "ready",
     tenantDomain:
-      tenantDomain && domainCompany ? { hostname: tenantDomain.hostname } : null,
+      tenantDomain && domainCompany
+        ? { hostname: tenantDomain.hostname }
+        : null,
   };
 }
 
 export async function getBuilderWorkspaceData(
+  db: Db,
   input: BuilderWorkspaceDataInput,
 ): Promise<BuilderWorkspaceData> {
-  const db = createPrismaClient().db;
-
-  if (!db) {
-    return { status: "database-unavailable" };
-  }
-
   const [
     company,
     activeDraft,
@@ -286,56 +245,12 @@ export async function getBuilderWorkspaceData(
     return { status: "company-not-found" };
   }
 
-  let resolvedActiveDraft = activeDraft;
-
-  if (!resolvedActiveDraft) {
-    const latestConfiguration = await db.siteConfiguration.findFirst({
-      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-      where: {
-        companyId: input.companyId,
-        deletedAt: null,
-      },
-    });
-
-    if (publishedVersion) {
-      await getOrCreateDraftVersion(db, {
-        contentJson: publishedVersion.contentJson,
-        createdById: input.userId,
-        themeJson: publishedVersion.themeJson,
-        websiteId: publishedVersion.websiteId,
-      });
-    } else if (latestConfiguration) {
-      await upsertDraftWebsiteVersion(db, {
-        companyId: input.companyId,
-        contentJson: latestConfiguration.contentJson as Record<string, string>,
-        createdById: input.userId,
-        name: latestConfiguration.name,
-        subdomain: input.companySlug,
-        templateKey: latestConfiguration.templateKey,
-        themeJson: latestConfiguration.themeJson as Record<string, string>,
-        updatedById: input.userId,
-      });
-    } else {
-      await upsertDraftWebsiteVersion(db, {
-        ...input.fallbackDraft,
-        companyId: input.companyId,
-        createdById: input.userId,
-        updatedById: input.userId,
-      });
-    }
-
-    resolvedActiveDraft = await resolveActiveDraftForCompany(
-      db,
-      input.companyId,
-    );
-  }
-
-  if (!resolvedActiveDraft) {
+  if (!activeDraft) {
     return { status: "draft-not-found" };
   }
 
   return {
-    activeDraft: resolvedActiveDraft,
+    activeDraft,
     agents: agentsPage.data,
     blogPosts: blogPostsPage.data,
     company,

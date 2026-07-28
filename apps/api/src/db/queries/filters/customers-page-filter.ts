@@ -1,6 +1,11 @@
-import { optionFilter, type PageFilterData, searchFilter } from "./common";
+import {
+  dateRangeFilter,
+  optionFilter,
+  type PageFilterData,
+  searchFilter,
+} from "./common";
 
-export type CustomersPageFilterKey = "filter" | "q";
+export type CustomersPageFilterKey = "end" | "filter" | "q" | "start";
 
 export const customerStatusFilterOptions = [
   { label: "Active", value: "active" },
@@ -16,5 +21,6 @@ export async function customersPageFilter() {
       "Customer status",
       customerStatusFilterOptions,
     ),
+    dateRangeFilter<CustomersPageFilterKey>("start", "Added"),
   ] satisfies PageFilterData<CustomersPageFilterKey>[];
 }

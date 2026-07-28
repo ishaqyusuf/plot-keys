@@ -3,19 +3,14 @@
 import type { AppRouter } from "@plotkeys/api/router";
 import { Avatar, AvatarFallback, AvatarImage } from "@plotkeys/ui/avatar";
 import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import type { inferRouterOutputs } from "@trpc/server";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  deleteAgentAction,
-  toggleAgentFeaturedAction,
-} from "@/app/actions";
-import { AgentSheet } from "@/components/sheets/agent-sheet";
+import type { inferRouterOutputs } from "@trpc/server";
+import { createSelectColumn } from "@/components/tables/core";
+import { ActionsMenu } from "./actions-menu";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type AgentTableRow =
-  RouterOutputs["workspace"]["listAgents"]["data"][number];
+export type AgentTableRow = RouterOutputs["agents"]["list"]["data"][number];
 
 function AgentCell({ agent }: { agent: AgentTableRow }) {
   return (
@@ -53,34 +48,11 @@ function ContactCell({ agent }: { agent: AgentTableRow }) {
 }
 
 function ActionsCell({ agent }: { agent: AgentTableRow }) {
-  return (
-    <div
-      className="flex flex-wrap justify-end gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <form action={toggleAgentFeaturedAction}>
-        <input name="agentId" type="hidden" value={agent.id} />
-        <Button size="sm" type="submit" variant="outline">
-          {agent.featured ? "Unfeature" : "Feature"}
-        </Button>
-      </form>
-      <AgentSheet agent={agent} mode="edit" />
-      <form action={deleteAgentAction}>
-        <input name="agentId" type="hidden" value={agent.id} />
-        <Button
-          className="text-destructive hover:text-destructive"
-          size="sm"
-          type="submit"
-          variant="ghost"
-        >
-          Delete
-        </Button>
-      </form>
-    </div>
-  );
+  return <ActionsMenu row={agent} />;
 }
 
 export const columns: ColumnDef<AgentTableRow>[] = [
+  createSelectColumn<AgentTableRow>(),
   {
     accessorFn: (row) => row.name,
     cell: ({ row }) => <AgentCell agent={row.original} />,
@@ -88,7 +60,7 @@ export const columns: ColumnDef<AgentTableRow>[] = [
     id: "agent",
     meta: {
       className:
-        "min-w-[260px] md:sticky md:left-0 md:z-20 md:bg-background",
+        "min-w-[260px] md:sticky md:left-[50px] bg-background group-hover:bg-muted z-20",
       headerLabel: "Agent",
       skeleton: { type: "text", width: "w-44" },
       sticky: true,
@@ -138,15 +110,15 @@ export const columns: ColumnDef<AgentTableRow>[] = [
   },
   {
     cell: ({ row }) => <ActionsCell agent={row.original} />,
-    header: "",
+    header: "Actions",
     id: "actions",
     meta: {
       className:
-        "min-w-[280px] text-right md:sticky md:right-0 md:z-20 md:border-l md:border-border md:bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f]",
+        "min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-muted z-30 justify-center !border-l !border-border",
       headerLabel: "Actions",
-      skeleton: { type: "text", width: "w-28" },
+      skeleton: { type: "icon" },
       sticky: true,
     },
-    size: 320,
+    size: 80,
   },
 ];

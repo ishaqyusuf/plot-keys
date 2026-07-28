@@ -1,14 +1,12 @@
 "use client";
 
 import { cn } from "@plotkeys/utils";
-import { type MouseEvent, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import { isPathInLink, normalizeNavPath } from "../lib/links";
 import type { NavLink as NavLinkType, NavModule } from "../lib/types";
 import { NavChildItem } from "./nav-child-item";
 import { NavLink } from "./nav-link";
 import { useSiteNav } from "./use-site-nav";
-
-const HOVER_EXPAND_DELAY_MS = 180;
 
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
@@ -32,16 +30,18 @@ function ChevronDownIcon({ className }: { className?: string }) {
 export function NavItem({
   isActive,
   isExpanded,
+  isItemExpanded,
   item,
   onSelect,
   onToggle,
 }: {
   isActive: boolean;
   isExpanded: boolean;
+  isItemExpanded: boolean;
   item: NavLinkType;
   module: NavModule;
   onSelect?: () => void;
-  onToggle: (path?: string) => void;
+  onToggle: () => void;
 }) {
   const {
     props: { pathName },
@@ -49,22 +49,10 @@ export function NavItem({
   const normalizedPathName = normalizeNavPath(pathName?.toLowerCase() ?? "");
   const hasChildren = Boolean(item?.subLinks?.length);
   const ItemIcon = item?.icon;
-  const [isHovered, setIsHovered] = useState(false);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasActiveChild = hasChildren
     ? item?.subLinks?.some((child) => isPathInLink(normalizedPathName, child))
     : false;
-  const shouldShowChildren =
-    isExpanded && (isHovered || hasActiveChild || isActive);
-
-  useEffect(
-    () => () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-    },
-    [],
-  );
+  const shouldShowChildren = isExpanded && isItemExpanded;
 
   if (!item) {
     return null;
@@ -74,29 +62,8 @@ export function NavItem({
     return null;
   }
 
-  function handleMouseEnter() {
-    if (hasChildren && !hasActiveChild && !isActive) {
-      hoverTimeoutRef.current = setTimeout(() => {
-        setIsHovered(true);
-      }, HOVER_EXPAND_DELAY_MS);
-      return;
-    }
-
-    setIsHovered(true);
-  }
-
-  function handleMouseLeave() {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-
-    setIsHovered(false);
-  }
-
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: hover state controls delayed child-link reveal for pointer users.
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div className="group">
       <NavLink
         href={item?.href ?? "#"}
         className="group"
@@ -105,25 +72,18 @@ export function NavItem({
         <div className="relative">
           <div
             className={cn(
-              "ml-[10px] mr-[10px] h-[44px] rounded-[18px] border transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+              "border border-transparent h-[40px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ml-[15px] mr-[15px]",
               isActive
-                ? "border-sidebar-border bg-sidebar-accent shadow-sm"
-                : "border-transparent bg-transparent group-hover:border-sidebar-border/80 group-hover:bg-sidebar-accent/70",
-              isExpanded ? "w-[calc(100%-20px)]" : "w-[44px]",
+                ? "bg-[#f7f7f7] dark:bg-[#131313] border-[#e6e6e6] dark:border-[#1d1d1d]"
+                : "bg-transparent",
+              isExpanded ? "w-[calc(100%-30px)]" : "w-[40px]",
             )}
           />
 
-          {isActive ? (
-            <>
-              <div className="absolute inset-y-[7px] left-[13px] w-[3px] rounded-full bg-sidebar-primary" />
-              <div className="absolute inset-x-[10px] inset-y-0 rounded-[18px] bg-gradient-to-r from-sidebar-primary/10 to-transparent" />
-            </>
-          ) : null}
-
-          <div className="pointer-events-none absolute left-[10px] top-0 flex h-[44px] w-[44px] items-center justify-center text-sidebar-foreground/48 group-hover:text-sidebar-foreground/88">
-            <div className={cn(isActive && "text-sidebar-primary")}>
+          <div className="absolute top-0 left-[15px] w-[40px] h-[40px] flex items-center justify-center dark:text-[#666666] text-black group-hover:!text-primary pointer-events-none">
+            <div className={cn(isActive && "dark:!text-white")}>
               {ItemIcon ? (
-                <ItemIcon className="size-4" />
+                <ItemIcon className="size-5" />
               ) : (
                 <span className="block size-2 rounded-full bg-current" />
               )}
@@ -131,12 +91,13 @@ export function NavItem({
           </div>
 
           {isExpanded ? (
-            <div className="pointer-events-none absolute left-[58px] right-[10px] top-0 flex h-[44px] items-center">
+            <div className="absolute top-0 left-[55px] right-[4px] h-[40px] flex items-center pointer-events-none">
               <span
                 className={cn(
-                  "overflow-hidden whitespace-nowrap text-sm font-medium tracking-[0.01em] text-sidebar-foreground/64 transition-colors duration-150 group-hover:text-sidebar-foreground",
-                  hasChildren && "pr-2",
-                  isActive && "font-semibold text-sidebar-foreground",
+                  "text-sm font-medium transition-opacity duration-200 ease-in-out text-[#666] group-hover:text-primary",
+                  "whitespace-nowrap overflow-hidden",
+                  hasChildren ? "pr-2" : "",
+                  isActive && "text-primary",
                 )}
               >
                 {item.title ?? item.name}
@@ -147,11 +108,12 @@ export function NavItem({
                   onClick={(event: MouseEvent<HTMLButtonElement>) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    onToggle(item.href);
+                    onToggle();
                   }}
                   className={cn(
-                    "pointer-events-auto ml-auto mr-1 flex size-8 items-center justify-center rounded-full border border-transparent text-sidebar-foreground/42 transition-all duration-200 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                    isActive && "text-sidebar-primary",
+                    "w-8 h-8 flex items-center justify-center transition-all duration-200 ml-auto mr-3",
+                    "text-[#888] hover:text-primary pointer-events-auto",
+                    isActive && "text-primary/60",
                     shouldShowChildren && "rotate-180",
                   )}
                 >
@@ -166,20 +128,22 @@ export function NavItem({
       {hasChildren ? (
         <div
           className={cn(
-            "overflow-hidden transition-all duration-300 ease-in-out",
-            shouldShowChildren ? "mt-1 max-h-96" : "max-h-0",
+            "transition-all duration-300 ease-out overflow-hidden",
+            shouldShowChildren ? "max-h-96 mt-1" : "max-h-0",
           )}
         >
-          {item?.subLinks?.map((child) => (
+          {item?.subLinks?.map((child, index) => (
             <NavChildItem
               key={child.href ?? child.name}
               child={child}
               hasActiveChild={Boolean(hasActiveChild)}
+              index={index}
               isActive={isPathInLink(normalizedPathName, child)}
               isExpanded={isExpanded}
               isParentActive={isActive}
-              isParentHovered={isHovered || Boolean(hasActiveChild) || isActive}
+              isParentHovered={shouldShowChildren}
               onSelect={onSelect}
+              shouldShow={shouldShowChildren}
             />
           ))}
         </div>
