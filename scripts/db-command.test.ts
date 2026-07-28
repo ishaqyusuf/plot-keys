@@ -99,6 +99,18 @@ describe("database command profile guard", () => {
         "postgresql://postgres:postgres@[::1]:5432/plotkeys",
       ),
     ).toThrow("Refusing to run the prod database command");
+    expect(() =>
+      assertDatabaseTarget(
+        "prod",
+        "postgresql://postgres:postgres@127.1.2.3:5432/plotkeys",
+      ),
+    ).toThrow("Refusing to run the prod database command");
+    expect(() =>
+      assertDatabaseTarget(
+        "remote",
+        "postgresql://postgres:postgres@[::ffff:7f00:1]:5432/plotkeys",
+      ),
+    ).toThrow("Refusing to run the remote database command");
     expect(() => assertDatabaseTarget("prod", undefined)).toThrow(
       "DATABASE_URL is missing",
     );

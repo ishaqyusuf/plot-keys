@@ -36,6 +36,7 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 - Production database access is explicit at the command boundary.
 - Filtered workspace commands retain the root-selected environment mode.
 - Local and hosted production configuration stay separate without committing secrets.
+- Local root builds use `.env.prod`; hosted root builds use the explicit platform-env build path, and hosted workspace builds keep their direct platform-compatible commands.
 - Future fixes to the shared toolkit apply consistently across projects.
 
 ### Tradeoffs

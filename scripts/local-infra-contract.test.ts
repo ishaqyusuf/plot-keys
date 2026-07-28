@@ -33,6 +33,36 @@ function exampleEnvKeys() {
     });
 }
 
+function runtimeEnvKeys() {
+  const sourceFiles = new Bun.Glob(
+    "{apps,packages,scripts}/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+  ).scanSync({
+    cwd: root,
+    absolute: true,
+    onlyFiles: true,
+  });
+  const keys = new Set<string>();
+
+  for (const sourceFile of sourceFiles) {
+    if (
+      sourceFile.includes("/node_modules/") ||
+      sourceFile.includes("/.next/") ||
+      sourceFile.includes("/dist/") ||
+      sourceFile.includes("/src/generated/")
+    ) {
+      continue;
+    }
+
+    const contents = readFileSync(sourceFile, "utf8");
+
+    for (const match of contents.matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)) {
+      if (match[1]) keys.add(match[1]);
+    }
+  }
+
+  return keys;
+}
+
 describe("shared root environment contract", () => {
   test("suppresses Bun env preloading for every toolkit command", () => {
     for (const packageFile of packageFiles) {
@@ -56,6 +86,10 @@ describe("shared root environment contract", () => {
     expect(
       readFileSync(resolve(root, "scripts/db-command.ts"), "utf8"),
       "database service startup must suppress Bun env preloading",
+    ).toContain('"--env-file=/dev/null"');
+    expect(
+      readFileSync(resolve(root, "scripts/local-infra-command.ts"), "utf8"),
+      "launcher dispatch must suppress Bun env preloading",
     ).toContain('"--env-file=/dev/null"');
   });
 
@@ -86,6 +120,10 @@ describe("shared root environment contract", () => {
     expect(scripts["email:test"]).toContain(
       "local-infra-command.ts with-env --mode local",
     );
+    expect(scripts["kill:ports"]).toContain(
+      "local-infra-command.ts with-env --mode local",
+    );
+    expect(scripts["build:platform"]).toBe("turbo build");
   });
 
   test("uses only standard root profile files", () => {
@@ -117,6 +155,12 @@ describe("shared root environment contract", () => {
     const globalEnv = new Set(turbo.globalEnv ?? []);
 
     for (const key of exampleEnvKeys()) {
+      expect(globalEnv.has(key), `${key} must be in turbo globalEnv`).toBe(
+        true,
+      );
+    }
+
+    for (const key of runtimeEnvKeys()) {
       expect(globalEnv.has(key), `${key} must be in turbo globalEnv`).toBe(
         true,
       );

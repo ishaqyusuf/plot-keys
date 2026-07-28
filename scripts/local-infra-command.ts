@@ -2,7 +2,7 @@
 
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { loadModeEnv } from "../../local-infra-kit/src/env";
+import { readEnvFile } from "../../local-infra-kit/src/env";
 
 export type LocalInfraEntrypoint = "dev" | "dev-services" | "with-env";
 export type LocalInfraMode = "local" | "prod" | "remote";
@@ -11,11 +11,14 @@ type CommandEnv = Record<string, string | undefined>;
 
 const PROFILE = "plotkeys";
 const PROFILE_ENV_MODE = "PLOTKEYS_ENV_MODE";
+const LOCAL_DATABASE_URL =
+  "postgresql://postgres:postgres@127.0.0.1:55432/plotkeys";
 const LOCAL_DATABASE_HOSTS = new Set([
   "0.0.0.0",
-  "127.0.0.1",
-  "[::1]",
+  "::",
   "::1",
+  "docker.for.mac.localhost",
+  "host.docker.internal",
   "localhost",
   "postgres",
 ]);
@@ -29,6 +32,8 @@ export function modeForCommand(
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+
+    if (arg === "--") break;
 
     if (entrypoint === "dev") {
       if (arg === "--local") modes.add("local");
@@ -76,14 +81,77 @@ export function envForMode(
     );
   }
 
-  const fileEnv = loadModeEnv(workspaceRoot, mode);
+  const baseEnv = { ...processEnv };
+  const clearedKeys = new Set([
+    ...Object.keys(readEnvFile(resolve(workspaceRoot, ".env.example"))),
+    // Clear unsupported legacy keys so nested toolkit commands cannot reload
+    // their values from .env over the selected root profile.
+    ...Object.keys(readEnvFile(resolve(workspaceRoot, ".env"))),
+  ]);
+
+  for (const key of clearedKeys) {
+    baseEnv[key] = "";
+  }
+
+  const fileEnv: CommandEnv =
+    mode === "remote"
+      ? {
+          ...readEnvFile(resolve(workspaceRoot, ".env.local")),
+          ...readEnvFile(resolve(workspaceRoot, ".env.remote.local")),
+        }
+      : readEnvFile(
+          resolve(workspaceRoot, mode === "prod" ? ".env.prod" : ".env.local"),
+        );
+
+  if (mode === "local" && !fileEnv.DATABASE_URL?.trim()) {
+    fileEnv.DATABASE_URL = LOCAL_DATABASE_URL;
+  }
 
   return {
-    ...processEnv,
+    ...baseEnv,
     ...fileEnv,
     PLOTKEYS_DB_MODE: mode === "remote" ? "remote-dev" : mode,
     PLOTKEYS_ENV_MODE: mode,
   };
+}
+
+function isLoopbackIpv4(hostname: string) {
+  const octets = hostname.split(".");
+
+  return (
+    octets.length === 4 &&
+    octets.every((octet) => /^\d+$/.test(octet) && Number(octet) <= 255) &&
+    Number(octets[0]) === 127
+  );
+}
+
+export function isLocalDatabaseHostname(hostname: string) {
+  const normalized = hostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "")
+    .replace(/\.$/, "");
+
+  if (
+    LOCAL_DATABASE_HOSTS.has(normalized) ||
+    normalized.endsWith(".localhost") ||
+    isLoopbackIpv4(normalized)
+  ) {
+    return true;
+  }
+
+  if (normalized.startsWith("::ffff:")) {
+    const mapped = normalized.slice("::ffff:".length);
+
+    if (isLoopbackIpv4(mapped)) return true;
+
+    const hexMatch = mapped.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+
+    if (hexMatch?.[1] && Number.parseInt(hexMatch[1], 16) >> 8 === 127) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function validateDatabaseForMode(mode: LocalInfraMode, env: CommandEnv) {
@@ -98,7 +166,7 @@ export function validateDatabaseForMode(mode: LocalInfraMode, env: CommandEnv) {
   }
 
   try {
-    if (LOCAL_DATABASE_HOSTS.has(new URL(databaseUrl).hostname)) {
+    if (isLocalDatabaseHostname(new URL(databaseUrl).hostname)) {
       throw new Error(
         `Refusing ${mode} mode with a local DATABASE_URL. Check the standard root profile file.`,
       );

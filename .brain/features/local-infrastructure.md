@@ -61,3 +61,11 @@ The checked-in root `.env.example` is the sole local environment contract. App- 
 - Turbo forwards the canonical root env contract through its explicit `globalEnv` allowlist.
 - Add new app ports through a stable `<WORKSPACE_NAME>_PORT` variable so filtered cleanup can derive the matching port from the workspace package name.
 - Keep production-mode checks compatible with the toolkit's canonical `prod` value.
+
+## Implementation Status
+
+- The shared root environment contract was completed on 2026-07-28.
+- Local values were consolidated into ignored root profiles, tracked app examples were removed, and `.env.production` was removed from the current tree.
+- Root `build` remains the local `.env.prod` build; hosted root builds use `build:platform`, while app and Trigger.dev builds continue to consume platform-injected variables.
+- The removed `.env.production` contained credential-like database and Paystack values that remain in Git history and require rotation. Credential rotation and any history rewrite require separate authorization.
+- Completion is recorded here because the existing untracked `.brain/tasks/` migration remains intentionally outside this change.

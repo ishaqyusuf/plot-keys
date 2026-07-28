@@ -9,6 +9,7 @@
   "scripts": {
     "brand:logos": "node ./scripts/generate-plotkeys-logo-assets.mjs",
     "build": "bun --env-file=/dev/null scripts/local-infra-command.ts with-env --mode prod -- turbo build",
+    "build:platform": "turbo build",
     "db:docker:down": "docker compose -f docker-compose.yml down",
     "db:docker:up": "bun run dev:services:local",
     "db:down": "bun run db:docker:down",
@@ -33,7 +34,7 @@
     "db:drizzle:studio": "bun scripts/db-command.ts drizzle-studio",
     "db:up": "bun run db:start",
     "email:test": "bun --env-file=/dev/null scripts/local-infra-command.ts with-env --mode local -- bun scripts/send-test-email.mjs",
-    "kill:ports": "bun --env-file=/dev/null ../local-infra-kit/bin/kill-ports.ts --profile plotkeys",
+    "kill:ports": "bun --env-file=/dev/null scripts/local-infra-command.ts with-env --mode local -- bun --env-file=/dev/null ../local-infra-kit/bin/kill-ports.ts --profile plotkeys --mode local",
     "dev:prepare": "bun run kill:ports && bun run dev:services",
     "dev:services": "bun --env-file=/dev/null scripts/local-infra-command.ts dev-services",
     "dev:services:local": "bun --env-file=/dev/null scripts/local-infra-command.ts dev-services --mode local",

@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
+import { isLocalDatabaseHostname } from "./local-infra-command";
 
 export type DatabaseMode = "local" | "prod" | "remote";
 export type DatabaseOperation =
@@ -111,7 +112,7 @@ export function classifyDatabaseTarget(
       return "managed-local";
     }
 
-    return LOCAL_DATABASE_HOSTS.has(url.hostname) ? "local" : "external";
+    return isLocalDatabaseHostname(url.hostname) ? "local" : "external";
   } catch {
     return "external";
   }
