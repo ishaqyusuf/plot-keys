@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - plotkeys-postgres-data:/var/lib/postgresql/data
+      - plotkeys_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d plotkeys"]
       interval: 5s
@@ -18,4 +18,4 @@ services:
       retries: 10
 
 volumes:
-  plotkeys-postgres-data:
+  plotkeys_postgres_data:

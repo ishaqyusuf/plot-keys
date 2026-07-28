@@ -20,6 +20,7 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 - All profiles expose the database as `DATABASE_URL`.
 - The managed local Postgres service uses host port `55432`.
 - Local database commands are the safe default. Remote and production database commands use explicit suffixes.
+- Database mutations and interactive tools use a School Clerk-style repository router that pins the selected profile's database URL and validates the target before invoking Prisma, Drizzle, or `psql`.
 - Project-local copies of the shared env loader, port cleanup script, and dev router are removed.
 
 ## Consequences

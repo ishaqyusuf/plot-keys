@@ -92,13 +92,13 @@ function resolveAppPublicUrl(kind: AppUrlKind) {
 }
 
 export function getAppUrlConfig(kind: AppUrlKind) {
+  const production = isProductionMode();
+
   return {
     appPort: resolveAppPort(kind),
     appRootDomain: resolveAppPortlessRootDomain(kind),
-    defaultProtocol: (process.env.NODE_ENV === "production"
-      ? "https"
-      : "http") as "http" | "https",
-    isProduction: process.env.NODE_ENV === "production",
+    defaultProtocol: (production ? "https" : "http") as "http" | "https",
+    isProduction: production,
     portlessRootDomain: resolveAppPortlessRootDomain(kind),
     productionRootDomain: resolveAppProductionRootDomain(kind),
     publicUrl: resolveAppPublicUrl(kind),
@@ -290,7 +290,7 @@ export function buildTenantSiteRootUrl(options: BuildAppUrlOptions = {}) {
 }
 
 export function getDevAppUrls() {
-  if (process.env.NODE_ENV === "production") {
+  if (isProductionMode()) {
     return {
       api: normalizeRuntimeHost(process.env.NEXT_PUBLIC_API_URL) || "",
       dashboard:
@@ -306,27 +306,27 @@ export function getDevAppUrls() {
 
   return {
     api: normalizeRuntimeHost(
-      process.env.NEXT_PUBLIC_API_URL ??
+      process.env.NEXT_PUBLIC_API_URL?.trim() ||
         `http://localhost:${resolveAppPort("api")}`,
     ),
     dashboard: normalizeRuntimeHost(
-      process.env.NEXT_PUBLIC_DASHBOARD_URL ??
-        process.env.NEXT_PUBLIC_DASHBOARD_APP_URL ??
+      process.env.NEXT_PUBLIC_DASHBOARD_URL?.trim() ||
+        process.env.NEXT_PUBLIC_DASHBOARD_APP_URL?.trim() ||
         `http://localhost:${resolveAppPort("dashboard")}`,
     ),
     site: normalizeRuntimeHost(
-      process.env.NEXT_PUBLIC_SITE_URL ??
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
         `http://localhost:${resolveAppPort("site")}`,
     ),
     tenantSite: normalizeRuntimeHost(
-      process.env.NEXT_PUBLIC_TENANT_SITE_URL ??
+      process.env.NEXT_PUBLIC_TENANT_SITE_URL?.trim() ||
         `http://localhost:${resolveAppPort("tenant-site")}`,
     ),
   };
 }
 
 export function getDevAppUrlStrings() {
-  if (process.env.NODE_ENV === "production") {
+  if (isProductionMode()) {
     return {
       api: buildApiUrl(),
       dashboard: buildDashboardUrl(),

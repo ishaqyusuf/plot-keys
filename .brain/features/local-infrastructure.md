@@ -54,5 +54,7 @@ The checked-in `.env.example` documents shared ports, URLs, and service variable
 
 - Production database commands must remain explicit `:prod` scripts.
 - Do not run production-profile database commands without confirming the target.
+- Database mutations and interactive tools pass through `scripts/db-command.ts`, which rejects external targets in local mode and managed-local targets in remote or production modes.
+- Remote and production database commands require their URL in the matching profile file; they never inherit `DATABASE_URL` from the local profile.
 - Add new app ports through a stable `<WORKSPACE_NAME>_PORT` variable so filtered cleanup can derive the matching port from the workspace package name.
 - Keep production-mode checks compatible with the toolkit's canonical `prod` value.
