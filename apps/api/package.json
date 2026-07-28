@@ -13,8 +13,8 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode local -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${API_PORT:-3902}} PORTLESS_WILDCARD=1 portless api-plotkeys bun --watch src/index.ts",
-    "dev:prod": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- PORT=${API_PROD_PORT:-3907} bun --watch src/index.ts",
+    "dev": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${API_PORT:-3902}} PORTLESS_WILDCARD=1 portless api-plotkeys bun --watch src/index.ts",
+    "dev:prod": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- PORT=${API_PROD_PORT:-3907} bun --watch src/index.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit"
   },

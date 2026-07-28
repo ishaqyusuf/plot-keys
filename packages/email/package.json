@@ -10,9 +10,9 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode local -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${EMAIL_PORT:-3904}} PORTLESS_WILDCARD=1 portless email-plotkeys email dev",
+    "dev": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${EMAIL_PORT:-3904}} PORTLESS_WILDCARD=1 portless email-plotkeys email dev",
     "lint": "biome check .",
-    "start": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- email start",
+    "start": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- email start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

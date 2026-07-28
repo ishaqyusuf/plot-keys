@@ -9,7 +9,9 @@
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "biome check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --",
+    "with-env:prod": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod --"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

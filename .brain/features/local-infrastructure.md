@@ -12,17 +12,17 @@ Provide one predictable development entrypoint for Plot Keys, with explicit loca
 
 Plot Keys delegates environment loading, local service startup, filtered port cleanup, and dev command routing to `/Users/M1PRO/Documents/code/local-infra-kit` using the `plotkeys` profile.
 
-Repository scripts should invoke the toolkit directly rather than adding project-local copies of its routers or env loaders.
+`scripts/local-infra-command.ts` is the only project-owned launcher. It makes the selected root profile authoritative, validates non-local database targets, disables Bun's implicit env preload, and then dispatches to the toolkit. It must not grow project-local copies of the shared routers or service implementation.
 
 ## Environment Contract
 
 - `.env.local`: local development
 - `.env.remote.local`: remote-development overrides loaded over `.env.local`
-- `.env.prod`: production
+- `.env.prod`: local production-mode commands
 - `DATABASE_URL`: the database URL in every profile
-- `PLOTKEYS_ENV_MODE`: derived by the toolkit as `local`, `remote`, or `prod`
+- `PLOTKEYS_ENV_MODE`: derived by the launcher as `local`, `remote`, or `prod`
 
-The checked-in `.env.example` documents shared ports, URLs, and service variables. Secrets remain in ignored profile files.
+The checked-in root `.env.example` is the sole local environment contract. App- and package-local env value files are unsupported. Secrets remain in ignored root profile files, while hosted deployments use platform-injected variables.
 
 ## Local Services
 
@@ -56,5 +56,8 @@ The checked-in `.env.example` documents shared ports, URLs, and service variable
 - Do not run production-profile database commands without confirming the target.
 - Database mutations and interactive tools pass through `scripts/db-command.ts`, which rejects external targets in local mode and managed-local targets in remote or production modes.
 - Remote and production database commands require their URL in the matching profile file; they never inherit `DATABASE_URL` from the local profile.
+- All toolkit entrypoints use `bun --env-file=/dev/null` so Bun cannot preload an unintended app or root env file.
+- Default workspace `dev` scripts inherit `PLOTKEYS_ENV_MODE`; they must not hard-code local mode.
+- Turbo forwards the canonical root env contract through its explicit `globalEnv` allowlist.
 - Add new app ports through a stable `<WORKSPACE_NAME>_PORT` variable so filtered cleanup can derive the matching port from the workspace package name.
 - Keep production-mode checks compatible with the toolkit's canonical `prod` value.

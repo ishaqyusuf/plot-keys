@@ -4,10 +4,10 @@
   "scripts": {
     "build": "bun next build --turbopack",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode local -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${TENANT_SITE_PORT:-3903}} PORTLESS_WILDCARD=1 portless tenant-plotkeys next dev --turbopack",
-    "dev:prod": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next dev --turbopack -p ${TENANT_SITE_PROD_PORT:-3908}",
+    "dev": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys -- PORTLESS_APP_PORT=${PORTLESS_APP_PORT:-${TENANT_SITE_PORT:-3903}} PORTLESS_WILDCARD=1 portless tenant-plotkeys next dev --turbopack",
+    "dev:prod": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next dev --turbopack -p ${TENANT_SITE_PROD_PORT:-3908}",
     "lint": "biome check .",
-    "start": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next start -p ${TENANT_SITE_PORT:-3903}",
+    "start": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod -- next start -p ${TENANT_SITE_PORT:-3903}",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

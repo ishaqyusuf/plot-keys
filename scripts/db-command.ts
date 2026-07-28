@@ -157,11 +157,7 @@ function readEnvFile(filePath: string): CommandEnv {
 }
 
 function productionEnv(workspaceRoot: string) {
-  const primary = readEnvFile(resolve(workspaceRoot, ".env.prod"));
-
-  return Object.keys(primary).length > 0
-    ? primary
-    : readEnvFile(resolve(workspaceRoot, ".env.production"));
+  return readEnvFile(resolve(workspaceRoot, ".env.prod"));
 }
 
 function defaultLocalDatabaseUrl(env: CommandEnv) {
@@ -277,6 +273,7 @@ async function main() {
     await run(
       [
         "bun",
+        "--env-file=/dev/null",
         withEnvPath,
         "--profile",
         "plotkeys",

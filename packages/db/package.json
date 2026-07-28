@@ -34,9 +34,9 @@
     "seed:templates": "bun src/seed-templates.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
-    "with-env": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode local --",
-    "with-env:prod": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod --",
-    "with-env:remote": "bun ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode remote --"
+    "with-env": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --",
+    "with-env:prod": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode prod --",
+    "with-env:remote": "bun --env-file=/dev/null ../../../local-infra-kit/bin/with-env.ts --profile plotkeys --mode remote --"
   },
   "dependencies": {
     "@plotkeys/section-registry": "workspace:*",
