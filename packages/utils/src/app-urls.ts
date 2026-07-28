@@ -24,7 +24,9 @@ export type AppUrlKind = "site" | "dashboard" | "api" | "tenant-site";
 function resolveAppPort(kind: AppUrlKind) {
   switch (kind) {
     case "site":
-      return Number(process.env.SITE_PORT ?? sitePort);
+      return Number(
+        process.env.SITE_PORT ?? process.env.WEBSITE_PORT ?? sitePort,
+      );
     case "dashboard":
       return Number(process.env.DASHBOARD_PORT ?? dashboardPort);
     case "api":
@@ -132,7 +134,8 @@ function appendPath(baseUrl: string, path?: string) {
 function isProductionMode() {
   return (
     process.env.NODE_ENV === "production" ||
-    process.env.PLOTKEYS_ENV_MODE === "production"
+    process.env.PLOTKEYS_ENV_MODE === "production" ||
+    process.env.PLOTKEYS_ENV_MODE === "prod"
   );
 }
 

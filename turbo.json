@@ -1,13 +1,26 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "globalDependencies": ["**/.env", "**/.env.development"],
+  "globalDependencies": [
+    "**/.env",
+    "**/.env.local",
+    "**/.env.remote.local",
+    "**/.env.prod",
+    "**/.env.production"
+  ],
   "ui": "tui",
   "tasks": {
     "topo": {
       "dependsOn": ["^topo"]
     },
     "build": {
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.development"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.remote.local",
+        ".env.prod",
+        ".env.production"
+      ],
       "dependsOn": ["^build"],
       "outputs": [
         ".next/**",
@@ -26,12 +39,19 @@
       "cache": false
     },
     "dev": {
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.development"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.remote.local",
+        ".env.prod",
+        ".env.production"
+      ],
       "cache": false,
       "persistent": true
     },
-    "dev:portless": {
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.development"],
+    "dev:prod": {
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.prod", ".env.production"],
       "cache": false,
       "persistent": true
     },
