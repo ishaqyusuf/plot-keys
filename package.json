@@ -22,6 +22,7 @@
     "db:start": "bun run dev:services:local",
     "db:studio": "bun --env-file=/dev/null ../local-infra-kit/bin/db.ts studio --profile plotkeys",
     "db:drizzle:studio": "bun --env-file=/dev/null ../local-infra-kit/bin/db.ts drizzle-studio --profile plotkeys",
+    "db:sync": "bun --env-file=/dev/null ../local-infra-kit/bin/db-sync.ts --profile plotkeys",
     "db:up": "bun run db:start",
     "email:test": "bun --env-file=/dev/null scripts/local-infra-command.ts with-env --mode local -- bun scripts/send-test-email.mjs",
     "kill:ports": "bun --env-file=/dev/null scripts/local-infra-command.ts with-env --mode local -- bun --env-file=/dev/null ../local-infra-kit/bin/kill-ports.ts --profile plotkeys --mode local",

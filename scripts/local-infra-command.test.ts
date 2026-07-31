@@ -11,11 +11,17 @@ import {
 describe("Plot Keys root environment launcher", () => {
   test("resolves explicit and inherited environment modes", () => {
     expect(modeForCommand("dev", [])).toBe("local");
-    expect(modeForCommand("dev", ["--remote"])).toBe("remote");
+    expect(modeForCommand("dev", ["--preview"])).toBe("preview");
+    expect(() => modeForCommand("dev", ["--remote"])).toThrow(
+      "Unknown local-infra mode flag",
+    );
+    expect(() => modeForCommand("dev", ["--remote-dev"])).toThrow(
+      "Unknown local-infra mode flag",
+    );
     expect(modeForCommand("dev", ["--prod"])).toBe("prod");
     expect(
-      modeForCommand("with-env", [], { PLOTKEYS_ENV_MODE: "remote" }),
-    ).toBe("remote");
+      modeForCommand("with-env", [], { PLOTKEYS_ENV_MODE: "preview" }),
+    ).toBe("preview");
     expect(modeForCommand("dev-services", ["--mode", "prod"])).toBe("prod");
   });
 
@@ -29,16 +35,16 @@ describe("Plot Keys root environment launcher", () => {
     expect(
       modeForCommand("with-env", [
         "--mode",
-        "remote",
+        "preview",
         "--",
         "child-command",
         "--mode",
         "prod",
       ]),
-    ).toBe("remote");
+    ).toBe("preview");
     expect(
-      modeForCommand("dev", ["--remote", "--", "child-command", "--prod"]),
-    ).toBe("remote");
+      modeForCommand("dev", ["--preview", "--", "child-command", "--prod"]),
+    ).toBe("preview");
   });
 
   test("makes the selected root profile authoritative", () => {
@@ -54,19 +60,19 @@ describe("Plot Keys root environment launcher", () => {
         "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:55432/plotkeys\nAPP_ENV=local\n",
       );
       writeFileSync(
-        join(root, ".env.remote.local"),
-        "DATABASE_URL=postgresql://remote.example.com/plotkeys\nAPP_ENV=remote\n",
+        join(root, ".env.preview"),
+        "DATABASE_URL=postgresql://preview.example.com/plotkeys\nAPP_ENV=preview\n",
       );
 
-      const env = envForMode("remote", root, {
+      const env = envForMode("preview", root, {
         DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:55432/plotkeys",
         APP_ENV: "shell",
       });
 
-      expect(env.DATABASE_URL).toBe("postgresql://remote.example.com/plotkeys");
-      expect(env.APP_ENV).toBe("remote");
-      expect(env.PLOTKEYS_ENV_MODE).toBe("remote");
-      expect(env.PLOTKEYS_DB_MODE).toBe("remote-dev");
+      expect(env.DATABASE_URL).toBe("postgresql://preview.example.com/plotkeys");
+      expect(env.APP_ENV).toBe("preview");
+      expect(env.PLOTKEYS_ENV_MODE).toBe("preview");
+      expect(env.PLOTKEYS_DB_MODE).toBe("preview");
       expect(env.PAYSTACK_SECRET_KEY).toBe("");
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -83,7 +89,7 @@ describe("Plot Keys root environment launcher", () => {
       );
       writeFileSync(join(root, ".env"), "OLD_APP_PORT=9999\n");
       writeFileSync(join(root, ".env.local"), "PAYSTACK_SECRET_KEY=\n");
-      writeFileSync(join(root, ".env.remote.local"), "APP_ENV=remote\n");
+      writeFileSync(join(root, ".env.preview"), "APP_ENV=preview\n");
       writeFileSync(join(root, ".env.prod"), "APP_ENV=prod\n");
 
       const local = envForMode("local", root, {
@@ -96,7 +102,7 @@ describe("Plot Keys root environment launcher", () => {
       expect(local.PAYSTACK_SECRET_KEY).toBe("");
       expect(local.OLD_APP_PORT).toBe("");
 
-      for (const mode of ["remote", "prod"] as const) {
+      for (const mode of ["preview", "prod"] as const) {
         const env = envForMode(mode, root, {
           DATABASE_URL: "postgresql://external.example.com/plotkeys",
         });
@@ -145,7 +151,7 @@ describe("Plot Keys root environment launcher", () => {
   });
 
   test("rejects local database URLs outside local mode", () => {
-    for (const mode of ["remote", "prod"] as const) {
+    for (const mode of ["preview", "prod"] as const) {
       for (const databaseUrl of [
         "postgresql://postgres:postgres@[::1]:55432/plotkeys",
         "postgresql://postgres:postgres@127.0.0.2:55432/plotkeys",

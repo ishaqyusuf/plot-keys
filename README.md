@@ -29,7 +29,7 @@ Plot Keys uses the shared `local-infra-kit` beside this repository for profile-a
 Create the env files you need from `.env.example`:
 
 - `.env.local` for local development
-- `.env.remote.local` for hosted development overrides
+- `.env.preview` for hosted preview overrides
 - `.env.prod` for local production-mode commands
 
 These root files are the only local environment sources. Do not create values in `apps/*/.env*` or `packages/*/.env*`. Hosted deployments continue to use environment variables injected by Vercel, Trigger.dev, or the relevant platform.
@@ -40,9 +40,9 @@ The default local database is PostgreSQL 16 in Docker at `127.0.0.1:55432`. Star
 bun run db:start
 ```
 
-Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with a flag, for example `bun run db:migrate --remote` or `bun run db:migrate --prod`.
+Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with a flag, for example `bun run db:migrate --preview` or `bun run db:migrate --prod`. `bun run db:sync` defaults to production → local; `--to-preview` explicitly selects preview, and production is never a destination.
 
-To use a hosted development database, put its `DATABASE_URL` in `.env.remote.local` and start the workspace with `bun run dev --remote`. Local services are skipped when the active database URL is not the managed Docker target.
+To use a hosted preview database, put its `DATABASE_URL` in `.env.preview` and start the workspace with `bun run dev --preview`. Local services are skipped when the active database URL is not the managed Docker target.
 
 ## Portless Local URLs
 PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for stable named `.localhost` URLs during development.
@@ -50,7 +50,7 @@ PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for 
 1. Install the CLI once with `npm install -g portless`
 2. Start the full workspace with `bun run dev`
 3. Or start a single app with `bun run dev -f dashboard`, `bun run dev -f sandbox`, `bun run dev -f website`, `bun run dev -f tenant-site`, or `bun run dev -f api`
-4. Use `bun run dev --remote` for hosted development services, or the explicit `bun run dev --prod` profile when production-profile validation is intended.
+4. Use `bun run dev --preview` for hosted preview services, or the explicit `bun run dev --prod` profile when production-profile validation is intended.
 
 Default routes:
 - `https://plotkeys.localhost` for the marketing site

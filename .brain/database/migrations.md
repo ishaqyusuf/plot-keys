@@ -21,7 +21,7 @@ This file tracks migration conventions and migration milestones.
 ## Planned Conventions
 
 - Use the shared root `db:generate`, `db:migrate`, `db:pull`, `db:push`, and `db:studio` commands against the intended database profile.
-- Each action defaults to local and accepts only `--local`, `--remote`, or `--prod`. Use `--prod` only when explicitly requested; connected production actions print a credential-free target fingerprint and require it as confirmation. Put tool arguments after `--` and do not force data loss or destructive changes without approval.
+- Each action defaults to local and accepts only `--local`, `--preview`, or `--prod`. Use `--prod` only when explicitly requested; connected production actions print a credential-free target fingerprint and require it as confirmation. `db:sync` defaults to production → local and accepts only `--to-local` or `--to-preview` destinations.
 - Use Prisma migrations from `packages/db/prisma`.
 - If repository root scripts `db:migrate` and `db:push` exist, run `bun db:migrate` and `bun db:push` after Prisma schema/database updates.
 - Do not manually create migration files; use the repository scripts and Prisma workflow.
@@ -65,6 +65,36 @@ This file tracks migration conventions and migration milestones.
 - Decide whether platform templates should remain code-backed or move into a Prisma `SiteTemplate` table
 - Decide whether template seeds should be Prisma seeds, static bootstrap scripts, or app-owned sync code
 - Add the first migration that records provisioning events or domain retry history once Vercel integration is implemented
+
+## 2026-07-28 Local Verification Note
+
+- Changed `tenant_template_licenses.granted_by_id` from PostgreSQL UUID to text
+  and added the optional Prisma relation to `User`, matching Better Auth's
+  opaque string user IDs.
+- `prisma migrate dev` was run against the isolated local PlotKeys database and
+  refused because migration history already lacks the existing QA
+  classification, purge-run, and notification-message-log schema changes.
+  No reset or manually authored migration was performed.
+- `prisma db push` completed successfully against local port `55433`, and
+  Prisma Client was regenerated. The outstanding migration-history drift
+  remains tracked by `Apply Pending Prisma Migrations`.
+
+## 2026-07-30 Real QA Tenant Sandbox
+
+- Removed `TemplateSandboxProfile` and its `template_sandbox_profiles` table
+  contract.
+- Made `Company.slug` and `User.email` globally unique so QA accounts reserve
+  the same tenant and identity namespaces as normal accounts.
+- Added cascading company deletion to template licenses, stock-image licenses,
+  analytics events, billing lines, AI credit/usage rows, and appointments so
+  guarded QA aggregate cleanup cannot leave dependent rows behind.
+- Regenerated Prisma Client successfully with `bun db:generate`.
+- `bun db:migrate` was executed as required, but Prisma refused because the
+  local database already contains documented schema changes absent from its
+  migration history and requested a reset. No reset and no manual migration
+  file were performed.
+- `bun db:push` completed successfully and reported the local database in sync.
+  Migration-history drift remains separate follow-up work.
 # QA cleanup schema
 
 - Adds company QA lifecycle fields and global purge-run receipts. Apply both

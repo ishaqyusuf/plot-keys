@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { readEnvFile } from "../../local-infra-kit/src/env";
 
 export type LocalInfraEntrypoint = "dev" | "dev-services" | "with-env";
-export type LocalInfraMode = "local" | "prod" | "remote";
+export type LocalInfraMode = "local" | "prod" | "preview";
 
 type CommandEnv = Record<string, string | undefined>;
 
@@ -36,8 +36,11 @@ export function modeForCommand(
     if (arg === "--") break;
 
     if (entrypoint === "dev") {
+      if (arg === "--remote" || arg === "--remote-dev") {
+        throw new Error(`Unknown local-infra mode flag: ${arg}. Use --preview.`);
+      }
       if (arg === "--local") modes.add("local");
-      if (arg === "--remote" || arg === "--remote-dev") modes.add("remote");
+      if (arg === "--preview") modes.add("preview");
       if (arg === "--prod") modes.add("prod");
       continue;
     }
@@ -62,11 +65,11 @@ export function modeForCommand(
 
 function normalizeMode(value: string | undefined): LocalInfraMode {
   if (value === "local" || value === "development") return "local";
-  if (value === "remote" || value === "remote-dev") return "remote";
+  if (value === "preview") return "preview";
   if (value === "prod" || value === "production") return "prod";
 
   throw new Error(
-    `Unknown local-infra mode "${value ?? ""}". Use local, remote, or prod.`,
+    `Unknown local-infra mode "${value ?? ""}". Use local, preview, or prod.`,
   );
 }
 
@@ -93,11 +96,13 @@ export function envForMode(
     baseEnv[key] = "";
   }
 
+  const previewEnv = readEnvFile(resolve(workspaceRoot, ".env.preview"));
   const fileEnv: CommandEnv =
-    mode === "remote"
+    mode === "preview"
       ? {
           ...readEnvFile(resolve(workspaceRoot, ".env.local")),
-          ...readEnvFile(resolve(workspaceRoot, ".env.remote.local")),
+          ...previewEnv,
+          DATABASE_URL: previewEnv.DATABASE_URL,
         }
       : readEnvFile(
           resolve(workspaceRoot, mode === "prod" ? ".env.prod" : ".env.local"),
@@ -110,7 +115,7 @@ export function envForMode(
   return {
     ...baseEnv,
     ...fileEnv,
-    PLOTKEYS_DB_MODE: mode === "remote" ? "remote-dev" : mode,
+    PLOTKEYS_DB_MODE: mode === "preview" ? "preview" : mode,
     PLOTKEYS_ENV_MODE: mode,
   };
 }

@@ -16,15 +16,21 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 
 - Root `dev`, `dev:services`, build, and one-off env commands pass through a thin Plot Keys launcher that only makes the selected root profile authoritative, validates database mode safety, and dispatches to the shared toolkit; port cleanup and database routing retain their dedicated entrypoints.
 - Runnable workspaces use the shared `with-env.ts` wrapper and make their default `dev` command Portless-aware.
-- Environment files follow `.env.local`, `.env.remote.local`, and `.env.prod`.
+- Environment files follow `.env.local`, `.env.preview`, and `.env.prod`; preview overlays local defaults but must provide its own `DATABASE_URL`.
 - Root profile files are the only local environment sources; app- and package-local env values are unsupported.
 - Bun env preloading is disabled at toolkit entrypoints, and default workspace development commands inherit `PLOTKEYS_ENV_MODE` instead of forcing local mode.
 - Local production-mode commands use `.env.prod`; hosted builds and runtimes continue to use platform-injected environment variables.
 - All profiles expose the database as `DATABASE_URL`.
 - The managed local Postgres service uses host port `55432`.
-- Local database commands are the safe default. Remote and production database commands use explicit suffixes.
+- Local database commands are the safe default. Preview and production database commands use explicit flags.
 - Database mutations and interactive tools use a School Clerk-style repository router that pins the selected profile's database URL and validates the target before invoking Prisma, Drizzle, or `psql`.
 - Project-local copies of the shared env loader, port cleanup script, and dev router are removed.
+- `db:sync` uses the toolkit's raw PostgreSQL engine. Production is source-only;
+  local is the default destination and `--to-preview` explicitly authorizes a
+  preview write. The engine performs schema/FK preflight, incremental upserts,
+  nullable-cycle deferral, sequence repair, and bounded opt-in static refresh,
+  never deletes destination-only rows, and stores cursors per destination under
+  `.local-db-sync/`.
 
 ## Consequences
 
@@ -32,7 +38,7 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 
 - Plot Keys and School Clerk share one development contract.
 - Filtered startup clears only ports owned by the selected workspaces.
-- Remote development does not unnecessarily start local Postgres.
+- Preview development does not unnecessarily start local Postgres.
 - Production database access is explicit at the command boundary.
 - Filtered workspace commands retain the root-selected environment mode.
 - Local and hosted production configuration stay separate without committing secrets.
@@ -45,6 +51,12 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 - Toolkit mode names and file conventions are now part of the repository contract.
 - Root env variables used by Turbo tasks must be declared in the shared `globalEnv` allowlist.
 - Contributors must add reusable infrastructure behavior to the toolkit rather than patching a Plot Keys-only copy.
+
+## Rollback
+
+Remove the root `db:sync` script to disable synchronization while retaining the
+shared environment and database-command contract. Cursor files are local,
+disposable state; rollback does not require a schema or data migration.
 
 ## References
 

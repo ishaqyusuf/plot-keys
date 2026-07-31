@@ -6,7 +6,7 @@ Implemented on 2026-07-28.
 
 ## Purpose
 
-Provide one predictable development entrypoint for Plot Keys, with explicit local, remote-development, and production environment profiles.
+Provide one predictable development entrypoint for Plot Keys, with explicit local, preview, and production environment profiles.
 
 ## Shared Toolkit Boundary
 
@@ -17,10 +17,10 @@ Plot Keys delegates environment loading, local service startup, filtered port cl
 ## Environment Contract
 
 - `.env.local`: local development
-- `.env.remote.local`: remote-development overrides loaded over `.env.local`
+- `.env.preview`: preview overrides loaded over `.env.local`; it must provide its own `DATABASE_URL`
 - `.env.prod`: local production-mode commands
 - `DATABASE_URL`: the database URL in every profile
-- `PLOTKEYS_ENV_MODE`: derived by the launcher as `local`, `remote`, or `prod`
+- `PLOTKEYS_ENV_MODE`: derived by the launcher as `local`, `preview`, or `prod`
 
 The checked-in root `.env.example` is the sole local environment contract. App- and package-local env value files are unsupported. Secrets remain in ignored root profile files, while hosted deployments use platform-injected variables.
 
@@ -34,12 +34,13 @@ The checked-in root `.env.example` is the sole local environment contract. App- 
 ## Developer Commands
 
 - `bun run dev`: local profile, Portless apps, and managed local services
-- `bun run dev --remote`: remote-development env with local database startup skipped for an external URL
+- `bun run dev --preview`: preview env with local database startup skipped for an external URL
 - `bun run dev --prod`: explicit production-profile development
 - `bun run dev -f dashboard api`: filtered workspace startup and filtered port cleanup
 - `bun run db:<action>` or `bun run db:<action> --local`: local database profile
-- `bun run db:<action> --remote`: remote-development profile
+- `bun run db:<action> --preview`: preview profile
 - `bun run db:<action> --prod`: explicit production profile; connected actions require target-fingerprint confirmation
+- `bun run db:sync`: production → local by default; `--to-preview` selects preview and `--to-prod` is rejected
 
 ## Portless Hosts
 
@@ -54,8 +55,8 @@ The checked-in root `.env.example` is the sole local environment contract. App- 
 
 - Connected production database commands must use the explicit `--prod` argument and confirm the credential-free target fingerprint printed by the shared router.
 - Do not run production-profile database commands without confirming the target.
-- Generate, migrate, pull, push, studio, shell, and Drizzle Studio pass through the shared `local-infra-kit` database router, which rejects external targets in local mode and local targets in remote or production modes.
-- Remote and production database commands require their URL in the matching profile file; they never inherit `DATABASE_URL` from the local profile.
+- Generate, migrate, pull, push, studio, shell, and Drizzle Studio pass through the shared `local-infra-kit` database router, which rejects external targets in local mode and local targets in preview or production modes.
+- Preview and production database commands require their URL in the matching profile file; preview never inherits `DATABASE_URL` from the local profile.
 - All toolkit entrypoints use `bun --env-file=/dev/null` so Bun cannot preload an unintended app or root env file.
 - Default workspace `dev` scripts inherit `PLOTKEYS_ENV_MODE`; they must not hard-code local mode.
 - Turbo forwards the canonical root env contract through its explicit `globalEnv` allowlist.

@@ -23,6 +23,9 @@ describe("shared database command contract", () => {
     expect(rootScripts["db:drizzle:studio"]).toBe(
       `${prefix} drizzle-studio --profile plotkeys`,
     );
+    expect(rootScripts["db:sync"]).toBe(
+      "bun --env-file=/dev/null ../local-infra-kit/bin/db-sync.ts --profile plotkeys",
+    );
     expect(
       Object.keys(rootScripts).filter((name) =>
         /^db:(generate|migrate|pull|push|studio|shell):/.test(name),
