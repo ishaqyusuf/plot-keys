@@ -20,12 +20,13 @@ This file tracks migration conventions and migration milestones.
 
 ## Planned Conventions
 
-- Use the repository DB push command against the intended database profile for schema readiness checks.
-- If profile flags are added to this repo, use `bun run db:push --local` for local checks and `bun run db:push --prod` only for explicitly requested production validation/push after confirming the target database and risk. Do not force data-loss prompts or destructive changes without approval.
+- Use the shared root `db:generate`, `db:migrate`, `db:pull`, `db:push`, and `db:studio` commands against the intended database profile.
+- Each action defaults to local and accepts only `--local`, `--remote`, or `--prod`. Use `--prod` only when explicitly requested; connected production actions print a credential-free target fingerprint and require it as confirmation. Put tool arguments after `--` and do not force data loss or destructive changes without approval.
 - Use Prisma migrations from `packages/db/prisma`.
 - If repository root scripts `db:migrate` and `db:push` exist, run `bun db:migrate` and `bun db:push` after Prisma schema/database updates.
 - Do not manually create migration files; use the repository scripts and Prisma workflow.
 - Keep migration commands aligned with root `package.json` and `packages/db` scripts.
+- 2026-07-31: Removed the repository-local database router and all mode-suffixed database aliases. `local-infra-kit/bin/db.ts` is now the only profile-aware interface, including shell and Drizzle Studio.
 - Keep migrations additive and reviewable.
 - Reflect tenant-safety concerns in schema design and indexes.
 - Document any destructive migration separately before execution.

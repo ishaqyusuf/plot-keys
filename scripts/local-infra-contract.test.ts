@@ -84,10 +84,6 @@ describe("shared root environment contract", () => {
     }
 
     expect(
-      readFileSync(resolve(root, "scripts/db-command.ts"), "utf8"),
-      "database service startup must suppress Bun env preloading",
-    ).toContain('"--env-file=/dev/null"');
-    expect(
       readFileSync(resolve(root, "scripts/local-infra-command.ts"), "utf8"),
       "launcher dispatch must suppress Bun env preloading",
     ).toContain('"--env-file=/dev/null"');
@@ -141,7 +137,6 @@ describe("shared root environment contract", () => {
     const activeContract = [
       readFileSync(resolve(root, "package.json"), "utf8"),
       readFileSync(resolve(root, "turbo.json"), "utf8"),
-      readFileSync(resolve(root, "scripts/db-command.ts"), "utf8"),
       readFileSync(resolve(root, "scripts/local-infra-command.ts"), "utf8"),
     ].join("\n");
 

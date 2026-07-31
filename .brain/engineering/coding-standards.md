@@ -53,7 +53,7 @@ This file defines implementation guardrails for the repository.
   - tenant public site: `<tenant>.tenant-plotkeys.localhost`
   - tenant dashboard: `dashboard.<tenant>.app-plotkeys.localhost`
 - Use raw localhost ports only for low-level debugging when Portless itself is the suspected failure.
-- For schema readiness checks, use the repository DB push command against the intended profile. If profile flags are added to this repo, use `bun run db:push --local` for local checks and `bun run db:push --prod` only for explicitly requested production validation.
+- Use the shared root database actions for generate, migrate, pull, push, studio, shell, and Drizzle Studio. Each defaults to local and accepts only `--local`, `--remote`, or `--prod`; connected production actions must be explicitly requested and require confirming the printed target fingerprint. Put tool arguments after `--`, and do not add mode-suffixed aliases or a repository-local router.
 - Do not run production-profile DB commands unless the task explicitly calls for production validation and the target database is confirmed.
 
 ## Midday Architecture Standards
