@@ -21,7 +21,7 @@ This file tracks migration conventions and migration milestones.
 ## Planned Conventions
 
 - Use the shared root `db:generate`, `db:migrate`, `db:pull`, `db:push`, and `db:studio` commands against the intended database profile.
-- Each action defaults to local and accepts only `--local`, `--preview`, or `--prod`. Use `--prod` only when explicitly requested; connected production actions print a credential-free target fingerprint and require it as confirmation. `db:sync` defaults to production → local and accepts only `--to-local` or `--to-preview` destinations.
+- Each action defaults to local and accepts only `--local`, `--preview`, or `--prod`. `db:sync` defaults to production → local, accepts `--from-local --to-preview`, and never accepts production as a destination.
 - Use Prisma migrations from `packages/db/prisma`.
 - If repository root scripts `db:migrate` and `db:push` exist, run `bun db:migrate` and `bun db:push` after Prisma schema/database updates.
 - Do not manually create migration files; use the repository scripts and Prisma workflow.

@@ -40,7 +40,7 @@ The default local database is PostgreSQL 16 in Docker at `127.0.0.1:55432`. Star
 bun run db:start
 ```
 
-Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with a flag, for example `bun run db:migrate --preview` or `bun run db:migrate --prod`. `bun run db:sync` defaults to production → local; `--to-preview` explicitly selects preview, and production is never a destination.
+Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with `--preview` or `--prod`. `bun run db:sync` defaults to production → local; `--from-local --to-preview` publishes local data, and production is never a destination.
 
 To use a hosted preview database, put its `DATABASE_URL` in `.env.preview` and start the workspace with `bun run dev --preview`. Local services are skipped when the active database URL is not the managed Docker target.
 

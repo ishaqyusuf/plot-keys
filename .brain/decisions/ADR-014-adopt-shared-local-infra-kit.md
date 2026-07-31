@@ -25,9 +25,9 @@ Plot Keys will use `local-infra-kit` with the `plotkeys` profile.
 - Local database commands are the safe default. Preview and production database commands use explicit flags.
 - Database mutations and interactive tools use a School Clerk-style repository router that pins the selected profile's database URL and validates the target before invoking Prisma, Drizzle, or `psql`.
 - Project-local copies of the shared env loader, port cleanup script, and dev router are removed.
-- `db:sync` uses the toolkit's raw PostgreSQL engine. Production is source-only;
-  local is the default destination and `--to-preview` explicitly authorizes a
-  preview write. The engine performs schema/FK preflight, incremental upserts,
+- `db:sync` uses the toolkit's raw PostgreSQL engine. Production → local is the
+  default; `--to-preview` authorizes a preview write and `--from-local` selects
+  local as its source. Production is never a destination. The engine performs schema/FK preflight, incremental upserts,
   nullable-cycle deferral, sequence repair, and bounded opt-in static refresh,
   never deletes destination-only rows, and stores cursors per destination under
   `.local-db-sync/`.
