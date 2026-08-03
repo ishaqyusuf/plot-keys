@@ -11,6 +11,7 @@ import {
 describe("Plot Keys root environment launcher", () => {
   test("resolves explicit and inherited environment modes", () => {
     expect(modeForCommand("dev", [])).toBe("local");
+    expect(modeForCommand("dev", ["--dev"])).toBe("dev");
     expect(modeForCommand("dev", ["--preview"])).toBe("preview");
     expect(() => modeForCommand("dev", ["--remote"])).toThrow(
       "Unknown local-infra mode flag",
@@ -73,13 +74,13 @@ describe("Plot Keys root environment launcher", () => {
       expect(env.APP_ENV).toBe("preview");
       expect(env.PLOTKEYS_ENV_MODE).toBe("preview");
       expect(env.PLOTKEYS_DB_MODE).toBe("preview");
-      expect(env.PAYSTACK_SECRET_KEY).toBe("");
+      expect(env.PAYSTACK_SECRET_KEY).toBeUndefined();
     } finally {
       rmSync(root, { force: true, recursive: true });
     }
   });
 
-  test("clears inherited contract values and defaults the managed local database", () => {
+  test("loads shared defaults plus exactly one selected profile", () => {
     const root = mkdtempSync(join(tmpdir(), "plotkeys-root-env-"));
 
     try {
@@ -88,9 +89,12 @@ describe("Plot Keys root environment launcher", () => {
         "DATABASE_URL=\nPAYSTACK_SECRET_KEY=\n",
       );
       writeFileSync(join(root, ".env"), "OLD_APP_PORT=9999\n");
-      writeFileSync(join(root, ".env.local"), "PAYSTACK_SECRET_KEY=\n");
+      writeFileSync(
+        join(root, ".env.local"),
+        "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:55432/plotkeys\nPAYSTACK_SECRET_KEY=\n",
+      );
       writeFileSync(join(root, ".env.preview"), "APP_ENV=preview\n");
-      writeFileSync(join(root, ".env.prod"), "APP_ENV=prod\n");
+      writeFileSync(join(root, ".env.production"), "APP_ENV=prod\n");
 
       const local = envForMode("local", root, {
         DATABASE_URL: "postgresql://external.example.com/plotkeys",
@@ -100,7 +104,7 @@ describe("Plot Keys root environment launcher", () => {
         "postgresql://postgres:postgres@127.0.0.1:55432/plotkeys",
       );
       expect(local.PAYSTACK_SECRET_KEY).toBe("");
-      expect(local.OLD_APP_PORT).toBe("");
+      expect(local.OLD_APP_PORT).toBe("9999");
 
       for (const mode of ["preview", "prod"] as const) {
         const env = envForMode(mode, root, {
@@ -115,20 +119,24 @@ describe("Plot Keys root environment launcher", () => {
     }
   });
 
-  test("does not fall back to legacy root env files", () => {
+  test("uses base values but never inherits its DATABASE_URL", () => {
     const root = mkdtempSync(join(tmpdir(), "plotkeys-root-env-"));
 
     try {
       writeFileSync(join(root, ".env.local"), "");
-      writeFileSync(join(root, ".env"), "APP_ENV=legacy-local\n");
-      writeFileSync(join(root, ".env.prod"), "");
       writeFileSync(
-        join(root, ".env.production"),
+        join(root, ".env"),
+        "APP_ENV=shared\nDATABASE_URL=postgresql://base.example.com/plotkeys\n",
+      );
+      writeFileSync(join(root, ".env.production"), "");
+      writeFileSync(
+        join(root, ".env.prod"),
         "DATABASE_URL=postgresql://legacy.example.com/plotkeys\nAPP_ENV=legacy-prod\n",
       );
 
-      expect(envForMode("local", root, {}).APP_ENV).toBe("");
-      expect(envForMode("prod", root, {}).APP_ENV).toBe("");
+      expect(envForMode("local", root, {}).APP_ENV).toBe("shared");
+      expect(envForMode("local", root, {}).DATABASE_URL).toBeUndefined();
+      expect(envForMode("prod", root, {}).APP_ENV).toBe("shared");
       expect(envForMode("prod", root, {}).DATABASE_URL).toBeUndefined();
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -140,18 +148,20 @@ describe("Plot Keys root environment launcher", () => {
 
     try {
       writeFileSync(
-        join(root, ".env.production"),
+        join(root, ".env.prod"),
         "DATABASE_URL=postgresql://legacy.example.com/plotkeys\n",
       );
 
-      expect(() => envForMode("prod", root, {})).toThrow("Missing .env.prod");
+      expect(() => envForMode("prod", root, {})).toThrow(
+        "Missing .env.production",
+      );
     } finally {
       rmSync(root, { force: true, recursive: true });
     }
   });
 
-  test("rejects local database URLs outside local mode", () => {
-    for (const mode of ["preview", "prod"] as const) {
+  test("allows local database URLs in every explicit profile", () => {
+    for (const mode of ["local", "dev", "preview", "prod"] as const) {
       for (const databaseUrl of [
         "postgresql://postgres:postgres@[::1]:55432/plotkeys",
         "postgresql://postgres:postgres@127.0.0.2:55432/plotkeys",
@@ -162,7 +172,7 @@ describe("Plot Keys root environment launcher", () => {
       ]) {
         expect(() =>
           validateDatabaseForMode(mode, { DATABASE_URL: databaseUrl }),
-        ).toThrow(`Refusing ${mode} mode with a local DATABASE_URL`);
+        ).not.toThrow();
       }
     }
   });

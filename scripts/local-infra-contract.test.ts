@@ -123,8 +123,6 @@ describe("shared root environment contract", () => {
   });
 
   test("uses only standard root profile files", () => {
-    expect(existsSync(resolve(root, ".env.production"))).toBe(false);
-
     for (const path of [
       "apps/api/.env.example",
       "apps/dashboard/.env.example",
@@ -140,7 +138,10 @@ describe("shared root environment contract", () => {
       readFileSync(resolve(root, "scripts/local-infra-command.ts"), "utf8"),
     ].join("\n");
 
-    expect(activeContract).not.toContain(".env.production");
+    expect(activeContract).toContain(".env.production");
+    expect(activeContract).not.toMatch(/\.env\.prod(?!uction)/);
+    expect(activeContract).not.toContain(".env.production.local");
+    expect(activeContract).not.toContain(".env.development");
   });
 
   test("forwards every documented root variable through Turbo", () => {

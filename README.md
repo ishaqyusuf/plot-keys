@@ -29,8 +29,9 @@ Plot Keys uses the shared `local-infra-kit` beside this repository for profile-a
 Create the env files you need from `.env.example`:
 
 - `.env.local` for local development
-- `.env.preview` for hosted preview overrides
-- `.env.prod` for local production-mode commands
+- `.env.dev` for hosted development
+- `.env.preview` for hosted preview
+- `.env.production` for local production-mode commands
 
 These root files are the only local environment sources. Do not create values in `apps/*/.env*` or `packages/*/.env*`. Hosted deployments continue to use environment variables injected by Vercel, Trigger.dev, or the relevant platform.
 
@@ -40,9 +41,9 @@ The default local database is PostgreSQL 16 in Docker at `127.0.0.1:55432`. Star
 bun run db:start
 ```
 
-Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with `--preview` or `--prod`. `bun run db:sync` defaults to production → local; `--from-local --to-preview` publishes local data, and production is never a destination.
+Use `bun run db:generate`, `bun run db:migrate`, and `bun run db:push` for the default local profile. Select another mode with `--dev`, `--preview`, or `--prod`. Every command loads `.env` followed by exactly one profile file. `bun run db:sync` defaults to production → local; `--from-local --to-preview` publishes local data, and production is never a destination.
 
-To use a hosted preview database, put its `DATABASE_URL` in `.env.preview` and start the workspace with `bun run dev --preview`. Local services are skipped when the active database URL is not the managed Docker target.
+To use a hosted development database, put its `DATABASE_URL` in `.env.dev` and start the workspace with `bun run dev --dev`. Preview uses `.env.preview`. Local services are skipped when the active database URL is not the managed Docker target.
 
 ## Portless Local URLs
 PlotKeys supports [Vercel Portless](https://www.npmjs.com/package/portless) for stable named `.localhost` URLs during development.

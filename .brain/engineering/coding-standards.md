@@ -43,17 +43,17 @@ This file defines implementation guardrails for the repository.
 
 ## Local QA And Dev Commands
 
-- Root `.env.local`, `.env.preview`, and `.env.prod` are the only local environment sources. Do not add values to app- or package-local env files.
+- Root `.env`, `.env.local`, `.env.dev`, `.env.preview`, and `.env.production` are the only environment files. Root tooling loads `.env` plus exactly one selected profile, and the profile owns `DATABASE_URL`. Do not add app/package-local lookup, legacy aliases, or cross-profile fallback.
 - Invoke shared local-infra entrypoints through `bun --env-file=/dev/null` so Bun cannot preload a different profile before root mode resolution.
 - Default workspace `dev` and `with-env` scripts must inherit `PLOTKEYS_ENV_MODE`; use an explicit `--mode` only for commands whose name is explicitly local, preview, or production.
 - Document new environment variables in the root `.env.example` and add them to Turbo's `globalEnv` allowlist.
-- Hosted apps use platform-injected environment variables; `.env.prod` is for local production-mode commands and must remain ignored.
+- Hosted apps may use platform-injected environment variables; `.env.production` is the canonical local production-mode file and must remain ignored.
 - Website/dashboard QA should start the local web stack with `bun run dev --local --filter dashboard tenant-site` when those apps are in scope. Add API or other app filters only when the QA slice needs them.
 - Website QA must use Portless hostnames instead of raw localhost ports:
   - tenant public site: `<tenant>.tenant-plotkeys.localhost`
   - tenant dashboard: `dashboard.<tenant>.app-plotkeys.localhost`
 - Use raw localhost ports only for low-level debugging when Portless itself is the suspected failure.
-- Use the shared root database actions for generate, migrate, pull, push, studio, shell, and Drizzle Studio. Each defaults to local and accepts only `--local`, `--preview`, or `--prod`; connected production actions must be explicitly requested and require confirming the printed target fingerprint. `db:sync` defaults to production → local, supports `--to-preview`, and rejects `--to-prod`.
+- Use the shared root database actions for generate, migrate, pull, push, studio, shell, and Drizzle Studio. Each defaults to local and accepts only `--local`, `--dev`, `--preview`, or `--prod`; non-production structure actions may target local or hosted databases but refuse the production database identity. Connected production actions must be explicitly requested and require confirming the printed target fingerprint. `db:sync` defaults to production → local, supports `--to-preview`, and rejects `--to-prod`.
 - Do not run production-profile DB commands unless the task explicitly calls for production validation and the target database is confirmed.
 
 ## Midday Architecture Standards
