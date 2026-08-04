@@ -7,6 +7,12 @@ Track the public PlotKeys website positioning and launch gating rules.
 - PlotKeys does not offer a freeform website builder today.
 - The accurate public promise is template-led website launch: customers choose curated real-estate templates, edit the copy, and publish.
 - Preferred short line: "Choose a template. Launch your site."
+- Shared platform links publish a branded 1200×630 Open Graph image and the
+  existing public-site description through Open Graph and Twitter large-image
+  metadata.
+
+The social image uses fixed documented PlotKeys brand colors because Next.js
+`ImageResponse` renders outside the application CSS/theme-variable runtime.
 
 ## Public Site Modes
 - The website app uses a server-only `EARLY_ACCESS` flag.
