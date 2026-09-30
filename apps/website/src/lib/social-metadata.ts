@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const marketingSiteUrl = `https://${siteRootDomain}`;
 
 export const marketingSocialImage = {
-  alt: "PlotKeys — the operating layer behind serious property companies",
+  alt: "PlotKeys — From the ground up. Every detail connected.",
   height: 630,
   path: "/opengraph-image",
   width: 1200,

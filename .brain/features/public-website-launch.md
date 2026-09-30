@@ -13,6 +13,10 @@ Track the public PlotKeys website positioning and launch gating rules.
 
 The social image uses fixed documented PlotKeys brand colors because Next.js
 `ImageResponse` renders outside the application CSS/theme-variable runtime.
+For the PK02 page, the Open Graph image uses the official light logo on deep
+navy, the “From the ground up” headline, and a labelled illustrative Palm Court
+plot diagram. It contains no live inventory or availability claims. The same
+image is used for Open Graph and Twitter large-image previews.
 
 ## Public Site Modes
 - The website app uses a server-only `EARLY_ACCESS` flag.

@@ -178,3 +178,6 @@ This file records completed work milestones.
   details, public-site-to-enquiry-to-team story, template preview, role views,
   onboarding, FAQs, and the real early-access form. Both configured public
   modes now render the same complete page at `/`; sample controls remain local.
+- Updated the PlotKeys marketing link preview to the PK02 visual direction with
+  the official logo, architectural plot diagram, and illustrative sample label;
+  verified the generated Open Graph PNG at 1200×630.

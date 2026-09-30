@@ -1,335 +1,231 @@
-const pipelineRows = [
-  ["Listings", "Published", "12"],
-  ["New interest", "Ready to follow up", "28"],
-  ["Site templates", "Brand aligned", "04"],
+const diagramPlots = [
+  { code: "A12", left: 22, top: 20, width: 100 },
+  { code: "A13", left: 133, top: 20, width: 100 },
+  { code: "A14", left: 244, top: 20, width: 77 },
+  { code: "A15", left: 332, top: 20, width: 100 },
+  { code: "B01", left: 22, top: 160, width: 100 },
+  { code: "B02", left: 133, top: 160, width: 100 },
+  { code: "B03", left: 244, top: 160, width: 100 },
+  { code: "B04", left: 355, top: 160, width: 77 },
 ] as const;
 
-function PlotKeysMark() {
+export function SocialPreviewImage({ logoSrc }: { logoSrc: string }) {
   return (
     <div
       style={{
-        background: "#0F6B61",
-        borderRadius: 18,
-        display: "flex",
-        height: 70,
-        overflow: "hidden",
-        position: "relative",
-        width: 70,
-      }}
-    >
-      <div
-        style={{
-          background: "#F8F5EF",
-          display: "flex",
-          height: 18,
-          left: 11,
-          position: "absolute",
-          top: 16,
-          transform: "skewY(-28deg)",
-          width: 20,
-        }}
-      />
-      <div
-        style={{
-          background: "#D9E3DE",
-          display: "flex",
-          height: 18,
-          left: 38,
-          position: "absolute",
-          top: 16,
-          transform: "skewY(28deg)",
-          width: 20,
-        }}
-      />
-      <div
-        style={{
-          background: "#F8F5EF",
-          bottom: 14,
-          display: "flex",
-          height: 20,
-          left: 11,
-          position: "absolute",
-          width: 20,
-        }}
-      />
-      <div
-        style={{
-          background: "#C9A45B",
-          borderRadius: 999,
-          bottom: 14,
-          display: "flex",
-          height: 20,
-          position: "absolute",
-          right: 12,
-          width: 20,
-        }}
-      />
-    </div>
-  );
-}
-
-export function SocialPreviewImage() {
-  return (
-    <div
-      style={{
-        alignItems: "stretch",
-        background: "#F8F5EF",
-        color: "#121B24",
+        background: "#18334F",
+        color: "#FFFFFF",
         display: "flex",
         fontFamily: "Arial, Helvetica, sans-serif",
         height: "100%",
         overflow: "hidden",
-        padding: 58,
+        padding: "54px 62px",
         position: "relative",
         width: "100%",
       }}
     >
       <div
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(18,27,36,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(18,27,36,0.055) 1px, transparent 1px)",
-          backgroundSize: "38px 38px",
-          display: "flex",
-          inset: 0,
+          borderLeft: "1px solid #315671",
+          height: 630,
+          left: 665,
           position: "absolute",
+          top: 0,
         }}
       />
       <div
         style={{
-          background: "rgba(15,107,97,0.13)",
-          borderRadius: 999,
           display: "flex",
-          height: 500,
-          position: "absolute",
-          right: -160,
-          top: -250,
-          width: 500,
+          flexDirection: "column",
+          height: "100%",
+          justifyContent: "space-between",
+          position: "relative",
+          width: 575,
         }}
-      />
+      >
+        {/* ImageResponse renders standard image elements instead of next/image. */}
+        {/* biome-ignore lint/performance/noImgElement: ImageResponse requires a plain image element. */}
+        <img
+          alt="PlotKeys"
+          height={69}
+          src={logoSrc}
+          style={{
+            height: 69,
+            objectFit: "contain",
+            objectPosition: "left",
+            width: 202,
+          }}
+          width={202}
+        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div
+            style={{
+              color: "#B7D0DF",
+              display: "flex",
+              fontSize: 16,
+              fontWeight: 700,
+              letterSpacing: 3,
+            }}
+          >
+            PROPERTY BUSINESS, ON THE SAME PAGE
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 62,
+              fontWeight: 500,
+              letterSpacing: -3.4,
+              lineHeight: 1.02,
+            }}
+          >
+            <span>From the</span>
+            <span>ground up.</span>
+            <span style={{ color: "#AFCBDD" }}>Every detail</span>
+            <span style={{ color: "#AFCBDD" }}>connected.</span>
+          </div>
+          <div
+            style={{
+              color: "#D5E2EB",
+              display: "flex",
+              fontSize: 21,
+              lineHeight: 1.35,
+              maxWidth: 515,
+            }}
+          >
+            A professional company website. A connected workspace behind it.
+          </div>
+        </div>
+        <div
+          style={{
+            alignItems: "center",
+            borderTop: "1px solid #4E7089",
+            color: "#BED0DF",
+            display: "flex",
+            fontSize: 17,
+            height: 38,
+            justifyContent: "space-between",
+            width: 540,
+          }}
+        >
+          <span>plotkeys.com</span>
+          <span>Request early access</span>
+        </div>
+      </div>
 
       <div
         style={{
           display: "flex",
-          gap: 52,
-          position: "relative",
-          width: "100%",
+          flexDirection: "column",
+          gap: 16,
+          left: 720,
+          position: "absolute",
+          top: 93,
+          width: 443,
         }}
       >
         <div
           style={{
+            color: "#C3D8E5",
             display: "flex",
-            flex: "1 1 0",
-            flexDirection: "column",
+            fontSize: 14,
             justifyContent: "space-between",
-            minWidth: 0,
+            letterSpacing: 1.2,
+            width: "100%",
           }}
         >
-          <div style={{ alignItems: "center", display: "flex", gap: 16 }}>
-            <PlotKeysMark />
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: 36,
-                  fontWeight: 900,
-                  letterSpacing: -1.5,
-                }}
-              >
-                PlotKeys
-              </div>
-              <div
-                style={{
-                  color: "#56636D",
-                  display: "flex",
-                  fontSize: 18,
-                  fontWeight: 700,
-                }}
-              >
-                Real-estate operating system
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 22,
-              maxWidth: 670,
-            }}
-          >
-            <div
-              style={{
-                color: "#0F6B61",
-                display: "flex",
-                fontSize: 23,
-                fontWeight: 900,
-              }}
-            >
-              One operating record
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 65,
-                fontWeight: 900,
-                letterSpacing: -3,
-                lineHeight: 0.98,
-              }}
-            >
-              The operating layer behind serious property companies.
-            </div>
-            <div
-              style={{
-                color: "#52606B",
-                display: "flex",
-                fontSize: 27,
-                fontWeight: 700,
-                lineHeight: 1.3,
-              }}
-            >
-              Listings, customer interest, team follow-up, and branded property
-              websites in one calm system.
-            </div>
-          </div>
-
+          <span>PALM COURT / SAMPLE ESTATE</span>
+          <span>N ↑</span>
+        </div>
+        <div
+          style={{
+            border: "1px dashed #61829B",
+            display: "flex",
+            height: 266,
+            position: "relative",
+            width: "100%",
+          }}
+        >
           <div
             style={{
               alignItems: "center",
+              borderBottom: "1px dashed #7799AF",
+              borderTop: "1px dashed #7799AF",
+              color: "#B7D0DF",
               display: "flex",
-              fontSize: 22,
-              fontWeight: 900,
-              gap: 12,
+              fontSize: 12,
+              height: 35,
+              justifyContent: "center",
+              left: 0,
+              letterSpacing: 4,
+              position: "absolute",
+              top: 111,
+              width: "100%",
             }}
           >
-            <div
-              style={{
-                background: "#0F6B61",
-                borderRadius: 999,
-                display: "flex",
-                height: 11,
-                width: 11,
-              }}
-            />
-            plotkeys.com
+            PALM AVENUE
           </div>
+          {diagramPlots.map((plot) => (
+            <div
+              key={plot.code}
+              style={{
+                alignItems: "center",
+                background: plot.code === "A12" ? "#D9E7ED" : "#234560",
+                border:
+                  plot.code === "A12"
+                    ? "2px solid #FFFFFF"
+                    : "1px solid #9FBFD2",
+                color: plot.code === "A12" ? "#18334F" : "#E2EEF4",
+                display: "flex",
+                fontSize: 17,
+                height: 75,
+                justifyContent: "center",
+                left: plot.left,
+                position: "absolute",
+                top: plot.top,
+                width: plot.width,
+              }}
+            >
+              {plot.code}
+            </div>
+          ))}
         </div>
-
         <div
           style={{
-            alignSelf: "center",
-            background: "#FFFFFF",
-            border: "1px solid rgba(18,27,36,0.1)",
-            borderRadius: 28,
-            boxShadow: "0 28px 70px rgba(18,27,36,0.17)",
+            background: "#EAF1F5",
+            color: "#18334F",
             display: "flex",
-            flex: "0 0 390px",
             flexDirection: "column",
-            overflow: "hidden",
+            gap: 9,
+            padding: "18px 22px",
+            width: "100%",
           }}
         >
           <div
             style={{
-              background: "#121B24",
-              color: "#FFFFFF",
+              color: "#526575",
               display: "flex",
-              flexDirection: "column",
-              gap: 8,
-              padding: "23px 25px",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 2,
             }}
           >
-            <div style={{ display: "flex", fontSize: 18, fontWeight: 900 }}>
-              Company workspace
-            </div>
-            <div
-              style={{
-                color: "rgba(255,255,255,0.58)",
-                display: "flex",
-                fontSize: 14,
-                fontWeight: 700,
-              }}
-            >
-              Website and operations connected
-            </div>
+            A PROPERTY IN CONTEXT
           </div>
           <div
             style={{
+              alignItems: "baseline",
               display: "flex",
-              flexDirection: "column",
-              gap: 14,
-              padding: 23,
+              justifyContent: "space-between",
+              width: "100%",
             }}
           >
-            {pipelineRows.map(([label, detail, value]) => (
-              <div
-                key={label}
-                style={{
-                  alignItems: "center",
-                  background: "#F8F5EF",
-                  border: "1px solid rgba(18,27,36,0.08)",
-                  borderRadius: 17,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "17px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 7,
-                  }}
-                >
-                  <div
-                    style={{ display: "flex", fontSize: 17, fontWeight: 900 }}
-                  >
-                    {label}
-                  </div>
-                  <div
-                    style={{
-                      color: "#68737B",
-                      display: "flex",
-                      fontSize: 14,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {detail}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    alignItems: "center",
-                    background: "#D9E3DE",
-                    borderRadius: 13,
-                    color: "#0F6B61",
-                    display: "flex",
-                    fontSize: 18,
-                    fontWeight: 900,
-                    height: 45,
-                    justifyContent: "center",
-                    width: 48,
-                  }}
-                >
-                  {value}
-                </div>
-              </div>
-            ))}
-            <div
-              style={{
-                alignItems: "center",
-                background: "#0F6B61",
-                borderRadius: 16,
-                color: "#FFFFFF",
-                display: "flex",
-                fontSize: 16,
-                fontWeight: 900,
-                justifyContent: "center",
-                padding: 16,
-              }}
-            >
-              Choose a template. Launch your site.
-            </div>
+            <span style={{ fontSize: 32, fontWeight: 500 }}>Plot A12</span>
+            <span style={{ fontSize: 17 }}>500 m² · Residential land</span>
           </div>
+        </div>
+        <div style={{ color: "#AFCBDD", display: "flex", fontSize: 12 }}>
+          Illustrative layout · No live availability or reservation
         </div>
       </div>
     </div>

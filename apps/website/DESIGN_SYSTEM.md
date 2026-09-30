@@ -45,3 +45,6 @@ This file documents the visual system for `apps/website`, the platform marketing
 - Marketing interactions use native scrolling, finite entry motion, focusable
   controls, and a complete reduced-motion state. The live conversion is the
   shared early-access form rather than a simulated result.
+- The 1200×630 social preview carries the same navy architectural treatment,
+  official light logo, headline, and estate linework. Sample property details
+  remain labelled illustrative, and the preview avoids invented usage counts.
