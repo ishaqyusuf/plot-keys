@@ -36,3 +36,20 @@ The social image uses fixed documented PlotKeys brand colors because Next.js
 - The tenant root layout initializes registry runtime context through `RegistryProvider`, so future template pages and sections can call `useRegistry()` for tenant/template/mode/page info.
 - `packages/section-registry` now exposes `templates.<page>.resolve(ctx)` for template-owned page handles, registry-scoped query/mutation helpers for tenant-safe data calls, and style-preset UI variant helpers for future template-local primitives.
 - The active starter register template is `riwaq-starter`, with `/`, `/blog`, `/contact`, and `/roadmap` as its primary public surfaces.
+
+## PK02 Platform Marketing Page (2026-09-30)
+
+- The selected “From the ground up” direction is the shared public marketing
+  presentation for both `landing` and `early-access` site modes at `/`. This
+  makes the complete page visible under the production default while keeping
+  the existing mode resolver and preview routes.
+- Request early access is the primary conversion. The page embeds the existing
+  `EarlyAccessForm`, which submits through `requestEarlyAccess` and stores a
+  `WaitlistEntry`; illustrative plot and template controls stay local to the
+  page and never submit business actions.
+- Palm & Place, Palm Court, plot areas, and the architecture image are fictional
+  examples. The estate drawing is not a survey or availability record, and
+  selecting a plot does not reserve, allocate, pay for, or verify land.
+- The platform page lives in `apps/website`; it does not replace tenant-site
+  templates or the dashboard. The previewed brand treatments are illustrative
+  variations of one example site, not a public template catalogue.

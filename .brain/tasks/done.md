@@ -171,3 +171,10 @@ This file records completed work milestones.
 - **Trigger.dev Job Integration** — Added `@trigger.dev/sdk`, created 4 task definitions (domain-sync, plan-sync, notification-dispatch, site-content-generation) in `packages/jobs/src/tasks/`, `triggerJob()` dual-mode dispatch utility (Trigger.dev when configured, in-memory fallback), `trigger.config.ts` at root, wired form submissions to dispatch notification jobs.
 - **Chat-bot LLM Integration** — Expanded `@plotkeys/chat-bot` with Anthropic Claude Haiku 4.5 chat completion, context-aware system prompt (company, properties, agents, business summary). Added `chat` tRPC router with `sendMessage` mutation. Created `/api/chat` route in tenant-site. Built floating `ChatWidget` component with message thread, typing indicator. Widget injected into tenant-site layout via server-resolved subdomain.
 - **App Store Expansion** — Created `/app-store` dashboard page with integration cards (Google Analytics, Facebook Pixel, WhatsApp, Calendly) showing connection status. Created `IntegrationScripts` component for tenant-site that injects GA4 and Facebook Pixel scripts. Sidebar App Store link now functional.
+
+
+- Implemented the selected PlotKeys v1 PK02 “From the ground up” marketing
+  direction in `apps/website`: architectural hero and estate example, plot
+  details, public-site-to-enquiry-to-team story, template preview, role views,
+  onboarding, FAQs, and the real early-access form. Both configured public
+  modes now render the same complete page at `/`; sample controls remain local.

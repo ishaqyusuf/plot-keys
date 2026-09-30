@@ -33,3 +33,15 @@ This file documents the visual system for `apps/website`, the platform marketing
 ## Documentation Rule
 - Any meaningful marketing-site visual direction change should update this file if it changes composition rules, hierarchy, or brand presentation standards.
 - Shared changes that affect dashboard and website together should also be reflected in `brain/system/design-system.md`.
+
+## PK02 Platform Marketing Composition
+- The public landing uses the approved architectural direction: deep brand
+  navy, warm light surfaces, generous type, estate linework, and a restrained
+  blue-grey secondary palette. The fixed brand treatment applies to the
+  platform marketing composition; tenant templates still use their own themes.
+- The estate scene must pair its diagram with readable plot details and a
+  touch-sized mobile plot alternative. All sample property and architecture
+  material is visibly labelled illustrative.
+- Marketing interactions use native scrolling, finite entry motion, focusable
+  controls, and a complete reduced-motion state. The live conversion is the
+  shared early-access form rather than a simulated result.

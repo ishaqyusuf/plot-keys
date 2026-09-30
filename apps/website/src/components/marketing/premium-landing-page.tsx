@@ -1,455 +1,690 @@
-import { Badge } from "@plotkeys/ui/badge";
-import { Button } from "@plotkeys/ui/button";
-import { PlotKeysLogo } from "@plotkeys/ui/plotkeys-logo";
-import {
-  ArrowRight,
-  Building2,
-  Check,
-  ClipboardList,
-  Globe2,
-  LayoutTemplate,
-  MapIcon,
-  Sparkles,
-  Users,
-} from "lucide-react";
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
-
-import { AnimatedCounter } from "../animated-counter";
+import { useEffect, useState } from "react";
 import { EarlyAccessForm } from "../early-access-form";
-import { ScrollReveal } from "../scroll-reveal";
+import "./plotkeys-landing.css";
 
-type PremiumLandingPageProps = {
-  createWorkspaceHref: string;
+const plots = {
+  A12: {
+    area: "500 m²",
+    path: "M55 68 L162 62 L167 132 L58 139 Z",
+    x: 88,
+    y: 108,
+  },
+  A13: {
+    area: "540 m²",
+    path: "M177 61 L281 56 L286 127 L182 132 Z",
+    x: 214,
+    y: 102,
+  },
+  A14: {
+    area: "450 m²",
+    path: "M296 55 L368 51 L374 123 L302 126 Z",
+    x: 319,
+    y: 98,
+  },
+  B03: {
+    area: "500 m²",
+    path: "M433 176 L544 170 L553 255 L440 261 Z",
+    x: 474,
+    y: 227,
+  },
+} as const;
+type PlotId = keyof typeof plots;
+const otherPlots = [
+  { id: "A15", path: "M422 47 L530 42 L537 115 L428 120 Z", x: 465, y: 91 },
+  { id: "A16", path: "M546 41 L661 36 L670 109 L552 114 Z", x: 590, y: 87 },
+  { id: "B01", path: "M61 195 L171 190 L175 274 L64 279 Z", x: 96, y: 242 },
+  { id: "B02", path: "M187 189 L290 184 L295 268 L191 273 Z", x: 220, y: 236 },
+  { id: "B04", path: "M306 183 L379 179 L384 264 L311 267 Z", x: 326, y: 232 },
+  { id: "B05", path: "M560 169 L677 163 L687 249 L569 254 Z", x: 605, y: 222 },
+];
+const scenes = [
+  {
+    tab: "01 Website",
+    kicker: "A clear first impression",
+    title: "Give the property a place to be discovered.",
+    description:
+      "Present the listing on your company website, with the location, plot area and a clear way to get in touch.",
+    label: "Company website",
+    next: "Enquire with the team",
+  },
+  {
+    tab: "02 Enquiry",
+    kicker: "Interest with context",
+    title: "Keep the property in the conversation.",
+    description:
+      "An enquiry connects a prospective customer and the listing they asked about, so the team can respond with context.",
+    label: "Customer enquiry",
+    next: "Review the enquiry",
+  },
+  {
+    tab: "03 Follow-up",
+    kicker: "A clearer next action",
+    title: "Help the right person follow through.",
+    description:
+      "Bring the property, customer conversation and responsible team member into one operating workspace.",
+    label: "Team workspace",
+    next: "Team follow-up",
+  },
+];
+const styles = [
+  { name: "Coastal", color: "#183e42" },
+  { name: "Slate", color: "#16324f" },
+  { name: "Clay", color: "#775143" },
+];
+const roles = [
+  {
+    name: "Company owners",
+    kicker: "For company owners",
+    title: "A company that looks as organised as it is.",
+    description:
+      "Build a credible public presence while keeping estates, listings and client conversations in view.",
+    rows: [
+      ["Public presence", "Company website"],
+      ["Behind the scenes", "Team workspace"],
+    ],
+  },
+  {
+    name: "Estate & land-sales teams",
+    kicker: "For estate and land-sales teams",
+    title: "See the details behind every plot.",
+    description:
+      "Keep estate records and plot details in context as your team works through land enquiries.",
+    rows: [
+      ["Estate", "Palm Court"],
+      ["Property context", "Plot A12 · 500 m²"],
+    ],
+  },
+  {
+    name: "Agencies & agents",
+    kicker: "For agencies and agents",
+    title: "Make each enquiry easier to act on.",
+    description:
+      "Connect public listings to customer interest and give agents a clearer starting point for follow-up.",
+    rows: [
+      ["Listing", "Palm Court · A12"],
+      ["Next step", "Team follow-up"],
+    ],
+  },
+  {
+    name: "Website & marketing teams",
+    kicker: "For website and marketing teams",
+    title: "Publish with your company in mind.",
+    description:
+      "Choose a curated template, adapt the available content and branding, then preview before publishing.",
+    rows: [
+      ["Starting point", "Curated template"],
+      ["Publishing", "Draft preview"],
+    ],
+  },
+  {
+    name: "Project operations",
+    kicker: "For project operations",
+    title: "Keep project progress in context.",
+    description:
+      "Organise internal phases and milestones alongside the property business your team is running.",
+    rows: [
+      ["Project view", "Phases and milestones"],
+      ["Audience", "Internal team"],
+    ],
+  },
+];
+const questions = [
+  [
+    "Who is PlotKeys for?",
+    "PlotKeys is for real-estate companies, estate developers, agencies and the teams behind them. The company gets an operating workspace and a branded public website.",
+  ],
+  [
+    "Is this a property marketplace?",
+    "Your listings belong on your company's own website. PlotKeys provides the platform behind that website and your internal operations.",
+  ],
+  [
+    "Can I design my website from scratch?",
+    "The website experience is template-led. Choose a curated structure and customise the content and branding available within it.",
+  ],
+  [
+    "What happens when I edit my website?",
+    "Draft changes and the published website are separate. Preview the draft before choosing to publish it.",
+  ],
+  [
+    "Does selecting a plot reserve it?",
+    "No. This illustrative plot selection only shows property information. It is not a reservation, payment, allocation or proof of ownership.",
+  ],
+  [
+    "How do I get access?",
+    "Request early access with your name and work email. We will follow up with setup details if your team is a fit.",
+  ],
+];
+
+export function PremiumLandingPage(_props: {
+  createWorkspaceHref?: string;
   showEarlyAccessCta?: boolean;
-};
-
-const operatingLayers = [
-  {
-    description:
-      "Keep inventory, media, status, and publishing details in sync.",
-    icon: Building2,
-    title: "Listings and estates",
-  },
-  {
-    description:
-      "Track holds, allocation intent, documents, and customer movement.",
-    icon: MapIcon,
-    title: "Plot operations",
-  },
-  {
-    description:
-      "Capture interest and hand work to the right people without delay.",
-    icon: Users,
-    title: "Leads and teams",
-  },
-  {
-    description: "Choose a template. Launch your site.",
-    icon: LayoutTemplate,
-    title: "Branded templates",
-  },
-];
-
-const dashboardStats = [
-  { label: "Active estates", value: "12" },
-  { label: "Open reservations", value: "48" },
-  { label: "Lead response", value: "7m" },
-];
-
-const plotCells = Array.from({ length: 24 }, (_, index) => ({
-  id: `plot-cell-${index + 1}`,
-  tone: index % 5 === 0 ? "primary" : index % 3 === 0 ? "accent" : "available",
-}));
-
-const timeline = [
-  "Company workspace configured",
-  "Template selected and copy edited",
-  "Listings synced to public pages",
-  "Leads routed to sales team",
-];
-
-const audiences = [
-  {
-    copy: "Launch inventory, manage interest, and see the commercial pipeline without spreadsheet drift.",
-    title: "Estate developers",
-  },
-  {
-    copy: "Give every listing a cleaner path from public discovery to assigned-agent follow-up.",
-    title: "Agencies and brokers",
-  },
-  {
-    copy: "Keep admins, sales reps, and leadership aligned around the same operational record.",
-    title: "Sales operations",
-  },
-];
-
-export function PremiumLandingPage({
-  createWorkspaceHref,
-  showEarlyAccessCta = false,
-}: PremiumLandingPageProps) {
+}) {
+  const [plot, setPlot] = useState<PlotId>("A12");
+  const [scene, setScene] = useState(0);
+  const [style, setStyle] = useState(0);
+  const [role, setRole] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const closeMenu = () => setMenuOpen(false);
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMenu();
+    };
+    window.addEventListener("hashchange", closeMenu);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("hashchange", closeMenu);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f8f5ef] text-[#121b24]">
-      <section className="relative isolate border-b border-[#121b24]/10 px-5 py-6 sm:px-8 lg:px-12">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#f8f5ef_0%,#ecf1ed_44%,#d9e3de_100%)]" />
-        <div className="mx-auto max-w-7xl">
-          <header className="flex flex-wrap items-center justify-between gap-5">
-            <PlotKeysLogo
-              className="text-[#0f6b61]"
-              markClassName="h-10"
-              wordmarkClassName="text-sm tracking-[0.32em]"
+    <div className="pk02" id="top">
+      <div className="pk-dark-top">
+        <header className="pk-nav pk-wrap">
+          <a href="#top" aria-label="PlotKeys home">
+            <Image
+              src="/logo-horizontal-dark.png"
+              alt="PlotKeys"
+              width={1936}
+              height={664}
+              priority
             />
-            <nav className="flex items-center gap-2 text-sm text-[#465360] sm:gap-4">
-              <a className="px-2 py-2 hover:text-[#121b24]" href="#platform">
-                Platform
-              </a>
-              <a className="px-2 py-2 hover:text-[#121b24]" href="#templates">
-                Templates
-              </a>
-              <a className="px-2 py-2 hover:text-[#121b24]" href="#access">
-                Access
-              </a>
-              <Button asChild className="rounded-full px-5">
-                <Link href={createWorkspaceHref}>Launch your website</Link>
-              </Button>
-            </nav>
-          </header>
-
-          <div className="grid gap-12 pb-14 pt-16 lg:grid-cols-[1fr_0.95fr] lg:items-end lg:pb-20 lg:pt-24">
-            <div>
-              <Badge className="rounded-full bg-[#121b24] px-4 py-2 text-xs uppercase tracking-[0.24em] text-white">
-                Real-estate operating system
-              </Badge>
-              <h1 className="mt-7 max-w-5xl text-5xl font-semibold leading-[0.95] tracking-normal text-[#121b24] sm:text-6xl lg:text-7xl">
-                The operating layer behind serious property companies.
+          </a>
+          <button
+            className="pk-menu"
+            type="button"
+            aria-controls="pk-navigation"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? "Close" : "Menu"}
+          </button>
+          <nav
+            className={menuOpen ? "pk-navlinks open" : "pk-navlinks"}
+            id="pk-navigation"
+            aria-label="Main navigation"
+          >
+            <Link href="#platform" onClick={() => setMenuOpen(false)}>
+              The platform
+            </Link>
+            <Link href="#website" onClick={() => setMenuOpen(false)}>
+              Your website
+            </Link>
+            <Link href="#people" onClick={() => setMenuOpen(false)}>
+              For your team
+            </Link>
+            <Link
+              className="pk-button pk-light"
+              href="#access"
+              onClick={() => setMenuOpen(false)}
+            >
+              Request early access
+            </Link>
+          </nav>
+        </header>
+        <section className="pk-hero pk-wrap" aria-labelledby="pk-hero-title">
+          <div className="pk-hero-heading">
+            <div className="pk-entrance">
+              <p className="pk-eyebrow">Property business, on the same page</p>
+              <h1 id="pk-hero-title">
+                From the ground up.
+                <br />
+                <span>Every detail connected.</span>
               </h1>
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-[#445260]">
-                PlotKeys connects listings, estates, plots, customer interest,
-                team follow-up, and branded website templates in one calm
-                system.
+            </div>
+            <div className="pk-entrance">
+              <p>
+                Bring your estates, listings and team into focus. Then give your
+                property business a website of its own.
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Button asChild className="rounded-full px-7 py-6 text-base">
-                  <Link href={createWorkspaceHref}>
-                    Launch your company website
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                {showEarlyAccessCta ? (
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="rounded-full border border-[#121b24]/10 bg-white/70 px-7 py-6 text-base"
-                  >
-                    <Link href="/early-access">View early access</Link>
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="rounded-full border border-[#121b24]/10 bg-white/70 px-7 py-6 text-base"
-                  >
-                    <a href="#platform">Explore platform</a>
-                  </Button>
-                )}
+              <div className="pk-actions">
+                <a className="pk-button pk-light" href="#access">
+                  Request early access
+                </a>
+                <a className="pk-textlink" href="#platform">
+                  Explore the platform
+                </a>
               </div>
             </div>
-
-            <ProductCommandScene />
           </div>
-        </div>
-      </section>
-
-      <section className="border-b border-[#121b24]/10 bg-[#121b24] px-5 py-8 text-white sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-5 sm:grid-cols-3">
-          <Metric label="Template-led launch" suffix=" site" target={1} />
-          <Metric label="Core tools unified" suffix="-in-1" target={5} />
-          <Metric label="Tenant-ready workflow" suffix="%" target={100} />
-        </div>
-      </section>
-
-      <section id="platform" className="px-5 py-18 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto max-w-7xl">
-          <ScrollReveal>
-            <div className="max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.28em] text-[#0f6b61]">
-                One operating record
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
-                Stop running public presence and operations as separate worlds.
-              </h2>
-            </div>
-          </ScrollReveal>
-
-          <div className="mt-12 grid gap-px overflow-hidden border border-[#121b24]/10 bg-[#121b24]/10 md:grid-cols-2 lg:grid-cols-4">
-            {operatingLayers.map((layer, index) => {
-              const Icon = layer.icon;
-              return (
-                <ScrollReveal delay={index * 0.08} key={layer.title}>
-                  <article className="min-h-64 bg-[#fffdf8] p-6">
-                    <div className="flex size-11 items-center justify-center rounded-full bg-[#0f6b61]/10 text-[#0f6b61]">
-                      <Icon className="size-5" />
-                    </div>
-                    <h3 className="mt-8 text-2xl font-semibold tracking-normal">
-                      {layer.title}
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-[#52606d]">
-                      {layer.description}
-                    </p>
-                  </article>
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="templates"
-        className="border-y border-[#121b24]/10 bg-[#eaf0ec] px-5 py-18 sm:px-8 lg:px-12 lg:py-24"
-      >
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <ScrollReveal>
-            <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-[#0f6b61]">
-                Branded site templates
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
-                Choose a template. Launch your site.
-              </h2>
-              <p className="mt-5 max-w-xl text-base leading-8 text-[#445260]">
-                Teams select from curated real-estate templates, edit the copy
-                that matters, and publish a polished public presence connected
-                to their operational data.
-              </p>
-              <ul className="mt-8 grid gap-3 text-sm text-[#26323e]">
-                {timeline.map((item) => (
-                  <li className="flex items-center gap-3" key={item}>
-                    <Check className="size-4 text-[#0f6b61]" />
-                    <span>{item}</span>
-                  </li>
+          <div className="pk-estate-stage pk-entrance">
+            <div className="pk-map-wrap">
+              <div className="pk-map-heading">
+                <span>PALM &amp; PLACE / PALM COURT</span>
+                <span>Illustrative estate layout &nbsp; N ↑</span>
+              </div>
+              <svg
+                className="pk-estate-map"
+                viewBox="0 0 740 320"
+                role="img"
+                aria-label="Illustrative Palm Court estate layout. Choose a sample plot using the buttons in the details panel."
+              >
+                <path
+                  className="pk-boundary"
+                  d="M25 52 L680 18 L713 282 L32 299 Z"
+                />
+                <path
+                  className="pk-road"
+                  d="M32 168 L705 138 M390 30 L404 287"
+                />
+                <text
+                  className="pk-road-label"
+                  x="130"
+                  y="166"
+                  transform="rotate(-2 130 166)"
+                >
+                  PALM AVENUE
+                </text>
+                <text
+                  className="pk-road-label"
+                  x="460"
+                  y="159"
+                  transform="rotate(-2 460 159)"
+                >
+                  PALM AVENUE
+                </text>
+                {otherPlots.map((item) => (
+                  <g key={item.id}>
+                    <path className="pk-parcel" d={item.path} />
+                    <text x={item.x} y={item.y}>
+                      {item.id}
+                    </text>
+                  </g>
                 ))}
-              </ul>
+                {(
+                  Object.entries(plots) as [PlotId, (typeof plots)[PlotId]][]
+                ).map(([id, item]) => (
+                  <g key={id}>
+                    <path
+                      className={
+                        plot === id ? "pk-parcel selected" : "pk-parcel"
+                      }
+                      d={item.path}
+                    />
+                    <text
+                      className={plot === id ? "selected-text" : ""}
+                      x={item.x}
+                      y={item.y}
+                    >
+                      {id}
+                    </text>
+                  </g>
+                ))}
+              </svg>
+              <fieldset
+                className="pk-mobile-plots"
+                aria-label="Illustrative plot layout"
+              >
+                {(Object.keys(plots) as PlotId[]).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={plot === id}
+                    onClick={() => setPlot(id)}
+                  >
+                    <span>Plot {id}</span>
+                    <small>{plots[id].area}</small>
+                  </button>
+                ))}
+              </fieldset>
+              <div className="pk-map-legend">
+                <span>
+                  <i />
+                  Plot boundary
+                </span>
+                <span>
+                  <i />
+                  Selected plot
+                </span>
+              </div>
             </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.15}>
-            <TemplatePickerScene />
-          </ScrollReveal>
-        </div>
-      </section>
-
-      <section className="px-5 py-18 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
-            <ScrollReveal>
+            <div className="pk-plot-panel" aria-live="polite">
+              <p className="pk-eyebrow">A property in context</p>
+              <h2>Plot {plot}</h2>
+              <p>
+                Palm Court
+                <br />
+                Ibeju-Lekki, Lagos
+              </p>
+              <dl>
+                <div>
+                  <dt>Area</dt>
+                  <dd>{plots[plot].area}</dd>
+                </div>
+                <div>
+                  <dt>Use</dt>
+                  <dd>Residential</dd>
+                </div>
+                <div>
+                  <dt>Type</dt>
+                  <dd>Land</dd>
+                </div>
+              </dl>
+              <a className="pk-textlink" href="#platform">
+                Follow this property
+              </a>
+              <fieldset
+                className="pk-plot-picker"
+                aria-label="Choose an illustrative plot"
+              >
+                {(Object.keys(plots) as PlotId[]).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={plot === id}
+                    onClick={() => setPlot(id)}
+                  >
+                    {id}
+                  </button>
+                ))}
+              </fieldset>
+            </div>
+          </div>
+          <div className="pk-map-foot">
+            <span>Select a plot to explore its details.</span>
+            <span>
+              Fictional sample · Not a survey plan or availability record
+            </span>
+          </div>
+        </section>
+      </div>
+      <main>
+        <section className="pk-section pk-connected" id="platform">
+          <div className="pk-wrap">
+            <div className="pk-section-head">
               <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-[#0f6b61]">
-                  Built for the people doing the work
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
-                  A premium front door with an operational backbone.
+                <p className="pk-eyebrow">From first impression to follow-up</p>
+                <h2>
+                  One property.
+                  <br />A more connected story.
                 </h2>
               </div>
-            </ScrollReveal>
-            <div className="grid gap-4 md:grid-cols-3">
-              {audiences.map((audience, index) => (
-                <ScrollReveal delay={index * 0.1} key={audience.title}>
-                  <article className="h-full border border-[#121b24]/10 bg-white p-6">
-                    <h3 className="text-xl font-semibold tracking-normal">
-                      {audience.title}
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-[#52606d]">
-                      {audience.copy}
-                    </p>
-                  </article>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="access"
-        className="border-t border-[#121b24]/10 bg-[#121b24] px-5 py-18 text-white sm:px-8 lg:px-12 lg:py-24"
-      >
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_0.75fr] lg:items-start">
-          <ScrollReveal>
-            <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-white/55">
-                Launch with focus
+              <p>
+                A great website is the beginning. Keep the property context
+                close when the conversation moves to your team.
               </p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
-                Give your property business a system that feels as considered as
-                the assets you sell.
-              </h2>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white/68">
-                Start with your company website, organize the real estate
-                operation behind it, then publish from a template when the
-                public presence is ready.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button
-                  asChild
-                  className="rounded-full bg-white px-7 py-6 text-base text-[#121b24] hover:bg-white/90"
-                >
-                  <Link href={createWorkspaceHref}>
-                    Launch your company website
-                  </Link>
-                </Button>
-                {showEarlyAccessCta ? (
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="rounded-full border border-white/15 bg-white/10 px-7 py-6 text-base text-white hover:bg-white/15"
-                  >
-                    <Link href="/early-access">Open early access page</Link>
-                  </Button>
-                ) : null}
-              </div>
             </div>
-          </ScrollReveal>
-
-          {showEarlyAccessCta ? (
-            <ScrollReveal delay={0.15}>
-              <EarlyAccessForm className="rounded-none border-white/10 bg-white/[0.06] text-white backdrop-blur-none [&_input]:bg-white [&_p]:text-white/72" />
-            </ScrollReveal>
-          ) : (
-            <ScrollReveal delay={0.15}>
-              <div className="border border-white/12 bg-white/[0.06] p-6">
-                <Sparkles className="size-6 text-[#c39a56]" />
-                <p className="mt-8 text-2xl font-semibold tracking-normal">
-                  Ready for serious teams.
-                </p>
-                <p className="mt-4 text-sm leading-7 text-white/68">
-                  Template-led site launch, operational CRM, plot workflows, and
-                  AI-assisted content live in the same product surface.
-                </p>
-              </div>
-            </ScrollReveal>
-          )}
-        </div>
-      </section>
-    </main>
-  );
-}
-
-function Metric({
-  label,
-  suffix,
-  target,
-}: {
-  label: string;
-  suffix: string;
-  target: number;
-}) {
-  return (
-    <div className="border-l border-white/14 px-5">
-      <p className="text-4xl font-semibold tracking-normal">
-        <AnimatedCounter target={target} suffix={suffix} />
-      </p>
-      <p className="mt-2 text-xs uppercase tracking-[0.22em] text-white/52">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function ProductCommandScene() {
-  return (
-    <div className="relative border border-[#121b24]/12 bg-white/72 p-3 shadow-[0_30px_80px_rgba(18,27,36,0.16)] backdrop-blur">
-      <div className="border border-[#121b24]/10 bg-[#fffdf8]">
-        <div className="flex items-center justify-between border-b border-[#121b24]/10 px-4 py-3 text-xs text-[#65717d]">
-          <span className="uppercase tracking-[0.22em]">Command center</span>
-          <span>Live workspace</span>
-        </div>
-        <div className="grid gap-px bg-[#121b24]/10 md:grid-cols-[0.72fr_1fr]">
-          <div className="bg-[#f7f2e9] p-5">
-            <div className="flex items-center gap-3">
-              <Globe2 className="size-5 text-[#0f6b61]" />
-              <span className="text-sm font-semibold">Oakfield Estates</span>
-            </div>
-            <div className="mt-6 grid gap-3">
-              {dashboardStats.map((stat) => (
-                <div
-                  className="flex items-center justify-between border border-[#121b24]/10 bg-white px-4 py-3"
-                  key={stat.label}
-                >
-                  <span className="text-xs text-[#65717d]">{stat.label}</span>
-                  <span className="text-lg font-semibold">{stat.value}</span>
+            <div className="pk-story-shell">
+              <div className="pk-story-visual">
+                <div className="pk-record">
+                  <div className="pk-record-head">
+                    <span>PALM &amp; PLACE</span>
+                    <span className="pk-tag">{scenes[scene]!.label}</span>
+                  </div>
+                  <div className="pk-record-body">
+                    <Image
+                      src="/palm-court-illustration.jpg"
+                      alt="Illustrative architecture for fictional Palm Court"
+                      width={1536}
+                      height={1024}
+                      loading="lazy"
+                    />
+                    <h3>Palm Court · A12</h3>
+                    <p>Residential land in Ibeju-Lekki, Lagos.</p>
+                    <div className="pk-record-line">
+                      <span>Plot area</span>
+                      <strong>500 m²</strong>
+                    </div>
+                    <div className="pk-record-line">
+                      <span>Next step</span>
+                      <strong>{scenes[scene]!.next}</strong>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              </div>
+              <div className="pk-story-copy">
+                <fieldset
+                  className="pk-story-tabs"
+                  aria-label="Follow a property"
+                >
+                  {scenes.map((item, index) => (
+                    <button
+                      key={item.tab}
+                      type="button"
+                      aria-pressed={scene === index}
+                      onClick={() => setScene(index)}
+                    >
+                      {item.tab}
+                    </button>
+                  ))}
+                </fieldset>
+                <div aria-live="polite" key={scene} className="pk-state-enter">
+                  <p className="pk-eyebrow">{scenes[scene]!.kicker}</p>
+                  <h3>{scenes[scene]!.title}</h3>
+                  <p>{scenes[scene]!.description}</p>
+                </div>
+                <p className="pk-scene-note">
+                  Illustrative workflow. Sample records are not real customer
+                  activity.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-[#fffdf8] p-5">
-            <div className="grid grid-cols-6 gap-2">
-              {plotCells.map((cell) => (
-                <div
-                  className={
-                    cell.tone === "primary"
-                      ? "h-12 bg-[#0f6b61]"
-                      : cell.tone === "accent"
-                        ? "h-12 bg-[#c39a56]"
-                        : "h-12 bg-[#dfe8e4]"
-                  }
-                  key={cell.id}
+        </section>
+        <section className="pk-section pk-studio" id="website">
+          <div className="pk-wrap pk-studio-grid">
+            <div
+              className="pk-studio-preview"
+              style={
+                {
+                  "--sample-accent": styles[style]!.color,
+                } as React.CSSProperties
+              }
+            >
+              <div className="pk-website">
+                <div className="pk-website-nav">
+                  <strong>PALM &amp; PLACE</strong>
+                  <span>Our estates &nbsp; · &nbsp; About us</span>
+                </div>
+                <Image
+                  src="/palm-court-illustration.jpg"
+                  width="1536"
+                  height="1024"
+                  alt="Illustrative architectural vision of a fictional estate"
+                  loading="lazy"
                 />
-              ))}
-            </div>
-            <div className="mt-5 border border-[#121b24]/10 bg-[#121b24] p-4 text-white">
-              <div className="flex items-center gap-3">
-                <ClipboardList className="size-5 text-[#c39a56]" />
-                <span className="font-semibold">Reservation queue</span>
+                <div className="pk-website-caption">
+                  <p className="pk-eyebrow">Palm Court · Ibeju-Lekki, Lagos</p>
+                  <h3>A place to put down roots.</h3>
+                  <p>
+                    Explore residential plots at Palm Court. Find the details,
+                    then talk to our team.
+                  </p>
+                  <div>
+                    <strong>Plot A12 &nbsp; / &nbsp; 500 m²</strong>
+                    <span>Residential land</span>
+                  </div>
+                </div>
               </div>
-              <p className="mt-3 text-sm leading-6 text-white/68">
-                9 qualified buyers awaiting plot confirmation and document
-                review.
+              <p className="pk-preview-note">
+                Draft preview · Your live website stays separate until you
+                publish.
+              </p>
+            </div>
+            <div className="pk-studio-copy">
+              <p className="pk-eyebrow">
+                A website that feels like your company
+              </p>
+              <h2>
+                Choose a template.
+                <br />
+                Launch your site.
+              </h2>
+              <p>
+                Start with a considered structure. Add your identity, adapt the
+                content and preview your changes before you publish.
+              </p>
+              <fieldset
+                className="pk-style-controls"
+                aria-label="Explore illustrative brand styles"
+              >
+                {styles.map((item, index) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    aria-label={`${item.name} brand style`}
+                    aria-pressed={style === index}
+                    onClick={() => setStyle(index)}
+                    style={{ "--swatch": item.color } as React.CSSProperties}
+                  />
+                ))}
+              </fieldset>
+              <p className="pk-style-name">
+                {styles[style]!.name} · Preview a brand treatment
+              </p>
+              <p className="pk-disclaimer">
+                Illustrative style previews, not a released template catalogue.
               </p>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TemplatePickerScene() {
-  return (
-    <div className="border border-[#121b24]/10 bg-white p-4 shadow-[0_24px_70px_rgba(18,27,36,0.12)]">
-      <div className="grid gap-4 md:grid-cols-[0.85fr_1.15fr]">
-        <div className="space-y-3">
-          {["Estate launch", "Brokerage classic", "Premium listings"].map(
-            (template, index) => (
-              <div
-                className={
-                  index === 0
-                    ? "border border-[#0f6b61] bg-[#ecf4f1] p-4"
-                    : "border border-[#121b24]/10 bg-[#f7f4ee] p-4"
-                }
-                key={template}
-              >
-                <p className="text-sm font-semibold">{template}</p>
-                <p className="mt-2 text-xs leading-5 text-[#65717d]">
-                  Structured sections, listing blocks, and editable launch copy.
+        </section>
+        <section className="pk-section pk-roles-section" id="people">
+          <div className="pk-wrap">
+            <div className="pk-section-head">
+              <div>
+                <p className="pk-eyebrow">
+                  Built around the people doing the work
                 </p>
+                <h2>
+                  Different responsibilities.
+                  <br />A shared picture.
+                </h2>
               </div>
-            ),
-          )}
-        </div>
-        <div className="border border-[#121b24]/10 bg-[#121b24] p-4 text-white">
-          <div className="h-40 bg-[linear-gradient(135deg,#dfe8e4,#f7f1e7)]" />
-          <p className="mt-5 text-xs uppercase tracking-[0.24em] text-white/48">
-            Public site preview
-          </p>
-          <h3 className="mt-3 text-3xl font-semibold leading-tight tracking-normal">
-            Modern homes at Westbridge Gardens
-          </h3>
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <div className="h-14 bg-white/12" />
-            <div className="h-14 bg-white/12" />
-            <div className="h-14 bg-[#c39a56]" />
+              <p>
+                From the first listing to the next team conversation, give each
+                role the context it needs.
+              </p>
+            </div>
+            <div className="pk-roles">
+              <fieldset
+                className="pk-role-buttons"
+                aria-label="Explore by role"
+              >
+                {roles.map((item, index) => (
+                  <button
+                    type="button"
+                    key={item.name}
+                    aria-pressed={role === index}
+                    onClick={() => setRole(index)}
+                  >
+                    {item.name}
+                    <span aria-hidden="true">{role === index ? "−" : "+"}</span>
+                  </button>
+                ))}
+              </fieldset>
+              <div
+                className="pk-role-panel pk-state-enter"
+                aria-live="polite"
+                key={role}
+              >
+                <p className="pk-eyebrow">{roles[role]!.kicker}</p>
+                <h3>{roles[role]!.title}</h3>
+                <p>{roles[role]!.description}</p>
+                <div className="pk-role-example">
+                  <div>
+                    <span>Company</span>
+                    <strong>Palm &amp; Place</strong>
+                  </div>
+                  {roles[role]!.rows.map(([label, value]) => (
+                    <div key={label}>
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+        <section className="pk-section pk-onboarding">
+          <div className="pk-wrap">
+            <p className="pk-eyebrow">A considered start</p>
+            <h2>Make room for your business.</h2>
+            <div className="pk-onboard-grid">
+              <article>
+                <small>01</small>
+                <h3>Set your foundation.</h3>
+                <p>
+                  Add your company identity and bring your property information
+                  into your workspace.
+                </p>
+              </article>
+              <article>
+                <small>02</small>
+                <h3>Make it your own.</h3>
+                <p>
+                  Choose a website template. Shape the available content and
+                  branding around your company.
+                </p>
+              </article>
+              <article>
+                <small>03</small>
+                <h3>Open your front door.</h3>
+                <p>
+                  Preview, publish and give visitors a clear path from the
+                  listing to your team.
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+        <section className="pk-section pk-faq" id="questions">
+          <div className="pk-wrap pk-faq-grid">
+            <div>
+              <p className="pk-eyebrow">A few things to know</p>
+              <h2>
+                Clarity, before
+                <br />
+                you begin.
+              </h2>
+            </div>
+            <div>
+              {questions.map(([question, answer]) => (
+                <details key={question}>
+                  <summary>{question}</summary>
+                  <p>{answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="pk-cta" id="access">
+          <div className="pk-wrap pk-cta-grid">
+            <div>
+              <p className="pk-eyebrow">Your next chapter</p>
+              <h2>
+                Give your property
+                <br />
+                business a place
+                <br />
+                to come together.
+              </h2>
+              <p>
+                Tell us a little about yourself. We will follow up with setup
+                details if your team is a fit.
+              </p>
+            </div>
+            <EarlyAccessForm className="pk-access-form" />
+          </div>
+        </section>
+      </main>
+      <footer className="pk-footer pk-wrap">
+        <a href="#top" aria-label="PlotKeys home">
+          <Image
+            src="/logo-horizontal-light.png"
+            alt="PlotKeys"
+            width={1936}
+            height={664}
+          />
+        </a>
+        <span>
+          © PlotKeys · Fictional records and illustrative estate imagery.
+        </span>
+        <a href="#questions">Questions &amp; answers</a>
+      </footer>
     </div>
   );
 }
