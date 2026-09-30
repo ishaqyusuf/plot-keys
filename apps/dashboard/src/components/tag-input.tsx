@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@plotkeys/ui/badge";
+import { Button } from "@plotkeys/ui/button";
 import { Input } from "@plotkeys/ui/input";
 import { type KeyboardEvent, useEffect, useState } from "react";
 
@@ -19,11 +19,13 @@ export const TAG_INPUT_SYSTEM_SUGGESTIONS = [
 
 export function TagInput({
   defaultValue = [],
+  id,
   name,
   onChange,
   value,
 }: {
   defaultValue?: string[];
+  id?: string;
   name?: string;
   onChange?: (tags: string[]) => void;
   value?: string[];
@@ -87,10 +89,13 @@ export function TagInput({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <Badge
+            <Button
               key={tag}
               data-dev-tag-selected="true"
               data-tag-value={tag}
+              type="button"
+              size="sm"
+              aria-label={`Remove ${tag}`}
               variant="secondary"
               className="cursor-pointer gap-1 pr-1"
               onClick={() => removeTag(tag)}
@@ -99,13 +104,14 @@ export function TagInput({
               <span className="ml-0.5 text-muted-foreground hover:text-foreground">
                 ×
               </span>
-            </Badge>
+            </Button>
           ))}
         </div>
       )}
 
       {/* Text input for custom tags */}
       <Input
+        id={id}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -116,16 +122,19 @@ export function TagInput({
       {availableSuggestions.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {availableSuggestions.map((suggestion) => (
-            <Badge
+            <Button
               key={suggestion}
               data-dev-tag-suggestion="true"
               data-tag-value={suggestion}
+              type="button"
+              size="sm"
+              aria-label={`Add ${suggestion}`}
               variant="outline"
               className="cursor-pointer transition-colors hover:bg-accent"
               onClick={() => addTag(suggestion)}
             >
               + {suggestion}
-            </Badge>
+            </Button>
           ))}
         </div>
       )}

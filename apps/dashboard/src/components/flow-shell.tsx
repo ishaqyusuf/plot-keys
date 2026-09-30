@@ -1,6 +1,7 @@
-import { Badge } from "@plotkeys/ui/badge";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import styles from "./flow-shell.module.css";
 import { OnboardingBrandAvatar } from "./onboarding/onboarding-brand-avatar";
 
 type Props = {
@@ -13,6 +14,8 @@ type Props = {
   eyebrow?: string;
   headerAction?: ReactNode;
   sidePanel: ReactNode;
+  step?: number;
+  totalSteps?: number;
   title: string;
 };
 
@@ -23,53 +26,76 @@ export function FlowShell({
   brandName = "PlotKeys",
   children,
   description,
-  eyebrow = "Tenant setup",
+  eyebrow = "Your company starts here",
   headerAction,
   sidePanel,
+  step = 1,
+  totalSteps = 3,
   title,
 }: Props) {
   return (
-    <main className="min-h-screen bg-background px-6 py-12 md:px-8 md:py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="inline-flex items-start gap-3 text-sm text-foreground">
-            <OnboardingBrandAvatar
-              brandName={brandName}
-              editable={brandEditable}
-              logoUrl={brandLogoUrl}
-            />
-            <Link
-              aria-label="Go to homepage"
-              className="self-center pr-1 font-medium transition hover:text-primary"
-              href="/"
-            >
-              {brandName}
-            </Link>
-          </div>
+    <main className={styles.shell}>
+      <header className={styles.header}>
+        <Link aria-label="Go to PlotKeys homepage" href="/">
+          <Image
+            alt="PlotKeys logo"
+            className={styles.logoLight}
+            src="/onboarding/logo-light.png"
+            width={116}
+            height={40}
+            priority
+          />
+          <Image
+            alt="PlotKeys logo"
+            className={styles.logoDark}
+            src="/onboarding/logo-dark.png"
+            width={116}
+            height={40}
+            priority
+          />
+        </Link>
+        <div className={styles.headerActions}>
+          {brandName !== "PlotKeys" ? (
+            <span className={styles.company}>{brandName}</span>
+          ) : null}
           {headerAction}
         </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <section className="border bg-background">
-            <div className="px-8 pt-8 md:px-10 md:pt-10">
-              <p className="text-sm font-medium text-muted-foreground">
-                {eyebrow}
-              </p>
-              <Badge variant="secondary" className="mt-4 w-fit">
-                {badge}
-              </Badge>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-                {title}
-              </h1>
-              <p className="mt-3 text-base leading-7 text-muted-foreground">
-                {description}
-              </p>
+      </header>
+      <div className={styles.layout}>
+        <aside className={styles.rail}>{sidePanel}</aside>
+        <section className={styles.content} aria-labelledby="flow-title">
+          <div className={styles.progress}>
+            <span>{badge}</span>
+            <span className={styles.segments} aria-hidden="true">
+              {Array.from({ length: totalSteps }, (_, index) => index + 1).map(
+                (number) => (
+                  <span key={number} data-complete={number <= step} />
+                ),
+              )}
+            </span>
+          </div>
+          <div className={styles.heading}>
+            <p className={styles.eyebrow}>{eyebrow}</p>
+            <h1 id="flow-title">{title}</h1>
+            <p className={styles.description}>{description}</p>
+          </div>
+          {brandEditable ? (
+            <div className={styles.logoUpload}>
+              <OnboardingBrandAvatar
+                brandName={brandName}
+                editable
+                logoUrl={brandLogoUrl}
+              />
+              <div>
+                <p>
+                  Add your company logo <span>(optional)</span>
+                </p>
+                <small>You can add or change it later.</small>
+              </div>
             </div>
-            <div className="px-8 pb-8 md:px-10 md:pb-10">{children}</div>
-          </section>
-
-          <div className="border bg-background p-8 md:p-10">{sidePanel}</div>
-        </div>
+          ) : null}
+          {children}
+        </section>
       </div>
     </main>
   );

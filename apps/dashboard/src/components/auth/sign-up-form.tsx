@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
+import { FlowDevTools } from "@/components/flow-dev-tools";
 import { createQuickFillAdapter, QuickFill } from "@/components/quick-fill";
 import { SubdomainField } from "@/components/subdomain-field";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -111,59 +112,119 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
-      <div className="flex justify-end">
-        <QuickFill
-          args={{ form: createQuickFillAdapter(form) }}
-          name="auth-sign-up"
-        />
-      </div>
-
+      <p className="flow-section-title">Your account</p>
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="sign-up-name">Full name</FieldLabel>
-          <Input
-            id="sign-up-name"
-            placeholder="Amara Okafor"
-            {...form.register("name")}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="sign-up-email">Email address</FieldLabel>
-          <Input
-            id="sign-up-email"
-            placeholder="founder@astergrove.com"
-            type="email"
-            {...form.register("email")}
-          />
-        </Field>
+        <div className="flow-two-columns">
+          <Field>
+            <FieldLabel htmlFor="sign-up-name">Full name</FieldLabel>
+            <Input
+              autoComplete="name"
+              id="sign-up-name"
+              placeholder="Amara Okafor"
+              aria-invalid={Boolean(form.formState.errors.name)}
+              aria-describedby={
+                form.formState.errors.name ? "sign-up-name-error" : undefined
+              }
+              {...form.register("name")}
+            />
+            {form.formState.errors.name ? (
+              <p id="sign-up-name-error" className="flow-inline-error">
+                {form.formState.errors.name?.message}
+              </p>
+            ) : null}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="sign-up-email">Email address</FieldLabel>
+            <Input
+              autoComplete="email"
+              id="sign-up-email"
+              placeholder="founder@astergrove.com"
+              type="email"
+              aria-invalid={Boolean(form.formState.errors.email)}
+              aria-describedby={
+                form.formState.errors.email ? "sign-up-email-error" : undefined
+              }
+              {...form.register("email")}
+            />
+            {form.formState.errors.email ? (
+              <p id="sign-up-email-error" className="flow-inline-error">
+                {form.formState.errors.email?.message}
+              </p>
+            ) : null}
+          </Field>
+        </div>
         <Field>
           <FieldLabel htmlFor="sign-up-password">Password</FieldLabel>
           <Input
+            autoComplete="new-password"
             id="sign-up-password"
             placeholder="Create a secure password"
             type="password"
+            aria-invalid={Boolean(form.formState.errors.password)}
+            aria-describedby={
+              form.formState.errors.password
+                ? "sign-up-password-error"
+                : undefined
+            }
             {...form.register("password")}
           />
+          {form.formState.errors.password ? (
+            <p id="sign-up-password-error" className="flow-inline-error">
+              {form.formState.errors.password?.message}
+            </p>
+          ) : null}
         </Field>
         <Field>
           <FieldLabel htmlFor="sign-up-phone">WhatsApp number</FieldLabel>
           <Input
+            autoComplete="tel"
             id="sign-up-phone"
             placeholder="+2348012345678"
             type="tel"
+            aria-invalid={Boolean(form.formState.errors.phoneNumber)}
+            aria-describedby={
+              form.formState.errors.phoneNumber
+                ? "sign-up-phone-error"
+                : undefined
+            }
             {...form.register("phoneNumber")}
           />
+          {form.formState.errors.phoneNumber ? (
+            <p id="sign-up-phone-error" className="flow-inline-error">
+              {form.formState.errors.phoneNumber?.message}
+            </p>
+          ) : null}
         </Field>
+      </FieldGroup>
+      <p className="flow-section-title">Your company</p>
+      <FieldGroup>
         <Field>
           <FieldLabel htmlFor="sign-up-company">Company name</FieldLabel>
           <Input
+            autoComplete="organization"
             id="sign-up-company"
             placeholder="Aster Grove Realty"
+            aria-invalid={Boolean(form.formState.errors.company)}
+            aria-describedby={
+              form.formState.errors.company
+                ? "sign-up-company-error"
+                : undefined
+            }
             {...form.register("company")}
           />
+          {form.formState.errors.company ? (
+            <p id="sign-up-company-error" className="flow-inline-error">
+              {form.formState.errors.company?.message}
+            </p>
+          ) : null}
         </Field>
         <SubdomainField
+          description="Choose an address for your company website."
           inputProps={{
+            "aria-invalid": Boolean(form.formState.errors.subdomain),
+            "aria-describedby": form.formState.errors.subdomain
+              ? "sign-up-subdomain-error"
+              : undefined,
             name: subdomainField.name,
             onBlur: subdomainField.onBlur,
             onChange: subdomainField.onChange,
@@ -171,6 +232,11 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
           }}
           value={subdomainValue}
         />
+        {form.formState.errors.subdomain ? (
+          <p id="sign-up-subdomain-error" className="flow-inline-error">
+            {form.formState.errors.subdomain.message}
+          </p>
+        ) : null}
       </FieldGroup>
 
       <AuthFormError
@@ -185,11 +251,8 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <SubmitButton isSubmitting={signUpMutation.isPending}>
-          Create account and continue
-        </SubmitButton>
-        <Button variant="secondary" asChild>
+      <div className="flow-actions">
+        <Button className="flow-back" variant="outline" asChild>
           <Link
             href={
               redirectTo
@@ -197,10 +260,22 @@ export function SignUpForm({ initialError }: { initialError?: string }) {
                 : authRoutes.signIn
             }
           >
-            Already have an account
+            Sign in
           </Link>
         </Button>
+        <SubmitButton
+          className="flow-submit"
+          isSubmitting={signUpMutation.isPending}
+        >
+          Create account <span aria-hidden="true">→</span>
+        </SubmitButton>
       </div>
+      <FlowDevTools>
+        <QuickFill
+          args={{ form: createQuickFillAdapter(form) }}
+          name="auth-sign-up"
+        />
+      </FlowDevTools>
     </form>
   );
 }

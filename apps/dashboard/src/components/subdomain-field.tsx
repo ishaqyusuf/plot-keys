@@ -81,7 +81,7 @@ export function SubdomainField({
         </InputGroup>
         <FieldDescription>{description}</FieldDescription>
       </Field>
-      <div className="border border-border bg-card p-4 text-sm">
+      <div className="flow-domain-preview border border-border bg-card p-4 text-sm">
         <p className="font-medium text-foreground">Hostname preview</p>
         <div className="mt-2 flex flex-col gap-1 text-muted-foreground">
           <p>

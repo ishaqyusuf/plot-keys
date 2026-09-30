@@ -79,11 +79,20 @@ export function MarketFocusStepForm({
         <Field>
           <FieldLabel htmlFor="market">Primary market</FieldLabel>
           <Input
+            aria-invalid={Boolean(form.formState.errors.market)}
+            aria-describedby={
+              form.formState.errors.market ? "market-error" : undefined
+            }
             id="market"
             placeholder="Lekki, Lagos"
             required
             {...form.register("market")}
           />
+          {form.formState.errors.market ? (
+            <p id="market-error" className="flow-inline-error">
+              {form.formState.errors.market.message}
+            </p>
+          ) : null}
           <FieldDescription>
             The city or region you serve most. We use this in your website
             messaging and local SEO defaults.
@@ -144,12 +153,18 @@ export function MarketFocusStepForm({
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel>Target audience (optional)</FieldLabel>
+          <FieldLabel htmlFor="target-audience">
+            Target audience (optional)
+          </FieldLabel>
           <Controller
             control={form.control}
             name="targetAudience"
             render={({ field }) => (
-              <TagInput onChange={field.onChange} value={field.value} />
+              <TagInput
+                id="target-audience"
+                onChange={field.onChange}
+                value={field.value}
+              />
             )}
           />
           <FieldDescription>

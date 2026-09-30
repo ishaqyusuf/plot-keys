@@ -114,7 +114,7 @@ export function ContentReadinessStepForm({
         saved?.locations?.find((value) => value.trim().length > 0) ??
         "";
       const templateKey =
-        saved?.templateKey ?? saved?.recommendedTemplateKey ?? "template-1";
+        saved?.templateKey ?? saved?.recommendedTemplateKey ?? "riwaq-starter";
 
       if (!companyName || !subdomain) {
         throw new Error(
@@ -123,9 +123,7 @@ export function ContentReadinessStepForm({
       }
 
       if (!market) {
-        throw new Error(
-          "Primary market is required before opening the builder.",
-        );
+        throw new Error("Primary market is required before finishing setup.");
       }
 
       await saveProgressMutation.mutateAsync({
@@ -141,7 +139,7 @@ export function ContentReadinessStepForm({
         templateKey,
       });
 
-      const result = await completeOnboardingMutation.mutateAsync({
+      await completeOnboardingMutation.mutateAsync({
         companyName,
         logoUrl: logoUrl ?? null,
         market,
@@ -154,14 +152,9 @@ export function ContentReadinessStepForm({
       const redirectUrl = new URL(
         buildTenantDashboardUrl(subdomain, {
           currentOrigin: window.location.origin,
-          pathname: "/sign-in",
+          pathname: "/",
           tenantHostname,
         }),
-      );
-
-      redirectUrl.searchParams.set(
-        "redirect",
-        `/builder?configId=${result.configId}&onboarding=1`,
       );
 
       await clearPendingOnboarding().catch(() => undefined);
@@ -182,7 +175,7 @@ export function ContentReadinessStepForm({
       className="flex flex-col gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
-      <div className="grid gap-3">
+      <div className="flow-content-grid">
         {contentFlags.map((flag) => (
           <Controller
             key={flag.name}
@@ -218,6 +211,9 @@ export function ContentReadinessStepForm({
           />
         ))}
       </div>
+      <p className="text-xs text-muted-foreground">
+        Nothing ready yet? You can add content from your dashboard later.
+      </p>
       {formError ? (
         <Alert variant="destructive">
           <AlertDescription>{formError}</AlertDescription>
@@ -232,7 +228,7 @@ export function ContentReadinessStepForm({
             name="onboarding-content-readiness"
           />
         }
-        submitLabel="Open builder"
+        submitLabel="Finish setup"
       />
     </form>
   );

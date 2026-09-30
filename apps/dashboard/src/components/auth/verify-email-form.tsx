@@ -16,10 +16,12 @@ import { persistSession } from "./session-bridge";
 
 export function VerifyEmailForm({
   initialError,
+  signUpPath = authRoutes.signUp,
   onboarding,
   token,
 }: {
   initialError?: string;
+  signUpPath?: string;
   onboarding?: {
     company: string;
     subdomain: string;
@@ -72,26 +74,27 @@ export function VerifyEmailForm({
         message={formError ?? form.formState.errors.token?.message}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <SubmitButton
-          disabled={!token}
-          isSubmitting={verifyEmailMutation.isPending}
-          onClick={form.handleSubmit(onSubmit)}
-          type="button"
-        >
-          Verify and continue
-        </SubmitButton>
-        <Button variant="secondary" asChild>
+      <div className="flow-actions">
+        <Button className="flow-back" variant="outline" asChild>
           <Link
             href={
               redirectTo
-                ? `${authRoutes.signUp}?redirect=${encodeURIComponent(redirectTo)}`
-                : authRoutes.signUp
+                ? `${signUpPath}?redirect=${encodeURIComponent(redirectTo)}`
+                : signUpPath
             }
           >
             Back to sign up
           </Link>
         </Button>
+        <SubmitButton
+          className="flow-submit"
+          disabled={!token}
+          isSubmitting={verifyEmailMutation.isPending}
+          onClick={form.handleSubmit(onSubmit)}
+          type="button"
+        >
+          Verify and continue <span aria-hidden="true">→</span>
+        </SubmitButton>
       </div>
     </div>
   );

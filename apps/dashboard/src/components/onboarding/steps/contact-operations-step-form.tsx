@@ -63,24 +63,37 @@ export function ContactOperationsStepForm({
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="phone">Phone number</FieldLabel>
-          <Input
-            id="phone"
-            placeholder="+234 801 234 5678"
-            type="tel"
-            {...form.register("phone")}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="contactEmail">Business email</FieldLabel>
-          <Input
-            id="contactEmail"
-            placeholder="hello@yourcompany.com"
-            type="email"
-            {...form.register("contactEmail")}
-          />
-        </Field>
+        <div className="flow-two-columns">
+          <Field>
+            <FieldLabel htmlFor="phone">Phone number</FieldLabel>
+            <Input
+              id="phone"
+              placeholder="+234 801 234 5678"
+              type="tel"
+              {...form.register("phone")}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="contactEmail">Business email</FieldLabel>
+            <Input
+              aria-invalid={Boolean(form.formState.errors.contactEmail)}
+              aria-describedby={
+                form.formState.errors.contactEmail
+                  ? "contact-email-error"
+                  : undefined
+              }
+              id="contactEmail"
+              placeholder="hello@yourcompany.com"
+              type="email"
+              {...form.register("contactEmail")}
+            />
+            {form.formState.errors.contactEmail ? (
+              <p id="contact-email-error" className="flow-inline-error">
+                {form.formState.errors.contactEmail.message}
+              </p>
+            ) : null}
+          </Field>
+        </div>
         <Field>
           <FieldLabel htmlFor="whatsapp">WhatsApp number (optional)</FieldLabel>
           <Input

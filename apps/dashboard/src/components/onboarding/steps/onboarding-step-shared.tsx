@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { FlowDevTools } from "@/components/flow-dev-tools";
 import { useTRPC } from "@/trpc/client";
 
 export type OnboardingStepId =
@@ -76,21 +77,22 @@ export function StepActions({
   submitLabel?: string;
 }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      {quickFill}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <SubmitButton isSubmitting={pending}>{submitLabel}</SubmitButton>
-        {backPath ? (
-          <Button variant="secondary" asChild>
-            <Link href={backPath}>Back</Link>
-          </Button>
-        ) : (
-          <Button variant="secondary" asChild>
-            <Link href="/sign-out">Cancel</Link>
-          </Button>
-        )}
+    <>
+      <div className="flow-actions">
+        <Button className="flow-back" variant="outline" asChild>
+          <Link href={backPath ?? "/sign-out"}>
+            {backPath ? "Back" : "Cancel"}
+          </Link>
+        </Button>
+        <SubmitButton className="flow-submit" isSubmitting={pending}>
+          {submitLabel} <span aria-hidden="true">→</span>
+        </SubmitButton>
       </div>
-    </div>
+      <p className="flow-save-note">
+        Your answers are saved when you continue.
+      </p>
+      <FlowDevTools>{quickFill}</FlowDevTools>
+    </>
   );
 }
 

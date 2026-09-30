@@ -2,11 +2,10 @@ import "server-only";
 
 import { authRoutes } from "@plotkeys/auth/shared";
 import { Alert, AlertDescription } from "@plotkeys/ui/alert";
-import { Badge } from "@plotkeys/ui/badge";
 import { Button } from "@plotkeys/ui/button";
-import { cn } from "@plotkeys/ui/cn";
 import { ThemeToggle } from "@plotkeys/ui/theme-toggle";
 import {
+  buildDashboardUrl,
   buildTenantDashboardUrl,
   resolveDashboardLandingRoute,
 } from "@plotkeys/utils";
@@ -14,8 +13,14 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs";
+import { VerificationIntro } from "@/components/auth/verification-intro";
 import { VerifyEmailForm } from "@/components/auth/verify-email-form";
+import { FlowDevTools } from "@/components/flow-dev-tools";
 import { FlowShell } from "@/components/flow-shell";
+import {
+  accountSteps,
+  OnboardingProgress,
+} from "@/components/onboarding/onboarding-progress";
 import { BrandStyleStepForm } from "@/components/onboarding/steps/brand-style-step-form";
 import { BusinessIdentityStepForm } from "@/components/onboarding/steps/business-identity-step-form";
 import { ContactOperationsStepForm } from "@/components/onboarding/steps/contact-operations-step-form";
@@ -102,65 +107,51 @@ export async function OnboardingPage({ searchParams }: Props) {
 
       return (
         <FlowShell
-          badge="Flow 02"
-          brandLogoUrl={null}
+          badge="Step 2 of 3"
+          step={2}
           brandName={params.company ?? "PlotKeys"}
-          description="Email verification now continues on your company website dashboard so setup stays connected to the right company from the first click."
+          description="Confirm your email to continue setting up your company."
           headerAction={<ThemeToggle />}
           sidePanel={
-            <>
-              <p className="text-sm font-medium text-muted-foreground">
-                Handoff contract
-              </p>
-              <div className="mt-6 grid gap-3">
-                {[
-                  "Verification happens on your company website dashboard.",
-                  "Successful verification continues directly into setup.",
-                  "The shared app host is only used to launch new company websites.",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="border bg-background px-4 py-4 text-sm leading-7 text-foreground"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </>
+            <OnboardingProgress currentStep={1} steps={accountSteps} />
           }
-          title="Verify the account before tenant onboarding begins."
+          title="Check your email."
         >
           <div className="flex flex-col gap-5">
-            <Badge variant="secondary">Verification pending</Badge>
-            <p className="max-w-2xl text-base leading-8 text-muted-foreground">
-              We created the account for{" "}
-              <strong>{params.email ?? "your email address"}</strong>. Check
-              your email and use the verification link we sent there. That link
-              brings you back to this tenant dashboard and continues onboarding.
-            </p>
+            <VerificationIntro
+              company={params.company}
+              email={params.email ?? "your email address"}
+              subdomain={params.subdomain}
+            />
 
             {process.env.NODE_ENV === "development" ? (
-              <Alert>
-                <AlertDescription className="flex flex-col gap-3">
-                  <span>
-                    Dev shortcut: use the same verification link from the email
-                    for quick testing.
-                  </span>
-                  <span className="break-all font-mono text-xs text-foreground/80">
-                    {verificationLink.toString()}
-                  </span>
-                  <div>
-                    <Button variant="secondary" size="sm" asChild>
-                      <Link href={verificationLink.toString()}>
-                        Open verification link
-                      </Link>
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              <FlowDevTools>
+                <Alert>
+                  <AlertDescription className="flex flex-col gap-3">
+                    <span>
+                      Dev shortcut: use the same verification link from the
+                      email for quick testing.
+                    </span>
+                    <span className="break-all font-mono text-xs text-foreground/80">
+                      {verificationLink.toString()}
+                    </span>
+                    <div>
+                      <Button variant="secondary" size="sm" asChild>
+                        <Link href={verificationLink.toString()}>
+                          Open verification link
+                        </Link>
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </FlowDevTools>
             ) : null}
 
             <VerifyEmailForm
+              signUpPath={buildDashboardUrl({
+                currentUrl: currentOrigin,
+                path: authRoutes.signUp,
+              })}
               initialError={params.error}
               onboarding={
                 params.company && params.subdomain
@@ -268,17 +259,16 @@ export async function OnboardingPage({ searchParams }: Props) {
       />
       <FlowShell
         badge={`Step ${currentStepIdx + 1} of ${STEPS.length}`}
-        brandEditable
+        brandEditable={currentStepId === "business-identity"}
+        step={currentStepIdx + 1}
+        totalSteps={STEPS.length}
+        eyebrow="Make it yours"
         brandLogoUrl={pendingOnboarding?.logoUrl ?? null}
         brandName={companyName || "PlotKeys"}
         description={stepDescription(currentStepId)}
         headerAction={<ThemeToggle />}
         sidePanel={
-          <StepSidePanel
-            companyName={companyName}
-            currentStepId={currentStepId}
-            subdomain={subdomain}
-          />
+          <OnboardingProgress currentStep={currentStepIdx} steps={STEPS} />
         }
         title={stepTitle(currentStepId)}
       >
@@ -341,82 +331,25 @@ function stepTitle(step: StepId): string {
     case "market-focus":
       return "Where do you operate?";
     case "brand-style":
-      return "What's your brand personality?";
+      return "Set the tone for your brand.";
     case "contact-operations":
-      return "How do clients reach you?";
+      return "Make it easy to reach you.";
     case "content-readiness":
-      return "What content do you already have?";
+      return "What is ready to share?";
   }
 }
 
 function stepDescription(step: StepId): string {
   switch (step) {
     case "business-identity":
-      return "We use this to shape your website copy, section headings, and the overall story your site tells.";
+      return "A few details to shape your website and the story it tells.";
     case "market-focus":
-      return "Your market focus helps us recommend the right sections and pre-populate your listings area.";
+      return "Tell us where you work and who you work with.";
     case "brand-style":
-      return "Your tone and style guide the design system, color palette, and typography defaults we apply to your site.";
+      return "Choose a tone and style that feels like your business.";
     case "contact-operations":
-      return "These details pre-fill your contact page, footer, and inquiry CTA so your site is ready from day one.";
+      return "Add the details clients will use to get in touch.";
     case "content-readiness":
-      return "Knowing what you already have helps us hide empty sections and decide where to generate placeholder content before we open your builder workspace.";
+      return "Select what you have ready. You can add everything else later.";
   }
-}
-
-// ---------------------------------------------------------------------------
-// Side panel
-// ---------------------------------------------------------------------------
-
-type StepSidePanelInput = {
-  companyName: string;
-  currentStepId: StepId;
-  subdomain: string;
-};
-
-function StepSidePanel({
-  companyName,
-  currentStepId,
-  subdomain,
-}: StepSidePanelInput) {
-  return (
-    <>
-      <p className="text-sm font-medium text-muted-foreground">
-        Onboarding checklist
-      </p>
-      <div className="mt-6 grid gap-3">
-        {STEPS.map((step) => {
-          const currentIdx = STEPS.findIndex((s) => s.id === currentStepId);
-          const stepIdx = STEPS.findIndex((s) => s.id === step.id);
-          const isDone = stepIdx < currentIdx;
-          const isCurrent = step.id === currentStepId;
-
-          return (
-            <div
-              key={step.id}
-              className={cn(
-                "border px-4 py-3 text-sm leading-7",
-                isCurrent && "bg-muted text-foreground",
-                isDone && "bg-background text-muted-foreground line-through",
-                !isCurrent &&
-                  !isDone &&
-                  "bg-background text-muted-foreground/60",
-              )}
-            >
-              <span className="mr-2 text-muted-foreground">
-                0{STEPS.findIndex((s) => s.id === step.id) + 1}
-              </span>
-              {step.label}
-            </div>
-          );
-        })}
-      </div>
-      {companyName && subdomain ? (
-        <div className="mt-8 border border-border bg-card px-4 py-4 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">{companyName}</p>
-          <p className="mt-1">{subdomain}.plotkeys.com</p>
-        </div>
-      ) : null}
-    </>
-  );
 }
