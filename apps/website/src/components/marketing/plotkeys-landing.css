@@ -1078,3 +1078,6 @@
 .pk02 .pk-access-form button[type="submit"]:hover {
   background: #254f70;
 }
+.pk02 .pk-access-form .text-primary {
+  color: var(--navy);
+}
