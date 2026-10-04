@@ -11,3 +11,10 @@ build
 .DS_Store
 .vercel
 .local-db-sync/
+.gstack/
+.qa/
+
+# Root dot folders are local-only; keep Git and shared GitHub configuration.
+/.*/
+!/.git/
+!/.github/
